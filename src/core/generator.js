@@ -6,15 +6,18 @@
  *   Non esiste una sola regola che renda il gioco piu' difficile in funzione di
  *   quanto bene stai andando. Niente difficolta' occulta, niente falsi quasi-successi.
  *
- * Le tre regole attive sono:
- *   1. PRESSIONE DA AFFOLLAMENTO — piu' la griglia e' piena, meno sono probabili le
- *      forme grandi. Aiuto, non ostacolo.
- *   2. MEMORIA — le forme uscite di recente pesano meno: alza la varieta' percepita
- *      senza rendere la sequenza prevedibile.
- *   3. CLEMENZA INIZIALE — con la griglia sotto meta', una mano in cui NESSUN pezzo
- *      e' piazzabile viene rigenerata. Morire a meta' partita per sfortuna pura non
- *      e' difficolta': e' un bug di design.
- * Sopra quella soglia il game over e' pienamente possibile ed e' meritato.
+ * Le regole attive sono CINQUE, tutte elencate anche in docs/GAMEPLAY_RULES.md:
+ *   1. PRESSIONE DA AFFOLLAMENTO — sopra CROWD_PRESSURE_START (45%) le forme grandi
+ *      diventano progressivamente meno probabili. Aiuto, non ostacolo.
+ *   2. MEMORIA — le forme uscite nelle ultime HISTORY_SIZE estrazioni pesano meno:
+ *      alza la varieta' percepita senza rendere la sequenza prevedibile.
+ *   3. PEZZI A RISCHIO — sotto RISKY_PIECE_FILL (30%) un pezzo con meno di
+ *      MIN_PLACEMENTS_EARLY case possibili viene sostituito.
+ *   4. MANO MORTA — sotto EARLY_MERCY_FILL (50%) una mano in cui NESSUN pezzo e'
+ *      piazzabile viene rigenerata.
+ *   5. PEZZO PICCOLO GARANTITO — sopra CROWDED_FILL_RATIO (60%) almeno un pezzo
+ *      della mano ha al massimo SMALL_PIECE_MAX_CELLS celle.
+ * Sopra quelle soglie il gioco non interviene: il game over e' possibile ed e' meritato.
  */
 
 import { SHAPES } from './shapes.js';
@@ -112,7 +115,15 @@ function drawHand(rng, fill, history) {
       const alreadyInHand = shapes.filter((s) => s.id === candidate.id).length;
       if (alreadyInHand < MAX_SAME_SHAPE_IN_HAND) { shape = candidate; break; }
     }
-    if (shape === null) shape = weightedPick(rng, SHAPES, fill, localHistory);
+    // Se otto tentativi non bastano si sceglie ESPLICITAMENTE fra le sole forme
+    // ammesse: prima questo ramo ripescava senza vincolo e poteva far entrare in mano
+    // una terza copia della stessa forma. Raro, ma "raro" non e' "mai".
+    if (shape === null) {
+      const ammesse = SHAPES.filter(
+        (c) => shapes.filter((s2) => s2.id === c.id).length < MAX_SAME_SHAPE_IN_HAND,
+      );
+      shape = weightedPick(rng, ammesse.length > 0 ? ammesse : SHAPES, fill, localHistory);
+    }
     shapes.push(shape);
     localHistory.push(shape.id);
     colors.push(pickColor(rng, colors));
@@ -149,9 +160,11 @@ export function generateHand(grid, rngState, history = []) {
   let pieces = drawHand(rng, fill, history);
   let mercyApplied = false;
 
-  // Regola 3a — clemenza iniziale, parte "pezzi a rischio".
-  // Finche' la griglia e' sotto meta', sostituiamo i pezzi che hanno pochissime
-  // case possibili: sono quelli che generano i game over percepiti come ingiusti.
+  // Regola 3 — pezzi a rischio.
+  // Solo nel primissimo terzo di partita (sotto RISKY_PIECE_FILL, cioe' il 30% di
+  // riempimento) sostituiamo i pezzi che hanno pochissime case possibili: sono quelli
+  // che generano i game over percepiti come ingiusti. Sopra quella soglia non tocchiamo
+  // piu' nulla, ed e' una soglia molto piu' bassa di quella della regola 4.
   if (fill < RISKY_PIECE_FILL) {
     for (let slot = 0; slot < pieces.length; slot += 1) {
       let guard = 0;
@@ -168,7 +181,7 @@ export function generateHand(grid, rngState, history = []) {
     }
   }
 
-  // Regola 3b — clemenza iniziale, parte "mano morta in partenza".
+  // Regola 4 — mano morta in partenza (soglia piu' alta: meta' griglia).
   if (fill < EARLY_MERCY_FILL && !handIsAlive(grid, pieces)) {
     for (let attempt = 0; attempt < MERCY_ATTEMPTS && !handIsAlive(grid, pieces); attempt += 1) {
       pieces = drawHand(rng, fill, history);
@@ -183,7 +196,7 @@ export function generateHand(grid, rngState, history = []) {
     }
   }
 
-  // Rete di sicurezza: con la griglia molto piena garantiamo almeno un pezzo piccolo.
+  // Regola 5 — con la griglia molto piena garantiamo almeno un pezzo piccolo.
   if (fill >= CROWDED_FILL_RATIO && !pieces.some((p) => p.shape.size <= SMALL_PIECE_MAX_CELLS)) {
     const small = SHAPES.filter((s) => s.size <= SMALL_PIECE_MAX_CELLS);
     const chosen = weightedPick(rng, small, fill, history);

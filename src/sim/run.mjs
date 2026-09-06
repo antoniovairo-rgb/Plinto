@@ -100,7 +100,7 @@ console.log(`Mosse         ${fmt(stats(moves))}`);
 console.log(`Gruppi chiusi ${fmt(stats(durationsGroups))}`);
 console.log(`Catena max    ${fmt(stats(bestChains))}`);
 console.log(`Riemp. finale ${fmt(stats(fillAtDeath))} %`);
-console.log(`\nGriglie svuotate del tutto: ${boardClears}`);
+console.log(`\nSvuotamenti totali della griglia: ${boardClears} (eventi, non partite)`);
 console.log(`Partite sotto 15 mosse: ${earlyDeaths} (${((earlyDeaths / GAMES) * 100).toFixed(1)}%)`);
 console.log(`Partite sotto  8 mosse: ${veryEarlyDeaths} (${((veryEarlyDeaths / GAMES) * 100).toFixed(2)}%)  <- deve restare vicino a zero`);
 

@@ -13,7 +13,7 @@
  * di celebrazione) senza sapere nulla di come verra' animato.
  */
 
-import { HAND_SIZE } from '../config/rules.js';
+import { HAND_SIZE, CHAIN_MAX } from '../config/rules.js';
 import {
   createGrid,
   placeShape,
@@ -111,9 +111,12 @@ export function deadPieces(state) {
  * @param {number} handIndex indice del pezzo nella mano
  * @param {number} row riga di destinazione dell'origine della forma
  * @param {number} col colonna di destinazione
+ * @param {number} [now] istante da registrare come fine partita. Esiste per non
+ *   rompere la promessa di riproducibilita': con Date.now() implicito la durata
+ *   della partita era l'unico valore non deterministico a parita' di seed.
  * @returns {object} nuovo stato (lo stato precedente non viene mai mutato)
  */
-export function placePiece(state, handIndex, row, col) {
+export function placePiece(state, handIndex, row, col, now = Date.now()) {
   if (state.status !== 'playing') return state;
   const piece = state.hand[handIndex];
   if (!piece) return state;
@@ -183,7 +186,7 @@ export function placePiece(state, handIndex, row, col) {
     chain: scored.chainAfter,
     status: alive ? 'playing' : 'over',
     stats,
-    endedAt: alive ? null : Date.now(),
+    endedAt: alive ? null : now,
     lastMove: {
       moveNumber: stats.moves,
       handIndex,
@@ -207,17 +210,21 @@ export function placePiece(state, handIndex, row, col) {
   };
 }
 
-/** Durata della partita in millisecondi. */
-export function gameDuration(state) {
-  return (state.endedAt ?? Date.now()) - state.startedAt;
+/**
+ * Durata della partita in millisecondi.
+ * @param {object} state
+ * @param {number} [now] istante di riferimento per una partita ancora in corso.
+ */
+export function gameDuration(state, now = Date.now()) {
+  return (state.endedAt ?? now) - state.startedAt;
 }
 
 /** Riepilogo leggibile a fine partita. */
-export function summarize(state) {
+export function summarize(state, now = Date.now()) {
   return {
     score: state.score,
     moves: state.stats.moves,
-    durationMs: gameDuration(state),
+    durationMs: gameDuration(state, now),
     clearedGroups:
       state.stats.clearedRows + state.stats.clearedCols + state.stats.clearedQuadrants,
     clearedRows: state.stats.clearedRows,
@@ -250,14 +257,30 @@ export function serializeGame(state) {
   };
 }
 
+/** true se il valore e' un numero finito non negativo. */
+function numeroValido(v) {
+  return typeof v === 'number' && Number.isFinite(v) && v >= 0;
+}
+
 /**
  * Oggetto JSON -> stato. Restituisce null se il salvataggio e' di una versione
  * incompatibile o corrotto: meglio ricominciare che caricare una partita rotta.
+ *
+ * La validazione controlla anche i valori, non solo la forma: un salvataggio
+ * manomesso (punteggio non numerico, stato inventato, catena fuori scala) veniva
+ * caricato lo stesso e produceva un'interfaccia incoerente invece di un errore netto.
+ * `lastMove` non viene ripristinato di proposito: descrive un'animazione gia' avvenuta.
  */
 export function deserializeGame(raw) {
   try {
     if (!raw || raw.version !== STATE_VERSION) return null;
     if (!Array.isArray(raw.grid) || raw.grid.length !== createGrid().length) return null;
+    if (raw.grid.some((v) => !Number.isInteger(v) || v < 0 || v > 255)) return null;
+    if (!numeroValido(raw.score) || !numeroValido(raw.rngState)) return null;
+    if (!Number.isInteger(raw.chain) || raw.chain < 0 || raw.chain > CHAIN_MAX) return null;
+    if (raw.status !== 'playing' && raw.status !== 'over') return null;
+    if (!numeroValido(raw.startedAt)) return null;
+    if (!Array.isArray(raw.hand)) return null;
     const grid = Uint8Array.from(raw.grid);
     const hand = raw.hand.map((p) =>
       p ? { uid: p.uid, shapeId: p.shapeId, shape: getShape(p.shapeId), color: p.color } : null,

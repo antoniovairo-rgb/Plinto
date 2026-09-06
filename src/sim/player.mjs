@@ -19,7 +19,8 @@ import {
   fillRatio,
   idx,
 } from '../core/grid.js';
-import { GRID_SIZE } from '../config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
+import { quadrantCells, QUADRANT_COUNT } from '../core/grid.js';
 import { createRng } from '../core/rng.js';
 
 /** Tutte le mosse legali disponibili nello stato corrente. */
@@ -50,9 +51,17 @@ function isolatedHoles(grid) {
   return holes;
 }
 
-/** Quanto e' "promettente" una griglia: quante righe/colonne/quadranti sono quasi chiusi. */
+/**
+ * Quanto e' "promettente" una griglia: quanti gruppi sono quasi chiusi.
+ *
+ * I QUADRANTI CONTANO. Nella prima versione questa funzione guardava solo righe e
+ * colonne, cioe' era cieca proprio sulla meccanica che distingue QUADRA: un giocatore
+ * simulato che non vede i quadranti non puo' giocare meglio di uno che li ignora, e
+ * questo falsava il confronto fra i profili.
+ */
 function nearCompletions(grid) {
   let score = 0;
+
   for (let r = 0; r < GRID_SIZE; r += 1) {
     let filled = 0;
     for (let c = 0; c < GRID_SIZE; c += 1) if (grid[idx(r, c)] !== 0) filled += 1;
@@ -62,6 +71,15 @@ function nearCompletions(grid) {
     let filled = 0;
     for (let r = 0; r < GRID_SIZE; r += 1) if (grid[idx(r, c)] !== 0) filled += 1;
     if (filled >= GRID_SIZE - 2 && filled < GRID_SIZE) score += filled - (GRID_SIZE - 3);
+  }
+
+  const celleQuadrante = QUADRANT_SIZE * QUADRANT_SIZE;
+  for (let q = 0; q < QUADRANT_COUNT; q += 1) {
+    let filled = 0;
+    for (const cella of quadrantCells(q)) if (grid[cella] !== 0) filled += 1;
+    if (filled >= celleQuadrante - 2 && filled < celleQuadrante) {
+      score += filled - (celleQuadrante - 3);
+    }
   }
   return score;
 }
@@ -116,9 +134,14 @@ function gridValue(grid, weights) {
  * @returns {{value:number, first:object|null}}
  */
 function planHand(grid, pieces, weights, depth) {
-  let best = { value: gridValue(grid, weights), first: null };
-  if (depth === 0) return best;
+  // Il valore "fermati qui" vale solo se davvero non si puo' piazzare piu' nulla:
+  // altrimenti una sequenza corta competerebbe contro sequenze lunghe misurate su
+  // una scala diversa, e la ricerca preferirebbe non giocare. Il giocatore invece
+  // DEVE piazzare, quindi il confronto va fatto solo fra sequenze complete.
+  const fermarsi = { value: gridValue(grid, weights), first: null };
+  if (depth === 0) return fermarsi;
 
+  let best = null;
   for (let i = 0; i < pieces.length; i += 1) {
     const piece = pieces[i];
     if (!piece) continue;
@@ -144,12 +167,12 @@ function planHand(grid, pieces, weights, depth) {
     for (const option of ranked) {
       const sub = planHand(option.step.grid, rest, weights, depth - 1);
       const value = option.step.groupCount * weights.groups + sub.value;
-      if (value > best.value || best.first === null) {
+      if (best === null || value > best.value) {
         best = { value, first: { handIndex: i, row: option.row, col: option.col, piece } };
       }
     }
   }
-  return best;
+  return best ?? fermarsi;
 }
 
 /**

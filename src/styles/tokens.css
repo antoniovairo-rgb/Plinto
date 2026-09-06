@@ -1,0 +1,94 @@
+/**
+ * QUADRA — sistema di design.
+ *
+ * Direzione artistica: MINERALE. Superfici opache come pietra levigata, non plastica
+ * lucida; bordi netti; luce che viene dai blocchi stessi e non da riflessi finti.
+ * Nessun font esterno, nessuna risorsa di terze parti: e' una scelta di privacy
+ * (zero richieste verso domini esterni) prima ancora che di peso.
+ *
+ * Ogni valore usato nell'interfaccia deve venire da qui.
+ */
+
+:root {
+  /* --- Fondali e superfici ------------------------------------------------ */
+  --q-ink: #0e1118;          /* fondo dell'app */
+  --q-ink-2: #131722;        /* fondo della plancia */
+  --q-surface: #181d2a;      /* pannelli, tray */
+  --q-surface-2: #1f2534;    /* elementi rialzati */
+  --q-line: #262d3f;         /* linee sottili della griglia */
+  --q-line-strong: #3a4460;  /* separatori dei quadranti 3x3: la firma del tabellone */
+
+  /* --- Testo -------------------------------------------------------------- */
+  --q-text: #e9ecf4;
+  --q-text-dim: #98a0b5;
+  --q-text-faint: #626b83;
+
+  /* --- Colore identitario ------------------------------------------------- */
+  --q-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
+  --q-brand-deep: #c9922a;
+  --q-danger: #e4587e;
+  --q-ok: #4cb5a5;
+
+  /* --- Famiglie cromatiche dei blocchi ------------------------------------
+     Sei tinte minerali distinte per tonalita' E per luminosita', cosi' restano
+     distinguibili anche a chi non separa bene i colori. Il colore in QUADRA non
+     ha nessuna regola di gioco: e' solo identita' visiva del pezzo. */
+  --q-block-1: #e8734a;      /* terracotta */
+  --q-block-2: #4cb5a5;      /* verderame */
+  --q-block-3: #7b6ce6;      /* indaco */
+  --q-block-4: #e4b44c;      /* ocra */
+  --q-block-5: #e4587e;      /* granato */
+  --q-block-6: #4a9be8;      /* azzurrite */
+
+  /* --- Geometria ---------------------------------------------------------- */
+  --q-radius-cell: 22%;      /* raggio del blocco, in percentuale del lato */
+  --q-radius-sm: 8px;
+  --q-radius-md: 14px;
+  --q-radius-lg: 22px;
+  --q-gap-cell: 2px;
+
+  /* --- Tipografia --------------------------------------------------------- */
+  --q-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --q-font-num: ui-rounded, 'SF Pro Rounded', -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* --- Tempi (vedi docs: il game feel vive qui) --------------------------- */
+  --q-t-instant: 90ms;
+  --q-t-fast: 160ms;
+  --q-t-base: 240ms;
+  --q-t-slow: 420ms;
+  --q-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --q-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --q-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --- Ombre -------------------------------------------------------------- */
+  --q-shadow-soft: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --q-shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Tema chiaro: stessa identita', fondali invertiti. Attivo solo su richiesta
+   esplicita del giocatore (attributo data-theme), mai in automatico, per non
+   cambiare l'aspetto del gioco sotto le mani di chi sta giocando. */
+:root[data-theme='chiaro'] {
+  --q-ink: #f3f4f8;
+  --q-ink-2: #e9ebf2;
+  --q-surface: #ffffff;
+  --q-surface-2: #f0f2f7;
+  --q-line: #d8dce7;
+  --q-line-strong: #a9b1c6;
+  --q-text: #171b26;
+  --q-text-dim: #4f586d;
+  --q-text-faint: #838ca2;
+  --q-brand-deep: #a8781c;
+  --q-shadow-soft: 0 2px 10px rgba(20, 25, 40, 0.1);
+  --q-shadow-lift: 0 12px 32px rgba(20, 25, 40, 0.18);
+}
+
+/* Chi ha chiesto meno animazioni al sistema operativo le riceve ridotte ovunque. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --q-t-instant: 1ms;
+    --q-t-fast: 1ms;
+    --q-t-base: 1ms;
+    --q-t-slow: 1ms;
+  }
+}
