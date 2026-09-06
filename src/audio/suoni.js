@@ -167,6 +167,27 @@ export function suonoGrandeCombo(catena) {
   });
 }
 
+/**
+ * Esplosione di una o piu' bombe.
+ * Rumore grave filtrato piu' una discesa rapida: e' l'unico suono del gioco che non
+ * appartiene alla scala, e deve essere cosi'. Una bomba non e' una nota: e' un colpo.
+ * Con piu' bombe il colpo diventa piu' profondo e piu' lungo, senza diventare piu'
+ * forte: il volume che cresce stanca, la profondita' no.
+ */
+export function suonoEsplosione(bombe = 1) {
+  const forza = Math.min(3, bombe);
+  rumore({ durata: 0.16 + forza * 0.05, volume: 0.16, taglio: 900 - forza * 180 });
+  nota(90 - forza * 12, {
+    durata: 0.3 + forza * 0.08,
+    volume: 0.2,
+    forma: 'sawtooth',
+    glide: 0.35,
+  });
+  for (let i = 1; i < forza; i += 1) {
+    rumore({ ritardo: i * 0.09, durata: 0.14, volume: 0.11, taglio: 1400 });
+  }
+}
+
 /** Griglia completamente svuotata: evento raro, merita un suono che nessun altro evento usa. */
 export function suonoGrigliaVuota() {
   [0, 3, 5, 8, 10].forEach((g, i) => {

@@ -4,7 +4,9 @@ import {
   serializeGame, deserializeGame, summarize, STATE_VERSION,
 } from '../src/core/engine.js';
 import { getShape } from '../src/core/shapes.js';
-import { gridFromString, idx, gridToString, isEmpty, allPlacements } from '../src/core/grid.js';
+import {
+  gridFromString, idx, gridToString, isEmpty, allPlacements, placeShape, findCompletedGroups,
+} from '../src/core/grid.js';
 import { HAND_SIZE, GROUP_BASE_POINTS, BOARD_CLEAR_BONUS } from '../src/config/rules.js';
 
 /** Costruisce uno stato di prova con griglia e mano scelte a mano. */
@@ -20,6 +22,19 @@ function scenario(gridText, shapeIds) {
 }
 
 const VUOTA = '.........\n'.repeat(9);
+
+/** Trova una mossa legale che non chiude nessun gruppo. */
+function mossaCheNonEliminaNulla(stato) {
+  for (let i = 0; i < stato.hand.length; i += 1) {
+    const pezzo = stato.hand[i];
+    if (!pezzo) continue;
+    for (const [r, c] of allPlacements(stato.grid, pezzo.shape)) {
+      const { grid: dopo } = placeShape(stato.grid, pezzo.shape, r, c, pezzo.color);
+      if (findCompletedGroups(dopo).length === 0) return [i, r, c];
+    }
+  }
+  throw new Error('nessuna mossa che non elimini nulla');
+}
 
 describe('creazione della partita', () => {
   it('parte da griglia vuota, punteggio zero, catena zero, mano piena', () => {
@@ -122,7 +137,7 @@ describe('eliminazioni e punteggio in partita', () => {
     expect(after.score).toBe(3 + GROUP_BASE_POINTS.quadrant);
   });
 
-  it('la Catena regge una mano intera prima di calare', () => {
+  it('la Catena regge una mossa a vuoto prima di calare', () => {
     // Regola cambiata dopo averla misurata: con il calo a ogni mossa a vuoto la
     // Catena era >= 3 solo nel 2% delle mosse giocate, cioe' non contava quasi mai.
     let s = scenario('########.\n' + '.........\n'.repeat(8), ['p1', 'p1', 'p1']);
@@ -131,16 +146,11 @@ describe('eliminazioni e punteggio in partita', () => {
 
     s = placePiece(s, 1, 5, 5);
     expect(s.chain, 'prima mossa a vuoto: la Catena tiene').toBe(1);
-    s = placePiece(s, 2, 5, 7);
-    expect(s.chain, 'seconda mossa a vuoto: la Catena tiene ancora').toBe(1);
 
-    // La terza mossa a vuoto supera la tolleranza di una mano.
-    const opzioni = [];
-    s.hand.forEach((p, hi) => {
-      if (p) allPlacements(s.grid, p.shape).forEach(([r, c]) => opzioni.push([hi, r, c]));
-    });
-    s = placePiece(s, ...opzioni.find(([, r]) => r === 7));
-    expect(s.chain, 'terza mossa a vuoto: ora cala').toBe(0);
+    // La seconda mossa a vuoto supera la tolleranza. La mossa va CERCATA: dopo tre
+    // pezzi la mano si ricarica con forme non note al test.
+    s = placePiece(s, ...mossaCheNonEliminaNulla(s));
+    expect(s.chain, 'seconda mossa a vuoto: ora cala').toBe(0);
   });
 
   it('svuotare completamente la griglia paga il bonus una tantum', () => {

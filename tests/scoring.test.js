@@ -13,14 +13,28 @@ describe('Catena', () => {
     expect(chainMultiplier(CHAIN_MAX)).toBeCloseTo(3.25);
   });
 
-  it('sale di quanti gruppi hai chiuso', () => {
+  it('sale di UNO per mossa che elimina, non di quanti gruppi hai chiuso', () => {
+    // Contare i gruppi qui sarebbe premiarli due volte, visto che l'Intreccio ha gia'
+    // il suo moltiplicatore. Misurato: con la crescita a gruppi il 59,5% delle mosse
+    // finiva giocato al tetto e la Catena diventava un numero fisso.
     expect(nextChainState(0, 1, 0)).toEqual({ livello: 1, digiuno: 0 });
-    expect(nextChainState(1, 3, 0)).toEqual({ livello: 4, digiuno: 0 });
+    expect(nextChainState(1, 3, 0)).toEqual({ livello: 2, digiuno: 0 });
+    expect(nextChainState(5, 9, 0)).toEqual({ livello: 6, digiuno: 0 });
   });
 
   it('non supera mai il livello massimo', () => {
     expect(nextChainState(CHAIN_MAX, 3, 0).livello).toBe(CHAIN_MAX);
     expect(nextChainState(CHAIN_MAX - 1, 5, 0).livello).toBe(CHAIN_MAX);
+  });
+
+  it('raggiungere il massimo richiede una salita lunga, non una mossa fortunata', () => {
+    let stato = { livello: 0, digiuno: 0 };
+    let mosse = 0;
+    while (stato.livello < CHAIN_MAX) {
+      stato = nextChainState(stato.livello, 3, stato.digiuno);
+      mosse += 1;
+    }
+    expect(mosse, 'servono almeno CHAIN_MAX eliminazioni per arrivare in cima').toBe(CHAIN_MAX);
   });
 
   it('SOPPORTA una mano intera senza eliminazioni prima di calare', () => {
@@ -38,9 +52,15 @@ describe('Catena', () => {
   });
 
   it('una sola eliminazione azzera il digiuno e riparte la tolleranza', () => {
-    let stato = nextChainState(4, 0, 0);
-    stato = nextChainState(stato.livello, 0, stato.digiuno);
+    // Si consuma tutta la tolleranza senza eliminare, poi si elimina: il livello
+    // riparte da dove era e il contatore delle mosse a vuoto torna a zero.
+    let stato = { livello: 4, digiuno: 0 };
+    for (let i = 0; i < CHAIN_GRACE; i += 1) {
+      stato = nextChainState(stato.livello, 0, stato.digiuno);
+    }
+    expect(stato.livello, 'entro la tolleranza il livello non cala').toBe(4);
     expect(stato.digiuno).toBe(CHAIN_GRACE);
+
     stato = nextChainState(stato.livello, 1, stato.digiuno);
     expect(stato).toEqual({ livello: 5, digiuno: 0 });
   });

@@ -182,6 +182,7 @@ export function SchermoGioco({
               incandidate={anteprima?.incandidate}
               appoggiate={effetti.appoggiate}
               esplosioni={effetti.esplosioni}
+              celleEsplose={effetti.celleEsplose}
               cursore={tastiera.cursore}
               pezzoInMano={drag.selezionato !== null}
               t={t}
@@ -232,6 +233,7 @@ export function SchermoGioco({
           <Pezzo
             shape={pezzoTrascinato.shape}
             color={pezzoTrascinato.color}
+            bombe={pezzoTrascinato.bombe}
             cella={drag.preso.cella}
           />
         </div>

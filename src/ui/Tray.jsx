@@ -61,6 +61,7 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
                 <Pezzo
                   shape={pezzo.shape}
                   color={pezzo.color}
+                  bombe={pezzo.bombe}
                   cella={cella}
                   className={presoIndex === i ? 'pl-pezzo--preso' : ''}
                 />

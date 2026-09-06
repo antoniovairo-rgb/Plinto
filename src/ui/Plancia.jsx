@@ -1,6 +1,6 @@
 import { forwardRef, useMemo } from 'react';
 import { GRID_SIZE } from '../config/rules.js';
-import { idx } from '../core/grid.js';
+import { idx, coloreDi, eBomba } from '../core/grid.js';
 
 /**
  * La griglia 9x9.
@@ -15,7 +15,8 @@ import { idx } from '../core/grid.js';
 export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
-    appoggiate, esplosioni, cursore, pezzoInMano, cellRefs, canvasRef, onCellPointerUp, t,
+    appoggiate, esplosioni, celleEsplose, cursore, pezzoInMano,
+    cellRefs, canvasRef, onCellPointerUp, t,
   },
   ref,
 ) {
@@ -30,6 +31,9 @@ export const Plancia = forwardRef(function Plancia(
         const appenaPosata = appoggiate?.has(i);
         const inEsplosione = valore === 0 && esplosioni?.celle.has(i);
         const sottoCursore = cursore && cursore.row === r && cursore.col === c;
+        const colore = coloreDi(valore);
+        const bomba = eBomba(valore);
+        const saltata = valore === 0 && celleEsplose?.has(i);
 
         const classi = ['pl-cella'];
         if (sottoCursore) classi.push('pl-cella--cursore');
@@ -52,7 +56,10 @@ export const Plancia = forwardRef(function Plancia(
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
             {valore !== 0 ? (
-              <div className={`pl-blocco pl-blocco--${valore} ${appenaPosata ? 'pl-blocco--posato' : ''}`} />
+              <div
+                className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''} `
+                  + `${bomba ? 'pl-blocco--bomba' : ''}`}
+              />
             ) : null}
             {valore === 0 && inAnteprima ? (
               <div className={`pl-blocco pl-blocco--${anteprimaColore}`} />
@@ -62,7 +69,7 @@ export const Plancia = forwardRef(function Plancia(
                 scatto e la mossa piu' soddisfacente del gioco passerebbe inosservata. */}
             {inEsplosione ? (
               <div
-                className="pl-blocco pl-blocco--esploso"
+                className={`pl-blocco pl-blocco--esploso ${saltata ? 'pl-blocco--saltato' : ''}`}
                 style={{ '--esploso': esplosioni.colore }}
               />
             ) : null}
@@ -72,7 +79,7 @@ export const Plancia = forwardRef(function Plancia(
     }
     return out;
   }, [grid, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
-      cursore, cellRefs, onCellPointerUp, t]);
+      celleEsplose, cursore, cellRefs, onCellPointerUp, t]);
 
   return (
     <div className="pl-plancia" ref={ref} role="grid" aria-label="PLINTO" data-in-mano={pezzoInMano ? 'si' : 'no'}>

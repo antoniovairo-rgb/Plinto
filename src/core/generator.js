@@ -38,6 +38,7 @@ import {
   SMALL_PIECE_MAX_CELLS,
   MIN_PLACEMENTS_EARLY,
   RISKY_PIECE_FILL,
+  BOMBA_PROBABILITA,
 } from '../config/rules.js';
 
 /** Contatore per gli identificativi dei pezzi (chiavi React stabili). */
@@ -48,9 +49,33 @@ export function resetUid() {
   uidCounter = 0;
 }
 
-function makePiece(shape, color) {
+function makePiece(shape, color, bombe = []) {
   uidCounter += 1;
-  return { uid: `pz${uidCounter}`, shapeId: shape.id, shape, color };
+  return { uid: `pz${uidCounter}`, shapeId: shape.id, shape, color, bombe };
+}
+
+/**
+ * Mette al massimo UNA bomba nella mano, con probabilita' fissa.
+ *
+ * Fissa e' la parola importante: la probabilita' non guarda ne' il punteggio, ne'
+ * quanto sta andando bene la partita, ne' da quanto non ne esce una. Un giocatore
+ * che va forte non riceve piu' bombe per premiarlo e nemmeno meno per rallentarlo.
+ * E' l'unico modo perche' una sorpresa resti una sorpresa e non una leva.
+ *
+ * La bomba non finisce mai su un pezzo da una cella sola: sarebbe una bomba da
+ * appoggiare dove capita, senza nessuna decisione da prendere.
+ */
+function forseUnaBomba(rng, pezzi) {
+  if (rng.float() >= BOMBA_PROBABILITA) return pezzi;
+  const candidati = pezzi
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p.shape.size > 1);
+  if (candidati.length === 0) return pezzi;
+  const scelto = candidati[rng.int(candidati.length)];
+  const cella = rng.int(scelto.p.shape.size);
+  const conBomba = pezzi.slice();
+  conBomba[scelto.i] = { ...scelto.p, bombe: [cella] };
+  return conBomba;
 }
 
 /**
@@ -203,7 +228,8 @@ export function generateHand(grid, rngState, history = []) {
     pieces[HAND_SIZE - 1] = makePiece(chosen, pickColor(rng, pieces.map((p) => p.color)));
   }
 
+  const conBombe = forseUnaBomba(rng, pieces);
   const nextHistory = [...history, ...pieces.map((p) => p.shapeId)].slice(-HISTORY_SIZE);
 
-  return { pieces, rngState: rng.state, history: nextHistory, mercyApplied };
+  return { pieces: conBombe, rngState: rng.state, history: nextHistory, mercyApplied };
 }

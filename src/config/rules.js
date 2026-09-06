@@ -54,7 +54,18 @@ export const CHAIN_DECAY = 1;
  * in mano si elimina all'incirca una volta ogni tre mosse. La regola si racconta in
  * una riga: "la Catena cala se non elimini niente per un'intera mano".
  */
-export const CHAIN_GRACE = 2;
+export const CHAIN_GRACE = 1;
+
+/**
+ * Di quanto sale la Catena a ogni mossa che elimina qualcosa.
+ *
+ * Sale di UNO, non di quanti gruppi hai chiuso. Chiudere tre gruppi insieme e' gia'
+ * premiato dal moltiplicatore Intreccio: farlo contare due volte faceva schizzare la
+ * Catena al massimo e li' restava. Misurato con il giocatore forte: il 59,5% delle
+ * mosse veniva giocato al tetto, cioe' il moltiplicatore era un numero fisso invece
+ * che una tensione. Esattamente inutile quanto quando non saliva mai.
+ */
+export const CHAIN_STEP_UP = 1;
 
 /** Bonus una tantum per aver svuotato completamente la griglia. */
 export const BOARD_CLEAR_BONUS = 300;
@@ -113,3 +124,31 @@ export const RISKY_PIECE_FILL = 0.3;
  * sorpresa appena il giocatore appoggia gli altri due: non e' difficolta', e' sfortuna.
  */
 export const MIN_PLACEMENTS_EARLY = 2;
+
+/**
+ * BOMBE
+ *
+ * Ogni tanto uno dei pezzi in mano contiene una cella-bomba. La bomba non fa niente
+ * finche' resta sulla plancia: esplode SOLO quando viene eliminata insieme al gruppo
+ * che la contiene, e allora porta via anche le celle intorno. Le bombe colpite da
+ * un'esplosione esplodono a loro volta, quindi tre bombe vicine fanno un buco grosso.
+ *
+ * La regola sta in una riga e non aggiunge nessuna eccezione al resto del gioco:
+ * una bomba e' un blocco normale che, quando sparisce, se ne porta dietro altri.
+ */
+
+/**
+ * Scarto che distingue una cella-bomba nella griglia: il valore di una cella e' il
+ * colore (1..6), e una bomba e' colore + 10 (11..16). Un solo array invece di due,
+ * quindi salvataggi e copie restano quelli di prima.
+ */
+export const VALORE_BOMBA = 10;
+
+/** Probabilita' che una mano contenga UNA cella-bomba. Tarata con le simulazioni. */
+export const BOMBA_PROBABILITA = 0.22;
+
+/** Raggio dell'esplosione, in celle. 1 = il quadrato 3x3 attorno alla bomba. */
+export const BOMBA_RAGGIO = 1;
+
+/** Punti per ogni cella portata via dall'esplosione oltre al gruppo eliminato. */
+export const PUNTI_CELLA_ESPLOSA = 6;

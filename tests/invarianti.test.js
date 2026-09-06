@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createGame, placePiece, handHasMove, serializeGame, deserializeGame } from '../src/core/engine.js';
 import {
-  allPlacements, hasAnyPlacement, filledCount, CELL_COUNT, gridToString,
+  allPlacements, hasAnyPlacement, filledCount, CELL_COUNT, gridToString, coloreDi, eBomba,
 } from '../src/core/grid.js';
-import { HAND_SIZE, COLOR_COUNT, CHAIN_MAX } from '../src/config/rules.js';
+import { HAND_SIZE, COLOR_COUNT, CHAIN_MAX, VALORE_BOMBA } from '../src/config/rules.js';
 import { SHAPES_BY_ID } from '../src/core/shapes.js';
 import { createRng } from '../src/core/rng.js';
 
@@ -33,8 +33,20 @@ function verificaStato(stato, contesto) {
 
   expect(stato.grid.length, dove).toBe(CELL_COUNT);
   for (let i = 0; i < stato.grid.length; i += 1) {
-    expect(stato.grid[i], `${dove}\ncella ${i}`).toBeGreaterThanOrEqual(0);
-    expect(stato.grid[i], `${dove}\ncella ${i}`).toBeLessThanOrEqual(COLOR_COUNT);
+    const valore = stato.grid[i];
+    // Una cella e' vuota, oppure un colore, oppure una bomba di quel colore.
+    // Non basta accettare l'intervallo piu' ampio: un valore fra 7 e 10 sarebbe un
+    // colore inesistente e verrebbe disegnato come blocco senza tinta.
+    const valida = valore === 0
+      || (valore >= 1 && valore <= COLOR_COUNT)
+      || (valore > VALORE_BOMBA && valore <= VALORE_BOMBA + COLOR_COUNT);
+    expect(valida, `${dove}\ncella ${i} ha valore ${valore}`).toBe(true);
+    if (valore !== 0) {
+      const colore = coloreDi(valore);
+      expect(colore, `${dove}\ncella ${i}`).toBeGreaterThanOrEqual(1);
+      expect(colore, `${dove}\ncella ${i}`).toBeLessThanOrEqual(COLOR_COUNT);
+      expect(eBomba(valore)).toBe(valore > VALORE_BOMBA);
+    }
   }
 
   expect(stato.hand.length, dove).toBe(HAND_SIZE);
@@ -108,8 +120,16 @@ describe('invarianti su partite complete', () => {
         expect(new Set(m.clearedCells).size).toBe(m.clearedCells.length);
 
         // Il conteggio delle celle piene torna: prima + posate - eliminate.
+        // Le celle fatte saltare dalle bombe sono gia' dentro clearedCells: se non lo
+        // fossero, questo controllo lo direbbe subito.
         expect(filledCount(dopo.grid), `${dove}: bilancio delle celle sbagliato`)
           .toBe(pieneDopoPrec + m.placedCells.length - m.clearedCells.length);
+
+        // Ogni cella dichiarata "fatta saltare" deve essere anche fra le eliminate.
+        const eliminate = new Set(m.clearedCells);
+        (m.celleEsplose ?? []).forEach((cella) => {
+          expect(eliminate.has(cella), `${dove}: cella ${cella} esplosa ma non eliminata`).toBe(true);
+        });
 
         // Ogni cella dichiarata eliminata e' davvero vuota adesso.
         m.clearedCells.forEach((cella) => {

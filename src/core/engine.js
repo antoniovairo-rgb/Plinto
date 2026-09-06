@@ -18,7 +18,8 @@ import {
   createGrid,
   placeShape,
   findCompletedGroups,
-  clearGroups,
+  detonaBombe,
+  svuotaCelle,
   canPlace,
   hasAnyPlacement,
   isEmpty,
@@ -47,6 +48,8 @@ function emptyStats() {
     bestChain: 0,
     bestIntreccio: 0,
     boardClears: 0,
+    bombeEsplose: 0,
+    celleEsplose: 0,
     handsDealt: 0,
   };
 }
@@ -130,23 +133,35 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
   if (!canPlace(state.grid, piece.shape, row, col)) return state;
 
   // 1. Appoggio.
-  const placed = placeShape(state.grid, piece.shape, row, col, piece.color);
+  const placed = placeShape(state.grid, piece.shape, row, col, piece.color, piece.bombe);
 
   // 2. Gruppi completati (riga, colonna, quadrante: valutati insieme).
   const groups = findCompletedGroups(placed.grid);
-  const cleared = clearGroups(placed.grid, groups);
+
+  // 3. Detonazioni. Le bombe entrano in gioco SOLO se qualcosa viene eliminato:
+  //    una bomba appoggiata sulla plancia resta un blocco come gli altri finche'
+  //    non e' il gruppo che la contiene a sparire.
+  const celleGruppi = [];
+  for (const gruppo of groups) for (const cella of gruppo.cells) celleGruppi.push(cella);
+  const detonazione = groups.length > 0
+    ? detonaBombe(placed.grid, celleGruppi)
+    : { tutte: new Set(), esplose: [], bombe: [] };
+  const cleared = groups.length > 0
+    ? svuotaCelle(placed.grid, detonazione.tutte)
+    : { grid: placed.grid, clearedCells: [] };
   const boardCleared = groups.length > 0 && isEmpty(cleared.grid);
 
-  // 3. Punteggio, con il moltiplicatore Catena che il giocatore vedeva prima di muovere.
+  // 4. Punteggio, con il moltiplicatore Catena che il giocatore vedeva prima di muovere.
   const scored = scoreMove({
     placedCellCount: placed.cells.length,
     groups,
     chainLevel: state.chain,
     chainFast: state.chainDigiuno ?? 0,
     boardCleared,
+    explodedCellCount: detonazione.esplose.length,
   });
 
-  // 4. Mano: si rigenera solo quando tutti i pezzi sono stati usati.
+  // 5. Mano: si rigenera solo quando tutti i pezzi sono stati usati.
   const hand = state.hand.slice();
   hand[handIndex] = null;
   const handEmpty = hand.every((p) => p === null);
@@ -165,7 +180,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     handsDealt += 1;
   }
 
-  // 5. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte.
+  // 6. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte.
   const alive = handHasMove(grid, nextHand);
 
   const stats = {
@@ -181,6 +196,8 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     bestChain: Math.max(state.stats.bestChain, scored.chainAfter),
     bestIntreccio: Math.max(state.stats.bestIntreccio, groups.length),
     boardClears: state.stats.boardClears + (boardCleared ? 1 : 0),
+    bombeEsplose: (state.stats.bombeEsplose ?? 0) + detonazione.bombe.length,
+    celleEsplose: (state.stats.celleEsplose ?? 0) + detonazione.esplose.length,
     handsDealt,
   };
 
@@ -206,12 +223,14 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
       placedCells: placed.cells,
       groups: groups.map((g) => ({ type: g.type, index: g.index, cells: g.cells })),
       clearedCells: cleared.clearedCells,
+      celleEsplose: detonazione.esplose,
+      bombeDetonate: detonazione.bombe,
       points: scored.points,
       breakdown: scored.breakdown,
       chainBefore: scored.chainUsed,
       chainAfter: scored.chainAfter,
       chainDigiunoAfter: scored.chainFastAfter,
-      tier: moveTier(groups.length, scored.chainUsed),
+      tier: moveTier(groups.length, scored.chainUsed, detonazione.esplose.length),
       boardCleared,
       handRefilled: handEmpty,
       gameOver: !alive,
@@ -257,7 +276,9 @@ export function serializeGame(state) {
     rngState: state.rngState,
     shapeHistory: state.shapeHistory,
     grid: Array.from(state.grid),
-    hand: state.hand.map((p) => (p ? { uid: p.uid, shapeId: p.shapeId, color: p.color } : null)),
+    hand: state.hand.map((p) => (
+      p ? { uid: p.uid, shapeId: p.shapeId, color: p.color, bombe: p.bombe ?? [] } : null
+    )),
     score: state.score,
     chain: state.chain,
     chainDigiuno: state.chainDigiuno ?? 0,
@@ -294,7 +315,13 @@ export function deserializeGame(raw) {
     if (!Array.isArray(raw.hand)) return null;
     const grid = Uint8Array.from(raw.grid);
     const hand = raw.hand.map((p) =>
-      p ? { uid: p.uid, shapeId: p.shapeId, shape: getShape(p.shapeId), color: p.color } : null,
+      p ? {
+        uid: p.uid,
+        shapeId: p.shapeId,
+        shape: getShape(p.shapeId),
+        color: p.color,
+        bombe: Array.isArray(p.bombe) ? p.bombe.filter((i) => Number.isInteger(i) && i >= 0) : [],
+      } : null,
     );
     if (hand.length !== HAND_SIZE) return null;
     return {

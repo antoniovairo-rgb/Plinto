@@ -23,7 +23,9 @@ import {
   CHAIN_STEP,
   CHAIN_DECAY,
   CHAIN_GRACE,
+  CHAIN_STEP_UP,
   BOARD_CLEAR_BONUS,
+  PUNTI_CELLA_ESPLOSA,
 } from '../config/rules.js';
 
 /** Moltiplicatore associato a un livello di Catena. Livello 0 => x1. */
@@ -50,7 +52,7 @@ export function intrecciMultiplier(groupCount) {
  */
 export function nextChainState(level, groupCount, digiuno = 0) {
   if (groupCount > 0) {
-    return { livello: Math.min(CHAIN_MAX, level + groupCount), digiuno: 0 };
+    return { livello: Math.min(CHAIN_MAX, level + CHAIN_STEP_UP), digiuno: 0 };
   }
   const prossimoDigiuno = digiuno + 1;
   if (prossimoDigiuno <= CHAIN_GRACE) return { livello: level, digiuno: prossimoDigiuno };
@@ -74,7 +76,9 @@ export function respiroRimasto(digiuno) {
  *   breakdown:{placement:number, groupsBase:number, intreccio:number, chain:number, clearPoints:number, boardClear:number}
  * }}
  */
-export function scoreMove({ placedCellCount, groups, chainLevel, chainFast = 0, boardCleared }) {
+export function scoreMove({
+  placedCellCount, groups, chainLevel, chainFast = 0, boardCleared, explodedCellCount = 0,
+}) {
   const placement = placedCellCount * POINTS_PER_CELL;
 
   let groupsBase = 0;
@@ -85,16 +89,19 @@ export function scoreMove({ placedCellCount, groups, chainLevel, chainFast = 0, 
   const intreccio = intrecciMultiplier(groups.length);
   const chain = chainMultiplier(chainLevel);
   const clearPoints = groups.length > 0 ? Math.round(groupsBase * intreccio * chain) : 0;
+  // Le celle portate via dalle bombe oltre al gruppo: seguono la Catena come tutto
+  // il resto, altrimenti sarebbero un punteggio scollegato dal ritmo della partita.
+  const esplosioni = Math.round(explodedCellCount * PUNTI_CELLA_ESPLOSA * chain);
   const boardClear = boardCleared && groups.length > 0 ? BOARD_CLEAR_BONUS : 0;
 
   const dopo = nextChainState(chainLevel, groups.length, chainFast);
 
   return {
-    points: placement + clearPoints + boardClear,
+    points: placement + clearPoints + esplosioni + boardClear,
     chainAfter: dopo.livello,
     chainFastAfter: dopo.digiuno,
     chainUsed: chainLevel,
-    breakdown: { placement, groupsBase, intreccio, chain, clearPoints, boardClear },
+    breakdown: { placement, groupsBase, intreccio, chain, clearPoints, esplosioni, boardClear },
   };
 }
 
@@ -103,9 +110,9 @@ export function scoreMove({ placedCellCount, groups, chainLevel, chainFast = 0, 
  * Serve al layer di game feel per scegliere l'intensita' del feedback.
  * @returns {null|'buona'|'ottima'|'eccellente'|'perfetta'}
  */
-export function moveTier(groupCount, chainLevel) {
+export function moveTier(groupCount, chainLevel, celleEsplose = 0) {
   if (groupCount <= 0) return null;
-  const heat = groupCount + Math.floor(chainLevel / 3);
+  const heat = groupCount + Math.floor(chainLevel / 3) + Math.floor(celleEsplose / 8);
   if (heat >= 6) return 'perfetta';
   if (heat >= 4) return 'eccellente';
   if (heat >= 2) return 'ottima';

@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { COLOR_COUNT } from '../config/rules.js';
 import {
   suonoAppoggio, suonoEliminazione, suonoGrandeCombo, suonoGrigliaVuota, suonoFinePartita,
+  suonoEsplosione,
 } from '../audio/suoni.js';
 import {
-  vibraAppoggio, vibraEliminazione, vibraCelebrazione, vibraFinePartita,
+  vibraAppoggio, vibraEliminazione, vibraCelebrazione, vibraFinePartita, vibraEsplosione,
 } from './vibrazione.js';
 
 /**
@@ -33,6 +34,7 @@ function coloreBlocco(indice) {
 export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni }) {
   const [appoggiate, setAppoggiate] = useState(null);
   const [esplosioni, setEsplosioni] = useState(null);
+  const [celleEsplose, setCelleEsplose] = useState(null);
   const [puntiVolanti, setPuntiVolanti] = useState(null);
   const ultimaMossa = useRef(null);
 
@@ -47,6 +49,11 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     if (gruppi > 0) {
       suonoEliminazione(gruppi, lastMove.chainBefore);
       vibraEliminazione(gruppi);
+      const bombe = lastMove.bombeDetonate?.length ?? 0;
+      if (bombe > 0) {
+        // Poco dopo l'eliminazione, non insieme: prima sparisce la riga, poi scoppia.
+        timers.push(setTimeout(() => { suonoEsplosione(bombe); vibraEsplosione(bombe); }, 90));
+      }
       if (lastMove.tier === 'eccellente' || lastMove.tier === 'perfetta') {
         suonoGrandeCombo(lastMove.chainBefore);
       }
@@ -69,7 +76,8 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     if (gruppi > 0) {
       const colore = coloreBlocco(lastMove.color);
       setEsplosioni({ celle: new Set(lastMove.clearedCells), colore });
-      timers.push(setTimeout(() => setEsplosioni(null), DURATA_ESPLOSIONE));
+      setCelleEsplose(new Set(lastMove.celleEsplose ?? []));
+      timers.push(setTimeout(() => { setEsplosioni(null); setCelleEsplose(null); }, DURATA_ESPLOSIONE));
 
       // --- particelle ------------------------------------------------------
       if (campo.current && plancia.current) {
@@ -99,5 +107,5 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     return () => timers.forEach(clearTimeout);
   }, [lastMove, campo, cellRefs, plancia, animazioni]);
 
-  return { appoggiate, esplosioni, puntiVolanti };
+  return { appoggiate, esplosioni, celleEsplose, puntiVolanti };
 }

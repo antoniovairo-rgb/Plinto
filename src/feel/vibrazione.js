@@ -37,6 +37,11 @@ export function vibraEliminazione(gruppi) {
   else vibra([22, 40, 22, 40, 30]);
 }
 
+/** Esplosione di bombe: un colpo solo, piu' lungo con piu' bombe. */
+export function vibraEsplosione(bombe = 1) {
+  vibra(Math.min(70, 26 + bombe * 16));
+}
+
 /** Nuovo record o griglia svuotata. */
 export function vibraCelebrazione() { vibra([30, 60, 30, 60, 60]); }
 

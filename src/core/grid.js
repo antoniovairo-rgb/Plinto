@@ -3,11 +3,12 @@
  *
  * Rappresentazione: Uint8Array di GRID_SIZE*GRID_SIZE celle.
  *   0        = cella vuota
- *   1..N     = cella piena, il valore e' la famiglia cromatica (solo estetica)
- * L'array piatto rende banali le copie e velocissime le simulazioni di massa.
+ *   1..6     = cella piena, il valore e' la famiglia cromatica (solo estetica)
+ *   11..16   = come sopra, ma la cella e' una BOMBA (colore + VALORE_BOMBA)
+ * Un array solo invece di due: copie, salvataggi e simulazioni restano quelli di prima.
  */
 
-import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE, VALORE_BOMBA, BOMBA_RAGGIO } from '../config/rules.js';
 
 export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
 export const QUADRANTS_PER_SIDE = GRID_SIZE / QUADRANT_SIZE;
@@ -15,6 +16,72 @@ export const QUADRANT_COUNT = QUADRANTS_PER_SIDE * QUADRANTS_PER_SIDE;
 
 if (!Number.isInteger(QUADRANTS_PER_SIDE)) {
   throw new Error('GRID_SIZE deve essere divisibile per QUADRANT_SIZE');
+}
+
+/** Colore di una cella, bomba o no. 0 se vuota. */
+export function coloreDi(valore) {
+  return valore === 0 ? 0 : ((valore - 1) % VALORE_BOMBA) + 1;
+}
+
+/** La cella contiene una bomba? */
+export function eBomba(valore) {
+  return valore > VALORE_BOMBA;
+}
+
+/** Valore di cella per un blocco-bomba del colore dato. */
+export function conBomba(colore) {
+  return colore + VALORE_BOMBA;
+}
+
+/**
+ * Espande un insieme di celle da eliminare facendo detonare le bombe che contiene.
+ *
+ * Una bomba porta via il quadrato BOMBA_RAGGIO attorno a se'. Se dentro quel quadrato
+ * c'e' un'altra bomba, anche quella detona: la propagazione continua finche' non si
+ * aggiunge piu' nulla, quindi tre bombe vicine si innescano a vicenda.
+ *
+ * @param {Uint8Array} grid griglia DOPO il posizionamento del pezzo
+ * @param {Iterable<number>} celleIniziali indici delle celle dei gruppi completati
+ * @returns {{tutte:Set<number>, esplose:number[], bombe:number[]}}
+ *   `tutte` = da svuotare; `esplose` = solo quelle aggiunte dalle bombe;
+ *   `bombe` = le bombe detonate, in ordine di detonazione (serve alle animazioni)
+ */
+export function detonaBombe(grid, celleIniziali) {
+  const tutte = new Set(celleIniziali);
+  const bombe = [];
+  const daEsaminare = [...tutte];
+  const esaminate = new Set();
+
+  while (daEsaminare.length > 0) {
+    const cella = daEsaminare.pop();
+    if (esaminate.has(cella)) continue;
+    esaminate.add(cella);
+    if (!eBomba(grid[cella])) continue;
+
+    bombe.push(cella);
+    const r0 = rowOf(cella);
+    const c0 = colOf(cella);
+    for (let r = r0 - BOMBA_RAGGIO; r <= r0 + BOMBA_RAGGIO; r += 1) {
+      for (let c = c0 - BOMBA_RAGGIO; c <= c0 + BOMBA_RAGGIO; c += 1) {
+        if (r < 0 || c < 0 || r >= GRID_SIZE || c >= GRID_SIZE) continue;
+        const vicina = idx(r, c);
+        if (grid[vicina] === 0) continue;          // il vuoto non si elimina
+        if (!tutte.has(vicina)) {
+          tutte.add(vicina);
+          daEsaminare.push(vicina);
+        } else if (!esaminate.has(vicina)) {
+          daEsaminare.push(vicina);                // gia' da eliminare, ma va innescata
+        }
+      }
+    }
+  }
+
+  const iniziali = new Set(celleIniziali);
+  return {
+    tutte,
+    esplose: [...tutte].filter((c) => !iniziali.has(c)),
+    bombe,
+  };
 }
 
 /** @returns {Uint8Array} griglia vuota */
@@ -148,13 +215,14 @@ export function allPlacements(grid, shape) {
  * animare "prima appoggia, poi esplode".
  * @returns {{grid: Uint8Array, cells: number[]}}
  */
-export function placeShape(grid, shape, row, col, color) {
+export function placeShape(grid, shape, row, col, color, bombe = null) {
   const cells = shapeCellsAt(shape, row, col);
   if (cells === null) throw new Error('Posizionamento fuori griglia');
   const next = grid.slice();
+  const conBombe = bombe && bombe.length ? new Set(bombe) : null;
   for (let i = 0; i < cells.length; i += 1) {
     if (next[cells[i]] !== 0) throw new Error('Posizionamento su cella occupata');
-    next[cells[i]] = color;
+    next[cells[i]] = conBombe && conBombe.has(i) ? conBomba(color) : color;
   }
   return { grid: next, cells };
 }
@@ -205,17 +273,17 @@ export function findCompletedGroups(grid) {
  */
 export function clearGroups(grid, groups) {
   if (groups.length === 0) return { grid, clearedCells: [] };
-  const next = grid.slice();
   const seen = new Set();
-  for (const group of groups) {
-    for (const cell of group.cells) {
-      if (!seen.has(cell)) {
-        seen.add(cell);
-        next[cell] = 0;
-      }
-    }
-  }
-  return { grid: next, clearedCells: [...seen] };
+  for (const group of groups) for (const cell of group.cells) seen.add(cell);
+  return svuotaCelle(grid, seen);
+}
+
+/** Svuota un insieme qualsiasi di celle. Usato anche dalle esplosioni. */
+export function svuotaCelle(grid, celle) {
+  const next = grid.slice();
+  const elencate = [...new Set(celle)];
+  for (const cella of elencate) next[cella] = 0;
+  return { grid: next, clearedCells: elencate };
 }
 
 /** Numero di celle piene. */
