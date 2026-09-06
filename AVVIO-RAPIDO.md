@@ -37,9 +37,20 @@ Stessi comandi dal Prompt dei comandi o da PowerShell, dopo aver installato Node
 ## Online, su GitHub Pages
 
 Il flusso di pubblicazione è in `.github/workflows/pages.yml` e parte a ogni push su
-`main`. **Non serve abilitare niente a mano**: il flusso attiva Pages da solo.
+`main`. Prima del primo uso serve **un passaggio manuale, una volta sola**, da fare
+come amministratore della repository:
 
-L'indirizzo è `https://antoniovairo-rgb.github.io/Plinto/`.
+**Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+
+Poi si può rilanciare la pubblicazione da Actions → "pubblica su Pages" → Run workflow.
+
+> Perché non è automatico: `actions/configure-pages` ha un'opzione `enablement: true`
+> che in teoria attiverebbe Pages da sé. È stata provata e fallisce con
+> *"Resource not accessible by integration ... create-a-pages-site"*: il token
+> automatico dei flussi non ha i permessi di amministrazione per **creare** il sito,
+> e nessun permesso dichiarabile nel file glieli può dare.
+
+L'indirizzo sarà `https://antoniovairo-rgb.github.io/Plinto/`.
 
 > **Nota sulla visibilità.** GitHub Pages su una repository *privata* richiede un
 > piano a pagamento. Questa repository è pubblica dal 6 settembre 2026, quindi Pages
