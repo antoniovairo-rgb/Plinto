@@ -23,7 +23,7 @@ import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
-import { quantiSuperati } from '../persistence/progressi.js';
+import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
 
 /**
  * Radice dell'applicazione.
@@ -60,6 +60,13 @@ export function App() {
   const [sfidaSalvata, setSfidaSalvata] = useState(() => cePartitaSalvata('sfida'));
   const [sfidaOggi, setSfidaOggi] = useState(() => sfidaDelGiorno());
   const [quadriFatti, setQuadriFatti] = useState(() => quantiSuperati());
+  // Il livello a cui il giocatore e' arrivato. Dipende dai progressi salvati, non dal
+  // conteggio: un livello puo' essere stato superato fuori ordine tornando indietro.
+  const livelloCorrente = useMemo(
+    () => prossimoQuadro(TOTALE_QUADRI),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [quadriFatti],
+  );
 
   const quadri = useQuadro();
 
@@ -121,6 +128,13 @@ export function App() {
     quadri.chiudi();
     setSchermata('quadri');
   }, [quadri]);
+
+  /** Il pulsante principale della home: entra direttamente nel livello corrente. */
+  const giocaLivelloCorrente = useCallback(() => {
+    const livello = quadroNumero(livelloCorrente);
+    if (livello) apriQuadro(livello);
+    else setSchermata('quadri');
+  }, [livelloCorrente, apriQuadro]);
 
   const quadroSuccessivo = useCallback(() => {
     const prossimo = quadroNumero((quadri.quadro?.numero ?? 0) + 1);
@@ -250,6 +264,7 @@ export function App() {
           onMenu={() => setMenuAperto(true)}
           aiutoVisivo={impostazioni.aiutoVisivo}
           animazioni={impostazioni.animazioni}
+          modalita={modalita}
           t={t}
         />
       ) : null}
@@ -262,7 +277,10 @@ export function App() {
           sfidaInCorso={sfidaSalvata}
           quadriFatti={quadriFatti}
           quadriTotali={TOTALE_QUADRI}
+          livelloCorrente={livelloCorrente}
+          versione={__APP_VERSION__}
           onQuadri={() => setSchermata('quadri')}
+          onGiocaLivello={giocaLivelloCorrente}
           onGioca={iniziaNuova}
           onRiprendi={riprendiPartita}
           onSfida={apriSfida}

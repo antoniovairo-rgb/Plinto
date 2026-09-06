@@ -22,7 +22,7 @@ import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf }
  */
 export function SchermoGioco({
   partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
-  quadro = null, statoQuadro = null, t,
+  quadro = null, statoQuadro = null, modalita = 'libera', t,
 }) {
   const cellRefs = useRef([]);
   const plancia = useRef(null);
@@ -167,11 +167,20 @@ export function SchermoGioco({
         t={t}
       />
 
-      {/* Nei Quadri l'obiettivo sta sopra la plancia: e' l'unica informazione che
-          serve PRIMA di muovere, mentre il punteggio si guarda dopo. */}
+      {/* Nei livelli l'obiettivo sta sopra la plancia: e' l'unica informazione che
+          serve PRIMA di muovere, mentre il punteggio si guarda dopo.
+
+          Nelle altre modalita' al suo posto c'e' il NOME della modalita'. Non e'
+          decorazione: senza, la partita libera e un livello si distinguevano solo per
+          l'assenza di una striscia, cioe' per una cosa che non c'e' — e un giocatore
+          ha creduto di essere al livello 1 mentre era in partita libera, concludendo
+          che il livello 1 non avesse obiettivo. Un'assenza non si nota; un'etichetta
+          si legge. */}
       {quadro && statoQuadro ? (
         <BarraObiettivo quadro={quadro} stato={statoQuadro} t={t} />
-      ) : null}
+      ) : (
+        <p className="pl-modalita">{t(`modo.${modalita}`)}</p>
+      )}
 
       {/* Catena, plancia e suggerimento formano un blocco unico centrato: su schermi
           alti lo spazio che avanza diventa respiro attorno al tavolo da gioco, non

@@ -1436,3 +1436,50 @@ button {
   color: var(--pl-text-dim);
   text-align: center;
 }
+
+/* ------------------------------------------------- home: modalita e versione --- */
+
+/* Il menu in fondo alla home ha quattro voci da quando c'e' "Come si gioca". In fila
+   non ci stavano: prima quella voce andava a capo su tre righe (sembrava un errore,
+   non una scelta), poi restava "Info" da solo sulla seconda riga.
+   Due colonne per due righe: bilanciato, prevedibile, e ogni voce resta su una riga. */
+.pl-home__menu {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px 8px;
+  max-width: 380px;
+  margin: 0 auto;
+  width: 100%;
+}
+.pl-home__menu .pl-btn {
+  white-space: nowrap;
+  min-height: 44px;
+}
+/* Dove c'e' spazio tornano tutte in fila, che resta la forma migliore. */
+@media (min-width: 460px) {
+  .pl-home__menu { grid-template-columns: repeat(4, auto); justify-content: center; }
+}
+
+.pl-home__versione {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--pl-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Il nome della modalita', al posto in cui nei livelli sta l'obiettivo. Discreto ma
+   presente: serve a rispondere alla domanda "dove sono", non a decorare. */
+.pl-modalita {
+  width: 100%;
+  max-width: min(96vw, 58vh);
+  margin: 0 auto;
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pl-text-faint);
+}

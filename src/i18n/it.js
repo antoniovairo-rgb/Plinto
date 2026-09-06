@@ -19,13 +19,14 @@ export default {
   home: {
     gioca: 'Gioca',
     riprendi: 'Riprendi la partita',
+    partitaLibera: 'Partita libera',
+    mappa: 'Mappa dei livelli',
     nuovaPartita: 'Nuova partita',
     record: 'Record',
     statistiche: 'Statistiche',
     impostazioni: 'Impostazioni',
     info: 'Info',
     sostieni: 'Sostieni il progetto',
-    nessunRecord: 'Nessun record: la prima partita fa storia.',
   },
   hud: {
     punteggio: 'Punteggio',
@@ -33,6 +34,10 @@ export default {
     catena: 'Catena',
     respiroFinito: 'la prossima mossa a vuoto la fa calare',
     menu: 'Menu',
+  },
+  modo: {
+    libera: 'Partita libera',
+    sfida: 'Sfida del giorno',
   },
   gioca: {
     trascina: 'Trascina un pezzo sulla griglia',
@@ -101,7 +106,6 @@ export default {
   },
   quadri: {
     titolo: 'Livelli',
-    breve: 'Livelli',
     avanzamento: '{fatti} di {totale}',
     superato: 'Superato',
     bloccato: 'Supera il livello precedente',

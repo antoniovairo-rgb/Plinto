@@ -112,7 +112,7 @@ await page.screenshot({ path: `${OUT}/01-home.png` });
 console.log('1. home caricata, titolo:', await page.title());
 
 // ---------- 2. Avvio partita ----------
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.screenshot({ path: `${OUT}/02-partita.png` });
 console.log('2. partita avviata. Blocchi sulla griglia:', await contaBlocchi(), '| punteggio:', await punteggio());
@@ -203,7 +203,7 @@ if (esplosiDopo !== 0) errori.push('ANIMAZIONE: i blocchi in esplosione non veng
 // ---------- 4. Modalita a due tocchi ----------
 await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
 const primaTap = await contaBlocchi();
 await page.locator('.pl-tray .pl-pezzo-presa').first().click();
@@ -219,7 +219,7 @@ if (dopoTap <= primaTap) errori.push('TAP: nessun blocco posizionato con la moda
 // ---------- 4b. Partita da tastiera, senza mai toccare il puntatore ----------
 await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
 const primaTastiera = await contaBlocchi();
 // Tab fino al primo pezzo, Invio per prenderlo, frecce per muoversi, Invio per appoggiare.
@@ -299,7 +299,7 @@ else console.log('   punteggio finale mostrato:', await page.locator('.pl-fine__
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 // Si lascia a meta' una partita libera...
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
 const geoLibera = await page.evaluate(() => {
   const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();

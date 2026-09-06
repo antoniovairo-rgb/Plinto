@@ -46,6 +46,13 @@ Le informazioni non passano mai dal solo colore: il cursore da tastiera e' un an
 mossa illegale un bordo, e la bomba si riconosce da un segno geometrico al centro del
 blocco e non dalla sua tinta.
 
+## Come e' fatta la home
+
+Il pulsante grande e' il **livello a cui sei arrivato**, e ci entra direttamente. Sotto,
+la **mappa dei livelli** con l'avanzamento, la **partita libera** (il gioco senza fine,
+con il suo record) e la **sfida del giorno**. In partita, quando non sei in un livello,
+la modalita' e' scritta sopra la plancia: cosi' non c'e' modo di non sapere dove sei.
+
 ## Le regole si rileggono
 
 Dalla home, voce **"Come si gioca"**: le quattro regole, i due modi di muovere, la tastiera,

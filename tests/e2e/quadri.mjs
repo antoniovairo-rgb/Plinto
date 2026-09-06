@@ -95,8 +95,35 @@ await page.evaluate(() => {
 });
 await page.reload({ waitUntil: 'networkidle' });
 
-// ---------- 1. Elenco dei Quadri ----------
-await page.getByRole('button', { name: /^Livelli/ }).click();
+// ---------- 0b. Il pulsante grande della home porta a un LIVELLO ----------
+// E' il difetto che ha reso inutili tre versioni di lavoro sulla spiegazione: il
+// pulsante piu' grande avviava la partita libera, e un giocatore ha creduto di essere
+// al livello 1 mentre non c'era nessun livello. La spiegazione era giusta; nessuno ci
+// arrivava. Quindi si verifica la STRADA, non solo la destinazione.
+{
+  const principale = page.locator('.pl-home__azioni .pl-btn--primario');
+  const testoPrincipale = (await principale.innerText()).trim();
+  // Il badge si legge ORA, finche' siamo sulla home: dopo il click siamo altrove.
+  const versione = (await page.locator('.pl-home__versione').innerText().catch(() => '')).trim();
+  if (!/livello/i.test(testoPrincipale)) {
+    errori.push(`HOME: il pulsante principale dice "${testoPrincipale}" invece di portare a un livello`);
+  }
+  if (!/^v\d+\.\d+\.\d+$/.test(versione)) {
+    errori.push(`HOME: il badge della versione dice "${versione}"`);
+  }
+
+  await principale.click();
+  await page.waitForTimeout(300);
+  // Deve aprirsi la presentazione del livello, non una partita senza obiettivi.
+  if (await page.locator('.pl-apertura').count() === 0) {
+    errori.push('HOME: il pulsante principale non apre la presentazione di un livello');
+  }
+  console.log(`0b. pulsante principale "${testoPrincipale}", versione ${versione}`);
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+}
+
+// ---------- 1. Elenco dei livelli ----------
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappe');
 const elencati = await page.locator('.pl-tappa').count();
 const aperti = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
@@ -239,7 +266,7 @@ if (apertiDopo !== 2) errori.push(`SBLOCCO: ${apertiDopo} quadri aperti invece d
 
 // ---------- 5. L'avanzamento sopravvive alla ricarica ----------
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /^Livelli/ }).click();
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappe');
 if (await page.locator('.pl-tappa--fatta').count() !== 1) {
   errori.push('PERSISTENZA: l avanzamento nei Quadri si perde ricaricando');

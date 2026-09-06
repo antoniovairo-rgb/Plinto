@@ -6,13 +6,14 @@ export default {
   home: {
     gioca: 'Play',
     riprendi: 'Resume game',
+    partitaLibera: 'Free play',
+    mappa: 'Level map',
     nuovaPartita: 'New game',
     record: 'Best',
     statistiche: 'Stats',
     impostazioni: 'Settings',
     info: 'About',
     sostieni: 'Support the project',
-    nessunRecord: 'No record yet: the first game makes history.',
   },
   hud: {
     punteggio: 'Score',
@@ -20,6 +21,10 @@ export default {
     catena: 'Chain',
     respiroFinito: 'next empty move brings it down',
     menu: 'Menu',
+  },
+  modo: {
+    libera: 'Free play',
+    sfida: 'Daily challenge',
   },
   gioca: {
     trascina: 'Drag a piece onto the grid',
@@ -88,7 +93,6 @@ export default {
   },
   quadri: {
     titolo: 'Levels',
-    breve: 'Levels',
     avanzamento: '{fatti} of {totale}',
     superato: 'Cleared',
     bloccato: 'Clear the previous level',

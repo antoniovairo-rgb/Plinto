@@ -7,6 +7,55 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.8] — 6 settembre 2026
+
+### Corretto
+
+**Il pulsante più grande della home portava nel posto sbagliato**
+
+È il difetto che ha reso inutili tre versioni di lavoro, e vale la pena scriverlo per
+esteso perché la lezione non sta nel codice.
+
+Il pulsante grande avviava la **partita libera** — il gioco senza fine, senza obiettivi —
+mentre il percorso a livelli stava in un pulsante secondario più in basso. Un giocatore ha
+aperto il gioco, ha premuto il pulsante grande, si è trovato in una partita senza obiettivo
+e ha detto: «già al primo livello non si capisce l'obiettivo».
+
+**Aveva ragione due volte**: non era il livello 1, e non c'era modo di accorgersene. Nel
+frattempo la spiegazione dei livelli era stata scritta (0.2.2), arricchita (0.2.6) e
+disegnata (0.2.7) — e lui non l'ha mai vista, perché nessuna strada ci portava. Stavo
+correggendo con cura una schermata che il giocatore non raggiungeva.
+
+- Il pulsante principale è ora il **livello a cui sei arrivato** («LIVELLO 1») e ci entra
+  direttamente, presentazione compresa. Sotto, **Mappa dei livelli** con l'avanzamento.
+- La **partita libera** resta a un tocco, ma come alternativa **dichiarata** invece che
+  come modalità predefinita non annunciata. Il record che le sta accanto è il suo, e ora
+  lo dice: «Record 454» invece di un numero nudo.
+- **In partita, la modalità è scritta.** Dove nei livelli c'è l'obiettivo, nelle altre
+  modalità c'è il loro nome: `PARTITA LIBERA`, `SFIDA DEL GIORNO`. Prima le si
+  distingueva solo per l'**assenza** di una striscia — e un'assenza non si nota.
+- `npm run e2e-quadri` verifica ora **la strada, non solo la destinazione**: che il
+  pulsante principale nomini un livello e che apra davvero la presentazione di un livello.
+  Il difetto era invisibile a test che partivano già dalla schermata giusta.
+
+### Aggiunto
+
+- **Badge della versione sulla home** (`v0.2.8`). Stava solo dentro Info, cioè dove nessuno
+  la cerca proprio quando servirebbe: serve a chi segnala un problema e a chi lo deve
+  capire, per sapere quale build era sullo schermo. Verificato dallo scenario nel browser,
+  formato compreso.
+- **Etichette accessibili sui pulsanti a due scritte.** Senza, il nome che arriva a un
+  lettore di schermo era la concatenazione delle due — «Partita libera —», che non è una
+  frase. Ora è «Partita libera, Record 454». Era anche il motivo per cui i selettori delle
+  prove nel browser erano fragili.
+
+### Cambiato
+
+- Il menu in fondo alla home è passato a **due colonne**: con quattro voci in fila «Come si
+  gioca» andava a capo su tre righe, e sistemata quella restava «Info» da solo sulla
+  seconda. Su schermi larghi torna in fila.
+
+
 ## [0.2.7] — 6 settembre 2026
 
 ### Aggiunto
