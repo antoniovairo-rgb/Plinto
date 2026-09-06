@@ -4,8 +4,8 @@
  * Tre livelli, tutti visibili al giocatore mentre gioca:
  *   1. CELLE      -> punti minimi per ogni cella appoggiata: feedback continuo.
  *   2. INTRECCIO  -> chiudere piu' gruppi con una sola mossa moltiplica il valore.
- *   3. CATENA     -> moltiplicatore persistente che CRESCE quando elimini e
- *                    CALA DI UNO quando non elimini. Non si azzera mai di colpo.
+ *   3. CATENA     -> moltiplicatore persistente che CRESCE quando elimini e cala di
+ *                    uno solo se stai fermo per un'intera mano. Non si azzera mai.
  *
  * La Catena e' la firma di PLINTO: trasforma la partita in una tensione continua
  * ("non spezzare la catena") senza aggiungere una sola regola sul tabellone.
@@ -22,6 +22,7 @@ import {
   CHAIN_MAX,
   CHAIN_STEP,
   CHAIN_DECAY,
+  CHAIN_GRACE,
   BOARD_CLEAR_BONUS,
 } from '../config/rules.js';
 
@@ -36,10 +37,29 @@ export function intrecciMultiplier(groupCount) {
   return 1 + INTRECCIO_STEP * (groupCount - 1);
 }
 
-/** Nuovo livello di Catena dopo una mossa. */
-export function nextChainLevel(level, groupCount) {
-  if (groupCount > 0) return Math.min(CHAIN_MAX, level + groupCount);
-  return Math.max(0, level - CHAIN_DECAY);
+/**
+ * Nuovo stato della Catena dopo una mossa.
+ *
+ * `digiuno` conta le mosse di fila senza eliminazioni. La Catena non cala finche' il
+ * digiuno resta entro CHAIN_GRACE: si perde solo se si sta fermi per un'intera mano.
+ *
+ * @param {number} level livello attuale
+ * @param {number} groupCount gruppi chiusi con questa mossa
+ * @param {number} digiuno mosse consecutive senza eliminazioni prima di questa
+ * @returns {{livello:number, digiuno:number}}
+ */
+export function nextChainState(level, groupCount, digiuno = 0) {
+  if (groupCount > 0) {
+    return { livello: Math.min(CHAIN_MAX, level + groupCount), digiuno: 0 };
+  }
+  const prossimoDigiuno = digiuno + 1;
+  if (prossimoDigiuno <= CHAIN_GRACE) return { livello: level, digiuno: prossimoDigiuno };
+  return { livello: Math.max(0, level - CHAIN_DECAY), digiuno: prossimoDigiuno };
+}
+
+/** Mosse di tolleranza ancora disponibili prima che la Catena cali. */
+export function respiroRimasto(digiuno) {
+  return Math.max(0, CHAIN_GRACE - digiuno);
 }
 
 /**
@@ -54,7 +74,7 @@ export function nextChainLevel(level, groupCount) {
  *   breakdown:{placement:number, groupsBase:number, intreccio:number, chain:number, clearPoints:number, boardClear:number}
  * }}
  */
-export function scoreMove({ placedCellCount, groups, chainLevel, boardCleared }) {
+export function scoreMove({ placedCellCount, groups, chainLevel, chainFast = 0, boardCleared }) {
   const placement = placedCellCount * POINTS_PER_CELL;
 
   let groupsBase = 0;
@@ -67,9 +87,12 @@ export function scoreMove({ placedCellCount, groups, chainLevel, boardCleared })
   const clearPoints = groups.length > 0 ? Math.round(groupsBase * intreccio * chain) : 0;
   const boardClear = boardCleared && groups.length > 0 ? BOARD_CLEAR_BONUS : 0;
 
+  const dopo = nextChainState(chainLevel, groups.length, chainFast);
+
   return {
     points: placement + clearPoints + boardClear,
-    chainAfter: nextChainLevel(chainLevel, groups.length),
+    chainAfter: dopo.livello,
+    chainFastAfter: dopo.digiuno,
     chainUsed: chainLevel,
     breakdown: { placement, groupsBase, intreccio, chain, clearPoints, boardClear },
   };

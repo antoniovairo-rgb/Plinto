@@ -22,7 +22,7 @@
 
 ## La griglia e i gruppi
 
-`GRID_SIZE = 9`, `PLINTONT_SIZE = 3`: 81 celle, 9 righe, 9 colonne e 9 quadranti 3x3
+`GRID_SIZE = 9`, `QUADRANT_SIZE = 3`: 81 celle, 9 righe, 9 colonne e 9 quadranti 3x3
 non sovrapposti (numerati 0..8 da sinistra a destra e dall'alto in basso).
 
 Un pezzo si appoggia con l'angolo alto-sinistra del proprio riquadro in una cella (riga,

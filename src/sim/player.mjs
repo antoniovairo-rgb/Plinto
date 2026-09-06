@@ -19,8 +19,8 @@ import {
   fillRatio,
   idx,
 } from '../core/grid.js';
-import { GRID_SIZE, PLINTONT_SIZE } from '../config/rules.js';
-import { quadrantCells, PLINTONT_COUNT } from '../core/grid.js';
+import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
+import { quadrantCells, QUADRANT_COUNT } from '../core/grid.js';
 import { createRng } from '../core/rng.js';
 
 /** Tutte le mosse legali disponibili nello stato corrente. */
@@ -54,7 +54,7 @@ function isolatedHoles(grid) {
 /**
  * Quanto e' "promettente" una griglia: quanti gruppi sono quasi chiusi.
  *
- * I PLINTONTI CONTANO. Nella prima versione questa funzione guardava solo righe e
+ * I QUADRANTI CONTANO. Nella prima versione questa funzione guardava solo righe e
  * colonne, cioe' era cieca proprio sulla meccanica che distingue PLINTO: un giocatore
  * simulato che non vede i quadranti non puo' giocare meglio di uno che li ignora, e
  * questo falsava il confronto fra i profili.
@@ -73,8 +73,8 @@ function nearCompletions(grid) {
     if (filled >= GRID_SIZE - 2 && filled < GRID_SIZE) score += filled - (GRID_SIZE - 3);
   }
 
-  const celleQuadrante = PLINTONT_SIZE * PLINTONT_SIZE;
-  for (let q = 0; q < PLINTONT_COUNT; q += 1) {
+  const celleQuadrante = QUADRANT_SIZE * QUADRANT_SIZE;
+  for (let q = 0; q < QUADRANT_COUNT; q += 1) {
     let filled = 0;
     for (const cella of quadrantCells(q)) if (grid[cella] !== 0) filled += 1;
     if (filled >= celleQuadrante - 2 && filled < celleQuadrante) {

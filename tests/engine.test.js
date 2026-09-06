@@ -122,12 +122,25 @@ describe('eliminazioni e punteggio in partita', () => {
     expect(after.score).toBe(3 + GROUP_BASE_POINTS.quadrant);
   });
 
-  it('la Catena scende di uno dopo una mossa che non elimina nulla', () => {
+  it('la Catena regge una mano intera prima di calare', () => {
+    // Regola cambiata dopo averla misurata: con il calo a ogni mossa a vuoto la
+    // Catena era >= 3 solo nel 2% delle mosse giocate, cioe' non contava quasi mai.
     let s = scenario('########.\n' + '.........\n'.repeat(8), ['p1', 'p1', 'p1']);
     s = placePiece(s, 0, 0, 8);
     expect(s.chain).toBe(1);
+
     s = placePiece(s, 1, 5, 5);
-    expect(s.chain).toBe(0);
+    expect(s.chain, 'prima mossa a vuoto: la Catena tiene').toBe(1);
+    s = placePiece(s, 2, 5, 7);
+    expect(s.chain, 'seconda mossa a vuoto: la Catena tiene ancora').toBe(1);
+
+    // La terza mossa a vuoto supera la tolleranza di una mano.
+    const opzioni = [];
+    s.hand.forEach((p, hi) => {
+      if (p) allPlacements(s.grid, p.shape).forEach(([r, c]) => opzioni.push([hi, r, c]));
+    });
+    s = placePiece(s, ...opzioni.find(([, r]) => r === 7));
+    expect(s.chain, 'terza mossa a vuoto: ora cala').toBe(0);
   });
 
   it('svuotare completamente la griglia paga il bonus una tantum', () => {

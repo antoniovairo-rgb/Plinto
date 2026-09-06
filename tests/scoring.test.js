@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { scoreMove, chainMultiplier, intrecciMultiplier, nextChainLevel, moveTier } from '../src/core/scoring.js';
-import { CHAIN_MAX, BOARD_CLEAR_BONUS, GROUP_BASE_POINTS } from '../src/config/rules.js';
+import { scoreMove, chainMultiplier, intrecciMultiplier, nextChainState, respiroRimasto, moveTier } from '../src/core/scoring.js';
+import { CHAIN_MAX, CHAIN_GRACE, BOARD_CLEAR_BONUS, GROUP_BASE_POINTS } from '../src/config/rules.js';
 
 const row = { type: 'row' };
 const col = { type: 'col' };
@@ -14,22 +14,50 @@ describe('Catena', () => {
   });
 
   it('sale di quanti gruppi hai chiuso', () => {
-    expect(nextChainLevel(0, 1)).toBe(1);
-    expect(nextChainLevel(1, 3)).toBe(4);
+    expect(nextChainState(0, 1, 0)).toEqual({ livello: 1, digiuno: 0 });
+    expect(nextChainState(1, 3, 0)).toEqual({ livello: 4, digiuno: 0 });
   });
 
   it('non supera mai il livello massimo', () => {
-    expect(nextChainLevel(CHAIN_MAX, 3)).toBe(CHAIN_MAX);
-    expect(nextChainLevel(CHAIN_MAX - 1, 5)).toBe(CHAIN_MAX);
+    expect(nextChainState(CHAIN_MAX, 3, 0).livello).toBe(CHAIN_MAX);
+    expect(nextChainState(CHAIN_MAX - 1, 5, 0).livello).toBe(CHAIN_MAX);
+  });
+
+  it('SOPPORTA una mano intera senza eliminazioni prima di calare', () => {
+    // E' la correzione che rende viva la meccanica: misurato, con il calo a ogni
+    // mossa la Catena era >= 3 solo nel 2% delle mosse giocate.
+    let stato = { livello: 5, digiuno: 0 };
+    for (let mossa = 1; mossa <= CHAIN_GRACE; mossa += 1) {
+      stato = nextChainState(stato.livello, 0, stato.digiuno);
+      expect(stato.livello, `mossa a vuoto numero ${mossa}`).toBe(5);
+      expect(stato.digiuno).toBe(mossa);
+    }
+    // La mossa oltre la tolleranza fa calare.
+    stato = nextChainState(stato.livello, 0, stato.digiuno);
+    expect(stato.livello).toBe(4);
+  });
+
+  it('una sola eliminazione azzera il digiuno e riparte la tolleranza', () => {
+    let stato = nextChainState(4, 0, 0);
+    stato = nextChainState(stato.livello, 0, stato.digiuno);
+    expect(stato.digiuno).toBe(CHAIN_GRACE);
+    stato = nextChainState(stato.livello, 1, stato.digiuno);
+    expect(stato).toEqual({ livello: 5, digiuno: 0 });
   });
 
   it('CALA DI UNO invece di azzerarsi: e la firma del gioco', () => {
-    expect(nextChainLevel(5, 0)).toBe(4);
-    expect(nextChainLevel(1, 0)).toBe(0);
+    expect(nextChainState(5, 0, CHAIN_GRACE).livello).toBe(4);
+    expect(nextChainState(1, 0, CHAIN_GRACE).livello).toBe(0);
   });
 
   it('non scende sotto zero', () => {
-    expect(nextChainLevel(0, 0)).toBe(0);
+    expect(nextChainState(0, 0, CHAIN_GRACE).livello).toBe(0);
+  });
+
+  it('il respiro rimasto e leggibile dall interfaccia', () => {
+    expect(respiroRimasto(0)).toBe(CHAIN_GRACE);
+    expect(respiroRimasto(CHAIN_GRACE)).toBe(0);
+    expect(respiroRimasto(99)).toBe(0);
   });
 });
 

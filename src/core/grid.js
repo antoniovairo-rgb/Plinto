@@ -7,14 +7,14 @@
  * L'array piatto rende banali le copie e velocissime le simulazioni di massa.
  */
 
-import { GRID_SIZE, PLINTONT_SIZE } from '../config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
 
 export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
-export const PLINTONTS_PER_SIDE = GRID_SIZE / PLINTONT_SIZE;
-export const PLINTONT_COUNT = PLINTONTS_PER_SIDE * PLINTONTS_PER_SIDE;
+export const QUADRANTS_PER_SIDE = GRID_SIZE / QUADRANT_SIZE;
+export const QUADRANT_COUNT = QUADRANTS_PER_SIDE * QUADRANTS_PER_SIDE;
 
-if (!Number.isInteger(PLINTONTS_PER_SIDE)) {
-  throw new Error('GRID_SIZE deve essere divisibile per PLINTONT_SIZE');
+if (!Number.isInteger(QUADRANTS_PER_SIDE)) {
+  throw new Error('GRID_SIZE deve essere divisibile per QUADRANT_SIZE');
 }
 
 /** @returns {Uint8Array} griglia vuota */
@@ -40,18 +40,18 @@ export function colOf(i) {
 /** Indice del quadrante 3x3 che contiene (row, col). */
 export function quadrantOf(row, col) {
   return (
-    Math.floor(row / PLINTONT_SIZE) * PLINTONTS_PER_SIDE +
-    Math.floor(col / PLINTONT_SIZE)
+    Math.floor(row / QUADRANT_SIZE) * QUADRANTS_PER_SIDE +
+    Math.floor(col / QUADRANT_SIZE)
   );
 }
 
 /** Indici piatti delle celle di un quadrante. */
 export function quadrantCells(quadrant) {
-  const baseRow = Math.floor(quadrant / PLINTONTS_PER_SIDE) * PLINTONT_SIZE;
-  const baseCol = (quadrant % PLINTONTS_PER_SIDE) * PLINTONT_SIZE;
+  const baseRow = Math.floor(quadrant / QUADRANTS_PER_SIDE) * QUADRANT_SIZE;
+  const baseCol = (quadrant % QUADRANTS_PER_SIDE) * QUADRANT_SIZE;
   const cells = [];
-  for (let r = 0; r < PLINTONT_SIZE; r += 1) {
-    for (let c = 0; c < PLINTONT_SIZE; c += 1) {
+  for (let r = 0; r < QUADRANT_SIZE; r += 1) {
+    for (let c = 0; c < QUADRANT_SIZE; c += 1) {
       cells.push(idx(baseRow + r, baseCol + c));
     }
   }
@@ -184,7 +184,7 @@ export function findCompletedGroups(grid) {
     if (full) groups.push({ type: 'col', index: c, cells: colCells(c) });
   }
 
-  for (let q = 0; q < PLINTONT_COUNT; q += 1) {
+  for (let q = 0; q < QUADRANT_COUNT; q += 1) {
     const cells = quadrantCells(q);
     let full = true;
     for (let i = 0; i < cells.length; i += 1) {

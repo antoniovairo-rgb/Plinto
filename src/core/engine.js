@@ -55,6 +55,10 @@ function emptyStats() {
  * Crea una nuova partita.
  * @param {object} [options]
  * @param {number|string} [options.seed] numero, oppure stringa (es. la data per la Sfida del Giorno)
+ * @param {Uint8Array} [options.grigliaIniziale] griglia di partenza gia' popolata.
+ *   Serve ai Quadri, che partono da una configurazione di ostacoli invece che dal
+ *   vuoto. La mano iniziale viene generata CONTRO questa griglia, non contro una
+ *   griglia vuota: altrimenti il primo turno potrebbe arrivare gia' morto.
  * @returns {object} stato di gioco
  */
 export function createGame(options = {}) {
@@ -65,7 +69,7 @@ export function createGame(options = {}) {
         ? options.seed >>> 0
         : randomSeed();
 
-  const grid = createGrid();
+  const grid = options.grigliaIniziale ? Uint8Array.from(options.grigliaIniziale) : createGrid();
   const dealt = generateHand(grid, seed, []);
 
   return {
@@ -78,6 +82,9 @@ export function createGame(options = {}) {
     hand: dealt.pieces,
     score: 0,
     chain: 0,
+    // Mosse consecutive senza eliminazioni. La Catena cala solo quando questo
+    // supera la tolleranza di una mano: vedi CHAIN_GRACE in config/rules.js.
+    chainDigiuno: 0,
     status: 'playing',
     stats: { ...emptyStats(), handsDealt: 1 },
     lastMove: null,
@@ -135,6 +142,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     placedCellCount: placed.cells.length,
     groups,
     chainLevel: state.chain,
+    chainFast: state.chainDigiuno ?? 0,
     boardCleared,
   });
 
@@ -184,6 +192,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     shapeHistory,
     score: state.score + scored.points,
     chain: scored.chainAfter,
+    chainDigiuno: scored.chainFastAfter,
     status: alive ? 'playing' : 'over',
     stats,
     endedAt: alive ? null : now,
@@ -201,6 +210,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
       breakdown: scored.breakdown,
       chainBefore: scored.chainUsed,
       chainAfter: scored.chainAfter,
+      chainDigiunoAfter: scored.chainFastAfter,
       tier: moveTier(groups.length, scored.chainUsed),
       boardCleared,
       handRefilled: handEmpty,
@@ -250,6 +260,7 @@ export function serializeGame(state) {
     hand: state.hand.map((p) => (p ? { uid: p.uid, shapeId: p.shapeId, color: p.color } : null)),
     score: state.score,
     chain: state.chain,
+    chainDigiuno: state.chainDigiuno ?? 0,
     status: state.status,
     stats: state.stats,
     startedAt: state.startedAt,
@@ -296,6 +307,7 @@ export function deserializeGame(raw) {
       hand,
       score: raw.score,
       chain: raw.chain,
+      chainDigiuno: Number.isInteger(raw.chainDigiuno) && raw.chainDigiuno >= 0 ? raw.chainDigiuno : 0,
       status: raw.status,
       stats: { ...emptyStats(), ...raw.stats },
       lastMove: null,

@@ -238,9 +238,10 @@ button {
   inset: 0;
   border-radius: var(--pl-radius-cell);
   background: var(--blocco);
+  /* Rilievo appena accennato: con tinte sature un bordo troppo marcato le sporca. */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.22);
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.26);
 }
 
 .pl-blocco--1 { --blocco: var(--pl-block-1); }
@@ -294,9 +295,15 @@ button {
 .pl-tray__posto--vuoto { background: transparent; }
 .pl-tray__posto--selezionato { background: color-mix(in srgb, var(--pl-brand) 12%, transparent); }
 
-/* Un pezzo che non entra piu' da nessuna parte viene detto chiaramente,
-   invece di lasciare il giocatore a chiedersi perche' non funziona. */
-.pl-tray__posto--morto { opacity: 0.34; }
+/* Un pezzo che non entra piu' da nessuna parte viene detto chiaramente, invece di
+   lasciare il giocatore a chiedersi perche' non funziona.
+   La sola opacita' non basta piu' da quando le tinte sono sature: un arancio al 34%
+   su fondo scuro diventa un marrone, e sembra un SETTIMO colore invece che un pezzo
+   disabilitato. Togliendo prima il colore, "spento" si legge come spento. */
+.pl-tray__posto--morto {
+  opacity: 0.55;
+  filter: grayscale(0.9);
+}
 
 .pl-pezzo {
   display: grid;

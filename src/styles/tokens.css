@@ -40,15 +40,18 @@
   --pl-ok: #4cb5a5;
 
   /* --- Famiglie cromatiche dei blocchi ------------------------------------
-     Sei tinte minerali distinte per tonalita' E per luminosita', cosi' restano
-     distinguibili anche a chi non separa bene i colori. Il colore in PLINTO non
-     ha nessuna regola di gioco: e' solo identita' visiva del pezzo. */
-  --pl-block-1: #e8734a;      /* terracotta */
-  --pl-block-2: #4cb5a5;      /* verderame */
-  --pl-block-3: #7b6ce6;      /* indaco */
-  --pl-block-4: #e4b44c;      /* ocra */
-  --pl-block-5: #e4587e;      /* granato */
-  --pl-block-6: #4a9be8;      /* azzurrite */
+     Sei tinte SATURE. La prima versione era volutamente smorzata ("minerale"),
+     ma su schermo risultava spenta: i blocchi sono l'unica cosa colorata di tutta
+     l'interfaccia e devono cantare. La saturazione e' spinta al massimo utile e la
+     luminosita' scelta perche' ogni tinta resti sopra 3:1 sul fondo della plancia
+     in ENTRAMBI i temi (contrasti misurati, riportati in docs/DESIGN_SYSTEM.md).
+     Il colore in PLINTO non ha nessuna regola di gioco: e' identita' del pezzo. */
+  --pl-block-1: #ff6a2b;      /* arancio    6.26:1 */
+  --pl-block-2: #12e1b0;      /* verde     10.59:1 */
+  --pl-block-3: #9b4dff;      /* viola      4.18:1 */
+  --pl-block-4: #ffc212;      /* oro       11.06:1 */
+  --pl-block-5: #ff3d71;      /* rosa       5.25:1 */
+  --pl-block-6: #2e97ff;      /* azzurro    5.95:1 */
 
   /* --- Geometria ---------------------------------------------------------- */
   --pl-radius-cell: 22%;      /* raggio del blocco, in percentuale del lato */
@@ -108,13 +111,14 @@
   --pl-ok: #337b70;           /* 4.54 su --pl-ink */
   --pl-danger: #ae5069;       /* 4.52 su --pl-surface-2 */
 
-  /* Blocchi: soglia 3:1 per elementi non testuali, sul fondo della plancia. */
-  --pl-block-1: #d36843;
-  --pl-block-2: #3e9487;
-  --pl-block-3: #7b6ce6;
-  --pl-block-4: #a48136;
-  --pl-block-5: #e1577c;
-  --pl-block-6: #428bd0;
+  /* Blocchi: stesse tinte del tema scuro, abbassate quel tanto che serve a restare
+     sopra 3:1 sul fondo chiaro della plancia. */
+  --pl-block-1: #d94500;      /* arancio  3.67:1 */
+  --pl-block-2: #00926d;      /* verde    3.31:1 */
+  --pl-block-3: #7a1fe0;      /* viola    5.69:1 */
+  --pl-block-4: #9c7400;      /* oro      3.59:1 */
+  --pl-block-5: #e00048;      /* rosa     4.14:1 */
+  --pl-block-6: #0072d6;      /* azzurro  4.03:1 */
 
   --pl-cella-vuota: rgba(23, 27, 38, 0.05);
 

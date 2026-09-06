@@ -8,7 +8,7 @@
 export const GRID_SIZE = 9;
 
 /** Lato di un quadrante. GRID_SIZE deve essere divisibile per questo valore. */
-export const PLINTONT_SIZE = 3;
+export const QUADRANT_SIZE = 3;
 
 /** Quanti pezzi vengono offerti contemporaneamente al giocatore. */
 export const HAND_SIZE = 3;
@@ -35,8 +35,26 @@ export const CHAIN_MAX = 9;
 /** Moltiplicatore Catena = 1 + CHAIN_STEP * livello. Livello 9 => x3.25. */
 export const CHAIN_STEP = 0.25;
 
-/** Quanto scende la Catena dopo una mossa che non elimina nulla (decadimento, non azzeramento). */
+/** Quanto scende la Catena quando scade la tolleranza. */
 export const CHAIN_DECAY = 1;
+
+/**
+ * Quante mosse senza eliminazioni la Catena sopporta prima di calare.
+ *
+ * Vale una MANO INTERA, cioe' i tre pezzi. Non e' un numero scelto a sentimento:
+ * con la regola precedente (calo a ogni mossa a vuoto) la Catena risultava >= 3
+ * soltanto nel 2% delle mosse giocate, e il moltiplicatore che dovrebbe essere la
+ * firma del gioco era di fatto decorativo. Misurato su 200 partite:
+ *
+ *   tolleranza 0 (prima) ->  2% delle mosse con Catena attiva, mai oltre 6
+ *   tolleranza 1         -> 11%
+ *   tolleranza 2 (ora)   -> 24%, e il 23% delle partite arriva a Catena 7
+ *
+ * Due mosse di tolleranza corrispondono al ritmo naturale del gioco: con tre pezzi
+ * in mano si elimina all'incirca una volta ogni tre mosse. La regola si racconta in
+ * una riga: "la Catena cala se non elimini niente per un'intera mano".
+ */
+export const CHAIN_GRACE = 2;
 
 /** Bonus una tantum per aver svuotato completamente la griglia. */
 export const BOARD_CLEAR_BONUS = 300;
