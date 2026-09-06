@@ -83,7 +83,65 @@ console.log(`3. trascinamento mouse: celle in anteprima ${anteprima} | blocchi $
 if (dopo <= prima) errori.push('TRASCINAMENTO: nessun blocco posizionato dopo il drag con mouse');
 if (anteprima === 0) errori.push('ANTEPRIMA: nessuna cella evidenziata durante il trascinamento');
 
+// ---------- 3b. Eliminazione: animazioni, particelle e punti volanti ----------
+// Griglia con la riga 0 piena tranne l'ultima cella e la mano che comincia con un punto:
+// una sola mossa e la riga sparisce. Serve a verificare il feedback, non le regole.
+const quasiRiga = (() => {
+  const base = createGame({ seed: 2 });
+  const righe = Array.from({ length: 9 }, () => Array(9).fill('.'));
+  for (let c = 0; c < 8; c += 1) righe[0][c] = '#';
+  righe[5][5] = '#';
+  return serializeGame({
+    ...base,
+    grid: gridFromString(righe.map((r) => r.join('')).join('\n')),
+    hand: [
+      { uid: 'y1', shapeId: 'p1', shape: getShape('p1'), color: 4 },
+      { uid: 'y2', shapeId: 'h2', shape: getShape('h2'), color: 2 },
+      { uid: 'y3', shapeId: 'v2', shape: getShape('v2'), color: 3 },
+    ],
+  });
+})();
+
+await page.evaluate((s) => window.localStorage.setItem('quadra:partita', JSON.stringify(s)), quasiRiga);
+await page.reload({ waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /Riprendi/ }).click();
+await page.waitForSelector('.q-plancia');
+const bersaglioRiga = await page.evaluate(() => {
+  const c = document.querySelectorAll('.q-plancia .q-cella')[8].getBoundingClientRect();
+  const p = document.querySelectorAll('.q-tray .q-pezzo')[0].getBoundingClientRect();
+  return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
+});
+await page.mouse.move(bersaglioRiga.px, bersaglioRiga.py);
+await page.mouse.down();
+await page.mouse.move(bersaglioRiga.cx, bersaglioRiga.cy, { steps: 10 });
+const incandidate = await page.locator('.q-cella--incandidata').count();
+await page.mouse.up();
+await page.waitForTimeout(60);
+const esplosi = await page.locator('.q-blocco--esploso').count();
+const punti = await page.locator('.q-punti-volanti').count();
+const particelleDisegnate = await page.evaluate(() => {
+  const cv = document.querySelector('.q-plancia__particelle');
+  const ctx = cv.getContext('2d');
+  const dati = ctx.getImageData(0, 0, cv.width, cv.height).data;
+  let opachi = 0;
+  for (let i = 3; i < dati.length; i += 4) if (dati[i] > 0) opachi += 1;
+  return opachi;
+});
+await page.screenshot({ path: `${OUT}/03b-eliminazione.png` });
+console.log(`3b. eliminazione: celle preannunciate ${incandidate} | blocchi in esplosione ${esplosi} | punti volanti ${punti} | pixel di particelle ${particelleDisegnate}`);
+if (incandidate !== 9) errori.push(`AIUTO VISIVO: la riga che sta per chiudersi dovrebbe evidenziare 9 celle, ne evidenzia ${incandidate}`);
+if (esplosi === 0) errori.push('ANIMAZIONE: nessun blocco in esplosione dopo un eliminazione');
+if (punti === 0) errori.push('FEEDBACK: nessun punteggio volante dopo un eliminazione');
+if (particelleDisegnate === 0) errori.push('PARTICELLE: il canvas resta vuoto dopo un eliminazione');
+await page.waitForTimeout(600);
+const esplosiDopo = await page.locator('.q-blocco--esploso').count();
+if (esplosiDopo !== 0) errori.push('ANIMAZIONE: i blocchi in esplosione non vengono ripuliti');
+
 // ---------- 4. Modalita a due tocchi ----------
+await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.reload({ waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.waitForSelector('.q-plancia');
 const primaTap = await contaBlocchi();
 await page.locator('.q-tray .q-pezzo-presa').first().click();
 await page.waitForTimeout(60);

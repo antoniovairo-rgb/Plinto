@@ -5,15 +5,18 @@ import { idx } from '../core/grid.js';
 /**
  * La griglia 9x9.
  *
- * Non contiene logica di gioco: riceve la griglia, le celle in anteprima e le celle
- * che la mossa in corso farebbe sparire, e le disegna. Le linee spesse dei quadranti
- * sono un livello sovrapposto, cosi' non entrano nel flusso delle celle.
+ * Non contiene logica di gioco: riceve la griglia e la descrizione degli effetti in
+ * corso, e disegna. Le linee spesse dei quadranti e il canvas delle particelle sono
+ * livelli sovrapposti, cosi' non entrano nel flusso delle celle.
  *
  * `cellRefs` viene riempito con i nodi delle celle: servono al trascinamento per
- * misurare con esattezza dove cade il dito, senza fare i conti con padding e gap.
+ * misurare con esattezza dove cade il dito, e alle particelle per sapere da dove partire.
  */
 export const Plancia = forwardRef(function Plancia(
-  { grid, anteprima, anteprimaColore, anteprimaValida, incandidate, cellRefs, onCellPointerUp },
+  {
+    grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
+    appoggiate, esplosioni, cellRefs, canvasRef, onCellPointerUp,
+  },
   ref,
 ) {
   const celle = useMemo(() => {
@@ -24,10 +27,14 @@ export const Plancia = forwardRef(function Plancia(
         const valore = grid[i];
         const inAnteprima = anteprima?.has(i);
         const daEliminare = incandidate?.has(i);
+        const appenaPosata = appoggiate?.has(i);
+        const inEsplosione = valore === 0 && esplosioni?.celle.has(i);
+
         const classi = ['q-cella'];
         if (inAnteprima) classi.push('q-cella--anteprima');
         if (inAnteprima && !anteprimaValida) classi.push('q-cella--vietata');
         if (daEliminare) classi.push('q-cella--incandidata');
+
         out.push(
           <div
             key={i}
@@ -37,21 +44,29 @@ export const Plancia = forwardRef(function Plancia(
             data-colonna={c}
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
-            {valore !== 0 ? <div className={`q-blocco q-blocco--${valore}`} /> : null}
+            {valore !== 0 ? (
+              <div className={`q-blocco q-blocco--${valore} ${appenaPosata ? 'q-blocco--posato' : ''}`} />
+            ) : null}
             {valore === 0 && inAnteprima ? (
               <div className={`q-blocco q-blocco--${anteprimaColore}`} />
             ) : null}
+            {/* Il blocco che sta sparendo viene ridisegnato per una frazione di secondo
+                dopo essere gia' uscito dallo stato: senza, l'eliminazione sarebbe uno
+                scatto e la mossa piu' soddisfacente del gioco passerebbe inosservata. */}
+            {inEsplosione ? <div className="q-blocco q-blocco--esploso" /> : null}
           </div>,
         );
       }
     }
     return out;
-  }, [grid, anteprima, anteprimaColore, anteprimaValida, incandidate, cellRefs, onCellPointerUp]);
+  }, [grid, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
+      cellRefs, onCellPointerUp]);
 
   return (
     <div className="q-plancia" ref={ref}>
       {celle}
       <div className="q-plancia__quadranti" />
+      <canvas className="q-plancia__particelle" ref={canvasRef} aria-hidden="true" />
     </div>
   );
 });

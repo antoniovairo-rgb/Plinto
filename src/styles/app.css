@@ -553,3 +553,92 @@ button {
   background: var(--q-surface);
   box-shadow: var(--q-shadow-lift);
 }
+
+/* ------------------------------------------------------- game feel: celle --- */
+/* Involucro che consente di sovrapporre alla plancia elementi in coordinate
+   percentuali (i punti volanti) senza toccare il layout della griglia. */
+.q-plancia-involucro {
+  position: relative;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.q-plancia__particelle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Il blocco appena appoggiato "atterra": parte leggermente piu' grande e si assesta.
+   Dura poco piu' di un quarto di secondo: abbastanza da vedersi, non abbastanza da
+   far aspettare chi sta gia' pensando alla mossa dopo. */
+.q-blocco--posato { animation: q-atterra 260ms var(--q-ease-pop) both; }
+
+@keyframes q-atterra {
+  0%   { transform: scale(1.28); filter: brightness(1.5); }
+  60%  { transform: scale(0.96); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* Il blocco che sparisce: prima lampeggia di bianco, poi collassa. */
+.q-blocco--esploso {
+  background: var(--q-text);
+  animation: q-svanisci 420ms var(--q-ease-out) both;
+}
+
+@keyframes q-svanisci {
+  0%   { transform: scale(1); opacity: 1; }
+  22%  { transform: scale(1.16); opacity: 1; }
+  100% { transform: scale(0.2); opacity: 0; }
+}
+
+/* --------------------------------------------------- game feel: punteggio --- */
+.q-punti-volanti {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  font-family: var(--q-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--q-brand);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
+  animation: q-sali 950ms var(--q-ease-out) both;
+  white-space: nowrap;
+}
+.q-punti-volanti--buona { font-size: 22px; }
+.q-punti-volanti--ottima { font-size: 28px; }
+.q-punti-volanti--eccellente { font-size: 34px; color: var(--q-block-2); }
+.q-punti-volanti--perfetta { font-size: 40px; color: var(--q-block-1); }
+
+@keyframes q-sali {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  18%  { transform: translate(-50%, -14px) scale(1.1); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: translate(-50%, -74px) scale(1); opacity: 0; }
+}
+
+.q-etichetta-mossa {
+  display: block;
+  font-size: 0.42em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* Il punteggio in testata reagisce quando cresce. */
+.q-hud__valore--scatta { animation: q-scatta 300ms var(--q-ease-pop) both; }
+@keyframes q-scatta {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+/* La barra della Catena pulsa quando sale di livello. */
+.q-catena__riempimento--cresciuta { animation: q-lampo 420ms var(--q-ease-out) both; }
+@keyframes q-lampo {
+  0%   { filter: brightness(2.2); }
+  100% { filter: brightness(1); }
+}

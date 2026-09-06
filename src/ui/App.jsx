@@ -1,7 +1,9 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePartita } from '../state/usePartita.js';
 import { useImpostazioni } from '../state/useImpostazioni.js';
 import { traduttore } from '../i18n/index.js';
+import { impostaAudio, suonoBottone, suonoRecord, sbloccaAudio } from '../audio/suoni.js';
+import { impostaVibrazione } from '../feel/vibrazione.js';
 import { clearAll } from '../persistence/storage.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
 import { SchermoGioco } from './SchermoGioco.jsx';
@@ -25,6 +27,11 @@ export function App() {
   const [statistiche, setStatistiche] = useState(() => loadStats());
 
   const { impostazioni, cambia, inverti } = useImpostazioni();
+
+  // Le preferenze audio e vibrazione vivono in moduli senza React: qui le si tiene
+  // allineate, cosi' i componenti non devono passarsele di mano in mano.
+  useEffect(() => { impostaAudio(impostazioni.audio); }, [impostazioni.audio]);
+  useEffect(() => { impostaVibrazione(impostazioni.vibrazione); }, [impostazioni.vibrazione]);
   const t = useMemo(() => traduttore(impostazioni.lingua), [impostazioni.lingua]);
 
   const {
@@ -35,6 +42,8 @@ export function App() {
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
 
   const iniziaNuova = useCallback(() => {
+    sbloccaAudio();
+    suonoBottone();
     nuovaPartita();
     setSalvataggioDisponibile(false);
     setMenuAperto(false);
@@ -88,6 +97,7 @@ export function App() {
           onGioca={gioca}
           onMenu={() => setMenuAperto(true)}
           aiutoVisivo={impostazioni.aiutoVisivo}
+          animazioni={impostazioni.animazioni}
           t={t}
         />
       ) : null}
