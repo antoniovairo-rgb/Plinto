@@ -31,7 +31,6 @@ const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
 
 
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
-const ESEGUIBILE = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const errori = [];
 let verifiche = 0;
