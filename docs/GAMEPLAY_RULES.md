@@ -333,7 +333,7 @@ teorico di 8: quando una bomba salta insieme a una riga, buona parte del quadrat
 circonda è già dentro il gruppo che sta sparendo, e il resto è spesso vuoto.
 
 Il colore della bomba resta quello del pezzo: come ogni altro colore, non ha nessuna regola.
-Il segno che la distingue è geometrico (un anello al centro della cella) ed è documentato in
+Il segno che la distingue è geometrico (una bomba disegnata, con la scintilla accesa sulla miccia) ed è documentato in
 `docs/DESIGN_SYSTEM.md`.
 
 ## Il catalogo delle forme
@@ -520,9 +520,9 @@ strutturato è stato ancora fatto.
 
 ---
 
-## I Quadri
+## I livelli
 
-Un Quadro è una partita normale con due aggiunte: uno o più **obiettivi** e, quasi sempre, un
+Un livello è una partita normale con due aggiunte: uno o più **obiettivi** e, quasi sempre, un
 **tetto di mosse**. Le regole non cambiano di una virgola: cambia la condizione di vittoria.
 
 Si perde in **due modi soli**, entrambi dichiarati prima di cominciare: finire le mosse, oppure
@@ -534,7 +534,7 @@ I dieci tipi di obiettivo sono in `OBIETTIVI` (`src/core/quadro.js`): righe, col
 quadranti, gruppi (uno qualunque dei tre), celle eliminate, punteggio, Catena, Intreccio,
 pulizia della griglia, sopravvivenza.
 
-### Ogni Quadro si apre spiegando che cosa chiede
+### Ogni livello si apre spiegando che cosa chiede
 
 `src/ui/schermate/AperturaQuadro.jsx`. Plinto dice la frase dell'obiettivo, che cosa significa,
 come conviene affrontarlo e quante mosse ci sono; poi si gioca.

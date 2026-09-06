@@ -96,7 +96,7 @@ await page.evaluate(() => {
 await page.reload({ waitUntil: 'networkidle' });
 
 // ---------- 1. Elenco dei Quadri ----------
-await page.getByRole('button', { name: /^Quadri/ }).click();
+await page.getByRole('button', { name: /^Livelli/ }).click();
 await page.waitForSelector('.pl-tappe');
 const elencati = await page.locator('.pl-tappa').count();
 const aperti = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
@@ -185,15 +185,40 @@ if (!sequenza) {
 
   await page.waitForTimeout(200);
   const esito = await page.locator('.pl-quadro-esito').innerText().catch(() => '');
-  await page.screenshot({ path: `${OUT}/3-esito.png` });
   console.log(`   esito nel browser: "${esito.trim()}"`);
   if (!/superato/i.test(esito)) {
-    errori.push(`QUADRO 1: la sequenza vincente calcolata in Node NON vince nel browser (esito: "${esito.trim()}"). Il motore e il gioco divergono.`);
+    errori.push(`LIVELLO 1: la sequenza vincente calcolata in Node NON vince nel browser (esito: "${esito.trim()}"). Il motore e il gioco divergono.`);
+  }
+
+  // ---------- 3b. Festeggiamento e avanzamento sul percorso ----------
+  // L'avanzamento e' animato: si aspetta che la barra abbia finito di allungarsi,
+  // altrimenti si misurerebbe lo stato di PARTENZA e il controllo direbbe il falso.
+  await page.waitForTimeout(1100);
+  await page.screenshot({ path: `${OUT}/3-esito.png` });
+
+  const stradaVisibile = await page.locator('.pl-avanza__strada').count();
+  const tappeMostrate = await page.locator('.pl-avanza__tappa').count();
+  const plintoAvanzato = await page.locator('.pl-avanza__tappa--qui .pl-avanza__plinto').count();
+  const conteggio = await page.locator('.pl-avanza__conteggio').innerText().catch(() => '');
+  const barra = await page.locator('.pl-avanza__barra').getAttribute('aria-valuenow').catch(() => null);
+  console.log(`3b. avanzamento: ${tappeMostrate} tappe, "${conteggio.trim()}", barra a ${barra}`);
+
+  if (!stradaVisibile) errori.push('AVANZAMENTO: il percorso non viene mostrato dopo la vittoria');
+  if (tappeMostrate < 3) errori.push(`AVANZAMENTO: solo ${tappeMostrate} tappe mostrate`);
+  if (plintoAvanzato !== 1) errori.push(`AVANZAMENTO: Plinto compare ${plintoAvanzato} volte sulla tappa corrente invece di 1`);
+  // Il livello 1 e' appena stato superato: il conteggio deve dire 1, non 0. E' il
+  // difetto piu' facile da fare qui — mostrare il valore letto PRIMA della vittoria.
+  if (barra !== '1') errori.push(`AVANZAMENTO: la barra dice ${barra} livelli superati invece di 1`);
+
+  // Plinto deve stare sulla tappa 2, non piu' sulla 1: e' lo spostamento il punto.
+  const numeroSottoPlinto = await page.locator('.pl-avanza__tappa--qui .pl-avanza__numero').innerText().catch(() => '');
+  if (numeroSottoPlinto.trim() !== '2') {
+    errori.push(`AVANZAMENTO: Plinto e fermo sulla tappa "${numeroSottoPlinto.trim()}" invece di essersi spostato sulla 2`);
   }
 }
 
 // ---------- 4. Superare un Quadro apre il successivo ----------
-await page.getByRole('button', { name: /Torna ai quadri/ }).click();
+await page.getByRole('button', { name: /Torna ai livelli/ }).click();
 await page.waitForSelector('.pl-tappe');
 const apertiDopo = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
 const fatti = await page.locator('.pl-tappa--fatta').count();
@@ -204,7 +229,7 @@ if (apertiDopo !== 2) errori.push(`SBLOCCO: ${apertiDopo} quadri aperti invece d
 
 // ---------- 5. L'avanzamento sopravvive alla ricarica ----------
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /^Quadri/ }).click();
+await page.getByRole('button', { name: /^Livelli/ }).click();
 await page.waitForSelector('.pl-tappe');
 if (await page.locator('.pl-tappa--fatta').count() !== 1) {
   errori.push('PERSISTENZA: l avanzamento nei Quadri si perde ricaricando');

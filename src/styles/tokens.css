@@ -39,6 +39,16 @@
   --pl-danger-fondo: #b81f47;  /* bianco sopra: 6.32 */
   --pl-ok: #4cb5a5;
 
+  /* --- Il segno della bomba ------------------------------------------------
+     Il corpo e' quasi nero e l'alone chiarissimo: insieme reggono su tutte e sei le
+     famiglie cromatiche, compreso il viola, che e' la piu' scura. La scintilla e'
+     l'unica parte accesa, ed e' cio' che rende il simbolo riconoscibile a colpo
+     d'occhio anche quando la cella e' piccola come nel tray. */
+  --pl-bomba-corpo: #14161f;
+  --pl-bomba-alone: rgba(255, 255, 255, 0.92);
+  --pl-bomba-luce: rgba(255, 255, 255, 0.55);
+  --pl-bomba-scintilla: #ffd23d;
+
   /* --- Famiglie cromatiche dei blocchi ------------------------------------
      Sei tinte SATURE. La prima versione era volutamente smorzata ("minerale"),
      ma su schermo risultava spenta: i blocchi sono l'unica cosa colorata di tutta
@@ -74,6 +84,9 @@
   --pl-t-atterraggio: 260ms;
   --pl-t-esplosione: 420ms;
   --pl-t-punti: 950ms;
+  /* Festeggiamento fra un livello e l'altro: coriandoli, salto di Plinto e barra
+     dell'avanzamento. Lunga perche' e' un momento da guardare, non un riscontro. */
+  --pl-t-festa: 900ms;
   --pl-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --pl-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -114,6 +127,16 @@
   --pl-ok: #307469;           /* 4.61 */
   --pl-danger: #a54c64;       /* 4.62 */
 
+  /* Il segno della bomba sta SOPRA i blocchi, non sul fondo pagina: i blocchi del
+     tema chiaro sono altrettanto saturi, quindi il contrasto del simbolo non cambia
+     e i valori restano quelli del tema scuro. Sono ridichiarati lo stesso, perche'
+     un tema mezzo ridefinito e' esattamente il difetto che ha reso inutilizzabile
+     la prima versione di questo blocco. */
+  --pl-bomba-corpo: #14161f;
+  --pl-bomba-alone: rgba(255, 255, 255, 0.92);
+  --pl-bomba-luce: rgba(255, 255, 255, 0.55);
+  --pl-bomba-scintilla: #ffd23d;
+
   /* Blocchi: stesse tinte del tema scuro, abbassate quel tanto che serve a restare
      sopra 3:1 sul fondo chiaro della plancia. */
   --pl-block-1: #d94500;      /* arancio  3.67:1 */
@@ -141,5 +164,6 @@
     --pl-t-atterraggio: 1ms;
     --pl-t-esplosione: 1ms;
     --pl-t-punti: 1ms;
+    --pl-t-festa: 1ms;
   }
 }

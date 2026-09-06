@@ -1,3 +1,5 @@
+import { Bomba } from './Bomba.jsx';
+
 /**
  * Disegno di un pezzo: una griglietta larga quanto il riquadro della forma.
  * Usato in tre posti con la sola differenza della dimensione della cella:
@@ -16,9 +18,9 @@ export function Pezzo({ shape, color, bombe = [], cella, gap = 2, className = ''
       celle.push(
         <div key={`${r}:${c}`} className="pl-pezzo__cella">
           {attiva ? (
-            <div
-              className={`pl-blocco pl-blocco--${color} ${conBomba.has(indice) ? 'pl-blocco--bomba' : ''}`}
-            />
+            <div className={`pl-blocco pl-blocco--${color}`}>
+              {conBomba.has(indice) ? <Bomba /> : null}
+            </div>
           ) : null}
         </div>,
       );

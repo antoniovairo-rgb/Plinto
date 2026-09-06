@@ -45,11 +45,11 @@ onesto elencarli invece di dichiarare una regola che il file non rispetta del tu
 - `#1a1405` (2 volte), il bruno quasi nero del testo sul giallo del marchio — pulsante
   primario e nastro "nuovo record" (10.92:1 su `--pl-brand`);
 - `#fff` (2 volte), il pallino dell'interruttore e il testo del pulsante di pericolo;
-- `#06231d` (1 volta), il verde quasi nero del numero di un Quadro completato, su `--pl-ok`;
-- 10 `rgba()` di bianco o nero usate come velature: le due luci interne del blocco, ombra del
-  pezzo trascinato, velo del menu, ombra del testo dei punti volanti, anello scuro dietro il
-  cursore da tastiera, ombra del pannello, e le tre velature che disegnano l'anello della
-  bomba. Non esistono token per l'opacità.
+- `#06231d` (1 volta), il verde quasi nero del numero di un livello completato, su `--pl-ok`;
+- alcune `rgba()` di bianco o nero usate come velature: le due luci interne del blocco, ombra
+  del pezzo trascinato, velo del menu, ombra del testo dei punti volanti, anello scuro dietro
+  il cursore da tastiera, ombra del pannello. Non esistono token per l'opacità. Il segno della
+  bomba **non è più fra queste**: dalla 0.2.3 passa dai token `--pl-bomba-*`.
 
 Due velature che c'erano in una versione precedente — `rgba(242, 193, 78, …)`, cioè
 `--pl-brand` ricopiato a mano in decimale — non ci sono più; la tinta delle celle libere,
@@ -361,6 +361,7 @@ restare allineata al bordo del tabellone.
 | `--pl-t-atterraggio` | 260ms | animazione `pl-atterra` |
 | `--pl-t-esplosione` | 420ms | animazioni `pl-svanisci`, `pl-lampo`, `pl-salta` |
 | `--pl-t-punti` | 950ms | animazione `pl-sali` |
+| `--pl-t-festa` | 900ms | festeggiamento fra un livello e l'altro: coriandoli, salto di Plinto, barra dell'avanzamento |
 | `--pl-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | tutte le transizioni di sfondo e larghezza; le animazioni `pl-svanisci`, `pl-sali`, `pl-lampo`, `pl-salta` |
 | `--pl-ease-pop` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | `transform` del pezzo; animazioni `pl-atterra` e `pl-scatta`. È l'unica curva che supera l'1 e "rimbalza" |
 
@@ -382,8 +383,10 @@ niente che li tenesse insieme.
 | `pl-lampo` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | la barra della Catena lampeggia quando sale di livello |
 | `pl-salta` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | la cella portata via da una **bomba**: ruota, si illumina e collassa |
 | `pl-pulsa` | 1s, infinita | `ease-in-out` (parola chiave) | pulsazione delle celle che stanno per essere eliminate |
-| `pl-bomba-respira` | 1.6s, infinita | `ease-in-out` (parola chiave) | l'anello della bomba che si contrae e si riapre |
+| `pl-bomba-respira` | 1.6s, infinita | `ease-in-out` (parola chiave) | la scintilla sulla miccia della bomba, che si stringe e ruota |
 | `pl-plinto-respira` | 3.2s, infinita | `ease-in-out` (parola chiave) | il respiro di Plinto: 2,5% di traslazione verticale, nient'altro |
+| `pl-coriandolo` | `--pl-t-festa` (900ms) | `--pl-ease-out` | due coriandoli cadono dietro Plinto quando si supera un livello |
+| `pl-salta-gioia` | `--pl-t-festa` (900ms) | `--pl-ease-pop` | Plinto rimbalza **una volta sola** all'esito vinto |
 
 Le uniche durate ancora scritte a mano sono le tre animazioni **infinite**, che non hanno una
 controparte in JavaScript. `tests/durate.test.js` verifica anche questo, cioè che nessuna
@@ -397,7 +400,7 @@ verifica che il selettore che la porta ricompaia con `animation: none` dentro un
 
 ### `prefers-reduced-motion`: cosa succede davvero
 
-Adesso funziona, ed è cambiato rispetto a prima. `tokens.css` porta a `1ms` **tutti e sei** i
+Adesso funziona, ed è cambiato rispetto a prima. `tokens.css` porta a `1ms` **tutti e sette** i
 token di durata (`--pl-t-slow` è stato rimosso: non lo usava nessuno), e poiché le
 `@keyframes` degli effetti di mossa usano quei token, con la preferenza attiva:
 
@@ -406,8 +409,9 @@ token di durata (`--pl-t-slow` è stato rimosso: non lo usava nessuno), e poich�
   mossa: atterraggio, esplosione, punti volanti, scatto del punteggio, lampo della Catena e
   cella saltata dalla bomba;
 - le tre animazioni **infinite** vengono spente a parte, in `app.css`:
-  `.pl-cella--incandidata::after`, `.pl-blocco--bomba::after` e `.pl-plinto--vivo` ricevono
+  `.pl-cella--incandidata::after`, `.pl-bomba__scintilla` e `.pl-plinto--vivo` ricevono
   `animation: none`, e una regola generica porta `animation-iteration-count` a 1 su tutto.
+  Il festeggiamento fra un livello e l'altro è spento allo stesso modo;
   Non è più una convenzione da ricordare: `tests/durate.test.js` fallisce se una di queste
   animazioni perde il suo interruttore;
 - **le particelle sul canvas non passano affatto dal CSS**, quindi il CSS non può spegnerle.
@@ -456,40 +460,33 @@ Hook e moduli di supporto che il sistema di design presuppone: `useTrascinamento
 
 ### Il segno della bomba
 
-Regola `.pl-blocco--bomba::after` in `app.css`. È uno pseudo-elemento sovrapposto alla cella:
-`inset: 26%`, `border-radius: 50%`, un bordo scuro da 2px (`rgba(0,0,0,0.55)`), una `box-shadow`
-`inset` bianca all'85% e un alone bianco al 25% verso l'esterno. In sintesi: **un anello
-bianco cerchiato di scuro al centro del blocco**, che respira con `pl-bomba-respira`
-(1.6s, scala da 1 a 0.86 e ritorno).
+`src/ui/Bomba.jsx`, SVG inline in un `viewBox` 100x100, usato identico dalla plancia e dal
+tray. Corpo tondo quasi nero (`--pl-bomba-corpo`), alone chiaro dietro, riflesso, tappo,
+miccia e **scintilla** in oro (`--pl-bomba-scintilla`).
+
+**La prima versione era sbagliata, ed è istruttivo perché.** Era un anello bianco cerchiato di
+scuro al centro della cella. Rispettava la regola giusta — segno **geometrico e non cromatico**,
+così lo vede anche chi non distingue bene i colori — e infatti era passata da tutte le
+revisioni. Sbagliava però quella più importante: **non sembrava una bomba.** Un cerchio può
+essere un bersaglio, un bottone, un buco. Un simbolo che rispetta ogni regola di accessibilità
+e non comunica la cosa che deve comunicare non è accessibile, è solo conforme.
 
 Tre scelte, e la ragione di ciascuna:
 
-1. **È geometrico, non cromatico.** Il colore in PLINTO non porta informazione (regola 6 della
-   sezione 8), e una bomba segnalata da una tinta diversa sarebbe invisibile a chi non
-   distingue bene i colori — proprio sull'unico elemento che cambia l'esito di una mossa. Un
-   anello si vede a prescindere dalla percezione cromatica, e lascia intatto il colore del
-   pezzo, che resta la sua identità.
-2. **Sta al centro e non su un bordo.** Il tray disegna i pezzi con celle da 11 a 28px: un
-   segno sul bordo, a quelle dimensioni, si confonde con il raggio del blocco. Al centro
-   resta leggibile anche nel disegno più piccolo.
-3. **Si vede prima di appoggiare.** Il segno è applicato dallo stesso componente `Pezzo` che
-   disegna il pezzo nel tray e sotto il dito, non solo dalla `Plancia`: una bomba che si
-   scoprisse solo dopo l'appoggio sarebbe un caso, non una sorpresa.
+1. **È geometrico, non cromatico.** Il colore in PLINTO non porta informazione, e una bomba
+   segnalata da una tinta diversa sarebbe invisibile a chi non distingue bene i colori —
+   proprio sull'unico elemento che cambia l'esito di una mossa. La forma si vede a prescindere
+   dalla percezione cromatica, e lascia intatto il colore del blocco.
+2. **Il corpo è quasi nero, l'alone chiarissimo.** Insieme reggono su tutte e sei le famiglie
+   cromatiche in entrambi i temi, compreso il viola, che è la più scura: senza l'alone il nero
+   su viola perderebbe i contorni.
+3. **Si muove solo la scintilla.** È l'unica parte accesa e l'unica animata
+   (`pl-bomba-respira`, 1.6s): l'occhio va lì e il resto si legge di conseguenza. Animare
+   tutto il simbolo lo renderebbe un elemento che pulsa, non una bomba con la miccia accesa.
 
-Il chiaroscuro doppio (bordo scuro all'esterno, luce bianca all'interno) serve a un motivo
-pratico: le sei famiglie cromatiche vanno dall'oro `#ffc212` al viola `#9b4dff`, e un anello
-di un solo colore sparirebbe su almeno una delle due estremità.
+Verificato a **26px** (tray), **34px** (plancia) e **64px**: riconoscibile a tutte e tre.
 
-C'è poi un secondo segno, per la conseguenza invece che per la causa: `.pl-blocco--saltato`
-anima con `pl-salta` le celle portate via **dall'esplosione** e non dal gruppo. Rispetto a
-`pl-svanisci` ruota di 24 gradi e sale a `brightness(3.4)`, quindi si distingue a occhio da
-una riga che sparisce normalmente. Anche questa è informazione veicolata dal movimento e dalla
-forma, non dalla tinta.
-
-Sotto `prefers-reduced-motion` l'anello resta ma smette di respirare (`animation: none`): il
-segno è nel disegno, la pulsazione è solo un richiamo.
-
-### Plinto, il personaggio
+### Plinto, il personaggio### Plinto, il personaggio
 
 `src/ui/Plinto.jsx`, SVG inline in un `viewBox` 100x100.
 
@@ -499,8 +496,8 @@ pezzi. Un personaggio che non c'entra con il gioco va poi giustificato ogni volt
 questo si spiega da solo. Prende i colori dai token (`--pl-brand` per il corpo,
 `--pl-brand-deep` per i piedini), quindi segue il tema chiaro senza una riga in più.
 
-**Cinque espressioni, ognuna con un compito:** `normale` (mappa e attesa), `contento` (Quadro
-superato), `deluso` (Quadro fallito), `stupito` (qualcosa di grosso), `dorme`. Cambiano solo
+**Cinque espressioni, ognuna con un compito:** `normale` (mappa e attesa), `contento` (livello
+superato), `deluso` (livello fallito), `stupito` (qualcosa di grosso), `dorme`. Cambiano solo
 occhi, sopracciglia e bocca — il corpo è sempre lo stesso, così l'identità non oscilla.
 
 L'animazione `pl-plinto-respira` è deliberatamente minima: 3,2 secondi, 2,5% di traslazione
@@ -569,15 +566,12 @@ difetti già corretti. Un elenco di debiti che non viene ricontrollato invecchia
 altra documentazione, con l'aggravante che fa perdere tempo a chi prova a risolvere qualcosa
 che è già risolto.
 
-1. Il segno della bomba è disegnato con tre `rgba()` letterali invece che con token. Sono
-   sovrapposizioni neutre (un bordo nero, due aloni bianchi) e funzionano in entrambi i temi,
-   ma restano l'unico punto del foglio di stile che non passa dai token.
-2. `prefers-reduced-motion` non può spegnere le particelle: sono disegnate su un canvas con
+1. `prefers-reduced-motion` non può spegnere le particelle: sono disegnate su un canvas con
    `requestAnimationFrame`, dove il CSS non arriva. Da questa versione la preferenza di sistema
    è letta anche da JavaScript e decide il **valore iniziale** dell'impostazione Animazioni
    (`src/state/useImpostazioni.js`), che le spegne davvero. Resta un valore iniziale: una
    scelta esplicita del giocatore, essendo salvata, continua a vincere.
-3. Il rapporto di contrasto dei sei blocchi nel tema chiaro è misurato sul fondo della plancia
+2. Il rapporto di contrasto dei sei blocchi nel tema chiaro è misurato sul fondo della plancia
    e sta fra 3.31 e 5.69: sopra la soglia di 3:1 per gli elementi grafici, ma il più basso ha
    poco margine. Verificabile in qualsiasi momento con `npm run contrasti`.
 

@@ -1,15 +1,23 @@
 import { descriviObiettivi } from './Quadri.jsx';
 import { Plinto } from '../Plinto.jsx';
+import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
 import { numero } from '../../i18n/formato.js';
 
 /**
- * Esito di un Quadro.
+ * Esito di un livello.
  *
  * Se hai perso, dice PERCHE' in una riga e mette "Riprova" come primo pulsante: un
- * Quadro fallito deve costare un tocco, non una navigazione. Se hai vinto, il pulsante
- * principale porta al Quadro successivo, che e' quello che si vuole fare dopo.
+ * livello fallito deve costare un tocco, non una navigazione.
+ *
+ * Se hai vinto, questa schermata fa TRE cose, in quest'ordine, perche' e' l'ordine in
+ * cui contano: festeggia (Plinto, il nastro, i coriandoli), mostra dove sei arrivato
+ * sul percorso con il segno che si sposta davvero da una tappa alla successiva, e poi
+ * manda al livello nuovo — che si apre spiegandosi. Fra un livello e l'altro non deve
+ * esserci un vuoto: deve esserci un motivo per premere ancora.
  */
-export function SchermoFineQuadro({ quadro, esito, ultimo, onRiprova, onProssimo, onElenco, t }) {
+export function SchermoFineQuadro({
+  quadro, esito, ultimo, superatiTotali, animazioni = true, onRiprova, onProssimo, onElenco, t,
+}) {
   const vinto = esito.completato;
   const motivo = esito.motivo === 'mosse' ? t('quadri.persoMosse') : t('quadri.persoBloccato');
 
@@ -19,7 +27,7 @@ export function SchermoFineQuadro({ quadro, esito, ultimo, onRiprova, onProssimo
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 
         {/* Plinto dice l'esito prima delle parole: si legge in mezzo secondo. */}
-        <div className="pl-fine__plinto">
+        <div className={`pl-fine__plinto ${vinto && animazioni ? 'pl-festa' : ''}`}>
           <Plinto espressione={vinto ? 'contento' : 'deluso'} dimensione={92} className="pl-plinto--vivo" />
         </div>
 
@@ -50,6 +58,16 @@ export function SchermoFineQuadro({ quadro, esito, ultimo, onRiprova, onProssimo
             ))}
           </div>
         )}
+
+        {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti". */}
+        {vinto && !ultimo ? (
+          <AvanzamentoMappa
+            superato={quadro.numero}
+            superatiTotali={superatiTotali}
+            animazioni={animazioni}
+            t={t}
+          />
+        ) : null}
 
         {vinto && ultimo ? <p className="pl-fine__extra">{t('quadri.finito')}</p> : null}
       </div>

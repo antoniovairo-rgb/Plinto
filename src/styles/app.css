@@ -880,21 +880,41 @@ button {
  * i colori vede comunque l'anello. Sta al centro della cella, cosi' si legge anche
  * alla dimensione ridotta del tray.
  */
-.pl-blocco--bomba::after {
-  content: '';
+/* Il segno della bomba (src/ui/Bomba.jsx) riempie la cella e scala con lei. */
+.pl-bomba {
   position: absolute;
-  inset: 26%;
-  border-radius: 50%;
-  border: 2px solid rgba(0, 0, 0, 0.55);
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.25);
+  inset: 6%;
+  width: 88%;
+  height: 88%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pl-bomba__corpo { fill: var(--pl-bomba-corpo); }
+.pl-bomba__alone { fill: var(--pl-bomba-alone); }
+.pl-bomba__luce {
+  fill: none;
+  stroke: var(--pl-bomba-luce);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.pl-bomba__miccia {
+  fill: none;
+  stroke: var(--pl-bomba-corpo);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* La scintilla e' l'unica parte accesa e l'unica che si muove: l'occhio va li'. */
+.pl-bomba__scintilla {
+  fill: var(--pl-bomba-scintilla);
+  transform-origin: 72px 14px;
   animation: pl-bomba-respira 1.6s ease-in-out infinite;
 }
 
 @keyframes pl-bomba-respira {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(0.86); }
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  50%      { transform: scale(0.68) rotate(45deg); opacity: 0.85; }
 }
 
 /* La cella portata via dall'esplosione, non dal gruppo: lampeggia piu' forte e piu'
@@ -910,7 +930,7 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pl-blocco--bomba::after { animation: none; }
+  .pl-bomba__scintilla { animation: none; }
 }
 
 /* ----------------------------------------------------------- mappa dei quadri --- */
@@ -1196,3 +1216,138 @@ button {
 }
 
 .pl-apertura__azioni { display: grid; gap: 10px; padding-top: 16px; }
+
+/* ---------------------------------------- festeggiamento e avanzamento --- */
+
+/* I coriandoli: sei quadratini dei colori dei blocchi che cadono dietro Plinto.
+   Sono pseudo-elementi di due nodi, non un canvas: durano un secondo e mezzo, si
+   spengono da soli e non aggiungono un ciclo di requestAnimationFrame a una
+   schermata che non ne ha nessuno. */
+.pl-festa { position: relative; }
+.pl-festa::before,
+.pl-festa::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: pl-coriandolo var(--pl-t-festa) var(--pl-ease-out) both;
+}
+.pl-festa::before { left: 32%; background: var(--pl-block-4); }
+.pl-festa::after { right: 32%; background: var(--pl-block-2); animation-delay: 140ms; }
+
+@keyframes pl-coriandolo {
+  0%   { transform: translateY(-14px) rotate(0deg); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(92px) rotate(320deg); opacity: 0; }
+}
+
+/* Plinto rimbalza una volta sola quando arriva l'esito: la vittoria si vede prima
+   di leggerla. Una sola volta, non in ciclo: un festeggiamento che non finisce
+   smette di essere un festeggiamento. */
+.pl-festa .pl-plinto { animation: pl-salta-gioia var(--pl-t-festa) var(--pl-ease-pop) both; }
+
+@keyframes pl-salta-gioia {
+  0%   { transform: translateY(0) scale(0.7); }
+  35%  { transform: translateY(-16px) scale(1.08); }
+  60%  { transform: translateY(0) scale(0.98); }
+  80%  { transform: translateY(-5px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.pl-avanza { margin: 22px 0 6px; }
+
+.pl-avanza__atto {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pl-brand);
+}
+
+/* Il pezzo di strada. Le tappe sono collegate da una linea continua che passa
+   dietro: e' quello che le fa leggere come un percorso invece che come sette bottoni. */
+.pl-avanza__strada {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  margin: 0 0 18px;
+  /* Lo spazio in alto e' per Plinto, che sta SOPRA la sua tappa e altrimenti
+     finirebbe addosso al nome dell'atto. */
+  padding: 32px 0 0;
+}
+.pl-avanza__strada::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  /* Centro delle tappe: il riempimento in alto piu' meta' dei loro 34px. */
+  top: calc(32px + 17px);
+  height: 2px;
+  background: var(--pl-line);
+}
+
+.pl-avanza__tappa {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--pl-surface-2);
+  border: 2px solid var(--pl-line);
+  color: var(--pl-text-faint);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background var(--pl-t-base) var(--pl-ease-out),
+              border-color var(--pl-t-base) var(--pl-ease-out),
+              color var(--pl-t-base) var(--pl-ease-out);
+}
+.pl-avanza__tappa--fatta {
+  background: color-mix(in srgb, var(--pl-ok) 22%, transparent);
+  border-color: var(--pl-ok);
+  color: var(--pl-ok);
+}
+
+/* Plinto si sposta sulla tappa nuova: e' la transizione che si deve vedere. */
+.pl-avanza__plinto {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: none;
+}
+.pl-avanza__tappa--qui { border-color: var(--pl-brand); }
+
+.pl-avanza__conteggio {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--pl-text-dim);
+}
+
+.pl-avanza__barra {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pl-surface);
+  overflow: hidden;
+}
+.pl-avanza__riempimento {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pl-ok), var(--pl-brand));
+  /* Lenta di proposito: e' l'unica animazione della schermata che il giocatore
+     guarda apposta, e a 240ms sarebbe finita prima di essere notata. */
+  transition: width var(--pl-t-festa) var(--pl-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-festa::before,
+  .pl-festa::after { animation: none; opacity: 0; }
+  .pl-festa .pl-plinto { animation: none; }
+}

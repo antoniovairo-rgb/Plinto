@@ -65,7 +65,7 @@ npm run schermate  # rigenera le immagini per gli store, dal gioco vero
 npm run icone      # rigenera le icone PNG da public/icon.svg
 npm run prova-pages    # verifica che la build funzioni servita da una sottocartella
 npm run prova-desktop  # controlla l'aspetto su schermi grandi
-npm run quadri         # misura la difficolta' reale di ogni Quadro
+npm run quadri         # misura la difficolta' reale di ogni livello
 npm run contrasti      # rimisura i contrasti WCAG leggendo il foglio dei token
 npm run catena         # distribuzione della Catena, confrontata con le regole scartate
 ```

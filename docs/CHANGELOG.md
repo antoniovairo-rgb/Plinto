@@ -7,6 +7,62 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.3] — 6 settembre 2026
+
+Tre correzioni nate dallo stesso playtest umano della versione precedente.
+
+### Cambiato
+
+**Il segno della bomba adesso sembra una bomba (`src/ui/Bomba.jsx`)**
+- Era un anello bianco al centro della cella. Rispettava la regola giusta — segno
+  **geometrico e non cromatico**, così lo vede anche chi non distingue i colori — ma
+  sbagliava quella più importante: **non sembrava una bomba.** Un cerchio può essere un
+  bersaglio, un bottone, un buco. Un giocatore che non riconosce il simbolo non sa che
+  quella cella cambierà l'esito della sua mossa, e allora tanto vale non averlo.
+- Adesso è una bomba disegnata: corpo tondo, riflesso, tappo, miccia e **scintilla**.
+  Il corpo è quasi nero e regge su tutte e sei le famiglie cromatiche in entrambi i temi;
+  la scintilla è l'unica parte accesa **ed è l'unica che si muove**, così l'occhio ci va
+  e il resto si legge di conseguenza. Verificata a 26px (tray), 34px (plancia) e 64px.
+- È SVG dentro il codice come tutto il resto: nessun file, nessuna licenza, nessuna
+  richiesta di rete. Sostituisce lo pseudo-elemento CSS, quindi il segno ora è un
+  componente solo (`Bomba`) usato sia dalla plancia sia dal tray, invece di due regole.
+
+**Si chiamano livelli, non "Quadri"**
+- Il nome interno era un gioco di parole con la griglia, ma per chi gioca un livello è un
+  livello. Rinominato in **tutti** i testi dell'interfaccia, in italiano e in inglese
+  (`Stage` → `Level`).
+- **Il codice non è stato rinominato**: `quadro.js`, `quadri.js`, `useQuadro` e compagnia
+  si chiamano ancora così. È una scelta, non una dimenticanza — un rinomina meccanico su
+  dieci file per una parola che compare anche dentro "quadrante" è esattamente il modo in
+  cui in questo progetto `QUADRANT_SIZE` è già diventato una volta `PLINTONT_SIZE`. Va
+  fatto a parte e con calma. Nel frattempo il vocabolario del prodotto e quello del
+  codice divergono, ed è detto qui perché nessuno lo scopra per caso.
+
+### Aggiunto
+
+**Fra un livello e l'altro succede qualcosa (`src/ui/AvanzamentoMappa.jsx`)**
+
+Prima si vinceva, si leggeva "superato" e si premeva un pulsante. Adesso la schermata di
+vittoria fa **tre cose, in quest'ordine**:
+
+1. **Festeggia.** Plinto salta una volta, due coriandoli cadono. Una volta sola, non in
+   ciclo: un festeggiamento che non finisce smette di essere un festeggiamento.
+2. **Mostra dove sei arrivato.** Un pezzo del percorso — la tappa appena superata, quelle
+   intorno — con il segno che **si sposta** dalla tappa vecchia a quella nuova e la barra
+   che **si allunga** mentre la guardi. Non è la mappa completa: quella è uno strumento
+   per orientarsi, questo è un momento. Il progresso si sente quando lo si vede accadere.
+3. **Manda al livello nuovo**, che si apre spiegandosi (la schermata della 0.2.2).
+
+- Il conteggio dei livelli superati viene ora riletto **appena un livello finisce**: prima
+  si aggiornava solo tornando alla mappa, e la barra sarebbe rimasta ferma proprio nel
+  momento in cui il giocatore è andato avanti.
+- Con `prefers-reduced-motion` o l'impostazione Animazioni spenta si vede lo stato di
+  arrivo, senza ritardo e senza movimento: **la stessa informazione**, non meno.
+- `npm run e2e-quadri` verifica nel browser che il percorso compaia, che Plinto si sia
+  **spostato sulla tappa successiva** e che il conteggio dica 1 e non 0 — che è il difetto
+  più facile da fare qui, mostrare il valore letto prima della vittoria.
+
+
 ## [0.2.2] — 6 settembre 2026
 
 ### Aggiunto

@@ -127,6 +127,18 @@ export function App() {
     else tornaAiQuadri();
   }, [quadri.quadro, apriQuadro, tornaAiQuadri]);
 
+  /**
+   * Il conteggio dei livelli superati va riletto appena un livello finisce.
+   *
+   * Prima veniva aggiornato solo tornando alla mappa o alla home: bastava, perche'
+   * lo leggeva solo la home. Adesso lo legge anche la schermata di vittoria, che deve
+   * mostrare l'avanzamento COMPRESO il livello appena superato; con il valore vecchio
+   * il giocatore vedrebbe la barra ferma proprio nel momento in cui e' andato avanti.
+   */
+  useEffect(() => {
+    if (quadri.esito?.completato) setQuadriFatti(quantiSuperati());
+  }, [quadri.esito]);
+
   // Partita finita: si passa automaticamente al riepilogo.
   const inGioco = partita && partita.status === 'playing';
   const finita = partita && partita.status === 'over';
@@ -169,6 +181,8 @@ export function App() {
             quadro={quadri.quadro}
             esito={quadri.esito}
             ultimo={quadri.quadro.numero >= TOTALE_QUADRI}
+            superatiTotali={quadriFatti}
+            animazioni={impostazioni.animazioni}
             onRiprova={quadri.riprova}
             onProssimo={quadroSuccessivo}
             onElenco={tornaAiQuadri}

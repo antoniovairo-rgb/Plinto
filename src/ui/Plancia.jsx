@@ -1,6 +1,7 @@
 import { forwardRef, useMemo } from 'react';
 import { GRID_SIZE } from '../config/rules.js';
 import { idx, coloreDi, eBomba } from '../core/grid.js';
+import { Bomba } from './Bomba.jsx';
 
 /**
  * La griglia 9x9.
@@ -56,10 +57,9 @@ export const Plancia = forwardRef(function Plancia(
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
             {valore !== 0 ? (
-              <div
-                className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''} `
-                  + `${bomba ? 'pl-blocco--bomba' : ''}`}
-              />
+              <div className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''}`}>
+                {bomba ? <Bomba /> : null}
+              </div>
             ) : null}
             {valore === 0 && inAnteprima ? (
               <div className={`pl-blocco pl-blocco--${anteprimaColore}`} />
