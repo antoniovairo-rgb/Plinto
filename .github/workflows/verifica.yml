@@ -35,3 +35,8 @@ jobs:
 
       - name: Precisione del trascinamento
         run: npm run precisione
+
+      # GitHub Pages serve il sito da una sottocartella: e' un caso che si rompe in
+      # silenzio dando una pagina bianca, e nessuna prova fatta dalla radice lo vede.
+      - name: La build funziona anche da una sottocartella
+        run: node tools/prova-sottocartella.mjs

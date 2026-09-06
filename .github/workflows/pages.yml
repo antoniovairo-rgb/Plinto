@@ -1,0 +1,62 @@
+# Pubblicazione su GitHub Pages a ogni push su main.
+#
+# ATTENZIONE: su una repository PRIVATA, GitHub Pages richiede un piano a pagamento
+# (Pro, Team o Enterprise). Con il piano gratuito questo flusso fallisce finche' la
+# repository non viene resa pubblica.
+#
+# Dopo il primo passaggio va abilitato una volta sola:
+#   Settings -> Pages -> Source: "GitHub Actions"
+name: pubblica su Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Permessi minimi necessari alla pubblicazione.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Una pubblicazione alla volta; non si annulla quella in corso per non lasciare
+# il sito a meta'.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Non si pubblica qualcosa che non passa i test.
+      - name: Test unitari
+        run: npm test
+
+      - name: Build di produzione
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  pubblica:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pubblicazione.outputs.page_url }}
+    steps:
+      - id: pubblicazione
+        uses: actions/deploy-pages@v4

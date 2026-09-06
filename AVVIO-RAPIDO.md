@@ -34,6 +34,27 @@ Per fermarlo: `Ctrl+C` nel terminale.
 
 Stessi comandi dal Prompt dei comandi o da PowerShell, dopo aver installato Node.js.
 
+## Online, su GitHub Pages
+
+Il flusso di pubblicazione è già pronto in `.github/workflows/pages.yml` e parte a ogni
+push su `main`. Va abilitato **una volta sola**:
+
+**Settings → Pages → Source: `GitHub Actions`**
+
+L'indirizzo sarà `https://antoniovairo-rgb.github.io/plinto/`.
+
+> **Vincolo da conoscere prima di provarci.** GitHub Pages su una repository
+> **privata** richiede un piano a pagamento (Pro, Team o Enterprise). Con il piano
+> gratuito il flusso fallisce finché la repository non viene resa pubblica
+> (Settings → General → Danger Zone → Change visibility).
+>
+> Rendere pubblica la repository significa rendere pubblici codice, documentazione e
+> gioco **prima** che il nome PLINTO sia stato verificato da un professionista (vedi
+> `docs/RELEASE_CHECKLIST.md`). Non è un ostacolo tecnico, è una scelta da fare
+> consapevolmente.
+
+La build è verificata per funzionare da una sottocartella: `npm run prova-pages`.
+
 ## Cosa guardare mentre provi
 
 Il gioco è stato verificato a macchina, ma le domande che contano non hanno ancora
