@@ -225,6 +225,10 @@ export default {
     ricarica: 'Reload the game',
     dati: 'Records, stats and cleared levels are safe: they stay on your device.',
   },
+  installa: {
+    azione: 'Install on your phone',
+    apple: 'Tap the Share button at the bottom, then "Add to Home Screen". The game opens like an app, full screen and even offline.',
+  },
   comune: {
     chiudi: 'Close',
     indietro: 'Back',

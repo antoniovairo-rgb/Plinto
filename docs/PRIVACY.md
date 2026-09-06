@@ -42,6 +42,23 @@ non fa nulla finché non lo tocchi tu.** Se lo tocchi, si apre il sito di PayPal
 una propria informativa privacy sulla quale non abbiamo alcun controllo. Il gioco non
 comunica a PayPal chi sei, perché non lo sa.
 
+## Il service worker (installazione e uso senza rete)
+
+Da quando il gioco si può installare sul telefono esiste un file, `public/sw.js`, che il
+browser esegue per conto del sito. Serve a due cose: rendere il gioco installabile e
+farlo funzionare **senza connessione**, tenendone una copia locale.
+
+Merita di essere detto per intero, perché è codice che vede passare le richieste:
+
+- Conserva **solo** i file del gioco stesso (la pagina, il JavaScript, il foglio di stile,
+  le icone), presi dallo stesso indirizzo da cui il gioco è servito.
+- Le richieste verso qualunque altro dominio **le lascia passare senza toccarle e senza
+  registrarle**: c'è una riga esplicita che le esclude, ed è verificata da un test
+  (`tests/privacy.test.js`).
+- Non manda niente a nessuno: nessun invio in sottofondo, nessuna statistica, nessuna
+  connessione aperta.
+- Sparisce cancellando i dati del sito dal browser, o disinstallando l'applicazione.
+
 ## Cancellare i tuoi dati
 
 Due modi, entrambi immediati e definitivi:
@@ -60,5 +77,9 @@ oltre a quello della donazione.
 ## Come verificarlo
 
 Il codice sorgente è ispezionabile. Le uniche funzioni che scrivono dati sono in
-`src/persistence/storage.js`, e usano solo `window.localStorage`. In tutto il progetto
-non esiste una sola chiamata di rete.
+`src/persistence/storage.js`, e usano solo `window.localStorage`. Le uniche richieste di
+rete dell'intero progetto sono quelle che il service worker fa per **riscaricare i file del
+gioco stesso** dallo stesso indirizzo da cui il gioco è servito: nessuna riga di codice si
+rivolge a un altro dominio. È possibile controllarlo anche senza leggere il codice, con il
+pannello Rete degli strumenti per sviluppatori del browser: giocando una partita intera non
+compare nessuna chiamata verso l'esterno.

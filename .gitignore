@@ -16,3 +16,5 @@ Thumbs.db
 coverage/
 .claude/settings.local.json
 /tmp-sim/
+
+.prova-sw/

@@ -7,6 +7,61 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.4.0] — 6 settembre 2026
+
+### Aggiunto
+
+**Installare PLINTO sul telefono o sul tablet (`public/sw.js`, `src/ui/Installa.jsx`)**
+- Chiesto da chi gioca: dalla home mancava un modo per portarsi il gioco sul telefono.
+  Ora in home c'è una voce che lo installa come applicazione vera — icona nel cassetto,
+  schermo intero, nessuna barra del browser.
+- **Le due piattaforme non si comportano allo stesso modo, e fingere di sì avrebbe mentito
+  a metà dei giocatori.** Su Android il browser lancia `beforeinstallprompt`: l'evento
+  viene catturato e conservato, e il pulsante apre la finestra di installazione vera. Su
+  iPhone e iPad quell'evento non esiste e non esisterà: lì il pulsante mostra le parole
+  esatte da cercare nel menu Condividi. Dove l'installazione non è possibile — su un
+  computer, o in un browser che non la offre — **non compare niente**: un pulsante che non
+  fa nulla è peggio di un pulsante che manca. E a gioco già installato la voce sparisce.
+- Serviva un **service worker**, perché senza Android non offre affatto l'installazione: il
+  manifest e le icone maskable che il progetto aveva già non bastano. `public/sw.js` fa due
+  cose sole: rende il gioco installabile e lo fa funzionare **senza rete**. Non manda niente
+  a nessuno — le richieste verso altri domini le lascia passare senza toccarle, e
+  `tests/privacy.test.js` ora lo verifica riga per riga.
+- **La strategia di aggiornamento è la parte pericolosa**, ed è scritta per non ripetere il
+  guaio classico: un service worker fatto male lascia il giocatore su una versione vecchia
+  *per sempre*. Quindi il documento HTML va **sempre in rete per primo** (la cache serve
+  solo quando la rete non c'è), le risorse con l'impronta nel nome si prendono dalla cache,
+  e il nome della cache contiene la versione: cambiando versione, all'attivazione le cache
+  vecchie vengono cancellate.
+
+### Corretto
+
+**Senza rete il gioco si apriva bianco** — trovato dallo scenario nuovo, non a mente
+- Alla **prima** visita il service worker non controlla ancora la pagina: il JavaScript e il
+  foglio di stile arrivavano senza passare da lui e non finivano in nessuna cache. Chi
+  installava il gioco e provava ad aprirlo in aereo trovava una pagina vuota.
+- Corretto precaricando il guscio all'installazione. I nomi dei file cambiano a ogni build,
+  quindi **non possono essere scritti a mano**: li scrive la build, con un plugin in
+  `vite.config.js` che sostituisce un segnaposto in `dist/sw.js` — e **fallisce la build**
+  se il segnaposto non c'è più, invece di produrre in silenzio un service worker che non
+  precarica niente.
+
+### Verifiche
+
+**`tests/e2e/installazione.mjs` (`npm run installazione`), decimo controllo di `npm run verifica`**
+- Serve la build da `/plinto/` come su GitHub Pages, con la cache HTTP disattivata perché
+  ciò che si osserva sia l'effetto del service worker e non quello del browser. Controlla:
+  registrazione e **ambito** (un service worker registrato sulla radice del dominio invece
+  che sulla sottocartella è un errore che non si nota subito), apertura **senza rete**,
+  icone e `display` del manifest, e soprattutto che **dopo un aggiornamento vero** — i file
+  serviti vengono sostituiti a caldo — il giocatore veda la versione nuova e non la vecchia.
+- Due difetti erano **nel controllo stesso**, non nel codice: il segnale dell'aggiornamento
+  era dentro `#root`, che React svuota quando si monta, e lo scenario accusava il gioco di
+  un difetto inesistente. Sta ora fuori da `#root`. Provato togliendo il plugin di
+  precaricamento: lo scenario fallisce con «senza rete il gioco non si apre», cioè accusa
+  la cosa giusta.
+
+
 ## [0.3.0] — 6 settembre 2026
 
 ### Aggiunto

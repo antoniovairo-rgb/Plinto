@@ -18,14 +18,15 @@
 | `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
 | `src/audio/` | `suoni.js` — sintesi Web Audio: nove voci del gioco, **nessun file audio** | niente | browser (`AudioContext`) |
 | `src/feel/` | `useEffettiMossa.js` (traduce `lastMove` in effetti), `particelle.js` (classe `CampoParticelle`, un canvas), `vibrazione.js` (pattern per `navigator.vibrate`) | `config/`, `audio/`, React (solo l'hook) | browser |
-| `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` le schermate (fra cui `Quadri`, `AperturaQuadro`, `FineQuadro`, `AvanzamentoMappa`, `ComeSiGioca`, `Bomba`, `MiniGriglia`, `Salvagente`) più l'impalcatura comune `Pagina.jsx` | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
+| `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` le schermate (fra cui `Quadri`, `AperturaQuadro`, `FineQuadro`, `AvanzamentoMappa`, `ComeSiGioca`, `Bomba`, `MiniGriglia`, `Salvagente`) più l'impalcatura comune `Pagina.jsx`, e `Installa.jsx` (installazione sul telefono) | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
 | `src/state/` | `usePartita.js`, `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
-| `tests/` | 14 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `quadri`, `i18n`, `sfide`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`) più gli scenari in `e2e/` (`partita`, `precisione`, `resistenza`, `quadri`) | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
+| `tests/` | 14 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `quadri`, `i18n`, `sfide`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`) più gli scenari in `e2e/` (`partita`, `precisione`, `resistenza`, `quadri`, `comunicazioni`, `installazione`) | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
+| `public/` | `icon.svg`, `icone/`, `manifest.webmanifest` e `sw.js` (service worker: installabilità e funzionamento senza rete) | niente | browser |
 | `tools/` | strumenti di misura e di produzione fuori dalla suite: `schermate`, `icone`, `prova-sottocartella`, `prova-desktop`, `quadri`, `taratura`, `genera-quadri`, `contrasti`, `misura-catena` | `core/`, `config/`, Playwright | Node |
 
 Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
 
-- `npm test` passa: **206 test in 14 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
+- `npm test` passa: **213 test in 14 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
   `invarianti.test.js`, che gioca 240 partite complete);
 - `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
 - `npm run sim` funziona;
@@ -85,7 +86,7 @@ Decisione presa. Motivi:
   definizione, nessun disallineamento fra tipi e realtà a runtime.
 - Il costo — perdere il controllo statico — è compensato in parte dai commenti `@param` /
   `@returns` presenti su tutte le funzioni pubbliche del `core/` e in parte dalla suite di
-  test, che sul `core/` resta la parte più densa: dei 206 test, 102 riguardano il `core/`
+  test, che sul `core/` resta la parte più densa: dei 213 test, 102 riguardano il `core/`
   (griglia, punteggio, bombe, generatore, motore, invarianti), 35 i Quadri (definizione, svolgimento e testi della schermata di apertura), 35 l'i18n (chiavi, traduzioni, ortografia italiana e regole della presentazione), 6 la
   Sfida del Giorno e 28 le promesse del progetto su se stesso (privacy, sintassi degli script,
   allineamento delle durate, contrasti WCAG, colori dell'icona).
@@ -274,6 +275,29 @@ vivono su **un solo canvas** invece che su decine di nodi DOM animati, e il cicl
 regole, e nessun loop gira a vuoto mentre il giocatore pensa. In cambio le durate degli
 effetti sono duplicate fra JS e CSS, e `prefers-reduced-motion` non è sufficiente a fermarli
 (vedi `DESIGN_SYSTEM.md`, sezione 6).
+
+### ADR-8 — Service worker minimo, documento sempre in rete per primo
+**Contesto.** Su Android il browser non offre l'installazione se non esiste un service
+worker che gestisce `fetch`: senza, manifest e icone maskable danno al massimo una
+scorciatoia. Ma un service worker è anche il modo più rapido di lasciare un giocatore su
+una versione vecchia per sempre, e questo progetto ha già pagato caro il dubbio su cosa ci
+fosse davvero online.
+**Decisione.** `public/sw.js` fa due cose e nient'altro: precarica il guscio
+all'installazione e risponde alle richieste dello stesso dominio. Il documento HTML va
+**sempre in rete per primo** (la cache è il ripiego di quando la rete manca); le risorse di
+`assets/` si prendono dalla cache per prime, ma solo perché Vite mette l'impronta del
+contenuto nel nome del file. Il nome della cache contiene la versione, passata
+nell'indirizzo di registrazione (`sw.js?v=…`): cambiando versione il browser reinstalla il
+service worker e all'attivazione le cache precedenti vengono cancellate. L'elenco delle
+risorse da precaricare lo scrive la **build**, non una mano umana: un plugin in
+`vite.config.js` sostituisce un segnaposto in `dist/sw.js` e **fa fallire la build** se il
+segnaposto non c'è più.
+**Conseguenze.** Il gioco è installabile e funziona in aereo, e un aggiornamento arriva alla
+ricarica successiva — verificato da `tests/e2e/installazione.mjs`, che sostituisce a caldo i
+file serviti. In cambio esiste un file che intercetta richieste, cioè esattamente il tipo di
+codice che può violare in silenzio la promessa di `PRIVACY.md`: per questo
+`tests/privacy.test.js` lo legge e rifiuta domini esterni, `sendBeacon`, WebSocket e la
+scomparsa del controllo sull'origine.
 
 ## 7. Non ancora deciso
 

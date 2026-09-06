@@ -1512,3 +1512,22 @@ button {
   display: grid;
   gap: 10px;
 }
+
+/* ------------------------------------------------------ installa l app --- */
+.pl-installa {
+  max-width: 380px;
+  width: 100%;
+  margin: 4px auto 0;
+  display: grid;
+  gap: 8px;
+}
+.pl-installa__come {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--pl-text-dim);
+  text-align: left;
+}

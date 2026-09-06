@@ -59,6 +59,15 @@ Dalla home, voce **"Come si gioca"**: le quattro regole, i due modi di muovere, 
 l'Intreccio, la Catena, le bombe e la sezione sull'equita' dichiarata. La presentazione al
 primo avvio resta breve apposta; questa pagina la si apre quando serve.
 
+## Installarlo sul telefono
+
+Dalla home c'e' una voce che installa PLINTO come applicazione: icona sullo schermo,
+schermo intero, e funziona **anche senza connessione**. Su Android il pulsante apre
+direttamente la finestra di installazione del browser; su iPhone e iPad, dove quella
+finestra non esiste, mostra le parole esatte da cercare nel menu Condividi. Dove
+l'installazione non e' possibile non compare niente, invece di un pulsante che non fa
+nulla.
+
 ## Provarlo
 
 Istruzioni passo passo, telefono compreso: **[AVVIO-RAPIDO.md](AVVIO-RAPIDO.md)**.

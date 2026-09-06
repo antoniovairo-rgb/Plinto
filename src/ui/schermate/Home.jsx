@@ -1,5 +1,6 @@
 import { Logo } from '../Logo.jsx';
 import { numero } from '../../i18n/formato.js';
+import { Installa } from '../Installa.jsx';
 
 /**
  * La home.
@@ -90,6 +91,11 @@ export function SchermoHome({
           <span className="pl-sfida-avvio__esito">{sfidaTesto || '—'}</span>
         </button>
       </div>
+
+      {/* Sta fra le azioni e il menu: si vede scorrendo, ma non compete con il
+          pulsante per giocare. E compare solo dove l'installazione e' possibile
+          davvero — non e' un pulsante decorativo. */}
+      <Installa t={t} />
 
       <nav className="pl-home__menu">
         <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('aiuto')}>

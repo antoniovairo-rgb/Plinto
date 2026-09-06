@@ -15,6 +15,27 @@ import './styles/app.css';
  */
 const t = traduttore(linguaDelBrowser());
 
+/**
+ * Registrazione del service worker.
+ *
+ * L'indirizzo porta la VERSIONE: `sw.js?v=<versione>`. Cambiando versione cambia
+ * l'indirizzo, il browser considera il file modificato e reinstalla il service worker,
+ * che all'attivazione cancella le cache delle versioni precedenti. Senza questo
+ * dettaglio un service worker puo' restare quello di mesi prima, e con lui la versione
+ * del gioco che serve.
+ *
+ * Solo in produzione: durante lo sviluppo intercettare le richieste servirebbe solo a
+ * far dubitare di quale codice si stia guardando.
+ */
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`./sw.js?v=${__APP_VERSION__}`).catch(() => {
+      // Un service worker che non si registra non impedisce di giocare: si perdono
+      // l'installazione e il gioco senza rete, non la partita. Silenzio voluto.
+    });
+  });
+}
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Salvagente t={t}>

@@ -238,6 +238,10 @@ export default {
     ricarica: 'Ricarica il gioco',
     dati: 'Record, statistiche e livelli superati sono al sicuro: restano sul tuo dispositivo.',
   },
+  installa: {
+    azione: 'Installa sul telefono',
+    apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
+  },
   comune: {
     chiudi: 'Chiudi',
     indietro: 'Indietro',
