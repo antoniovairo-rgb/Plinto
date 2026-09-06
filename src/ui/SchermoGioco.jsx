@@ -178,7 +178,7 @@ export function SchermoGioco({
           tre buchi scollegati fra elementi che parlano della stessa cosa. */}
       <div className="pl-plancia-area">
         <div className="pl-tavolo">
-          <BarraCatena livello={partita.chain} t={t} />
+          <BarraCatena livello={partita.chain} digiuno={partita.chainDigiuno ?? 0} t={t} />
 
           <div className="pl-plancia-involucro">
             <Plancia

@@ -68,7 +68,6 @@
   --pl-t-instant: 90ms;
   --pl-t-fast: 160ms;
   --pl-t-base: 240ms;
-  --pl-t-slow: 420ms;
   /* Durate degli effetti di gioco. Sono le stesse costanti usate da
      src/feel/useEffettiMossa.js: se cambiano qui devono cambiare anche li',
      altrimenti l'animazione e il momento in cui viene rimossa si scollano. */
@@ -100,16 +99,20 @@
   --pl-line: #d8dce7;
   --pl-line-strong: #a9b1c6;
 
-  /* Testi: 15.9, 7.7 e 4.5 su --pl-ink. */
+  /* Contrasti misurati con `node tools/contrasti.mjs` sul fondo PIU' SCURO
+     dell'interfaccia chiara (--pl-ink-2, #e9ebf2): 14.44, 5.98 e 4.69.
+     I valori precedenti erano dichiarati contro --pl-ink, il fondo piu' favorevole,
+     e --pl-text-faint stava in realta' a 3.94: sotto la soglia AA che il commento
+     stesso affermava di rispettare. Il fondo di riferimento e' ora il peggiore. */
   --pl-text: #171b26;
   --pl-text-dim: #4f586d;
-  --pl-text-faint: #6b7488;
+  --pl-text-faint: #60687a;
 
-  /* Accenti riportati sopra 4.5:1 su fondo chiaro. */
-  --pl-brand: #876c2b;        /* 4.54 su --pl-ink */
+  /* Accenti, sopra 4.5:1 sullo stesso fondo di riferimento dei testi. */
+  --pl-brand: #7f6628;        /* 4.60 */
   --pl-brand-deep: #6d5622;
-  --pl-ok: #337b70;           /* 4.54 su --pl-ink */
-  --pl-danger: #ae5069;       /* 4.52 su --pl-surface-2 */
+  --pl-ok: #307469;           /* 4.61 */
+  --pl-danger: #a54c64;       /* 4.62 */
 
   /* Blocchi: stesse tinte del tema scuro, abbassate quel tanto che serve a restare
      sopra 3:1 sul fondo chiaro della plancia. */
@@ -135,7 +138,6 @@
     --pl-t-instant: 1ms;
     --pl-t-fast: 1ms;
     --pl-t-base: 1ms;
-    --pl-t-slow: 1ms;
     --pl-t-atterraggio: 1ms;
     --pl-t-esplosione: 1ms;
     --pl-t-punti: 1ms;

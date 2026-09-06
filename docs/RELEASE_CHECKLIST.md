@@ -33,7 +33,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Contrasti conformi WCAG AA | **FATTO** | Misurati e documentati in `DESIGN_SYSTEM.md`, entrambi i temi |
+| Contrasti conformi WCAG AA | **FATTO** | Misurati sul fondo più sfavorevole di ciascun tema e documentati in `DESIGN_SYSTEM.md`. Non è più una verifica manuale: `npm run contrasti` li ricalcola dai token e `tests/contrasti.test.js` lo esegue a ogni `npm test`, quindi una regressione fa fallire la suite |
 | Partita completa da tastiera | **FATTO** | Verificata dallo scenario e2e |
 | Annunci per lettori di schermo | **FATTO** | Verificati dallo scenario e2e |
 | Bersagli tattili ≥ 44 px | **FATTO** | Portati a 48 px minimi dopo averli misurati a 34 px |

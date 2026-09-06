@@ -18,6 +18,7 @@ export default {
     punteggio: 'Score',
     record: 'Best',
     catena: 'Chain',
+    respiroFinito: 'next empty move brings it down',
     menu: 'Menu',
   },
   gioca: {

@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <!-- Stessa geometria di src/ui/Logo.jsx (riquadri da 19, raggio 5, tratteggio 4 3).
-       I colori sono ripetuti in esadecimale perche' un file in public/ non vede i
-       token CSS: se cambia la palette va aggiornato anche questo file. -->
-  <rect width="48" height="48" rx="11" fill="#0E1118"/>
-  <rect x="3" y="3" width="19" height="19" rx="5" fill="#E4B44C"/>
-  <rect x="26" y="3" width="19" height="19" rx="5" fill="#4CB5A5"/>
-  <rect x="3" y="26" width="19" height="19" rx="5" fill="#7B6CE6"/>
-  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#3A4460" stroke-width="2" stroke-dasharray="4 3"/>
+  <!-- Stessa geometria e stessi colori di src/ui/Logo.jsx (riquadri da 19, raggio 5,
+       tratteggio 4 3). I colori sono ripetuti in esadecimale perche' un file in
+       public/ non vede i token CSS; l'allineamento con i token del tema scuro e'
+       verificato da tests/icona.test.js, cosi' la palette non puo' piu' divergere
+       in silenzio come e' gia' successo. -->
+  <rect width="48" height="48" rx="11" fill="#0e1118"/>
+  <rect x="3" y="3" width="19" height="19" rx="5" fill="#ffc212"/>
+  <rect x="26" y="3" width="19" height="19" rx="5" fill="#12e1b0"/>
+  <rect x="3" y="26" width="19" height="19" rx="5" fill="#9b4dff"/>
+  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#3a4460" stroke-width="2" stroke-dasharray="4 3"/>
 </svg>

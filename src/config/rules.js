@@ -41,18 +41,26 @@ export const CHAIN_DECAY = 1;
 /**
  * Quante mosse senza eliminazioni la Catena sopporta prima di calare.
  *
- * Vale una MANO INTERA, cioe' i tre pezzi. Non e' un numero scelto a sentimento:
- * con la regola precedente (calo a ogni mossa a vuoto) la Catena risultava >= 3
- * soltanto nel 2% delle mosse giocate, e il moltiplicatore che dovrebbe essere la
- * firma del gioco era di fatto decorativo. Misurato su 200 partite:
+ * Non e' un numero scelto a sentimento, ed e' stato sbagliato due volte in due
+ * direzioni opposte. Misurato con `npm run catena` (tools/misura-catena.mjs), profilo
+ * stratega, 120 partite con tetto di 250 mosse:
  *
- *   tolleranza 0 (prima) ->  2% delle mosse con Catena attiva, mai oltre 6
- *   tolleranza 1         -> 11%
- *   tolleranza 2 (ora)   -> 24%, e il 23% delle partite arriva a Catena 7
+ *   regola                        Catena >= 3   al tetto (9)   Catena media
+ *   passo=gruppi, tolleranza 0           1.3%           0.0%           0.61
+ *   passo=gruppi, tolleranza 2          95.4%          77.4%           8.21
+ *   passo=1,      tolleranza 0           0.4%           0.0%           0.48
+ *   passo=1,      tolleranza 1 (ora)    75.4%          15.0%           5.15
+ *   passo=1,      tolleranza 2          94.9%          74.3%           8.11
  *
- * Due mosse di tolleranza corrispondono al ritmo naturale del gioco: con tre pezzi
- * in mano si elimina all'incirca una volta ogni tre mosse. La regola si racconta in
- * una riga: "la Catena cala se non elimini niente per un'intera mano".
+ * Senza tolleranza la Catena non si accende mai: il moltiplicatore che dovrebbe essere
+ * la firma del gioco resta decorativo. Con due mosse di tolleranza si accende e non si
+ * spegne piu': tre mosse su quattro giocate al tetto, cioe' non un moltiplicatore ma
+ * una costante. Una mossa di tolleranza e' l'unico valore che lascia la Catena
+ * distribuita su tutta la scala, ed e' il punto: deve essere qualcosa da difendere.
+ *
+ * La regola si racconta comunque in una riga: "la Catena cala se non elimini niente per
+ * due mosse di fila". Vedi docs/GAMEPLAY_RULES.md per la cronaca completa delle tre
+ * versioni e per il limite delle righe controfattuali di quella tabella.
  */
 export const CHAIN_GRACE = 1;
 
@@ -61,9 +69,10 @@ export const CHAIN_GRACE = 1;
  *
  * Sale di UNO, non di quanti gruppi hai chiuso. Chiudere tre gruppi insieme e' gia'
  * premiato dal moltiplicatore Intreccio: farlo contare due volte faceva schizzare la
- * Catena al massimo e li' restava. Misurato con il giocatore forte: il 59,5% delle
- * mosse veniva giocato al tetto, cioe' il moltiplicatore era un numero fisso invece
- * che una tensione. Esattamente inutile quanto quando non saliva mai.
+ * Catena al massimo e li' restava, cioe' il moltiplicatore diventava un numero fisso
+ * invece che una tensione — esattamente inutile quanto quando non saliva mai.
+ * Le quote sono nella tabella di CHAIN_GRACE qui sopra: le righe "passo=gruppi" sono
+ * quella versione. Si rifanno con `npm run catena`.
  */
 export const CHAIN_STEP_UP = 1;
 

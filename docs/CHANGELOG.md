@@ -7,12 +7,228 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.1] — 6 settembre 2026
+
+Nessuna regola di gioco cambiata. Questa versione chiude difetti trovati riverificando codice e
+documentazione riga per riga, e soprattutto **sostituisce affermazioni con controlli**: dove
+prima c'era un numero scritto a mano in un commento, ora c'è un comando che lo produce.
+
+Controlli: `npm test` passa con **161 test in 14 file**, `npm run build` riesce, `npm run e2e`
+non rileva problemi, `npm run precisione` riporta 201 prove su 41 forme senza scostamenti.
+
+### Corretto
+
+**Contrasti del tema chiaro sotto la soglia WCAG AA**
+- `--pl-text-faint` stava a **3.94:1** sul fondo più sfavorevole dell'interfaccia, sotto la
+  soglia AA di 4.5 che il commento di `tokens.css` **dichiarava di rispettare**. Sotto soglia
+  anche `--pl-brand` (4.45), `--pl-ok` (4.46) e `--pl-danger` (4.25).
+- La causa è di metodo: i valori erano dichiarati contro `--pl-ink`, il fondo *più favorevole*
+  dei quattro. Misurare sul caso migliore non è misurare. Ora il riferimento è `--pl-ink-2`,
+  il peggiore, e i quattro token sono stati scuriti: `#60687a` (4.69), `#7f6628` (4.60),
+  `#307469` (4.61), `#a54c64` (4.62).
+- **Nuovo `tools/contrasti.mjs` (`npm run contrasti`) e `tests/contrasti.test.js`**: i
+  contrasti si ricalcolano leggendo `tokens.css` e la suite fallisce se anche uno solo scende
+  sotto soglia. È la terza volta che compare questo difetto: una correzione puntuale non lo
+  chiude, un controllo automatico sì.
+
+**Il commento di `CHAIN_GRACE` descriveva una regola che non esiste più**
+- Diceva «tolleranza 2 (ora)» e riportava misure (2% / 11% / 24%) della *seconda* versione
+  della Catena, mentre la costante vale 1 dalla terza. Il codice era giusto, il commento no.
+- Anche qui la correzione non è stata battere altri numeri a mano: **nuovo
+  `tools/misura-catena.mjs` (`npm run catena`)**, che fa giocare lo `stratega`, registra la
+  sequenza dei gruppi chiusi e la rigioca con la regola attuale e con le quattro varianti
+  scartate. Il commento riporta la tabella e il comando che la produce.
+- Il limite dello strumento è dichiarato dentro lo strumento: le partite sono giocate con la
+  regola attuale e lo stratega guarda la Catena quando sceglie, quindi **solo la riga della
+  regola attuale è una misura esatta**; le altre sono controfattuali.
+
+**`tests/durate.test.js` garantiva meno di quanto dichiarasse**
+- Il controllo che vieta le durate scritte a mano nelle `animation:` cercava `\d+m?s`, cioè
+  solo numeri interi: `1.6s` di `pl-bomba-respira` e `3.2s` di `pl-plinto-respira` non venivano
+  nemmeno esaminate. Ora riconosce i decimali, l'elenco delle eccezioni è esplicito e per
+  ognuna verifica che il selettore che la porta abbia un `animation: none` sotto
+  `prefers-reduced-motion`.
+
+**`public/icon.svg` era rimasto alla palette smorzata**
+- Per due versioni l'icona ha usato `#E4B44C`, `#4CB5A5` e `#7B6CE6` mentre il marchio dentro
+  il gioco disegnava già le tinte sature. Riallineata, PNG rigenerati con `npm run icone`, e
+  **`tests/icona.test.js`** confronta ora l'SVG con i token a ogni `npm test`: la duplicazione
+  resta necessaria (un file in `public/` non vede i token) ma non può più divergere in
+  silenzio.
+
+**Un elenco di debiti aperti che descriveva difetti già risolti**
+- Quattro voci su undici in `DESIGN_SYSTEM.md` erano obsolete: bersagli tattili, stringhe
+  italiane nel JSX, `toLocaleString('it-IT')` e `"orientation": "portrait"` nel manifest erano
+  già stati corretti. L'elenco è stato riverificato sul codice, voce per voce.
+
+### Aggiunto
+
+**La Catena dice quando sta per calare**
+- `respiroRimasto` era esportata e coperta da test ma **non la usava nessun componente**: la
+  tolleranza era l'unica regola del gioco che il giocatore poteva soltanto dedurre guardando il
+  numero scendere. Ora la barra della Catena mostra un avviso di ultima chiamata quando la
+  prossima mossa senza eliminazioni farà calare il moltiplicatore. Una regola invisibile è
+  indistinguibile da un capriccio.
+
+**Sei test sulla generazione delle bombe**
+- La detonazione era coperta dal primo giorno; la regola che decide **quando** arriva una bomba
+  no, ed è quella che porta la promessa di equità. Ora si verifica per misura: mai più di una
+  bomba per mano, mai su un pezzo da una cella, indice sempre dentro il pezzo, frequenza pari a
+  `BOMBA_PROBABILITA` su 3000 mani e **frequenza invariata con la griglia quasi piena** — cioè
+  la prova che le bombe non sono una leva sulla difficoltà.
+
+**`prefers-reduced-motion` arriva anche alle particelle**
+- Le particelle sono disegnate su un canvas, dove il CSS non arriva. La preferenza di sistema è
+  ora letta da JavaScript e decide il **valore iniziale** dell'impostazione Animazioni. Resta un
+  valore iniziale: una scelta esplicita del giocatore, essendo salvata, continua a vincere.
+
+### Rimosso
+
+- `--pl-t-slow`: definito e mai usato da nessuna regola.
+
+
+## [0.2.0] — 6 settembre 2026
+
+Prima versione pubblicata su GitHub Pages. Raccoglie le modifiche di regole, di palette, di
+nome e il percorso dei Quadri.
+
+Stato dei controlli al momento della pubblicazione: `npm test` passava con **150 test in 12
+file**, `npm run build` riusciva.
+
+
+### Cambiato
+
+**Il gioco si chiama PLINTO, non più QUADRA**
+- Il nome precedente era già usato da giochi esistenti nello stesso genere. Motivazioni e
+  verifica in `docs/DIFFERENZIAZIONE.md`.
+- La rinomina è passata anche per i nomi delle costanti. Un passaggio automatico aveva
+  trasformato `QUADRANT_SIZE` in `PLINTONT_SIZE`, sostituendo la sottostringa "QUADRA" dentro
+  una parola che non c'entrava: **corretto**, la costante si chiama di nuovo `QUADRANT_SIZE` e
+  i quadranti restano quadranti. Non restano tracce di "PLINTONT" nel codice né nei documenti.
+
+**La regola della Catena, riscritta due volte perché la misura diceva che non funzionava**
+
+Cronologia, con i numeri del giocatore artificiale forte. Tutte le cifre di questo elenco si
+rifanno con **`npm run catena`** (`stratega`, 120 partite, tetto di 250 mosse, 29.825 mosse):
+
+1. *Versione originale.* La Catena saliva di **quanti gruppi** chiudeva la mossa e calava di
+   uno a **ogni** mossa che non eliminava nulla. Misurato: Catena ≥ 3 solo nell'**1,3%** delle
+   mosse giocate, mai sopra 4. Il moltiplicatore che doveva essere la firma del gioco era
+   decorativo.
+2. *Seconda versione.* Due mosse di tolleranza prima del calo, crescita ancora pari al numero
+   di gruppi. Misurato: **95,4%** delle mosse con Catena ≥ 3, ma **77,4%** giocate al tetto
+   massimo. Un moltiplicatore fisso è inutile esattamente quanto uno che non arriva mai.
+3. *Versione attuale.* La Catena sale di **uno** per mossa che elimina — non di quanti gruppi,
+   perché l'Intreccio li premia già e contarli due volte incollava la Catena al tetto — con
+   **una** mossa di tolleranza prima di calare (`CHAIN_STEP_UP = 1`, `CHAIN_GRACE = 1`).
+   Misurato: **15,0%** delle mosse al tetto e una distribuzione larga su tutti i livelli 0-9,
+   fra il 5,6% e il 15,0% per livello. Nessun livello domina, che è il punto.
+
+Le due correzioni servono **insieme**: con la crescita di uno ma senza tolleranza la Catena
+torna a non accendersi (0,4% delle mosse ≥ 3), e con la tolleranza a due si incolla di nuovo al
+tetto (74,3%) anche con il passo corretto. La tabella completa, e il limite delle righe
+controfattuali, sono in `docs/GAMEPLAY_RULES.md`.
+
+Conseguenze sul codice: `nextChainLevel` è diventata `nextChainState`, che restituisce
+livello **e** digiuno; lo stato della partita ha un campo `chainDigiuno` in più, serializzato
+e validato; `respiroRimasto` espone la tolleranza residua e la barra della Catena la mostra
+come **avviso di ultima chiamata** quando la prossima mossa a vuoto farà calare il
+moltiplicatore — prima era una regola che il giocatore poteva solo dedurre.
+
+**Palette dei blocchi: da smorzata a satura**
+- Le sei famiglie cromatiche erano coerenti con la direzione minerale ma spente su schermo. I
+  blocchi sono l'unica cosa colorata dell'interfaccia: ora sono saturi, con la luminosità
+  scelta perché ognuno resti sopra 3:1 sul fondo della plancia **in entrambi i temi**.
+  Scuro: `#ff6a2b` `#12e1b0` `#9b4dff` `#ffc212` `#ff3d71` `#2e97ff`.
+- **Il tema chiaro è stato ridefinito per intero e misurato.** Prima ridefiniva solo fondali e
+  testi: il punteggio in ottone stava a **1.53:1** e **cinque blocchi su sei** sotto 3:1 sulla
+  plancia. Ora ha tinte proprie per blocchi, `--pl-brand`, `--pl-brand-deep`, `--pl-ok`,
+  `--pl-danger` e `--pl-cella-vuota`, e tutti e sei i blocchi passano (peggiore: 3.31).
+- Nuovo token `--pl-danger-fondo` (`#b81f47`): il pulsante che **cancella i dati del
+  giocatore** scriveva bianco su `--pl-danger`, cioè **2.94:1**. Adesso 6.32:1. `--pl-danger`
+  resta il colore del testo di allarme; il fondo è un token separato.
+- `--pl-text-faint` e la tinta delle celle libere: quest'ultima è diventata il token
+  `--pl-cella-vuota`, perché un velo bianco trasparente su fondo chiaro è invisibile.
+
+### Aggiunto
+
+**I Quadri: cento livelli con una mappa del percorso (`src/config/quadri.js`,
+`src/core/quadro.js`, `src/state/useQuadro.js`, `src/ui/schermate/Quadri.jsx`)**
+- Cento livelli in **sette atti** — Le basi (1-10), Il ritmo (11-24), Gli ostacoli (25-40),
+  La pressione (41-58), Il mestiere (59-76), La maestria (77-92), La vetta (93-100). Ogni
+  Quadro ha uno o più obiettivi, un tetto di mosse (da 12 a 40) e, dal 16° in poi, una griglia
+  di partenza già occupata: **85 Quadri su 100** partono da uno di **15 motivi** verificati.
+- Nove tipi di obiettivo: righe, colonne, quadranti, gruppi, Catena, Intreccio, punteggio,
+  celle e pulizia della griglia. Ruotano per atto, così due Quadri vicini non chiedono la
+  stessa cosa.
+- **I bersagli non sono inventati: sono calcolati.** `tools/taratura.mjs` (`npm run taratura`)
+  fa giocare ogni Quadro al pianificatore artificiale, senza obiettivo, e mette il bersaglio a
+  un percentile della distribuzione ottenuta — dal 14° percentile del primo atto al 56° della
+  Vetta. È la correzione di un difetto grave della prima stesura, in cui i bersagli erano
+  scritti a mano: un livello chiedeva **1500 punti dove in quelle mosse se ne fanno 325**, e
+  16 Quadri su 40 erano matematicamente impossibili.
+  - Lo strumento di taratura aveva a sua volta un difetto che lo rendeva inutile: il
+    pianificatore era completamente deterministico, quindi minimo, mediana e massimo
+    coincidevano su ogni Quadro e il percentile non misurava niente. Risolto rompendo i
+    pareggi con un pizzico di casualità.
+- Due motivi di griglia della prima stesura erano **ingiocabili** (celle isolate che nessun
+  pezzo può raggiungere). Il generatore ora valida ogni motivo: niente gruppi già completi
+  alla partenza, non più di 48 celle occupate, dimensione 9x9.
+- `src/config/quadri.js` è **generato** da `tools/genera-quadri.mjs` e non va modificato a
+  mano: il design (atti, rotazione degli obiettivi, motivi, tetti di mosse, percentili) vive
+  nel generatore, dove si può leggere come un discorso invece che come una tabella.
+- La mappa del percorso mostra gli atti, l'avanzamento e la tappa corrente, e si apre già
+  scorrendo al punto giusto. La vittoria di un Quadro si valuta **prima** della sconfitta,
+  così vincere all'ultima mossa disponibile conta come vittoria e non come mosse esaurite.
+- `tests/quadri.test.js`: 18 test su obiettivi, transizioni di stato, unicità e ordine dei
+  Quadri. `tests/e2e/quadri.mjs` (`npm run e2e-quadri`) calcola in Node una sequenza vincente
+  e poi la rigioca **trascinando davvero i pezzi** in un browser.
+
+**Plinto, il personaggio (`src/ui/Plinto.jsx`)**
+- Un blocco di pietra disegnato in SVG, con cinque espressioni (normale, contento, deluso,
+  stupito, addormentato) e un respiro di 3,2 secondi che si ferma con `prefers-reduced-motion`.
+  Prende i colori dai token, quindi segue il tema. Nessuna immagine, nessuna dipendenza.
+
+**Le bombe (`src/config/rules.js`, `src/core/grid.js`, `src/core/generator.js`,
+`src/core/engine.js`)**
+- Ogni tanto una cella di un pezzo è una bomba. Non fa niente sulla plancia: **esplode solo se
+  eliminata insieme al gruppo che la contiene**, e allora porta via il quadrato di raggio 1
+  attorno a sé. Le bombe colpite detonano a loro volta; quelle a distanza 2 no.
+- `BOMBA_PROBABILITA = 0.22`, estratta **una volta per mano**: mai due bombe nella stessa
+  terna, mai su un pezzo da una cella. La probabilità è **fissa** e non guarda punteggio,
+  Catena o andamento della partita — la stessa dichiarazione di equità del generatore.
+  Misurato su 40.697 mani: 22,2%.
+- Codifica in **un solo array**: il valore di una cella è il colore (1..6), una bomba è
+  colore + 10 (11..16). Salvataggi, copie e simulazioni restano quelli di prima.
+- Punteggio: `PUNTI_CELLA_ESPLOSA = 6` per ogni cella portata via oltre al gruppo, moltiplicata
+  per la Catena ma non per l'Intreccio. Una detonazione non conta come gruppo chiuso.
+- Segno visivo **geometrico e non cromatico**: un anello bianco al centro della cella, visibile
+  già nel tray. Il colore in PLINTO non porta informazione, e una bomba segnalata da una tinta
+  sarebbe invisibile a chi non distingue i colori.
+- `tests/bombe.test.js`: 14 test su codifica, raggio, reazione a catena, bordi, celle vuote,
+  punteggio e sopravvivenza al salvataggio.
+
+**Strumenti e controlli automatici**
+- `tools/schermate.mjs` (`npm run schermate`), `tools/icone.mjs` (`npm run icone`),
+  `tools/prova-sottocartella.mjs` (`npm run prova-pages`), `tools/prova-desktop.mjs`
+  (`npm run prova-desktop`), `tools/quadri.mjs` (`npm run quadri`). Descritti in
+  `docs/TESTING.md`.
+- `tests/e2e/precisione.mjs` (`npm run precisione`) e `tests/e2e/resistenza.mjs`
+  (`npm run soak`).
+- `tests/privacy.test.js`: la promessa "nessuna richiesta di rete" ora è verificata da un test
+  che legge i file del prodotto, invece di essere solo scritta in un documento.
+- `tests/script.test.js`: `node --check` su tutti gli script di `tools/`, `tests/e2e/` e
+  `src/sim/`, che nessun altro test importa.
+- `tests/durate.test.js` e `src/feel/durate.js`: le durate degli effetti vivono per forza in
+  CSS e in JavaScript, e ora un test fallisce se qualcuno ne cambia solo una.
+
+
 ## [0.1.0] — non ancora rilasciata
 
 Primo nucleo del progetto: il motore di gioco, il generatore, gli strumenti di misura,
-l'interfaccia, il game feel, l'accessibilità e la Sfida del Giorno. Il progetto compila
-(`npm run build` riesce), i **150 test unitari in 12 file** passano (misurato il 6 settembre
-2026 con `npm test`) e lo scenario `npm run e2e` guida un
+l'interfaccia, il game feel, l'accessibilità e la Sfida del Giorno. Il progetto compilava
+(`npm run build`), la suite unitaria di allora — **89 test in 7 file** — passava, e lo scenario
+`npm run e2e` guidava un
 browser reale attraverso primo avvio, partita con mouse, partita a due tocchi, partita da
 tastiera, eliminazione con particelle, ripresa dopo ricarica, game over e Sfida del Giorno.
 Restano fuori dalla verifica: dispositivi reali, tocco vero, audio e playtest umano. Da
@@ -137,87 +353,6 @@ considerarsi non rilasciabile.
 - `README.md` e i documenti in `docs/`: architettura, regole di gioco, sistema di design,
   test, questo changelog e il registro degli asset.
 
-### Cambiato
-
-**Il gioco si chiama PLINTO, non più QUADRA**
-- Il nome precedente era già usato da giochi esistenti nello stesso genere. Motivazioni e
-  verifica in `docs/DIFFERENZIAZIONE.md`.
-- La rinomina è passata anche per i nomi delle costanti. Un passaggio automatico aveva
-  trasformato `QUADRANT_SIZE` in `PLINTONT_SIZE`, sostituendo la sottostringa "QUADRA" dentro
-  una parola che non c'entrava: **corretto**, la costante si chiama di nuovo `QUADRANT_SIZE` e
-  i quadranti restano quadranti. Non restano tracce di "PLINTONT" nel codice né nei documenti.
-
-**La regola della Catena, riscritta due volte perché la misura diceva che non funzionava**
-
-Cronologia, con i numeri prodotti dal giocatore artificiale forte:
-
-1. *Versione originale.* La Catena saliva di **quanti gruppi** chiudeva la mossa e calava di
-   uno a **ogni** mossa che non eliminava nulla. Misurato: Catena ≥ 3 solo nel **2%** delle
-   mosse giocate, mai sopra 6. Il moltiplicatore che doveva essere la firma del gioco era
-   decorativo.
-2. *Seconda versione.* Due mosse di tolleranza prima del calo, crescita ancora pari al numero
-   di gruppi. Misurato: **93%** delle mosse con Catena attiva, ma **59,5%** giocate al tetto
-   massimo. Un moltiplicatore fisso è inutile esattamente quanto uno che non arriva mai.
-3. *Versione attuale.* La Catena sale di **uno** per mossa che elimina — non di quanti gruppi,
-   perché l'Intreccio li premia già e contarli due volte incollava la Catena al tetto — con
-   **una** mossa di tolleranza prima di calare (`CHAIN_STEP_UP = 1`, `CHAIN_GRACE = 1`).
-   Misurato: **79,5%** delle mosse con Catena attiva, **13,6%** al tetto, e la distribuzione
-   è piatta su tutti i livelli 0-9, fra il 6,0% e il 13,6% per livello.
-
-Conseguenze sul codice: `nextChainLevel` è diventata `nextChainState`, che restituisce
-livello **e** digiuno; lo stato della partita ha un campo `chainDigiuno` in più, serializzato
-e validato; `respiroRimasto` espone la tolleranza residua (per ora nessun componente la usa).
-
-**Palette dei blocchi: da smorzata a satura**
-- Le sei famiglie cromatiche erano coerenti con la direzione minerale ma spente su schermo. I
-  blocchi sono l'unica cosa colorata dell'interfaccia: ora sono saturi, con la luminosità
-  scelta perché ognuno resti sopra 3:1 sul fondo della plancia **in entrambi i temi**.
-  Scuro: `#ff6a2b` `#12e1b0` `#9b4dff` `#ffc212` `#ff3d71` `#2e97ff`.
-- **Il tema chiaro è stato ridefinito per intero e misurato.** Prima ridefiniva solo fondali e
-  testi: il punteggio in ottone stava a **1.53:1** e **cinque blocchi su sei** sotto 3:1 sulla
-  plancia. Ora ha tinte proprie per blocchi, `--pl-brand`, `--pl-brand-deep`, `--pl-ok`,
-  `--pl-danger` e `--pl-cella-vuota`, e tutti e sei i blocchi passano (peggiore: 3.31).
-- Nuovo token `--pl-danger-fondo` (`#b81f47`): il pulsante che **cancella i dati del
-  giocatore** scriveva bianco su `--pl-danger`, cioè **2.94:1**. Adesso 6.32:1. `--pl-danger`
-  resta il colore del testo di allarme; il fondo è un token separato.
-- `--pl-text-faint` e la tinta delle celle libere: quest'ultima è diventata il token
-  `--pl-cella-vuota`, perché un velo bianco trasparente su fondo chiaro è invisibile.
-
-### Aggiunto dopo il primo nucleo
-
-**Le bombe (`src/config/rules.js`, `src/core/grid.js`, `src/core/generator.js`,
-`src/core/engine.js`)**
-- Ogni tanto una cella di un pezzo è una bomba. Non fa niente sulla plancia: **esplode solo se
-  eliminata insieme al gruppo che la contiene**, e allora porta via il quadrato di raggio 1
-  attorno a sé. Le bombe colpite detonano a loro volta; quelle a distanza 2 no.
-- `BOMBA_PROBABILITA = 0.22`, estratta **una volta per mano**: mai due bombe nella stessa
-  terna, mai su un pezzo da una cella. La probabilità è **fissa** e non guarda punteggio,
-  Catena o andamento della partita — la stessa dichiarazione di equità del generatore.
-  Misurato su 40.697 mani: 22,2%.
-- Codifica in **un solo array**: il valore di una cella è il colore (1..6), una bomba è
-  colore + 10 (11..16). Salvataggi, copie e simulazioni restano quelli di prima.
-- Punteggio: `PUNTI_CELLA_ESPLOSA = 6` per ogni cella portata via oltre al gruppo, moltiplicata
-  per la Catena ma non per l'Intreccio. Una detonazione non conta come gruppo chiuso.
-- Segno visivo **geometrico e non cromatico**: un anello bianco al centro della cella, visibile
-  già nel tray. Il colore in PLINTO non porta informazione, e una bomba segnalata da una tinta
-  sarebbe invisibile a chi non distingue i colori.
-- `tests/bombe.test.js`: 14 test su codifica, raggio, reazione a catena, bordi, celle vuote,
-  punteggio e sopravvivenza al salvataggio.
-
-**Strumenti e controlli automatici**
-- `tools/schermate.mjs` (`npm run schermate`), `tools/icone.mjs` (`npm run icone`),
-  `tools/prova-sottocartella.mjs` (`npm run prova-pages`), `tools/prova-desktop.mjs`
-  (`npm run prova-desktop`), `tools/quadri.mjs` (`npm run quadri`). Descritti in
-  `docs/TESTING.md`.
-- `tests/e2e/precisione.mjs` (`npm run precisione`) e `tests/e2e/resistenza.mjs`
-  (`npm run soak`).
-- `tests/privacy.test.js`: la promessa "nessuna richiesta di rete" ora è verificata da un test
-  che legge i file del prodotto, invece di essere solo scritta in un documento.
-- `tests/script.test.js`: `node --check` su tutti gli script di `tools/`, `tests/e2e/` e
-  `src/sim/`, che nessun altro test importa.
-- `tests/durate.test.js` e `src/feel/durate.js`: le durate degli effetti vivono per forza in
-  CSS e in JavaScript, e ora un test fallisce se qualcuno ne cambia solo una.
-
 ### Deciso durante lo sviluppo (bilanciamento)
 
 - La prima versione del generatore imponeva che ogni pezzo avesse almeno **4 posizioni valide**
@@ -247,31 +382,27 @@ e validato; `respiroRimasto` espone la tolleranza residua (per ora nessun compon
 
 ### Noto e non risolto
 
-- I profili di simulazione `esperto` e `normale` producono risultati praticamente identici
-  (media 1443 contro 1393, mediana 1082 contro 1030). Non è ancora chiaro se il difetto sia
-  nell'euristica del giocatore artificiale o nel gioco, che potrebbe non premiare abbastanza la
-  strategia. Misura in corso con il profilo `stratega`; vedi `docs/TESTING.md`.
+- I profili di simulazione `esperto` e `normale` producono risultati molto vicini. La domanda
+  è però risultata mal posta: confrontarli a partite libere confonde chi gioca *meglio* con chi
+  sopravvive *di più*. A parità di occasioni (tetto di mosse) il salto vero è fra scegliere una
+  mossa alla volta e pianificare tutta la terna. Vedi `docs/TESTING.md`.
+- **Le misure di bilanciamento vanno rifatte a ogni cambio di regole, e non sempre è stato
+  fatto subito.** L'arrivo delle bombe e la nuova Catena hanno spostato di molto la durata e il
+  punteggio delle partite simulate: i numeri citati nei documenti valgono per la revisione in
+  cui sono stati presi, ed è per questo che ognuno riporta profilo, numero di partite e data.
 - L'interfaccia è coperta **solo** dallo scenario `npm run e2e`, che è un percorso felice: non
   esistono test unitari sui componenti né un ambiente di test con DOM.
 - Lo scenario e2e usa il mouse, quindi il ramo del trascinamento pensato per il tocco (il
   pezzo che si solleva sopra il dito) non viene mai eseguito. Il percorso di Chromium è inoltre
   scritto nel file e va corretto a mano su un'altra macchina.
-- Nel tema chiaro `--pl-text-faint` resta a **4.27:1** sul fondo pagina e **4.19:1** sui
-  pannelli, sotto la soglia AA di 4.5. È l'ultimo contrasto non conforme rimasto; il resto
-  del tema chiaro è stato ridefinito e misurato. Vedi `docs/DESIGN_SYSTEM.md`, sezione 3.
-- Il commento di `tokens.css` sui testi del tema chiaro dichiara «15.9, 7.7 e 4.5 su
-  `--pl-ink`»: i valori misurati sono 15.65, 6.48 e 4.27.
-- `public/icon.svg` ha ancora i colori della palette smorzata, quindi l'icona e il marchio
-  disegnato nel gioco non coincidono più.
-- Il bersaglio tattile del pezzo da una cella nel tray misura 34 × 34 px su un viewport da
-  390 px (29 × 29 su 360 px), sotto i 44 px raccomandati.
-- `prefers-reduced-motion` ora riduce anche le animazioni a fotogrammi chiave (usano i token
-  di durata) e spegne le due animazioni infinite. **Restano** le particelle sul canvas, che
-  non passano dal CSS: per quelle serve l'impostazione "Animazioni".
-- Alcuni testi sono ancora scritti nel JSX invece che nei dizionari (etichetta accessibile dei
-  pezzi nel tray, note di `Info.jsx` e `Sostieni.jsx`) e restano in italiano anche scegliendo
-  l'inglese; i numeri usano `toLocaleString('it-IT')` fisso.
-- `suonoRecord()` è definito e importato in `App.jsx` ma non viene mai chiamato: il suono del
-  nuovo record non si sente.
+- `prefers-reduced-motion` riduce le animazioni a fotogrammi chiave e spegne le tre animazioni
+  infinite. Le particelle sul canvas non passano dal CSS e restano fuori dalla sua portata: la
+  preferenza di sistema è ora letta anche da JavaScript e decide il valore **iniziale**
+  dell'impostazione "Animazioni", che le spegne davvero. Chi le vuole comunque le riaccende, e
+  la sua scelta salvata vince sulla preferenza di sistema.
 - Il link di donazione in `src/config/progetto.js` è volutamente vuoto e va inserito a mano
   dal proprietario del progetto.
+- La verifica professionale del nome PLINTO (marchi e negozi di applicazioni) non è stata
+  fatta: `docs/DIFFERENZIAZIONE.md` non afferma e non può affermare che il nome sia libero.
+- Nessun playtest umano e nessuna prova su un dispositivo fisico. Tutte le misure di questo
+  documento vengono da giocatori artificiali e da un browser guidato da script.

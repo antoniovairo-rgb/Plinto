@@ -21,6 +21,9 @@ npm run schermate      # immagini per gli store, generate dal gioco vero
 npm run icone          # icone PNG rigenerate da public/icon.svg
 npm run prova-pages    # build servita da una sottocartella (caso GitHub Pages)
 npm run prova-desktop  # aspetto su schermi grandi
+npm run contrasti      # rimisura i contrasti WCAG leggendo tokens.css
+npm run catena         # distribuzione della Catena, e confronto con le regole scartate
+npm run taratura       # ricalcola i bersagli dei Quadri facendoli giocare
 ```
 
 Il simulatore accetta tre argomenti posizionali — **numero di partite**, **profilo** e
@@ -42,7 +45,7 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **150 test in 12 file, tutti verdi**, durata ~12.3 s (misurato il 6 settembre
+`npm test`: **161 test in 14 file, tutti verdi**, durata ~12.5 s (misurato il 6 settembre
 2026). Undici e mezzo di quei secondi sono tutti in `invarianti.test.js`, che gioca 240
 partite complete: è il costo di quel file, non un rallentamento della suite.
 
@@ -54,15 +57,17 @@ dall'ultima esecuzione registrata e non da questa revisione.
 | --- | --- | --- |
 | `tests/grid.test.js` | 19 | geometria della griglia e dei quadranti (3); posizionamento — bordi, coordinate negative, sovrapposizioni, immutabilità di `placeShape`, errore su cella occupata, conteggio ed elenco delle posizioni valide (9); eliminazione di riga, colonna e quadrante, i tre tipi insieme, cella d'incrocio svuotata una volta sola, round-trip `gridFromString`/`gridToString` (7) |
 | `tests/engine.test.js` | 26 | creazione della partita e determinismo del seed, seed testuale (3); mosse — immutabilità dello stato, rifiuto delle mosse illegali, coerenza fra `canPlaceHandPiece` e `placePiece`, ricarica della mano solo a terna esaurita (4); punteggio in partita — riga, quadrante, decadimento della Catena, bonus di svuotamento, contenuto di `lastMove` (5); fine partita, incluse partite casuali complete senza cicli infiniti (4); serializzazione, ripresa identica e rifiuto dei salvataggi corrotti (3); `summarize` (1); **robustezza dei salvataggi manomessi** — punteggio non numerico, stato inventato, Catena fuori scala, griglia con valori impossibili, stato del generatore mancante (5); determinismo della durata a parità di seed (1) |
-| `tests/generator.test.js` | 15 | determinismo e varietà fra seed diversi (2); forma della terna, limite di forme ripetute, unicità degli identificativi (3); pressione da affollamento e memoria dello storico (4); le reti di sicurezza, **compreso un test che verifica che sopra la soglia il game over resti possibile** (4); integrità del catalogo e normalizzazione delle forme (2). Nessun test copre `forseUnaBomba`: la frequenza delle bombe è verificata solo per simulazione (vedi più sotto) |
+| `tests/generator.test.js` | 15 | determinismo e varietà fra seed diversi (2); forma della terna, limite di forme ripetute, unicità degli identificativi (3); pressione da affollamento e memoria dello storico (4); le reti di sicurezza, **compreso un test che verifica che sopra la soglia il game over resti possibile** (4); integrità del catalogo e normalizzazione delle forme (2) |
 | `tests/scoring.test.js` | 19 | Catena — crescita di **uno** per mossa che elimina e non per gruppo chiuso, tetto, tolleranza di una mano, azzeramento del digiuno dopo un'eliminazione, calo di uno invece dell'azzeramento, pavimento a zero, `respiroRimasto` (9); Intreccio (2); punteggio di una mossa, moltiplicatore "quello che vedevi prima di muovere", bonus di svuotamento, punteggio sempre intero e non negativo (6); livello di celebrazione `moveTier` (2) |
-| `tests/bombe.test.js` | 14 | codifica colore+10 nella griglia, andata e ritorno fra colore e bomba (3); detonazione — quadrato 3x3, bombe adiacenti che si innescano, **bombe a distanza 2 che NON si innescano**, ritaglio sul bordo, celle vuote non toccate, nessuna bomba nessun effetto (6); in partita — una bomba appoggiata non esplode, una bomba eliminata con la riga porta via i vicini, i punti delle celle saltate seguono la Catena, celebrazione più alta, sopravvivenza a salvataggio e ripristino (5) |
-| `tests/durate.test.js` | 4 | i tre token di durata di `tokens.css` coincidono con le costanti di `src/feel/durate.js`; nessuna `animation:` del foglio di stile scrive una durata a mano |
+| `tests/bombe.test.js` | 20 | codifica colore+10 nella griglia, andata e ritorno fra colore e bomba (3); detonazione — quadrato 3x3, bombe adiacenti che si innescano, **bombe a distanza 2 che NON si innescano**, ritaglio sul bordo, celle vuote non toccate, nessuna bomba nessun effetto (6); in partita — una bomba appoggiata non esplode, una bomba eliminata con la riga porta via i vicini, i punti delle celle saltate seguono la Catena, celebrazione più alta, sopravvivenza a salvataggio e ripristino (5); **generazione** — mai più di una bomba per mano, mai su un pezzo da una cella, indice sempre dentro il pezzo, frequenza osservata pari a `BOMBA_PROBABILITA` su 3000 mani, **frequenza invariata con la griglia quasi piena** (cioè non è una leva sulla difficoltà) e sequenza identica a parità di seme (6) |
+| `tests/durate.test.js` | 4 | i tre token di durata di `tokens.css` coincidono con le costanti di `src/feel/durate.js`; nessuna `animation:` del foglio di stile scrive una durata a mano fuori dalle tre animazioni infinite dichiarate, e per ognuna di quelle il selettore che la porta deve ricomparire con `animation: none` sotto `prefers-reduced-motion`. La falla precedente — l'espressione regolare vedeva solo durate intere, quindi `1.6s` e `3.2s` le sfuggivano — è chiusa |
 | `tests/privacy.test.js` | 5 | nessun file del prodotto apre una connessione di rete; l'unico dominio esterno è PayPal e sta solo nel file di configurazione; la pagina non carica font o fogli di stile esterni; tutte le chiavi salvate stanno sotto un unico prefisso dichiarato; più un test che verifica che il controllo esamini davvero dei file |
-| `tests/script.test.js` | 14 | `node --check` su ogni script di `tools/`, `tests/e2e/` e `src/sim/` — cioè su tutto il codice eseguibile che **nessun altro test importa**; più un test che verifica che l'elenco non sia vuoto |
+| `tests/script.test.js` | 16 | `node --check` su ogni script di `tools/`, `tests/e2e/` e `src/sim/` — cioè su tutto il codice eseguibile che **nessun altro test importa**; più un test che verifica che l'elenco non sia vuoto |
 | `tests/quadri.test.js` | 18 | definizione dei Quadri (griglie iniziali ben formate, nessun gruppo già completo, almeno un pezzo piazzabile) e svolgimento del percorso (sblocco progressivo, conservazione del risultato migliore, conteggio dei tentativi) |
 | `tests/i18n.test.js` | 7 | parità delle chiavi fra italiano e inglese; nessuna traduzione vuota; una chiave inesistente restituisce la chiave; una lingua sconosciuta ricade sull'italiano; i segnaposto `{r}` e `{c}` dell'etichetta di cella esistono in tutte le lingue; **nessuna chiave definita e mai usata**; **nessuna chiave usata e mai definita** |
 | `tests/sfide.test.js` | 6 | Sfida del Giorno — formato della data **locale e non UTC** (compreso il caso delle 23:30, in cui UTC sarebbe già il giorno dopo); stessa partita a parità di giorno e partite diverse fra giorni diversi; conservazione del solo miglior punteggio di giornata; un giorno mai giocato non vale zero per errore; ordinamento dello storico; potatura dello storico a 60 giorni |
+| `tests/contrasti.test.js` | 1 | esegue `tools/contrasti.mjs`, che rimisura **tutti** i contrasti WCAG leggendo `tokens.css` ed esce con errore se anche uno solo scende sotto soglia (4.5:1 per il testo, 3:1 per i blocchi), su entrambi i temi e sul fondo più sfavorevole di ciascuno. Nasce da un difetto ripetuto due volte: contrasti dichiarati in un commento e mai misurati |
+| `tests/icona.test.js` | 2 | `public/icon.svg` usa gli stessi colori del marchio disegnato nel gioco e ne conserva la geometria. L'icona è un file statico e non vede i token: senza questo controllo la sua palette resta indietro in silenzio, come è già successo per due versioni |
 | `tests/invarianti.test.js` | 3 | invarianti su partite intere — 240 partite giocate fino al game over con mosse casuali (1); 12 partite in cui **ogni singolo stato attraversato** viene serializzato e ripristinato e confrontato (1); 400 seed in cui la prima mano non è mai già morta (1) |
 
 `tests/sfide.test.js` è l'unico file che tocca la persistenza, e ci riesce costruendo un
@@ -189,6 +194,8 @@ quindi anche su un'altra macchina senza modifiche (variabile `PLINTO_CHROMIUM` p
 | `tools/icone.mjs` | `npm run icone` | rigenera in `public/icone/` i sei PNG richiesti dalle piattaforme (192, 512, maskable 512 con margine del 12%, apple 180, 1024 per le schede degli store, favicon 32) a partire dall'**unica** fonte `public/icon.svg`. Tenere sei PNG disegnati a mano significa che prima o poi cinque saranno aggiornati e uno no |
 | `tools/prova-sottocartella.mjs` | `npm run prova-pages` | fa `npm run build`, serve `dist/` da `/plinto/` con un server HTTP scritto sul posto e verifica che il gioco funzioni **da una sottocartella** e non solo dalla radice di un dominio. Controlla presentazione, 81 celle, una mossa vera col mouse, `manifest.webmanifest`, `icon.svg` e `icone/icona-192.png` raggiungibili, e che **nessuna richiesta finisca alla radice del dominio**. È un caso che si rompe in silenzio: con i percorsi assoluti la pagina si apre bianca su GitHub Pages e nessun test che gira in locale se ne accorge |
 | `tools/prova-desktop.mjs` | `npm run prova-desktop` | apre il gioco su quattro schermi grandi (1631 × 1030, 1920 × 1200, 1440 × 700, 820 × 1180) e misura una cosa concreta e non opinabile: **quanti pixel di vuoto** restano fra la fine del contenuto della presentazione e il pulsante GIOCA. Oltre 180 px è un errore. Poi entra in partita e controlla che la plancia non sia più bassa di 240 px. Salva una schermata per ciascuno |
+| `tools/contrasti.mjs` | `npm run contrasti` | ricalcola **tutti** i rapporti di contrasto WCAG leggendo `src/styles/tokens.css`, su entrambi i temi e sul fondo più sfavorevole di ciascuno, ed esce con codice 1 se anche uno solo scende sotto soglia (4.5:1 per il testo, 3:1 per i blocchi). Lo esegue anche `tests/contrasti.test.js`, quindi gira a ogni `npm test`. Esiste perché lo stesso difetto — contrasti dichiarati in un commento e mai misurati — si era già presentato due volte |
+| `tools/misura-catena.mjs` | `npm run catena [partite] [tetto]` | fa giocare lo `stratega` e registra, mossa per mossa, quanti gruppi ha chiuso; poi **rigioca quella stessa sequenza** con la regola attuale della Catena e con le quattro varianti scartate, e ne stampa la distribuzione dei livelli. Produce i numeri citati nei commenti di `CHAIN_GRACE` e `CHAIN_STEP_UP` e nella sezione "Le tre versioni" di `GAMEPLAY_RULES.md`. **Limite dichiarato nel file stesso**: le partite sono giocate con la regola attuale e lo stratega guarda il livello di Catena quando sceglie, quindi solo la riga della regola attuale è una misura esatta; le altre sono controfattuali |
 | `tools/quadri.mjs` | `npm run quadri [tentativi]` | misura la **difficoltà reale** di ogni Quadro facendolo giocare più volte a un giocatore artificiale che conosce l'obiettivo del livello e ci mira. Stampa per ogni quadro la percentuale di riuscite, le mosse medie e il motivo dei fallimenti; in fondo, i quadri mai superati, quelli sempre superati oltre i primi sei e la curva delle riuscite per gruppi di dieci. Serve a leggere la **curva**, non a stabilire una verità assoluta |
 
 Una nota sul metro di `tools/quadri.mjs`, perché è una lezione riusabile: la prima versione
@@ -260,33 +267,45 @@ di ogni mossa viene sommato un rumore casuale in `[0, 0.5)` per rompere i paregg
 Ottenuti con `node src/sim/run.mjs`. Il seed dell'harness è fisso (`20260906`), quindi le serie
 sono ripetibili.
 
+**Tutte le serie qui sotto sono state rieseguite il 6 settembre 2026**, cioè dopo l'arrivo
+delle bombe e della Catena attuale. I valori precedenti erano molto più bassi (mediana 1030
+punti e 83 mosse per il profilo `normale`) e vanno considerati superati: le due modifiche
+insieme hanno allungato molto le partite. È il motivo per cui ogni tabella di questo documento
+porta profilo, numero di partite e data.
+
 ### Punteggio
 
 | Profilo | Partite | Media | p10 | Mediana | p90 | Max |
 | --- | --- | --- | --- | --- | --- | --- |
-| casuale | 1500 | 112 | — | 83 | — | 613 |
-| normale | 1200 | 1393 | 270 | 1030 | 3024 | 10281 |
-| esperto | 500 | 1443 | — | 1082 | — | 9701 |
+| casuale | 1500 | 119 | 46 | 86 | 239 | 748 |
+| normale | 1200 | 7289 | 863 | 4652 | 17200 | 64101 |
+| esperto | 500 | 7178 | 818 | 4327 | 17519 | 66378 |
 
 ### Mosse per partita
 
 | Profilo | Partite | Media | p10 | Mediana | p90 | Max |
 | --- | --- | --- | --- | --- | --- | --- |
-| casuale | 1500 | 19 | — | 17 | — | 58 |
-| normale | 1200 | 110 | 29 | 83 | 226 | 755 |
-| esperto | 500 | 113 | — | 86 | — | 698 |
+| casuale | 1500 | 19 | 13 | 17 | 26 | 65 |
+| normale | 1200 | 289 | 59 | 205 | 629 | 2243 |
+| esperto | 500 | 285 | 56 | 187 | 656 | 2360 |
 
 ### Altri indicatori (profilo "normale", 1200 partite)
 
 | Indicatore | Valore |
 | --- | --- |
-| Catena massima raggiunta | mediana 3, massimo 8 (su un tetto teorico di 9) |
+| Catena massima raggiunta | mediana **9**, cioè il tetto (prima della modifica: mediana 3, massimo 8) |
 | Riempimento al game over | mediana 51%, minimo 25% |
-| Partite finite sotto le 15 mosse | 1.5% |
+| Partite finite sotto le 15 mosse | 0.3% (3 partite su 1200) |
 | Partite finite sotto le 8 mosse | 0.00% |
-| Svuotamenti completi della griglia | 45 in 1200 partite |
+| Svuotamenti completi della griglia | 46 in 1200 partite |
 
-Il riempimento mediano al game over dell'esperto è **51%**, identico a quello del normale.
+Il riempimento mediano al game over dell'esperto è **51%**, identico a quello del normale: su
+questo indicatore le due euristiche restano indistinguibili.
+
+**Un numero da leggere con attenzione: la Catena massima ha mediana 9.** Vuol dire che in più
+di metà delle partite il giocatore artificiale tocca il tetto almeno una volta. Non è la stessa
+cosa che *giocare* al tetto — la distribuzione mossa per mossa è più sotto — ma è un indizio
+che, con partite tanto più lunghe, il tetto di 9 sia meno lontano di quanto fosse pensato.
 
 ### La Catena e le bombe
 
@@ -297,18 +316,33 @@ Catena **applicata** a ogni mossa (cioè `state.chain` prima della mossa) e legg
 `lastMove.bombeDetonate` e `state.stats`. Chi le rifà deve dichiarare profilo e numero di
 partite: **le serie prodotte da profili diversi non sono confrontabili cifra per cifra.**
 
-Rimisura del 6 settembre 2026, profilo `esperto`, 300 partite, 90.827 mosse — distribuzione
-della Catena applicata:
+Due serie misurate il 6 settembre 2026, entrambe contando la Catena **applicata** alla mossa:
+
+| Serie | Mosse | Catena ≥ 1 | Catena ≥ 3 | Al tetto (9) |
+| --- | --- | --- | --- | --- |
+| `stratega`, 120 partite, tetto 250 mosse, **`npm run catena`** | 29.825 | 94.4% | 75.4% | **15.0%** |
+| `stratega`, 120 partite, tetto 250 mosse, script estemporaneo, altro seme | 29.884 | 94.6% | 77.6% | 13.6% |
+| `esperto`, 300 partite, senza tetto | 90.827 | 95.2% | 84.1% | 17.8% |
+
+Distribuzione completa della prima serie, che ora è la **fonte riproducibile**: la produce
+`tools/misura-catena.mjs` con un seme fisso, quindi chiunque riesegua `npm run catena` ottiene
+queste cifre e non altre.
 
 | Livello | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Quota mosse | 4.8% | 5.2% | 5.8% | 6.9% | 7.8% | 9.9% | 12.4% | 14.1% | 15.2% | 17.8% |
+| Quota mosse | 5.6% | 9.9% | 9.1% | 8.8% | 8.3% | 8.2% | 8.8% | 11.8% | 14.4% | **15.0%** |
 
-Mosse con Catena attiva: **95.2%**. Mosse al tetto: **17.8%**. Sono valori più alti di quelli
-citati in `docs/GAMEPLAY_RULES.md` per la regola attuale (79,5% e 13,6%), che vengono dal
-giocatore forte su 120 partite: **la conclusione qualitativa è la stessa** — la Catena è
-distribuita su tutta la scala e non incollata al tetto come nella seconda versione della
-regola, dove il 59,5% delle mosse si giocava a 9 — ma le due cifre non vanno mescolate.
+**Le prime due righe misurano la stessa cosa su semi diversi**, e la differenza fra 13.6% e
+15.0% al tetto è utile proprio per questo: dice quanta variazione ci si deve aspettare fra due
+campioni da 120 partite. Una differenza di un punto e mezzo su questo indicatore **non è un
+cambio di comportamento del gioco**, ed è la ragione per cui una regola non va scelta su uno
+scarto di quell'ordine. Le conclusioni della sezione "Le tre versioni" di `GAMEPLAY_RULES.md`
+poggiano invece su differenze da 0,4% a 77%, che nessun seme può produrre per caso.
+
+Non si riproduce invece il valore di "mosse con Catena attiva" che circolava insieme alla
+misura originale (79,5%): con la soglia ≥ 1 viene 94.4%, con la soglia ≥ 3 viene 75.4%. Le due
+cifre contavano presumibilmente cose diverse — ed è la ragione per cui qui la soglia è sempre
+dichiarata.
 
 Bombe, profilo `normale`, 400 partite (40.697 mani, 121.636 mosse):
 
@@ -374,11 +408,13 @@ rovinando il gioco.
 
 ### Il caso chiuso: "esperto ≈ normale", e perché la domanda era mal posta
 
-**Il problema.** A partite libere i due profili producevano risultati indistinguibili: media
-1393 contro 1443, mediana 1030 contro 1082, mosse mediane 83 contro 86, riempimento mediano al
-game over 51% in entrambi i casi. Le due spiegazioni possibili erano che l'euristica
-dell'"esperto" non fosse davvero migliore (difetto del simulatore) o che il gioco non premiasse
-la strategia (difetto di bilanciamento).
+**Il problema.** A partite libere i due profili producono risultati indistinguibili. Con le
+misure rifatte il 6 settembre 2026: media 7289 contro 7178, mediana 4652 contro 4327, mosse
+mediane 205 contro 187, riempimento mediano al game over 51% in entrambi i casi. (Prima delle
+bombe e della Catena attuale i valori assoluti erano molto più bassi — mediana 1030 contro
+1082 — ma la vicinanza fra i due profili era la stessa.) Le due spiegazioni possibili erano che
+l'euristica dell'"esperto" non fosse davvero migliore (difetto del simulatore) o che il gioco
+non premiasse la strategia (difetto di bilanciamento).
 
 **La misura era viziata.** Confrontare profili a partite libere confonde due cose: il giocatore
 più bravo segna di più anche solo perché **sopravvive** più a lungo, e dal punteggio totale non
@@ -390,28 +426,29 @@ occasioni:
 node src/sim/run.mjs 100 esperto 150
 ```
 
-**A 150 mosse, 100 partite per profilo** (misure rieseguite il 6 settembre 2026):
+**A 150 mosse, 100 partite per profilo**, misure rieseguite il 6 settembre 2026 con
+`node src/sim/run.mjs 100 <profilo> 150`:
 
-| Profilo | Ancora vivo al tetto | Punteggio mediano | Gruppi chiusi (mediana) |
-| --- | --- | --- | --- |
-| `casuale` | 0% | 79 | 1 |
-| `normale` | 50% | 1906 | 55 |
-| `esperto` | 55% | 1934 | 56 |
-| `stratega` | 99% | 2142 | 60 |
+| Profilo | Ancora vivo al tetto | Punteggio mediano | Gruppi chiusi (mediana) | Riemp. mediano a fine serie |
+| --- | --- | --- | --- | --- |
+| `casuale` | 0% | 92 | 1 | 63% |
+| `normale` | 56% | 2947 | 55 | 37% |
+| `esperto` | 53% | 2978 | 55 | 38% |
+| `stratega` | **99%** | 3519 | 59 | **17%** |
 
-**Come si legge.** Il divario vero non è fra euristiche diverse — `normale` ed `esperto`
-restano a cinque punti percentuali di distanza — ma fra **scegliere una mossa alla volta e
-pianificare tutti e tre i pezzi insieme**: lo `stratega` quasi raddoppia la sopravvivenza.
-La conclusione è che la profondità strategica di PLINTO esiste già ed è intrinseca alla mano da
-tre; non serve aggiungere meccaniche per crearla.
+**Come si legge.** Il divario vero non è fra euristiche diverse — `normale` ed `esperto` sono
+ormai indistinguibili anche qui, e l'`esperto` sopravvive perfino un po' meno — ma fra
+**scegliere una mossa alla volta e pianificare tutti e tre i pezzi insieme**: lo `stratega`
+quasi raddoppia la sopravvivenza. La conclusione è che la profondità strategica di PLINTO
+esiste già ed è intrinseca alla mano da tre; non serve aggiungere meccaniche per crearla.
 
 Un dato secondario che conferma la lettura: il riempimento mediano della griglia alla fine
-delle 150 mosse scende dal 40% dei due profili avidi al **20%** dello `stratega`. Chi pianifica
-non fa solo più punti: tiene la griglia più vuota, ed è per questo che sopravvive.
+delle 150 mosse scende dal 37-38% dei due profili avidi al **17%** dello `stratega`. Chi
+pianifica non fa solo più punti: tiene la griglia più vuota, ed è per questo che sopravvive.
 
-Tutte e quattro le righe sono state rimisurate eseguendo `node src/sim/run.mjs 100 <profilo>
-150` e coincidono con i valori dichiarati dal commit. La serie dello `stratega` è di gran lunga
-la più lenta (beam search su ogni terna): va messa in conto qualche minuto.
+La serie dello `stratega` è di gran lunga la più lenta (beam search su ogni terna): le 100
+partite da 150 mosse hanno richiesto **circa 7 minuti e mezzo**, contro i 3,5 secondi
+dell'`esperto` e i 130 millisecondi del `casuale`. Va messo in conto.
 
 **Una correzione già fatta, che una versione precedente di questo documento dava ancora per
 aperta.** La funzione `nearCompletions` in `src/sim/player.mjs` — quella che misura le

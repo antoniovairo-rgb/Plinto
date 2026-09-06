@@ -5,7 +5,11 @@ import {
 } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
 import { scoreMove } from '../src/core/scoring.js';
-import { PUNTI_CELLA_ESPLOSA, COLOR_COUNT, VALORE_BOMBA } from '../src/config/rules.js';
+import { generateHand } from '../src/core/generator.js';
+import { createRng } from '../src/core/rng.js';
+import {
+  PUNTI_CELLA_ESPLOSA, COLOR_COUNT, VALORE_BOMBA, BOMBA_PROBABILITA,
+} from '../src/config/rules.js';
 
 /** Stato di prova con griglia e mano scelte a mano. */
 function scenario(gridText, pezzi) {
@@ -170,5 +174,86 @@ describe('le bombe in partita', () => {
       .toEqual(dopo.hand.map((p) => p?.bombe ?? null));
     // La bomba deve essere ancora una bomba anche dopo il giro in JSON.
     expect(eBomba(ripristinato.grid[idx(0, 1)])).toBe(true);
+  });
+});
+
+
+/**
+ * Generazione delle bombe.
+ *
+ * La detonazione era coperta da test fin dal primo giorno; la REGOLA CHE DECIDE QUANDO
+ * arriva una bomba, no. Ed e' quella che porta la promessa piu' importante del gioco:
+ * la probabilita' e' fissa e non guarda come sta andando la partita. Una promessa di
+ * equita' senza test e' un'opinione, quindi qui si misura.
+ */
+describe('generazione delle bombe', () => {
+  /** Estrae molte mani da griglie diverse e raccoglie le bombe uscite. */
+  function mani(quante, grigliaTesto = VUOTA) {
+    const grid = gridFromString(grigliaTesto);
+    const risultati = [];
+    let stato = createRng(20240601).state;
+    let storia = [];
+    for (let i = 0; i < quante; i += 1) {
+      const mano = generateHand(grid, stato, storia);
+      stato = mano.rngState;
+      storia = mano.history;
+      risultati.push(mano.pieces);
+    }
+    return risultati;
+  }
+
+  const CAMPIONE = mani(3000);
+
+  it('mai piu di una bomba per mano', () => {
+    for (const pezzi of CAMPIONE) {
+      const conBombe = pezzi.filter((p) => (p.bombe?.length ?? 0) > 0);
+      expect(conBombe.length).toBeLessThanOrEqual(1);
+      for (const p of conBombe) expect(p.bombe.length).toBe(1);
+    }
+  });
+
+  it('mai su un pezzo da una cella sola: sarebbe una bomba senza decisioni', () => {
+    for (const pezzi of CAMPIONE) {
+      for (const p of pezzi) {
+        if ((p.bombe?.length ?? 0) > 0) expect(p.shape.size).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it('la bomba sta sempre dentro il pezzo che la porta', () => {
+    for (const pezzi of CAMPIONE) {
+      for (const p of pezzi) {
+        for (const cella of p.bombe ?? []) {
+          expect(cella).toBeGreaterThanOrEqual(0);
+          expect(cella).toBeLessThan(p.shape.size);
+        }
+      }
+    }
+  });
+
+  it('la frequenza osservata corrisponde a BOMBA_PROBABILITA', () => {
+    const conBomba = CAMPIONE.filter((pezzi) => pezzi.some((p) => (p.bombe?.length ?? 0) > 0));
+    const osservata = conBomba.length / CAMPIONE.length;
+    // Su 3000 mani lo scarto tipo e' circa 0,0076: due punti percentuali di
+    // tolleranza sono abbondanti e non nascondono un errore vero di regolazione.
+    expect(Math.abs(osservata - BOMBA_PROBABILITA)).toBeLessThan(0.02);
+  });
+
+  it('la frequenza non cambia con la griglia piena: non e una leva sulla difficolta', () => {
+    // Riempimento molto alto: se il generatore "aiutasse" o "punisse" in base a come
+    // sta andando la partita, e' qui che si vedrebbe.
+    const piena = [
+      '#########', '#########', '#########', '#########', '#########',
+      '########.', '########.', '########.', '.........',
+    ].join('\n');
+    const conGrigliaPiena = mani(1500, piena)
+      .filter((pezzi) => pezzi.some((p) => (p.bombe?.length ?? 0) > 0)).length / 1500;
+    expect(Math.abs(conGrigliaPiena - BOMBA_PROBABILITA)).toBeLessThan(0.035);
+  });
+
+  it('a parita di seme la sequenza di bombe e identica', () => {
+    const primo = mani(200).map((pezzi) => pezzi.map((p) => (p.bombe ?? []).join(',')).join('|'));
+    const secondo = mani(200).map((pezzi) => pezzi.map((p) => (p.bombe ?? []).join(',')).join('|'));
+    expect(primo).toEqual(secondo);
   });
 });

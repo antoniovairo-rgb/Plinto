@@ -6,7 +6,7 @@
 > numerico è stato ricalcolato eseguendo il codice. Fotografia del 6 settembre 2026.
 >
 > Avvertenza: quello che segue descrive il **motore**, coperto dalla suite unitaria
-> (147 test in 12 file, tutti verdi).
+> (150 test in 12 file, tutti verdi).
 > L'interfaccia è stata provata in un browser reale (Chromium, viewport 390x844) con lo
 > scenario automatico `npm run e2e`, che verifica trascinamento, anteprima, modalità a due
 > tocchi, salvataggio, ripresa, fine partita e navigazione. Non è ancora stata provata da
@@ -145,9 +145,12 @@ livello 5 e digiuno 0:
 Si legge in una riga: **la Catena sale di uno ogni volta che elimini e cala di uno ogni volta
 che stai fermo, con una mossa di respiro.**
 
-`respiroRimasto(digiuno)` restituisce quante mosse di tolleranza restano. È esportata e
-coperta da test, ma **nessun componente dell'interfaccia la usa**: al giocatore la tolleranza
-residua non viene mostrata.
+`respiroRimasto(digiuno)` restituisce quante mosse di tolleranza restano, e la barra della
+Catena la usa: quando il respiro è finito — cioè quando la prossima mossa senza eliminazioni
+farà calare il moltiplicatore — compare un avviso di ultima chiamata sotto la barra. Finché
+è stata solo una funzione esportata e testata, la tolleranza era l'unica regola del gioco che
+il giocatore poteva soltanto dedurre osservando il numero scendere. Una regola invisibile è
+indistinguibile da un capriccio, che è esattamente ciò che questo gioco promette di non fare.
 
 ### Perché sale di uno e non di quanti gruppi
 
@@ -158,32 +161,62 @@ moltiplicatore fisso, cioè non un moltiplicatore ma una costante.
 ### Le tre versioni, con i numeri
 
 La regola è cambiata due volte, e ogni volta perché una misura diceva che non stava
-funzionando. I numeri vengono dal giocatore artificiale forte, non da persone.
+funzionando. I numeri vengono da giocatori artificiali, non da persone.
 
-| Versione | Regola | Mosse con Catena attiva | Mosse al tetto |
+Si rifanno con **`npm run catena`** (`tools/misura-catena.mjs`): lo strumento fa giocare il
+profilo `stratega` e registra, mossa per mossa, quanti gruppi ha chiuso; poi **rigioca quella
+stessa sequenza** con la regola attuale e con le varianti scartate. Confrontarle sulle stesse
+partite toglie di mezzo il rumore che ci sarebbe rigiocando tutto da capo per ogni variante.
+
+Misura del 6 settembre 2026 — `stratega`, 120 partite, tetto di 250 mosse, **29.825 mosse**
+(nessuna partita è finita prima del tetto: lo stratega, a questo livello di abilità, non muore
+in 250 mosse):
+
+| Regola | Catena ≥ 3 | Al tetto (9) | Catena media |
 | --- | --- | --- | --- |
-| 1 | sale di *N* gruppi, cala a **ogni** mossa a vuoto | Catena ≥ 3 solo nel **2%** delle mosse, mai sopra 6 | — |
-| 2 | sale di *N* gruppi, **due** mosse di tolleranza | **93%** | **59,5%** |
-| 3 (attuale) | sale di **uno**, **una** mossa di tolleranza | **79,5%** | **13,6%** |
+| **v1** sale di *N* gruppi, nessuna tolleranza | 1.3% | 0.0% | 0.61 |
+| **v2** sale di *N* gruppi, due mosse di tolleranza | 95.4% | **77.4%** | 8.21 |
+| v3 sale di uno, nessuna tolleranza | 0.4% | 0.0% | 0.48 |
+| **v4, attuale** sale di uno, **una** mossa di tolleranza | 75.4% | **15.0%** | 5.15 |
+| v5 sale di uno, due mosse di tolleranza | 94.9% | 74.3% | 8.11 |
+
+Distribuzione della Catena **applicata** alla mossa con la regola attuale:
+
+| Livello | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Quota mosse | 5.6% | 9.9% | 9.1% | 8.8% | 8.3% | 8.2% | 8.8% | 11.8% | 14.4% | 15.0% |
 
 - **Versione 1.** Il moltiplicatore che doveva essere la firma del gioco era decorativo: con
-  la Catena sopra 2 in due mosse su cento, il giocatore non aveva niente da proteggere.
-- **Versione 2.** Il problema opposto, e altrettanto grave: quasi sei mosse su dieci giocate
-  al tetto. Un numero fisso è inutile esattamente quanto un numero che non arriva mai.
-- **Versione 3.** Le due correzioni insieme — crescita di uno e tolleranza dimezzata —
-  distribuiscono la Catena su tutta la scala: **79,5%** delle mosse con Catena attiva,
-  **13,6%** al tetto, e una distribuzione piatta su tutti i livelli 0-9, fra il **6,0%** e il
-  **13,6%** per livello. È l'unica delle tre versioni in cui il numero sullo schermo cambia
-  abbastanza spesso da essere una tensione.
+  la Catena sopra 2 in poco più di una mossa su cento, il giocatore non aveva niente da
+  proteggere. Non arrivava mai sopra 4.
+- **Versione 2.** Il problema opposto, e altrettanto grave: **tre mosse su quattro giocate al
+  tetto**. Un numero fisso è inutile esattamente quanto un numero che non arriva mai.
+- **Versione 3.** Corretta la crescita ma non la tolleranza, la Catena torna a non accendersi:
+  le due correzioni servono insieme, non una alla volta.
+- **Versione 4, attuale.** Nessun livello supera il 15% e nessuno scende sotto il 5,6%: la
+  distribuzione è larga, e la Catena resta qualcosa che si costruisce e si può perdere.
+- **Versione 5.** Serve a mostrare che è la *tolleranza*, non il passo, a decidere se la Catena
+  si incolla al tetto: con passo 1 e tolleranza 2 si torna al 74,3%.
 
-**Nota onesta su questi numeri.** Le versioni 1 e 2 non sono più nel codice: le loro misure
-non sono riproducibili oggi e vanno prese come cronaca. Della versione 3 è riproducibile solo
-il metodo. Una rimisura indipendente fatta il 6 settembre 2026 con il profilo `esperto`
-(300 partite, 90.827 mosse, contando la Catena *applicata* a ogni mossa) dà valori più alti —
-95,2% di mosse con Catena attiva e 17,8% al tetto — perché il profilo e il numero di partite
-sono diversi. La conclusione qualitativa regge (la Catena è distribuita e non incollata al
-tetto), ma **le due serie non sono confrontabili cifra per cifra**: chi le rifà deve
-dichiarare profilo e numero di partite.
+**Il limite di questa tabella, detto chiaramente.** Le partite sono giocate con la regola
+attuale, e lo `stratega` guarda il livello di Catena quando sceglie una mossa. Le righe delle
+regole scartate sono quindi **controfattuali**: dicono che cosa avrebbe fatto quella regola su
+*queste* partite, non che cosa avrebbe giocato qualcuno che vedeva quella regola. Solo la riga
+della regola attuale è una misura esatta. Il confronto resta utile — la differenza fra «non si
+accende mai» e «resta incollata al tetto» è troppo grande per dipendere da quel dettaglio — ma
+non va spacciato per una simulazione delle vecchie regole.
+
+**Il risultato dipende dal profilo.** Serie prodotte da profili, numero di partite o tetti
+diversi non sono confrontabili cifra per cifra: chi le rifà deve dichiarare tutti e tre, come
+è fatto qui.
+
+**Una fonte contraddittoria, e come è stata chiusa.** Il commento di `CHAIN_GRACE` in
+`src/config/rules.js` ha continuato per due versioni a descrivere la *seconda* regola — diceva
+«tolleranza 2 (ora)» e riportava misure (2% / 11% / 24%) che non corrispondevano né alla
+costante, che vale **1**, né a questa sezione. Il codice era giusto e il suo commento vecchio.
+La correzione non è stata riscrivere il commento con altri numeri battuti a mano: quelli
+invecchiano di nuovo. Ora il commento riporta la tabella qui sopra **e il comando che la
+produce**, così i numeri si rifanno invece di ricordarli.
 
 ### Trasparenza
 
@@ -215,7 +248,9 @@ La doppia condizione serve a un caso limite reale: se la griglia è già vuota e
 pezzo che non chiude niente, non stai svuotando nulla e non prendi il bonus.
 
 Ordine di grandezza: 300 punti sono più del doppio della mossa da 130 punti dell'esempio qui
-sopra. Nelle simulazioni con il profilo "normale" è successo 45 volte in 1200 partite.
+sopra. Resta un evento raro: nelle simulazioni con il profilo "normale" è successo **46 volte
+in 1200 partite** (rimisurato il 6 settembre 2026), cioè meno di una partita su venti, e le
+bombe non lo hanno reso comune.
 
 ## Le bombe
 
@@ -293,9 +328,9 @@ Due conseguenze che si notano giocando:
 | Bombe per mossa con detonazione | 1,09 |
 
 L'ultima riga è quella che ridimensiona la reazione a catena: nel gioco reale una detonazione
-ne innesca un'altra di rado. E 1,63 celle saltate per bomba è molto meno del massimo teorico
-di 8, perché gran parte del quadrato attorno a una bomba che sta chiudendo una riga o è già
-dentro il gruppo eliminato, o è vuota.
+ne innesca un'altra di rado. Anche 1,63 celle saltate per bomba è molto meno del massimo
+teorico di 8: quando una bomba salta insieme a una riga, buona parte del quadrato che la
+circonda è già dentro il gruppo che sta sparendo, e il resto è spesso vuoto.
 
 Il colore della bomba resta quello del pezzo: come ogni altro colore, non ha nessuna regola.
 Il segno che la distingue è geometrico (un anello al centro della cella) ed è documentato in
@@ -457,20 +492,27 @@ L'indicatore che rende la dichiarazione controllabile è il **riempimento della 
 over**. Una partita che finisce con la griglia quasi vuota è quella che il giocatore percepisce
 come ingiusta: significa che gli sono arrivati pezzi che non entravano mentre lo spazio c'era.
 
-Profilo "normale", 1200 partite simulate (`node src/sim/run.mjs 1200 normale`):
+Profilo "normale", 1200 partite simulate, rieseguito il 6 settembre 2026
+(`node src/sim/run.mjs 1200 normale`):
 
 | Riempimento al game over | Quota partite |
 | --- | --- |
-| < 30% | 0.9% |
-| 30–40% | 7.6% |
-| 40–50% | 37.8% |
-| 50–60% | 40.6% |
-| 60–70% | 12.8% |
-| ≥ 70% | 0.3% |
+| < 30% | 0.3% |
+| 30–40% | 9.4% |
+| 40–50% | 35.3% |
+| 50–60% | 40.4% |
+| 60–70% | 13.7% |
+| ≥ 70% | 0.9% |
 
-Mediana 51%, minimo 25%. Partite finite sotto le 15 mosse: **1.5%**. Sotto le 8 mosse:
-**0.00%** (nessuna). Le partite finiscono dove devono finire: con la griglia intasata, non
-mezza vuota.
+Mediana 51%, minimo 25%. Partite finite sotto le 15 mosse: **0.3%** (3 partite su 1200).
+Sotto le 8 mosse: **0.00%** (nessuna). Le partite finiscono dove devono finire: con la griglia
+intasata, non mezza vuota.
+
+Questi numeri sono stati rimisurati **dopo** l'arrivo delle bombe e della Catena attuale, e
+sono cambiati: nella revisione precedente la coda sotto il 30% pesava lo 0.9% e le partite
+sotto le 15 mosse l'1.5%. La direzione è migliorata, ma la lezione da tenere è un'altra: una
+misura di equità vale per la revisione in cui è stata presa, e va rifatta a ogni cambio di
+regole.
 
 Nota onesta su questi numeri: sono prodotti da un **giocatore artificiale**, non da esseri
 umani. Misurano l'equità del generatore, non l'esperienza reale. Nessun playtest umano

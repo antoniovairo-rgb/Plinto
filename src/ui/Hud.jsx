@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { CHAIN_MAX } from '../config/rules.js';
-import { chainMultiplier } from '../core/scoring.js';
+import { chainMultiplier, respiroRimasto } from '../core/scoring.js';
 import { numero } from '../i18n/formato.js';
 
 /** Testata della partita: punteggio, record, accesso al menu. */
@@ -34,14 +34,25 @@ export function Hud({ punteggio, record, onMenu, scatta, t }) {
  * Barra della Catena.
  * Mostra il moltiplicatore ESATTO che verra' applicato alla prossima eliminazione:
  * e' la promessa di trasparenza del gioco, quindi non deve mai mentire ne' arrotondare.
+ *
+ * Avvisa anche quando il "respiro" e' finito, cioe' quando la prossima mossa senza
+ * eliminazioni fara' calare il moltiplicatore. La tolleranza esisteva gia' nel motore
+ * ma non si vedeva da nessuna parte, ed era l'unica regola del gioco che il giocatore
+ * poteva solo dedurre. Una regola invisibile e' indistinguibile da un capriccio:
+ * proprio cio' che questo gioco promette di non fare.
  */
-export function BarraCatena({ livello, t }) {
+export function BarraCatena({ livello, digiuno = 0, t }) {
   const precedente = useRef(livello);
   const cresciuta = livello > precedente.current;
   useEffect(() => { precedente.current = livello; }, [livello]);
   const percentuale = (livello / CHAIN_MAX) * 100;
   const moltiplicatore = chainMultiplier(livello);
   const attiva = livello > 0;
+  // Avviso di ultima chiamata: si accende solo quando c'e' davvero qualcosa da
+  // perdere (Catena accesa) e il respiro e' finito, cioe' la prossima mossa senza
+  // eliminazioni fara' calare il moltiplicatore. Un avviso che compare a ogni mossa
+  // non e' un avviso, e' arredamento.
+  const ultimaChiamata = attiva && digiuno > 0 && respiroRimasto(digiuno) === 0;
   return (
     <div className="pl-catena">
       <span className="pl-hud__etichetta">{t('hud.catena')}</span>
@@ -62,6 +73,9 @@ export function BarraCatena({ livello, t }) {
       <span className={`pl-catena__valore ${attiva ? 'pl-catena__valore--attiva' : ''}`}>
         &times;{moltiplicatore.toFixed(2)}
       </span>
+      {ultimaChiamata && (
+        <span className="pl-catena__respiro" role="status">{t('hud.respiroFinito')}</span>
+      )}
     </div>
   );
 }

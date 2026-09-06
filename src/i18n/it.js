@@ -18,6 +18,7 @@ export default {
     punteggio: 'Punteggio',
     record: 'Record',
     catena: 'Catena',
+    respiroFinito: 'la prossima mossa a vuoto la fa calare',
     menu: 'Menu',
   },
   gioca: {

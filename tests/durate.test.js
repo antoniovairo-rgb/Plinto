@@ -32,10 +32,42 @@ describe('allineamento fra durate JavaScript e CSS', () => {
   it('le animazioni del foglio di stile non scrivono durate a mano', () => {
     // Una durata letterale dentro una animation: e' esattamente il modo in cui i due
     // file tornano a scollarsi, e in piu' ignora prefers-reduced-motion.
+    //
+    // La prima versione di questo controllo cercava `\\d+m?s` e quindi non vedeva
+    // nemmeno una durata con la virgola: `1.6s` e `3.2s` passavano indisturbate, e il
+    // test dichiarava di garantire qualcosa che non stava verificando.
     const app = readFileSync(new URL('../src/styles/app.css', import.meta.url), 'utf8');
-    const letterali = [...app.matchAll(/animation:\s*[\w-]+\s+(\d+m?s)/g)].map((m) => m[1]);
-    // L'unica eccezione ammessa e' la pulsazione continua dell'aiuto visivo, che non
-    // e' un effetto di mossa e non ha una controparte in JavaScript.
-    expect(letterali.filter((d) => d !== '1s')).toEqual([]);
+    const letterali = [...app.matchAll(/animation:\s*([\w-]+)\s+([\d.]+m?s)/g)]
+      .map((m) => ({ nome: m[1], durata: m[2] }));
+
+    // Le uniche eccezioni ammesse sono i cicli continui di "vita" (respiri, pulsazioni):
+    // non sono effetti di mossa, non hanno controparte in JavaScript e ognuno di essi
+    // deve avere il proprio interruttore sotto prefers-reduced-motion.
+    const CICLI_CONTINUI = ['pl-pulsa', 'pl-bomba-respira', 'pl-plinto-respira'];
+
+    expect(letterali.filter((l) => !CICLI_CONTINUI.includes(l.nome))).toEqual([]);
+
+    // Il test non deve passare a vuoto: se qualcuno rinomina i cicli, ce ne accorgiamo.
+    expect(letterali.map((l) => l.nome).sort()).toEqual([...CICLI_CONTINUI].sort());
+
+    // E ognuno resta spegnibile da chi ha chiesto meno movimento: il selettore che
+    // porta il ciclo deve ricomparire, con animation: none, dentro un blocco
+    // prefers-reduced-motion. Per saperlo serve il selettore che RACCHIUDE la
+    // dichiarazione, non la riga in cui si trova: quasi sempre sono righe diverse.
+    const blocchi = [...app.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .map((m) => ({ selettore: m[1].trim().split('\n').pop().trim(), corpo: m[2] }));
+
+    const spenti = new Set(
+      blocchi.filter((b) => /animation:\s*none/.test(b.corpo)).map((b) => b.selettore),
+    );
+
+    for (const nome of CICLI_CONTINUI) {
+      const portante = blocchi.find((b) => new RegExp(`animation:\\s*${nome}\\b`).test(b.corpo));
+      expect(portante, `${nome} deve avere una regola che lo applica`).toBeTruthy();
+      expect(
+        spenti.has(portante.selettore),
+        `${portante.selettore} (${nome}) non ha un animation: none sotto prefers-reduced-motion`,
+      ).toBe(true);
+    }
   });
 });

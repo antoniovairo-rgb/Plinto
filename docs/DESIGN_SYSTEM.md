@@ -110,11 +110,11 @@ sistema.
 | `--pl-line-strong` | `#a9b1c6` | |
 | `--pl-text` | `#171b26` | |
 | `--pl-text-dim` | `#4f586d` | |
-| `--pl-text-faint` | `#6b7488` | scurito rispetto al tema scuro (`#838ca1`) |
-| `--pl-brand` | `#876c2b` | ottone scurito: sul chiaro il giallo del tema scuro era illeggibile |
+| `--pl-text-faint` | `#60687a` | scurito rispetto al tema scuro (`#838ca1`) |
+| `--pl-brand` | `#7f6628` | ottone scurito: sul chiaro il giallo del tema scuro era illeggibile |
 | `--pl-brand-deep` | `#6d5622` | |
-| `--pl-ok` | `#337b70` | |
-| `--pl-danger` | `#ae5069` | |
+| `--pl-ok` | `#307469` | |
+| `--pl-danger` | `#a54c64` | |
 | `--pl-block-1` | `#d94500` | arancio |
 | `--pl-block-2` | `#00926d` | verde |
 | `--pl-block-3` | `#7a1fe0` | viola |
@@ -185,24 +185,31 @@ testuali:
 
 Il peggiore (viola, 4.18) supera comunque anche la soglia più severa per il testo normale.
 
-### Tema chiaro: ora misurato, e quasi conforme
+### Tema chiaro: misurato sul fondo peggiore, e conforme
 
 Il tema chiaro è stato ridefinito per intero e **misurato**, cosa che prima non era mai
-successa. Fondo di riferimento: `--pl-ink` `#f3f4f8` per le pagine, `--pl-surface` `#ffffff`
-per i pannelli, `--pl-surface-2` `#f0f2f7` per gli elementi rialzati, `--pl-ink-2` `#e9ebf2`
-per la plancia.
+successa. Le quattro superfici su cui può capitare del testo sono `--pl-surface` `#ffffff`,
+`--pl-ink` `#f3f4f8`, `--pl-surface-2` `#f0f2f7` e `--pl-ink-2` `#e9ebf2`.
 
-| Elemento | su `--pl-ink` | su `--pl-surface` | su `--pl-surface-2` | Esito |
+Il fondo di riferimento è **il più sfavorevole dei quattro**, cioè `--pl-ink-2`. Non è un
+dettaglio di metodo: la prima stesura di questa tabella dichiarava i contrasti su `--pl-ink`,
+il fondo più *favorevole*, e faceva così passare per conforme un token che sugli altri fondi
+non lo era. Misurare sul caso migliore non è misurare.
+
+| Elemento | su `--pl-surface` | su `--pl-ink` | su `--pl-surface-2` | su `--pl-ink-2` (riferimento) |
 | --- | --- | --- | --- | --- |
-| `--pl-text` `#171b26` | 15.65 | 17.20 | 15.35 | conforme |
-| `--pl-text-dim` `#4f586d` | 6.48 | 7.12 | 6.36 | conforme |
-| `--pl-text-faint` `#6b7488` | **4.27** | 4.69 | **4.19** | **sotto 4.5 su due fondi su tre** |
-| `--pl-brand` `#876c2b` | **4.54** | 4.99 | 4.45 | al pelo sopra soglia sul fondo pagina |
-| `--pl-ok` `#337b70` | **4.54** | 4.99 | 4.46 | idem |
-| `--pl-danger` `#ae5069` | 4.60 | 5.06 | **4.52** | conforme, con margine minimo |
-| `#fff` su `--pl-danger-fondo` `#b81f47` | — | — | **6.32** | conforme |
+| `--pl-text` `#171b26` | 17.20 | 15.65 | 15.35 | **14.44** |
+| `--pl-text-dim` `#4f586d` | 7.12 | 6.48 | 6.36 | **5.98** |
+| `--pl-text-faint` `#60687a` | 5.59 | 5.08 | 4.99 | **4.69** |
+| `--pl-brand` `#7f6628` | 5.48 | 4.98 | 4.89 | **4.60** |
+| `--pl-ok` `#307469` | 5.49 | 4.99 | 4.90 | **4.61** |
+| `--pl-danger` `#a54c64` | 5.50 | 5.00 | 4.91 | **4.62** |
+| `#fff` su `--pl-danger-fondo` `#b81f47` | — | — | — | **6.32** |
 
-Blocchi contro la plancia chiara `--pl-ink-2` (`#e9ebf2`), soglia 3:1:
+Tutti conformi ad AA (4.5:1) **sul fondo peggiore**, quindi conformi ovunque.
+
+Blocchi contro la plancia chiara `--pl-ink-2` (`#e9ebf2`), soglia 3:1 perché sono elementi
+grafici e non testo:
 
 | Blocco | Valore chiaro | Contrasto |
 | --- | --- | --- |
@@ -216,18 +223,12 @@ Blocchi contro la plancia chiara `--pl-ink-2` (`#e9ebf2`), soglia 3:1:
 **Tutti e sei passano.** Prima erano cinque su sei sotto soglia: è la correzione più
 sostanziosa della palette.
 
-**Quello che non passa ancora, detto senza attenuazioni:**
-
-- `--pl-text-faint` nel tema chiaro sta a **4.27:1** sul fondo pagina e **4.19:1** sui
-  pannelli rialzati, cioè **sotto la soglia AA di 4.5** per il testo normale. Non è un token
-  marginale: lo usano le etichette maiuscole dell'HUD, il suggerimento sotto la plancia, le
-  note e le descrizioni degli interruttori. Nel tema scuro lo stesso token passa (4.54), nel
-  chiaro no;
-- il commento di `tokens.css` dichiara per il tema chiaro «Testi: 15.9, 7.7 e 4.5 su
-  `--pl-ink`». **Nessuno dei tre numeri è quello misurato**: su `--pl-ink` i valori sono
-  15.65, 6.48 e 4.27. Il terzo, in particolare, è dichiarato al limite mentre è sotto;
-- `--pl-brand` e `--pl-ok` chiari passano con **4.54**, cioè quattro centesimi di margine: un
-  ritocco di luminosità qualsiasi li riporta sotto.
+**Come si rifanno questi numeri.** `npm run contrasti` (`tools/contrasti.mjs`) legge
+`tokens.css`, ricalcola ogni riga di queste tabelle e termina con errore se anche un solo
+valore scende sotto soglia; `tests/contrasti.test.js` lo esegue dentro `npm test`. Nessuno di
+questi numeri va più copiato a mano, ed è deliberato: la stessa affermazione sbagliata — un
+commento che dichiarava contrasti mai misurati — era già stata corretta una volta ed era
+tornata. Un controllo automatico chiude la categoria; una correzione puntuale no.
 
 ### Le correzioni già fatte, e perché
 
@@ -240,6 +241,10 @@ Sono correzioni reali sul codice, non esempi didattici:
 | fondo di `.pl-btn--pericolo` | `--pl-danger` | bianco sopra: **2.94** → non conforme | `--pl-danger-fondo` `#b81f47` | bianco sopra: **6.32** |
 | blocchi (scuro) | tinte smorzate | il peggiore a 4.37 | tinte sature | il peggiore a 4.18 |
 | blocchi (chiaro) | uguali allo scuro | **cinque su sei sotto 3:1** | sei tinte dedicate | il peggiore a 3.31 |
+| `--pl-text-faint` (chiaro) | `#6b7488` | **3.94** sul fondo peggiore → sotto soglia, mentre il commento dichiarava 4.5 | `#60687a` | 4.69 |
+| `--pl-brand` (chiaro) | `#876c2b` | 4.45 sul fondo peggiore → sotto soglia | `#7f6628` | 4.60 |
+| `--pl-ok` (chiaro) | `#337b70` | 4.46 sul fondo peggiore → sotto soglia | `#307469` | 4.61 |
+| `--pl-danger` (chiaro) | `#ae5069` | 4.25 sul fondo peggiore → sotto soglia | `#a54c64` | 4.62 |
 
 Il pulsante di pericolo merita una riga in più: è quello che **cancella i dati del giocatore**,
 ed era l'unico caso che falliva in entrambi i temi. La correzione non è stata schiarire il
@@ -353,7 +358,6 @@ restare allineata al bordo del tabellone.
 | `--pl-t-instant` | 90ms | `transform` del pulsante premuto (`.pl-btn:active` scala a 0.97) |
 | `--pl-t-fast` | 160ms | sfondo del pulsante; sfondo del posto del tray; `transform` del pezzo; sfondo e pallino dell'interruttore |
 | `--pl-t-base` | 240ms | larghezza del riempimento della barra della Catena; animazione `pl-scatta` |
-| `--pl-t-slow` | 420ms | **definito ma mai usato** |
 | `--pl-t-atterraggio` | 260ms | animazione `pl-atterra` |
 | `--pl-t-esplosione` | 420ms | animazioni `pl-svanisci`, `pl-lampo`, `pl-salta` |
 | `--pl-t-punti` | 950ms | animazione `pl-sali` |
@@ -379,32 +383,43 @@ niente che li tenesse insieme.
 | `pl-salta` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | la cella portata via da una **bomba**: ruota, si illumina e collassa |
 | `pl-pulsa` | 1s, infinita | `ease-in-out` (parola chiave) | pulsazione delle celle che stanno per essere eliminate |
 | `pl-bomba-respira` | 1.6s, infinita | `ease-in-out` (parola chiave) | l'anello della bomba che si contrae e si riapre |
+| `pl-plinto-respira` | 3.2s, infinita | `ease-in-out` (parola chiave) | il respiro di Plinto: 2,5% di traslazione verticale, nient'altro |
 
-Le uniche durate ancora scritte a mano sono le due animazioni **infinite**, che non hanno una
+Le uniche durate ancora scritte a mano sono le tre animazioni **infinite**, che non hanno una
 controparte in JavaScript. `tests/durate.test.js` verifica anche questo, cioè che nessuna
-`animation:` dichiari una durata letterale — con un'eccezione ammessa per `1s`. La regola ha
-però una falla: la sua espressione regolare riconosce solo durate intere (`\d+m?s`), quindi
-`1.6s` di `pl-bomba-respira` le sfugge. Il difetto è nel controllo, non nell'effetto.
+`animation:` dichiari una durata letterale fuori da quell'elenco di tre.
+
+Il controllo aveva una falla ed è stata chiusa: l'espressione regolare riconosceva solo durate
+intere (`\d+m?s`), quindi `1.6s` e `3.2s` le sfuggivano e il test garantiva meno di quanto
+dichiarasse. Ora riconosce anche i decimali, l'elenco delle eccezioni è esplicito, e per ognuna
+verifica che il selettore che la porta ricompaia con `animation: none` dentro un blocco
+`prefers-reduced-motion` — l'elenco delle eccezioni non è più un permesso, è un contratto.
 
 ### `prefers-reduced-motion`: cosa succede davvero
 
-Adesso funziona, ed è cambiato rispetto a prima. `tokens.css` porta a `1ms` **tutti e sette**
-i token di durata, e poiché le `@keyframes` degli effetti di mossa usano quei token, con la
-preferenza attiva:
+Adesso funziona, ed è cambiato rispetto a prima. `tokens.css` porta a `1ms` **tutti e sei** i
+token di durata (`--pl-t-slow` è stato rimosso: non lo usava nessuno), e poiché le
+`@keyframes` degli effetti di mossa usano quei token, con la preferenza attiva:
 
 - **diventano istantanee** sia le transizioni (pressione del pulsante, sfondo del posto del
   tray, larghezza della barra della Catena, leva degli interruttori) sia le animazioni di
   mossa: atterraggio, esplosione, punti volanti, scatto del punteggio, lampo della Catena e
   cella saltata dalla bomba;
-- le due animazioni **infinite** vengono spente a parte, in `app.css`:
-  `.pl-cella--incandidata::after` e `.pl-blocco--bomba::after` ricevono `animation: none`, e
-  una regola generica porta `animation-iteration-count` a 1 su tutto;
-- **restano attive** le particelle sul canvas, che non passano affatto dal CSS.
+- le tre animazioni **infinite** vengono spente a parte, in `app.css`:
+  `.pl-cella--incandidata::after`, `.pl-blocco--bomba::after` e `.pl-plinto--vivo` ricevono
+  `animation: none`, e una regola generica porta `animation-iteration-count` a 1 su tutto.
+  Non è più una convenzione da ricordare: `tests/durate.test.js` fallisce se una di queste
+  animazioni perde il suo interruttore;
+- **le particelle sul canvas non passano affatto dal CSS**, quindi il CSS non può spegnerle.
 
-Resta quindi una sola cosa che la preferenza di sistema non spegne: le particelle. Per quelle
-serve l'impostazione **Animazioni** del giocatore, che è anche l'unico interruttore che ferma
-tutto in blocco — `useEffettiMossa` esce prima di applicare le classi e
+Per quelle serve l'impostazione **Animazioni** del giocatore, che è anche l'unico interruttore
+che ferma tutto in blocco — `useEffettiMossa` esce prima di applicare le classi e
 `CampoParticelle.imposta(false)` svuota il canvas e ferma il ciclo di `requestAnimationFrame`.
+Perché la preferenza di sistema conti anche lì, `src/state/useImpostazioni.js` legge
+`matchMedia('(prefers-reduced-motion: reduce)')` e la usa come **valore iniziale**
+dell'impostazione. Chi chiede meno movimento al sistema operativo trova quindi il gioco già
+senza particelle, senza dover cercare l'interruttore; e chi le vuole comunque le riaccende,
+perché una scelta esplicita e salvata batte una preferenza dedotta.
 
 ## 7. Componenti
 
@@ -474,22 +489,44 @@ forma, non dalla tinta.
 Sotto `prefers-reduced-motion` l'anello resta ma smette di respirare (`animation: none`): il
 segno è nel disegno, la pulsazione è solo un richiamo.
 
+### Plinto, il personaggio
+
+`src/ui/Plinto.jsx`, SVG inline in un `viewBox` 100x100.
+
+**Perché è un blocco e non un animale.** Plinto è la stessa forma che il giocatore appoggia
+sulla plancia cento volte a partita: un blocco squadrato con lo stesso raggio d'angolo dei
+pezzi. Un personaggio che non c'entra con il gioco va poi giustificato ogni volta che compare;
+questo si spiega da solo. Prende i colori dai token (`--pl-brand` per il corpo,
+`--pl-brand-deep` per i piedini), quindi segue il tema chiaro senza una riga in più.
+
+**Cinque espressioni, ognuna con un compito:** `normale` (mappa e attesa), `contento` (Quadro
+superato), `deluso` (Quadro fallito), `stupito` (qualcosa di grosso), `dorme`. Cambiano solo
+occhi, sopracciglia e bocca — il corpo è sempre lo stesso, così l'identità non oscilla.
+
+L'animazione `pl-plinto-respira` è deliberatamente minima: 3,2 secondi, 2,5% di traslazione
+verticale, `transform-origin` sui piedi. Fermo del tutto sembrerebbe un'illustrazione; di più
+ruberebbe attenzione alla plancia. Si spegne con `prefers-reduced-motion`.
+
+Nessuna immagine, nessun file, nessuna licenza da tracciare, nessuna richiesta di rete: è la
+stessa regola che vale per il logo e per le icone dell'interfaccia.
+
 ### Marchio e icona
 
 `Logo.jsx` disegna in SVG inline e riferisce i colori come `var(--pl-block-*)`, quindi segue i
 token. `public/icon.svg` è un file separato e **ripete i colori in esadecimale**: un cambio di
 token va riportato lì a mano.
 
-**Oggi non è stato riportato, e le due versioni del marchio sono divergenti.** L'icona contiene
-ancora `#E4B44C`, `#4CB5A5` e `#7B6CE6`, cioè i valori *smorzati* di `--pl-block-4`,
-`--pl-block-2` e `--pl-block-3` prima del passaggio alla palette satura; il componente usa i
-token e quindi disegna `#ffc212`, `#12e1b0` e `#9b4dff`. Il marchio dentro il gioco e
-l'icona sulla schermata iniziale non hanno più gli stessi colori. (`#0E1118` e `#3A4460`
-coincidono ancora con `--pl-ink` e `--pl-line-strong`.)
+Per due versioni non è stato riportato: l'icona ha continuato a contenere `#E4B44C`,
+`#4CB5A5` e `#7B6CE6`, cioè i valori *smorzati* di `--pl-block-4`, `--pl-block-2` e
+`--pl-block-3`, mentre il componente disegnava già `#ffc212`, `#12e1b0` e `#9b4dff`. Il marchio
+dentro il gioco e l'icona sulla schermata iniziale erano di due colori diversi, e nessuno se ne
+era accorto perché niente li confrontava.
 
-Le due versioni non hanno nemmeno la stessa geometria (rettangoli 19px con `rx=5` e tratteggio
-`4 3` nel componente, 15px con `rx=4` e tratteggio `3.5 2.5` nell'icona): stesso disegno,
-proporzioni diverse.
+Ora l'icona è riallineata (`#0e1118`, `#ffc212`, `#12e1b0`, `#9b4dff`, `#3a4460`, cioè
+`--pl-ink` e i tre blocchi del tema scuro più `--pl-line-strong`) e la stessa geometria del
+componente — rettangoli da 19px, `rx=5`, tratteggio `4 3`. Soprattutto: **`tests/icona.test.js`
+confronta l'SVG con i token a ogni `npm test`**, quindi la duplicazione resta ma non può più
+divergere in silenzio. I PNG in `public/icone/` si rigenerano dall'SVG con `npm run icone`.
 
 `manifest.webmanifest` dichiara `background_color` e `theme_color` a `#0E1118`, cioè
 `--pl-ink`, e `index.html` ripete lo stesso valore nel meta `theme-color`. Nessuno dei tre
@@ -526,32 +563,38 @@ Da rispettare quando si aggiunge interfaccia.
 
 ### Debiti aperti di questo sistema, in ordine di gravità
 
-1. Il bersaglio tattile del pezzo da una cella è 34 × 34px (29 × 29px su schermi da 360px).
-2. Nel tema chiaro `--pl-text-faint` sta a **4.27:1** sul fondo pagina e **4.19:1** sui
-   pannelli, sotto la soglia AA di 4.5. Nel tema scuro lo stesso token passa.
-3. Il commento di `tokens.css` sui testi del tema chiaro dichiara «15.9, 7.7 e 4.5 su
-   `--pl-ink`» mentre i valori misurati sono 15.65, 6.48 e 4.27: **la documentazione interna
-   del file è più ottimista della misura.**
-4. `public/icon.svg` ha ancora i colori della palette smorzata: l'icona e il marchio disegnato
-   nel gioco non coincidono più.
-5. Il segno della bomba è disegnato con tre `rgba()` letterali, senza token.
-6. `--pl-t-slow` è definito e mai usato. `--pl-ease-in-out`, che una versione precedente di
-   questo documento elencava fra i token, **non esiste più** in `tokens.css`: le due
-   animazioni infinite usano la parola chiave CSS `ease-in-out`.
-7. Il controllo di `tests/durate.test.js` che vieta le durate letterali nelle `animation:`
-   riconosce solo i numeri interi, quindi non vede `1.6s` di `pl-bomba-respira`.
-8. `prefers-reduced-motion` non spegne le particelle sul canvas: per quelle serve
-   l'impostazione Animazioni.
-9. Testi ancora scritti nel JSX invece che nell'i18n: l'etichetta accessibile dei pezzi nel
-   tray (`Tray.jsx`), il paragrafo sulle licenze e la nota sul link di donazione mancante in
-   `Info.jsx`, la nota corrispondente in `Sostieni.jsx`. Sono in italiano anche per un
-   giocatore che ha scelto l'inglese.
-10. `toLocaleString('it-IT')` è fisso: i numeri restano formattati all'italiana in inglese.
-11. Il manifest dichiara `"orientation": "portrait"`. Il layout orizzontale scritto in
-    `app.css` resta quindi raggiungibile solo aprendo il gioco in una scheda del browser: nel
-    gioco installato come PWA l'orientamento richiesto dal manifest lo esclude.
+Questo elenco è stato riverificato riga per riga sul codice al 6 settembre 2026, dopo che la
+versione precedente si è rivelata **parzialmente obsoleta**: quattro voci su undici descrivevano
+difetti già corretti. Un elenco di debiti che non viene ricontrollato invecchia come qualsiasi
+altra documentazione, con l'aggravante che fa perdere tempo a chi prova a risolvere qualcosa
+che è già risolto.
 
-Risolti rispetto alla versione precedente di questo documento: il tema chiaro (ridefinito per
-intero e misurato), il pulsante di pericolo (2.94:1 → 6.32:1 grazie a `--pl-danger-fondo`), le
-durate delle animazioni scritte a mano in CSS e JS (ora token più `tests/durate.test.js`) e
-`prefers-reduced-motion`, che adesso riduce anche le animazioni a fotogrammi chiave.
+1. Il segno della bomba è disegnato con tre `rgba()` letterali invece che con token. Sono
+   sovrapposizioni neutre (un bordo nero, due aloni bianchi) e funzionano in entrambi i temi,
+   ma restano l'unico punto del foglio di stile che non passa dai token.
+2. `prefers-reduced-motion` non può spegnere le particelle: sono disegnate su un canvas con
+   `requestAnimationFrame`, dove il CSS non arriva. Da questa versione la preferenza di sistema
+   è letta anche da JavaScript e decide il **valore iniziale** dell'impostazione Animazioni
+   (`src/state/useImpostazioni.js`), che le spegne davvero. Resta un valore iniziale: una
+   scelta esplicita del giocatore, essendo salvata, continua a vincere.
+3. Il rapporto di contrasto dei sei blocchi nel tema chiaro è misurato sul fondo della plancia
+   e sta fra 3.31 e 5.69: sopra la soglia di 3:1 per gli elementi grafici, ma il più basso ha
+   poco margine. Verificabile in qualsiasi momento con `npm run contrasti`.
+
+**Chiuse rispetto alla versione precedente di questo elenco** (verificate nel codice, non
+dedotte): il bersaglio tattile dei pezzi — `.pl-pezzo-presa` occupa tutto il posto del tray con
+`min-width`/`min-height` di 48px; `--pl-text-faint` e gli accenti del tema chiaro, ora misurati
+sul fondo **più sfavorevole** e tutti sopra 4.5:1; il commento dei contrasti in `tokens.css`,
+che dichiarava numeri più ottimisti della misura; `public/icon.svg`, riallineato alla palette
+satura e ora sorvegliato da `tests/icona.test.js`; `--pl-t-slow`, rimosso perché non usato da
+nessuno; la falla dell'espressione regolare in `tests/durate.test.js`; le stringhe italiane
+scritte nel JSX, passate all'i18n; `toLocaleString('it-IT')`, sostituito da `src/i18n/formato.js`
+che segue la lingua scelta; e l'`"orientation": "portrait"` del manifest, che non c'è più.
+
+I contrasti non sono più un'affermazione scritta in un commento: `tools/contrasti.mjs`
+(`npm run contrasti`) li rimisura leggendo `tokens.css`, ed esce con errore se anche uno solo
+scende sotto soglia. `tests/contrasti.test.js` lo esegue a ogni `npm test`, quindi la promessa
+di accessibilità di questo documento è controllata dalla stessa suite che controlla le regole
+del gioco. È la risposta diretta a un difetto ripetuto due volte: dichiarare contrasti mai
+misurati.
+

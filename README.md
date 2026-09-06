@@ -36,9 +36,11 @@ Ricevi tre pezzi, li appoggi su una griglia 9x9 e li fai sparire completando una
 
 La partita si gioca **interamente da tastiera** (Tab per scegliere il pezzo, Invio per
 prenderlo, frecce per muoversi, Invio per appoggiarlo, Esc per annullare) e ogni mossa
-viene descritta a voce ai lettori di schermo. I contrasti sono misurati, non stimati, e
-documentati uno per uno in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — compreso
-l'unico token che nel tema chiaro resta sotto la soglia WCAG AA.
+viene descritta a voce ai lettori di schermo. I contrasti sono misurati, non stimati:
+`npm run contrasti` li ricalcola leggendo il foglio dei token e fallisce se anche uno solo
+scende sotto la soglia WCAG, la suite di test lo esegue a ogni giro, e sono documentati uno
+per uno in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md). Nessun testo dell'interfaccia
+resta sotto AA in nessuno dei due temi.
 
 Le informazioni non passano mai dal solo colore: il cursore da tastiera e' un anello, la
 mossa illegale un bordo, e la bomba si riconosce da un segno geometrico al centro del
@@ -64,6 +66,8 @@ npm run icone      # rigenera le icone PNG da public/icon.svg
 npm run prova-pages    # verifica che la build funzioni servita da una sottocartella
 npm run prova-desktop  # controlla l'aspetto su schermi grandi
 npm run quadri         # misura la difficolta' reale di ogni Quadro
+npm run contrasti      # rimisura i contrasti WCAG leggendo il foglio dei token
+npm run catena         # distribuzione della Catena, confrontata con le regole scartate
 ```
 
 Gli script che usano il browser avviano da soli il server di sviluppo.

@@ -148,6 +148,9 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  /* L'avviso di ultima chiamata va a capo sotto la barra invece di stringerla: la
+     barra e' l'informazione principale e non deve rimpicciolirsi quando compare. */
+  flex-wrap: wrap;
 }
 
 .pl-catena__barra {
@@ -1090,3 +1093,13 @@ button {
 }
 
 .pl-fine__plinto { display: grid; place-items: center; margin: 14px 0 6px; }
+
+/* Ultima chiamata della Catena: il momento in cui il giocatore sta per perdere il
+   moltiplicatore. Va sulla riga sotto, allineato al valore, senza mai coprirlo. */
+.pl-catena__respiro {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--pl-danger);
+}
