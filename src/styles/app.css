@@ -1103,3 +1103,96 @@ button {
   letter-spacing: 0.02em;
   color: var(--pl-danger);
 }
+
+/* --------------------------------------------------- apertura di un Quadro --- */
+/* Stessa impalcatura della presentazione al primo avvio: contenuto che scorre,
+   azioni ancorate in fondo. Il pulsante deve stare sempre allo stesso posto, perche'
+   fra un Quadro e il successivo si preme decine di volte. */
+.pl-apertura { display: flex; flex-direction: column; height: 100%; padding: 18px; }
+
+.pl-apertura .pl-fine__titolo { text-align: center; }
+
+/* Il contenuto e' corto: centrarlo verticalmente evita la colonna di vuoto sotto,
+   che su uno schermo alto fa sembrare la schermata incompiuta. */
+.pl-apertura .pl-scroll { display: flex; flex-direction: column; justify-content: center; }
+
+.pl-apertura__atto {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pl-brand);
+  margin: 0 0 2px;
+}
+
+/* Plinto a sinistra e il suo fumetto a destra: si legge come un personaggio che
+   parla, non come un pannello di aiuto. */
+.pl-apertura__scena {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 18px;
+}
+
+.pl-apertura__fumetto {
+  position: relative;
+  background: var(--pl-surface-2);
+  border: 1px solid var(--pl-line);
+  border-radius: var(--pl-radius-lg);
+  padding: 14px 16px;
+}
+
+/* La punta del fumetto: due triangoli sovrapposti, quello di sopra del colore del
+   fondo, cosi' il bordo resta continuo senza disegnare un poligono. */
+.pl-apertura__fumetto::before,
+.pl-apertura__fumetto::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 28px;
+  border: 9px solid transparent;
+  border-left: 0;
+  border-right-color: var(--pl-line);
+}
+.pl-apertura__fumetto::after {
+  left: -8px;
+  border-right-color: var(--pl-surface-2);
+}
+
+.pl-apertura__obiettivo {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--pl-text);
+}
+
+.pl-apertura__spiega {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pl-text-dim);
+}
+.pl-apertura__spiega + .pl-apertura__spiega { margin-top: 8px; }
+
+.pl-apertura__consiglio {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-cella-vuota);
+  border-left: 3px solid var(--pl-ok);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pl-text-dim);
+}
+.pl-apertura__consiglio .pl-hud__etichetta { display: block; margin-bottom: 4px; }
+
+.pl-apertura__mosse {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pl-text-faint);
+  text-align: center;
+}
+
+.pl-apertura__azioni { display: grid; gap: 10px; padding-top: 16px; }

@@ -112,14 +112,42 @@ const atti = await page.locator('.pl-atto').count();
 console.log(`   atti mostrati: ${atti}, Plinto sulla tappa corrente: ${plintoSullaMappa === 1}`);
 if (atti < 5) errori.push(`MAPPA: solo ${atti} atti mostrati`);
 
-// ---------- 2. Il primo Quadro ----------
+// ---------- 2. L'apertura: Plinto spiega l'obiettivo ----------
 await page.locator('.pl-tappa').first().click();
+await page.waitForSelector('.pl-apertura');
+const obiettivoDetto = (await page.locator('.pl-apertura__obiettivo').innerText()).trim();
+const spiegazioni = await page.locator('.pl-apertura__spiega').count();
+const consigli = await page.locator('.pl-apertura__consiglio').count();
+const plintoParla = await page.locator('.pl-apertura .pl-plinto').count();
+await page.screenshot({ path: `${OUT}/2-apertura.png` });
+console.log(`2. apertura: "${obiettivoDetto}" | spiegazioni ${spiegazioni} | consigli ${consigli}`);
+
+const attesi = quadroNumero(1).obiettivi.length;
+if (!obiettivoDetto) errori.push('APERTURA: l obiettivo non viene detto');
+if (spiegazioni !== attesi) errori.push(`APERTURA: ${spiegazioni} spiegazioni invece di ${attesi}`);
+if (consigli !== attesi) errori.push(`APERTURA: ${consigli} consigli invece di ${attesi}`);
+if (plintoParla !== 1) errori.push(`APERTURA: Plinto compare ${plintoParla} volte invece di 1`);
+// Una spiegazione che restituisce la chiave invece del testo e' peggio di nessuna
+// spiegazione: sembra un errore del gioco proprio a chi sta imparando le regole.
+const testoApertura = await page.locator('.pl-apertura').innerText();
+if (/quadri\.(spiegazioni|consigli)\./.test(testoApertura)) {
+  errori.push('APERTURA: compare una chiave di traduzione non risolta');
+}
+
+// ---------- 2b. Si comincia ----------
+await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
 const obiettivo = await page.locator('.pl-obiettivo__frase').innerText();
 const mosseMostrate = await page.locator('.pl-obiettivo__mosse strong').innerText();
 await page.screenshot({ path: `${OUT}/2-quadro.png` });
-console.log(`2. quadro 1: obiettivo "${obiettivo}", mosse ${mosseMostrate}`);
+console.log(`2c. quadro 1: obiettivo "${obiettivo}", mosse ${mosseMostrate}`);
 if (!obiettivo.trim()) errori.push('QUADRO: l obiettivo non viene mostrato');
+// La frase dell'apertura e quella sopra la plancia devono essere LA STESSA: se Plinto
+// spiegasse un obiettivo e la striscia ne mostrasse un altro, il giocatore non
+// saprebbe a quale credere.
+if (obiettivo.trim() !== obiettivoDetto) {
+  errori.push(`COERENZA: l apertura dice "${obiettivoDetto}" ma la striscia dice "${obiettivo.trim()}"`);
+}
 if (Number(mosseMostrate) !== quadroNumero(1).maxMosse) {
   errori.push(`QUADRO: mostra ${mosseMostrate} mosse invece di ${quadroNumero(1).maxMosse}`);
 }

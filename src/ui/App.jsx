@@ -19,6 +19,7 @@ import { SchermoSostieni } from './schermate/Sostieni.jsx';
 import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
 import { SchermoQuadri } from './schermate/Quadri.jsx';
 import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
+import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
 import { quantiSuperati } from '../persistence/progressi.js';
@@ -176,6 +177,20 @@ export function App() {
         </div>
       );
     }
+    // Prima di giocare, Plinto dice che cosa chiede questo Quadro e come ottenerlo.
+    if (quadri.daPresentare) {
+      return (
+        <div className="pl-app">
+          <AperturaQuadro
+            quadro={quadri.quadro}
+            onGioca={quadri.avvia}
+            onElenco={tornaAiQuadri}
+            t={t}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="pl-app">
         <SchermoGioco

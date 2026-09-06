@@ -520,6 +520,38 @@ strutturato è stato ancora fatto.
 
 ---
 
+## I Quadri
+
+Un Quadro è una partita normale con due aggiunte: uno o più **obiettivi** e, quasi sempre, un
+**tetto di mosse**. Le regole non cambiano di una virgola: cambia la condizione di vittoria.
+
+Si perde in **due modi soli**, entrambi dichiarati prima di cominciare: finire le mosse, oppure
+restare senza mosse possibili. Nessun tempo, nessuna vita, nessuna penalità nascosta. E la
+vittoria si valuta **prima** della sconfitta: chi raggiunge l'obiettivo con l'ultima mossa
+disponibile ha vinto.
+
+I dieci tipi di obiettivo sono in `OBIETTIVI` (`src/core/quadro.js`): righe, colonne,
+quadranti, gruppi (uno qualunque dei tre), celle eliminate, punteggio, Catena, Intreccio,
+pulizia della griglia, sopravvivenza.
+
+### Ogni Quadro si apre spiegando che cosa chiede
+
+`src/ui/schermate/AperturaQuadro.jsx`. Plinto dice la frase dell'obiettivo, che cosa significa,
+come conviene affrontarlo e quante mosse ci sono; poi si gioca.
+
+**Perché esiste.** La striscia sopra la plancia dice COSA fare — «Chiudi una riga», `0/1` — ma
+non ha mai detto che cosa SIA una riga. Chi conosce il genere lo deduce in un secondo; chi non
+lo conosce si trova un contatore e nessun appiglio. È una lacuna emersa dal primo playtest
+umano del progetto, e nessun test automatico avrebbe potuto trovarla: il gioco funzionava
+perfettamente, semplicemente non si spiegava.
+
+**È coerente con l'equità dichiarata.** Un gioco che promette di non nascondere niente al
+giocatore non può poi lasciargli dedurre le regole. Vale per la tolleranza della Catena — che
+per due versioni è stata una regola invisibile — e vale per l'obiettivo di un livello.
+
+Il consiglio mostrato è un consiglio vero, non un incoraggiamento: dice dove conviene giocare,
+non che ce la puoi fare.
+
 ## Come finisce una partita
 
 Il controllo è in `placePiece`, subito dopo l'appoggio e l'eventuale eliminazione. In ordine:

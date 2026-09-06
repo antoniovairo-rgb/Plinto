@@ -19,12 +19,15 @@ export function useQuadro() {
   const [partita, setPartita] = useState(null);
   const [esito, setEsito] = useState(null);
   const [registrato, setRegistrato] = useState(false);
+  // Vero finche' l'apertura con la spiegazione di Plinto e' ancora sullo schermo.
+  const [daPresentare, setDaPresentare] = useState(false);
 
   const apri = useCallback((definizione) => {
     setQuadro(definizione);
     setPartita(iniziaQuadro(definizione));
     setEsito(null);
     setRegistrato(false);
+    setDaPresentare(true);
   }, []);
 
   const chiudi = useCallback(() => {
@@ -32,10 +35,24 @@ export function useQuadro() {
     setPartita(null);
     setEsito(null);
     setRegistrato(false);
+    setDaPresentare(false);
   }, []);
 
+  /** Chiude l'apertura e comincia a giocare. */
+  const avvia = useCallback(() => setDaPresentare(false), []);
+
+  /**
+   * Riprova dopo un fallimento.
+   *
+   * Non rimostra la spiegazione: l'obiettivo e' lo stesso ed e' stato letto meno di un
+   * minuto fa. Dopo un Quadro fallito si vuole ritentare subito, e rileggere la stessa
+   * schermata a ogni tentativo la trasformerebbe da aiuto in pedaggio. Resta comunque
+   * raggiungibile: si torna all'elenco e si riapre il Quadro.
+   */
   const riprova = useCallback(() => {
-    if (quadro) apri(quadro);
+    if (!quadro) return;
+    apri(quadro);
+    setDaPresentare(false);
   }, [quadro, apri]);
 
   const gioca = useCallback((handIndex, row, col) => {
@@ -64,8 +81,10 @@ export function useQuadro() {
     quadro,
     partita,
     esito,
+    daPresentare,
     stato: quadro && partita ? statoQuadro(quadro, partita) : null,
     apri,
+    avvia,
     chiudi,
     riprova,
     gioca,

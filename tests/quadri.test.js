@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI } from '../src/core/quadro.js';
 import { gridFromString, findCompletedGroups, filledCount, allPlacements } from '../src/core/grid.js';
+import { traduttore, LINGUE } from '../src/i18n/index.js';
 
 const memoria = new Map();
 vi.stubGlobal('window', {
@@ -176,5 +177,48 @@ describe('avanzamento nel percorso', () => {
     expect(progressi.registraTentativo(2, { superato: true, mosse: 9, punteggio: 1 }).primaVolta).toBe(true);
     expect(progressi.registraTentativo(2, { superato: true, mosse: 7, punteggio: 1 }).miglioramento).toBe(true);
     expect(progressi.registraTentativo(2, { superato: true, mosse: 11, punteggio: 1 }).miglioramento).toBe(false);
+  });
+});
+
+/**
+ * Ogni Quadro apre con Plinto che spiega l'obiettivo.
+ *
+ * La spiegazione e' costruita a runtime, `t(`quadri.spiegazioni.${tipo}`)`, quindi un
+ * tipo di obiettivo senza testo non fa fallire niente: mostra al giocatore la CHIAVE
+ * al posto della frase, e la mostra proprio a chi sta imparando le regole. E' un
+ * difetto che si vede solo aprendo il Quadro giusto fra cento, cioe' quasi mai in
+ * fase di sviluppo. Qui si controllano tutti e cento in un colpo, in tutte le lingue.
+ */
+describe('apertura dei Quadri', () => {
+  const tipiUsati = [...new Set(QUADRI.flatMap((q) => q.obiettivi.map((o) => o.tipo)))];
+
+  it('trova davvero dei tipi di obiettivo (il test non deve passare a vuoto)', () => {
+    expect(tipiUsati.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it.each(Object.keys(LINGUE))('in %s ogni obiettivo ha spiegazione e consiglio', (lingua) => {
+    const t = traduttore(lingua);
+    for (const tipo of tipiUsati) {
+      for (const gruppo of ['spiegazioni', 'consigli']) {
+        const chiave = `quadri.${gruppo}.${tipo}`;
+        const testo = t(chiave);
+        // Il traduttore restituisce la chiave stessa quando il testo manca.
+        expect(testo, `${lingua}: manca ${chiave}`).not.toBe(chiave);
+        expect(testo.length, `${lingua}: ${chiave} troppo corto per spiegare qualcosa`)
+          .toBeGreaterThan(20);
+      }
+    }
+  });
+
+  it('anche i tipi di obiettivo non ancora usati sono spiegati', () => {
+    // OBIETTIVI ne dichiara piu' di quanti il percorso ne usi oggi. Chi ne mettera'
+    // uno in un Quadro nuovo non deve scoprire da un giocatore che manca il testo.
+    const t = traduttore('it');
+    for (const tipo of Object.keys(OBIETTIVI)) {
+      expect(t(`quadri.spiegazioni.${tipo}`), `manca la spiegazione di ${tipo}`)
+        .not.toBe(`quadri.spiegazioni.${tipo}`);
+      expect(t(`quadri.consigli.${tipo}`), `manca il consiglio di ${tipo}`)
+        .not.toBe(`quadri.consigli.${tipo}`);
+    }
   });
 });

@@ -7,6 +7,46 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.2] — 6 settembre 2026
+
+### Aggiunto
+
+**Plinto spiega l'obiettivo all'inizio di ogni Quadro (`src/ui/schermate/AperturaQuadro.jsx`)**
+
+Da un playtest umano — il primo di questo progetto — è emersa una lacuna che nessun test
+poteva trovare: **il gioco dice cosa fare ma non spiega mai cosa significhi.** La striscia
+sopra la plancia scrive «Chiudi una riga» e un contatore `0/1`; che cosa sia una riga, e come
+convenga affrontarla, non è scritto da nessuna parte. La presentazione al primo avvio non
+copre il buco: è una schermata sola, si vede una volta e non si può più rileggere.
+
+- Ogni Quadro ora si apre con Plinto che dice, in quest'ordine: **la frase dell'obiettivo**
+  (la stessa che resterà sopra la plancia), **che cosa significa**, **un consiglio su come
+  ottenerlo** e **quante mosse hai**.
+- Il consiglio è un consiglio vero, non un incoraggiamento. «Scegline una e finiscila, invece
+  di riempirne tre a metà» è un'informazione; «ce la puoi fare» non lo è.
+- Testi scritti per **tutti e dieci** i tipi di obiettivo dichiarati in `OBIETTIVI`, non solo
+  per i nove che il percorso usa oggi: chi aggiungerà un Quadro con il decimo non deve
+  scoprire da un giocatore che manca la frase.
+- **Non si rivede premendo "Riprova"**: dopo un Quadro fallito si vuole ritentare subito, e
+  rileggere la stessa schermata a ogni tentativo la trasformerebbe da aiuto in pedaggio.
+  Resta raggiungibile tornando all'elenco e riaprendo il Quadro.
+- Verificato da `tests/quadri.test.js` (4 test nuovi) e da `npm run e2e-quadri`. I test
+  controllano la cosa che si rompe davvero: una spiegazione mancante non fa fallire niente,
+  mostra la **chiave di traduzione** al posto della frase — e la mostra proprio a chi sta
+  imparando le regole. Lo scenario nel browser verifica anche che la frase dell'apertura e
+  quella sopra la plancia siano **la stessa**: se dicessero cose diverse, il giocatore non
+  saprebbe a quale credere.
+
+### Noto e non risolto
+
+- **Le bombe non sono spiegate da nessuna parte.** Il giocatore vede un anello bianco al
+  centro di un blocco e nessun testo dell'applicazione dice che cosa faccia. È l'unico
+  elemento che cambia l'esito di una mossa, e compare già nella prima mano del Quadro 1.
+- **Non c'è modo di rileggere le regole.** L'introduzione compare una volta sola e non esiste
+  una voce "Come si gioca". Non sono spiegati nemmeno l'Intreccio, la modalità a due tocchi e
+  il gioco da tastiera.
+
+
 ## [0.2.1] — 6 settembre 2026
 
 Nessuna regola di gioco cambiata. Questa versione chiude difetti trovati riverificando codice e
