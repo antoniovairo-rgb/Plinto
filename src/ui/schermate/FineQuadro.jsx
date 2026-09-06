@@ -1,7 +1,7 @@
-import { descriviObiettivi } from './Quadri.jsx';
+import { descriviObiettivi, descriviObiettivo } from './Quadri.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
-import { numero } from '../../i18n/formato.js';
+
 
 /**
  * Esito di un livello.
@@ -50,7 +50,7 @@ export function SchermoFineQuadro({
           <div className="pl-fine__dettagli">
             {esito.progressi.map((p) => (
               <div className="pl-fine__riga" key={p.tipo}>
-                <span>{t(`quadri.obiettivi.${p.tipo}`).replace('{n}', numero(p.quanti))}</span>
+                <span>{descriviObiettivo(p.tipo, p.quanti, t)}</span>
                 <strong className={p.completo ? 'pl-quadro-esito--vinto' : ''}>
                   {p.fatto} / {p.quanti}
                 </strong>

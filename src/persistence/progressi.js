@@ -37,7 +37,19 @@ export function prossimoQuadro(totale, progressi = caricaProgressi()) {
 /**
  * Registra un tentativo. Conserva il risultato migliore: meno mosse a parita' di
  * successo, e a parita' di mosse il punteggio piu' alto.
- * @returns {{progressi:object, miglioramento:boolean, primaVolta:boolean}}
+ *
+ * Il campo con la mappa salvata si chiama `salvati` e NON `progressi`. Si chiamava
+ * cosi', e ha causato un difetto che ha portato allo schermo nero: `statoQuadro()`
+ * restituisce anche lei un campo `progressi`, ma e' un ARRAY (le righe "obiettivo: 3
+ * su 5"), mentre questo e' un OGGETTO (la mappa dei livelli superati). Fusi in un
+ * unico oggetto di esito, il secondo sovrascriveva il primo, e la schermata di
+ * sconfitta -- l'unica che quelle righe le disegna -- chiamava .map() su un oggetto.
+ * Vincendo non succedeva niente, perdendo il gioco si spegneva.
+ *
+ * Due nomi uguali per due cose diverse nello stesso oggetto: il tipo di errore che
+ * nessuno vede rileggendo, perche' ogni singolo pezzo e' giusto.
+ *
+ * @returns {{salvati:object, miglioramento:boolean, primaVolta:boolean}}
  */
 export function registraTentativo(numero, { superato, mosse, punteggio }) {
   const progressi = caricaProgressi();
@@ -48,7 +60,7 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
     // Anche un tentativo fallito viene contato, ma non crea un record dal nulla.
     if (precedente) progressi[numero] = { ...precedente, tentativi };
     write(KEYS.PROGRESS, progressi);
-    return { progressi, miglioramento: false, primaVolta: false };
+    return { salvati: progressi, miglioramento: false, primaVolta: false };
   }
 
   const meglio = !precedente
@@ -60,7 +72,7 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
     : { ...precedente, tentativi };
 
   write(KEYS.PROGRESS, progressi);
-  return { progressi, miglioramento: meglio && Boolean(precedente), primaVolta: !precedente };
+  return { salvati: progressi, miglioramento: meglio && Boolean(precedente), primaVolta: !precedente };
 }
 
 /** Quanti Quadri sono stati superati. */

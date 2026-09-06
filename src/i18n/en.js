@@ -214,6 +214,12 @@ export default {
     pezzo: 'Piece {n}, {celle} cells',
     pezzoMorto: 'does not fit on the grid any more',
   },
+  errore: {
+    titolo: 'Something broke',
+    testo: 'The game stopped because of an error. It is not your fault and you have lost nothing.',
+    ricarica: 'Reload the game',
+    dati: 'Records, stats and cleared levels are safe: they stay on your device.',
+  },
   comune: {
     chiudi: 'Close',
     indietro: 'Back',

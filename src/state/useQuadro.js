@@ -66,12 +66,17 @@ export function useQuadro() {
       if (stato.finito && !registrato) {
         setRegistrato(true);
         const riepilogo = summarize(dopo);
-        const registrazione = registraTentativo(quadro.numero, {
+        const { miglioramento, primaVolta } = registraTentativo(quadro.numero, {
           superato: stato.completato,
           mosse: riepilogo.moves,
           punteggio: riepilogo.score,
         });
-        setEsito({ ...stato, ...registrazione, riepilogo });
+        // Si prende SOLO cio' che serve alla schermata, invece di riversarci dentro
+        // tutto quello che la funzione restituisce. Prima era `{ ...stato,
+        // ...registrazione }`, e un campo omonimo dell'una sovrascriveva quello
+        // dell'altra: la schermata di sconfitta chiamava .map() su un oggetto e il
+        // gioco si spegneva. Elencare i campi costa una riga e chiude la categoria.
+        setEsito({ ...stato, miglioramento, primaVolta, riepilogo });
       }
       return dopo;
     });

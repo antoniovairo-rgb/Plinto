@@ -115,14 +115,14 @@ export function SchermoQuadri({ onApri, onIndietro, t }) {
  * esiste per quel tipo, il traduttore restituisce la chiave stessa e si ricade sul
  * plurale, quindi aggiungerne una nuova non richiede di toccare questo codice.
  */
+export function descriviObiettivo(tipo, quanti, t) {
+  if (quanti === 1) {
+    const singolare = t(`quadri.obiettivi.${tipo}Uno`);
+    if (!singolare.startsWith('quadri.obiettivi.')) return singolare;
+  }
+  return t(`quadri.obiettivi.${tipo}`).replace('{n}', numero(quanti));
+}
+
 export function descriviObiettivi(quadro, t) {
-  return quadro.obiettivi
-    .map(({ tipo, quanti }) => {
-      if (quanti === 1) {
-        const singolare = t(`quadri.obiettivi.${tipo}Uno`);
-        if (!singolare.startsWith('quadri.obiettivi.')) return singolare;
-      }
-      return t(`quadri.obiettivi.${tipo}`).replace('{n}', numero(quanti));
-    })
-    .join(' + ');
+  return quadro.obiettivi.map(({ tipo, quanti }) => descriviObiettivo(tipo, quanti, t)).join(' + ');
 }

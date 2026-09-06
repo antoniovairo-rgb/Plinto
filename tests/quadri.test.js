@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI } from '../src/core/quadro.js';
-import { gridFromString, findCompletedGroups, filledCount, allPlacements } from '../src/core/grid.js';
+import { gridFromString, findCompletedGroups, filledCount, allPlacements, placeShape } from '../src/core/grid.js';
 import { traduttore, LINGUE } from '../src/i18n/index.js';
 import { celleDa } from '../src/ui/MiniGriglia.jsx';
+import { descriviObiettivo } from '../src/ui/schermate/Quadri.jsx';
 import { GRID_SIZE } from '../src/config/rules.js';
 
 const memoria = new Map();
@@ -306,5 +307,76 @@ describe('disegno dell obiettivo', () => {
         expect(i).toBeLessThan(GRID_SIZE * GRID_SIZE);
       }
     }
+  });
+});
+
+/**
+ * La sconfitta di un livello.
+ *
+ * Un difetto arrivato fino a un giocatore, con l'effetto peggiore possibile: schermo
+ * nero e gioco bloccato. La causa era una COLLISIONE DI NOMI. `statoQuadro()`
+ * restituisce `progressi` come ARRAY (le righe "obiettivo: 3 su 5");
+ * `registraTentativo()` restituiva `progressi` come OGGETTO (la mappa dei livelli
+ * superati). L'esito era costruito con `{ ...stato, ...registrazione }` e il secondo
+ * sovrascriveva il primo; la schermata di sconfitta -- l'unica che quelle righe le
+ * disegna -- chiamava .map() su un oggetto e React smontava tutto.
+ *
+ * Vincendo non succedeva niente, perche' quel campo non viene mai letto. E' il motivo
+ * per cui nessun test lo ha visto: coprivano la vittoria, non la sconfitta.
+ *
+ * Qui si controlla la causa (i due nomi non devono tornare a coincidere) e la forma
+ * dell'esito. Il rendering vero e' coperto da `npm run e2e-quadri`, che adesso perde
+ * un livello apposta.
+ */
+describe('sconfitta di un livello', () => {
+  beforeEach(() => memoria.clear());
+
+  it('registraTentativo non restituisce un campo che si chiama progressi', () => {
+    // Il nome e' quello che ha causato il difetto: se torna, torna anche il difetto.
+    for (const superato of [true, false]) {
+      const esito = progressi.registraTentativo(1, { superato, mosse: 9, punteggio: 100 });
+      expect(Object.keys(esito)).not.toContain('progressi');
+      expect(esito.salvati).toBeTypeOf('object');
+    }
+  });
+
+  it('lo stato di un livello perso elenca i progressi come array', () => {
+    const quadro = quadroNumero(1);
+    let partita = iniziaQuadro(quadro, { now: 0 });
+    // Si gioca fino a esaurire le mosse senza mai chiudere niente.
+    for (let m = 0; m < quadro.maxMosse; m += 1) {
+      const stato = statoQuadro(quadro, partita);
+      if (stato.finito) break;
+      let scelta = null;
+      for (let i = 0; i < partita.hand.length && !scelta; i += 1) {
+        const pezzo = partita.hand[i];
+        if (!pezzo) continue;
+        for (const [row, col] of allPlacements(partita.grid, pezzo.shape)) {
+          const { grid } = placeShape(partita.grid, pezzo.shape, row, col, 1, pezzo.bombe);
+          if (findCompletedGroups(grid).length === 0) { scelta = { i, row, col }; break; }
+        }
+      }
+      if (!scelta) break;
+      partita = giocaNelQuadro(quadro, partita, scelta.i, scelta.row, scelta.col, m * 1000);
+    }
+
+    const finale = statoQuadro(quadro, partita);
+    expect(finale.fallito).toBe(true);
+    // La forma che la schermata di sconfitta si aspetta, e che era stata sostituita.
+    expect(Array.isArray(finale.progressi)).toBe(true);
+    expect(finale.progressi.length).toBe(quadro.obiettivi.length);
+    for (const p of finale.progressi) {
+      expect(p).toHaveProperty('tipo');
+      expect(p).toHaveProperty('fatto');
+      expect(p).toHaveProperty('quanti');
+    }
+  });
+
+  it('un obiettivo da uno si legge al singolare', () => {
+    // "Chiudi 1 righe" e' il genere di dettaglio che fa sembrare tradotto male un
+    // gioco scritto bene. La schermata di sconfitta lo scriveva cosi'.
+    const t = traduttore('it');
+    expect(descriviObiettivo('righe', 1, t)).toBe('Chiudi una riga');
+    expect(descriviObiettivo('righe', 3, t)).toBe('Chiudi 3 righe');
   });
 });

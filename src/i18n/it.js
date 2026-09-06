@@ -227,6 +227,12 @@ export default {
     pezzo: 'Pezzo {n}, {celle} celle',
     pezzoMorto: 'non entra più sulla griglia',
   },
+  errore: {
+    titolo: 'Qualcosa si è rotto',
+    testo: 'Il gioco si è fermato per un errore. Non è colpa tua e non hai perso niente.',
+    ricarica: 'Ricarica il gioco',
+    dati: 'Record, statistiche e livelli superati sono al sicuro: restano sul tuo dispositivo.',
+  },
   comune: {
     chiudi: 'Chiudi',
     indietro: 'Indietro',

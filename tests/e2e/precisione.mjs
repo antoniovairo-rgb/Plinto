@@ -102,7 +102,17 @@ async function trascina(slot, riga, colonna) {
   await page.mouse.down();
   await page.mouse.move(punti.cx, punti.cy, { steps: 6 });
   await page.mouse.up();
-  const scadenza = Date.now() + 500;
+  // Si aspetta che il salvataggio CAMBI, non un tempo fisso: e' l'unico segnale
+  // affidabile che la mossa e' stata registrata davvero.
+  //
+  // La finestra e' larga di proposito. Con 500 ms questa prova ha segnalato uno
+  // scostamento inesistente mentre la macchina era occupata da un altro browser: il
+  // pezzo era atterrato benissimo, solo qualche decina di millisecondi piu' tardi.
+  // Una prova che accusa il codice giusto quando la macchina e' carica e' peggio di
+  // inutile, perche' insegna a non fidarsi dei propri controlli. Attendere piu' a
+  // lungo non costa niente quando le cose funzionano -- si esce al primo cambiamento
+  // -- e toglie di mezzo l'unica causa di falsi allarmi che questa prova abbia avuto.
+  const scadenza = Date.now() + 3000;
   while (Date.now() < scadenza) {
     const ora = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
     if (ora !== prima) return true;

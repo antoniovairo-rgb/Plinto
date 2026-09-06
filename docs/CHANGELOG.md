@@ -7,6 +7,103 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.9] — 6 settembre 2026
+
+### Corretto
+
+**Perdere un livello spegneva il gioco: schermo nero e blocco**
+
+Segnalato da chi giocava. È il difetto peggiore comparso finora, e la causa è una
+**collisione di nomi** fra due funzioni che restituivano un campo chiamato allo stesso
+modo ma con due tipi diversi:
+
+- `statoQuadro()` → `progressi` è un **array**: le righe «obiettivo: 3 su 5»;
+- `registraTentativo()` → `progressi` era un **oggetto**: la mappa dei livelli salvati.
+
+`useQuadro` costruiva l'esito con `{ ...stato, ...registrazione }`, e il secondo
+**sovrascriveva** il primo. La schermata di sconfitta chiamava `.map()` su un oggetto,
+React smontava l'intero albero, e il giocatore restava davanti al fondo della pagina
+senza un pulsante per uscirne.
+
+**Si vedeva solo perdendo**, perché quelle righe le disegna soltanto il ramo della
+sconfitta: vincendo il campo rotto non veniva mai letto. Ed è il motivo per cui nessun
+test lo ha visto — le prove nel browser coprivano la vittoria di un livello e mai la
+sconfitta.
+
+Corretto in due punti, perché il difetto ne aveva due:
+- Il campo di `registraTentativo` si chiama ora **`salvati`**: due nomi uguali per due
+  cose diverse non possono più incontrarsi.
+- `useQuadro` **elenca i campi che gli servono** invece di riversare nell'esito tutto
+  quello che la funzione restituisce. Costa una riga e chiude la categoria, non il
+  singolo caso.
+
+### Aggiunto
+
+**Una rete di sicurezza attorno all'applicazione (`src/ui/Salvagente.jsx`)**
+- Il difetto qui sopra è stato corretto alla radice, ma la fragilità che lo rendeva
+  **catastrofico invece che fastidioso** è un'altra cosa: in React un errore di
+  rendering smonta tutto l'albero, e il giocatore vede il fondo e basta.
+- Ora un errore mostra un messaggio, il dettaglio tecnico (serve a chi segnala) e un
+  pulsante per ricaricare, più la rassicurazione che **record, statistiche e livelli
+  superati non si perdono**: stanno in `localStorage` e un errore di disegno non li
+  tocca. Nessun invio a servizi esterni: il gioco non parla con nessuno **nemmeno
+  quando si rompe**.
+- Un difetto in una schermata deve costare quella schermata, non la partita.
+
+**La sconfitta di un livello è provata nel browser**
+- `npm run e2e-quadri` ora **perde il livello 2 apposta** — una sequenza calcolata dal
+  motore che piazza sempre senza mai chiudere un gruppo — e verifica che la schermata
+  compaia, che elenchi gli obiettivi e che ci sia il pulsante per riprovare.
+- Verifica anche che **non sia entrata in funzione la rete di sicurezza**: la rete
+  evita lo schermo nero al giocatore, ma per una prova resta un fallimento pieno.
+  Rimettendo il difetto, lo scenario adesso fallisce subito con un messaggio chiaro
+  invece di morire trenta secondi dopo su un pulsante che non esiste più.
+- Tre test in più in `tests/quadri.test.js`, fra cui uno che vieta il nome `progressi`
+  nel valore di ritorno di `registraTentativo`: se torna il nome, torna il difetto.
+
+### Aggiunto (verifiche)
+
+**`npm run verifica`: un comando solo che esegue tutto (`tools/verifica-tutto.mjs`)**
+- I controlli di questo progetto sono nove ed erano nove comandi separati: chi pubblica
+  doveva ricordarseli tutti. **Non me li sono ricordati tutti** — ho pubblicato saltando
+  `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto era
+  proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria è un
+  elenco che prima o poi si dimentica.
+- Nessuna verifica viene saltata quando un'altra fallisce: si arriva sempre in fondo e si
+  stampa il quadro completo, perché sapere che tre cose sono rotte è più utile che
+  scoprirle una alla volta in tre esecuzioni.
+
+**`npm run comunicazioni`: tutto ciò che il gioco dice, in entrambe le lingue**
+- Attraversa **ogni schermata** — presentazione, partita libera, home, le quattro pagine
+  secondarie, mappa, apertura di un livello, livello in corso, sfida — e legge il testo
+  che finisce **davvero sullo schermo**, cercando: chiavi di traduzione non risolte,
+  segnaposto non sostituiti (`{max}`), `undefined`, `NaN`, schermate senza testo, e la
+  rete di sicurezza entrata in funzione.
+- Ogni trappola cercata è un difetto **già accaduto** in questo progetto, non un'ipotesi.
+  Nessuno dei tre rompeva niente: il gioco funzionava benissimo mentre diceva cose
+  sbagliate, ed è per questo che servono controlli sul testo e non solo sul comportamento.
+
+### Corretto (metodo)
+
+- **Le pipe mascheravano gli esiti.** Lanciavo le prove come `node prova.mjs | tail -3`:
+  il codice di uscita di una pipeline è quello dell'**ultimo** comando, cioè di `tail`,
+  sempre 0. Una prova di precisione che segnalava uno scostamento mi risultava passata.
+  `npm run verifica` non usa pipe e riporta gli esiti veri.
+- **La prova di precisione aspettava troppo poco.** Attendeva fino a 500 ms che il
+  salvataggio cambiasse; con la macchina occupata da un altro browser ha segnalato uno
+  scostamento inesistente — il pezzo era atterrato benissimo, solo qualche decina di
+  millisecondi più tardi. Ora la finestra è di 3 secondi: non costa niente quando le cose
+  funzionano, perché si esce al primo cambiamento. Una prova che accusa il codice giusto
+  quando la macchina è carica è peggio che inutile, perché insegna a non fidarsi dei
+  propri controlli.
+
+### Cambiato
+
+- La schermata di sconfitta scriveva «Chiudi **1 righe**». La forma singolare esisteva
+  già ma solo la mappa la usava: ora `descriviObiettivo` è una funzione sola, condivisa
+  fra le due schermate.
+
+
 ## [0.2.8] — 6 settembre 2026
 
 ### Corretto

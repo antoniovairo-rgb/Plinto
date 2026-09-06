@@ -54,6 +54,34 @@ function buchi(g) {
 }
 
 /** Calcola in Node una sequenza di mosse che supera il Quadro. */
+/**
+ * Sequenza che PERDE il livello: piazza sempre senza mai chiudere un gruppo.
+ *
+ * Serve a coprire la schermata di sconfitta, che per tre versioni non e' mai stata
+ * disegnata da nessuna prova. Ci si e' rotta dentro -- schermo nero e gioco bloccato --
+ * e l'ha trovata un giocatore, non i test: coprivano solo la vittoria.
+ */
+function sequenzaPerdente(quadro) {
+  let partita = iniziaQuadro(quadro, { now: 0 });
+  const mosse = [];
+  for (let m = 0; m < (quadro.maxMosse ?? 40) + 2; m += 1) {
+    if (statoQuadro(quadro, partita).finito) break;
+    let scelta = null;
+    for (let i = 0; i < partita.hand.length && !scelta; i += 1) {
+      const pezzo = partita.hand[i];
+      if (!pezzo) continue;
+      for (const [row, col] of allPlacements(partita.grid, pezzo.shape)) {
+        const { grid } = placeShape(partita.grid, pezzo.shape, row, col, 1, pezzo.bombe);
+        if (findCompletedGroups(grid).length === 0) { scelta = { handIndex: i, row, col }; break; }
+      }
+    }
+    if (!scelta) break;
+    mosse.push(scelta);
+    partita = giocaNelQuadro(quadro, partita, scelta.handIndex, scelta.row, scelta.col, m * 1000);
+  }
+  return statoQuadro(quadro, partita).fallito ? mosse : null;
+}
+
 function sequenzaVincente(quadro, tentativi = 40) {
   for (let prova = 0; prova < tentativi; prova += 1) {
     const rng = createRng(1000 + prova);
@@ -86,6 +114,28 @@ function sequenzaVincente(quadro, tentativi = 40) {
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
 page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
+
+/**
+ * Dove afferrare il pezzo e dove lasciarlo, per una mossa calcolata dal motore.
+ * Sta in un posto solo perche' la usano due sequenze: quella che vince e quella che
+ * perde. Duplicarla significherebbe che una delle due invecchia.
+ */
+async function posizioneMossa(mossa) {
+  return page.evaluate(({ handIndex, row, col }) => {
+    const posto = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex];
+    const pezzo = posto?.querySelector('.pl-pezzo');
+    if (!pezzo) return null;
+    const rp = pezzo.getBoundingClientRect();
+    const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
+    const celle = document.querySelectorAll('.pl-plancia .pl-cella');
+    const c0 = celle[0].getBoundingClientRect();
+    const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
+    const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
+    const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
+    const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
+    return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
+  }, mossa);
+}
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
 
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
@@ -197,20 +247,7 @@ if (!sequenza) {
 } else {
   console.log(`3. sequenza vincente calcolata in Node: ${sequenza.length} mosse. La rigioco nel browser...`);
   for (const mossa of sequenza) {
-    const punti = await page.evaluate(({ handIndex, row, col }) => {
-      const posto = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex];
-      const pezzo = posto?.querySelector('.pl-pezzo');
-      if (!pezzo) return null;
-      const rp = pezzo.getBoundingClientRect();
-      const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
-      const celle = document.querySelectorAll('.pl-plancia .pl-cella');
-      const c0 = celle[0].getBoundingClientRect();
-      const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
-      const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
-      const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
-      const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
-      return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
-    }, mossa);
+    const punti = await posizioneMossa(mossa);
     if (!punti) { errori.push('QUADRO: pezzo non trovato durante la riproduzione'); break; }
     await page.mouse.move(punti.px, punti.py);
     await page.mouse.down();
@@ -251,6 +288,74 @@ if (!sequenza) {
   const numeroSottoPlinto = await page.locator('.pl-avanza__tappa--qui .pl-avanza__numero').innerText().catch(() => '');
   if (numeroSottoPlinto.trim() !== '2') {
     errori.push(`AVANZAMENTO: Plinto e fermo sulla tappa "${numeroSottoPlinto.trim()}" invece di essersi spostato sulla 2`);
+  }
+}
+
+// ---------- 3c. PERDERE un livello non deve rompere niente ----------
+// La schermata di sconfitta e' rimasta scoperta per tre versioni, e ci si e' rotta
+// dentro: schermo nero, gioco bloccato, nessun modo di uscirne. L'ha trovata un
+// giocatore. Qui si perde il livello 2 apposta e si controlla che la schermata ci sia
+// DAVVERO e che nessun errore JavaScript sia arrivato alla pagina.
+{
+  const erroriPrima = errori.length;
+  await page.getByRole('button', { name: /Torna ai livelli/ }).click();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').nth(1).click();
+  await page.waitForSelector('.pl-apertura');
+  await page.getByRole('button', { name: /^Gioca$/ }).click();
+  await page.waitForSelector('.pl-plancia');
+
+  const daPerdere = quadroNumero(2);
+  const perdente = sequenzaPerdente(daPerdere);
+  if (!perdente) {
+    errori.push('LIVELLO 2: non si riesce a costruire una sequenza perdente, il controllo non prova nulla');
+  } else {
+    for (const mossa of perdente) {
+      const punti = await posizioneMossa(mossa);
+      if (!punti) break;
+      await page.mouse.move(punti.px, punti.py);
+      await page.mouse.down();
+      await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+      await page.mouse.up();
+      await page.waitForTimeout(45);
+      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+    }
+    await page.waitForTimeout(400);
+
+    const esitoPerso = (await page.locator('.pl-quadro-esito').innerText().catch(() => '')).trim();
+    const corpo = (await page.locator('body').innerText().catch(() => '')).trim();
+    const righe = await page.locator('.pl-fine__riga').count();
+    const riprova = await page.getByRole('button', { name: /Riprova/ }).count();
+    await page.screenshot({ path: `${OUT}/3c-sconfitta.png` });
+    console.log(`3c. sconfitta: "${esitoPerso}", ${righe} righe di obiettivo`);
+
+    // Due modi in cui questo passaggio puo' andare male, ed entrambi sono fatali per
+    // quelli successivi: la pagina vuota (React ha smontato tutto) oppure la rete di
+    // sicurezza entrata in funzione. La rete evita lo schermo nero al giocatore, ma
+    // per una prova resta un fallimento pieno: il gioco si e' rotto lo stesso.
+    const retePresente = await page.locator('.pl-crash').count();
+    if (corpo.length === 0 || retePresente > 0) {
+      errori.push(retePresente > 0
+        ? 'SCONFITTA: e entrata in funzione la rete di sicurezza, cioe il gioco si e rotto perdendo un livello'
+        : 'SCONFITTA: la pagina e VUOTA, il gioco si e spento perdendo un livello');
+      console.error('\n================ ESITO ================');
+      errori.forEach((e) => console.error(`PROBLEMA - ${e}`));
+      await browser.close();
+      if (server) server.kill();
+      process.exit(1);
+    }
+    if (!/non superato/i.test(esitoPerso)) {
+      errori.push(`SCONFITTA: la schermata dice "${esitoPerso}" invece dell esito`);
+    }
+    if (righe !== daPerdere.obiettivi.length) {
+      errori.push(`SCONFITTA: ${righe} righe di obiettivo invece di ${daPerdere.obiettivi.length}`);
+    }
+    if (riprova !== 1) errori.push('SCONFITTA: manca il pulsante per riprovare');
+    if (errori.length > erroriPrima) {
+      // Gli errori del browser finiscono in `errori` tramite i gestori in cima: se ne
+      // sono comparsi ORA, e' successo perdendo.
+      console.log('   (attenzione: sono comparsi errori durante la sconfitta)');
+    }
   }
 }
 

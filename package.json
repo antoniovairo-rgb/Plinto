@@ -1,6 +1,6 @@
 {
   "name": "plinto",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "private": true,
   "type": "module",
   "description": "PLINTO — puzzle game a blocchi originale, gratuito e senza pubblicita.",
@@ -22,7 +22,9 @@
     "e2e-quadri": "node tests/e2e/quadri.mjs",
     "taratura": "node tools/taratura.mjs",
     "contrasti": "node tools/contrasti.mjs",
-    "catena": "node tools/misura-catena.mjs"
+    "catena": "node tools/misura-catena.mjs",
+    "comunicazioni": "node tests/e2e/comunicazioni.mjs",
+    "verifica": "node tools/verifica-tutto.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

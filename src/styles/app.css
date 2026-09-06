@@ -1483,3 +1483,21 @@ button {
   text-transform: uppercase;
   color: var(--pl-text-faint);
 }
+
+/* --------------------------------------------------- rete di sicurezza --- */
+/* Quello che si vede se un errore ferma il gioco. Deve essere leggibile senza
+   dipendere da niente di complicato: se siamo qui, qualcosa non ha funzionato. */
+.pl-crash { display: grid; place-items: center; padding: 24px; text-align: center; }
+.pl-crash__corpo { max-width: 380px; display: grid; gap: 4px; }
+.pl-crash__titolo {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--pl-text);
+}
+.pl-crash__dettaglio {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  word-break: break-word;
+  margin-bottom: 18px;
+}

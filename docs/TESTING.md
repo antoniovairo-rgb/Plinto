@@ -7,6 +7,22 @@
 > `icone`, `prova-pages`, `prova-desktop`) **non sono stati rieseguiti in questa revisione**:
 > dove si riportano loro risultati, è detto da dove vengono.
 
+## Prima di pubblicare: un comando solo
+
+```bash
+npm run verifica       # esegue TUTTI i controlli, in ordine, e riassume l'esito
+```
+
+Nove controlli, un comando. Esiste perché i comandi separati vanno ricordati, e ricordarli
+tutti non ha funzionato: una pubblicazione è stata bloccata dall'integrazione continua
+proprio sul controllo che non era stato eseguito in locale. Non si ferma al primo
+fallimento — arriva in fondo e stampa il quadro completo, perché sapere che tre cose sono
+rotte è più utile che scoprirle una alla volta.
+
+**Attenzione alle pipe.** Lanciare una prova come `node prova.mjs | tail -3` restituisce il
+codice di uscita di `tail`, non quello della prova: è sempre 0, e un fallimento passa
+inosservato. È già successo. `npm run verifica` non usa pipe.
+
 ## Come si eseguono
 
 ```bash
@@ -23,6 +39,7 @@ npm run prova-pages    # build servita da una sottocartella (caso GitHub Pages)
 npm run prova-desktop  # aspetto su schermi grandi
 npm run contrasti      # rimisura i contrasti WCAG leggendo tokens.css
 npm run catena         # distribuzione della Catena, e confronto con le regole scartate
+npm run comunicazioni  # ogni schermata, in ogni lingua: i testi che il giocatore legge
 npm run taratura       # ricalcola i bersagli dei Quadri facendoli giocare
 ```
 
@@ -45,7 +62,7 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **201 test in 14 file, tutti verdi**, durata ~12.5 s (misurato il 6 settembre
+`npm test`: **204 test in 14 file, tutti verdi**, durata ~12.5 s (misurato il 6 settembre
 2026). Undici e mezzo di quei secondi sono tutti in `invarianti.test.js`, che gioca 240
 partite complete: è il costo di quel file, non un rallentamento della suite.
 
@@ -63,7 +80,7 @@ dall'ultima esecuzione registrata e non da questa revisione.
 | `tests/durate.test.js` | 4 | i tre token di durata di `tokens.css` coincidono con le costanti di `src/feel/durate.js`; nessuna `animation:` del foglio di stile scrive una durata a mano fuori dalle tre animazioni infinite dichiarate, e per ognuna di quelle il selettore che la porta deve ricomparire con `animation: none` sotto `prefers-reduced-motion`. La falla precedente — l'espressione regolare vedeva solo durate intere, quindi `1.6s` e `3.2s` le sfuggivano — è chiusa |
 | `tests/privacy.test.js` | 5 | nessun file del prodotto apre una connessione di rete; l'unico dominio esterno è PayPal e sta solo nel file di configurazione; la pagina non carica font o fogli di stile esterni; tutte le chiavi salvate stanno sotto un unico prefisso dichiarato; più un test che verifica che il controllo esamini davvero dei file |
 | `tests/script.test.js` | 16 | `node --check` su ogni script di `tools/`, `tests/e2e/` e `src/sim/` — cioè su tutto il codice eseguibile che **nessun altro test importa**; più un test che verifica che l'elenco non sia vuoto |
-| `tests/quadri.test.js` | 30 | definizione dei Quadri (griglie iniziali ben formate, nessun gruppo già completo, almeno un pezzo piazzabile) e svolgimento del percorso (sblocco progressivo, conservazione del risultato migliore, conteggio dei tentativi); più i testi e il **disegno** della schermata di apertura — che la miniatura corrisponda alla geometria vera (nove caselle sulla stessa riga, nove dentro un solo riquadro 3x3, le due figure dell'Intreccio che si incrociano davvero) e che gli obiettivi senza una forma sulla griglia non vengano disegnati affatto —, oltre ai testi — **ogni** tipo di obiettivo, in **ogni** lingua, deve avere spiegazione e consiglio. Quest'ultimo controllo esiste perché la frase è costruita a runtime: se manca, non fallisce niente e il giocatore vede la chiave di traduzione al posto della spiegazione, proprio mentre sta imparando le regole |
+| `tests/quadri.test.js` | 33 | definizione dei Quadri (griglie iniziali ben formate, nessun gruppo già completo, almeno un pezzo piazzabile) e svolgimento del percorso (sblocco progressivo, conservazione del risultato migliore, conteggio dei tentativi); più i testi e il **disegno** della schermata di apertura — che la miniatura corrisponda alla geometria vera (nove caselle sulla stessa riga, nove dentro un solo riquadro 3x3, le due figure dell'Intreccio che si incrociano davvero) e che gli obiettivi senza una forma sulla griglia non vengano disegnati affatto —, oltre ai testi — **ogni** tipo di obiettivo, in **ogni** lingua, deve avere spiegazione e consiglio. Quest'ultimo controllo esiste perché la frase è costruita a runtime: se manca, non fallisce niente e il giocatore vede la chiave di traduzione al posto della spiegazione, proprio mentre sta imparando le regole |
 | `tests/i18n.test.js` | 35 | parità delle chiavi fra italiano e inglese; nessuna traduzione vuota; una chiave inesistente restituisce la chiave; una lingua sconosciuta ricade sull'italiano; i segnaposto `{r}` e `{c}` dell'etichetta di cella esistono in tutte le lingue; **nessuna chiave definita e mai usata**; **nessuna chiave usata e mai definita**; più l'**ortografia italiana**: nessun testo può contenere le parole che in italiano non esistono senza accento (`piu`, `perche`, `puo`, `gia`, `cosi`, `meta`, `citta`, `sara`…), gli accenti devono esserci davvero e la risposta affermativa deve essere «Sì». Nasce da un difetto reale: tutto il dizionario italiano era in ASCII puro, e «un gruppo **e** una riga» significa un'altra cosa da «un gruppo **è** una riga» |
 | `tests/sfide.test.js` | 6 | Sfida del Giorno — formato della data **locale e non UTC** (compreso il caso delle 23:30, in cui UTC sarebbe già il giorno dopo); stessa partita a parità di giorno e partite diverse fra giorni diversi; conservazione del solo miglior punteggio di giornata; un giorno mai giocato non vale zero per errore; ordinamento dello storico; potatura dello storico a 60 giorni |
 | `tests/contrasti.test.js` | 1 | esegue `tools/contrasti.mjs`, che rimisura **tutti** i contrasti WCAG leggendo `tokens.css` ed esce con errore se anche uno solo scende sotto soglia (4.5:1 per il testo, 3:1 per i blocchi), su entrambi i temi e sul fondo più sfavorevole di ciascuno. Nasce da un difetto ripetuto due volte: contrasti dichiarati in un commento e mai misurati |
@@ -176,6 +193,7 @@ con codice 1):
 | Script | Comando | Che domanda risponde |
 | --- | --- | --- |
 | `tests/e2e/precisione.mjs` | `npm run precisione` | il pezzo atterra **esattamente** dove è stato lasciato? Verifica cella per cella, per ogni forma del catalogo e in più punti della griglia. È il gesto che il giocatore ripete centinaia di volte: se il pezzo cade una cella più in là, il gioco sembra rotto anche con tutte le regole giuste |
+| `tests/e2e/comunicazioni.mjs` | `npm run comunicazioni` | attraversa **ogni schermata in entrambe le lingue** e legge il testo che finisce davvero sullo schermo: chiavi di traduzione non risolte, segnaposto non sostituiti (`{max}`), `undefined`, `NaN`, schermate senza testo, e la rete di sicurezza entrata in funzione. Ogni trappola cercata è un difetto **già accaduto** qui, non un'ipotesi. Nessuna di quelle rompeva niente: il gioco funzionava mentre diceva cose sbagliate |
 | `tests/e2e/quadri.mjs` | `npm run e2e-quadri` | percorre i Quadri in un browser vero: mappa, **apertura con la spiegazione di Plinto**, partita, esito, sblocco del Quadro successivo e avanzamento conservato dopo una ricarica. La sequenza vincente viene calcolata in Node e poi **rigiocata trascinando i pezzi**, quindi verifica anche che il motore e il gioco nel browser siano lo stesso gioco. Controlla inoltre che la frase dell'apertura e quella sopra la plancia coincidano, e che nessuna chiave di traduzione arrivi allo schermo non risolta |
 | `tests/e2e/resistenza.mjs` | `npm run soak` (o `node tests/e2e/resistenza.mjs [mosse]`) | dopo centinaia di mosse il gioco è ancora fluido? Ha accumulato memoria, nodi DOM, timer o cicli di animazione lasciati per strada? Sono i difetti che non si vedono in una partita di prova da dieci mosse |
 
