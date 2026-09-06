@@ -290,7 +290,15 @@ export function App() {
       ) : null}
 
       {schermata === 'quadri' ? (
-        <SchermoQuadri onApri={apriQuadro} onIndietro={() => setSchermata('home')} t={t} />
+        <SchermoQuadri
+          onApri={apriQuadro}
+          onIndietro={() => setSchermata('home')}
+          // Dopo l'azzeramento il conteggio va riletto: la mappa si ridisegna da sola
+          // perche' rilegge il salvataggio, ma la home mostrerebbe ancora il vecchio
+          // livello sul pulsante principale.
+          onAzzerato={() => setQuadriFatti(quantiSuperati())}
+          t={t}
+        />
       ) : null}
 
       {schermata === 'statistiche' ? (

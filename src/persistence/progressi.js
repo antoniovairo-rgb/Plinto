@@ -75,6 +75,18 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
   return { salvati: progressi, miglioramento: meglio && Boolean(precedente), primaVolta: !precedente };
 }
 
+/**
+ * Cancella tutto l'avanzamento nei livelli e riporta al livello 1.
+ *
+ * Tocca SOLO i livelli. Record della partita libera, statistiche e Sfida del Giorno
+ * restano dove sono: chi vuole rigiocare il percorso da capo non sta chiedendo di
+ * buttare via mesi di partite. Per cancellare tutto c'e' gia' "Azzera i miei dati"
+ * nelle impostazioni, ed e' giusto che siano due cose distinte.
+ */
+export function azzeraProgressi() {
+  write(KEYS.PROGRESS, {});
+}
+
 /** Quanti Quadri sono stati superati. */
 export function quantiSuperati(progressi = caricaProgressi()) {
   return Object.keys(progressi).filter((n) => progressi[n]).length;

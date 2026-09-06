@@ -1,8 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { QUADRI, ATTI, TOTALE_QUADRI } from '../../config/quadri.js';
-import { caricaProgressi, quadroSbloccato, prossimoQuadro } from '../../persistence/progressi.js';
+import { caricaProgressi, quadroSbloccato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 
 /**
@@ -18,7 +18,12 @@ import { numero } from '../../i18n/formato.js';
  *
  * Le tappe chiuse restano leggibili, spente ma non nascoste, e dicono cosa chiedono.
  */
-export function SchermoQuadri({ onApri, onIndietro, t }) {
+export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
+  // Ricominciare da capo si conferma DUE volte. Non e' burocrazia: e' un'azione che
+  // cancella ore di gioco e non si puo' annullare, e sta nella stessa schermata che
+  // si apre per scegliere un livello. Un tocco solo, da un pollice che scorre, la
+  // farebbe partire per sbaglio; due volte no.
+  const [passoConferma, setPassoConferma] = useState(0);
   const progressi = caricaProgressi();
   const superati = QUADRI.filter((q) => progressi[q.numero]).length;
   const corrente = prossimoQuadro(TOTALE_QUADRI, progressi);
@@ -103,6 +108,49 @@ export function SchermoQuadri({ onApri, onIndietro, t }) {
           </section>
         );
       })}
+
+      {/* Ricominciare da capo. In fondo alla mappa, dopo tutti i livelli: chi la cerca
+          la trova, chi non la cerca non ci inciampa. */}
+      <div className="pl-ricomincia">
+        {superati === 0 ? null : passoConferma === 0 ? (
+          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo"
+                  onClick={() => setPassoConferma(1)}>
+            {t('quadri.ricomincia')}
+          </button>
+        ) : passoConferma === 1 ? (
+          <>
+            <p className="pl-nota pl-nota--allarme">
+              {t('quadri.ricominciaAvviso').replace('{n}', numero(superati))}
+            </p>
+            <div className="pl-segmenti">
+              <button type="button" className="pl-btn pl-btn--fantasma"
+                      onClick={() => setPassoConferma(0)}>
+                {t('comune.no')}
+              </button>
+              <button type="button" className="pl-btn" onClick={() => setPassoConferma(2)}>
+                {t('comune.si')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Seconda conferma: dice cosa NON si perde, perche' il timore ragionevole
+                a questo punto e' di star cancellando anche record e statistiche. */}
+            <p className="pl-nota pl-nota--allarme">{t('quadri.ricominciaSicuro')}</p>
+            <p className="pl-nota">{t('quadri.ricominciaResta')}</p>
+            <div className="pl-segmenti">
+              <button type="button" className="pl-btn pl-btn--fantasma"
+                      onClick={() => setPassoConferma(0)}>
+                {t('comune.no')}
+              </button>
+              <button type="button" className="pl-btn pl-btn--pericolo"
+                      onClick={() => { azzeraProgressi(); setPassoConferma(0); onAzzerato?.(); }}>
+                {t('quadri.ricominciaConferma')}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </Pagina>
   );
 }

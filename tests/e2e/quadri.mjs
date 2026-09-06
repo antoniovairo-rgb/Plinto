@@ -378,8 +378,69 @@ if (await page.locator('.pl-tappa--fatta').count() !== 1) {
 }
 console.log('5. avanzamento conservato dopo la ricarica');
 
+// ---------- 6. Ricominciare dal livello 1, con due conferme ----------
+// Un'azione che cancella ore di gioco e non si puo' annullare, in una schermata che si
+// apre per scegliere un livello. Si verifica che serva confermare DUE volte e che si
+// possa tirarsi indietro a ogni passo: un solo tocco, da un pollice che scorre, la
+// farebbe partire per sbaglio.
+{
+  // Si lascia un record finto della partita libera: senza, il controllo qui sotto
+  // verificherebbe la sopravvivenza di una cosa che non e' mai esistita, cioe' niente.
+  await page.evaluate(() => window.localStorage.setItem('plinto:records', JSON.stringify({ best: 4321 })));
+  const primaDi = await page.locator('.pl-tappa--fatta').count();
+  if (primaDi === 0) {
+    errori.push('RICOMINCIA: non ci sono livelli superati, il controllo non prova nulla');
+  } else {
+    // Passo 1, poi ci si tira indietro: l'avanzamento non deve muoversi.
+    await page.getByRole('button', { name: /Ricomincia dal livello 1/ }).click();
+    await page.getByRole('button', { name: /^No$/ }).click();
+    if (await page.locator('.pl-tappa--fatta').count() !== primaDi) {
+      errori.push('RICOMINCIA: annullando alla prima conferma l avanzamento e cambiato lo stesso');
+    }
+
+    // Passo 1 e 2, e ci si tira indietro alla seconda: ancora niente deve cambiare.
+    await page.getByRole('button', { name: /Ricomincia dal livello 1/ }).click();
+    await page.getByRole('button', { name: /^Sì$/ }).click();
+    // L'etichetta va cercata ESATTA: cercando "ricomincia" si trova anche il pulsante
+    // di partenza, che ricompare dopo un azzeramento andato a buon fine — e il
+    // controllo direbbe che la seconda conferma c'e' proprio quando non c'e'.
+    const secondaConferma = await page.getByRole('button', { name: /^Sì, ricomincia$/ }).count();
+    if (secondaConferma === 0) {
+      errori.push('RICOMINCIA: manca la SECONDA conferma, basta un tocco solo per cancellare tutto');
+    } else {
+      await page.getByRole('button', { name: /^No$/ }).click();
+      if (await page.locator('.pl-tappa--fatta').count() !== primaDi) {
+        errori.push('RICOMINCIA: annullando alla seconda conferma l avanzamento e cambiato lo stesso');
+      }
+    }
+
+    // E adesso fino in fondo. Solo se le due conferme ci sono davvero: se ne manca una
+    // l'azzeramento e' gia' avvenuto, e insistere seppellirebbe la causa sotto un
+    // timeout su un pulsante che non esiste.
+    if (secondaConferma > 0) {
+    await page.getByRole('button', { name: /Ricomincia dal livello 1/ }).click();
+    await page.getByRole('button', { name: /^Sì$/ }).click();
+    await page.getByRole('button', { name: /^Sì, ricomincia$/ }).click();
+    await page.waitForTimeout(250);
+    const dopo = await page.locator('.pl-tappa--fatta').count();
+    const aperti = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
+    console.log(`6. ricomincia: da ${primaDi} livelli superati a ${dopo}, ${aperti} aperti`);
+    if (dopo !== 0) errori.push(`RICOMINCIA: restano ${dopo} livelli superati invece di 0`);
+    if (aperti !== 1) errori.push(`RICOMINCIA: ${aperti} livelli aperti invece del solo primo`);
+
+    // Il record della partita libera NON deve essere stato toccato: azzerare i livelli
+    // e' un'altra cosa da azzerare i dati, e chi preme qui non sta chiedendo quello.
+    const recordRimasto = await page.evaluate(() => window.localStorage.getItem('plinto:records'));
+    if (!recordRimasto || !recordRimasto.includes('4321')) {
+      errori.push(`RICOMINCIA: ha toccato anche il record della partita libera (${recordRimasto})`);
+    }
+    }
+  }
+}
+
 await browser.close();
 if (server) server.kill();
+
 
 console.log('\n================ ESITO ================');
 if (errori.length === 0) console.log('Nessun problema rilevato.');

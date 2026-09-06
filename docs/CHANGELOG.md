@@ -7,6 +7,32 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.3.0] — 6 settembre 2026
+
+### Aggiunto
+
+**Ricominciare il percorso dal livello 1 (`azzeraProgressi`, mappa dei livelli)**
+- Chiesto da chi gioca: arrivato al livello 5, non c'era modo di ripartire da capo.
+  Si potevano rigiocare i livelli già superati toccandoli sulla mappa, ma non azzerare
+  l'avanzamento.
+- Il comando sta **in fondo alla mappa**, dopo tutti i cento livelli: chi lo cerca lo
+  trova, chi non lo cerca non ci inciampa. Compare solo se c'è qualcosa da azzerare.
+- **Due conferme**, come richiesto. Non è burocrazia: è un'azione che cancella ore di
+  gioco, non si può annullare, e sta nella stessa schermata che si apre per scegliere
+  un livello — un solo tocco, da un pollice che scorre, la farebbe partire per sbaglio.
+  La prima conferma dice **quanti** livelli si perdono; la seconda dice che non si torna
+  indietro **e cosa non si perde**, perché il timore ragionevole a quel punto è di stare
+  cancellando anche record e statistiche.
+- **Azzera solo i livelli.** Record della partita libera, statistiche e Sfida del Giorno
+  restano dove sono: chi vuole rigiocare il percorso non sta chiedendo di buttare via
+  mesi di partite. Per cancellare tutto c'è già "Azzera i miei dati" nelle impostazioni,
+  ed è giusto che siano due cose distinte.
+- `npm run e2e-quadri` verifica che servano **due** conferme, che si possa tirarsi
+  indietro **a ogni passo** senza che l'avanzamento si muova, e che il record della
+  partita libera sopravviva. Provato togliendo una conferma: lo scenario fallisce con il
+  messaggio giusto.
+
+
 ## [0.2.9] — 6 settembre 2026
 
 ### Corretto

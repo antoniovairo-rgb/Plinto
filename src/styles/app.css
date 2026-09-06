@@ -1501,3 +1501,14 @@ button {
   word-break: break-word;
   margin-bottom: 18px;
 }
+
+/* ------------------------------------------------ ricominciare da capo --- */
+/* In fondo alla mappa, staccato dai livelli e in tono minore: e' un'azione che si
+   cerca, non una che deve farsi notare. */
+.pl-ricomincia {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--pl-line);
+  display: grid;
+  gap: 10px;
+}
