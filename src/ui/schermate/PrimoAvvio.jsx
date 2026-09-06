@@ -3,6 +3,7 @@ import { Pezzo } from '../Pezzo.jsx';
 import { getShape } from '../../core/shapes.js';
 import { Plinto } from '../Plinto.jsx';
 import { Bomba } from '../Bomba.jsx';
+import { REGOLE_INTRO } from '../../config/intro.js';
 
 /**
  * Presentazione al primo avvio.
@@ -29,23 +30,16 @@ export function PrimoAvvio({ onInizia, t }) {
           <Logo />
         </div>
 
+        {/* Le regole vengono da REGOLE_INTRO e non sono scritte una per una: e' la
+            stessa lista che i due script nel browser usano per sapere quante
+            aspettarsene, quindi il numero non puo' piu' scollarsi. */}
         <ol className="pl-intro__regole">
-          <li>
-            <span className="pl-intro__numero">1</span>
-            <span>{t('intro.uno')}</span>
-          </li>
-          <li>
-            <span className="pl-intro__numero">2</span>
-            <span>{t('intro.due')}</span>
-          </li>
-          <li>
-            <span className="pl-intro__numero">3</span>
-            <span>{t('intro.tre')}</span>
-          </li>
-          <li>
-            <span className="pl-intro__numero">4</span>
-            <span>{t('intro.quattro')}</span>
-          </li>
+          {REGOLE_INTRO.map((chiave, i) => (
+            <li key={chiave}>
+              <span className="pl-intro__numero">{i + 1}</span>
+              <span>{t(`intro.${chiave}`)}</span>
+            </li>
+          ))}
         </ol>
 
         {/* Un esempio vale piu' di una spiegazione. I due pezzi mostrati chiudono

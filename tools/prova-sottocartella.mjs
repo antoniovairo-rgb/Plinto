@@ -14,6 +14,7 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join, normalize } from 'node:path';
 import { chromium } from 'playwright';
+import { REGOLE_INTRO } from '../src/config/intro.js';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
 const SOTTOCARTELLA = '/plinto/';
@@ -64,7 +65,9 @@ await page.goto(indirizzo, { waitUntil: 'networkidle' });
 
 // Deve comparire la presentazione, e da li' si deve poter giocare.
 const regole = await page.locator('.pl-intro__regole li').count();
-if (regole !== 3) errori.push(`la presentazione non compare (trovate ${regole} regole)`);
+if (regole !== REGOLE_INTRO.length) {
+  errori.push(`la presentazione mostra ${regole} regole invece di ${REGOLE_INTRO.length}`);
+}
 
 await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => {

@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import { createGame, serializeGame } from '../../src/core/engine.js';
 import { gridFromString } from '../../src/core/grid.js';
 import { getShape } from '../../src/core/shapes.js';
+import { REGOLE_INTRO } from '../../src/config/intro.js';
 import { existsSync } from 'node:fs';
 
 /**
@@ -88,7 +89,9 @@ const introVisibile = await page.locator('.pl-intro__regole li').count();
 const bombaSpiegata = await page.locator('.pl-intro__bomba .pl-bomba').count();
 await page.screenshot({ path: `${OUT}/00-primo-avvio.png` });
 console.log(`0. presentazione al primo avvio: regole mostrate ${introVisibile}, bomba illustrata: ${bombaSpiegata === 1}`);
-if (introVisibile !== 4) errori.push(`PRIMO AVVIO: la presentazione mostra ${introVisibile} regole invece di 4`);
+if (introVisibile !== REGOLE_INTRO.length) {
+  errori.push(`PRIMO AVVIO: la presentazione mostra ${introVisibile} regole invece di ${REGOLE_INTRO.length}`);
+}
 // La bomba e' l'unica regola che non si puo' dedurre giocando: un blocco appoggiato si
 // comporta come gli altri finche' non lo elimini, e a quel punto ne porta via otto.
 // Se sparisce da qui, il giocatore la scopre subendola.

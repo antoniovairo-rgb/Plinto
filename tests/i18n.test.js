@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import italiano from '../src/i18n/it.js';
 import inglese from '../src/i18n/en.js';
 import { traduttore, LINGUE, LINGUA_PREDEFINITA } from '../src/i18n/index.js';
+import { REGOLE_INTRO } from '../src/config/intro.js';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -158,5 +159,32 @@ describe('ortografia italiana', () => {
 
   it('la risposta affermativa e "Si" con accento', () => {
     expect(italiano.comune.si).toBe('Sì');
+  });
+});
+
+
+/**
+ * Le regole della presentazione.
+ *
+ * Il loro numero era scritto a mano in tre posti — il componente e i due script che
+ * pilotano un browser — e aggiungendo la quarta regola ne ho aggiornati due su tre:
+ * la pubblicazione e' fallita sul terzo. Ora la fonte e' una sola, `REGOLE_INTRO`, ma
+ * una lista puo' comunque crescere senza che qualcuno scriva la traduzione: in quel
+ * caso il giocatore leggerebbe "intro.cinque" al primo avvio, cioe' la prima cosa che
+ * vede del gioco.
+ */
+describe('regole della presentazione', () => {
+  it('ce ne sono, e sono poche come deve essere una presentazione', () => {
+    expect(REGOLE_INTRO.length).toBeGreaterThanOrEqual(3);
+    expect(REGOLE_INTRO.length).toBeLessThanOrEqual(6);
+  });
+
+  it.each(Object.keys(LINGUE))('in %s ogni regola ha il suo testo', (lingua) => {
+    const t = traduttore(lingua);
+    for (const chiave of REGOLE_INTRO) {
+      const testo = t(`intro.${chiave}`);
+      expect(testo, `${lingua}: manca intro.${chiave}`).not.toBe(`intro.${chiave}`);
+      expect(testo.length, `${lingua}: intro.${chiave} e troppo corto`).toBeGreaterThan(20);
+    }
   });
 });

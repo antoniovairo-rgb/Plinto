@@ -25,7 +25,7 @@
 
 Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
 
-- `npm test` passa: **190 test in 14 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
+- `npm test` passa: **193 test in 14 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
   `invarianti.test.js`, che gioca 240 partite complete);
 - `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
 - `npm run sim` funziona;
@@ -85,8 +85,8 @@ Decisione presa. Motivi:
   definizione, nessun disallineamento fra tipi e realtà a runtime.
 - Il costo — perdere il controllo statico — è compensato in parte dai commenti `@param` /
   `@returns` presenti su tutte le funzioni pubbliche del `core/` e in parte dalla suite di
-  test, che sul `core/` resta la parte più densa: dei 190 test, 102 riguardano il `core/`
-  (griglia, punteggio, bombe, generatore, motore, invarianti), 22 i Quadri (definizione, svolgimento e testi della schermata di apertura), 32 l'i18n (chiavi, traduzioni e ortografia italiana), 6 la
+  test, che sul `core/` resta la parte più densa: dei 193 test, 102 riguardano il `core/`
+  (griglia, punteggio, bombe, generatore, motore, invarianti), 22 i Quadri (definizione, svolgimento e testi della schermata di apertura), 35 l'i18n (chiavi, traduzioni, ortografia italiana e regole della presentazione), 6 la
   Sfida del Giorno e 28 le promesse del progetto su se stesso (privacy, sintassi degli script,
   allineamento delle durate, contrasti WCAG, colori dell'icona).
 

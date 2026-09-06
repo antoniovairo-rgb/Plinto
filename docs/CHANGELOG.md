@@ -7,7 +7,7 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
-## [0.2.4] — 6 settembre 2026
+## [0.2.5] — 6 settembre 2026
 
 ### Aggiunto
 
@@ -20,6 +20,15 @@ La versione è dichiarata in un solo posto — il campo `version` di `package.js
 - Accanto alle parole c'è il disegno: il blocco con il segno, e il quadrato 3x3 che porta
   via. Verificato da `npm run e2e`, che controlla sia le quattro regole sia la presenza
   dell'illustrazione.
+- **Il numero delle regole ora ha una fonte sola** (`src/config/intro.js`). Era scritto a
+  mano in tre posti — il componente e i due script che pilotano un browser — e aggiungendo
+  la quarta ne ho aggiornati due su tre: **la pubblicazione è fallita sul terzo**. È la
+  stessa categoria di errore che in questo progetto ha già prodotto una costante dichiarata
+  due volte e una palette rimasta indietro nell'icona: una modifica meccanica applicata a
+  *quasi* tutti i posti. Adesso i due script importano l'elenco invece di contare a memoria,
+  e un test verifica che ogni regola abbia il suo testo in ogni lingua — perché una lista
+  può crescere senza che qualcuno scriva la traduzione, e il giocatore leggerebbe
+  `intro.cinque` come prima cosa del gioco.
 
 ### Corretto
 
