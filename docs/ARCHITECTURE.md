@@ -1,4 +1,4 @@
-# Architettura di QUADRA
+# Architettura di PLINTO
 
 > Fotografia del codice al **6 settembre 2026**, aggiornata a `f31b2d5`, cioè dopo i commit
 > `9253cc7` (interfaccia), `ee7b452` (game feel e audio), `fe290f7` (tastiera, accessibilità,
@@ -13,7 +13,7 @@
 | `src/config/` | `rules.js` (costanti di regolamento), `progetto.js` (link di donazione, contatto, anno) | niente | neutro |
 | `src/core/` | `rng.js`, `shapes.js`, `grid.js`, `scoring.js`, `generator.js`, `engine.js` | solo `config/` e se stesso | neutro (né DOM né React) |
 | `src/sim/` | `player.mjs` (giocatori artificiali), `run.mjs` (harness da riga di comando) | `core/`, `config/` | Node |
-| `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `quadra:`), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
+| `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `plinto:`), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
 | `src/styles/` | `tokens.css` (variabili del sistema di design, vedi `DESIGN_SYSTEM.md`), `app.css` (~770 righe, tutto il resto) | niente | browser |
 | `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
 | `src/audio/` | `suoni.js` — sintesi Web Audio: nove voci del gioco, **nessun file audio** | niente | browser (`AudioContext`) |
@@ -182,8 +182,8 @@ salvata non si riproduce l'animazione dell'ultima mossa.
         +--> stato locale React    appoggiate (260ms), esplosioni (420ms), puntiVolanti (950ms)
                     |
                     v
-              Plancia / Hud                    classi CSS: q-blocco--posato, q-blocco--esploso,
-                                               q-hud__valore--scatta, q-punti-volanti
+              Plancia / Hud                    classi CSS: pl-blocco--posato, pl-blocco--esploso,
+                                               pl-hud__valore--scatta, pl-punti-volanti
 ```
 
 Tre cose che questo flusso rende vere, e che vale la pena non rompere:
@@ -193,7 +193,7 @@ Tre cose che questo flusso rende vere, e che vale la pena non rompere:
    *come* rappresentarlo.
 2. **Le celle eliminate vengono ridisegnate per 420 ms dopo essere già uscite dallo stato.**
    `useEffettiMossa` tiene un `Set` di celle "in esplosione" e `Plancia` disegna un
-   `.q-blocco--esploso` dove la griglia dice già `0`. Senza, l'eliminazione sarebbe uno
+   `.pl-blocco--esploso` dove la griglia dice già `0`. Senza, l'eliminazione sarebbe uno
    scatto istantaneo.
 3. **L'impostazione "Animazioni" spegne la parte visiva ma non l'audio.** `useEffettiMossa`
    suona e vibra, poi esce prima di impostare classi e particelle. È deliberato: chi riduce
@@ -280,7 +280,7 @@ Restano aperte queste, e sono aperte per davvero.
 - **Prestazioni su dispositivo reale.** `src/ui/Plancia.jsx` disegna 81 `<div>` più un canvas
   sovrapposto; `<canvas>` e SVG per la griglia sono stati scartati implicitamente, senza una
   misura. Lo scenario e2e gira in Chromium su una macchina da sviluppo: **nessuno ha ancora
-  aperto QUADRA su un telefono lento**, e con quattro gruppi chiusi insieme si parla di oltre
+  aperto PLINTO su un telefono lento**, e con quattro gruppi chiusi insieme si parla di oltre
   trenta celle animate più fino a 900 particelle.
 - **Taratura del game feel.** Le costanti dell'interazione — sollevamento del pezzo sopra il
   dito a 1.35 celle, snap al centro più vicino, dimensione della cella nel tray limitata a

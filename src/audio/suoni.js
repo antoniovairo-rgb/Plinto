@@ -1,5 +1,5 @@
 /**
- * Audio di QUADRA — sintetizzato, non registrato.
+ * Audio di PLINTO — sintetizzato, non registrato.
  *
  * Non esiste un solo file audio nel progetto: ogni suono viene generato al momento
  * con oscillatori e inviluppi della Web Audio API. Tre motivi, in ordine di importanza:

@@ -23,7 +23,7 @@ function useSuonoRecord(attivo) {
 
 function Riga({ etichetta, valore }) {
   return (
-    <div className="q-fine__riga">
+    <div className="pl-fine__riga">
       <span>{etichetta}</span>
       <strong>{valore}</strong>
     </div>
@@ -47,22 +47,22 @@ export function SchermoFine({
     : nuoviRecord.includes('punteggio');
   useSuonoRecord(eRecord);
   return (
-    <div className="q-screen q-fine">
-      <div className="q-scroll">
-        <p className="q-fine__titolo">{eSfida ? t('sfida.titolo') : t('fine.titolo')}</p>
-        <p className="q-fine__motivo">
+    <div className="pl-screen pl-fine">
+      <div className="pl-scroll">
+        <p className="pl-fine__titolo">{eSfida ? t('sfida.titolo') : t('fine.titolo')}</p>
+        <p className="pl-fine__motivo">
           {eSfida ? t('sfida.spiegazione') : t('fine.motivo')}
         </p>
 
-        <div className={`q-fine__punteggio ${eRecord ? 'q-fine__punteggio--record' : ''}`}>
-          <span className="q-hud__etichetta">{t('fine.punteggio')}</span>
-          <span className="q-fine__numero">{numero(riepilogo.score)}</span>
+        <div className={`pl-fine__punteggio ${eRecord ? 'pl-fine__punteggio--record' : ''}`}>
+          <span className="pl-hud__etichetta">{t('fine.punteggio')}</span>
+          <span className="pl-fine__numero">{numero(riepilogo.score)}</span>
           {eRecord ? (
-            <span className="q-fine__nastro">
+            <span className="pl-fine__nastro">
               {eSfida ? t('sfida.nuovoRecordOggi') : t('fine.nuovoRecord')}
             </span>
           ) : (
-            <span className="q-fine__precedente">
+            <span className="pl-fine__precedente">
               {eSfida
                 ? `${t('sfida.tuoRecordOggi')} ${(esitoSfida?.best ?? numero(0))}`
                 : `${t('hud.record')} ${numero(record.best)}`}
@@ -71,13 +71,13 @@ export function SchermoFine({
         </div>
 
         {!eSfida && nuoviRecord.includes('catena') ? (
-          <p className="q-fine__extra">{t('fine.recordCatena')}</p>
+          <p className="pl-fine__extra">{t('fine.recordCatena')}</p>
         ) : null}
         {!eSfida && nuoviRecord.includes('mossa') ? (
-          <p className="q-fine__extra">{t('fine.recordMossa')}</p>
+          <p className="pl-fine__extra">{t('fine.recordMossa')}</p>
         ) : null}
 
-        <div className="q-fine__dettagli">
+        <div className="pl-fine__dettagli">
           <Riga etichetta={t('fine.mosse')} valore={riepilogo.moves} />
           <Riga etichetta={t('fine.gruppi')} valore={riepilogo.clearedGroups} />
           <Riga etichetta={t('fine.catenaMax')} valore={riepilogo.bestChain} />
@@ -92,11 +92,11 @@ export function SchermoFine({
         </div>
       </div>
 
-      <div className="q-fine__azioni">
-        <button type="button" className="q-btn q-btn--primario q-btn--largo" onClick={onRigioca}>
+      <div className="pl-fine__azioni">
+        <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onRigioca}>
           {t('fine.rigioca')}
         </button>
-        <button type="button" className="q-btn q-btn--fantasma q-btn--largo" onClick={onHome}>
+        <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onHome}>
           {t('fine.home')}
         </button>
       </div>

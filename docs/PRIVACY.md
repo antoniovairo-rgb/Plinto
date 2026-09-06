@@ -1,0 +1,64 @@
+# Informativa privacy di PLINTO
+
+*Ultimo aggiornamento: 6 settembre 2026. Questo testo descrive ciò che il codice fa
+davvero: se un giorno il gioco raccogliesse qualcosa, questo documento va cambiato
+**prima** di quella modifica, non dopo.*
+
+## In breve
+
+PLINTO non raccoglie nulla. Nessun account, nessuna registrazione, nessun
+identificativo, nessuna analitica, nessuna pubblicità, nessun servizio di terze parti.
+
+## Cosa viene salvato, e dove
+
+Il gioco salva alcune informazioni **esclusivamente nel tuo dispositivo**, nell'archivio
+locale del browser (`localStorage`), sotto le chiavi con prefisso `plinto:`:
+
+| Dato | A cosa serve |
+| --- | --- |
+| Record personali | Mostrarti il tuo miglior punteggio |
+| Statistiche di gioco | Partite giocate, mosse, gruppi chiusi, tempo totale |
+| Partita in corso | Riprendere la partita se chiudi il gioco |
+| Risultati della Sfida del Giorno | Il tuo miglior punteggio di ciascun giorno, per gli ultimi 60 giorni |
+| Impostazioni | Audio, vibrazione, animazioni, tema, lingua |
+
+Questi dati **non lasciano mai il dispositivo**. Non esiste alcun server a cui possano
+essere inviati: il gioco è un'applicazione che gira interamente nel browser.
+
+## Cosa NON viene fatto
+
+- Nessuna richiesta di rete verso domini di terze parti. Non ci sono font esterni,
+  librerie caricate da CDN, pixel di tracciamento o servizi di analisi.
+- Nessun cookie.
+- Nessun identificativo pubblicitario, nessuna profilazione.
+- Nessuna raccolta di dati personali: il gioco non chiede né il nome, né l'email,
+  né l'età, né la posizione.
+- Nessuna condivisione con nessuno, perché non c'è nulla da condividere.
+
+## L'unica eccezione: il collegamento alla donazione
+
+Nella schermata "Sostieni il progetto" c'è un collegamento a PayPal. **Il collegamento
+non fa nulla finché non lo tocchi tu.** Se lo tocchi, si apre il sito di PayPal, che ha
+una propria informativa privacy sulla quale non abbiamo alcun controllo. Il gioco non
+comunica a PayPal chi sei, perché non lo sa.
+
+## Cancellare i tuoi dati
+
+Due modi, entrambi immediati e definitivi:
+
+1. **Impostazioni → Azzera i miei dati**, dentro il gioco.
+2. Cancellando i dati del sito dal tuo browser.
+
+Non esiste una copia altrove: cancellati lì, sono cancellati e basta.
+
+## Minori
+
+Il gioco non raccoglie dati, quindi non raccoglie dati di minori. Non contiene
+pubblicità, acquisti, chat, contenuti generati dagli utenti né collegamenti esterni
+oltre a quello della donazione.
+
+## Come verificarlo
+
+Il codice sorgente è ispezionabile. Le uniche funzioni che scrivono dati sono in
+`src/persistence/storage.js`, e usano solo `window.localStorage`. In tutto il progetto
+non esiste una sola chiamata di rete.

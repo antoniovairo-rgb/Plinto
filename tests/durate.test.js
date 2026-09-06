@@ -18,15 +18,15 @@ describe('allineamento fra durate JavaScript e CSS', () => {
   }
 
   it('il token dell atterraggio corrisponde alla costante JavaScript', () => {
-    expect(millisecondi('q-t-atterraggio')).toBe(DURATA_ATTERRAGGIO);
+    expect(millisecondi('pl-t-atterraggio')).toBe(DURATA_ATTERRAGGIO);
   });
 
   it('il token dell esplosione corrisponde alla costante JavaScript', () => {
-    expect(millisecondi('q-t-esplosione')).toBe(DURATA_ESPLOSIONE);
+    expect(millisecondi('pl-t-esplosione')).toBe(DURATA_ESPLOSIONE);
   });
 
   it('il token dei punti volanti corrisponde alla costante JavaScript', () => {
-    expect(millisecondi('q-t-punti')).toBe(DURATA_PUNTI);
+    expect(millisecondi('pl-t-punti')).toBe(DURATA_PUNTI);
   });
 
   it('le animazioni del foglio di stile non scrivono durate a mano', () => {

@@ -10,7 +10,7 @@
  */
 export function Annunci({ testo }) {
   return (
-    <div className="q-sr" role="status" aria-live="polite" aria-atomic="true">
+    <div className="pl-sr" role="status" aria-live="polite" aria-atomic="true">
       {testo}
     </div>
   );

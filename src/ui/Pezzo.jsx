@@ -10,15 +10,15 @@ export function Pezzo({ shape, color, cella, gap = 2, className = '', style = {}
     for (let c = 0; c < shape.width; c += 1) {
       const attiva = pieni.has(`${r}:${c}`);
       celle.push(
-        <div key={`${r}:${c}`} className="q-pezzo__cella">
-          {attiva ? <div className={`q-blocco q-blocco--${color}`} /> : null}
+        <div key={`${r}:${c}`} className="pl-pezzo__cella">
+          {attiva ? <div className={`pl-blocco pl-blocco--${color}`} /> : null}
         </div>,
       );
     }
   }
   return (
     <div
-      className={`q-pezzo ${className}`}
+      className={`pl-pezzo ${className}`}
       style={{
         gridTemplateColumns: `repeat(${shape.width}, ${cella}px)`,
         gridTemplateRows: `repeat(${shape.height}, ${cella}px)`,

@@ -16,9 +16,9 @@ export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietr
   return (
     <Pagina titolo={t('stats.titolo')} onIndietro={onIndietro} t={t}>
       {vuoto ? (
-        <p className="q-vuoto">{t('stats.vuoto')}</p>
+        <p className="pl-vuoto">{t('stats.vuoto')}</p>
       ) : (
-        <div className="q-lista">
+        <div className="pl-lista">
           <Voce etichetta={t('stats.migliore')} valore={numero(record.best)} />
           <Voce etichetta={t('stats.partite')} valore={stats.partite} />
           <Voce
@@ -37,8 +37,8 @@ export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietr
 
       {storicoSfide.length > 0 ? (
         <>
-          <h2 className="q-sezione">{t('sfida.storico')}</h2>
-          <div className="q-lista">
+          <h2 className="pl-sezione">{t('sfida.storico')}</h2>
+          <div className="pl-lista">
             {storicoSfide.map(({ giorno, best, partite }) => (
               <Voce
                 key={giorno}

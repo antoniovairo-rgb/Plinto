@@ -94,7 +94,7 @@ export function App() {
 
   if (schermata === 'gioco' && finita) {
     return (
-      <div className="q-app">
+      <div className="pl-app">
         <SchermoFine
           riepilogo={riepilogo}
           record={record}
@@ -112,7 +112,7 @@ export function App() {
   // Presentazione al primo avvio: una volta sola, e chi ha gia' giocato non la vede mai.
   if (!impostazioni.introVista) {
     return (
-      <div className="q-app">
+      <div className="pl-app">
         <PrimoAvvio
           t={t}
           onInizia={() => { cambia('introVista', true); iniziaNuova(); }}
@@ -122,7 +122,7 @@ export function App() {
   }
 
   return (
-    <div className="q-app">
+    <div className="pl-app">
       {schermata === 'gioco' && inGioco ? (
         <SchermoGioco
           partita={partita}
@@ -184,15 +184,15 @@ export function App() {
       ) : null}
 
       {menuAperto ? (
-        <div className="q-velo" onClick={() => setMenuAperto(false)}>
-          <div className="q-menu" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="q-btn q-btn--largo" onClick={() => setMenuAperto(false)}>
+        <div className="pl-velo" onClick={() => setMenuAperto(false)}>
+          <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
               {t('comune.chiudi')}
             </button>
-            <button type="button" className="q-btn q-btn--largo" onClick={iniziaNuova}>
+            <button type="button" className="pl-btn pl-btn--largo" onClick={iniziaNuova}>
               {t('home.nuovaPartita')}
             </button>
-            <button type="button" className="q-btn q-btn--fantasma q-btn--largo" onClick={tornaAllaHome}>
+            <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={tornaAllaHome}>
               {t('fine.home')}
             </button>
           </div>

@@ -1,5 +1,5 @@
 /**
- * QUADRA — costanti di regolamento.
+ * PLINTO — costanti di regolamento.
  * Fonte unica di verita per il bilanciamento: nessun numero magico sparso nel codice.
  * Ogni valore qui e' documentato in docs/GAMEPLAY_RULES.md.
  */
@@ -8,7 +8,7 @@
 export const GRID_SIZE = 9;
 
 /** Lato di un quadrante. GRID_SIZE deve essere divisibile per questo valore. */
-export const QUADRANT_SIZE = 3;
+export const PLINTONT_SIZE = 3;
 
 /** Quanti pezzi vengono offerti contemporaneamente al giocatore. */
 export const HAND_SIZE = 3;

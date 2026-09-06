@@ -62,6 +62,6 @@ describe('Sfida del Giorno', () => {
     for (let g = 1; g <= 80; g += 1) {
       registraSfida(g, `2026-01-${String(g).padStart(2, '0')}`);
     }
-    expect(Object.keys(JSON.parse(memoria.get('quadra:sfide'))).length).toBeLessThanOrEqual(60);
+    expect(Object.keys(JSON.parse(memoria.get('plinto:sfide'))).length).toBeLessThanOrEqual(60);
   });
 });

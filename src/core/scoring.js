@@ -1,5 +1,5 @@
 /**
- * Sistema di punteggio di QUADRA.
+ * Sistema di punteggio di PLINTO.
  *
  * Tre livelli, tutti visibili al giocatore mentre gioca:
  *   1. CELLE      -> punti minimi per ogni cella appoggiata: feedback continuo.
@@ -7,7 +7,7 @@
  *   3. CATENA     -> moltiplicatore persistente che CRESCE quando elimini e
  *                    CALA DI UNO quando non elimini. Non si azzera mai di colpo.
  *
- * La Catena e' la firma di QUADRA: trasforma la partita in una tensione continua
+ * La Catena e' la firma di PLINTO: trasforma la partita in una tensione continua
  * ("non spezzare la catena") senza aggiungere una sola regola sul tabellone.
  *
  * Trasparenza (regola di equita'): il moltiplicatore applicato e' quello che il

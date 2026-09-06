@@ -16,8 +16,8 @@ import {
 } from '../../src/core/grid.js';
 import { SHAPES, getShape } from '../../src/core/shapes.js';
 
-const INDIRIZZO = process.env.QUADRA_E2E_URL ?? 'http://localhost:5173/';
-const ESEGUIBILE = process.env.QUADRA_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
+const ESEGUIBILE = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const errori = [];
 let verifiche = 0;
@@ -42,7 +42,7 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 }, loca
 page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-await page.evaluate(() => window.localStorage.setItem('quadra:settings', JSON.stringify({ introVista: true })));
+await page.evaluate(() => window.localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true })));
 
 /** Prepara una partita con griglia vuota e una mano scelta, poi la apre. */
 async function preparaPartita(idForme) {
@@ -53,22 +53,22 @@ async function preparaPartita(idForme) {
     hand: idForme.map((id, i) => ({ uid: `p${i}`, shapeId: id, shape: getShape(id), color: 1 })),
   };
   await page.evaluate((s) => {
-    window.localStorage.setItem('quadra:partita', JSON.stringify(s));
+    window.localStorage.setItem('plinto:partita', JSON.stringify(s));
   }, serializeGame(stato));
   await page.reload({ waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /Riprendi la partita/ }).click();
-  await page.waitForSelector('.q-plancia');
+  await page.waitForSelector('.pl-plancia');
 }
 
 /** Trascina il pezzo nello slot indicato in modo che la sua origine cada in (riga, colonna). */
 async function trascina(slot, riga, colonna) {
   const punti = await page.evaluate(({ slot: s, riga: r, colonna: c }) => {
-    const posto = document.querySelectorAll('.q-tray .q-tray__posto')[s];
-    const pezzo = posto?.querySelector('.q-pezzo');
+    const posto = document.querySelectorAll('.pl-tray .pl-tray__posto')[s];
+    const pezzo = posto?.querySelector('.pl-pezzo');
     if (!pezzo) return null;
     const rp = pezzo.getBoundingClientRect();
     const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
-    const celle = document.querySelectorAll('.q-plancia .q-cella');
+    const celle = document.querySelectorAll('.pl-plancia .pl-cella');
     const c0 = celle[0].getBoundingClientRect();
     const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
     const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
@@ -84,14 +84,14 @@ async function trascina(slot, riga, colonna) {
   }, { slot, riga, colonna });
   if (!punti) return false;
 
-  const prima = await page.evaluate(() => window.localStorage.getItem('quadra:partita'));
+  const prima = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
   await page.mouse.move(punti.px, punti.py);
   await page.mouse.down();
   await page.mouse.move(punti.cx, punti.cy, { steps: 6 });
   await page.mouse.up();
   const scadenza = Date.now() + 500;
   while (Date.now() < scadenza) {
-    const ora = await page.evaluate(() => window.localStorage.getItem('quadra:partita'));
+    const ora = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
     if (ora !== prima) return true;
     await page.waitForTimeout(15);
   }
@@ -100,7 +100,7 @@ async function trascina(slot, riga, colonna) {
 
 /** Griglia attuale letta dal salvataggio. */
 async function grigliaAttuale() {
-  const raw = await page.evaluate(() => window.localStorage.getItem('quadra:partita'));
+  const raw = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
   return deserializeGame(JSON.parse(raw)).grid;
 }
 
@@ -146,7 +146,7 @@ for (const forma of SHAPES) {
 await browser.close();
 if (server) server.kill();
 
-console.log(`\nQUADRA — precisione del trascinamento: ${verifiche} prove su ${SHAPES.length} forme\n`);
+console.log(`\nPLINTO — precisione del trascinamento: ${verifiche} prove su ${SHAPES.length} forme\n`);
 console.log('================ ESITO ================');
 if (errori.length === 0) console.log(`Nessuno scostamento: ogni pezzo e atterrato esattamente dove doveva.`);
 else {

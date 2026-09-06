@@ -131,7 +131,7 @@ describe('eliminazione di riga, colonna e quadrante', () => {
     expect(groups[0]).toMatchObject({ type: 'col', index: 4 });
   });
 
-  it('trova un quadrante completo — la regola che distingue QUADRA', () => {
+  it('trova un quadrante completo — la regola che distingue PLINTO', () => {
     const g = gridFromString(`
       .........
       .........

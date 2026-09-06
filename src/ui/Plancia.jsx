@@ -31,11 +31,11 @@ export const Plancia = forwardRef(function Plancia(
         const inEsplosione = valore === 0 && esplosioni?.celle.has(i);
         const sottoCursore = cursore && cursore.row === r && cursore.col === c;
 
-        const classi = ['q-cella'];
-        if (sottoCursore) classi.push('q-cella--cursore');
-        if (inAnteprima) classi.push('q-cella--anteprima');
-        if (inAnteprima && !anteprimaValida) classi.push('q-cella--vietata');
-        if (daEliminare) classi.push('q-cella--incandidata');
+        const classi = ['pl-cella'];
+        if (sottoCursore) classi.push('pl-cella--cursore');
+        if (inAnteprima) classi.push('pl-cella--anteprima');
+        if (inAnteprima && !anteprimaValida) classi.push('pl-cella--vietata');
+        if (daEliminare) classi.push('pl-cella--incandidata');
 
         out.push(
           <div
@@ -52,17 +52,17 @@ export const Plancia = forwardRef(function Plancia(
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
             {valore !== 0 ? (
-              <div className={`q-blocco q-blocco--${valore} ${appenaPosata ? 'q-blocco--posato' : ''}`} />
+              <div className={`pl-blocco pl-blocco--${valore} ${appenaPosata ? 'pl-blocco--posato' : ''}`} />
             ) : null}
             {valore === 0 && inAnteprima ? (
-              <div className={`q-blocco q-blocco--${anteprimaColore}`} />
+              <div className={`pl-blocco pl-blocco--${anteprimaColore}`} />
             ) : null}
             {/* Il blocco che sta sparendo viene ridisegnato per una frazione di secondo
                 dopo essere gia' uscito dallo stato: senza, l'eliminazione sarebbe uno
                 scatto e la mossa piu' soddisfacente del gioco passerebbe inosservata. */}
             {inEsplosione ? (
               <div
-                className="q-blocco q-blocco--esploso"
+                className="pl-blocco pl-blocco--esploso"
                 style={{ '--esploso': esplosioni.colore }}
               />
             ) : null}
@@ -75,10 +75,10 @@ export const Plancia = forwardRef(function Plancia(
       cursore, cellRefs, onCellPointerUp, t]);
 
   return (
-    <div className="q-plancia" ref={ref} role="grid" aria-label="QUADRA" data-in-mano={pezzoInMano ? 'si' : 'no'}>
+    <div className="pl-plancia" ref={ref} role="grid" aria-label="PLINTO" data-in-mano={pezzoInMano ? 'si' : 'no'}>
       {celle}
-      <div className="q-plancia__quadranti" />
-      <canvas className="q-plancia__particelle" ref={canvasRef} aria-hidden="true" />
+      <div className="pl-plancia__quadranti" />
+      <canvas className="pl-plancia__particelle" ref={canvasRef} aria-hidden="true" />
     </div>
   );
 });

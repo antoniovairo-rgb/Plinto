@@ -13,18 +13,18 @@ import { PAYPAL_URL } from '../../config/progetto.js';
 export function SchermoSostieni({ onIndietro, t }) {
   return (
     <Pagina titolo={t('sostieni.titolo')} onIndietro={onIndietro} t={t}>
-      <p className="q-testo">{t('sostieni.testo')}</p>
+      <p className="pl-testo">{t('sostieni.testo')}</p>
 
       {PAYPAL_URL ? (
-        <a className="q-btn q-btn--primario q-btn--largo" href={PAYPAL_URL}
+        <a className="pl-btn pl-btn--primario pl-btn--largo" href={PAYPAL_URL}
            target="_blank" rel="noopener noreferrer">
           {t('sostieni.bottone')}
         </a>
       ) : (
-        <p className="q-nota">{t('varie.donazioneNonAttiva')}</p>
+        <p className="pl-nota">{t('varie.donazioneNonAttiva')}</p>
       )}
 
-      <button type="button" className="q-btn q-btn--fantasma q-btn--largo" onClick={onIndietro}>
+      <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onIndietro}>
         {t('sostieni.noGrazie')}
       </button>
     </Pagina>

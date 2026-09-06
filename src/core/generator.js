@@ -1,5 +1,5 @@
 /**
- * Generatore della mano di QUADRA — casualita' controllata.
+ * Generatore della mano di PLINTO — casualita' controllata.
  *
  * Principio guida (vedi docs/GAMEPLAY_RULES.md, "Equita'"):
  *   il generatore puo' solo AIUTARE il giocatore, mai ostacolarlo.

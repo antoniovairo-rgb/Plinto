@@ -1,4 +1,4 @@
-# Regole di QUADRA
+# Regole di PLINTO
 
 > Documento di riferimento sulle regole. Ogni numero qui dentro è stato letto in
 > `src/config/rules.js`, `src/core/grid.js`, `src/core/scoring.js`,
@@ -22,7 +22,7 @@
 
 ## La griglia e i gruppi
 
-`GRID_SIZE = 9`, `QUADRANT_SIZE = 3`: 81 celle, 9 righe, 9 colonne e 9 quadranti 3x3
+`GRID_SIZE = 9`, `PLINTONT_SIZE = 3`: 81 celle, 9 righe, 9 colonne e 9 quadranti 3x3
 non sovrapposti (numerati 0..8 da sinistra a destra e dall'alto in basso).
 
 Un pezzo si appoggia con l'angolo alto-sinistra del proprio riquadro in una cella (riga,
@@ -201,7 +201,7 @@ esiste una sola regola che lo guardi.
 
 # EQUITÀ
 
-Questa è la sezione che conta. QUADRA dichiara per intero le proprie regole nascoste.
+Questa è la sezione che conta. PLINTO dichiara per intero le proprie regole nascoste.
 
 **Dichiarazione, verificabile nel sorgente.** `generateHand(grid, rngState, history)` in
 `src/core/generator.js` riceve tre soli argomenti: la griglia, lo stato del generatore

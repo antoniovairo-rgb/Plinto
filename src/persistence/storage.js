@@ -1,5 +1,5 @@
 /**
- * Persistenza locale di QUADRA.
+ * Persistenza locale di PLINTO.
  *
  * Privacy by design: TUTTO resta nel browser del giocatore. Nessun account,
  * nessun server, nessun identificativo, nessuna telemetria. Se il giocatore
@@ -9,7 +9,7 @@
  * ogni accesso e' protetto e il gioco deve funzionare comunque, solo senza memoria.
  */
 
-const PREFIX = 'quadra:';
+const PREFIX = 'plinto:';
 
 /** true se lo storage e' utilizzabile in questo contesto. */
 export function storageAvailable() {
@@ -54,7 +54,7 @@ export function remove(key) {
   }
 }
 
-/** Cancella tutti i dati di QUADRA (usato dal pulsante "azzera i miei dati"). */
+/** Cancella tutti i dati di PLINTO (usato dal pulsante "azzera i miei dati"). */
 export function clearAll() {
   try {
     const keys = [];

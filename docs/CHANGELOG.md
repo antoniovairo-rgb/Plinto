@@ -1,6 +1,6 @@
 # Changelog
 
-Tutte le modifiche degne di nota a QUADRA. Il formato segue una versione semplificata di
+Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplificata di
 [Keep a Changelog](https://keepachangelog.com/it/1.1.0/); il progetto usa
 [Versionamento Semantico](https://semver.org/lang/it/).
 
@@ -102,9 +102,9 @@ considerarsi non rilasciabile.
   altrimenti in una raffica di mosse diventerebbe inascoltabile.
 - Ogni cella ha un'etichetta con riga, colonna e stato; la barra della Catena è un
   `progressbar` con i valori corretti; gli interruttori sono `role="switch"`.
-- **Contrasti misurati, non stimati.** `--q-text-faint` era `#626b83`, cioè 3.55:1 sul fondo e
+- **Contrasti misurati, non stimati.** `--pl-text-faint` era `#626b83`, cioè 3.55:1 sul fondo e
   **2.88:1** sui pannelli, sotto la soglia WCAG AA di 4.5 per testo normale: sostituito con
-  `#838ca1` (5.60 e 4.54). `--q-danger` è stato schiarito da `#e4587e` (**4.37:1** sui
+  `#838ca1` (5.60 e 4.54). `--pl-danger` è stato schiarito da `#e4587e` (**4.37:1** sui
   pannelli) a `#ec6d8e` (5.21). I numeri sono scritti nel commento di `tokens.css` così che la
   prossima modifica parta da una misura e non da un'impressione.
 

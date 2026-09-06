@@ -1,6 +1,6 @@
 /**
  * Record personali e statistiche di vita del giocatore.
- * Sono l'unica forma di progressione di QUADRA: nessun livello, nessuna valuta,
+ * Sono l'unica forma di progressione di PLINTO: nessun livello, nessuna valuta,
  * nessuna ricompensa a tempo. Si torna a giocare per battere se stessi.
  */
 

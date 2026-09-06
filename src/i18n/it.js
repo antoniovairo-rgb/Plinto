@@ -73,7 +73,7 @@ export default {
     versione: 'Versione',
     privacyTitolo: 'Privacy',
     privacy:
-      'QUADRA non raccoglie nulla. Nessun account, nessuna registrazione, nessun tracciamento, '
+      'PLINTO non raccoglie nulla. Nessun account, nessuna registrazione, nessun tracciamento, '
       + 'nessuna pubblicita. Record e impostazioni restano nel tuo dispositivo e non vengono mai inviati altrove.',
     licenzeTitolo: 'Risorse e licenze',
   },

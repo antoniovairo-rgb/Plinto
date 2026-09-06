@@ -1,5 +1,5 @@
 /**
- * Motore di QUADRA: riduttore puro. Nessun DOM, nessun React, nessun timer.
+ * Motore di PLINTO: riduttore puro. Nessun DOM, nessun React, nessun timer.
  *
  * Tutto lo stato di una partita e' un oggetto serializzabile; ogni azione e' una
  * funzione (stato, argomenti) -> nuovo stato. Questo rende il gioco:

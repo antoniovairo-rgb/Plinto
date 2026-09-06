@@ -3,7 +3,7 @@ import { createGame, serializeGame } from '../../src/core/engine.js';
 import { gridFromString } from '../../src/core/grid.js';
 import { getShape } from '../../src/core/shapes.js';
 
-const OUT = process.env.QUADRA_E2E_OUT ?? '/tmp/quadra-e2e';
+const OUT = process.env.PLINTO_E2E_OUT ?? '/tmp/plinto-e2e';
 await (await import('node:fs/promises')).mkdir(OUT, { recursive: true });
 const errori = [];
 
@@ -37,7 +37,7 @@ const quasiFinita = (() => {
 
 // Il server di sviluppo viene avviato qui se non risponde gia': cosi' `npm run e2e`
 // funziona da solo, senza ricordarsi di aprire prima un altro terminale.
-const INDIRIZZO = process.env.QUADRA_E2E_URL ?? 'http://localhost:5173/';
+const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 let server = null;
 async function serverRisponde() {
   try {
@@ -65,39 +65,39 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 }, devi
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
 page.on('pageerror', (e) => errori.push(`pageerror: ${e.message}`));
 
-const contaBlocchi = () => page.locator('.q-plancia .q-blocco').count();
-const punteggio = () => page.locator('.q-hud__punteggio .q-hud__valore').innerText();
+const contaBlocchi = () => page.locator('.pl-plancia .pl-blocco').count();
+const punteggio = () => page.locator('.pl-hud__punteggio .pl-hud__valore').innerText();
 
 // ---------- 0. Primo avvio: la presentazione deve comparire una volta sola ----------
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-const introVisibile = await page.locator('.q-intro__regole li').count();
+const introVisibile = await page.locator('.pl-intro__regole li').count();
 await page.screenshot({ path: `${OUT}/00-primo-avvio.png` });
 console.log('0. presentazione al primo avvio: regole mostrate', introVisibile);
 if (introVisibile !== 3) errori.push('PRIMO AVVIO: la presentazione non mostra le tre regole');
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 await page.reload({ waitUntil: 'networkidle' });
-if (await page.locator('.q-intro__regole').count() !== 0) {
+if (await page.locator('.pl-intro__regole').count() !== 0) {
   errori.push('PRIMO AVVIO: la presentazione ricompare dopo il primo avvio');
 }
 
 // ---------- 1. Home ----------
-await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
 await page.reload({ waitUntil: 'networkidle' });
 await page.screenshot({ path: `${OUT}/01-home.png` });
 console.log('1. home caricata, titolo:', await page.title());
 
 // ---------- 2. Avvio partita ----------
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 await page.screenshot({ path: `${OUT}/02-partita.png` });
 console.log('2. partita avviata. Blocchi sulla griglia:', await contaBlocchi(), '| punteggio:', await punteggio());
 
 // ---------- 3. Trascinamento con mouse ----------
 const geo = await page.evaluate(() => {
-  const pezzo = document.querySelectorAll('.q-tray .q-pezzo')[0];
+  const pezzo = document.querySelectorAll('.pl-tray .pl-pezzo')[0];
   const r = pezzo.getBoundingClientRect();
-  const celle = document.querySelectorAll('.q-plancia .q-cella');
+  const celle = document.querySelectorAll('.pl-plancia .pl-cella');
   const c40 = celle[4 * 9 + 4].getBoundingClientRect();
   const stile = getComputedStyle(pezzo);
   const colonne = stile.gridTemplateColumns.split(' ').length;
@@ -113,7 +113,7 @@ await page.mouse.move(geo.pezzo.x, geo.pezzo.y);
 await page.mouse.down();
 await page.mouse.move(geo.bersaglio.x, geo.bersaglio.y, { steps: 12 });
 await page.screenshot({ path: `${OUT}/03-trascinamento.png` });
-const anteprima = await page.locator('.q-cella--anteprima').count();
+const anteprima = await page.locator('.pl-cella--anteprima').count();
 await page.mouse.up();
 await page.waitForTimeout(120);
 const dopo = await contaBlocchi();
@@ -141,25 +141,25 @@ const quasiRiga = (() => {
   });
 })();
 
-await page.evaluate((s) => window.localStorage.setItem('quadra:partita', JSON.stringify(s)), quasiRiga);
+await page.evaluate((s) => window.localStorage.setItem('plinto:partita', JSON.stringify(s)), quasiRiga);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /Riprendi/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const bersaglioRiga = await page.evaluate(() => {
-  const c = document.querySelectorAll('.q-plancia .q-cella')[8].getBoundingClientRect();
-  const p = document.querySelectorAll('.q-tray .q-pezzo')[0].getBoundingClientRect();
+  const c = document.querySelectorAll('.pl-plancia .pl-cella')[8].getBoundingClientRect();
+  const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
   return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
 });
 await page.mouse.move(bersaglioRiga.px, bersaglioRiga.py);
 await page.mouse.down();
 await page.mouse.move(bersaglioRiga.cx, bersaglioRiga.cy, { steps: 10 });
-const incandidate = await page.locator('.q-cella--incandidata').count();
+const incandidate = await page.locator('.pl-cella--incandidata').count();
 await page.mouse.up();
 await page.waitForTimeout(60);
-const esplosi = await page.locator('.q-blocco--esploso').count();
-const punti = await page.locator('.q-punti-volanti').count();
+const esplosi = await page.locator('.pl-blocco--esploso').count();
+const punti = await page.locator('.pl-punti-volanti').count();
 const particelleDisegnate = await page.evaluate(() => {
-  const cv = document.querySelector('.q-plancia__particelle');
+  const cv = document.querySelector('.pl-plancia__particelle');
   const ctx = cv.getContext('2d');
   const dati = ctx.getImageData(0, 0, cv.width, cv.height).data;
   let opachi = 0;
@@ -173,19 +173,19 @@ if (esplosi === 0) errori.push('ANIMAZIONE: nessun blocco in esplosione dopo un 
 if (punti === 0) errori.push('FEEDBACK: nessun punteggio volante dopo un eliminazione');
 if (particelleDisegnate === 0) errori.push('PARTICELLE: il canvas resta vuoto dopo un eliminazione');
 await page.waitForTimeout(600);
-const esplosiDopo = await page.locator('.q-blocco--esploso').count();
+const esplosiDopo = await page.locator('.pl-blocco--esploso').count();
 if (esplosiDopo !== 0) errori.push('ANIMAZIONE: i blocchi in esplosione non vengono ripuliti');
 
 // ---------- 4. Modalita a due tocchi ----------
-await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const primaTap = await contaBlocchi();
-await page.locator('.q-tray .q-pezzo-presa').first().click();
+await page.locator('.pl-tray .pl-pezzo-presa').first().click();
 await page.waitForTimeout(60);
-const selezionato = await page.locator('.q-tray__posto--selezionato').count();
-await page.locator('.q-plancia .q-cella').nth(8 * 9 + 4).click();
+const selezionato = await page.locator('.pl-tray__posto--selezionato').count();
+await page.locator('.pl-plancia .pl-cella').nth(8 * 9 + 4).click();
 await page.waitForTimeout(120);
 const dopoTap = await contaBlocchi();
 console.log(`4. due tocchi: slot selezionato ${selezionato} | blocchi ${primaTap} -> ${dopoTap}`);
@@ -193,18 +193,18 @@ if (selezionato !== 1) errori.push('TAP: il pezzo toccato non risulta selezionat
 if (dopoTap <= primaTap) errori.push('TAP: nessun blocco posizionato con la modalita a due tocchi');
 
 // ---------- 4b. Partita da tastiera, senza mai toccare il puntatore ----------
-await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const primaTastiera = await contaBlocchi();
 // Tab fino al primo pezzo, Invio per prenderlo, frecce per muoversi, Invio per appoggiare.
 await page.keyboard.press('Tab');
 await page.keyboard.press('Tab');
 await page.keyboard.press('Enter');
 await page.waitForTimeout(80);
-const cursoreVisibile = await page.locator('.q-cella--cursore').count();
-const anteprimaTastiera = await page.locator('.q-cella--anteprima').count();
+const cursoreVisibile = await page.locator('.pl-cella--cursore').count();
+const anteprimaTastiera = await page.locator('.pl-cella--anteprima').count();
 await page.keyboard.press('ArrowUp');
 await page.keyboard.press('ArrowLeft');
 await page.keyboard.press('Enter');
@@ -222,7 +222,7 @@ await page.keyboard.press('Enter');
 await page.waitForTimeout(60);
 await page.keyboard.press('Escape');
 await page.waitForTimeout(60);
-if (await page.locator('.q-cella--cursore').count() !== 0) {
+if (await page.locator('.pl-cella--cursore').count() !== 0) {
   errori.push('TASTIERA: Esc non annulla la selezione del pezzo');
 }
 
@@ -236,7 +236,7 @@ const punteggioPrima = await punteggio();
 const blocchiPrima = await contaBlocchi();
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /Riprendi/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const punteggioDopo = await punteggio();
 const blocchiDopo = await contaBlocchi();
 console.log(`5. ripresa dopo ricarica: punteggio ${punteggioPrima} -> ${punteggioDopo} | blocchi ${blocchiPrima} -> ${blocchiDopo}`);
@@ -246,17 +246,17 @@ if (punteggioPrima !== punteggioDopo || blocchiPrima !== blocchiDopo) {
 
 // ---------- 6. Fine partita ----------
 await page.evaluate((salvataggio) => {
-  window.localStorage.setItem('quadra:partita', JSON.stringify(salvataggio));
+  window.localStorage.setItem('plinto:partita', JSON.stringify(salvataggio));
 }, quasiFinita);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /Riprendi/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 await page.screenshot({ path: `${OUT}/05-quasi-finita.png` });
 console.log('   dopo la ripresa: blocchi sulla griglia', await contaBlocchi(), '| punteggio', await punteggio());
 // L'unica mossa possibile: il punto in una delle quattro celle libere (riga 0, colonna 0).
 const cellaLibera = await page.evaluate(() => {
-  const c = document.querySelectorAll('.q-plancia .q-cella')[0].getBoundingClientRect();
-  const p = document.querySelectorAll('.q-tray .q-pezzo')[0].getBoundingClientRect();
+  const c = document.querySelectorAll('.pl-plancia .pl-cella')[0].getBoundingClientRect();
+  const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
   return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
 });
 await page.mouse.move(cellaLibera.px, cellaLibera.py);
@@ -264,22 +264,22 @@ await page.mouse.down();
 await page.mouse.move(cellaLibera.cx, cellaLibera.cy, { steps: 10 });
 await page.mouse.up();
 await page.waitForTimeout(300);
-console.log('   dopo la mossa: blocchi', await contaBlocchi(), '| pezzi in mano', await page.locator('.q-tray .q-pezzo').count());
-const fineVisibile = await page.locator('.q-fine__numero').count();
+console.log('   dopo la mossa: blocchi', await contaBlocchi(), '| pezzi in mano', await page.locator('.pl-tray .pl-pezzo').count());
+const fineVisibile = await page.locator('.pl-fine__numero').count();
 await page.screenshot({ path: `${OUT}/06-fine.png` });
 console.log('6. schermata di fine partita mostrata:', fineVisibile === 1);
 if (fineVisibile !== 1) errori.push('FINE PARTITA: la schermata di riepilogo non e comparsa');
-else console.log('   punteggio finale mostrato:', await page.locator('.q-fine__numero').innerText());
+else console.log('   punteggio finale mostrato:', await page.locator('.pl-fine__numero').innerText());
 
 // ---------- 6b. Sfida del giorno e slot di salvataggio separati ----------
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 // Si lascia a meta' una partita libera...
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const geoLibera = await page.evaluate(() => {
-  const p = document.querySelectorAll('.q-tray .q-pezzo')[0].getBoundingClientRect();
-  const c = document.querySelectorAll('.q-plancia .q-cella')[40].getBoundingClientRect();
+  const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+  const c = document.querySelectorAll('.pl-plancia .pl-cella')[40].getBoundingClientRect();
   return { px: p.left + p.width / 2, py: p.top + p.height / 2, cx: c.left + c.width / 2, cy: c.top + c.height / 2 };
 });
 await page.mouse.move(geoLibera.px, geoLibera.py);
@@ -288,13 +288,13 @@ await page.mouse.move(geoLibera.cx, geoLibera.cy, { steps: 8 });
 await page.mouse.up();
 await page.waitForTimeout(120);
 const blocchiLibera = await contaBlocchi();
-await page.locator('.q-hud__menu').first().click();
+await page.locator('.pl-hud__menu').first().click();
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 
 // ...e si apre la Sfida del Giorno: deve essere una partita nuova e vuota.
 await page.getByRole('button', { name: /Sfida del giorno/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const blocchiSfida = await contaBlocchi();
 await page.screenshot({ path: `${OUT}/06b-sfida.png` });
 console.log(`6b. sfida del giorno: partita libera ${blocchiLibera} blocchi, sfida ${blocchiSfida} blocchi`);
@@ -302,11 +302,11 @@ if (blocchiSfida !== 0) errori.push('SFIDA: non parte da griglia vuota');
 
 // A parita di giorno la sfida deve essere identica: si annota la mano e si riavvia.
 const manoSfida = await page.evaluate(() =>
-  [...document.querySelectorAll('.q-tray .q-pezzo')].map((p) => {
+  [...document.querySelectorAll('.pl-tray .pl-pezzo')].map((p) => {
     const st = getComputedStyle(p);
     return `${st.gridTemplateColumns.split(' ').length}x${st.gridTemplateRows.split(' ').length}`;
   }).join(','));
-await page.locator('.q-hud__menu').first().click();
+await page.locator('.pl-hud__menu').first().click();
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 
@@ -316,38 +316,38 @@ if (riprendiVisibile === 0) {
   errori.push('SFIDA: aprire la sfida ha cancellato la partita libera in corso');
 } else {
   await page.getByRole('button', { name: /Riprendi la partita/ }).click();
-  await page.waitForSelector('.q-plancia');
+  await page.waitForSelector('.pl-plancia');
   const blocchiRipresi = await contaBlocchi();
   if (blocchiRipresi !== blocchiLibera) {
     errori.push(`SFIDA: la partita libera ripresa ha ${blocchiRipresi} blocchi invece di ${blocchiLibera}`);
   }
-  await page.locator('.q-hud__menu').first().click();
+  await page.locator('.pl-hud__menu').first().click();
   await page.getByRole('button', { name: /Torna alla home/ }).click();
   await page.waitForTimeout(150);
 }
 
 // Riaprendo la sfida nello stesso giorno la si RIPRENDE, non se ne comincia un'altra.
 await page.getByRole('button', { name: /Sfida del giorno|Riprendi la sfida/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 const manoSfidaDopo = await page.evaluate(() =>
-  [...document.querySelectorAll('.q-tray .q-pezzo')].map((p) => {
+  [...document.querySelectorAll('.pl-tray .pl-pezzo')].map((p) => {
     const st = getComputedStyle(p);
     return `${st.gridTemplateColumns.split(' ').length}x${st.gridTemplateRows.split(' ').length}`;
   }).join(','));
 console.log(`   mano della sfida: "${manoSfida}" -> "${manoSfidaDopo}"`);
 if (manoSfida !== manoSfidaDopo) errori.push('SFIDA: la partita del giorno non e stabile fra un accesso e l altro');
-await page.locator('.q-hud__menu').first().click();
+await page.locator('.pl-hud__menu').first().click();
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 
 // ---------- 7. Navigazione delle altre schermate ----------
-for (const [nome, selettore] of [['Statistiche', '.q-lista'], ['Impostazioni', '.q-interruttore'], ['Info', '.q-testo']]) {
+for (const [nome, selettore] of [['Statistiche', '.pl-lista'], ['Impostazioni', '.pl-interruttore'], ['Info', '.pl-testo']]) {
   await page.getByRole('button', { name: nome }).click();
   await page.waitForTimeout(150);
   const ok = await page.locator(selettore).count();
   await page.screenshot({ path: `${OUT}/07-${nome.toLowerCase()}.png` });
   if (ok === 0) errori.push(`NAVIGAZIONE: la schermata ${nome} non mostra contenuto`);
-  await page.locator('.q-pagina__testata .q-hud__menu').click();
+  await page.locator('.pl-pagina__testata .pl-hud__menu').click();
   await page.waitForTimeout(120);
 }
 console.log('7. schermate secondarie visitate');

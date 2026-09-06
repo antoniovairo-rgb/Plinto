@@ -14,8 +14,8 @@ import { deserializeGame } from '../../src/core/engine.js';
 import { allPlacements, findCompletedGroups, placeShape, fillRatio } from '../../src/core/grid.js';
 
 const MOSSE = Number(process.argv[2] ?? 400);
-const INDIRIZZO = process.env.QUADRA_E2E_URL ?? 'http://localhost:5173/';
-const ESEGUIBILE = process.env.QUADRA_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
+const ESEGUIBILE = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 const errori = [];
 
@@ -47,10 +47,10 @@ page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
 
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-await page.evaluate(() => window.localStorage.setItem('quadra:settings', JSON.stringify({ introVista: true })));
+await page.evaluate(() => window.localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true })));
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.q-plancia');
+await page.waitForSelector('.pl-plancia');
 
 /** Memoria JS occupata, se il browser la espone. */
 const memoria = () => page.evaluate(() => performance.memory?.usedJSHeapSize ?? 0);
@@ -102,7 +102,7 @@ function scegliMossa(stato) {
 }
 
 for (let i = 0; i < MOSSE; i += 1) {
-  const salvata = await page.evaluate(() => window.localStorage.getItem('quadra:partita'));
+  const salvata = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
   const stato = salvata ? deserializeGame(JSON.parse(salvata)) : null;
   if (!stato) { await page.waitForTimeout(60); continue; }
 
@@ -112,14 +112,14 @@ for (let i = 0; i < MOSSE; i += 1) {
   // Coordinate esatte del trascinamento: si afferra il pezzo al centro del suo
   // riquadro e lo si lascia dove quel centro fa cadere l'origine sulla cella voluta.
   const punti = await page.evaluate(({ indice, row, col, forma }) => {
-    // Si parte dallo SLOT, non dal disegno: il tray disegna un .q-pezzo solo per gli
+    // Si parte dallo SLOT, non dal disegno: il tray disegna un .pl-pezzo solo per gli
     // slot ancora pieni, quindi l'indice del pezzo in mano non coincide con l'indice
     // nella lista dei disegni appena uno dei tre e' stato usato.
-    const slot = document.querySelectorAll('.q-tray .q-tray__posto')[indice];
-    const pezzo = slot?.querySelector('.q-pezzo');
+    const slot = document.querySelectorAll('.pl-tray .pl-tray__posto')[indice];
+    const pezzo = slot?.querySelector('.pl-pezzo');
     if (!pezzo) return null;
     const rp = pezzo.getBoundingClientRect();
-    const celle = document.querySelectorAll('.q-plancia .q-cella');
+    const celle = document.querySelectorAll('.pl-plancia .pl-cella');
     const c0 = celle[0].getBoundingClientRect();
     const c8 = celle[8].getBoundingClientRect();
     const c72 = celle[72].getBoundingClientRect();
@@ -146,7 +146,7 @@ for (let i = 0; i < MOSSE; i += 1) {
   }, mossa);
   if (!punti) { mosseFallite += 1; continue; }
 
-  const prima = await page.locator('.q-plancia .q-blocco').count();
+  const prima = await page.locator('.pl-plancia .pl-blocco').count();
   await page.mouse.move(punti.px, punti.py);
   await page.mouse.down();
   await page.mouse.move(punti.cx, punti.cy, { steps: 4 });
@@ -158,11 +158,11 @@ for (let i = 0; i < MOSSE; i += 1) {
   // colpa sembrava del trascinamento.
   const scadenzaSalvataggio = Date.now() + 400;
   while (Date.now() < scadenzaSalvataggio) {
-    const ora = await page.evaluate(() => window.localStorage.getItem('quadra:partita'));
+    const ora = await page.evaluate(() => window.localStorage.getItem('plinto:partita'));
     if (ora !== salvata) break;
     await page.waitForTimeout(15);
   }
-  const dopo = await page.locator('.q-plancia .q-blocco').count();
+  const dopo = await page.locator('.pl-plancia .pl-blocco').count();
   if (dopo !== prima) mosseRiuscite += 1;
   else {
     mosseFallite += 1;
@@ -172,9 +172,9 @@ for (let i = 0; i < MOSSE; i += 1) {
   }
 
   // Se la partita e' finita si ricomincia: una sessione vera e' fatta di piu' partite.
-  if (await page.locator('.q-fine__numero').count() > 0) {
+  if (await page.locator('.pl-fine__numero').count() > 0) {
     await page.getByRole('button', { name: /Gioca ancora/ }).click();
-    await page.waitForSelector('.q-plancia');
+    await page.waitForSelector('.pl-plancia');
     partite += 1;
   }
 }
@@ -193,7 +193,7 @@ await page.waitForTimeout(600);
 const memoriaFinale = await memoria();
 const nodiFinali = await page.evaluate(() => document.querySelectorAll('*').length);
 const particelleVive = await page.evaluate(() => {
-  const cv = document.querySelector('.q-plancia__particelle');
+  const cv = document.querySelector('.pl-plancia__particelle');
   if (!cv) return -1;
   const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
   let opachi = 0;
@@ -205,7 +205,7 @@ await browser.close();
 if (server) server.kill();
 
 const mb = (n) => (n / 1048576).toFixed(1);
-console.log(`\nQUADRA — prova di resistenza: ${mosseRiuscite} mosse valide su ${MOSSE} tentativi, ${partite} partite (${(durata / 1000).toFixed(1)} s)\n`);
+console.log(`\nPLINTO — prova di resistenza: ${mosseRiuscite} mosse valide su ${MOSSE} tentativi, ${partite} partite (${(durata / 1000).toFixed(1)} s)\n`);
 console.log(`Fotogrammi        mediana ${mediana.toFixed(1)} ms | p95 ${p95.toFixed(1)} ms | sopra 50 ms: ${lunghi} su ${fotogrammi.length}`);
 console.log(`Memoria JS        ${mb(memoriaIniziale)} MB -> ${mb(memoriaFinale)} MB`);
 console.log(`Nodi nel DOM      ${nodiIniziali} -> ${nodiFinali}`);

@@ -7,9 +7,9 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--q-ink);
-  color: var(--q-text);
-  font-family: var(--q-font);
+  background: var(--pl-ink);
+  color: var(--pl-text);
+  font-family: var(--pl-font);
   -webkit-font-smoothing: antialiased;
   /* Un gioco a trascinamento non deve mai far scrollare o zoomare la pagina. */
   overscroll-behavior: none;
@@ -28,12 +28,12 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--q-brand);
+  outline: 2px solid var(--pl-brand);
   outline-offset: 3px;
-  border-radius: var(--q-radius-sm);
+  border-radius: var(--pl-radius-sm);
 }
 
-.q-app {
+.pl-app {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -42,7 +42,7 @@ button {
 }
 
 /* Testo per soli lettori di schermo. */
-.q-sr {
+.pl-sr {
   position: absolute;
   width: 1px; height: 1px;
   padding: 0; margin: -1px;
@@ -51,14 +51,14 @@ button {
 }
 
 /* ---------------------------------------------------------------- schermo --- */
-.q-screen {
+.pl-screen {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-.q-scroll {
+.pl-scroll {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -66,42 +66,42 @@ button {
 }
 
 /* --------------------------------------------------------------- pulsanti --- */
-.q-btn {
+.pl-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   min-height: 52px;              /* bersaglio tattile generoso */
   padding: 0 24px;
-  border-radius: var(--q-radius-md);
-  background: var(--q-surface-2);
-  color: var(--q-text);
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface-2);
+  color: var(--pl-text);
   font-weight: 600;
   font-size: 16px;
   letter-spacing: 0.01em;
-  transition: transform var(--q-t-instant) var(--q-ease-out),
-              background var(--q-t-fast) var(--q-ease-out);
+  transition: transform var(--pl-t-instant) var(--pl-ease-out),
+              background var(--pl-t-fast) var(--pl-ease-out);
 }
-.q-btn:active { transform: scale(0.97); }
+.pl-btn:active { transform: scale(0.97); }
 
-.q-btn--primario {
-  background: linear-gradient(180deg, var(--q-brand), var(--q-brand-deep));
+.pl-btn--primario {
+  background: linear-gradient(180deg, var(--pl-brand), var(--pl-brand-deep));
   color: #1a1405;
   font-weight: 800;
   font-size: 19px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   min-height: 64px;
-  box-shadow: var(--q-shadow-lift);
+  box-shadow: var(--pl-shadow-lift);
 }
 
-.q-btn--fantasma { background: transparent; color: var(--q-text-dim); }
-.q-btn--fantasma:hover { color: var(--q-text); }
+.pl-btn--fantasma { background: transparent; color: var(--pl-text-dim); }
+.pl-btn--fantasma:hover { color: var(--pl-text); }
 
-.q-btn--largo { width: 100%; }
+.pl-btn--largo { width: 100%; }
 
 /* -------------------------------------------------------------------- hud --- */
-.q-hud {
+.pl-hud {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -109,77 +109,77 @@ button {
   padding: 14px 18px 10px;
 }
 
-.q-hud__punteggio { text-align: left; }
-.q-hud__record { text-align: right; }
+.pl-hud__punteggio { text-align: left; }
+.pl-hud__record { text-align: right; }
 
-.q-hud__etichetta {
+.pl-hud__etichetta {
   display: block;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--q-text-faint);
+  color: var(--pl-text-faint);
 }
 
-.q-hud__valore {
+.pl-hud__valore {
   display: block;
-  font-family: var(--q-font-num);
+  font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   font-size: 30px;
   line-height: 1.1;
-  color: var(--q-brand);
+  color: var(--pl-brand);
 }
 
-.q-hud__valore--piccolo { font-size: 18px; color: var(--q-text-dim); }
+.pl-hud__valore--piccolo { font-size: 18px; color: var(--pl-text-dim); }
 
-.q-hud__menu {
+.pl-hud__menu {
   width: 44px; height: 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: var(--q-surface);
-  color: var(--q-text-dim);
+  background: var(--pl-surface);
+  color: var(--pl-text-dim);
 }
 
 /* --------------------------------------------------------------- catena --- */
-.q-catena {
+.pl-catena {
   padding: 0 18px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.q-catena__barra {
+.pl-catena__barra {
   flex: 1;
   height: 6px;
   border-radius: 999px;
-  background: var(--q-surface);
+  background: var(--pl-surface);
   overflow: hidden;
 }
 
-.q-catena__riempimento {
+.pl-catena__riempimento {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--q-block-2), var(--q-brand), var(--q-block-1));
-  transition: width var(--q-t-base) var(--q-ease-out);
+  background: linear-gradient(90deg, var(--pl-block-2), var(--pl-brand), var(--pl-block-1));
+  transition: width var(--pl-t-base) var(--pl-ease-out);
 }
 
-.q-catena__valore {
-  font-family: var(--q-font-num);
+.pl-catena__valore {
+  font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   font-size: 15px;
-  color: var(--q-text-dim);
+  color: var(--pl-text-dim);
   min-width: 46px;
   text-align: right;
 }
-.q-catena__valore--attiva { color: var(--q-brand); }
+.pl-catena__valore--attiva { color: var(--pl-brand); }
 
 /* --------------------------------------------------------------- plancia --- */
 /* La plancia prende lo spazio che avanza, ma il tray non deve mai schiacciarsi:
    su schermi bassi si stringe la plancia, non i pezzi da prendere in mano. */
-.q-plancia-area {
+.pl-plancia-area {
   flex: 1;
   display: grid;
   place-items: center;
@@ -188,91 +188,91 @@ button {
 }
 
 /* Il tavolo da gioco: barra della Catena, plancia e suggerimento restano attaccati. */
-.q-tavolo {
+.pl-tavolo {
   width: 100%;
   display: grid;
   justify-items: center;
   gap: 6px;
 }
-.q-tavolo .q-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
+.pl-tavolo .pl-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
 
-.q-plancia {
+.pl-plancia {
   position: relative;
   width: 100%;
   max-width: min(96vw, 58vh);
   aspect-ratio: 1;
   padding: 6px;
-  border-radius: var(--q-radius-lg);
-  background: var(--q-ink-2);
-  box-shadow: inset 0 0 0 1px var(--q-line), var(--q-shadow-soft);
+  border-radius: var(--pl-radius-lg);
+  background: var(--pl-ink-2);
+  box-shadow: inset 0 0 0 1px var(--pl-line), var(--pl-shadow-soft);
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  gap: var(--q-gap-cell);
+  gap: var(--pl-gap-cell);
   touch-action: none;
 }
 
-.q-cella {
+.pl-cella {
   position: relative;
-  border-radius: var(--q-radius-cell);
-  background: var(--q-cella-vuota);
+  border-radius: var(--pl-radius-cell);
+  background: var(--pl-cella-vuota);
 }
 
 /* Le linee spesse che separano i nove quadranti: e' la firma del tabellone. */
-.q-plancia__quadranti {
+.pl-plancia__quadranti {
   position: absolute;
   inset: 6px;
   pointer-events: none;
   border-radius: 10px;
   background:
-    linear-gradient(to right, transparent calc(33.333% - 1px), var(--q-line-strong) calc(33.333% - 1px), var(--q-line-strong) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
-    linear-gradient(to right, transparent calc(66.666% - 1px), var(--q-line-strong) calc(66.666% - 1px), var(--q-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
-    linear-gradient(to bottom, transparent calc(33.333% - 1px), var(--q-line-strong) calc(33.333% - 1px), var(--q-line-strong) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
-    linear-gradient(to bottom, transparent calc(66.666% - 1px), var(--q-line-strong) calc(66.666% - 1px), var(--q-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px));
+    linear-gradient(to right, transparent calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+    linear-gradient(to right, transparent calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
+    linear-gradient(to bottom, transparent calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
+    linear-gradient(to bottom, transparent calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px));
   opacity: 0.85;
 }
 
 /* ---------------------------------------------------------------- blocchi --- */
-.q-blocco {
+.pl-blocco {
   position: absolute;
   inset: 0;
-  border-radius: var(--q-radius-cell);
+  border-radius: var(--pl-radius-cell);
   background: var(--blocco);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -2px 0 rgba(0, 0, 0, 0.22);
 }
 
-.q-blocco--1 { --blocco: var(--q-block-1); }
-.q-blocco--2 { --blocco: var(--q-block-2); }
-.q-blocco--3 { --blocco: var(--q-block-3); }
-.q-blocco--4 { --blocco: var(--q-block-4); }
-.q-blocco--5 { --blocco: var(--q-block-5); }
-.q-blocco--6 { --blocco: var(--q-block-6); }
+.pl-blocco--1 { --blocco: var(--pl-block-1); }
+.pl-blocco--2 { --blocco: var(--pl-block-2); }
+.pl-blocco--3 { --blocco: var(--pl-block-3); }
+.pl-blocco--4 { --blocco: var(--pl-block-4); }
+.pl-blocco--5 { --blocco: var(--pl-block-5); }
+.pl-blocco--6 { --blocco: var(--pl-block-6); }
 
 /* Anteprima del pezzo sotto il dito. */
-.q-cella--anteprima .q-blocco { opacity: 0.55; }
-.q-cella--vietata { box-shadow: inset 0 0 0 2px var(--q-danger); }
+.pl-cella--anteprima .pl-blocco { opacity: 0.55; }
+.pl-cella--vietata { box-shadow: inset 0 0 0 2px var(--pl-danger); }
 
 /* Celle che stanno per essere eliminate dalla mossa in corso: e' il vero aiuto
    strategico del gioco, ed e' un'opzione che si puo' spegnere. */
-.q-cella--incandidata::after {
+.pl-cella--incandidata::after {
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: var(--q-radius-cell);
-  box-shadow: 0 0 0 2px var(--q-brand), 0 0 14px color-mix(in srgb, var(--q-brand) 55%, transparent);
-  animation: q-pulsa 1s ease-in-out infinite;
-  animation-name: q-pulsa;
+  border-radius: var(--pl-radius-cell);
+  box-shadow: 0 0 0 2px var(--pl-brand), 0 0 14px color-mix(in srgb, var(--pl-brand) 55%, transparent);
+  animation: pl-pulsa 1s ease-in-out infinite;
+  animation-name: pl-pulsa;
 }
 
-@keyframes q-pulsa {
+@keyframes pl-pulsa {
   0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
 
 /* ------------------------------------------------------------------ tray --- */
-.q-tray {
+.pl-tray {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
@@ -280,48 +280,48 @@ button {
   padding: 10px 14px calc(16px + env(safe-area-inset-bottom));
 }
 
-.q-tray__posto {
+.pl-tray__posto {
   display: grid;
   place-items: center;
   /* Su schermi alti lo spazio che avanza va ai pezzi da prendere, non al vuoto:
      bersagli piu' grandi da afferrare e forme piu' leggibili prima di muovere. */
   height: clamp(96px, 17vh, 152px);
-  border-radius: var(--q-radius-md);
-  background: var(--q-cella-vuota);
-  transition: background var(--q-t-fast) var(--q-ease-out);
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-cella-vuota);
+  transition: background var(--pl-t-fast) var(--pl-ease-out);
 }
 
-.q-tray__posto--vuoto { background: transparent; }
-.q-tray__posto--selezionato { background: color-mix(in srgb, var(--q-brand) 12%, transparent); }
+.pl-tray__posto--vuoto { background: transparent; }
+.pl-tray__posto--selezionato { background: color-mix(in srgb, var(--pl-brand) 12%, transparent); }
 
 /* Un pezzo che non entra piu' da nessuna parte viene detto chiaramente,
    invece di lasciare il giocatore a chiedersi perche' non funziona. */
-.q-tray__posto--morto { opacity: 0.34; }
+.pl-tray__posto--morto { opacity: 0.34; }
 
-.q-pezzo {
+.pl-pezzo {
   display: grid;
-  gap: var(--q-gap-cell);
+  gap: var(--pl-gap-cell);
   touch-action: none;
-  transition: transform var(--q-t-fast) var(--q-ease-pop);
+  transition: transform var(--pl-t-fast) var(--pl-ease-pop);
 }
-.q-pezzo__cella { position: relative; }
-.q-pezzo--preso { opacity: 0.18; }
+.pl-pezzo__cella { position: relative; }
+.pl-pezzo--preso { opacity: 0.18; }
 
 /* Il pezzo trascinato: fuori dal flusso, alla stessa scala della griglia. */
-.q-trascinato {
+.pl-trascinato {
   position: fixed;
   z-index: 40;
   pointer-events: none;
   display: grid;
-  gap: var(--q-gap-cell);
+  gap: var(--pl-gap-cell);
   filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.55));
 }
 
 /* ------------------------------------------------------------- messaggi --- */
-.q-suggerimento {
+.pl-suggerimento {
   text-align: center;
   font-size: 12.5px;
-  color: var(--q-text-faint);
+  color: var(--pl-text-faint);
   padding: 6px 20px 0;
   min-height: 18px;
 }
@@ -333,46 +333,46 @@ button {
    piu' costoso dell'interfaccia. La presa viene poi riportata dentro il pezzo
    (vedi useTrascinamento), cosi' afferrare un angolo vuoto dello slot non fa
    saltare il pezzo lontano dal dito. */
-.q-pezzo-presa {
+.pl-pezzo-presa {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
   min-width: 48px;
   min-height: 48px;
-  border-radius: var(--q-radius-md);
+  border-radius: var(--pl-radius-md);
   touch-action: none;
 }
 
 /* ------------------------------------------------------------------ logo --- */
-.q-logo { display: flex; align-items: center; gap: 14px; }
-.q-logo__testo {
+.pl-logo { display: flex; align-items: center; gap: 14px; }
+.pl-logo__testo {
   font-size: 34px;
   font-weight: 800;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--q-text);
+  color: var(--pl-text);
 }
 
 /* ------------------------------------------------------------------ home --- */
-.q-home {
+.pl-home {
   justify-content: center;
   gap: 5vh;
   padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
   text-align: center;
 }
-.q-home__testata { display: grid; place-items: center; gap: 12px; }
-.q-home__claim {
+.pl-home__testata { display: grid; place-items: center; gap: 12px; }
+.pl-home__claim {
   margin: 0;
-  color: var(--q-text-faint);
+  color: var(--pl-text-faint);
   font-size: 13px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
-.q-home__azioni { display: grid; gap: 12px; max-width: 380px; width: 100%; margin: 0 auto; }
-.q-home__record {
+.pl-home__azioni { display: grid; gap: 12px; max-width: 380px; width: 100%; margin: 0 auto; }
+.pl-home__record {
   margin: 4px 0 0;
-  color: var(--q-text-dim);
+  color: var(--pl-text-dim);
   font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
@@ -381,65 +381,65 @@ button {
    Non sono ancorate in fondo: con un menu appiccicato al bordo inferiore, su un
    telefono alto si apriva un vuoto di quasi meta' schermo nel mezzo della home.
    Meglio una composizione centrata con lo stesso respiro sopra e sotto. */
-.q-home__menu {
+.pl-home__menu {
   display: flex;
   justify-content: center;
   gap: 2px;
 }
-.q-home__menu .q-btn { padding: 0 12px; font-size: 14px; }
+.pl-home__menu .pl-btn { padding: 0 12px; font-size: 14px; }
 
 /* ------------------------------------------------------------------ fine --- */
-.q-fine { text-align: center; }
-.q-fine .q-scroll { padding-top: 8vh; }
-.q-fine__titolo {
+.pl-fine { text-align: center; }
+.pl-fine .pl-scroll { padding-top: 8vh; }
+.pl-fine__titolo {
   margin: 0;
   font-size: 13px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--q-text-faint);
+  color: var(--pl-text-faint);
 }
-.q-fine__motivo { margin: 8px auto 26px; max-width: 320px; color: var(--q-text-dim); font-size: 14px; }
-.q-fine__punteggio { display: grid; gap: 4px; justify-items: center; margin-bottom: 22px; }
-.q-fine__numero {
-  font-family: var(--q-font-num);
+.pl-fine__motivo { margin: 8px auto 26px; max-width: 320px; color: var(--pl-text-dim); font-size: 14px; }
+.pl-fine__punteggio { display: grid; gap: 4px; justify-items: center; margin-bottom: 22px; }
+.pl-fine__numero {
+  font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   font-size: 60px;
   line-height: 1;
-  color: var(--q-brand);
+  color: var(--pl-brand);
 }
-.q-fine__nastro {
+.pl-fine__nastro {
   margin-top: 6px;
   padding: 5px 14px;
   border-radius: 999px;
-  background: var(--q-brand);
+  background: var(--pl-brand);
   color: #1a1405;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.q-fine__precedente { color: var(--q-text-faint); font-size: 13px; }
-.q-fine__extra { margin: 2px 0; color: var(--q-ok); font-size: 13px; font-weight: 600; }
-.q-fine__dettagli {
+.pl-fine__precedente { color: var(--pl-text-faint); font-size: 13px; }
+.pl-fine__extra { margin: 2px 0; color: var(--pl-ok); font-size: 13px; font-weight: 600; }
+.pl-fine__dettagli {
   max-width: 380px;
   margin: 26px auto 0;
   display: grid;
   gap: 1px;
-  background: var(--q-line);
-  border-radius: var(--q-radius-md);
+  background: var(--pl-line);
+  border-radius: var(--pl-radius-md);
   overflow: hidden;
 }
-.q-fine__riga {
+.pl-fine__riga {
   display: flex;
   justify-content: space-between;
   padding: 13px 16px;
-  background: var(--q-surface);
+  background: var(--pl-surface);
   font-size: 14px;
-  color: var(--q-text-dim);
+  color: var(--pl-text-dim);
 }
-.q-fine__riga strong { color: var(--q-text); font-variant-numeric: tabular-nums; }
-.q-fine__azioni {
+.pl-fine__riga strong { color: var(--pl-text); font-variant-numeric: tabular-nums; }
+.pl-fine__azioni {
   display: grid;
   gap: 8px;
   padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
@@ -449,109 +449,109 @@ button {
 }
 
 /* --------------------------------------------------------------- pagine --- */
-.q-pagina__testata {
+.pl-pagina__testata {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
   padding: 12px 16px 8px;
 }
-.q-pagina__titolo {
+.pl-pagina__titolo {
   margin: 0;
   text-align: center;
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--q-text-dim);
+  color: var(--pl-text-dim);
 }
 
-.q-lista {
+.pl-lista {
   display: grid;
   gap: 1px;
-  background: var(--q-line);
-  border-radius: var(--q-radius-md);
+  background: var(--pl-line);
+  border-radius: var(--pl-radius-md);
   overflow: hidden;
   margin-bottom: 22px;
 }
-.q-voce {
+.pl-voce {
   display: flex;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px;
-  background: var(--q-surface);
+  background: var(--pl-surface);
   font-size: 14px;
-  color: var(--q-text-dim);
+  color: var(--pl-text-dim);
 }
-.q-voce strong { color: var(--q-text); font-variant-numeric: tabular-nums; }
+.pl-voce strong { color: var(--pl-text); font-variant-numeric: tabular-nums; }
 
-.q-gruppo { display: grid; gap: 10px; margin-bottom: 24px; }
+.pl-gruppo { display: grid; gap: 10px; margin-bottom: 24px; }
 
-.q-segmenti { display: flex; gap: 8px; }
-.q-segmento {
+.pl-segmenti { display: flex; gap: 8px; }
+.pl-segmento {
   flex: 1;
   min-height: 46px;
-  border-radius: var(--q-radius-md);
-  background: var(--q-surface);
-  color: var(--q-text-dim);
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface);
+  color: var(--pl-text-dim);
   font-size: 14px;
   font-weight: 600;
 }
-.q-segmento--attivo { background: var(--q-surface-2); color: var(--q-text); box-shadow: inset 0 0 0 1px var(--q-line-strong); }
+.pl-segmento--attivo { background: var(--pl-surface-2); color: var(--pl-text); box-shadow: inset 0 0 0 1px var(--pl-line-strong); }
 
-.q-interruttore {
+.pl-interruttore {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   width: 100%;
   padding: 14px 16px;
-  background: var(--q-surface);
+  background: var(--pl-surface);
   text-align: left;
 }
-.q-interruttore__testi { display: grid; gap: 2px; }
-.q-interruttore__etichetta { font-size: 15px; color: var(--q-text); }
-.q-interruttore__desc { font-size: 12px; color: var(--q-text-faint); }
-.q-interruttore__leva {
+.pl-interruttore__testi { display: grid; gap: 2px; }
+.pl-interruttore__etichetta { font-size: 15px; color: var(--pl-text); }
+.pl-interruttore__desc { font-size: 12px; color: var(--pl-text-faint); }
+.pl-interruttore__leva {
   flex: none;
   width: 50px; height: 30px;
   border-radius: 999px;
-  background: var(--q-line);
+  background: var(--pl-line);
   padding: 3px;
-  transition: background var(--q-t-fast) var(--q-ease-out);
+  transition: background var(--pl-t-fast) var(--pl-ease-out);
 }
-.q-interruttore__leva--on { background: var(--q-ok); }
-.q-interruttore__pallino {
+.pl-interruttore__leva--on { background: var(--pl-ok); }
+.pl-interruttore__pallino {
   display: block;
   width: 24px; height: 24px;
   border-radius: 50%;
   background: #fff;
-  transition: transform var(--q-t-fast) var(--q-ease-out);
+  transition: transform var(--pl-t-fast) var(--pl-ease-out);
 }
-.q-interruttore__leva--on .q-interruttore__pallino { transform: translateX(20px); }
+.pl-interruttore__leva--on .pl-interruttore__pallino { transform: translateX(20px); }
 
-.q-btn--pericolo {
+.pl-btn--pericolo {
   flex: 1;
-  background: var(--q-danger-fondo);
+  background: var(--pl-danger-fondo);
   color: #fff;
   font-weight: 700;
 }
 
-.q-sezione {
+.pl-sezione {
   margin: 24px 0 8px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--q-text-faint);
+  color: var(--pl-text-faint);
 }
-.q-testo { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--q-text-dim); }
-.q-nota { margin: 0 0 14px; font-size: 13px; color: var(--q-text-faint); }
-.q-nota--allarme { color: var(--q-danger); }
-.q-nota--piede { text-align: center; margin-top: 26px; }
-.q-vuoto { text-align: center; color: var(--q-text-faint); padding: 40px 0; font-size: 14px; }
+.pl-testo { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--pl-text-dim); }
+.pl-nota { margin: 0 0 14px; font-size: 13px; color: var(--pl-text-faint); }
+.pl-nota--allarme { color: var(--pl-danger); }
+.pl-nota--piede { text-align: center; margin-top: 26px; }
+.pl-vuoto { text-align: center; color: var(--pl-text-faint); padding: 40px 0; font-size: 14px; }
 
 /* ------------------------------------------------------------------ menu --- */
-.q-velo {
+.pl-velo {
   position: fixed;
   inset: 0;
   z-index: 50;
@@ -561,35 +561,35 @@ button {
   place-items: center;
   padding: 24px;
 }
-.q-menu {
+.pl-menu {
   width: 100%;
   max-width: 340px;
   display: grid;
   gap: 8px;
   padding: 20px;
-  border-radius: var(--q-radius-lg);
-  background: var(--q-surface);
-  box-shadow: var(--q-shadow-lift);
+  border-radius: var(--pl-radius-lg);
+  background: var(--pl-surface);
+  box-shadow: var(--pl-shadow-lift);
 }
 
 /* Chi ha chiesto meno animazioni al sistema operativo non deve vedere nemmeno le
    pulsazioni continue: i token accorciano le durate, questa regola ferma i cicli. */
 @media (prefers-reduced-motion: reduce) {
-  .q-cella--incandidata::after { animation: none; opacity: 1; }
+  .pl-cella--incandidata::after { animation: none; opacity: 1; }
   *, *::before, *::after { animation-iteration-count: 1 !important; }
 }
 
 /* ------------------------------------------------------- game feel: celle --- */
 /* Involucro che consente di sovrapporre alla plancia elementi in coordinate
    percentuali (i punti volanti) senza toccare il layout della griglia. */
-.q-plancia-involucro {
+.pl-plancia-involucro {
   position: relative;
   width: 100%;
   display: grid;
   place-items: center;
 }
 
-.q-plancia__particelle {
+.pl-plancia__particelle {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -599,9 +599,9 @@ button {
 /* Il blocco appena appoggiato "atterra": parte leggermente piu' grande e si assesta.
    Dura poco piu' di un quarto di secondo: abbastanza da vedersi, non abbastanza da
    far aspettare chi sta gia' pensando alla mossa dopo. */
-.q-blocco--posato { animation: q-atterra var(--q-t-atterraggio) var(--q-ease-pop) both; }
+.pl-blocco--posato { animation: pl-atterra var(--pl-t-atterraggio) var(--pl-ease-pop) both; }
 
-@keyframes q-atterra {
+@keyframes pl-atterra {
   0%   { transform: scale(1.28); filter: brightness(1.5); }
   60%  { transform: scale(0.96); }
   100% { transform: scale(1); filter: brightness(1); }
@@ -610,43 +610,44 @@ button {
 /* Il blocco che sparisce: parte dal PROPRIO colore, sbianca e collassa.
    Partire dal colore reale rende leggibile quale blocco e' esploso quando ne
    spariscono venti insieme; un lampo bianco e basta li appiattiva tutti. */
-.q-blocco--esploso {
-  background: var(--esploso, var(--q-text));
-  animation: q-svanisci var(--q-t-esplosione) var(--q-ease-out) both;
+.pl-blocco--esploso {
+  background: var(--esploso, var(--pl-text));
+  animation: pl-svanisci var(--pl-t-esplosione) var(--pl-ease-out) both;
 }
 
-@keyframes q-svanisci {
+@keyframes pl-svanisci {
   0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
   18%  { transform: scale(1.16); opacity: 1; filter: brightness(2.6) saturate(0.35); }
   100% { transform: scale(0.2); opacity: 0; filter: brightness(2.6) saturate(0.35); }
 }
 
 /* --------------------------------------------------- game feel: punteggio --- */
-.q-punti-volanti {
+.pl-punti-volanti {
   position: absolute;
   z-index: 5;
   pointer-events: none;
-  font-family: var(--q-font-num);
+  font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
-  color: var(--q-brand);
+  color: var(--pl-brand);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
-  animation: q-sali var(--q-t-punti) var(--q-ease-out) both;
+  animation: pl-sali var(--pl-t-punti) var(--pl-ease-out) both;
   white-space: nowrap;
+  text-align: center;
 }
-.q-punti-volanti--buona { font-size: 22px; }
-.q-punti-volanti--ottima { font-size: 28px; }
-.q-punti-volanti--eccellente { font-size: 34px; color: var(--q-block-2); }
-.q-punti-volanti--perfetta { font-size: 40px; color: var(--q-block-1); }
+.pl-punti-volanti--buona { font-size: 22px; }
+.pl-punti-volanti--ottima { font-size: 28px; }
+.pl-punti-volanti--eccellente { font-size: 34px; color: var(--pl-block-2); }
+.pl-punti-volanti--perfetta { font-size: 40px; color: var(--pl-block-1); }
 
-@keyframes q-sali {
+@keyframes pl-sali {
   0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
   18%  { transform: translate(-50%, -14px) scale(1.1); opacity: 1; }
   70%  { opacity: 1; }
   100% { transform: translate(-50%, -74px) scale(1); opacity: 0; }
 }
 
-.q-etichetta-mossa {
+.pl-etichetta-mossa {
   display: block;
   font-size: 0.42em;
   letter-spacing: 0.18em;
@@ -656,16 +657,16 @@ button {
 }
 
 /* Il punteggio in testata reagisce quando cresce. */
-.q-hud__valore--scatta { animation: q-scatta var(--q-t-base) var(--q-ease-pop) both; }
-@keyframes q-scatta {
+.pl-hud__valore--scatta { animation: pl-scatta var(--pl-t-base) var(--pl-ease-pop) both; }
+@keyframes pl-scatta {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.16); }
   100% { transform: scale(1); }
 }
 
 /* La barra della Catena pulsa quando sale di livello. */
-.q-catena__riempimento--cresciuta { animation: q-lampo var(--q-t-esplosione) var(--q-ease-out) both; }
-@keyframes q-lampo {
+.pl-catena__riempimento--cresciuta { animation: pl-lampo var(--pl-t-esplosione) var(--pl-ease-out) both; }
+@keyframes pl-lampo {
   0%   { filter: brightness(2.2); }
   100% { filter: brightness(1); }
 }
@@ -673,18 +674,18 @@ button {
 /* ------------------------------------------------------- gioco da tastiera --- */
 /* Il cursore della tastiera deve essere visibile senza dipendere dal colore:
    e' un anello spesso, non una tinta diversa. */
-.q-cella--cursore::before {
+.pl-cella--cursore::before {
   content: '';
   position: absolute;
   inset: -3px;
-  border-radius: var(--q-radius-cell);
-  box-shadow: 0 0 0 3px var(--q-text), 0 0 0 5px rgba(0, 0, 0, 0.5);
+  border-radius: var(--pl-radius-cell);
+  box-shadow: 0 0 0 3px var(--pl-text), 0 0 0 5px rgba(0, 0, 0, 0.5);
   z-index: 2;
   pointer-events: none;
 }
 
 /* ------------------------------------------------------------ primo avvio --- */
-.q-intro .q-scroll {
+.pl-intro .pl-scroll {
   max-width: 460px;
   margin: 0 auto;
   width: 100%;
@@ -692,49 +693,49 @@ button {
   flex-direction: column;
   justify-content: center;
 }
-.q-intro__testata { display: grid; place-items: center; margin-bottom: 34px; }
+.pl-intro__testata { display: grid; place-items: center; margin-bottom: 34px; }
 
-.q-intro__regole { list-style: none; margin: 0 0 30px; padding: 0; display: grid; gap: 16px; }
-.q-intro__regole li {
+.pl-intro__regole { list-style: none; margin: 0 0 30px; padding: 0; display: grid; gap: 16px; }
+.pl-intro__regole li {
   display: grid;
   grid-template-columns: 34px 1fr;
   align-items: start;
   gap: 14px;
   font-size: 15.5px;
   line-height: 1.5;
-  color: var(--q-text);
+  color: var(--pl-text);
 }
-.q-intro__numero {
+.pl-intro__numero {
   display: grid;
   place-items: center;
   width: 34px; height: 34px;
   border-radius: 10px;
-  background: var(--q-surface-2);
-  color: var(--q-brand);
-  font-family: var(--q-font-num);
+  background: var(--pl-surface-2);
+  color: var(--pl-brand);
+  font-family: var(--pl-font-num);
   font-weight: 800;
   font-size: 16px;
 }
 
-.q-intro__esempio {
+.pl-intro__esempio {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
   padding: 18px;
-  border-radius: var(--q-radius-md);
-  background: var(--q-surface);
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface);
 }
-.q-intro__piu { color: var(--q-text-faint); font-size: 20px; font-weight: 700; }
-.q-intro__risultato {
-  color: var(--q-ok);
+.pl-intro__piu { color: var(--pl-text-faint); font-size: 20px; font-weight: 700; }
+.pl-intro__risultato {
+  color: var(--pl-ok);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.q-intro__azioni {
+.pl-intro__azioni {
   padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
   max-width: 420px;
   margin: 0 auto;
@@ -745,7 +746,7 @@ button {
 /* Su un telefono coricato la colonna verticale non ci sta: plancia a sinistra,
    punteggio e pezzi a destra, senza cambiare un solo componente. */
 @media (orientation: landscape) and (max-height: 620px) {
-  .q-screen--gioco {
+  .pl-screen--gioco {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(220px, 0.75fr);
     grid-template-areas: 'plancia lato';
@@ -753,44 +754,44 @@ button {
     gap: 8px;
     padding: 6px 10px;
   }
-  .q-screen--gioco .q-plancia-area { grid-area: plancia; padding: 0; }
-  .q-screen--gioco .q-hud,
-  .q-screen--gioco .q-tray,
-  .q-screen--gioco .q-suggerimento { grid-area: lato; }
-  .q-screen--gioco .q-hud {
+  .pl-screen--gioco .pl-plancia-area { grid-area: plancia; padding: 0; }
+  .pl-screen--gioco .pl-hud,
+  .pl-screen--gioco .pl-tray,
+  .pl-screen--gioco .pl-suggerimento { grid-area: lato; }
+  .pl-screen--gioco .pl-hud {
     align-self: start;
     grid-template-columns: 1fr auto;
     padding: 4px 0 0;
   }
-  .q-screen--gioco .q-hud__record { display: none; }
-  .q-screen--gioco .q-tray {
+  .pl-screen--gioco .pl-hud__record { display: none; }
+  .pl-screen--gioco .pl-tray {
     align-self: end;
     grid-template-columns: repeat(3, 1fr);
     padding: 0 0 4px;
   }
-  .q-screen--gioco .q-tray__posto { height: clamp(70px, 26vh, 110px); }
-  .q-screen--gioco .q-suggerimento { display: none; }
-  .q-plancia { max-width: min(92vh, 46vw); }
-  .q-tavolo .q-catena { max-width: min(92vh, 46vw); }
+  .pl-screen--gioco .pl-tray__posto { height: clamp(70px, 26vh, 110px); }
+  .pl-screen--gioco .pl-suggerimento { display: none; }
+  .pl-plancia { max-width: min(92vh, 46vw); }
+  .pl-tavolo .pl-catena { max-width: min(92vh, 46vw); }
 }
 
 /* Schermi molto piccoli: si stringe tutto invece di far sparire pezzi di plancia. */
 @media (max-height: 700px) and (orientation: portrait) {
-  .q-hud { padding: 8px 16px 4px; }
-  .q-hud__valore { font-size: 26px; }
-  .q-tray__posto { height: clamp(84px, 14vh, 110px); }
+  .pl-hud { padding: 8px 16px 4px; }
+  .pl-hud__valore { font-size: 26px; }
+  .pl-tray__posto { height: clamp(84px, 14vh, 110px); }
 }
 
 /* ------------------------------------------------------- sfida del giorno --- */
 /* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
    secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */
-.q-sfida-avvio {
+.pl-sfida-avvio {
   justify-content: space-between;
   padding: 0 18px;
 }
-.q-sfida-avvio__esito {
-  font-family: var(--q-font-num);
+.pl-sfida-avvio__esito {
+  font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
-  color: var(--q-brand);
+  color: var(--pl-brand);
 }

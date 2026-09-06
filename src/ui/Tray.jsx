@@ -33,13 +33,13 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
   }, []);
 
   return (
-    <div className="q-tray">
+    <div className="pl-tray">
       {mano.map((pezzo, i) => {
         const morto = pezziMorti.includes(i);
-        const classi = ['q-tray__posto'];
-        if (!pezzo) classi.push('q-tray__posto--vuoto');
-        if (selezionato === i) classi.push('q-tray__posto--selezionato');
-        if (morto) classi.push('q-tray__posto--morto');
+        const classi = ['pl-tray__posto'];
+        if (!pezzo) classi.push('pl-tray__posto--vuoto');
+        if (selezionato === i) classi.push('pl-tray__posto--selezionato');
+        if (morto) classi.push('pl-tray__posto--morto');
         return (
           <div
             key={pezzo?.uid ?? `vuoto-${i}`}
@@ -49,7 +49,7 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
             {pezzo ? (
               <button
                 type="button"
-                className="q-pezzo-presa"
+                className="pl-pezzo-presa"
                 onPointerDown={(e) => onPointerDownPezzo(e, i, cella)}
                 onClick={() => onTapPezzo(i)}
                 aria-label={
@@ -62,7 +62,7 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
                   shape={pezzo.shape}
                   color={pezzo.color}
                   cella={cella}
-                  className={presoIndex === i ? 'q-pezzo--preso' : ''}
+                  className={presoIndex === i ? 'pl-pezzo--preso' : ''}
                 />
               </button>
             ) : null}

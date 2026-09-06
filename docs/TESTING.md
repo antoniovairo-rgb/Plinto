@@ -87,13 +87,13 @@ Tre cose che lo rendono comodo:
 2. **Costruisce gli stati difficili con il motore vero.** Le situazioni che sarebbero
    lunghissime da raggiungere giocando (una griglia quasi piena, una riga a una cella dalla
    chiusura) vengono create importando `createGame`/`serializeGame`/`gridFromString` e
-   iniettate in `localStorage` alla chiave `quadra:partita`; poi la pagina si ricarica e si
+   iniettate in `localStorage` alla chiave `plinto:partita`; poi la pagina si ricarica e si
    preme "Riprendi".
 3. **Cattura gli errori del browser.** Ogni `console.error` e ogni `pageerror` finisce fra i
    problemi, quindi un'eccezione in React fa fallire lo scenario anche se le asserzioni
    passerebbero.
 
-Le schermate vengono salvate in `/tmp/quadra-e2e` (o in `QUADRA_E2E_OUT`).
+Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
 
 ### Cosa copre, passo per passo
 
@@ -287,7 +287,7 @@ node src/sim/run.mjs 100 esperto 150
 **Come si legge.** Il divario vero non è fra euristiche diverse — `normale` ed `esperto`
 restano a cinque punti percentuali di distanza — ma fra **scegliere una mossa alla volta e
 pianificare tutti e tre i pezzi insieme**: lo `stratega` quasi raddoppia la sopravvivenza.
-La conclusione è che la profondità strategica di QUADRA esiste già ed è intrinseca alla mano da
+La conclusione è che la profondità strategica di PLINTO esiste già ed è intrinseca alla mano da
 tre; non serve aggiungere meccaniche per crearla.
 
 Un dato secondario che conferma la lettura: il riempimento mediano della griglia alla fine
@@ -301,7 +301,7 @@ la più lenta (beam search su ogni terna): va messa in conto qualche minuto.
 **Una correzione già fatta, che una versione precedente di questo documento dava ancora per
 aperta.** La funzione `nearCompletions` in `src/sim/player.mjs` — quella che misura le
 "quasi-chiusure", cioè il peso su cui `normale` ed `esperto` differiscono di più (1 contro 4) —
-ignorava i quadranti, cioè era cieca proprio sulla meccanica che distingue QUADRA. **È stata
+ignorava i quadranti, cioè era cieca proprio sulla meccanica che distingue PLINTO. **È stata
 corretta in `9253cc7`**: il codice attuale scorre righe, colonne **e** i nove quadranti. Quindi
 non è quella la spiegazione della vicinanza fra i due profili avidi; la spiegazione, alla luce
 dei numeri qui sopra, è che il salto di abilità stia nella pianificazione della terna e non

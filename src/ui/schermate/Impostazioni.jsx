@@ -13,7 +13,7 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
 
   return (
     <Pagina titolo={t('impostazioni.titolo')} onIndietro={onIndietro} t={t}>
-      <div className="q-lista">
+      <div className="pl-lista">
         <Interruttore etichetta={t('impostazioni.audio')} attivo={impostazioni.audio}
                       onCambia={() => inverti('audio')} />
         <Interruttore etichetta={t('impostazioni.vibrazione')} attivo={impostazioni.vibrazione}
@@ -24,13 +24,13 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
                       onCambia={() => inverti('aiutoVisivo')} />
       </div>
 
-      <div className="q-gruppo">
-        <span className="q-hud__etichetta">{t('impostazioni.tema')}</span>
-        <div className="q-segmenti">
+      <div className="pl-gruppo">
+        <span className="pl-hud__etichetta">{t('impostazioni.tema')}</span>
+        <div className="pl-segmenti">
           {[['scuro', t('impostazioni.temaScuro')], ['chiaro', t('impostazioni.temaChiaro')]].map(
             ([valore, testo]) => (
               <button key={valore} type="button"
-                      className={`q-segmento ${impostazioni.tema === valore ? 'q-segmento--attivo' : ''}`}
+                      className={`pl-segmento ${impostazioni.tema === valore ? 'pl-segmento--attivo' : ''}`}
                       onClick={() => cambia('tema', valore)} aria-pressed={impostazioni.tema === valore}>
                 {testo}
               </button>
@@ -39,12 +39,12 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
         </div>
       </div>
 
-      <div className="q-gruppo">
-        <span className="q-hud__etichetta">{t('impostazioni.lingua')}</span>
-        <div className="q-segmenti">
+      <div className="pl-gruppo">
+        <span className="pl-hud__etichetta">{t('impostazioni.lingua')}</span>
+        <div className="pl-segmenti">
           {Object.entries(LINGUE).map(([codice, { nome }]) => (
             <button key={codice} type="button"
-                    className={`q-segmento ${impostazioni.lingua === codice ? 'q-segmento--attivo' : ''}`}
+                    className={`pl-segmento ${impostazioni.lingua === codice ? 'pl-segmento--attivo' : ''}`}
                     onClick={() => cambia('lingua', codice)} aria-pressed={impostazioni.lingua === codice}>
               {nome}
             </button>
@@ -52,24 +52,24 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
         </div>
       </div>
 
-      <div className="q-gruppo">
+      <div className="pl-gruppo">
         {fatto ? (
-          <p className="q-nota">{t('impostazioni.azzeraFatto')}</p>
+          <p className="pl-nota">{t('impostazioni.azzeraFatto')}</p>
         ) : conferma ? (
           <>
-            <p className="q-nota q-nota--allarme">{t('impostazioni.azzeraConferma')}</p>
-            <div className="q-segmenti">
-              <button type="button" className="q-btn q-btn--fantasma" onClick={() => setConferma(false)}>
+            <p className="pl-nota pl-nota--allarme">{t('impostazioni.azzeraConferma')}</p>
+            <div className="pl-segmenti">
+              <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => setConferma(false)}>
                 {t('comune.no')}
               </button>
-              <button type="button" className="q-btn q-btn--pericolo"
+              <button type="button" className="pl-btn pl-btn--pericolo"
                       onClick={() => { onAzzera(); setFatto(true); setConferma(false); }}>
                 {t('comune.si')}
               </button>
             </div>
           </>
         ) : (
-          <button type="button" className="q-btn q-btn--fantasma q-btn--largo" onClick={() => setConferma(true)}>
+          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => setConferma(true)}>
             {t('impostazioni.azzera')}
           </button>
         )}

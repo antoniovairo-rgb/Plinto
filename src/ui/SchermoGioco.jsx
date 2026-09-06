@@ -137,17 +137,26 @@ export function SchermoGioco({
 
   const pezzoTrascinato = drag.preso ? partita.hand[drag.preso.handIndex] : null;
 
-  // Posizione dei punti volanti, in percentuale sulla plancia.
+  /**
+   * Posizione dei punti volanti, in percentuale sulla plancia.
+   *
+   * I valori vengono riportati verso il centro: l'etichetta e' larga (un "+612" con
+   * sotto la scritta ECCELLENTE) ed e' centrata sulla cella, quindi su una mossa fatta
+   * nell'ultima colonna finiva mezza fuori dallo schermo. Meglio un numero spostato di
+   * mezza cella che un numero tagliato: serve a far vedere quanto hai guadagnato.
+   */
   const puntiVolanti = effetti.puntiVolanti;
+  const dentro = (percentuale, margine) =>
+    Math.max(margine, Math.min(100 - margine, percentuale));
   const posizionePunti = puntiVolanti != null
     ? {
-      left: `${((colOf(puntiVolanti.cella) + 0.5) / 9) * 100}%`,
-      top: `${((rowOf(puntiVolanti.cella) + 0.5) / 9) * 100}%`,
+      left: `${dentro(((colOf(puntiVolanti.cella) + 0.5) / 9) * 100, 22)}%`,
+      top: `${dentro(((rowOf(puntiVolanti.cella) + 0.5) / 9) * 100, 12)}%`,
     }
     : null;
 
   return (
-    <div className="q-screen q-screen--gioco">
+    <div className="pl-screen pl-screen--gioco">
       <Hud
         punteggio={partita.score}
         record={record.best}
@@ -159,11 +168,11 @@ export function SchermoGioco({
       {/* Catena, plancia e suggerimento formano un blocco unico centrato: su schermi
           alti lo spazio che avanza diventa respiro attorno al tavolo da gioco, non
           tre buchi scollegati fra elementi che parlano della stessa cosa. */}
-      <div className="q-plancia-area">
-        <div className="q-tavolo">
+      <div className="pl-plancia-area">
+        <div className="pl-tavolo">
           <BarraCatena livello={partita.chain} t={t} />
 
-          <div className="q-plancia-involucro">
+          <div className="pl-plancia-involucro">
             <Plancia
               ref={plancia}
               grid={partita.grid}
@@ -187,21 +196,21 @@ export function SchermoGioco({
             {puntiVolanti ? (
               <span
                 key={puntiVolanti.chiave}
-                className={`q-punti-volanti q-punti-volanti--${puntiVolanti.tier ?? 'buona'}`}
+                className={`pl-punti-volanti pl-punti-volanti--${puntiVolanti.tier ?? 'buona'}`}
                 style={posizionePunti}
               >
                 +{puntiVolanti.punti}
                 {puntiVolanti.tier && puntiVolanti.tier !== 'buona' ? (
-                  <span className="q-etichetta-mossa">{puntiVolanti.tier}</span>
+                  <span className="pl-etichetta-mossa">{puntiVolanti.tier}</span>
                 ) : null}
               </span>
             ) : null}
           </div>
 
-          <p className="q-suggerimento">
+          <p className="pl-suggerimento">
             {drag.selezionato !== null ? t('gioca.tocca') : t('gioca.trascina')}
           </p>
-          <p className="q-sr">{t('a11y.istruzioni')}</p>
+          <p className="pl-sr">{t('a11y.istruzioni')}</p>
         </div>
       </div>
 
@@ -217,7 +226,7 @@ export function SchermoGioco({
 
       {pezzoTrascinato && drag.preso ? (
         <div
-          className="q-trascinato"
+          className="pl-trascinato"
           style={{ left: `${drag.preso.x}px`, top: `${drag.preso.y}px` }}
         >
           <Pezzo

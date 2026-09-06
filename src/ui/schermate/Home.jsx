@@ -9,29 +9,29 @@ export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, onGioca, onRiprendi, onSfida, onVai, t,
 }) {
   return (
-    <div className="q-screen q-home">
-      <div className="q-home__testata">
+    <div className="pl-screen pl-home">
+      <div className="pl-home__testata">
         <Logo />
-        <p className="q-home__claim">{t('gioco.claim')}</p>
+        <p className="pl-home__claim">{t('gioco.claim')}</p>
       </div>
 
-      <div className="q-home__azioni">
+      <div className="pl-home__azioni">
         {cePartitaSalvata ? (
           <>
-            <button type="button" className="q-btn q-btn--primario q-btn--largo" onClick={onRiprendi}>
+            <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onRiprendi}>
               {t('home.riprendi')}
             </button>
-            <button type="button" className="q-btn q-btn--largo" onClick={onGioca}>
+            <button type="button" className="pl-btn pl-btn--largo" onClick={onGioca}>
               {t('home.nuovaPartita')}
             </button>
           </>
         ) : (
-          <button type="button" className="q-btn q-btn--primario q-btn--largo" onClick={onGioca}>
+          <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onGioca}>
             {t('home.gioca')}
           </button>
         )}
 
-        <p className="q-home__record">
+        <p className="pl-home__record">
           {record.best > 0
             ? `${t('home.record')} ${numero(record.best)}`
             : t('home.nessunRecord')}
@@ -39,22 +39,22 @@ export function SchermoHome({
 
         {/* La Sfida del Giorno e' un secondo pulsante, non un richiamo insistente:
             non lampeggia, non ha contatori alla rovescia e non ha serie da mantenere. */}
-        <button type="button" className="q-btn q-btn--largo q-sfida-avvio" onClick={onSfida}>
+        <button type="button" className="pl-btn pl-btn--largo pl-sfida-avvio" onClick={onSfida}>
           <span>{sfidaInCorso ? t('sfida.riprendi') : t('sfida.breve')}</span>
-          <span className="q-sfida-avvio__esito">
+          <span className="pl-sfida-avvio__esito">
             {sfidaOggi.partite > 0 ? numero(sfidaOggi.best) : '—'}
           </span>
         </button>
       </div>
 
-      <nav className="q-home__menu">
-        <button type="button" className="q-btn q-btn--fantasma" onClick={() => onVai('statistiche')}>
+      <nav className="pl-home__menu">
+        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('statistiche')}>
           {t('home.statistiche')}
         </button>
-        <button type="button" className="q-btn q-btn--fantasma" onClick={() => onVai('impostazioni')}>
+        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('impostazioni')}>
           {t('home.impostazioni')}
         </button>
-        <button type="button" className="q-btn q-btn--fantasma" onClick={() => onVai('info')}>
+        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('info')}>
           {t('home.info')}
         </button>
       </nav>

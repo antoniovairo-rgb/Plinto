@@ -6,23 +6,23 @@ import { numero } from '../i18n/formato.js';
 /** Testata della partita: punteggio, record, accesso al menu. */
 export function Hud({ punteggio, record, onMenu, scatta, t }) {
   return (
-    <header className="q-hud">
-      <div className="q-hud__punteggio">
-        <span className="q-hud__etichetta">{t('hud.punteggio')}</span>
-        <span className={`q-hud__valore ${scatta ? 'q-hud__valore--scatta' : ''}`}>
+    <header className="pl-hud">
+      <div className="pl-hud__punteggio">
+        <span className="pl-hud__etichetta">{t('hud.punteggio')}</span>
+        <span className={`pl-hud__valore ${scatta ? 'pl-hud__valore--scatta' : ''}`}>
           {numero(punteggio)}
         </span>
       </div>
-      <button type="button" className="q-hud__menu" onClick={onMenu} aria-label={t('hud.menu')}>
+      <button type="button" className="pl-hud__menu" onClick={onMenu} aria-label={t('hud.menu')}>
         <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
           <rect x="2" y="4" width="16" height="2" rx="1" fill="currentColor" />
           <rect x="2" y="9" width="16" height="2" rx="1" fill="currentColor" />
           <rect x="2" y="14" width="16" height="2" rx="1" fill="currentColor" />
         </svg>
       </button>
-      <div className="q-hud__record">
-        <span className="q-hud__etichetta">{t('hud.record')}</span>
-        <span className="q-hud__valore q-hud__valore--piccolo">
+      <div className="pl-hud__record">
+        <span className="pl-hud__etichetta">{t('hud.record')}</span>
+        <span className="pl-hud__valore pl-hud__valore--piccolo">
           {numero(record)}
         </span>
       </div>
@@ -43,10 +43,10 @@ export function BarraCatena({ livello, t }) {
   const moltiplicatore = chainMultiplier(livello);
   const attiva = livello > 0;
   return (
-    <div className="q-catena">
-      <span className="q-hud__etichetta">{t('hud.catena')}</span>
+    <div className="pl-catena">
+      <span className="pl-hud__etichetta">{t('hud.catena')}</span>
       <div
-        className="q-catena__barra"
+        className="pl-catena__barra"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={CHAIN_MAX}
@@ -55,11 +55,11 @@ export function BarraCatena({ livello, t }) {
       >
         <div
           key={cresciuta ? `su-${livello}` : `giu-${livello}`}
-          className={`q-catena__riempimento ${cresciuta ? 'q-catena__riempimento--cresciuta' : ''}`}
+          className={`pl-catena__riempimento ${cresciuta ? 'pl-catena__riempimento--cresciuta' : ''}`}
           style={{ width: `${percentuale}%` }}
         />
       </div>
-      <span className={`q-catena__valore ${attiva ? 'q-catena__valore--attiva' : ''}`}>
+      <span className={`pl-catena__valore ${attiva ? 'pl-catena__valore--attiva' : ''}`}>
         &times;{moltiplicatore.toFixed(2)}
       </span>
     </div>

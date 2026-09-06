@@ -26,7 +26,7 @@ import { DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI } from './durate.js
 function coloreBlocco(indice) {
   if (typeof window === 'undefined') return '#ffffff';
   const valore = getComputedStyle(document.documentElement)
-    .getPropertyValue(`--q-block-${((indice - 1) % COLOR_COUNT) + 1}`);
+    .getPropertyValue(`--pl-block-${((indice - 1) % COLOR_COUNT) + 1}`);
   return valore.trim() || '#ffffff';
 }
 

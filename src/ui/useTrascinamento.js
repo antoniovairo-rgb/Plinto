@@ -86,7 +86,7 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       // un'imbottitura per essere comodo da toccare, e usare la sua origine sfasava il
       // posizionamento di quasi una cella. Su griglia vuota non si notava; su griglia
       // piena rendeva il gioco inutilizzabile.
-      const nodo = evento.currentTarget.querySelector('.q-pezzo') ?? evento.currentTarget;
+      const nodo = evento.currentTarget.querySelector('.pl-pezzo') ?? evento.currentTarget;
       const rect = nodo.getBoundingClientRect();
 
       // Offset della presa espresso in unita' di cella: sopravvive al cambio di scala.

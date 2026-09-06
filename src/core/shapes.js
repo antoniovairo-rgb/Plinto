@@ -1,5 +1,5 @@
 /**
- * Catalogo delle forme di QUADRA.
+ * Catalogo delle forme di PLINTO.
  *
  * Scelte di design:
  * - NESSUNA ROTAZIONE in partita. Su mobile ruotare un pezzo richiede un gesto in piu'
@@ -7,7 +7,7 @@
  *   cosi' la varieta' resta alta ma il controllo resta "prendi e appoggia".
  * - Ogni forma ha un PESO: il generatore non usa random puro (vedi generator.js).
  * - Le famiglie servono al generatore per garantire varieta' percepita e per le statistiche.
- * - Le diagonali sono una firma di QUADRA: rare, spiazzanti, obbligano a leggere la griglia
+ * - Le diagonali sono una firma di PLINTO: rare, spiazzanti, obbligano a leggere la griglia
  *   in un modo che le forme ortogonali non richiedono.
  */
 
@@ -93,7 +93,7 @@ export const SHAPES = Object.freeze([
   shape('s4v', 'tetro', 2, ['#.', '##', '.#']),
   shape('z4v', 'tetro', 2, ['.#', '##', '#.']),
 
-  // --- Diagonali: firma di QUADRA. Rare per scelta.
+  // --- Diagonali: firma di PLINTO. Rare per scelta.
   shape('d2a', 'diagonale', 2, ['#.', '.#']),
   shape('d2b', 'diagonale', 2, ['.#', '#.']),
   shape('d3a', 'diagonale', 1, ['#..', '.#.', '..#']),

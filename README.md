@@ -1,4 +1,4 @@
-# QUADRA
+# PLINTO
 
 Puzzle game a blocchi. Gratuito, **senza pubblicita**, senza account, senza attese.
 
@@ -11,7 +11,7 @@ Puzzle game a blocchi. Gratuito, **senza pubblicita**, senza account, senza atte
 Ricevi tre pezzi, li appoggi su una griglia 9x9 e li fai sparire completando una
 **riga**, una **colonna** o un **quadrante 3x3**. Finisce quando nessun pezzo entra piu'.
 
-## Cosa lo rende QUADRA e non un altro gioco a blocchi
+## Cosa lo rende PLINTO e non un altro gioco a blocchi
 
 1. **Il quadrante.** Non si eliminano solo righe e colonne: anche i nove riquadri 3x3.
    Una sola mossa puo' chiuderne tre insieme.

@@ -1,5 +1,5 @@
 /**
- * Harness di simulazione di QUADRA.
+ * Harness di simulazione di PLINTO.
  *
  * Uso:  node src/sim/run.mjs [partite] [profilo] [tetto di mosse]
  *       node src/sim/run.mjs 5000 normale
@@ -102,7 +102,7 @@ const elapsed = Date.now() - t0;
 const totalPieces = Object.values(shapeCount).reduce((a, b) => a + b, 0);
 const totalWeight = SHAPES.reduce((a, s) => a + s.weight, 0);
 
-console.log(`\nQUADRA — simulazione: ${GAMES} partite, profilo "${PROFILE}" (${elapsed} ms)\n`);
+console.log(`\nPLINTO — simulazione: ${GAMES} partite, profilo "${PROFILE}" (${elapsed} ms)\n`);
 console.log(`Punteggio     ${fmt(stats(scores))}`);
 console.log(`Mosse         ${fmt(stats(moves))}`);
 console.log(`Gruppi chiusi ${fmt(stats(durationsGroups))}`);
