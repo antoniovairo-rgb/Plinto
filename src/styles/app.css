@@ -642,3 +642,114 @@ button {
   0%   { filter: brightness(2.2); }
   100% { filter: brightness(1); }
 }
+
+/* ------------------------------------------------------- gioco da tastiera --- */
+/* Il cursore della tastiera deve essere visibile senza dipendere dal colore:
+   e' un anello spesso, non una tinta diversa. */
+.q-cella--cursore::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: var(--q-radius-cell);
+  box-shadow: 0 0 0 3px var(--q-text), 0 0 0 5px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ primo avvio --- */
+.q-intro .q-scroll {
+  max-width: 460px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.q-intro__testata { display: grid; place-items: center; margin-bottom: 34px; }
+
+.q-intro__regole { list-style: none; margin: 0 0 30px; padding: 0; display: grid; gap: 16px; }
+.q-intro__regole li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: start;
+  gap: 14px;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--q-text);
+}
+.q-intro__numero {
+  display: grid;
+  place-items: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--q-surface-2);
+  color: var(--q-brand);
+  font-family: var(--q-font-num);
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.q-intro__esempio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px;
+  border-radius: var(--q-radius-md);
+  background: var(--q-surface);
+}
+.q-intro__piu { color: var(--q-text-faint); font-size: 20px; font-weight: 700; }
+.q-intro__risultato {
+  color: var(--q-ok);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.q-intro__azioni {
+  padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ------------------------------------------------------- schermo orizzontale --- */
+/* Su un telefono coricato la colonna verticale non ci sta: plancia a sinistra,
+   punteggio e pezzi a destra, senza cambiare un solo componente. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .q-screen--gioco {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.75fr);
+    grid-template-areas: 'plancia lato';
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+  .q-screen--gioco .q-plancia-area { grid-area: plancia; padding: 0; }
+  .q-screen--gioco .q-hud,
+  .q-screen--gioco .q-tray,
+  .q-screen--gioco .q-suggerimento { grid-area: lato; }
+  .q-screen--gioco .q-hud {
+    align-self: start;
+    grid-template-columns: 1fr auto;
+    padding: 4px 0 0;
+  }
+  .q-screen--gioco .q-hud__record { display: none; }
+  .q-screen--gioco .q-tray {
+    align-self: end;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 0 4px;
+  }
+  .q-screen--gioco .q-tray__posto { height: clamp(70px, 26vh, 110px); }
+  .q-screen--gioco .q-suggerimento { display: none; }
+  .q-plancia { max-width: min(92vh, 46vw); }
+  .q-tavolo .q-catena { max-width: min(92vh, 46vw); }
+}
+
+/* Schermi molto piccoli: si stringe tutto invece di far sparire pezzi di plancia. */
+@media (max-height: 700px) and (orientation: portrait) {
+  .q-hud { padding: 8px 16px 4px; }
+  .q-hud__valore { font-size: 26px; }
+  .q-tray__posto { height: clamp(84px, 14vh, 110px); }
+}

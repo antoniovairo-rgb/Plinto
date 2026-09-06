@@ -15,7 +15,7 @@ import { idx } from '../core/grid.js';
 export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
-    appoggiate, esplosioni, cellRefs, canvasRef, onCellPointerUp,
+    appoggiate, esplosioni, cursore, pezzoInMano, cellRefs, canvasRef, onCellPointerUp, t,
   },
   ref,
 ) {
@@ -29,8 +29,10 @@ export const Plancia = forwardRef(function Plancia(
         const daEliminare = incandidate?.has(i);
         const appenaPosata = appoggiate?.has(i);
         const inEsplosione = valore === 0 && esplosioni?.celle.has(i);
+        const sottoCursore = cursore && cursore.row === r && cursore.col === c;
 
         const classi = ['q-cella'];
+        if (sottoCursore) classi.push('q-cella--cursore');
         if (inAnteprima) classi.push('q-cella--anteprima');
         if (inAnteprima && !anteprimaValida) classi.push('q-cella--vietata');
         if (daEliminare) classi.push('q-cella--incandidata');
@@ -42,6 +44,11 @@ export const Plancia = forwardRef(function Plancia(
             className={classi.join(' ')}
             data-riga={r}
             data-colonna={c}
+            role="gridcell"
+            aria-label={t
+              ? `${t('a11y.cella').replace('{r}', r + 1).replace('{c}', c + 1)}, ${
+                valore === 0 ? t('a11y.cellaLibera') : t('a11y.cellaOccupata')}`
+              : undefined}
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
             {valore !== 0 ? (
@@ -60,10 +67,10 @@ export const Plancia = forwardRef(function Plancia(
     }
     return out;
   }, [grid, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
-      cellRefs, onCellPointerUp]);
+      cursore, cellRefs, onCellPointerUp, t]);
 
   return (
-    <div className="q-plancia" ref={ref}>
+    <div className="q-plancia" ref={ref} role="grid" aria-label="QUADRA" data-in-mano={pezzoInMano ? 'si' : 'no'}>
       {celle}
       <div className="q-plancia__quadranti" />
       <canvas className="q-plancia__particelle" ref={canvasRef} aria-hidden="true" />

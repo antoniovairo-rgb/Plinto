@@ -35,6 +35,31 @@ const quasiFinita = (() => {
   return serializeGame(stato);
 })();
 
+// Il server di sviluppo viene avviato qui se non risponde gia': cosi' `npm run e2e`
+// funziona da solo, senza ricordarsi di aprire prima un altro terminale.
+const INDIRIZZO = process.env.QUADRA_E2E_URL ?? 'http://localhost:5173/';
+let server = null;
+async function serverRisponde() {
+  try {
+    const r = await fetch(INDIRIZZO, { signal: AbortSignal.timeout(1500) });
+    return r.ok;
+  } catch { return false; }
+}
+if (!(await serverRisponde())) {
+  const { spawn } = await import('node:child_process');
+  server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
+    cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore', detached: false,
+  });
+  const scadenza = Date.now() + 30000;
+  while (Date.now() < scadenza && !(await serverRisponde())) {
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  if (!(await serverRisponde())) {
+    console.error('Impossibile avviare il server di sviluppo su', INDIRIZZO);
+    process.exit(1);
+  }
+}
+
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'it-IT' });
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
@@ -43,8 +68,22 @@ page.on('pageerror', (e) => errori.push(`pageerror: ${e.message}`));
 const contaBlocchi = () => page.locator('.q-plancia .q-blocco').count();
 const punteggio = () => page.locator('.q-hud__punteggio .q-hud__valore').innerText();
 
+// ---------- 0. Primo avvio: la presentazione deve comparire una volta sola ----------
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+const introVisibile = await page.locator('.q-intro__regole li').count();
+await page.screenshot({ path: `${OUT}/00-primo-avvio.png` });
+console.log('0. presentazione al primo avvio: regole mostrate', introVisibile);
+if (introVisibile !== 3) errori.push('PRIMO AVVIO: la presentazione non mostra le tre regole');
+await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.waitForSelector('.q-plancia');
+await page.reload({ waitUntil: 'networkidle' });
+if (await page.locator('.q-intro__regole').count() !== 0) {
+  errori.push('PRIMO AVVIO: la presentazione ricompare dopo il primo avvio');
+}
+
 // ---------- 1. Home ----------
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.reload({ waitUntil: 'networkidle' });
 await page.screenshot({ path: `${OUT}/01-home.png` });
 console.log('1. home caricata, titolo:', await page.title());
 
@@ -153,6 +192,45 @@ console.log(`4. due tocchi: slot selezionato ${selezionato} | blocchi ${primaTap
 if (selezionato !== 1) errori.push('TAP: il pezzo toccato non risulta selezionato');
 if (dopoTap <= primaTap) errori.push('TAP: nessun blocco posizionato con la modalita a due tocchi');
 
+// ---------- 4b. Partita da tastiera, senza mai toccare il puntatore ----------
+await page.evaluate(() => window.localStorage.removeItem('quadra:partita'));
+await page.reload({ waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.waitForSelector('.q-plancia');
+const primaTastiera = await contaBlocchi();
+// Tab fino al primo pezzo, Invio per prenderlo, frecce per muoversi, Invio per appoggiare.
+await page.keyboard.press('Tab');
+await page.keyboard.press('Tab');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(80);
+const cursoreVisibile = await page.locator('.q-cella--cursore').count();
+const anteprimaTastiera = await page.locator('.q-cella--anteprima').count();
+await page.keyboard.press('ArrowUp');
+await page.keyboard.press('ArrowLeft');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+const dopoTastiera = await contaBlocchi();
+await page.screenshot({ path: `${OUT}/04b-tastiera.png` });
+console.log(`4b. tastiera: cursore ${cursoreVisibile} | anteprima ${anteprimaTastiera} | blocchi ${primaTastiera} -> ${dopoTastiera}`);
+if (cursoreVisibile !== 1) errori.push('TASTIERA: il cursore sulla griglia non compare dopo aver preso un pezzo');
+if (anteprimaTastiera === 0) errori.push('TASTIERA: nessuna anteprima del pezzo mentre si muove il cursore');
+if (dopoTastiera <= primaTastiera) errori.push('TASTIERA: Invio non appoggia il pezzo');
+
+// Esc deve annullare la selezione.
+await page.keyboard.press('Tab');
+await page.keyboard.press('Enter');
+await page.waitForTimeout(60);
+await page.keyboard.press('Escape');
+await page.waitForTimeout(60);
+if (await page.locator('.q-cella--cursore').count() !== 0) {
+  errori.push('TASTIERA: Esc non annulla la selezione del pezzo');
+}
+
+// L'annuncio per i lettori di schermo deve descrivere la mossa.
+const annuncio = await page.locator('[role="status"]').innerText();
+console.log(`   annuncio per lettore di schermo: "${annuncio.trim()}"`);
+if (!annuncio.trim()) errori.push('ACCESSIBILITA: la regione di annuncio resta vuota dopo una mossa');
+
 // ---------- 5. Persistenza: ricarico e la partita deve essere la stessa ----------
 const punteggioPrima = await punteggio();
 const blocchiPrima = await contaBlocchi();
@@ -207,6 +285,7 @@ for (const [nome, selettore] of [['Statistiche', '.q-lista'], ['Impostazioni', '
 console.log('7. schermate secondarie visitate');
 
 await browser.close();
+if (server) server.kill();
 
 console.log('\n================ ESITO ================');
 if (errori.length === 0) console.log('Nessun problema rilevato.');

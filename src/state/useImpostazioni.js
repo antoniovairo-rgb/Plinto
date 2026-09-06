@@ -16,6 +16,7 @@ export function useImpostazioni() {
     aiutoVisivo: true,
     tema: 'scuro',
     lingua: linguaDelBrowser(),
+    introVista: false,
     ...(read(KEYS.SETTINGS, {}) ?? {}),
   }));
 

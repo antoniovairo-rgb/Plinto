@@ -3,7 +3,9 @@ import { Plancia } from './Plancia.jsx';
 import { Tray } from './Tray.jsx';
 import { Hud, BarraCatena } from './Hud.jsx';
 import { Pezzo } from './Pezzo.jsx';
-import { useTrascinamento } from './useTrascinamento.js';
+import { useTrascinamento, origineDaCella } from './useTrascinamento.js';
+import { useTastiera } from './useTastiera.js';
+import { Annunci, frasePerMossa } from './Annunci.jsx';
 import { useEffettiMossa } from '../feel/useEffettiMossa.js';
 import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
@@ -70,6 +72,20 @@ export function SchermoGioco({
     attivo: partita.status === 'playing',
   });
 
+  const tastiera = useTastiera({
+    attivo: partita.status === 'playing',
+    selezionato: drag.selezionato,
+    mano: partita.hand,
+    onAnnulla: drag.annulla,
+    onPosiziona: (indice, row, col) => {
+      const pezzo = partita.hand[indice];
+      if (!pezzo) return;
+      const origine = origineDaCella(pezzo.shape, row, col);
+      posiziona(indice, origine.row, origine.col);
+      drag.annulla();
+    },
+  });
+
   const prendi = useCallback((evento, handIndex, cella) => {
     sbloccaAudio();
     suonoPresa();
@@ -82,8 +98,20 @@ export function SchermoGioco({
    * del gioco: rende leggibile una mossa a tre gruppi che altrimenti si vede solo dopo.
    */
   const anteprima = useMemo(() => {
-    const indice = drag.preso?.handIndex;
-    const destinazione = drag.destinazione;
+    // L'intenzione puo' arrivare da tre strade diverse — dito, tocco doppio, tastiera —
+    // ma da qui in giu' il gioco non deve sapere quale: l'anteprima e' una sola.
+    let indice = null;
+    let destinazione = null;
+    if (drag.preso) {
+      indice = drag.preso.handIndex;
+      destinazione = drag.destinazione;
+    } else if (drag.selezionato !== null && tastiera.cursore) {
+      indice = drag.selezionato;
+      const pezzoSelezionato = partita.hand[indice];
+      destinazione = pezzoSelezionato
+        ? origineDaCella(pezzoSelezionato.shape, tastiera.cursore.row, tastiera.cursore.col)
+        : null;
+    }
     if (indice == null || !destinazione) return null;
     const pezzo = partita.hand[indice];
     if (!pezzo) return null;
@@ -104,7 +132,8 @@ export function SchermoGioco({
       }
     }
     return { celle: new Set(celle), colore: pezzo.color, valida, incandidate };
-  }, [drag.preso, drag.destinazione, partita.hand, partita.grid, aiutoVisivo]);
+  }, [drag.preso, drag.destinazione, drag.selezionato, tastiera.cursore,
+      partita.hand, partita.grid, aiutoVisivo]);
 
   const pezzoTrascinato = drag.preso ? partita.hand[drag.preso.handIndex] : null;
 
@@ -118,7 +147,7 @@ export function SchermoGioco({
     : null;
 
   return (
-    <div className="q-screen">
+    <div className="q-screen q-screen--gioco">
       <Hud
         punteggio={partita.score}
         record={record.best}
@@ -144,6 +173,9 @@ export function SchermoGioco({
               incandidate={anteprima?.incandidate}
               appoggiate={effetti.appoggiate}
               esplosioni={effetti.esplosioni}
+              cursore={tastiera.cursore}
+              pezzoInMano={drag.selezionato !== null}
+              t={t}
               cellRefs={cellRefs}
               canvasRef={canvas}
               onCellPointerUp={
@@ -169,6 +201,7 @@ export function SchermoGioco({
           <p className="q-suggerimento">
             {drag.selezionato !== null ? t('gioca.tocca') : t('gioca.trascina')}
           </p>
+          <p className="q-sr">{t('a11y.istruzioni')}</p>
         </div>
       </div>
 
@@ -193,6 +226,8 @@ export function SchermoGioco({
           />
         </div>
       ) : null}
+
+      <Annunci testo={frasePerMossa(partita.lastMove, t)} />
     </div>
   );
 }

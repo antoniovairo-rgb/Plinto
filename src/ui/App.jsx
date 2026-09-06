@@ -13,6 +13,7 @@ import { SchermoStatistiche } from './schermate/Statistiche.jsx';
 import { SchermoImpostazioni } from './schermate/Impostazioni.jsx';
 import { SchermoInfo } from './schermate/Info.jsx';
 import { SchermoSostieni } from './schermate/Sostieni.jsx';
+import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
 
 /**
  * Radice dell'applicazione.
@@ -82,6 +83,18 @@ export function App() {
           onRigioca={iniziaNuova}
           onHome={tornaAllaHome}
           t={t}
+        />
+      </div>
+    );
+  }
+
+  // Presentazione al primo avvio: una volta sola, e chi ha gia' giocato non la vede mai.
+  if (!impostazioni.introVista) {
+    return (
+      <div className="q-app">
+        <PrimoAvvio
+          t={t}
+          onInizia={() => { cambia('introVista', true); iniziaNuova(); }}
         />
       </div>
     );

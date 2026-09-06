@@ -19,14 +19,18 @@
   --q-line-strong: #3a4460;  /* separatori dei quadranti 3x3: la firma del tabellone */
 
   /* --- Testo -------------------------------------------------------------- */
+  /* Contrasti misurati sul fondo piu' chiaro dell'interfaccia (--q-surface-2):
+     testo 12.95, testo attenuato 5.85, testo tenue 4.54. Tutti sopra la soglia
+     WCAG AA di 4.5 per testo normale. Il valore precedente di --q-text-faint
+     (#626b83) si fermava a 2.88 ed era illeggibile sui pannelli. */
   --q-text: #e9ecf4;
   --q-text-dim: #98a0b5;
-  --q-text-faint: #626b83;
+  --q-text-faint: #838ca1;
 
   /* --- Colore identitario ------------------------------------------------- */
   --q-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
   --q-brand-deep: #c9922a;
-  --q-danger: #e4587e;
+  --q-danger: #ec6d8e;   /* 5.21 su --q-surface-2 */
   --q-ok: #4cb5a5;
 
   /* --- Famiglie cromatiche dei blocchi ------------------------------------

@@ -21,6 +21,21 @@ import { GRID_SIZE } from '../config/rules.js';
  *    non da calcoli su padding e gap: funziona a qualunque dimensione di schermo.
  */
 
+/**
+ * Dove finisce l'origine di una forma se il giocatore indica la cella (row, col).
+ * La forma viene centrata sulla cella indicata e poi riportata dentro la griglia.
+ * Usata dalla modalita' a due tocchi e da quella a tastiera: indicare una casella
+ * deve voler dire la stessa cosa in entrambe.
+ */
+export function origineDaCella(shape, row, col) {
+  const r = row - Math.floor((shape.height - 1) / 2);
+  const c = col - Math.floor((shape.width - 1) / 2);
+  return {
+    row: Math.max(0, Math.min(GRID_SIZE - shape.height, r)),
+    col: Math.max(0, Math.min(GRID_SIZE - shape.width, c)),
+  };
+}
+
 /** Di quante celle il pezzo viene sollevato sopra il dito (solo su touch). */
 const SOLLEVAMENTO_TOCCO = 1.35;
 
@@ -164,11 +179,8 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       if (selezionato === null) return;
       const pezzo = mano[selezionato];
       if (!pezzo) return;
-      const centrataR = row - Math.floor((pezzo.shape.height - 1) / 2);
-      const centrataC = col - Math.floor((pezzo.shape.width - 1) / 2);
-      const r = Math.max(0, Math.min(GRID_SIZE - pezzo.shape.height, centrataR));
-      const c = Math.max(0, Math.min(GRID_SIZE - pezzo.shape.width, centrataC));
-      onPosiziona(selezionato, r, c);
+      const origine = origineDaCella(pezzo.shape, row, col);
+      onPosiziona(selezionato, origine.row, origine.col);
       setSelezionato(null);
     },
     [selezionato, mano, onPosiziona],
