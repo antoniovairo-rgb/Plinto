@@ -1,8 +1,13 @@
 /**
  * Harness di simulazione di QUADRA.
  *
- * Uso:  node src/sim/run.mjs [partite] [profilo]
+ * Uso:  node src/sim/run.mjs [partite] [profilo] [tetto di mosse]
  *       node src/sim/run.mjs 5000 normale
+ *       node src/sim/run.mjs 200 stratega 250
+ *
+ * Il tetto di mosse serve a confrontare profili di abilita' diversa a parita' di
+ * occasioni: senza, il giocatore piu' bravo fa piu' punti anche solo perche' sopravvive
+ * piu' a lungo, e non si capisce se sta giocando MEGLIO o soltanto di piu'.
  *
  * Non e' un test di regressione: e' lo strumento di BILANCIAMENTO. Risponde a
  * "quanto dura una partita", "quanto e' distribuito il punteggio", "quanto spesso
@@ -16,6 +21,7 @@ import { SHAPES } from '../core/shapes.js';
 
 const GAMES = Number(process.argv[2] ?? 2000);
 const PROFILE = process.argv[3] ?? 'normale';
+const TETTO = Number(process.argv[4] ?? Infinity);
 
 if (!PROFILE_NAMES.includes(PROFILE)) {
   console.error(`Profilo sconosciuto: ${PROFILE}. Disponibili: ${PROFILE_NAMES.join(', ')}`);
@@ -59,6 +65,7 @@ const shapeCount = Object.fromEntries(SHAPES.map((s) => [s.id, 0]));
 let earlyDeaths = 0;   // partite finite sotto le 15 mosse
 let veryEarlyDeaths = 0; // partite finite sotto le 8 mosse: potenziale ingiustizia
 let boardClears = 0;
+let sopravvissute = 0;   // partite ancora vive al raggiungimento del tetto
 
 const rng = createRng(20260906);
 const t0 = Date.now();
@@ -68,7 +75,7 @@ for (let g = 0; g < GAMES; g += 1) {
   state.hand.forEach((p) => { shapeCount[p.shapeId] += 1; });
 
   let guard = 0;
-  while (state.status === 'playing' && guard < 10000) {
+  while (state.status === 'playing' && guard < 10000 && guard < TETTO) {
     const move = chooseMove(state, PROFILE, rng);
     if (!move) break;
     const before = state.stats.handsDealt;
@@ -79,6 +86,7 @@ for (let g = 0; g < GAMES; g += 1) {
     guard += 1;
   }
 
+  if (state.status === 'playing') sopravvissute += 1;
   const s = summarize(state);
   scores.push(s.score);
   moves.push(s.moves);
@@ -101,6 +109,9 @@ console.log(`Gruppi chiusi ${fmt(stats(durationsGroups))}`);
 console.log(`Catena max    ${fmt(stats(bestChains))}`);
 console.log(`Riemp. finale ${fmt(stats(fillAtDeath))} %`);
 console.log(`\nSvuotamenti totali della griglia: ${boardClears} (eventi, non partite)`);
+if (Number.isFinite(TETTO)) {
+  console.log(`Ancora vive al tetto di ${TETTO} mosse: ${sopravvissute}/${GAMES} (${((sopravvissute / GAMES) * 100).toFixed(1)}%)`);
+}
 console.log(`Partite sotto 15 mosse: ${earlyDeaths} (${((earlyDeaths / GAMES) * 100).toFixed(1)}%)`);
 console.log(`Partite sotto  8 mosse: ${veryEarlyDeaths} (${((veryEarlyDeaths / GAMES) * 100).toFixed(2)}%)  <- deve restare vicino a zero`);
 

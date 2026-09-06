@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createGame, placePiece, serializeGame, deserializeGame, summarize, deadPieces,
 } from '../core/engine.js';
-import { read, write, remove, KEYS } from '../persistence/storage.js';
+import { read, write, remove, chiavePartita } from '../persistence/storage.js';
 import { loadRecords, recordGame } from '../persistence/records.js';
+import { registraSfida, giornoDiOggi } from '../persistence/sfide.js';
 
 /**
  * Collega il motore puro a React.
@@ -17,32 +18,43 @@ import { loadRecords, recordGame } from '../persistence/records.js';
  */
 export function usePartita() {
   const [partita, setPartita] = useState(null);
+  // 'libera' oppure 'sfida': cambia solo lo slot di salvataggio e la registrazione
+  // del risultato. Le regole sono identiche, ed e' importante che restino tali.
+  const [modalita, setModalita] = useState('libera');
+  const [esitoSfida, setEsitoSfida] = useState(null);
   const [record, setRecord] = useState(() => loadRecords());
   const [nuoviRecord, setNuoviRecord] = useState([]);
   const registrata = useRef(false);
 
   /** Riprende una partita salvata, se ce n'e' una ancora in corso. */
-  const partitaSalvata = useCallback(() => {
-    const raw = read(KEYS.CURRENT_GAME, null);
+  const partitaSalvata = useCallback((quale = 'libera') => {
+    const raw = read(chiavePartita(quale), null);
     if (!raw) return null;
     const stato = deserializeGame(raw);
     return stato && stato.status === 'playing' ? stato : null;
   }, []);
 
-  const nuovaPartita = useCallback((opzioni = {}) => {
+  const nuovaPartita = useCallback((opzioni = {}, quale = 'libera') => {
     registrata.current = false;
     setNuoviRecord([]);
+    setEsitoSfida(null);
+    setModalita(quale);
     const stato = createGame(opzioni);
     setPartita(stato);
-    write(KEYS.CURRENT_GAME, serializeGame(stato));
+    write(chiavePartita(quale), serializeGame(stato));
     return stato;
   }, []);
 
-  const riprendi = useCallback(() => {
-    const stato = partitaSalvata();
+  /** Avvia la Sfida del Giorno: il seme e' la data, quindi e' uguale per tutti. */
+  const nuovaSfida = useCallback(() => nuovaPartita({ seed: giornoDiOggi() }, 'sfida'), [nuovaPartita]);
+
+  const riprendi = useCallback((quale = 'libera') => {
+    const stato = partitaSalvata(quale);
     if (!stato) return null;
     registrata.current = false;
     setNuoviRecord([]);
+    setEsitoSfida(null);
+    setModalita(quale);
     setPartita(stato);
     return stato;
   }, [partitaSalvata]);
@@ -68,27 +80,32 @@ export function usePartita() {
   useEffect(() => {
     if (!partita) return;
     if (partita.status === 'playing') {
-      write(KEYS.CURRENT_GAME, serializeGame(partita));
+      write(chiavePartita(modalita), serializeGame(partita));
       return;
     }
     if (registrata.current) return;
     registrata.current = true;
-    remove(KEYS.CURRENT_GAME);
-    const esito = recordGame(summarize(partita));
+    remove(chiavePartita(modalita));
+    const riepilogo = summarize(partita);
+    const esito = recordGame(riepilogo);
     setRecord(esito.records);
     setNuoviRecord(esito.nuoviRecord);
-  }, [partita]);
+    if (modalita === 'sfida') setEsitoSfida(registraSfida(riepilogo.score));
+  }, [partita, modalita]);
 
   return {
     partita,
+    modalita,
+    esitoSfida,
     record,
     nuoviRecord,
     pezziMorti: partita ? deadPieces(partita) : [],
     riepilogo: partita ? summarize(partita) : null,
     nuovaPartita,
+    nuovaSfida,
     riprendi,
     abbandona,
     gioca,
-    cePartitaSalvata: () => partitaSalvata() !== null,
+    cePartitaSalvata: (quale = 'libera') => partitaSalvata(quale) !== null,
   };
 }

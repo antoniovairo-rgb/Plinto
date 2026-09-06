@@ -6,6 +6,7 @@ import { impostaAudio, suonoBottone, suonoRecord, sbloccaAudio } from '../audio/
 import { impostaVibrazione } from '../feel/vibrazione.js';
 import { clearAll } from '../persistence/storage.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
+import { sfidaDelGiorno, storicoSfide } from '../persistence/sfide.js';
 import { SchermoGioco } from './SchermoGioco.jsx';
 import { SchermoHome } from './schermate/Home.jsx';
 import { SchermoFine } from './schermate/Fine.jsx';
@@ -36,11 +37,13 @@ export function App() {
   const t = useMemo(() => traduttore(impostazioni.lingua), [impostazioni.lingua]);
 
   const {
-    partita, record, nuoviRecord, pezziMorti, riepilogo,
-    nuovaPartita, riprendi, abbandona, gioca, cePartitaSalvata,
+    partita, modalita, esitoSfida, record, nuoviRecord, pezziMorti, riepilogo,
+    nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
   } = usePartita();
 
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
+  const [sfidaSalvata, setSfidaSalvata] = useState(() => cePartitaSalvata('sfida'));
+  const [sfidaOggi, setSfidaOggi] = useState(() => sfidaDelGiorno());
 
   const iniziaNuova = useCallback(() => {
     sbloccaAudio();
@@ -55,10 +58,22 @@ export function App() {
     if (riprendi()) setSchermata('gioco');
   }, [riprendi]);
 
+  /** Sfida del Giorno: se ne era rimasta una a meta' oggi, si riprende invece di ricominciare. */
+  const apriSfida = useCallback(() => {
+    sbloccaAudio();
+    suonoBottone();
+    if (cePartitaSalvata('sfida') && riprendi('sfida')) { setSchermata('gioco'); return; }
+    nuovaSfida();
+    setSfidaSalvata(false);
+    setSchermata('gioco');
+  }, [cePartitaSalvata, riprendi, nuovaSfida]);
+
   const tornaAllaHome = useCallback(() => {
     abbandona();
     setStatistiche(loadStats());
     setSalvataggioDisponibile(cePartitaSalvata());
+    setSfidaSalvata(cePartitaSalvata('sfida'));
+    setSfidaOggi(sfidaDelGiorno());
     setMenuAperto(false);
     setSchermata('home');
   }, [abbandona, cePartitaSalvata]);
@@ -67,6 +82,8 @@ export function App() {
     clearAll();
     setStatistiche(loadStats());
     setSalvataggioDisponibile(false);
+    setSfidaSalvata(false);
+    setSfidaOggi(sfidaDelGiorno());
   }, []);
 
   // Partita finita: si passa automaticamente al riepilogo.
@@ -80,7 +97,9 @@ export function App() {
           riepilogo={riepilogo}
           record={record}
           nuoviRecord={nuoviRecord}
-          onRigioca={iniziaNuova}
+          modalita={modalita}
+          esitoSfida={esitoSfida}
+          onRigioca={modalita === 'sfida' ? apriSfida : iniziaNuova}
           onHome={tornaAllaHome}
           t={t}
         />
@@ -119,8 +138,11 @@ export function App() {
         <SchermoHome
           record={record}
           cePartitaSalvata={salvataggioDisponibile}
+          sfidaOggi={sfidaOggi}
+          sfidaInCorso={sfidaSalvata}
           onGioca={iniziaNuova}
           onRiprendi={riprendiPartita}
+          onSfida={apriSfida}
           onVai={setSchermata}
           t={t}
         />
@@ -130,6 +152,7 @@ export function App() {
         <SchermoStatistiche
           record={loadRecords()}
           stats={statistiche}
+          storicoSfide={storicoSfide()}
           onIndietro={() => setSchermata('home')}
           t={t}
         />

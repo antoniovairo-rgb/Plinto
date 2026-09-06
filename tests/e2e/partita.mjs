@@ -271,8 +271,76 @@ console.log('6. schermata di fine partita mostrata:', fineVisibile === 1);
 if (fineVisibile !== 1) errori.push('FINE PARTITA: la schermata di riepilogo non e comparsa');
 else console.log('   punteggio finale mostrato:', await page.locator('.q-fine__numero').innerText());
 
-// ---------- 7. Navigazione delle altre schermate ----------
+// ---------- 6b. Sfida del giorno e slot di salvataggio separati ----------
 await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForTimeout(150);
+// Si lascia a meta' una partita libera...
+await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.waitForSelector('.q-plancia');
+const geoLibera = await page.evaluate(() => {
+  const p = document.querySelectorAll('.q-tray .q-pezzo')[0].getBoundingClientRect();
+  const c = document.querySelectorAll('.q-plancia .q-cella')[40].getBoundingClientRect();
+  return { px: p.left + p.width / 2, py: p.top + p.height / 2, cx: c.left + c.width / 2, cy: c.top + c.height / 2 };
+});
+await page.mouse.move(geoLibera.px, geoLibera.py);
+await page.mouse.down();
+await page.mouse.move(geoLibera.cx, geoLibera.cy, { steps: 8 });
+await page.mouse.up();
+await page.waitForTimeout(120);
+const blocchiLibera = await contaBlocchi();
+await page.locator('.q-hud__menu').first().click();
+await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForTimeout(150);
+
+// ...e si apre la Sfida del Giorno: deve essere una partita nuova e vuota.
+await page.getByRole('button', { name: /Sfida del giorno/ }).click();
+await page.waitForSelector('.q-plancia');
+const blocchiSfida = await contaBlocchi();
+await page.screenshot({ path: `${OUT}/06b-sfida.png` });
+console.log(`6b. sfida del giorno: partita libera ${blocchiLibera} blocchi, sfida ${blocchiSfida} blocchi`);
+if (blocchiSfida !== 0) errori.push('SFIDA: non parte da griglia vuota');
+
+// A parita di giorno la sfida deve essere identica: si annota la mano e si riavvia.
+const manoSfida = await page.evaluate(() =>
+  [...document.querySelectorAll('.q-tray .q-pezzo')].map((p) => {
+    const st = getComputedStyle(p);
+    return `${st.gridTemplateColumns.split(' ').length}x${st.gridTemplateRows.split(' ').length}`;
+  }).join(','));
+await page.locator('.q-hud__menu').first().click();
+await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForTimeout(150);
+
+// La partita libera lasciata a meta' deve essere ancora li': slot separati.
+const riprendiVisibile = await page.getByRole('button', { name: /Riprendi la partita/ }).count();
+if (riprendiVisibile === 0) {
+  errori.push('SFIDA: aprire la sfida ha cancellato la partita libera in corso');
+} else {
+  await page.getByRole('button', { name: /Riprendi la partita/ }).click();
+  await page.waitForSelector('.q-plancia');
+  const blocchiRipresi = await contaBlocchi();
+  if (blocchiRipresi !== blocchiLibera) {
+    errori.push(`SFIDA: la partita libera ripresa ha ${blocchiRipresi} blocchi invece di ${blocchiLibera}`);
+  }
+  await page.locator('.q-hud__menu').first().click();
+  await page.getByRole('button', { name: /Torna alla home/ }).click();
+  await page.waitForTimeout(150);
+}
+
+// Riaprendo la sfida nello stesso giorno la si RIPRENDE, non se ne comincia un'altra.
+await page.getByRole('button', { name: /Sfida del giorno|Riprendi la sfida/ }).click();
+await page.waitForSelector('.q-plancia');
+const manoSfidaDopo = await page.evaluate(() =>
+  [...document.querySelectorAll('.q-tray .q-pezzo')].map((p) => {
+    const st = getComputedStyle(p);
+    return `${st.gridTemplateColumns.split(' ').length}x${st.gridTemplateRows.split(' ').length}`;
+  }).join(','));
+console.log(`   mano della sfida: "${manoSfida}" -> "${manoSfidaDopo}"`);
+if (manoSfida !== manoSfidaDopo) errori.push('SFIDA: la partita del giorno non e stabile fra un accesso e l altro');
+await page.locator('.q-hud__menu').first().click();
+await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForTimeout(150);
+
+// ---------- 7. Navigazione delle altre schermate ----------
 for (const [nome, selettore] of [['Statistiche', '.q-lista'], ['Impostazioni', '.q-interruttore'], ['Info', '.q-testo']]) {
   await page.getByRole('button', { name: nome }).click();
   await page.waitForTimeout(150);

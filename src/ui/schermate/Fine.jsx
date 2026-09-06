@@ -24,30 +24,41 @@ function durata(ms) {
   return m > 0 ? `${m}m ${String(s % 60).padStart(2, '0')}s` : `${s}s`;
 }
 
-export function SchermoFine({ riepilogo, record, nuoviRecord, onRigioca, onHome, t }) {
-  const eRecord = nuoviRecord.includes('punteggio');
+export function SchermoFine({
+  riepilogo, record, nuoviRecord, modalita, esitoSfida, onRigioca, onHome, t,
+}) {
+  const eSfida = modalita === 'sfida';
+  // Nella Sfida del Giorno il confronto che conta e' con il proprio risultato di oggi,
+  // non con il record di sempre: la partita e' un'altra e paragonarle sarebbe scorretto.
+  const eRecord = eSfida
+    ? Boolean(esitoSfida?.nuovoRecordDiGiornata)
+    : nuoviRecord.includes('punteggio');
   return (
     <div className="q-screen q-fine">
       <div className="q-scroll">
-        <p className="q-fine__titolo">{t('fine.titolo')}</p>
+        <p className="q-fine__titolo">{eSfida ? t('sfida.titolo') : t('fine.titolo')}</p>
         <p className="q-fine__motivo">{t('fine.motivo')}</p>
 
         <div className={`q-fine__punteggio ${eRecord ? 'q-fine__punteggio--record' : ''}`}>
           <span className="q-hud__etichetta">{t('fine.punteggio')}</span>
           <span className="q-fine__numero">{riepilogo.score.toLocaleString('it-IT')}</span>
           {eRecord ? (
-            <span className="q-fine__nastro">{t('fine.nuovoRecord')}</span>
+            <span className="q-fine__nastro">
+              {eSfida ? t('sfida.nuovoRecordOggi') : t('fine.nuovoRecord')}
+            </span>
           ) : (
             <span className="q-fine__precedente">
-              {t('hud.record')} {record.best.toLocaleString('it-IT')}
+              {eSfida
+                ? `${t('sfida.tuoRecordOggi')} ${(esitoSfida?.best ?? 0).toLocaleString('it-IT')}`
+                : `${t('hud.record')} ${record.best.toLocaleString('it-IT')}`}
             </span>
           )}
         </div>
 
-        {nuoviRecord.includes('catena') ? (
+        {!eSfida && nuoviRecord.includes('catena') ? (
           <p className="q-fine__extra">{t('fine.recordCatena')}</p>
         ) : null}
-        {nuoviRecord.includes('mossa') ? (
+        {!eSfida && nuoviRecord.includes('mossa') ? (
           <p className="q-fine__extra">{t('fine.recordMossa')}</p>
         ) : null}
 
@@ -60,6 +71,9 @@ export function SchermoFine({ riepilogo, record, nuoviRecord, onRigioca, onHome,
             <Riga etichetta={t('fine.griglieSvuotate')} valore={riepilogo.boardClears} />
           ) : null}
           <Riga etichetta={t('fine.durata')} valore={durata(riepilogo.durationMs)} />
+          {eSfida && esitoSfida ? (
+            <Riga etichetta={t('sfida.tentativi')} valore={esitoSfida.partite} />
+          ) : null}
         </div>
       </div>
 

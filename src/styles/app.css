@@ -346,7 +346,7 @@ button {
 /* ------------------------------------------------------------------ home --- */
 .q-home {
   justify-content: center;
-  gap: 7vh;
+  gap: 5vh;
   padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
   text-align: center;
 }
@@ -366,12 +366,14 @@ button {
   font-variant-numeric: tabular-nums;
 }
 /* Le tre voci secondarie devono stare su una riga sola anche su schermi stretti:
-   una voce che va a capo da sola sembra un errore di impaginazione. */
+   una voce che va a capo da sola sembra un errore di impaginazione.
+   Non sono ancorate in fondo: con un menu appiccicato al bordo inferiore, su un
+   telefono alto si apriva un vuoto di quasi meta' schermo nel mezzo della home.
+   Meglio una composizione centrata con lo stesso respiro sopra e sotto. */
 .q-home__menu {
   display: flex;
   justify-content: center;
   gap: 2px;
-  margin-top: auto;
 }
 .q-home__menu .q-btn { padding: 0 12px; font-size: 14px; }
 
@@ -752,4 +754,18 @@ button {
   .q-hud { padding: 8px 16px 4px; }
   .q-hud__valore { font-size: 26px; }
   .q-tray__posto { height: clamp(84px, 14vh, 110px); }
+}
+
+/* ------------------------------------------------------- sfida del giorno --- */
+/* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
+   secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */
+.q-sfida-avvio {
+  justify-content: space-between;
+  padding: 0 18px;
+}
+.q-sfida-avvio__esito {
+  font-family: var(--q-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  color: var(--q-brand);
 }

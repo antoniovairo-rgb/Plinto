@@ -73,5 +73,15 @@ export const KEYS = {
   RECORDS: 'records',
   SETTINGS: 'settings',
   CURRENT_GAME: 'partita',
+  CURRENT_CHALLENGE: 'partita-sfida',
   STATS: 'statistiche',
 };
+
+/**
+ * Slot di salvataggio della partita in corso, uno per modalita'.
+ * Sono separati di proposito: iniziare la Sfida del Giorno non deve cancellare
+ * la partita libera che il giocatore aveva lasciato a meta'.
+ */
+export function chiavePartita(modalita) {
+  return modalita === 'sfida' ? KEYS.CURRENT_CHALLENGE : KEYS.CURRENT_GAME;
+}

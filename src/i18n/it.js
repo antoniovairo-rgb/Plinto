@@ -88,6 +88,17 @@ export default {
     bottone: 'Dona con PayPal',
     noGrazie: 'Magari piu avanti',
   },
+  sfida: {
+    titolo: 'Sfida del giorno',
+    breve: 'Sfida del giorno',
+    spiegazione: 'Oggi la partita e la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine.',
+    tuoRecordOggi: 'Il tuo record di oggi',
+    tentativi: 'Tentativi',
+    nessunTentativo: 'Non l hai ancora provata.',
+    nuovoRecordOggi: 'Nuovo record di giornata!',
+    storico: 'Ultimi giorni',
+    riprendi: 'Riprendi la sfida',
+  },
   intro: {
     uno: 'Trascina i pezzi sulla griglia. Non si ruotano.',
     due: 'Completa una riga, una colonna o un quadrante 3x3: sparisce e fa punti.',

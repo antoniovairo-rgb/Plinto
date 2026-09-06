@@ -88,6 +88,17 @@ export default {
     bottone: 'Donate with PayPal',
     noGrazie: 'Maybe later',
   },
+  sfida: {
+    titolo: 'Daily challenge',
+    breve: 'Daily challenge',
+    spiegazione: 'Today everyone plays the same game: same grid, same pieces, same order.',
+    tuoRecordOggi: 'Your best today',
+    tentativi: 'Attempts',
+    nessunTentativo: 'You have not tried it yet.',
+    nuovoRecordOggi: 'New best of the day!',
+    storico: 'Recent days',
+    riprendi: 'Resume challenge',
+  },
   intro: {
     uno: 'Drag the pieces onto the grid. They do not rotate.',
     due: 'Complete a row, a column or a 3x3 quadrant: it clears and scores.',
