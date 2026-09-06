@@ -36,29 +36,25 @@ Stessi comandi dal Prompt dei comandi o da PowerShell, dopo aver installato Node
 
 ## Online, su GitHub Pages
 
-Il flusso di pubblicazione è in `.github/workflows/pages.yml` e parte a ogni push su
-`main`. Prima del primo uso serve **un passaggio manuale, una volta sola**, da fare
-come amministratore della repository:
+**Indirizzo: https://antoniovairo-rgb.github.io/Plinto/**
 
-**Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+La pubblicazione avviene a ogni push su `main` tramite
+`.github/workflows/pages.yml`, che costruisce il gioco e scrive il risultato sul
+branch `gh-pages`. Quel branch contiene solo la build: non si modifica a mano.
 
-Poi si può rilanciare la pubblicazione da Actions → "pubblica su Pages" → Run workflow.
+Se aprendo l'indirizzo trovi un 404, manca **un solo passaggio**, da fare una volta:
 
-> Perché non è automatico: `actions/configure-pages` ha un'opzione `enablement: true`
-> che in teoria attiverebbe Pages da sé. È stata provata e fallisce con
-> *"Resource not accessible by integration ... create-a-pages-site"*: il token
-> automatico dei flussi non ha i permessi di amministrazione per **creare** il sito,
-> e nessun permesso dichiarabile nel file glieli può dare.
+**Settings → Pages → Build and deployment → Source: `Deploy from a branch`
+→ Branch: `gh-pages` / `(root)`**
 
-L'indirizzo sarà `https://antoniovairo-rgb.github.io/Plinto/`.
+Poi Pages impiega uno o due minuti a rispondere la prima volta.
 
-> **Nota sulla visibilità.** GitHub Pages su una repository *privata* richiede un
-> piano a pagamento. Questa repository è pubblica dal 6 settembre 2026, quindi Pages
-> funziona con il piano gratuito. Resta valido quanto scritto in
-> `docs/RELEASE_CHECKLIST.md`: il gioco è online **prima** che il nome PLINTO sia
-> stato verificato da un professionista.
-
-La build è verificata per funzionare da una sottocartella: `npm run prova-pages`.
+> Perché serve un passaggio manuale: `actions/deploy-pages` avrebbe evitato il branch,
+> ma richiede che Pages sia già attivo in modalità "GitHub Actions", e il token
+> automatico dei flussi non può attivarlo. Provato, fallisce con *"Resource not
+> accessible by integration ... create-a-pages-site"*: `pages: write` consente di
+> pubblicare su un sito esistente, non di crearne uno. Spingere un branch invece
+> richiede solo `contents: write`, che il token ha.
 
 ## Cosa guardare mentre provi
 

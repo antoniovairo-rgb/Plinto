@@ -1,19 +1,19 @@
-# Pubblicazione su GitHub Pages a ogni push su main.
+# Pubblicazione del gioco su GitHub Pages.
 #
-# ATTENZIONE: su una repository PRIVATA, GitHub Pages richiede un piano a pagamento
-# (Pro, Team o Enterprise). Con il piano gratuito questo flusso fallisce finche' la
-# repository non viene resa pubblica.
+# COME FUNZIONA: la build finisce su un branch dedicato `gh-pages`, che contiene solo
+# il risultato di `npm run build`. Il branch non si modifica a mano: si rigenera.
 #
-# PRIMA DEL PRIMO USO, un amministratore della repository deve fare una volta sola:
-#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
-#
-# Non e' evitabile. E' stato provato `enablement: true` su configure-pages, che in
-# teoria attiverebbe Pages da solo: fallisce con
+# PERCHE' COSI' e non con actions/deploy-pages: quel percorso richiede che un
+# amministratore abbia prima attivato Pages con Source "GitHub Actions", e il token
+# automatico dei flussi NON puo' farlo da se'. Provato: fallisce con
 #   "Resource not accessible by integration ... create-a-pages-site"
-# perche' il token automatico dei flussi non ha i permessi di amministrazione
-# necessari a CREARE il sito, e nessun permesso dichiarabile qui glieli da'.
-# Finche' quel passaggio manuale non viene fatto, questo flusso fallisce con
-#   "Get Pages site failed... verify that the repository has Pages enabled".
+# perche' `pages: write` permette di pubblicare su un sito esistente, non di crearlo.
+# Spingere un branch, invece, il token lo puo' fare con il solo `contents: write`.
+#
+# Se Pages non risultasse ancora attivo, l'unico passaggio manuale e':
+#   Settings -> Pages -> Build and deployment -> Source: "Deploy from a branch"
+#   -> Branch: gh-pages / (root)
+# Da quel momento ogni push su main aggiorna il sito da solo.
 name: pubblica su Pages
 
 on:
@@ -21,20 +21,18 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permessi minimi necessari alla pubblicazione.
+# Serve solo poter scrivere un branch: nessun permesso di amministrazione.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Una pubblicazione alla volta; non si annulla quella in corso per non lasciare
+# Una pubblicazione alla volta, e non si annulla quella in corso per non lasciare
 # il sito a meta'.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  pubblica:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,28 +44,31 @@ jobs:
 
       - run: npm ci
 
-      # Non si pubblica qualcosa che non passa i test.
-      - name: Test unitari
+      # Non si mette online qualcosa che non ha superato le proprie verifiche.
+      - name: Test
         run: npm test
 
       - name: Build di produzione
         run: npm run build
 
-      # Niente `enablement: true`: il token dei flussi non puo' creare il sito Pages
-      # (vedi la nota in testa al file). Con Pages gia' attivo, questo passo si limita
-      # a leggerne la configurazione.
-      - uses: actions/configure-pages@v5
+      # La build e' verificata per funzionare da una sottocartella: e' il caso di
+      # GitHub Pages, e senza questo controllo si scoprirebbe con una pagina bianca.
+      - name: La build funziona da una sottocartella
+        run: |
+          npx playwright install --with-deps chromium
+          node tools/prova-sottocartella.mjs
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  pubblica:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.pubblicazione.outputs.page_url }}
-    steps:
-      - id: pubblicazione
-        uses: actions/deploy-pages@v4
+      - name: Pubblica su gh-pages
+        run: |
+          # .nojekyll: senza, Pages passerebbe il sito da Jekyll e ignorerebbe le
+          # cartelle che iniziano con un trattino basso.
+          touch dist/.nojekyll
+          cd dist
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "build da ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
