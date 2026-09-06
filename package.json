@@ -16,7 +16,8 @@
     "precisione": "node tests/e2e/precisione.mjs",
     "schermate": "node tools/schermate.mjs",
     "icone": "node tools/icone.mjs",
-    "prova-pages": "npm run build && node tools/prova-sottocartella.mjs"
+    "prova-pages": "npm run build && node tools/prova-sottocartella.mjs",
+    "prova-desktop": "node tools/prova-desktop.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

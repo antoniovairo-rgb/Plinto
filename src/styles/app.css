@@ -685,6 +685,25 @@ button {
 }
 
 /* ------------------------------------------------------------ primo avvio --- */
+/*
+ * Presentazione e fine partita hanno la stessa struttura: un blocco di contenuto e,
+ * sotto, l'azione principale. Se l'area del contenuto prende tutto lo spazio
+ * disponibile, su uno schermo alto il pulsante resta inchiodato al fondo a
+ * duecentocinquanta pixel dal testo, e l'interfaccia non sembra progettata: sembra
+ * rotta. Con `flex: 0 1 auto` il contenuto occupa solo cio' che gli serve e i due
+ * blocchi si centrano INSIEME, restando comunque scorrevoli se lo spazio manca.
+ */
+.pl-intro,
+.pl-fine {
+  justify-content: center;
+}
+
+.pl-intro .pl-scroll,
+.pl-fine .pl-scroll {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
 .pl-intro .pl-scroll {
   max-width: 460px;
   margin: 0 auto;
@@ -736,7 +755,7 @@ button {
 }
 
 .pl-intro__azioni {
-  padding: 12px 24px calc(20px + env(safe-area-inset-bottom));
+  padding: 18px 24px calc(20px + env(safe-area-inset-bottom));
   max-width: 420px;
   margin: 0 auto;
   width: 100%;
@@ -794,4 +813,52 @@ button {
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   color: var(--pl-brand);
+}
+
+/* --------------------------------------------------- schermi grandi (desktop) --- */
+/*
+ * PLINTO e' pensato per il telefono: una colonna sola, testata in alto, pezzi in
+ * basso sotto il pollice. Lasciato libero su un monitor da 1600 px quella colonna si
+ * sfilaccia: il pulsante resta inchiodato al fondo dello schermo a trecento pixel dal
+ * contenuto, e la partita galleggia in mezzo al vuoto.
+ *
+ * Su schermi ampi l'applicazione viene quindi racchiusa in un riquadro delle
+ * proporzioni di un telefono, centrato. Non e' una scorciatoia: e' la stessa
+ * interfaccia, alle stesse distanze fra le dita e i comandi, in una cornice che
+ * dichiara cosa e'. Sotto queste soglie non cambia assolutamente nulla.
+ */
+@media (min-width: 720px) and (min-height: 720px) {
+  body {
+    display: grid;
+    place-items: center;
+    /* Il fondo attorno alla cornice e' piu' scuro del gioco, cosi' il riquadro si
+       stacca invece di sembrare una finestra senza bordi. */
+    background:
+      radial-gradient(120% 90% at 50% 0%,
+        color-mix(in srgb, var(--pl-surface) 45%, var(--pl-ink)) 0%,
+        var(--pl-ink) 70%);
+  }
+
+  #root {
+    width: min(430px, 92vw);
+    height: min(920px, 92vh);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--pl-line),
+      0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Dentro la cornice non serve lo spazio per le tacche dei telefoni. */
+  .pl-app { padding: 0; }
+}
+
+/* Schermi larghi ma bassi (un portatile molto panoramico): niente cornice, che
+   taglierebbe la plancia, ma almeno si limita la larghezza della colonna. */
+@media (min-width: 720px) and (max-height: 719px) {
+  .pl-app {
+    width: min(430px, 100%);
+    margin: 0 auto;
+    box-shadow: 0 0 0 1px var(--pl-line);
+  }
 }
