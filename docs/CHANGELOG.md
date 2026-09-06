@@ -7,6 +7,42 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.7] — 6 settembre 2026
+
+### Aggiunto
+
+**L'obiettivo di un livello si vede, non solo si legge (`src/ui/MiniGriglia.jsx`)**
+
+Segnalazione da chi giocava: «già al primo livello non si capisce l'obiettivo». La
+schermata di apertura c'era, la frase pure — «Chiudi una riga» — e diceva la cosa giusta
+**nel modo sbagliato**.
+
+A chi non conosce il genere, *riga* non è un'immagine: è una parola. E il gioco non gli
+aveva ancora mostrato una riga chiudersi, quindi non aveva niente a cui agganciarla. La
+spiegazione della 0.2.2 partiva dal presupposto che il giocatore sapesse già leggere la
+griglia — cioè esattamente il presupposto che non si può fare con chi apre il gioco per la
+prima volta.
+
+- Ora l'obiettivo è **disegnato**: una griglia 9×9 in miniatura, con le stesse linee spesse
+  a separare i quadranti, e le caselle dell'obiettivo accese in ottone — lo stesso colore
+  con cui il gioco evidenzia i gruppi che stai per chiudere, quindi il segno è coerente con
+  quello che vedrai giocando. Una parola si può fraintendere, nove caselle accese in fila no.
+- Il disegno sta **prima** del consiglio: chi non ha mai visto una riga chiusa non può
+  capire un consiglio su come chiuderne una.
+- Ogni tipo ha la sua figura: riga, colonna, quadrante, gruppo (una riga *o* una colonna,
+  la seconda in tinta più tenue), **Intreccio** (una riga e una colonna che si incrociano —
+  il disegno spiega da solo perché l'incrocio è il posto giusto) e pulizia (griglia vuota).
+- **Gli obiettivi che non sono una forma non vengono disegnati affatto.** «Fai 300 punti» o
+  «arriva a Catena 5» non hanno un disegno onesto sulla griglia, e inventarne uno
+  insegnerebbe una cosa falsa a chi non ha modo di accorgersene. Meglio nessuna figura.
+- Otto test in `tests/quadri.test.js` verificano che la figura corrisponda alla **geometria
+  vera**: nove caselle sulla stessa riga, nove sulla stessa colonna, nove dentro un solo
+  riquadro 3×3, e per l'Intreccio che le due figure **si incrocino davvero** (9 + 9 − 1
+  casella in comune: se non si incrociassero, il disegno direbbe «due gruppi qualsiasi»
+  invece di «due gruppi con una sola mossa»). Più `npm run e2e-quadri`, che conta le caselle
+  accese nel browser.
+
+
 ## [0.2.6] — 6 settembre 2026
 
 ### Aggiunto

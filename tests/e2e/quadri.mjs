@@ -122,6 +122,16 @@ const plintoParla = await page.locator('.pl-apertura .pl-plinto').count();
 await page.screenshot({ path: `${OUT}/2-apertura.png` });
 console.log(`2. apertura: "${obiettivoDetto}" | spiegazioni ${spiegazioni} | consigli ${consigli}`);
 
+// Il disegno dell'obiettivo: una riga sono NOVE caselle accese, non otto e non dieci.
+// E' l'unica parte della schermata che spiega senza usare parole, quindi si controlla
+// che dica il vero: una miniatura sbagliata insegnerebbe la regola sbagliata.
+const celleAccese = await page.locator('.pl-mini__cella--accesa').count();
+const celleTotali = await page.locator('.pl-mini__cella').count();
+if (celleTotali !== 81) errori.push(`APERTURA: la miniatura ha ${celleTotali} caselle invece di 81`);
+if (celleAccese !== 9) errori.push(`APERTURA: la riga illustrata ha ${celleAccese} caselle invece di 9`);
+const didascalia = await page.locator('.pl-apertura__didascalia').innerText().catch(() => '');
+if (!didascalia.trim()) errori.push('APERTURA: il disegno non ha didascalia');
+
 const attesi = quadroNumero(1).obiettivi.length;
 if (!obiettivoDetto) errori.push('APERTURA: l obiettivo non viene detto');
 if (spiegazioni !== attesi) errori.push(`APERTURA: ${spiegazioni} spiegazioni invece di ${attesi}`);

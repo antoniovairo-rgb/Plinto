@@ -1,4 +1,5 @@
 import { Plinto } from '../Plinto.jsx';
+import { MiniGriglia, celleDa } from '../MiniGriglia.jsx';
 import { descriviObiettivi } from './Quadri.jsx';
 
 /**
@@ -37,6 +38,15 @@ export function AperturaQuadro({ quadro, onGioca, onElenco, t }) {
             ))}
           </div>
         </div>
+
+        {/* Il disegno prima del consiglio: chi non ha mai visto una riga chiusa non
+            puo' capire un consiglio su come chiuderne una. */}
+        {quadro.obiettivi.map(({ tipo }) => (celleDa(tipo) ? (
+          <div className="pl-apertura__disegno" key={`disegno-${tipo}`}>
+            <MiniGriglia tipo={tipo} />
+            <p className="pl-apertura__didascalia">{t(`quadri.didascalie.${tipo}`)}</p>
+          </div>
+        ) : null))}
 
         {quadro.obiettivi.map(({ tipo }) => (
           <p className="pl-apertura__consiglio" key={tipo}>

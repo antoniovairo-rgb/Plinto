@@ -1392,3 +1392,47 @@ button {
 /* Nella pagina di aiuto le regole numerate hanno piu' aria che nella presentazione:
    li' si scorrono, qui si leggono. */
 .pl-screen .pl-aiuto__saluto + .pl-sezione { margin-top: 18px; }
+
+/* ------------------------------------------ griglia in miniatura (obiettivo) --- */
+/* Illustra l'obiettivo di un livello sulla stessa griglia 9x9 su cui si giochera'
+   un secondo dopo. Una parola si puo' fraintendere; nove caselle accese in fila no. */
+.pl-apertura__disegno {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  margin: 4px 0 16px;
+}
+
+.pl-mini {
+  display: grid;
+  grid-template-columns: repeat(9, 15px);
+  grid-template-rows: repeat(9, 15px);
+  gap: 1px;
+  padding: 6px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-ink-2);
+  border: 1px solid var(--pl-line);
+}
+
+.pl-mini__cella {
+  border-radius: 2px;
+  background: var(--pl-cella-vuota);
+}
+/* Le caselle dell'obiettivo sono in ottone, lo stesso colore con cui il gioco
+   evidenzia i gruppi che stai per chiudere: il segno e' gia' familiare a chi gioca. */
+.pl-mini__cella--accesa { background: var(--pl-brand); }
+.pl-mini__cella--tenue { background: color-mix(in srgb, var(--pl-brand) 40%, transparent); }
+
+/* Le linee spesse dei quadranti, come sul tabellone vero. */
+.pl-mini__cella--stacco-sx { box-shadow: inset 2px 0 0 var(--pl-line-strong); }
+.pl-mini__cella--stacco-su { box-shadow: inset 0 2px 0 var(--pl-line-strong); }
+.pl-mini__cella--stacco-sx.pl-mini__cella--stacco-su {
+  box-shadow: inset 2px 0 0 var(--pl-line-strong), inset 0 2px 0 var(--pl-line-strong);
+}
+
+.pl-apertura__didascalia {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pl-text-dim);
+  text-align: center;
+}

@@ -3,6 +3,8 @@ import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI } from '../src/core/quadro.js';
 import { gridFromString, findCompletedGroups, filledCount, allPlacements } from '../src/core/grid.js';
 import { traduttore, LINGUE } from '../src/i18n/index.js';
+import { celleDa } from '../src/ui/MiniGriglia.jsx';
+import { GRID_SIZE } from '../src/config/rules.js';
 
 const memoria = new Map();
 vi.stubGlobal('window', {
@@ -219,6 +221,90 @@ describe('apertura dei Quadri', () => {
         .not.toBe(`quadri.spiegazioni.${tipo}`);
       expect(t(`quadri.consigli.${tipo}`), `manca il consiglio di ${tipo}`)
         .not.toBe(`quadri.consigli.${tipo}`);
+    }
+  });
+});
+
+/**
+ * Il disegno dell'obiettivo.
+ *
+ * E' l'unica parte della schermata di apertura che spiega SENZA usare parole, ed e'
+ * nata perche' le parole non bastavano: al primo livello "Chiudi una riga" non diceva
+ * niente a chi non aveva mai visto una riga chiudersi. Proprio per questo una miniatura
+ * sbagliata sarebbe peggio di nessuna miniatura: insegnerebbe la regola sbagliata a chi
+ * non ha modo di accorgersene.
+ *
+ * Qui si verifica che la figura corrisponda alla geometria vera del gioco, e che per
+ * gli obiettivi che NON sono una forma sulla griglia (punti, Catena) non venga disegnato
+ * niente, invece di una figura inventata.
+ */
+describe('disegno dell obiettivo', () => {
+  it('una riga e nove caselle sulla stessa riga', () => {
+    const { celle } = celleDa('righe');
+    expect(celle).toHaveLength(GRID_SIZE);
+    expect(new Set(celle.map((i) => Math.floor(i / GRID_SIZE))).size).toBe(1);
+  });
+
+  it('una colonna e nove caselle sulla stessa colonna', () => {
+    const { celle } = celleDa('colonne');
+    expect(celle).toHaveLength(GRID_SIZE);
+    expect(new Set(celle.map((i) => i % GRID_SIZE)).size).toBe(1);
+  });
+
+  it('un quadrante e nove caselle dentro un solo riquadro 3x3', () => {
+    const { celle } = celleDa('quadranti');
+    expect(celle).toHaveLength(GRID_SIZE);
+    const riquadri = new Set(celle.map((i) => {
+      const r = Math.floor(i / GRID_SIZE);
+      const c = i % GRID_SIZE;
+      return `${Math.floor(r / 3)}:${Math.floor(c / 3)}`;
+    }));
+    expect(riquadri.size).toBe(1);
+  });
+
+  it('l Intreccio mostra una riga e una colonna che si incrociano', () => {
+    const { celle, secondo } = celleDa('intreccio');
+    // 9 + 9 - 1 casella in comune: se le due figure non si incrociassero, il disegno
+    // spiegherebbe "due gruppi qualsiasi" invece di "due gruppi con una sola mossa".
+    expect(celle.length + secondo.length).toBe(GRID_SIZE * 2 - 1);
+    const righe = new Set(celle.map((i) => Math.floor(i / GRID_SIZE)));
+    const colonne = new Set(secondo.map((i) => i % GRID_SIZE));
+    expect(righe.size).toBe(1);
+    expect(colonne.size).toBe(1);
+  });
+
+  it('la pulizia si illustra con la griglia vuota', () => {
+    expect(celleDa('pulizia').celle).toEqual([]);
+  });
+
+  it('gli obiettivi che non sono una forma non vengono disegnati affatto', () => {
+    // Meglio nessuna figura che una figura inventata: "fai 300 punti" non ha un
+    // disegno onesto sulla griglia, e inventarne uno insegnerebbe una cosa falsa.
+    for (const tipo of ['punteggio', 'catena', 'celle', 'sopravvivi']) {
+      expect(celleDa(tipo), `${tipo} non deve avere un disegno`).toBeNull();
+    }
+  });
+
+  it('ogni tipo con un disegno ha anche la sua didascalia, in ogni lingua', () => {
+    const conDisegno = Object.keys(OBIETTIVI).filter((tipo) => celleDa(tipo) !== null);
+    expect(conDisegno.length).toBeGreaterThanOrEqual(4);
+    for (const lingua of Object.keys(LINGUE)) {
+      const t = traduttore(lingua);
+      for (const tipo of conDisegno) {
+        const chiave = `quadri.didascalie.${tipo}`;
+        expect(t(chiave), `${lingua}: manca ${chiave}`).not.toBe(chiave);
+      }
+    }
+  });
+
+  it('ogni cella disegnata sta dentro la griglia', () => {
+    for (const tipo of Object.keys(OBIETTIVI)) {
+      const forma = celleDa(tipo);
+      if (!forma) continue;
+      for (const i of [...forma.celle, ...(forma.secondo ?? [])]) {
+        expect(i).toBeGreaterThanOrEqual(0);
+        expect(i).toBeLessThan(GRID_SIZE * GRID_SIZE);
+      }
     }
   });
 });

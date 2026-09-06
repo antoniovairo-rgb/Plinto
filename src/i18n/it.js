@@ -120,6 +120,14 @@ export default {
     consiglio: 'Come fare',
     hai: 'Hai {n} mosse. Se le finisci senza riuscirci, il livello ricomincia da capo.',
     senzaLimite: 'Nessun limite di mosse: giochi finché i pezzi entrano.',
+    didascalie: {
+      righe: 'Una riga: nove caselle così.',
+      colonne: 'Una colonna: nove caselle così.',
+      quadranti: 'Un quadrante: uno dei nove riquadri.',
+      gruppi: 'Un gruppo: una riga, una colonna o un quadrante.',
+      intreccio: 'Una riga e una colonna chiuse con la stessa mossa.',
+      pulizia: 'La griglia deve restare così: vuota.',
+    },
     spiegazioni: {
       righe: 'Una riga sono nove caselle in fila da sinistra a destra. Riempila tutta e sparisce.',
       colonne: 'Una colonna sono nove caselle una sopra l\'altra, dall\'alto in basso.',

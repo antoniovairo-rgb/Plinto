@@ -107,6 +107,14 @@ export default {
     consiglio: 'How to do it',
     hai: 'You have {n} moves. Run out without making it and the level starts over.',
     senzaLimite: 'No move limit: you play until nothing fits.',
+    didascalie: {
+      righe: 'A row: nine squares like this.',
+      colonne: 'A column: nine squares like this.',
+      quadranti: 'A quadrant: one of the nine boxes.',
+      gruppi: 'A group: a row, a column or a quadrant.',
+      intreccio: 'A row and a column cleared with the same move.',
+      pulizia: 'The board must end up like this: empty.',
+    },
     spiegazioni: {
       righe: 'A row is nine squares side by side, left to right. Fill it completely and it clears.',
       colonne: 'A column is nine squares stacked on top of each other, top to bottom.',
