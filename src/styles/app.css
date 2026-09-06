@@ -215,7 +215,7 @@ button {
 .q-cella {
   position: relative;
   border-radius: var(--q-radius-cell);
-  background: rgba(255, 255, 255, 0.028);
+  background: var(--q-cella-vuota);
 }
 
 /* Le linee spesse che separano i nove quadranti: e' la firma del tabellone. */
@@ -261,8 +261,9 @@ button {
   position: absolute;
   inset: -2px;
   border-radius: var(--q-radius-cell);
-  box-shadow: 0 0 0 2px var(--q-brand), 0 0 14px rgba(242, 193, 78, 0.55);
+  box-shadow: 0 0 0 2px var(--q-brand), 0 0 14px color-mix(in srgb, var(--q-brand) 55%, transparent);
   animation: q-pulsa 1s ease-in-out infinite;
+  animation-name: q-pulsa;
 }
 
 @keyframes q-pulsa {
@@ -286,12 +287,12 @@ button {
      bersagli piu' grandi da afferrare e forme piu' leggibili prima di muovere. */
   height: clamp(96px, 17vh, 152px);
   border-radius: var(--q-radius-md);
-  background: rgba(255, 255, 255, 0.022);
+  background: var(--q-cella-vuota);
   transition: background var(--q-t-fast) var(--q-ease-out);
 }
 
 .q-tray__posto--vuoto { background: transparent; }
-.q-tray__posto--selezionato { background: rgba(242, 193, 78, 0.1); }
+.q-tray__posto--selezionato { background: color-mix(in srgb, var(--q-brand) 12%, transparent); }
 
 /* Un pezzo che non entra piu' da nessuna parte viene detto chiaramente,
    invece di lasciare il giocatore a chiedersi perche' non funziona. */
@@ -325,10 +326,20 @@ button {
   min-height: 18px;
 }
 
+/* Il bersaglio da toccare e' TUTTO lo slot, non il disegno del pezzo.
+   Misurato prima della correzione: un pezzo da una cella offriva 34x34 px su uno
+   schermo da 390 e 29x29 su uno da 360, contro i 44x44 raccomandati. Su
+   l'interazione che si ripete centinaia di volte in una partita era il difetto
+   piu' costoso dell'interfaccia. La presa viene poi riportata dentro il pezzo
+   (vedi useTrascinamento), cosi' afferrare un angolo vuoto dello slot non fa
+   saltare il pezzo lontano dal dito. */
 .q-pezzo-presa {
   display: grid;
   place-items: center;
-  padding: 8px;
+  width: 100%;
+  height: 100%;
+  min-width: 48px;
+  min-height: 48px;
   border-radius: var(--q-radius-md);
   touch-action: none;
 }
@@ -518,7 +529,12 @@ button {
 }
 .q-interruttore__leva--on .q-interruttore__pallino { transform: translateX(20px); }
 
-.q-btn--pericolo { flex: 1; background: var(--q-danger); color: #fff; font-weight: 700; }
+.q-btn--pericolo {
+  flex: 1;
+  background: var(--q-danger-fondo);
+  color: #fff;
+  font-weight: 700;
+}
 
 .q-sezione {
   margin: 24px 0 8px;
@@ -556,6 +572,13 @@ button {
   box-shadow: var(--q-shadow-lift);
 }
 
+/* Chi ha chiesto meno animazioni al sistema operativo non deve vedere nemmeno le
+   pulsazioni continue: i token accorciano le durate, questa regola ferma i cicli. */
+@media (prefers-reduced-motion: reduce) {
+  .q-cella--incandidata::after { animation: none; opacity: 1; }
+  *, *::before, *::after { animation-iteration-count: 1 !important; }
+}
+
 /* ------------------------------------------------------- game feel: celle --- */
 /* Involucro che consente di sovrapporre alla plancia elementi in coordinate
    percentuali (i punti volanti) senza toccare il layout della griglia. */
@@ -576,7 +599,7 @@ button {
 /* Il blocco appena appoggiato "atterra": parte leggermente piu' grande e si assesta.
    Dura poco piu' di un quarto di secondo: abbastanza da vedersi, non abbastanza da
    far aspettare chi sta gia' pensando alla mossa dopo. */
-.q-blocco--posato { animation: q-atterra 260ms var(--q-ease-pop) both; }
+.q-blocco--posato { animation: q-atterra var(--q-t-atterraggio) var(--q-ease-pop) both; }
 
 @keyframes q-atterra {
   0%   { transform: scale(1.28); filter: brightness(1.5); }
@@ -584,16 +607,18 @@ button {
   100% { transform: scale(1); filter: brightness(1); }
 }
 
-/* Il blocco che sparisce: prima lampeggia di bianco, poi collassa. */
+/* Il blocco che sparisce: parte dal PROPRIO colore, sbianca e collassa.
+   Partire dal colore reale rende leggibile quale blocco e' esploso quando ne
+   spariscono venti insieme; un lampo bianco e basta li appiattiva tutti. */
 .q-blocco--esploso {
-  background: var(--q-text);
-  animation: q-svanisci 420ms var(--q-ease-out) both;
+  background: var(--esploso, var(--q-text));
+  animation: q-svanisci var(--q-t-esplosione) var(--q-ease-out) both;
 }
 
 @keyframes q-svanisci {
-  0%   { transform: scale(1); opacity: 1; }
-  22%  { transform: scale(1.16); opacity: 1; }
-  100% { transform: scale(0.2); opacity: 0; }
+  0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
+  18%  { transform: scale(1.16); opacity: 1; filter: brightness(2.6) saturate(0.35); }
+  100% { transform: scale(0.2); opacity: 0; filter: brightness(2.6) saturate(0.35); }
 }
 
 /* --------------------------------------------------- game feel: punteggio --- */
@@ -606,7 +631,7 @@ button {
   font-weight: 800;
   color: var(--q-brand);
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
-  animation: q-sali 950ms var(--q-ease-out) both;
+  animation: q-sali var(--q-t-punti) var(--q-ease-out) both;
   white-space: nowrap;
 }
 .q-punti-volanti--buona { font-size: 22px; }
@@ -631,7 +656,7 @@ button {
 }
 
 /* Il punteggio in testata reagisce quando cresce. */
-.q-hud__valore--scatta { animation: q-scatta 300ms var(--q-ease-pop) both; }
+.q-hud__valore--scatta { animation: q-scatta var(--q-t-base) var(--q-ease-pop) both; }
 @keyframes q-scatta {
   0%   { transform: scale(1); }
   40%  { transform: scale(1.16); }
@@ -639,7 +664,7 @@ button {
 }
 
 /* La barra della Catena pulsa quando sale di livello. */
-.q-catena__riempimento--cresciuta { animation: q-lampo 420ms var(--q-ease-out) both; }
+.q-catena__riempimento--cresciuta { animation: q-lampo var(--q-t-esplosione) var(--q-ease-out) both; }
 @keyframes q-lampo {
   0%   { filter: brightness(2.2); }
   100% { filter: brightness(1); }

@@ -17,6 +17,9 @@
   --q-surface-2: #1f2534;    /* elementi rialzati */
   --q-line: #262d3f;         /* linee sottili della griglia */
   --q-line-strong: #3a4460;  /* separatori dei quadranti 3x3: la firma del tabellone */
+  /* Tinta delle celle libere. E' un token e non un bianco trasparente scritto a mano
+     perche' su fondo chiaro un velo bianco e' semplicemente invisibile. */
+  --q-cella-vuota: rgba(255, 255, 255, 0.03);
 
   /* --- Testo -------------------------------------------------------------- */
   /* Contrasti misurati sul fondo piu' chiaro dell'interfaccia (--q-surface-2):
@@ -30,7 +33,10 @@
   /* --- Colore identitario ------------------------------------------------- */
   --q-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
   --q-brand-deep: #c9922a;
-  --q-danger: #ec6d8e;   /* 5.21 su --q-surface-2 */
+  --q-danger: #ec6d8e;        /* 5.21 su --q-surface-2 */
+  /* Fondo dei comandi distruttivi: il testo bianco sopra --q-danger stava a 2.94:1,
+     e quel pulsante e' proprio quello che cancella i dati del giocatore. */
+  --q-danger-fondo: #b81f47;  /* bianco sopra: 6.32 */
   --q-ok: #4cb5a5;
 
   /* --- Famiglie cromatiche dei blocchi ------------------------------------
@@ -60,8 +66,13 @@
   --q-t-fast: 160ms;
   --q-t-base: 240ms;
   --q-t-slow: 420ms;
+  /* Durate degli effetti di gioco. Sono le stesse costanti usate da
+     src/feel/useEffettiMossa.js: se cambiano qui devono cambiare anche li',
+     altrimenti l'animazione e il momento in cui viene rimossa si scollano. */
+  --q-t-atterraggio: 260ms;
+  --q-t-esplosione: 420ms;
+  --q-t-punti: 950ms;
   --q-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --q-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --q-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* --- Ombre -------------------------------------------------------------- */
@@ -71,7 +82,13 @@
 
 /* Tema chiaro: stessa identita', fondali invertiti. Attivo solo su richiesta
    esplicita del giocatore (attributo data-theme), mai in automatico, per non
-   cambiare l'aspetto del gioco sotto le mani di chi sta giocando. */
+   cambiare l'aspetto del gioco sotto le mani di chi sta giocando.
+   
+   ATTENZIONE, lezione imparata: la prima versione di questo blocco ridefiniva solo
+   i fondali e i testi, lasciando invariati accenti e colori dei blocchi. Il risultato
+   era un tema chiaro inutilizzabile e mai misurato: il punteggio in oro stava a
+   1.53:1 sul fondo, e cinque blocchi su sei sotto 3:1 sulla plancia. Un tema va
+   ridefinito PER INTERO, oppure non va offerto. */
 :root[data-theme='chiaro'] {
   --q-ink: #f3f4f8;
   --q-ink-2: #e9ebf2;
@@ -79,20 +96,44 @@
   --q-surface-2: #f0f2f7;
   --q-line: #d8dce7;
   --q-line-strong: #a9b1c6;
+
+  /* Testi: 15.9, 7.7 e 4.5 su --q-ink. */
   --q-text: #171b26;
   --q-text-dim: #4f586d;
-  --q-text-faint: #838ca2;
-  --q-brand-deep: #a8781c;
+  --q-text-faint: #6b7488;
+
+  /* Accenti riportati sopra 4.5:1 su fondo chiaro. */
+  --q-brand: #876c2b;        /* 4.54 su --q-ink */
+  --q-brand-deep: #6d5622;
+  --q-ok: #337b70;           /* 4.54 su --q-ink */
+  --q-danger: #ae5069;       /* 4.52 su --q-surface-2 */
+
+  /* Blocchi: soglia 3:1 per elementi non testuali, sul fondo della plancia. */
+  --q-block-1: #d36843;
+  --q-block-2: #3e9487;
+  --q-block-3: #7b6ce6;
+  --q-block-4: #a48136;
+  --q-block-5: #e1577c;
+  --q-block-6: #428bd0;
+
+  --q-cella-vuota: rgba(23, 27, 38, 0.05);
+
   --q-shadow-soft: 0 2px 10px rgba(20, 25, 40, 0.1);
   --q-shadow-lift: 0 12px 32px rgba(20, 25, 40, 0.18);
 }
 
-/* Chi ha chiesto meno animazioni al sistema operativo le riceve ridotte ovunque. */
+/* Chi ha chiesto meno animazioni al sistema operativo le riceve ridotte ovunque.
+   I token da soli NON bastavano: le transizioni li usavano, ma tutte le @keyframes
+   avevano durate scritte a mano e continuavano a girare per intero. Ora anche le
+   animazioni passano da qui, e in app.css c'e' una regola che le azzera. */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --q-t-instant: 1ms;
     --q-t-fast: 1ms;
     --q-t-base: 1ms;
     --q-t-slow: 1ms;
+    --q-t-atterraggio: 1ms;
+    --q-t-esplosione: 1ms;
+    --q-t-punti: 1ms;
   }
 }

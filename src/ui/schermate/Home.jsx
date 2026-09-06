@@ -1,4 +1,5 @@
 import { Logo } from '../Logo.jsx';
+import { numero } from '../../i18n/formato.js';
 
 /**
  * La home ha un solo protagonista: il pulsante per giocare.
@@ -32,7 +33,7 @@ export function SchermoHome({
 
         <p className="q-home__record">
           {record.best > 0
-            ? `${t('home.record')} ${record.best.toLocaleString('it-IT')}`
+            ? `${t('home.record')} ${numero(record.best)}`
             : t('home.nessunRecord')}
         </p>
 
@@ -41,7 +42,7 @@ export function SchermoHome({
         <button type="button" className="q-btn q-btn--largo q-sfida-avvio" onClick={onSfida}>
           <span>{sfidaInCorso ? t('sfida.riprendi') : t('sfida.breve')}</span>
           <span className="q-sfida-avvio__esito">
-            {sfidaOggi.partite > 0 ? sfidaOggi.best.toLocaleString('it-IT') : '—'}
+            {sfidaOggi.partite > 0 ? numero(sfidaOggi.best) : '—'}
           </span>
         </button>
       </div>

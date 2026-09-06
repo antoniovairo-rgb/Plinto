@@ -88,9 +88,15 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       // piena rendeva il gioco inutilizzabile.
       const nodo = evento.currentTarget.querySelector('.q-pezzo') ?? evento.currentTarget;
       const rect = nodo.getBoundingClientRect();
+
       // Offset della presa espresso in unita' di cella: sopravvive al cambio di scala.
-      const presaX = (evento.clientX - rect.left) / cellaTray;
-      const presaY = (evento.clientY - rect.top) / cellaTray;
+      // Viene riportato DENTRO il pezzo perche' l'area toccabile e' tutto lo slot,
+      // piu' grande del disegno: senza questo, afferrare un angolo vuoto dello slot
+      // farebbe comparire il pezzo spostato di una cella rispetto al dito.
+      const forma = mano[handIndex].shape;
+      const dentro = (valore, massimo) => Math.max(0.5, Math.min(massimo - 0.5, valore));
+      const presaX = dentro((evento.clientX - rect.left) / cellaTray, forma.width);
+      const presaY = dentro((evento.clientY - rect.top) / cellaTray, forma.height);
       const sollevamento = evento.pointerType === 'mouse' ? 0 : SOLLEVAMENTO_TOCCO * g.cella;
 
       setSelezionato(null);

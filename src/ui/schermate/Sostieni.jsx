@@ -21,9 +21,7 @@ export function SchermoSostieni({ onIndietro, t }) {
           {t('sostieni.bottone')}
         </a>
       ) : (
-        <p className="q-nota">
-          Il link di donazione non e ancora stato configurato.
-        </p>
+        <p className="q-nota">{t('varie.donazioneNonAttiva')}</p>
       )}
 
       <button type="button" className="q-btn q-btn--fantasma q-btn--largo" onClick={onIndietro}>

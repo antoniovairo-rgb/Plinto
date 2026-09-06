@@ -20,9 +20,7 @@ import {
  * bella del gioco passerebbe inosservata.
  */
 
-const DURATA_APPOGGIO = 260;
-const DURATA_ESPLOSIONE = 420;
-const DURATA_PUNTI = 950;
+import { DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI } from './durate.js';
 
 /** Legge dal foglio di stile il colore reale di una famiglia cromatica. */
 function coloreBlocco(indice) {
@@ -65,7 +63,7 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
 
     // --- pop delle celle appena appoggiate ----------------------------------
     setAppoggiate(new Set(lastMove.placedCells));
-    timers.push(setTimeout(() => setAppoggiate(null), DURATA_APPOGGIO));
+    timers.push(setTimeout(() => setAppoggiate(null), DURATA_ATTERRAGGIO));
 
     // --- celle che stanno sparendo ------------------------------------------
     if (gruppi > 0) {

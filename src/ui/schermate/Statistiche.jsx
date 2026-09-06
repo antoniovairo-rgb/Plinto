@@ -1,4 +1,5 @@
 import { Pagina, Voce } from './Pagina.jsx';
+import { numero, data } from '../../i18n/formato.js';
 
 function tempo(ms) {
   const min = Math.round(ms / 60000);
@@ -18,18 +19,18 @@ export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietr
         <p className="q-vuoto">{t('stats.vuoto')}</p>
       ) : (
         <div className="q-lista">
-          <Voce etichetta={t('stats.migliore')} valore={record.best.toLocaleString('it-IT')} />
+          <Voce etichetta={t('stats.migliore')} valore={numero(record.best)} />
           <Voce etichetta={t('stats.partite')} valore={stats.partite} />
           <Voce
             etichetta={t('stats.mediaPunteggio')}
-            valore={Math.round(stats.punteggioTotale / stats.partite).toLocaleString('it-IT')}
+            valore={Math.round(stats.punteggioTotale / numero(stats.partite))}
           />
-          <Voce etichetta={t('stats.mosseTotali')} valore={stats.mosseTotali.toLocaleString('it-IT')} />
-          <Voce etichetta={t('stats.gruppiTotali')} valore={stats.gruppiTotali.toLocaleString('it-IT')} />
+          <Voce etichetta={t('stats.mosseTotali')} valore={numero(stats.mosseTotali)} />
+          <Voce etichetta={t('stats.gruppiTotali')} valore={numero(stats.gruppiTotali)} />
           <Voce etichetta={t('stats.griglieSvuotate')} valore={stats.griglieSvuotate} />
           <Voce etichetta={t('stats.tempoTotale')} valore={tempo(stats.tempoTotaleMs)} />
           <Voce etichetta={t('stats.recordCatena')} valore={record.bestChain} />
-          <Voce etichetta={t('stats.recordMossa')} valore={record.bestMove.toLocaleString('it-IT')} />
+          <Voce etichetta={t('stats.recordMossa')} valore={numero(record.bestMove)} />
           <Voce etichetta={t('stats.recordIntreccio')} valore={record.bestGroupsInOneMove} />
         </div>
       )}
@@ -41,8 +42,8 @@ export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietr
             {storicoSfide.map(({ giorno, best, partite }) => (
               <Voce
                 key={giorno}
-                etichetta={new Date(`${giorno}T12:00:00`).toLocaleDateString()}
-                valore={`${best.toLocaleString('it-IT')} (${partite})`}
+                etichetta={data(giorno)}
+                valore={`${numero(best)} (${partite})`}
               />
             ))}
           </div>

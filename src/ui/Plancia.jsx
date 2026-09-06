@@ -60,7 +60,12 @@ export const Plancia = forwardRef(function Plancia(
             {/* Il blocco che sta sparendo viene ridisegnato per una frazione di secondo
                 dopo essere gia' uscito dallo stato: senza, l'eliminazione sarebbe uno
                 scatto e la mossa piu' soddisfacente del gioco passerebbe inosservata. */}
-            {inEsplosione ? <div className="q-blocco q-blocco--esploso" /> : null}
+            {inEsplosione ? (
+              <div
+                className="q-blocco q-blocco--esploso"
+                style={{ '--esploso': esplosioni.colore }}
+              />
+            ) : null}
           </div>,
         );
       }

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePartita } from '../state/usePartita.js';
 import { useImpostazioni } from '../state/useImpostazioni.js';
 import { traduttore } from '../i18n/index.js';
-import { impostaAudio, suonoBottone, suonoRecord, sbloccaAudio } from '../audio/suoni.js';
+import { impostaLingua } from '../i18n/formato.js';
+import { impostaAudio, suonoBottone, sbloccaAudio } from '../audio/suoni.js';
 import { impostaVibrazione } from '../feel/vibrazione.js';
 import { clearAll } from '../persistence/storage.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
@@ -32,6 +33,7 @@ export function App() {
 
   // Le preferenze audio e vibrazione vivono in moduli senza React: qui le si tiene
   // allineate, cosi' i componenti non devono passarsele di mano in mano.
+  useEffect(() => { impostaLingua(impostazioni.lingua); }, [impostazioni.lingua]);
   useEffect(() => { impostaAudio(impostazioni.audio); }, [impostazioni.audio]);
   useEffect(() => { impostaVibrazione(impostazioni.vibrazione); }, [impostazioni.vibrazione]);
   const t = useMemo(() => traduttore(impostazioni.lingua), [impostazioni.lingua]);

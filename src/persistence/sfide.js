@@ -16,9 +16,9 @@
  * Nessun dato lascia il dispositivo: non esiste classifica perche' non esiste server.
  */
 
-import { read, write } from './storage.js';
+import { read, write, KEYS } from './storage.js';
 
-const CHIAVE = 'sfide';
+const CHIAVE = KEYS.CHALLENGES;
 
 /** Quanti giorni di storico conservare. Oltre non serve e occupa spazio inutilmente. */
 const GIORNI_CONSERVATI = 60;

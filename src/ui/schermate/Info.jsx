@@ -19,10 +19,7 @@ export function SchermoInfo({ onIndietro, onSostieni, t }) {
       <p className="q-testo">{t('info.privacy')}</p>
 
       <h2 className="q-sezione">{t('info.licenzeTitolo')}</h2>
-      <p className="q-testo">
-        Grafica, suoni e testi sono realizzati per questo progetto. Nessun font esterno,
-        nessuna risorsa caricata da domini di terze parti.
-      </p>
+      <p className="q-testo">{t('varie.licenzeTesto')}</p>
 
       {CONTATTO ? <p className="q-nota">{CONTATTO}</p> : null}
 
@@ -32,9 +29,7 @@ export function SchermoInfo({ onIndietro, onSostieni, t }) {
 
       <p className="q-nota q-nota--piede">© {ANNO} QUADRA</p>
       {PAYPAL_URL ? null : (
-        <p className="q-nota q-nota--piede">
-          Link di donazione non ancora configurato (vedi src/config/progetto.js).
-        </p>
+        <p className="q-nota q-nota--piede">{t('varie.donazioneNonAttiva')}</p>
       )}
     </Pagina>
   );

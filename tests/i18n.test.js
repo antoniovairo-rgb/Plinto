@@ -4,6 +4,8 @@ import { describe, it, expect } from 'vitest';
 import italiano from '../src/i18n/it.js';
 import inglese from '../src/i18n/en.js';
 import { traduttore, LINGUE, LINGUA_PREDEFINITA } from '../src/i18n/index.js';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 /** Elenco piatto delle chiavi annidate, es. "home.gioca". */
 function chiavi(oggetto, prefisso = '') {
@@ -50,5 +52,41 @@ describe('traduzioni', () => {
       expect(testo).toContain('{r}');
       expect(testo).toContain('{c}');
     });
+  });
+});
+
+describe('chiavi effettivamente usate', () => {
+  /** Tutte le chiavi passate a t('...') nel sorgente dell'interfaccia. */
+  function chiaviUsate() {
+    const radice = new URL('../src/', import.meta.url).pathname;
+    const trovate = new Set();
+    const visita = (cartella) => {
+      for (const voce of readdirSync(cartella, { withFileTypes: true })) {
+        const percorso = join(cartella, voce.name);
+        // La cartella i18n si esclude: nei suoi commenti c'e' un esempio di chiamata
+        // che non e' un uso reale e falserebbe entrambi i controlli.
+        if (voce.isDirectory()) { if (voce.name !== 'i18n') visita(percorso); continue; }
+        if (!/\.(jsx?|mjs)$/.test(voce.name)) continue;
+        const testo = readFileSync(percorso, 'utf8');
+        for (const m of testo.matchAll(/\bt\(\s*'([a-zA-Z0-9_.]+)'/g)) trovate.add(m[1]);
+      }
+    };
+    visita(radice);
+    return trovate;
+  }
+
+  it('non esistono chiavi definite che nessuno usa', () => {
+    // Una chiave orfana e' un testo che qualcuno ha scritto e tradotto due volte
+    // per niente, e che al primo sguardo sembra invece una funzionalita' esistente.
+    const usate = chiaviUsate();
+    const orfane = chiavi(italiano).filter((k) => !usate.has(k));
+    expect(orfane).toEqual([]);
+  });
+
+  it('non si usano chiavi che non esistono in nessun dizionario', () => {
+    // Questo e' il difetto peggiore: a schermo comparirebbe la chiave grezza.
+    const definite = new Set(chiavi(italiano));
+    const inventate = [...chiaviUsate()].filter((k) => !definite.has(k));
+    expect(inventate).toEqual([]);
   });
 });

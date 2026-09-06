@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "sim": "node src/sim/run.mjs",
-    "e2e": "node tests/e2e/partita.mjs"
+    "e2e": "node tests/e2e/partita.mjs",
+    "soak": "node tests/e2e/resistenza.mjs",
+    "precisione": "node tests/e2e/precisione.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

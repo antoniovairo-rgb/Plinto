@@ -1,7 +1,6 @@
 /** English strings. Translated from src/i18n/it.js, which is the reference. */
 export default {
   gioco: {
-    nome: 'QUADRA',
     claim: 'Row, column, quadrant.',
   },
   home: {
@@ -19,13 +18,11 @@ export default {
     punteggio: 'Score',
     record: 'Best',
     catena: 'Chain',
-    catenaVuota: 'Clear a group to light the Chain',
     menu: 'Menu',
   },
   gioca: {
     trascina: 'Drag a piece onto the grid',
     tocca: 'Tap a piece, then tap where to put it',
-    annulla: 'Clear selection',
   },
   fine: {
     titolo: 'Game over',
@@ -94,7 +91,6 @@ export default {
     spiegazione: 'Today everyone plays the same game: same grid, same pieces, same order.',
     tuoRecordOggi: 'Your best today',
     tentativi: 'Attempts',
-    nessunTentativo: 'You have not tried it yet.',
     nuovoRecordOggi: 'New best of the day!',
     storico: 'Recent days',
     riprendi: 'Resume challenge',
@@ -118,12 +114,16 @@ export default {
     cellaOccupata: 'filled',
     istruzioni: 'Use Tab to choose a piece, Enter to pick it up, the arrow keys to move on the grid and Enter to drop it. Esc cancels.',
   },
+  varie: {
+    licenzeTesto: 'Graphics, sounds and text are made for this project. No external fonts, no resources loaded from third-party domains.',
+    donazioneNonAttiva: 'The donation link has not been set up yet.',
+    pezzo: 'Piece {n}, {celle} cells',
+    pezzoMorto: 'does not fit on the grid any more',
+  },
   comune: {
     chiudi: 'Close',
     indietro: 'Back',
     si: 'Yes',
     no: 'No',
-    attivo: 'On',
-    spento: 'Off',
   },
 };

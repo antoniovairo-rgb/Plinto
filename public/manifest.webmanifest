@@ -4,7 +4,6 @@
   "description": "Puzzle game a blocchi. Gratuito, senza pubblicita.",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0E1118",
   "theme_color": "#0E1118",
   "icons": [

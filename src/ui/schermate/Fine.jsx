@@ -1,3 +1,6 @@
+import { numero } from '../../i18n/formato.js';
+import { suonoRecord } from '../../audio/suoni.js';
+import { useEffect } from 'react';
 /**
  * Fine partita.
  *
@@ -9,6 +12,15 @@
  *    farti sentire in colpa: nessun paragone con altri giocatori, nessun punteggio
  *    "che avresti potuto fare".
  */
+/**
+ * Il suono del nuovo record esisteva in src/audio/suoni.js ed era pure importato,
+ * ma non veniva mai eseguito: a schermo compariva il nastro "Nuovo record" e non si
+ * sentiva niente. E' il momento piu' bello di una partita ed era muto.
+ */
+function useSuonoRecord(attivo) {
+  useEffect(() => { if (attivo) suonoRecord(); }, [attivo]);
+}
+
 function Riga({ etichetta, valore }) {
   return (
     <div className="q-fine__riga">
@@ -33,15 +45,18 @@ export function SchermoFine({
   const eRecord = eSfida
     ? Boolean(esitoSfida?.nuovoRecordDiGiornata)
     : nuoviRecord.includes('punteggio');
+  useSuonoRecord(eRecord);
   return (
     <div className="q-screen q-fine">
       <div className="q-scroll">
         <p className="q-fine__titolo">{eSfida ? t('sfida.titolo') : t('fine.titolo')}</p>
-        <p className="q-fine__motivo">{t('fine.motivo')}</p>
+        <p className="q-fine__motivo">
+          {eSfida ? t('sfida.spiegazione') : t('fine.motivo')}
+        </p>
 
         <div className={`q-fine__punteggio ${eRecord ? 'q-fine__punteggio--record' : ''}`}>
           <span className="q-hud__etichetta">{t('fine.punteggio')}</span>
-          <span className="q-fine__numero">{riepilogo.score.toLocaleString('it-IT')}</span>
+          <span className="q-fine__numero">{numero(riepilogo.score)}</span>
           {eRecord ? (
             <span className="q-fine__nastro">
               {eSfida ? t('sfida.nuovoRecordOggi') : t('fine.nuovoRecord')}
@@ -49,8 +64,8 @@ export function SchermoFine({
           ) : (
             <span className="q-fine__precedente">
               {eSfida
-                ? `${t('sfida.tuoRecordOggi')} ${(esitoSfida?.best ?? 0).toLocaleString('it-IT')}`
-                : `${t('hud.record')} ${record.best.toLocaleString('it-IT')}`}
+                ? `${t('sfida.tuoRecordOggi')} ${(esitoSfida?.best ?? numero(0))}`
+                : `${t('hud.record')} ${numero(record.best)}`}
             </span>
           )}
         </div>

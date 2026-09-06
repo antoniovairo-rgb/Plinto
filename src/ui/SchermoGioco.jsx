@@ -212,6 +212,7 @@ export function SchermoGioco({
         presoIndex={drag.preso?.handIndex ?? null}
         onPointerDownPezzo={prendi}
         onTapPezzo={drag.selezionaPezzo}
+        t={t}
       />
 
       {pezzoTrascinato && drag.preso ? (

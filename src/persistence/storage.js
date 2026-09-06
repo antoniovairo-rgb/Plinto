@@ -74,6 +74,7 @@ export const KEYS = {
   SETTINGS: 'settings',
   CURRENT_GAME: 'partita',
   CURRENT_CHALLENGE: 'partita-sfida',
+  CHALLENGES: 'sfide',
   STATS: 'statistiche',
 };
 

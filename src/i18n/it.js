@@ -1,7 +1,6 @@
 /** Testi italiani. Lingua di riferimento del progetto: le altre traducono da qui. */
 export default {
   gioco: {
-    nome: 'QUADRA',
     claim: 'Riga, colonna, quadrante.',
   },
   home: {
@@ -19,13 +18,11 @@ export default {
     punteggio: 'Punteggio',
     record: 'Record',
     catena: 'Catena',
-    catenaVuota: 'Chiudi un gruppo per accendere la Catena',
     menu: 'Menu',
   },
   gioca: {
     trascina: 'Trascina un pezzo sulla griglia',
     tocca: 'Tocca un pezzo, poi tocca dove metterlo',
-    annulla: 'Annulla selezione',
   },
   fine: {
     titolo: 'Partita finita',
@@ -94,7 +91,6 @@ export default {
     spiegazione: 'Oggi la partita e la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine.',
     tuoRecordOggi: 'Il tuo record di oggi',
     tentativi: 'Tentativi',
-    nessunTentativo: 'Non l hai ancora provata.',
     nuovoRecordOggi: 'Nuovo record di giornata!',
     storico: 'Ultimi giorni',
     riprendi: 'Riprendi la sfida',
@@ -118,12 +114,16 @@ export default {
     cellaOccupata: 'occupata',
     istruzioni: 'Usa Tab per scegliere un pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia e Invio per appoggiarlo. Esc annulla.',
   },
+  varie: {
+    licenzeTesto: 'Grafica, suoni e testi sono realizzati per questo progetto. Nessun font esterno, nessuna risorsa caricata da domini di terze parti.',
+    donazioneNonAttiva: 'Il link di donazione non e ancora stato configurato.',
+    pezzo: 'Pezzo {n}, {celle} celle',
+    pezzoMorto: 'non entra piu sulla griglia',
+  },
   comune: {
     chiudi: 'Chiudi',
     indietro: 'Indietro',
     si: 'Si',
     no: 'No',
-    attivo: 'Attivo',
-    spento: 'Spento',
   },
 };

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { CHAIN_MAX } from '../config/rules.js';
 import { chainMultiplier } from '../core/scoring.js';
+import { numero } from '../i18n/formato.js';
 
 /** Testata della partita: punteggio, record, accesso al menu. */
 export function Hud({ punteggio, record, onMenu, scatta, t }) {
@@ -9,7 +10,7 @@ export function Hud({ punteggio, record, onMenu, scatta, t }) {
       <div className="q-hud__punteggio">
         <span className="q-hud__etichetta">{t('hud.punteggio')}</span>
         <span className={`q-hud__valore ${scatta ? 'q-hud__valore--scatta' : ''}`}>
-          {punteggio.toLocaleString('it-IT')}
+          {numero(punteggio)}
         </span>
       </div>
       <button type="button" className="q-hud__menu" onClick={onMenu} aria-label={t('hud.menu')}>
@@ -22,7 +23,7 @@ export function Hud({ punteggio, record, onMenu, scatta, t }) {
       <div className="q-hud__record">
         <span className="q-hud__etichetta">{t('hud.record')}</span>
         <span className="q-hud__valore q-hud__valore--piccolo">
-          {record.toLocaleString('it-IT')}
+          {numero(record)}
         </span>
       </div>
     </header>

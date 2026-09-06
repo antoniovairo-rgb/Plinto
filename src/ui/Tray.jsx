@@ -11,7 +11,7 @@ const CELLE_MAX = 5;
  * su un telefono stretto i pezzi restano interi invece di essere tagliati, e su
  * uno schermo largo non diventano francobolli.
  */
-export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownPezzo, onTapPezzo }) {
+export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownPezzo, onTapPezzo, t }) {
   const primoSlot = useRef(null);
   const [cella, setCella] = useState(18);
 
@@ -52,7 +52,10 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
                 className="q-pezzo-presa"
                 onPointerDown={(e) => onPointerDownPezzo(e, i, cella)}
                 onClick={() => onTapPezzo(i)}
-                aria-label={`Pezzo ${i + 1}, ${pezzo.shape.size} celle${morto ? ', non entra piu sulla griglia' : ''}`}
+                aria-label={
+                  `${t('varie.pezzo').replace('{n}', i + 1).replace('{celle}', pezzo.shape.size)}`
+                  + (morto ? `, ${t('varie.pezzoMorto')}` : '')
+                }
                 aria-pressed={selezionato === i}
               >
                 <Pezzo

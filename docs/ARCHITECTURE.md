@@ -1,37 +1,41 @@
 # Architettura di QUADRA
 
-> Fotografia del codice al **6 settembre 2026**. Il repository è in sviluppo attivo e i
-> layer superiori stavano crescendo mentre questo documento veniva scritto: quello che segue
-> descrive solo file e comportamenti verificati leggendo il sorgente in quel momento. Dove una
-> cosa non esiste, è scritto che non esiste; dove esiste ma non è ancora verificabile, è
-> scritto anche quello. Solo `src/config/`, `src/core/` e `src/sim/` sono committati
-> (`532b716`): tutto il resto è ancora lavoro non committato.
+> Fotografia del codice al **6 settembre 2026**, aggiornata a `f31b2d5`, cioè dopo i commit
+> `9253cc7` (interfaccia), `ee7b452` (game feel e audio), `fe290f7` (tastiera, accessibilità,
+> primo avvio, orizzontale) e `f31b2d5` (Sfida del Giorno, invarianti). Descrive solo file e
+> comportamenti verificati leggendo il sorgente ed eseguendo i comandi. Dove una cosa non
+> esiste, è scritto che non esiste.
 
 ## 1. I layer
 
 | Cartella | Contenuto reale | Dipende da | Ambiente |
 | --- | --- | --- | --- |
-| `src/config/` | `rules.js` — tutte le costanti di regolamento | niente | neutro |
+| `src/config/` | `rules.js` (costanti di regolamento), `progetto.js` (link di donazione, contatto, anno) | niente | neutro |
 | `src/core/` | `rng.js`, `shapes.js`, `grid.js`, `scoring.js`, `generator.js`, `engine.js` | solo `config/` e se stesso | neutro (né DOM né React) |
 | `src/sim/` | `player.mjs` (giocatori artificiali), `run.mjs` (harness da riga di comando) | `core/`, `config/` | Node |
-| `src/persistence/` | `storage.js` (wrapper `localStorage`), `records.js` (record e statistiche di vita) | fra loro | **browser** (usa `window`) |
-| `src/styles/` | `tokens.css` — variabili CSS del sistema di design | niente | browser |
-| `src/i18n/` | `index.js`, `it.js`, `en.js` — dizionari e funzione `t()` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
-| `src/ui/` | componenti/hook React (`Plancia`, `Tray`, `Pezzo`, `Hud`, `Logo`, `SchermoGioco`, `useTrascinamento`) e 7 schermate | `core/`, `config/`, React | browser |
+| `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `quadra:`), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
+| `src/styles/` | `tokens.css` (variabili del sistema di design, vedi `DESIGN_SYSTEM.md`), `app.css` (~770 righe, tutto il resto) | niente | browser |
+| `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
+| `src/audio/` | `suoni.js` — sintesi Web Audio: nove voci del gioco, **nessun file audio** | niente | browser (`AudioContext`) |
+| `src/feel/` | `useEffettiMossa.js` (traduce `lastMove` in effetti), `particelle.js` (classe `CampoParticelle`, un canvas), `vibrazione.js` (pattern per `navigator.vibrate`) | `config/`, `audio/`, React (solo l'hook) | browser |
+| `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` sette schermate più l'impalcatura comune `Pagina.jsx` | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
 | `src/state/` | `usePartita.js`, `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
-| `src/feel/` | **vuota** | — | — |
-| `src/audio/` | **vuota** | — | — |
-| `tests/` | 4 file Vitest sul solo `core/` | `core/`, `config/` | Node |
+| `tests/` | 7 file Vitest (`grid`, `scoring`, `generator`, `engine`, `i18n`, `sfide`, `invarianti`) più lo scenario `e2e/partita.mjs` | `core/`, `config/`, `i18n/`, `persistence/`, Playwright | Node |
 
-Stato dei comandi, verificato eseguendoli alle 09:41 del 6 settembre 2026:
-`npm test` passa (75 test), `npm run sim` funziona e `npm run build` **riesce**
-(60 moduli, `dist/assets` da 180 kB di JS e 12 kB di CSS, rispettivamente 57.6 kB e 3.2 kB
-compressi con gzip).
+Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
 
-Quello che **non** è verificabile da qui: nessun test copre l'interfaccia, e il gioco non è
-mai stato aperto in un browser nel corso di questa analisi. Che compili non dimostra che si
-giochi. Tutto ciò che questo documento afferma sull'interfaccia va letto come "così è scritto
-oggi il sorgente", non come "così si comporta il gioco".
+- `npm test` passa: **89 test in 7 file**, ~11.7 s (undici dei quali spesi nel solo
+  `invarianti.test.js`, che gioca 240 partite complete);
+- `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
+- `npm run sim` funziona;
+- `npm run build` riesce: 68 moduli, `dist/assets` da **196.10 kB di JS** (63.19 kB gzip) e
+  **16.17 kB di CSS** (4.11 kB gzip).
+
+Il gioco **è stato aperto in un browser reale**: lo scenario e2e lo guida attraverso primo
+avvio, trascinamento con mouse, eliminazione con particelle, modalità a due tocchi, partita
+da tastiera, ripresa dopo ricarica, game over e schermate secondarie. Restano fuori dalla
+verifica automatica: le prestazioni su un dispositivo lento reale, il tocco vero (l'e2e usa
+il mouse), l'audio (nessuna asserzione lo verifica) e il playtest umano.
 
 ### Perché i layer sono separati
 
@@ -40,15 +44,34 @@ non tocca il DOM, non usa timer, non legge `Date` se non per due campi informati
 (`startedAt`/`endedAt`). Questo permette tre cose che altrimenti sarebbero impossibili:
 
 1. i test girano in Node senza jsdom e senza mock;
-2. `src/sim/run.mjs` gioca migliaia di partite complete importando gli stessi moduli che
-   userà l'interfaccia — non una copia semplificata delle regole;
-3. il giorno in cui l'interfaccia esisterà, un bug di regole resterà un bug di `core/`,
-   non qualcosa da cercare dentro un componente.
+2. `src/sim/run.mjs` gioca migliaia di partite complete importando gli stessi moduli che usa
+   l'interfaccia — non una copia semplificata delle regole;
+3. un bug di regole è un bug di `core/`, non qualcosa da cercare dentro un componente.
 
-`persistence/` e `i18n/` **non** rispettano quel confine (usano `window` e `navigator`) ed è
-corretto così: sono layer di piattaforma, non di regole. Ogni loro accesso è protetto da
-`try/catch`, quindi il gioco deve funzionare anche con `localStorage` bloccato — solo senza
-memoria fra una partita e l'altra.
+`persistence/`, `i18n/`, `audio/` e `feel/` **non** rispettano quel confine (usano `window`,
+`navigator`, `AudioContext`, il canvas) ed è corretto così: sono layer di piattaforma, non di
+regole. Ogni loro accesso è protetto da `try/catch` o da un controllo di esistenza, quindi il
+gioco deve funzionare anche con `localStorage` bloccato, senza `AudioContext` e su un
+dispositivo che non vibra — solo con meno feedback e senza memoria fra una partita e l'altra.
+
+Gli altri confini, in ordine dal basso verso l'alto:
+
+- **`state/` è l'unico punto di contatto fra motore e React.** `usePartita` chiama
+  `createGame` / `placePiece` / `summarize` / `serializeGame` e nient'altro sa di React;
+  nessun componente importa direttamente `engine.js` per far progredire la partita.
+  `SchermoGioco` importa da `core/grid.js`, ma solo funzioni **di sola lettura**
+  (`canPlace`, `placeShape` su una copia, `findCompletedGroups`, `shapeCellsAt`) per
+  calcolare l'anteprima della mossa: guarda, non muove.
+- **`feel/` legge, non decide.** `useEffettiMossa` riceve `partita.lastMove` e lo traduce in
+  suoni, vibrazioni, classi CSS e particelle. Non conosce le regole e non può cambiare lo
+  stato: cambiare il gioco non richiede di toccarlo, cambiare gli effetti non richiede di
+  toccare le regole.
+- **`audio/` e `feel/vibrazione.js` non sono React.** Tengono una variabile di modulo
+  (`attivo` / `attiva`) e la si allinea alle impostazioni con due `useEffect` in `App.jsx`
+  (`impostaAudio`, `impostaVibrazione`), così le funzioni-voce non vanno passate di mano in
+  mano attraverso i componenti.
+- **`ui/` non parla con `persistence/` se non per due letture di comodo** (`loadStats` e
+  `loadRecords` in `App.jsx`); tutte le scritture passano da `state/`.
 
 ## 2. JavaScript + JSDoc, non TypeScript
 
@@ -61,7 +84,8 @@ Decisione presa. Motivi:
   definizione, nessun disallineamento fra tipi e realtà a runtime.
 - Il costo — perdere il controllo statico — è compensato in parte dai commenti `@param` /
   `@returns` presenti su tutte le funzioni pubbliche del `core/` e in parte dalla suite di
-  test, che sul `core/` è densa (75 test).
+  test, che sul `core/` è densa (78 degli 89 test riguardano il `core/`; 5 l'i18n e 6 la
+  Sfida del Giorno).
 
 Il prezzo va detto con onestà: nulla impedisce oggi di passare a `scoreMove` un oggetto con
 un campo sbagliato. Il controllo è nei test, non nel linguaggio.
@@ -106,9 +130,13 @@ Perché non `Math.random()`:
 - i test possono asserire su mani e punteggi esatti;
 - le simulazioni di bilanciamento sono ripetibili: se un profilo peggiora, si può rieseguire
   la stessa serie di partite;
-- `seedFromString` permette di derivare un seed da una stringa (per esempio una data). Nel
-  codice questo è già usato e testato (`createGame({ seed: '2026-09-06' })`); una modalità di
-  gioco che la sfrutti **non è ancora implementata**: esiste solo il campo `seedLabel`.
+- `seedFromString` permette di derivare un seed da una stringa. È ciò che rende possibile la
+  **Sfida del Giorno**: il seme è la data locale in formato `AAAA-MM-GG`
+  (`createGame({ seed: '2026-09-06' })`), quindi nello stesso giorno tutti ricevono la stessa
+  griglia e la stessa sequenza di pezzi. Il seme di partenza resta nel campo `seedLabel` dello
+  stato, e la partita della sfida ha uno **slot di salvataggio separato**
+  (`KEYS.CURRENT_CHALLENGE`) da quello della partita libera, così aprirne una non cancella
+  l'altra. Non esiste classifica: non esiste server, e nessun dato lascia il dispositivo.
 
 ## 5. `lastMove`: l'unico canale verso il game feel
 
@@ -119,10 +147,61 @@ successo*, mai *come animarlo*: numero di mossa, `handIndex`, `pieceUid`, `shape
 (`moveTier`: `buona` / `ottima` / `eccellente` / `perfetta`, oppure `null`), `boardCleared`,
 `handRefilled`, `gameOver`, `fillAfter`.
 
-È il contratto con il futuro layer `src/feel/` (oggi vuoto): quel layer leggerà `lastMove` e
-deciderà scosse, particelle, suoni e intensità. Il motore resta ignaro. Nota verificata:
+È il contratto con `src/feel/`, che oggi esiste: quel layer legge `lastMove` e decide
+particelle, suoni, vibrazioni e animazioni. Il motore resta ignaro. Nota verificata:
 `deserializeGame` riporta sempre `lastMove: null`, quindi al caricamento di una partita
 salvata non si riproduce l'animazione dell'ultima mossa.
+
+### Il flusso completo di una mossa
+
+```
+  dito / tocco / tastiera
+        |
+        v
+  useTrascinamento  oppure  useTastiera        (src/ui/)
+        |  handIndex, row, col
+        v
+  SchermoGioco.posiziona()                     controlla canPlace: se la mossa e' illegale
+        |                                      si ferma qui e suona suonoRifiuto + vibraRifiuto
+        v
+  usePartita.gioca()                           (src/state/)
+        |
+        v
+  placePiece(state, i, r, c)                   (src/core/engine.js) -> nuovo stato immutabile
+        |                                      con state.lastMove compilato
+        +--> useEffect di usePartita: write(KEYS.CURRENT_GAME, serializeGame(stato))
+        |                             e, a partita finita, recordGame(summarize(stato))
+        v
+  partita.lastMove  ->  useEffettiMossa()      (src/feel/)
+        |
+        +--> audio/suoni.js        suonoEliminazione(gruppi, chainBefore) / suonoAppoggio /
+        |                          suonoGrandeCombo / suonoGrigliaVuota / suonoFinePartita
+        +--> feel/vibrazione.js    vibraAppoggio / vibraEliminazione / vibraCelebrazione /
+        |                          vibraFinePartita
+        +--> feel/particelle.js    campo.esplodi(punti, gruppi) sul canvas sovrapposto
+        +--> stato locale React    appoggiate (260ms), esplosioni (420ms), puntiVolanti (950ms)
+                    |
+                    v
+              Plancia / Hud                    classi CSS: q-blocco--posato, q-blocco--esploso,
+                                               q-hud__valore--scatta, q-punti-volanti
+```
+
+Tre cose che questo flusso rende vere, e che vale la pena non rompere:
+
+1. **Il motore non sa che esistono suoni e animazioni.** `lastMove` descrive *cosa* è
+   successo (`groups`, `clearedCells`, `points`, `tier`, `boardCleared`, `gameOver`), mai
+   *come* rappresentarlo.
+2. **Le celle eliminate vengono ridisegnate per 420 ms dopo essere già uscite dallo stato.**
+   `useEffettiMossa` tiene un `Set` di celle "in esplosione" e `Plancia` disegna un
+   `.q-blocco--esploso` dove la griglia dice già `0`. Senza, l'eliminazione sarebbe uno
+   scatto istantaneo.
+3. **L'impostazione "Animazioni" spegne la parte visiva ma non l'audio.** `useEffettiMossa`
+   suona e vibra, poi esce prima di impostare classi e particelle. È deliberato: chi riduce
+   il movimento non perde il feedback.
+
+Da sapere: le durate dei tre effetti (260 / 420 / 950 ms) sono scritte **due volte**, in
+`useEffettiMossa.js` come costanti JS e in `app.css` dentro le `@keyframes`. Nulla verifica
+che restino allineate.
 
 ## 6. Decisioni architetturali (ADR brevi)
 
@@ -169,33 +248,61 @@ magico nei moduli.
 visibile nei test (che importano le costanti invece di ricopiarne i valori). In cambio,
 `rules.js` è un file che tutti importano: cambiarne un nome tocca molti file.
 
+### ADR-6 — Audio sintetizzato, nessun campione registrato
+**Contesto.** Il gioco deve poter essere pubblicato senza dubbi di licenza, restare leggero e
+non fare richieste di rete.
+**Decisione.** `src/audio/suoni.js` genera ogni suono a runtime con oscillatori, inviluppi e
+un buffer di rumore filtrato della Web Audio API. Le note stanno su una scala pentatonica
+maggiore; l'`AudioContext` nasce solo dentro un gesto dell'utente (`sbloccaAudio()`).
+**Conseguenze.** Zero byte di asset audio, zero campioni di terzi da giustificare (vedi
+`ASSET_LICENSES.md`) e un suono che può seguire lo stato del gioco: l'arpeggio
+dell'eliminazione parte da un gradino più alto man mano che la Catena sale. In cambio la
+tavolozza timbrica è quella che quattro forme d'onda permettono, e non esiste alcun test che
+verifichi che il suono esca davvero.
+
+### ADR-7 — Game feel a valle di `lastMove`, in un layer separato
+**Contesto.** Le animazioni e i suoni sono la parte che cambia più spesso, e sono anche la
+parte in cui è più facile intrecciare per sbaglio la logica di gioco.
+**Decisione.** Un solo hook (`useEffettiMossa`) legge `lastMove` e produce tutto il feedback;
+il motore non conosce il feedback e il feedback non può modificare lo stato. Le particelle
+vivono su **un solo canvas** invece che su decine di nodi DOM animati, e il ciclo di
+`requestAnimationFrame` esiste solo finché ci sono particelle vive.
+**Conseguenze.** Gli effetti si spengono con un interruttore (`animazioni`) senza toccare le
+regole, e nessun loop gira a vuoto mentre il giocatore pensa. In cambio le durate degli
+effetti sono duplicate fra JS e CSS, e `prefers-reduced-motion` non è sufficiente a fermarli
+(vedi `DESIGN_SYSTEM.md`, sezione 6).
+
 ## 7. Non ancora deciso
 
-Aperti davvero, cioè: non esiste codice che li implementi.
+Molte voci di questo elenco sono state chiuse dai commit `9253cc7`, `ee7b452` e `fe290f7`.
+Restano aperte queste, e sono aperte per davvero.
 
-- **Rendering della griglia: scelto ma non verificato.** `src/ui/Plancia.jsx` disegna 81
-  `<div>` con un livello sovrapposto per le linee spesse dei quadranti; `<canvas>` e SVG sono
-  stati scartati implicitamente, senza che risulti da nessuna parte una misura di prestazioni
-  su dispositivi reali. Resta aperto se 81 nodi DOM reggano l'animazione di eliminazione su
-  telefoni lenti: non è mai stato provato.
-- **Interazione: scelta ma non verificata.** `src/ui/useTrascinamento.js` implementa il drag &
-  drop con pointer events, sollevamento del pezzo sopra il dito (1.35 celle su touch), scala
-  alla dimensione della griglia e snap al centro di cella più vicino. Nessuna di queste
-  costanti è stata tarata su utenti reali, e non esiste un'alternativa tap-per-appoggiare per
-  chi non riesce a trascinare.
-- **Sistema audio.** `src/audio/` è vuota. È aperta anche la scelta di fondo: campioni
-  registrati contro sintesi procedurale via Web Audio (che eviterebbe qualunque asset esterno;
-  vedi `ASSET_LICENSES.md`).
-- **Game feel.** `src/feel/` è vuota. Il contratto d'ingresso (`lastMove`) c'è, ciò che ne
-  esce no.
-- **Persistenza: scritta, mai eseguita.** `storage.js` dichiara quattro chiavi (`records`,
-  `settings`, `partita`, `statistiche`); `records.js` usa le prime e le ultime, e gli hook di
-  `src/state/` leggono e scrivono le altre. Nulla di tutto ciò ha test, perché richiederebbe un
-  ambiente con `localStorage` che oggi non è configurato.
-- **i18n: quanto lontano andare.** Esistono italiano e inglese e un fallback a catena
-  (chiave mancante → italiano → la chiave stessa). Non è deciso se altre lingue seguiranno né
-  come si sceglie la lingua in interfaccia.
-- **Gestione dello stato di UI: scelta ma non collaudata.** `src/state/usePartita.js` avvolge
-  il motore in un hook con `useState`, senza reducer e senza libreria esterna. Non è ancora
-  passato attraverso una partita reale, quindi non si sa se regge (per esempio) il rientro
-  dall'app in background.
+- **Prestazioni su dispositivo reale.** `src/ui/Plancia.jsx` disegna 81 `<div>` più un canvas
+  sovrapposto; `<canvas>` e SVG per la griglia sono stati scartati implicitamente, senza una
+  misura. Lo scenario e2e gira in Chromium su una macchina da sviluppo: **nessuno ha ancora
+  aperto QUADRA su un telefono lento**, e con quattro gruppi chiusi insieme si parla di oltre
+  trenta celle animate più fino a 900 particelle.
+- **Taratura del game feel.** Le costanti dell'interazione — sollevamento del pezzo sopra il
+  dito a 1.35 celle, snap al centro più vicino, dimensione della cella nel tray limitata a
+  `[11, 28]` px — sono scelte a tavolino e non sono mai state provate su utenti reali.
+  L'alternativa a due tocchi e il gioco da tastiera esistono, ma nemmeno quelli sono stati
+  osservati in mano a qualcuno.
+- **Persistenza: coperta solo a metà.** `sfide.js` ha sei test (`tests/sfide.test.js`), che
+  girano grazie a un `localStorage` finto costruito con `vi.stubGlobal`. `storage.js` e
+  `records.js` non hanno test propri e sono coperti solo di rimbalzo: nel progetto non è
+  configurato nessun ambiente con DOM (`vite.config.js` non definisce una sezione `test`,
+  Vitest gira in Node puro). L'altra verifica reale è indiretta: il passo 5 dell'e2e ricarica
+  la pagina e controlla che la partita ripresa coincida con quella salvata.
+- **i18n: quanto lontano andare.** Esistono italiano e inglese, un fallback a catena (chiave
+  mancante → italiano → la chiave stessa) e un test di parità delle chiavi. Non è deciso se
+  altre lingue seguiranno. Resta inoltre irrisolto che alcuni testi siano ancora scritti nel
+  JSX invece che nei dizionari (etichette dei pezzi nel tray, note di `Info.jsx` e
+  `Sostieni.jsx`) e che i numeri siano formattati con `toLocaleString('it-IT')` fisso anche
+  in inglese.
+- **Accessibilità del tema chiaro.** I contrasti sono stati misurati e corretti solo per il
+  tema scuro; il tema chiaro non è conforme e nessuno ha ancora deciso se correggerlo o
+  ritirarlo (vedi `DESIGN_SYSTEM.md`, sezione 3).
+- **Rientro dall'app in background.** La partita viene salvata a ogni mossa, quindi la
+  perdita è al massimo di zero mosse; ma non esiste nessuna gestione esplicita di
+  `visibilitychange`, e il comportamento dell'`AudioContext` sospeso dal sistema operativo
+  non è mai stato provato su un dispositivo vero.
