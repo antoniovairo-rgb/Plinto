@@ -2,6 +2,20 @@ import { chromium } from 'playwright';
 import { createGame, serializeGame } from '../../src/core/engine.js';
 import { gridFromString } from '../../src/core/grid.js';
 import { getShape } from '../../src/core/shapes.js';
+import { existsSync } from 'node:fs';
+
+/**
+ * Percorso del browser.
+ *
+ * In questo ambiente di sviluppo Chromium e' preinstallato in una posizione fissa;
+ * in integrazione continua e sulle macchine altrui lo installa Playwright, e quel
+ * percorso non esiste. Se il percorso noto non c'e', si lascia decidere a Playwright
+ * passando `undefined`: cosi' gli stessi script girano ovunque senza modifiche.
+ */
+const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
+  ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
+
 
 const OUT = process.env.PLINTO_E2E_OUT ?? '/tmp/plinto-e2e';
 await (await import('node:fs/promises')).mkdir(OUT, { recursive: true });
@@ -60,7 +74,7 @@ if (!(await serverRisponde())) {
   }
 }
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'it-IT' });
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
 page.on('pageerror', (e) => errori.push(`pageerror: ${e.message}`));

@@ -1,0 +1,27 @@
+# Configurazione di pubblicazione su Netlify.
+# La build gira su Netlify (npm run build) e viene pubblicata la cartella dist/.
+# Il gioco non ha variabili d'ambiente: non parla con nessun servizio.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# E' una applicazione a pagina singola senza router: qualunque percorso torna alla pagina.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Nessuna risorsa esterna, nessuna chiamata di rete: la politica di sicurezza puo'
+# essere severa quanto il gioco. Se un giorno servisse un dominio esterno, andrebbe
+# aggiunto qui E dichiarato in docs/PRIVACY.md.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=(), interest-cohort=()"

@@ -7,9 +7,20 @@
     <meta name="description" content="PLINTO — puzzle game a blocchi. Gratuito, senza pubblicita." />
     <title>PLINTO</title>
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icone/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/icone/icona-apple-180.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PLINTO" />
+    <style>
+      html, body { margin: 0; height: 100%; background: #0e1118; }
+    </style>
   </head>
   <body>
+    <!-- Fondo dipinto subito nel foglio di stile della pagina: senza, fra il primo
+         disegno e il montaggio di React comparirebbe un lampo bianco, che su un gioco
+         a fondo scuro si nota parecchio. -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

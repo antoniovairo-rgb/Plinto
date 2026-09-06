@@ -3,10 +3,15 @@
   "short_name": "PLINTO",
   "description": "Puzzle game a blocchi. Gratuito, senza pubblicita.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0E1118",
   "theme_color": "#0E1118",
+  "categories": ["games", "puzzle"],
   "icons": [
+    { "src": "/icone/icona-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icone/icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icone/icona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

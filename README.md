@@ -29,6 +29,10 @@ prenderlo, frecce per muoversi, Invio per appoggiarlo, Esc per annullare) e ogni
 viene descritta a voce ai lettori di schermo. Tutti i contrasti sono misurati e
 documentati in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
+## Provarlo
+
+Istruzioni passo passo, telefono compreso: **[AVVIO-RAPIDO.md](AVVIO-RAPIDO.md)**.
+
 ## Comandi
 
 ```bash
@@ -40,6 +44,8 @@ npm run e2e        # partita completa guidata in un browser reale
 npm run precisione # precisione del trascinamento su tutte le forme
 npm run soak       # sessione lunga: fluidita', memoria, residui
 npm run sim        # simulazione di bilanciamento (migliaia di partite)
+npm run schermate  # rigenera le immagini per gli store, dal gioco vero
+npm run icone      # rigenera le icone PNG da public/icon.svg
 ```
 
 Gli script che usano il browser avviano da soli il server di sviluppo.

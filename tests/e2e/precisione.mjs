@@ -15,6 +15,20 @@ import {
   createGrid, shapeCellsAt, placeShape, findCompletedGroups, clearGroups,
 } from '../../src/core/grid.js';
 import { SHAPES, getShape } from '../../src/core/shapes.js';
+import { existsSync } from 'node:fs';
+
+/**
+ * Percorso del browser.
+ *
+ * In questo ambiente di sviluppo Chromium e' preinstallato in una posizione fissa;
+ * in integrazione continua e sulle macchine altrui lo installa Playwright, e quel
+ * percorso non esiste. Se il percorso noto non c'e', si lascia decidere a Playwright
+ * passando `undefined`: cosi' gli stessi script girano ovunque senza modifiche.
+ */
+const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
+  ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
+const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
+
 
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const ESEGUIBILE = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';

@@ -1,0 +1,37 @@
+# Verifica automatica a ogni push e pull request.
+# Gira quello che gira in locale: test unitari, build, e le prove nel browser.
+name: verifica
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verifica:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test unitari
+        run: npm test
+
+      - name: Build di produzione
+        run: npm run build
+
+      - name: Browser per le prove
+        run: npx playwright install --with-deps chromium
+
+      - name: Partita completa nel browser
+        run: npm run e2e
+
+      - name: Precisione del trascinamento
+        run: npm run precisione
