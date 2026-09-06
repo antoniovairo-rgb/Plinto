@@ -15,6 +15,13 @@ divergono, il file CSS ha ragione e il documento è da correggere.
 sono netti e i separatori sottili; l'unica luce della schermata viene dai blocchi, che sono
 gli unici elementi saturi su un fondo che resta scuro e desaturato.
 
+Su un punto la direzione è stata corretta dopo averla vista su schermo: **le sei famiglie
+cromatiche dei blocchi erano smorzate anche loro**, coerenti con il resto ma spente. I blocchi
+sono l'unica cosa colorata dell'interfaccia e devono cantare, quindi le sei tinte sono state
+portate alla saturazione massima utile, scegliendo la luminosità in modo che ognuna resti
+sopra 3:1 sul fondo della plancia **in entrambi i temi**. Il fondo resta minerale; i blocchi
+no. La misura è nella sezione 3.
+
 Ne discendono tre conseguenze concrete, verificabili nel CSS:
 
 - **Nessun gradiente decorativo sui fondali.** I gradienti esistono in tre punti soltanto e
@@ -32,19 +39,22 @@ Ne discendono tre conseguenze concrete, verificabili nel CSS:
 ## 2. Token colore
 
 Tutti i valori sono presi da `tokens.css`. Ogni colore usato nell'interfaccia deve venire da
-qui. In `app.css` restano però quattordici colori letterali, ed è onesto elencarli invece di
-dichiarare una regola che il file non rispetta del tutto:
+qui. In `app.css` restano però tredici colori letterali (conteggio del 6 settembre 2026), ed è
+onesto elencarli invece di dichiarare una regola che il file non rispetta del tutto:
 
 - `#1a1405` (2 volte), il bruno quasi nero del testo sul giallo del marchio — pulsante
-  primario e nastro "nuovo record";
+  primario e nastro "nuovo record" (10.92:1 su `--pl-brand`);
 - `#fff` (2 volte), il pallino dell'interruttore e il testo del pulsante di pericolo;
-- 8 `rgba()` di bianco o nero usate come velature: fondo tenue delle celle e dei posti del
-  tray, le due luci interne del blocco, ombra del pezzo trascinato, velo del menu, ombra del
-  testo dei punti volanti, anello scuro dietro il cursore da tastiera. Non esistono token per
-  l'opacità;
-- **due `rgba(242, 193, 78, …)`, che sono `--pl-brand` riscritto a mano in decimale** perché
-  serviva con un canale alfa: l'alone dell'aiuto visivo e lo sfondo del posto selezionato nel
-  tray. Un cambio di `--pl-brand` va riportato lì a mano.
+- `#06231d` (1 volta), il verde quasi nero del numero di un Quadro completato, su `--pl-ok`;
+- 10 `rgba()` di bianco o nero usate come velature: le due luci interne del blocco, ombra del
+  pezzo trascinato, velo del menu, ombra del testo dei punti volanti, anello scuro dietro il
+  cursore da tastiera, ombra del pannello, e le tre velature che disegnano l'anello della
+  bomba. Non esistono token per l'opacità.
+
+Due velature che c'erano in una versione precedente — `rgba(242, 193, 78, …)`, cioè
+`--pl-brand` ricopiato a mano in decimale — non ci sono più; la tinta delle celle libere,
+che prima era un bianco trasparente scritto a mano, è diventata il token `--pl-cella-vuota`
+proprio perché su fondo chiaro un velo bianco è invisibile.
 
 ### Tema scuro (predefinito, `:root`)
 
@@ -56,23 +66,31 @@ dichiarare una regola che il file non rispetta del tutto:
 | `--pl-surface-2` | `#1f2534` | elementi rialzati: pulsanti normali, segmento attivo, numeri della presentazione |
 | `--pl-line` | `#262d3f` | linee sottili, separatori a 1px fra le voci di lista, sfondo della leva spenta |
 | `--pl-line-strong` | `#3a4460` | separatori dei nove quadranti 3x3 — la firma del tabellone |
+| `--pl-cella-vuota` | `rgba(255,255,255,0.03)` | tinta delle celle libere e dei posti vuoti del tray |
 | `--pl-text` | `#e9ecf4` | testo principale; anche il colore del blocco che sta esplodendo e dell'anello del cursore da tastiera |
 | `--pl-text-dim` | `#98a0b5` | testo secondario: righe di dettaglio, record, pulsanti fantasma |
 | `--pl-text-faint` | `#838ca1` | etichette maiuscole, note, suggerimenti, descrizioni degli interruttori |
 | `--pl-brand` | `#f2c14e` | ottone: punteggio, logo, anello di focus, evidenziazione dei gruppi in chiusura, punti volanti |
 | `--pl-brand-deep` | `#c9922a` | fondo del gradiente del pulsante primario |
-| `--pl-danger` | `#ec6d8e` | bordo della mossa illegale, note di allarme, pulsante di cancellazione dati |
+| `--pl-danger` | `#ec6d8e` | bordo della mossa illegale, note di allarme, testo di allarme |
+| `--pl-danger-fondo` | `#b81f47` | **fondo** dei comandi distruttivi, cioè `.pl-btn--pericolo` |
 | `--pl-ok` | `#4cb5a5` | conferme: leva accesa, riga "extra" di fine partita, risultato dell'esempio nell'intro |
-| `--pl-block-1` | `#e8734a` | terracotta |
-| `--pl-block-2` | `#4cb5a5` | verderame (stesso valore di `--pl-ok`) |
-| `--pl-block-3` | `#7b6ce6` | indaco |
-| `--pl-block-4` | `#e4b44c` | ocra |
-| `--pl-block-5` | `#e4587e` | granato |
-| `--pl-block-6` | `#4a9be8` | azzurrite |
+| `--pl-block-1` | `#ff6a2b` | arancio |
+| `--pl-block-2` | `#12e1b0` | verde |
+| `--pl-block-3` | `#9b4dff` | viola |
+| `--pl-block-4` | `#ffc212` | oro |
+| `--pl-block-5` | `#ff3d71` | rosa |
+| `--pl-block-6` | `#2e97ff` | azzurro |
 
-I colori dei blocchi hanno un secondo uso oltre alla plancia: `--pl-block-2` e `--pl-block-1`
-compongono il gradiente della barra della Catena, e i punti volanti delle mosse migliori
-passano da `--pl-brand` a `--pl-block-2` (`eccellente`) e a `--pl-block-1` (`perfetta`).
+`--pl-danger` e `--pl-danger-fondo` sono due token distinti proprio perché servono due
+mestieri diversi: uno è un colore di **testo** su fondo scuro, l'altro un colore di **fondo**
+sotto testo bianco. Un solo token non può passare entrambe le soglie (vedi sezione 3).
+
+I colori dei blocchi hanno un secondo uso oltre alla plancia: il gradiente della barra della
+Catena va da `--pl-block-2` a `--pl-brand` a `--pl-block-1`, e i punti volanti delle mosse
+migliori passano da `--pl-brand` a `--pl-block-2` (`eccellente`) e a `--pl-block-1`
+(`perfetta`). Da quando i blocchi sono saturi, `--pl-block-2` **non** coincide più con
+`--pl-ok`: erano lo stesso `#4cb5a5`, adesso sono due tinte diverse.
 
 ### Tema chiaro (`:root[data-theme='chiaro']`)
 
@@ -85,21 +103,39 @@ sistema.
 | Token | Valore chiaro | Note |
 | --- | --- | --- |
 | `--pl-ink` | `#f3f4f8` | |
-| `--pl-ink-2` | `#e9ebf2` | |
+| `--pl-ink-2` | `#e9ebf2` | fondo della plancia |
 | `--pl-surface` | `#ffffff` | |
 | `--pl-surface-2` | `#f0f2f7` | |
 | `--pl-line` | `#d8dce7` | |
 | `--pl-line-strong` | `#a9b1c6` | |
 | `--pl-text` | `#171b26` | |
 | `--pl-text-dim` | `#4f586d` | |
-| `--pl-text-faint` | `#838ca2` | quasi identico al valore scuro (`#838ca1`) |
-| `--pl-brand-deep` | `#a8781c` | |
+| `--pl-text-faint` | `#6b7488` | scurito rispetto al tema scuro (`#838ca1`) |
+| `--pl-brand` | `#876c2b` | ottone scurito: sul chiaro il giallo del tema scuro era illeggibile |
+| `--pl-brand-deep` | `#6d5622` | |
+| `--pl-ok` | `#337b70` | |
+| `--pl-danger` | `#ae5069` | |
+| `--pl-block-1` | `#d94500` | arancio |
+| `--pl-block-2` | `#00926d` | verde |
+| `--pl-block-3` | `#7a1fe0` | viola |
+| `--pl-block-4` | `#9c7400` | oro |
+| `--pl-block-5` | `#e00048` | rosa |
+| `--pl-block-6` | `#0072d6` | azzurro |
+| `--pl-cella-vuota` | `rgba(23,27,38,0.05)` | |
 | `--pl-shadow-soft` | `0 2px 10px rgba(20,25,40,0.1)` | |
 | `--pl-shadow-lift` | `0 12px 32px rgba(20,25,40,0.18)` | |
 
-Il tema chiaro **non ridefinisce** `--pl-brand`, `--pl-ok`, `--pl-danger` né le sei famiglie
-cromatiche dei blocchi: restano quelli del tema scuro. Le conseguenze sono misurate nella
-sezione 3 e non sono buone.
+**Il tema chiaro è stato riscritto per intero.** La versione precedente ridefiniva solo
+fondali e testi e lasciava accenti e blocchi del tema scuro: il risultato era un tema
+inutilizzabile e mai misurato (il punteggio in ottone stava a 1.53:1 sul fondo e cinque
+blocchi su sei sotto 3:1 sulla plancia). Adesso ridefinisce anche `--pl-brand`,
+`--pl-brand-deep`, `--pl-ok`, `--pl-danger`, tutte e sei le famiglie cromatiche e
+`--pl-cella-vuota`. La lezione, scritta anche nel commento di `tokens.css`: **un tema va
+ridefinito per intero, oppure non va offerto.**
+
+Restano del tema scuro, perché non sono ridefiniti nel blocco chiaro, i token dei tempi,
+della geometria, della tipografia e `--pl-danger-fondo` (che regge il testo bianco in
+entrambi i temi allo stesso rapporto).
 
 ### Ombre
 
@@ -115,10 +151,12 @@ in grassetto o ≥ 24px) e per gli **elementi non testuali** che devono essere d
 (bordi di controlli, grafica portatrice di informazione — i blocchi sulla plancia
 rientrano qui).
 
-### Tema scuro: conforme, e verificato
+Tutti i rapporti di questa sezione sono stati **ricalcolati il 6 settembre 2026** dai valori
+esadecimali di `tokens.css`, con la formula WCAG 2.1 (verifica della funzione usata:
+nero su bianco = 21.00, `#777` su bianco = 4.48). Coincidono con i numeri scritti nei
+commenti di `tokens.css`, tranne dove è detto esplicitamente il contrario.
 
-Verificato leggendo `tokens.css`: i valori attuali sono davvero `--pl-text-faint: #838ca1` e
-`--pl-danger: #ec6d8e`. I rapporti qui sotto sono ricalcolati su quei valori.
+### Tema scuro: conforme
 
 | Token | su `--pl-ink` (`#0e1118`) | su `--pl-surface-2` (`#1f2534`) | Esito |
 | --- | --- | --- | --- |
@@ -128,6 +166,7 @@ Verificato leggendo `tokens.css`: i valori attuali sono davvero `--pl-text-faint
 | `--pl-brand` `#f2c14e` | **11.25** | 9.12 | AA |
 | `--pl-ok` `#4cb5a5` | 7.61 | 6.16 | AA |
 | `--pl-danger` `#ec6d8e` | 6.42 | **5.21** | AA |
+| `#fff` su `--pl-danger-fondo` `#b81f47` | — | **6.32** | AA |
 
 `--pl-surface-2` è il fondo **più chiaro** dell'interfaccia scura, quindi è il caso peggiore:
 se un testo passa lì, passa ovunque nel tema scuro.
@@ -137,53 +176,75 @@ testuali:
 
 | Blocco | Valore | Contrasto |
 | --- | --- | --- |
-| terracotta `--pl-block-1` | `#e8734a` | **5.95** |
-| verderame `--pl-block-2` | `#4cb5a5` | **7.21** |
-| indaco `--pl-block-3` | `#7b6ce6` | **4.37** |
-| ocra `--pl-block-4` | `#e4b44c` | **9.32** |
-| granato `--pl-block-5` | `#e4587e` | **5.11** |
-| azzurrite `--pl-block-6` | `#4a9be8` | **6.09** |
+| arancio `--pl-block-1` | `#ff6a2b` | **6.26** |
+| verde `--pl-block-2` | `#12e1b0` | **10.59** |
+| viola `--pl-block-3` | `#9b4dff` | **4.18** |
+| oro `--pl-block-4` | `#ffc212` | **11.06** |
+| rosa `--pl-block-5` | `#ff3d71` | **5.25** |
+| azzurro `--pl-block-6` | `#2e97ff` | **5.95** |
 
-Il peggiore (indaco, 4.37) supera comunque anche la soglia più severa per il testo normale.
-Tutti i valori di questa sezione sono conformi.
+Il peggiore (viola, 4.18) supera comunque anche la soglia più severa per il testo normale.
 
-### Due token corretti proprio per questo motivo
+### Tema chiaro: ora misurato, e quasi conforme
 
-Sono correzioni reali, fatte nel commit `fe290f7`, non un esempio didattico:
+Il tema chiaro è stato ridefinito per intero e **misurato**, cosa che prima non era mai
+successa. Fondo di riferimento: `--pl-ink` `#f3f4f8` per le pagine, `--pl-surface` `#ffffff`
+per i pannelli, `--pl-surface-2` `#f0f2f7` per gli elementi rialzati, `--pl-ink-2` `#e9ebf2`
+per la plancia.
+
+| Elemento | su `--pl-ink` | su `--pl-surface` | su `--pl-surface-2` | Esito |
+| --- | --- | --- | --- | --- |
+| `--pl-text` `#171b26` | 15.65 | 17.20 | 15.35 | conforme |
+| `--pl-text-dim` `#4f586d` | 6.48 | 7.12 | 6.36 | conforme |
+| `--pl-text-faint` `#6b7488` | **4.27** | 4.69 | **4.19** | **sotto 4.5 su due fondi su tre** |
+| `--pl-brand` `#876c2b` | **4.54** | 4.99 | 4.45 | al pelo sopra soglia sul fondo pagina |
+| `--pl-ok` `#337b70` | **4.54** | 4.99 | 4.46 | idem |
+| `--pl-danger` `#ae5069` | 4.60 | 5.06 | **4.52** | conforme, con margine minimo |
+| `#fff` su `--pl-danger-fondo` `#b81f47` | — | — | **6.32** | conforme |
+
+Blocchi contro la plancia chiara `--pl-ink-2` (`#e9ebf2`), soglia 3:1:
+
+| Blocco | Valore chiaro | Contrasto |
+| --- | --- | --- |
+| arancio `--pl-block-1` | `#d94500` | **3.67** |
+| verde `--pl-block-2` | `#00926d` | **3.31** |
+| viola `--pl-block-3` | `#7a1fe0` | **5.69** |
+| oro `--pl-block-4` | `#9c7400` | **3.59** |
+| rosa `--pl-block-5` | `#e00048` | **4.14** |
+| azzurro `--pl-block-6` | `#0072d6` | **4.03** |
+
+**Tutti e sei passano.** Prima erano cinque su sei sotto soglia: è la correzione più
+sostanziosa della palette.
+
+**Quello che non passa ancora, detto senza attenuazioni:**
+
+- `--pl-text-faint` nel tema chiaro sta a **4.27:1** sul fondo pagina e **4.19:1** sui
+  pannelli rialzati, cioè **sotto la soglia AA di 4.5** per il testo normale. Non è un token
+  marginale: lo usano le etichette maiuscole dell'HUD, il suggerimento sotto la plancia, le
+  note e le descrizioni degli interruttori. Nel tema scuro lo stesso token passa (4.54), nel
+  chiaro no;
+- il commento di `tokens.css` dichiara per il tema chiaro «Testi: 15.9, 7.7 e 4.5 su
+  `--pl-ink`». **Nessuno dei tre numeri è quello misurato**: su `--pl-ink` i valori sono
+  15.65, 6.48 e 4.27. Il terzo, in particolare, è dichiarato al limite mentre è sotto;
+- `--pl-brand` e `--pl-ok` chiari passano con **4.54**, cioè quattro centesimi di margine: un
+  ritocco di luminosità qualsiasi li riporta sotto.
+
+### Le correzioni già fatte, e perché
+
+Sono correzioni reali sul codice, non esempi didattici:
 
 | Token | Valore precedente | Contrasto precedente | Valore attuale | Contrasto attuale |
 | --- | --- | --- | --- | --- |
-| `--pl-text-faint` | `#626b83` | 3.55 su `--pl-ink`, **2.88** su `--pl-surface-2` → **non conforme** | `#838ca1` | 5.60 / 4.54 |
-| `--pl-danger` | `#e4587e` | **4.37** su `--pl-surface-2` → sotto soglia | `#ec6d8e` | 5.21 |
+| `--pl-text-faint` (scuro) | `#626b83` | 3.55 su `--pl-ink`, **2.88** su `--pl-surface-2` → non conforme | `#838ca1` | 5.60 / 4.54 |
+| `--pl-danger` (scuro) | `#e4587e` | **4.37** su `--pl-surface-2` → sotto soglia | `#ec6d8e` | 5.21 |
+| fondo di `.pl-btn--pericolo` | `--pl-danger` | bianco sopra: **2.94** → non conforme | `--pl-danger-fondo` `#b81f47` | bianco sopra: **6.32** |
+| blocchi (scuro) | tinte smorzate | il peggiore a 4.37 | tinte sature | il peggiore a 4.18 |
+| blocchi (chiaro) | uguali allo scuro | **cinque su sei sotto 3:1** | sei tinte dedicate | il peggiore a 3.31 |
 
-`--pl-text-faint` non è un token marginale: lo usano le etichette maiuscole dell'HUD, il
-suggerimento sotto la plancia, il claim della home, il titolo di fine partita, le note e le
-descrizioni degli interruttori. Al valore precedente quei testi erano illeggibili sui
-pannelli. Il vecchio valore di `--pl-danger` sopravvive comunque nel sistema: è esattamente
-`--pl-block-5`, il granato, dove però la soglia da rispettare è 3:1 e non 4.5:1.
-
-### Tema chiaro: NON verificato e non conforme
-
-Va detto senza attenuazioni, perché il commento in `tokens.css` afferma che i contrasti sono
-"tutti sopra la soglia WCAG AA" senza precisare che la misura riguarda solo il tema scuro.
-Ricalcolati sui valori del blocco `[data-theme='chiaro']`:
-
-| Elemento | Contrasto | Soglia | Esito |
-| --- | --- | --- | --- |
-| `--pl-text` `#171b26` su `--pl-surface` | 17.20 | 4.5 | conforme |
-| `--pl-text-dim` `#4f586d` su `--pl-surface` | 7.12 | 4.5 | conforme |
-| `--pl-text-faint` `#838ca2` su `--pl-ink` | **3.06** | 4.5 | **non conforme** |
-| `--pl-text-faint` `#838ca2` su `--pl-surface` | **3.37** | 4.5 | **non conforme** |
-| `--pl-brand` `#f2c14e` su `--pl-ink` | **1.53** | 4.5 | **non conforme** — è il colore del punteggio nell'HUD e del numerone di fine partita |
-| `--pl-ok` `#4cb5a5` su `--pl-surface` | **2.48** | 4.5 | **non conforme** |
-| blocchi su `--pl-ink-2` chiaro | da **1.61** (ocra) a **3.44** (indaco) | 3.0 | **cinque su sei sotto soglia** |
-
-C'è inoltre un caso che fallisce in **entrambi** i temi: `.pl-btn--pericolo` scrive `#fff` su
-`--pl-danger`, cioè **2.94:1**, sotto la soglia per testo normale. È il pulsante che conferma
-la cancellazione dei dati.
-
-Nessuna di queste è stata corretta: il tema chiaro non è mai stato misurato prima di questo
-documento.
+Il pulsante di pericolo merita una riga in più: è quello che **cancella i dati del giocatore**,
+ed era l'unico caso che falliva in entrambi i temi. La correzione non è stata schiarire il
+testo ma **separare i due mestieri del colore**: `--pl-danger` resta il rosa che si legge su
+fondo scuro, `--pl-danger-fondo` è il fondo che regge il bianco.
 
 ## 4. Tipografia
 
@@ -291,48 +352,59 @@ restare allineata al bordo del tabellone.
 | --- | --- | --- |
 | `--pl-t-instant` | 90ms | `transform` del pulsante premuto (`.pl-btn:active` scala a 0.97) |
 | `--pl-t-fast` | 160ms | sfondo del pulsante; sfondo del posto del tray; `transform` del pezzo; sfondo e pallino dell'interruttore |
-| `--pl-t-base` | 240ms | larghezza del riempimento della barra della Catena |
-| `--pl-t-slow` | 420ms | **mai usato tramite il token** — vedi sotto |
-| `--pl-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | tutte le transizioni di sfondo e larghezza; le animazioni `pl-svanisci`, `pl-sali`, `pl-lampo` |
-| `--pl-ease-in-out` | `cubic-bezier(0.65, 0, 0.35, 1)` | **mai usato** (la pulsazione dell'aiuto visivo usa la parola chiave CSS `ease-in-out`, non il token) |
+| `--pl-t-base` | 240ms | larghezza del riempimento della barra della Catena; animazione `pl-scatta` |
+| `--pl-t-slow` | 420ms | **definito ma mai usato** |
+| `--pl-t-atterraggio` | 260ms | animazione `pl-atterra` |
+| `--pl-t-esplosione` | 420ms | animazioni `pl-svanisci`, `pl-lampo`, `pl-salta` |
+| `--pl-t-punti` | 950ms | animazione `pl-sali` |
+| `--pl-ease-out` | `cubic-bezier(0.16, 1, 0.3, 1)` | tutte le transizioni di sfondo e larghezza; le animazioni `pl-svanisci`, `pl-sali`, `pl-lampo`, `pl-salta` |
 | `--pl-ease-pop` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | `transform` del pezzo; animazioni `pl-atterra` e `pl-scatta`. È l'unica curva che supera l'1 e "rimbalza" |
+
+I tre token `--pl-t-atterraggio`, `--pl-t-esplosione` e `--pl-t-punti` esistono perché quelle
+durate servono **anche** al JavaScript, che decide quando togliere dallo stato l'elemento
+temporaneo. Sono dichiarate in `src/feel/durate.js` (`DURATA_ATTERRAGGIO`, `DURATA_ESPLOSIONE`,
+`DURATA_PUNTI`) e in `tokens.css`, e `tests/durate.test.js` legge i due file e **fallisce se
+qualcuno ne cambia uno solo**. Prima erano numeri scritti a mano in entrambi i posti, senza
+niente che li tenesse insieme.
 
 ### Le animazioni a fotogrammi chiave
 
-Le durate delle `@keyframes` sono **numeri letterali**, non token:
-
 | Animazione | Durata | Curva | Cosa fa |
 | --- | --- | --- | --- |
-| `pl-atterra` | 260ms | `--pl-ease-pop` | il blocco appena appoggiato parte a scala 1.28 e si assesta |
-| `pl-svanisci` | 420ms | `--pl-ease-out` | il blocco eliminato lampeggia (fondo `--pl-text`) e collassa a scala 0.2 |
-| `pl-sali` | 950ms | `--pl-ease-out` | i punti volano verso l'alto di 74px e svaniscono |
-| `pl-scatta` | 300ms | `--pl-ease-pop` | il punteggio in testata pulsa quando cresce |
-| `pl-lampo` | 420ms | `--pl-ease-out` | la barra della Catena lampeggia quando sale di livello |
+| `pl-atterra` | `--pl-t-atterraggio` (260ms) | `--pl-ease-pop` | il blocco appena appoggiato parte a scala 1.28 e si assesta |
+| `pl-svanisci` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | il blocco eliminato lampeggia (fondo `--pl-text`) e collassa a scala 0.2 |
+| `pl-sali` | `--pl-t-punti` (950ms) | `--pl-ease-out` | i punti volano verso l'alto e svaniscono |
+| `pl-scatta` | `--pl-t-base` (240ms) | `--pl-ease-pop` | il punteggio in testata pulsa quando cresce |
+| `pl-lampo` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | la barra della Catena lampeggia quando sale di livello |
+| `pl-salta` | `--pl-t-esplosione` (420ms) | `--pl-ease-out` | la cella portata via da una **bomba**: ruota, si illumina e collassa |
 | `pl-pulsa` | 1s, infinita | `ease-in-out` (parola chiave) | pulsazione delle celle che stanno per essere eliminate |
+| `pl-bomba-respira` | 1.6s, infinita | `ease-in-out` (parola chiave) | l'anello della bomba che si contrae e si riapre |
 
-Le prime tre durate sono **duplicate** in `src/feel/useEffettiMossa.js`
-(`DURATA_APPOGGIO = 260`, `DURATA_ESPLOSIONE = 420`, `DURATA_PUNTI = 950`), perché è il
-JavaScript a decidere quando togliere la classe. CSS e JS vanno tenuti allineati a mano:
-non c'è nulla che lo verifichi.
+Le uniche durate ancora scritte a mano sono le due animazioni **infinite**, che non hanno una
+controparte in JavaScript. `tests/durate.test.js` verifica anche questo, cioè che nessuna
+`animation:` dichiari una durata letterale — con un'eccezione ammessa per `1s`. La regola ha
+però una falla: la sua espressione regolare riconosce solo durate intere (`\d+m?s`), quindi
+`1.6s` di `pl-bomba-respira` le sfugge. Il difetto è nel controllo, non nell'effetto.
 
 ### `prefers-reduced-motion`: cosa succede davvero
 
-`tokens.css` contiene un blocco `@media (prefers-reduced-motion: reduce)` che porta i quattro
-token di durata a `1ms`, con il commento "le riceve ridotte ovunque". **"Ovunque" non è
-esatto.** Poiché i token sono usati solo dalle `transition` e mai dalle `animation`, con la
+Adesso funziona, ed è cambiato rispetto a prima. `tokens.css` porta a `1ms` **tutti e sette**
+i token di durata, e poiché le `@keyframes` degli effetti di mossa usano quei token, con la
 preferenza attiva:
 
-- **diventano istantanee** le transizioni: pressione del pulsante, sfondo del posto del tray,
-  larghezza della barra della Catena, leva degli interruttori;
-- **restano a durata piena** tutte le animazioni a fotogrammi chiave: atterraggio del blocco
-  (260ms), esplosione (420ms), punti volanti (950ms), scatto del punteggio (300ms), lampo
-  della Catena (420ms) e la pulsazione infinita dell'aiuto visivo;
+- **diventano istantanee** sia le transizioni (pressione del pulsante, sfondo del posto del
+  tray, larghezza della barra della Catena, leva degli interruttori) sia le animazioni di
+  mossa: atterraggio, esplosione, punti volanti, scatto del punteggio, lampo della Catena e
+  cella saltata dalla bomba;
+- le due animazioni **infinite** vengono spente a parte, in `app.css`:
+  `.pl-cella--incandidata::after` e `.pl-blocco--bomba::after` ricevono `animation: none`, e
+  una regola generica porta `animation-iteration-count` a 1 su tutto;
 - **restano attive** le particelle sul canvas, che non passano affatto dal CSS.
 
-L'unico interruttore che spegne davvero tutto è l'impostazione **Animazioni** del giocatore:
-`useEffettiMossa` esce prima di applicare le classi e `CampoParticelle.imposta(false)` svuota
-il canvas e ferma il ciclo di `requestAnimationFrame`. Chi dichiara la preferenza a livello
-di sistema non la eredita: deve trovare e spegnere l'opzione a mano.
+Resta quindi una sola cosa che la preferenza di sistema non spegne: le particelle. Per quelle
+serve l'impostazione **Animazioni** del giocatore, che è anche l'unico interruttore che ferma
+tutto in blocco — `useEffettiMossa` esce prima di applicare le classi e
+`CampoParticelle.imposta(false)` svuota il canvas e ferma il ciclo di `requestAnimationFrame`.
 
 ## 7. Componenti
 
@@ -367,12 +439,55 @@ Hook e moduli di supporto che il sistema di design presuppone: `useTrascinamento
 `useEffettiMossa` (traduce `lastMove` in classi e suoni), `CampoParticelle`
 (`src/feel/particelle.js`, un solo canvas).
 
+### Il segno della bomba
+
+Regola `.pl-blocco--bomba::after` in `app.css`. È uno pseudo-elemento sovrapposto alla cella:
+`inset: 26%`, `border-radius: 50%`, un bordo scuro da 2px (`rgba(0,0,0,0.55)`), una `box-shadow`
+`inset` bianca all'85% e un alone bianco al 25% verso l'esterno. In sintesi: **un anello
+bianco cerchiato di scuro al centro del blocco**, che respira con `pl-bomba-respira`
+(1.6s, scala da 1 a 0.86 e ritorno).
+
+Tre scelte, e la ragione di ciascuna:
+
+1. **È geometrico, non cromatico.** Il colore in PLINTO non porta informazione (regola 6 della
+   sezione 8), e una bomba segnalata da una tinta diversa sarebbe invisibile a chi non
+   distingue bene i colori — proprio sull'unico elemento che cambia l'esito di una mossa. Un
+   anello si vede a prescindere dalla percezione cromatica, e lascia intatto il colore del
+   pezzo, che resta la sua identità.
+2. **Sta al centro e non su un bordo.** Il tray disegna i pezzi con celle da 11 a 28px: un
+   segno sul bordo, a quelle dimensioni, si confonde con il raggio del blocco. Al centro
+   resta leggibile anche nel disegno più piccolo.
+3. **Si vede prima di appoggiare.** Il segno è applicato dallo stesso componente `Pezzo` che
+   disegna il pezzo nel tray e sotto il dito, non solo dalla `Plancia`: una bomba che si
+   scoprisse solo dopo l'appoggio sarebbe un caso, non una sorpresa.
+
+Il chiaroscuro doppio (bordo scuro all'esterno, luce bianca all'interno) serve a un motivo
+pratico: le sei famiglie cromatiche vanno dall'oro `#ffc212` al viola `#9b4dff`, e un anello
+di un solo colore sparirebbe su almeno una delle due estremità.
+
+C'è poi un secondo segno, per la conseguenza invece che per la causa: `.pl-blocco--saltato`
+anima con `pl-salta` le celle portate via **dall'esplosione** e non dal gruppo. Rispetto a
+`pl-svanisci` ruota di 24 gradi e sale a `brightness(3.4)`, quindi si distingue a occhio da
+una riga che sparisce normalmente. Anche questa è informazione veicolata dal movimento e dalla
+forma, non dalla tinta.
+
+Sotto `prefers-reduced-motion` l'anello resta ma smette di respirare (`animation: none`): il
+segno è nel disegno, la pulsazione è solo un richiamo.
+
 ### Marchio e icona
 
 `Logo.jsx` disegna in SVG inline e riferisce i colori come `var(--pl-block-*)`, quindi segue i
-token. `public/icon.svg` è un file separato e **ripete gli stessi colori in esadecimale**
-(`#0E1118`, `#E4B44C`, `#4CB5A5`, `#7B6CE6`, `#3A4460`): un cambio di token va riportato lì a
-mano. Le due versioni non hanno la stessa geometria (rettangoli 19px con `rx=5` e tratteggio
+token. `public/icon.svg` è un file separato e **ripete i colori in esadecimale**: un cambio di
+token va riportato lì a mano.
+
+**Oggi non è stato riportato, e le due versioni del marchio sono divergenti.** L'icona contiene
+ancora `#E4B44C`, `#4CB5A5` e `#7B6CE6`, cioè i valori *smorzati* di `--pl-block-4`,
+`--pl-block-2` e `--pl-block-3` prima del passaggio alla palette satura; il componente usa i
+token e quindi disegna `#ffc212`, `#12e1b0` e `#9b4dff`. Il marchio dentro il gioco e
+l'icona sulla schermata iniziale non hanno più gli stessi colori. (`#0E1118` e `#3A4460`
+coincidono ancora con `--pl-ink` e `--pl-line-strong`.)
+
+Le due versioni non hanno nemmeno la stessa geometria (rettangoli 19px con `rx=5` e tratteggio
 `4 3` nel componente, 15px con `rx=4` e tratteggio `3.5 2.5` nell'icona): stesso disegno,
 proporzioni diverse.
 
@@ -411,18 +526,32 @@ Da rispettare quando si aggiunge interfaccia.
 
 ### Debiti aperti di questo sistema, in ordine di gravità
 
-1. Il **tema chiaro non è conforme**: `--pl-brand` sul punteggio scende a 1.53:1, cinque
-   blocchi su sei stanno sotto 3:1 sulla plancia chiara, `--pl-text-faint` sta sotto 4.5:1.
-2. `.pl-btn--pericolo` scrive bianco su `--pl-danger`: 2.94:1 in entrambi i temi.
-3. Il bersaglio tattile del pezzo da una cella è 34 × 34px (29 × 29px su schermi da 360px).
-4. `prefers-reduced-motion` non riduce le animazioni a fotogrammi chiave né le particelle.
-5. `--pl-t-slow` e `--pl-ease-in-out` sono definiti ma non usati; le durate a cui `--pl-t-slow`
-   corrisponde (420ms) sono scritte a mano in tre punti fra CSS e JS.
-6. Testi ancora scritti nel JSX invece che nell'i18n: l'etichetta accessibile dei pezzi nel
+1. Il bersaglio tattile del pezzo da una cella è 34 × 34px (29 × 29px su schermi da 360px).
+2. Nel tema chiaro `--pl-text-faint` sta a **4.27:1** sul fondo pagina e **4.19:1** sui
+   pannelli, sotto la soglia AA di 4.5. Nel tema scuro lo stesso token passa.
+3. Il commento di `tokens.css` sui testi del tema chiaro dichiara «15.9, 7.7 e 4.5 su
+   `--pl-ink`» mentre i valori misurati sono 15.65, 6.48 e 4.27: **la documentazione interna
+   del file è più ottimista della misura.**
+4. `public/icon.svg` ha ancora i colori della palette smorzata: l'icona e il marchio disegnato
+   nel gioco non coincidono più.
+5. Il segno della bomba è disegnato con tre `rgba()` letterali, senza token.
+6. `--pl-t-slow` è definito e mai usato. `--pl-ease-in-out`, che una versione precedente di
+   questo documento elencava fra i token, **non esiste più** in `tokens.css`: le due
+   animazioni infinite usano la parola chiave CSS `ease-in-out`.
+7. Il controllo di `tests/durate.test.js` che vieta le durate letterali nelle `animation:`
+   riconosce solo i numeri interi, quindi non vede `1.6s` di `pl-bomba-respira`.
+8. `prefers-reduced-motion` non spegne le particelle sul canvas: per quelle serve
+   l'impostazione Animazioni.
+9. Testi ancora scritti nel JSX invece che nell'i18n: l'etichetta accessibile dei pezzi nel
    tray (`Tray.jsx`), il paragrafo sulle licenze e la nota sul link di donazione mancante in
    `Info.jsx`, la nota corrispondente in `Sostieni.jsx`. Sono in italiano anche per un
    giocatore che ha scelto l'inglese.
-7. `toLocaleString('it-IT')` è fisso: i numeri restano formattati all'italiana in inglese.
-8. Il manifest dichiara `"orientation": "portrait"`. Il layout orizzontale scritto in
-   `app.css` resta quindi raggiungibile solo aprendo il gioco in una scheda del browser: nel
-   gioco installato come PWA l'orientamento richiesto dal manifest lo esclude.
+10. `toLocaleString('it-IT')` è fisso: i numeri restano formattati all'italiana in inglese.
+11. Il manifest dichiara `"orientation": "portrait"`. Il layout orizzontale scritto in
+    `app.css` resta quindi raggiungibile solo aprendo il gioco in una scheda del browser: nel
+    gioco installato come PWA l'orientamento richiesto dal manifest lo esclude.
+
+Risolti rispetto alla versione precedente di questo documento: il tema chiaro (ridefinito per
+intero e misurato), il pulsante di pericolo (2.94:1 → 6.32:1 grazie a `--pl-danger-fondo`), le
+durate delle animazioni scritte a mano in CSS e JS (ora token più `tests/durate.test.js`) e
+`prefers-reduced-motion`, che adesso riduce anche le animazioni a fotogrammi chiave.

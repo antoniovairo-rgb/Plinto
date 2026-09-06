@@ -1,6 +1,7 @@
 import { Logo } from '../Logo.jsx';
 import { Pezzo } from '../Pezzo.jsx';
 import { getShape } from '../../core/shapes.js';
+import { Plinto } from '../Plinto.jsx';
 
 /**
  * Presentazione al primo avvio.
@@ -14,7 +15,10 @@ export function PrimoAvvio({ onInizia, t }) {
   return (
     <div className="pl-screen pl-intro">
       <div className="pl-scroll">
-        <div className="pl-intro__testata"><Logo /></div>
+        <div className="pl-intro__testata">
+          <Plinto espressione="contento" dimensione={84} className="pl-plinto--vivo" />
+          <Logo />
+        </div>
 
         <ol className="pl-intro__regole">
           <li>

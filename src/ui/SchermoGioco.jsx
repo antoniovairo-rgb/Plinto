@@ -6,6 +6,7 @@ import { Pezzo } from './Pezzo.jsx';
 import { useTrascinamento, origineDaCella } from './useTrascinamento.js';
 import { useTastiera } from './useTastiera.js';
 import { Annunci, frasePerMossa } from './Annunci.jsx';
+import { BarraObiettivo } from './BarraObiettivo.jsx';
 import { useEffettiMossa } from '../feel/useEffettiMossa.js';
 import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
@@ -20,7 +21,8 @@ import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf }
  * stanno in basso perche' li' arriva il pollice.
  */
 export function SchermoGioco({
-  partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni, t,
+  partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
+  quadro = null, statoQuadro = null, t,
 }) {
   const cellRefs = useRef([]);
   const plancia = useRef(null);
@@ -164,6 +166,12 @@ export function SchermoGioco({
         scatta={Boolean(puntiVolanti)}
         t={t}
       />
+
+      {/* Nei Quadri l'obiettivo sta sopra la plancia: e' l'unica informazione che
+          serve PRIMA di muovere, mentre il punteggio si guarda dopo. */}
+      {quadro && statoQuadro ? (
+        <BarraObiettivo quadro={quadro} stato={statoQuadro} t={t} />
+      ) : null}
 
       {/* Catena, plancia e suggerimento formano un blocco unico centrato: su schermi
           alti lo spazio che avanza diventa respiro attorno al tavolo da gioco, non

@@ -1,16 +1,26 @@
 # Test e simulazioni
 
 > Fotografia del 6 settembre 2026. I conteggi di test sono stati ottenuti eseguendo
-> `npm test` e `npx vitest run --reporter=verbose`, non stimati. I risultati di simulazione
-> riportati più sotto sono misure reali prodotte da `node src/sim/run.mjs`.
+> `npm test` e `npx vitest run --reporter=json`, non stimati. I risultati di simulazione
+> riportati più sotto sono misure reali prodotte da `node src/sim/run.mjs` o da script
+> equivalenti. Gli script che pilotano un browser (`e2e`, `precisione`, `soak`, `schermate`,
+> `icone`, `prova-pages`, `prova-desktop`) **non sono stati rieseguiti in questa revisione**:
+> dove si riportano loro risultati, è detto da dove vengono.
 
 ## Come si eseguono
 
 ```bash
-npm test              # suite unitaria completa, una volta sola (vitest run)
-npm run test:watch    # riesecuzione automatica durante lo sviluppo
-npm run e2e           # scenario in un browser reale (Chromium via Playwright)
-npm run sim           # simulazione con i valori predefiniti: 2000 partite, profilo "normale"
+npm test               # suite unitaria completa, una volta sola (vitest run)
+npm run test:watch     # riesecuzione automatica durante lo sviluppo
+npm run e2e            # scenario in un browser reale (Chromium via Playwright)
+npm run precisione     # precisione del trascinamento, forma per forma
+npm run soak           # sessione lunga: fluidità, memoria, residui
+npm run sim            # simulazione con i valori predefiniti: 2000 partite, profilo "normale"
+npm run quadri         # difficoltà misurata di ogni Quadro
+npm run schermate      # immagini per gli store, generate dal gioco vero
+npm run icone          # icone PNG rigenerate da public/icon.svg
+npm run prova-pages    # build servita da una sottocartella (caso GitHub Pages)
+npm run prova-desktop  # aspetto su schermi grandi
 ```
 
 Il simulatore accetta tre argomenti posizionali — **numero di partite**, **profilo** e
@@ -32,20 +42,26 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **89 test in 7 file, tutti verdi**, durata ~11.7 s. Undici di quei secondi sono
-tutti in `invarianti.test.js`, che gioca 240 partite complete: è il costo di quel file, non un
-rallentamento della suite.
+`npm test`: **150 test in 12 file, tutti verdi**, durata ~12.3 s (misurato il 6 settembre
+2026). Undici e mezzo di quei secondi sono tutti in `invarianti.test.js`, che gioca 240
+partite complete: è il costo di quel file, non un rallentamento della suite.
 
-`npm run e2e`: **11 passaggi in Chromium reale**, esito "Nessun problema rilevato". Sezione
-dedicata più sotto.
+`npm run e2e`: **11 passaggi in Chromium reale** (0, 1, 2, 3, 3b, 4, 4b, 5, 6, 6b, 7). Il
+numero e la sequenza sono stati riletti nel file; l'esito riportato più sotto viene
+dall'ultima esecuzione registrata e non da questa revisione.
 
 | File | Test | Aree coperte |
 | --- | --- | --- |
 | `tests/grid.test.js` | 19 | geometria della griglia e dei quadranti (3); posizionamento — bordi, coordinate negative, sovrapposizioni, immutabilità di `placeShape`, errore su cella occupata, conteggio ed elenco delle posizioni valide (9); eliminazione di riga, colonna e quadrante, i tre tipi insieme, cella d'incrocio svuotata una volta sola, round-trip `gridFromString`/`gridToString` (7) |
 | `tests/engine.test.js` | 26 | creazione della partita e determinismo del seed, seed testuale (3); mosse — immutabilità dello stato, rifiuto delle mosse illegali, coerenza fra `canPlaceHandPiece` e `placePiece`, ricarica della mano solo a terna esaurita (4); punteggio in partita — riga, quadrante, decadimento della Catena, bonus di svuotamento, contenuto di `lastMove` (5); fine partita, incluse partite casuali complete senza cicli infiniti (4); serializzazione, ripresa identica e rifiuto dei salvataggi corrotti (3); `summarize` (1); **robustezza dei salvataggi manomessi** — punteggio non numerico, stato inventato, Catena fuori scala, griglia con valori impossibili, stato del generatore mancante (5); determinismo della durata a parità di seed (1) |
-| `tests/generator.test.js` | 15 | determinismo e varietà fra seed diversi (2); forma della terna, limite di forme ripetute, unicità degli identificativi (3); pressione da affollamento e memoria dello storico (4); le quattro reti di sicurezza, **compreso un test che verifica che sopra la soglia il game over resti possibile** (4); integrità del catalogo e normalizzazione delle forme (2) |
-| `tests/scoring.test.js` | 15 | Catena — crescita, tetto, decadimento di uno, pavimento a zero (5); Intreccio (2); punteggio di una mossa, moltiplicatore "quello che vedevi prima di muovere", bonus di svuotamento, punteggio sempre intero e non negativo (6); livello di celebrazione `moveTier` (2) |
-| `tests/i18n.test.js` | 5 | parità delle chiavi fra italiano e inglese; nessuna traduzione vuota; una chiave inesistente restituisce la chiave; una lingua sconosciuta ricade sull'italiano; i segnaposto `{r}` e `{c}` dell'etichetta di cella esistono in tutte le lingue |
+| `tests/generator.test.js` | 15 | determinismo e varietà fra seed diversi (2); forma della terna, limite di forme ripetute, unicità degli identificativi (3); pressione da affollamento e memoria dello storico (4); le reti di sicurezza, **compreso un test che verifica che sopra la soglia il game over resti possibile** (4); integrità del catalogo e normalizzazione delle forme (2). Nessun test copre `forseUnaBomba`: la frequenza delle bombe è verificata solo per simulazione (vedi più sotto) |
+| `tests/scoring.test.js` | 19 | Catena — crescita di **uno** per mossa che elimina e non per gruppo chiuso, tetto, tolleranza di una mano, azzeramento del digiuno dopo un'eliminazione, calo di uno invece dell'azzeramento, pavimento a zero, `respiroRimasto` (9); Intreccio (2); punteggio di una mossa, moltiplicatore "quello che vedevi prima di muovere", bonus di svuotamento, punteggio sempre intero e non negativo (6); livello di celebrazione `moveTier` (2) |
+| `tests/bombe.test.js` | 14 | codifica colore+10 nella griglia, andata e ritorno fra colore e bomba (3); detonazione — quadrato 3x3, bombe adiacenti che si innescano, **bombe a distanza 2 che NON si innescano**, ritaglio sul bordo, celle vuote non toccate, nessuna bomba nessun effetto (6); in partita — una bomba appoggiata non esplode, una bomba eliminata con la riga porta via i vicini, i punti delle celle saltate seguono la Catena, celebrazione più alta, sopravvivenza a salvataggio e ripristino (5) |
+| `tests/durate.test.js` | 4 | i tre token di durata di `tokens.css` coincidono con le costanti di `src/feel/durate.js`; nessuna `animation:` del foglio di stile scrive una durata a mano |
+| `tests/privacy.test.js` | 5 | nessun file del prodotto apre una connessione di rete; l'unico dominio esterno è PayPal e sta solo nel file di configurazione; la pagina non carica font o fogli di stile esterni; tutte le chiavi salvate stanno sotto un unico prefisso dichiarato; più un test che verifica che il controllo esamini davvero dei file |
+| `tests/script.test.js` | 14 | `node --check` su ogni script di `tools/`, `tests/e2e/` e `src/sim/` — cioè su tutto il codice eseguibile che **nessun altro test importa**; più un test che verifica che l'elenco non sia vuoto |
+| `tests/quadri.test.js` | 18 | definizione dei Quadri (griglie iniziali ben formate, nessun gruppo già completo, almeno un pezzo piazzabile) e svolgimento del percorso (sblocco progressivo, conservazione del risultato migliore, conteggio dei tentativi) |
+| `tests/i18n.test.js` | 7 | parità delle chiavi fra italiano e inglese; nessuna traduzione vuota; una chiave inesistente restituisce la chiave; una lingua sconosciuta ricade sull'italiano; i segnaposto `{r}` e `{c}` dell'etichetta di cella esistono in tutte le lingue; **nessuna chiave definita e mai usata**; **nessuna chiave usata e mai definita** |
 | `tests/sfide.test.js` | 6 | Sfida del Giorno — formato della data **locale e non UTC** (compreso il caso delle 23:30, in cui UTC sarebbe già il giorno dopo); stessa partita a parità di giorno e partite diverse fra giorni diversi; conservazione del solo miglior punteggio di giornata; un giorno mai giocato non vale zero per errore; ordinamento dello storico; potatura dello storico a 60 giorni |
 | `tests/invarianti.test.js` | 3 | invarianti su partite intere — 240 partite giocate fino al game over con mosse casuali (1); 12 partite in cui **ogni singolo stato attraversato** viene serializzato e ripristinato e confrontato (1); 400 seed in cui la prima mano non è mai già morta (1) |
 
@@ -54,13 +70,33 @@ dedicata più sotto.
 `await import()`. È il modello da riusare se un giorno si vorranno testare anche `storage.js`
 e `records.js`.
 
+Tre file non verificano il gioco ma **le promesse che il progetto fa su se stesso**, ed è la
+categoria di test che invecchia peggio se non esiste:
+
+- `privacy.test.js` legge i sorgenti del prodotto (esclusa `src/sim/`, che gira solo in Node)
+  e fallisce se qualcuno introduce una `fetch`, un font remoto o un dominio esterno diverso da
+  PayPal. La promessa "nessuna richiesta di rete" di `docs/PRIVACY.md` regge finché qualcuno
+  non aggiunge in buona fede una libreria da CDN: adesso quel qualcuno lo scopre subito.
+- `script.test.js` esegue `node --check` su tutti gli script eseguibili che nessun test
+  importa — quelli di `tools/`, `tests/e2e/` e `src/sim/`. Costa millisecondi e chiude una
+  categoria di errore reale: una costante dichiarata due volte dopo una modifica meccanica su
+  più file, scoperta solo in integrazione continua perché in locale ne era stato rilanciato
+  uno solo.
+- `durate.test.js` confronta i token di durata di `tokens.css` con le costanti di
+  `src/feel/durate.js`. Se si scollano, un effetto sparisce prima della fine
+  dell'animazione o resta appeso dopo: due file diversi, due numeri che sembrano entrambi
+  giusti, e nessuno se ne accorge leggendo il codice.
+
 ### Il test delle invarianti, e perché è diverso dagli altri
 
 Gli altri file verificano una regola alla volta su uno scenario costruito a mano.
 `invarianti.test.js` gioca partite vere dall'inizio alla fine con mosse scelte a caso fra
 quelle legali, e dopo **ogni** mossa controlla ciò che deve essere sempre vero:
 
-- la griglia ha 81 celle e ogni valore sta fra `0` e `COLOR_COUNT`;
+- la griglia ha 81 celle e ogni valore è **o** 0, **o** un colore `1..COLOR_COUNT`, **o** una
+  bomba `VALORE_BOMBA+1 .. VALORE_BOMBA+COLOR_COUNT`. L'intervallo non è dichiarato come un
+  unico "da 0 a 16": un valore fra 7 e 10 sarebbe un colore inesistente, e verrebbe disegnato
+  come un blocco senza tinta invece di far fallire il test;
 - la mano ha sempre `HAND_SIZE` posizioni e ogni pezzo ha una forma esistente nel catalogo;
 - punteggio intero, non negativo e **mai in calo**; Catena intera fra `0` e `CHAIN_MAX`;
 - **`status === 'playing'` se e solo se esiste davvero una mossa possibile.** È la coerenza
@@ -124,6 +160,43 @@ Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
 - Le asserzioni sono `if (...) errori.push(...)`, non un framework: non c'è isolamento fra i
   passaggi e un fallimento a metà lascia lo stato per quelli successivi.
 
+## Le altre prove in browser
+
+Oltre a `partita.mjs` ci sono due script in `tests/e2e/`, con la stessa impalcatura (Chromium
+via Playwright, server di sviluppo avviato da soli, problemi accumulati in un array, uscita
+con codice 1):
+
+| Script | Comando | Che domanda risponde |
+| --- | --- | --- |
+| `tests/e2e/precisione.mjs` | `npm run precisione` | il pezzo atterra **esattamente** dove è stato lasciato? Verifica cella per cella, per ogni forma del catalogo e in più punti della griglia. È il gesto che il giocatore ripete centinaia di volte: se il pezzo cade una cella più in là, il gioco sembra rotto anche con tutte le regole giuste |
+| `tests/e2e/resistenza.mjs` | `npm run soak` (o `node tests/e2e/resistenza.mjs [mosse]`) | dopo centinaia di mosse il gioco è ancora fluido? Ha accumulato memoria, nodi DOM, timer o cicli di animazione lasciati per strada? Sono i difetti che non si vedono in una partita di prova da dieci mosse |
+
+Nessuno dei due è un test unitario e nessuno dei due gira in `npm test`: vanno lanciati a
+mano. `tests/script.test.js` garantisce almeno che siano sintatticamente validi.
+
+## Gli strumenti di misura in `tools/`
+
+Non sono test: non dicono "giusto" o "sbagliato" su una regola. Sono strumenti che producono
+**materiale** (immagini, icone) o **misure** su cose che nessun test unitario può guardare —
+l'aspetto su uno schermo diverso, la difficoltà di un livello, il comportamento della build
+servita da un percorso diverso. Tutti quelli che aprono un browser cercano Chromium prima nel
+percorso di questo ambiente di sviluppo e, se non c'è, lasciano decidere a Playwright: girano
+quindi anche su un'altra macchina senza modifiche (variabile `PLINTO_CHROMIUM` per forzarlo).
+
+| Strumento | Comando | Cosa fa |
+| --- | --- | --- |
+| `tools/schermate.mjs` | `npm run schermate` | genera le sei immagini per gli store in `store/` (home, partita, eliminazione, fine partita, statistiche, impostazioni) su viewport 390 × 844 a densità 3, cioè 1170 × 2532. **Non sono mockup**: ogni immagine è il gioco vero, con lo stato costruito importando il motore perché mostri qualcosa di significativo invece di una griglia a caso. Rifarle dopo una modifica all'interfaccia costa un comando |
+| `tools/icone.mjs` | `npm run icone` | rigenera in `public/icone/` i sei PNG richiesti dalle piattaforme (192, 512, maskable 512 con margine del 12%, apple 180, 1024 per le schede degli store, favicon 32) a partire dall'**unica** fonte `public/icon.svg`. Tenere sei PNG disegnati a mano significa che prima o poi cinque saranno aggiornati e uno no |
+| `tools/prova-sottocartella.mjs` | `npm run prova-pages` | fa `npm run build`, serve `dist/` da `/plinto/` con un server HTTP scritto sul posto e verifica che il gioco funzioni **da una sottocartella** e non solo dalla radice di un dominio. Controlla presentazione, 81 celle, una mossa vera col mouse, `manifest.webmanifest`, `icon.svg` e `icone/icona-192.png` raggiungibili, e che **nessuna richiesta finisca alla radice del dominio**. È un caso che si rompe in silenzio: con i percorsi assoluti la pagina si apre bianca su GitHub Pages e nessun test che gira in locale se ne accorge |
+| `tools/prova-desktop.mjs` | `npm run prova-desktop` | apre il gioco su quattro schermi grandi (1631 × 1030, 1920 × 1200, 1440 × 700, 820 × 1180) e misura una cosa concreta e non opinabile: **quanti pixel di vuoto** restano fra la fine del contenuto della presentazione e il pulsante GIOCA. Oltre 180 px è un errore. Poi entra in partita e controlla che la plancia non sia più bassa di 240 px. Salva una schermata per ciascuno |
+| `tools/quadri.mjs` | `npm run quadri [tentativi]` | misura la **difficoltà reale** di ogni Quadro facendolo giocare più volte a un giocatore artificiale che conosce l'obiettivo del livello e ci mira. Stampa per ogni quadro la percentuale di riuscite, le mosse medie e il motivo dei fallimenti; in fondo, i quadri mai superati, quelli sempre superati oltre i primi sei e la curva delle riuscite per gruppi di dieci. Serve a leggere la **curva**, non a stabilire una verità assoluta |
+
+Una nota sul metro di `tools/quadri.mjs`, perché è una lezione riusabile: la prima versione
+usava il giocatore generico delle simulazioni di bilanciamento, che chiude qualunque gruppo gli
+venga comodo. Risultato: "chiudi una riga in 12 mosse" risultava impossibile e "chiudi un
+quadrante in 12 mosse" riusciva in tre tentativi. Non era il quadro a essere sbagliato: era il
+metro. Un giocatore a cui è stato detto "fai una riga" punta alla riga.
+
 ## Avvertimento: `it` come nome di import in un file Vitest
 
 Vale la pena tenerlo a mente, perché è già successo ed è costato una suite verde che verde
@@ -153,9 +226,16 @@ numero totale di test sia salito**, non solo che l'esito sia verde.
 - **Persistenza, per metà.** `src/persistence/sfide.js` è coperto da `tests/sfide.test.js`,
   ma `storage.js` e `records.js` non hanno test propri: sono verificati solo di rimbalzo, dai
   test della sfida e dai passi 5 e 6b dell'e2e.
-- **Contrasti e tema chiaro.** I numeri di `docs/DESIGN_SYSTEM.md` sono calcolati a mano; non
-  esiste nessun controllo automatico che impedisca di reintrodurre un colore non conforme.
-- **Prestazioni su dispositivo reale.** Mai misurate.
+- **Contrasti e tema chiaro.** I numeri di `docs/DESIGN_SYSTEM.md` sono calcolati eseguendo la
+  formula WCAG sui valori dei token, ma **fuori dalla suite**: non esiste nessun controllo
+  automatico che impedisca di reintrodurre un colore non conforme. È l'unica promessa del
+  progetto che non abbia un test a guardia, dopo che privacy, durate e sintassi degli script
+  ne hanno preso uno.
+- **La frequenza delle bombe.** `forseUnaBomba` non ha test unitari: `tests/bombe.test.js`
+  copre la codifica, la detonazione e il punteggio, ma la probabilità del 22% e il vincolo
+  "mai su un pezzo da una cella" sono verificati solo per simulazione.
+- **Prestazioni su dispositivo reale.** Mai misurate. `npm run soak` misura una sessione lunga
+  in Chromium su una macchina da sviluppo, che non è la stessa cosa.
 - **Playtest umano.** Mai fatto. Tutti i numeri di questo documento vengono da giocatori
   artificiali.
 
@@ -207,6 +287,41 @@ sono ripetibili.
 | Svuotamenti completi della griglia | 45 in 1200 partite |
 
 Il riempimento mediano al game over dell'esperto è **51%**, identico a quello del normale.
+
+### La Catena e le bombe
+
+Il simulatore `run.mjs` non stampa la distribuzione della Catena mossa per mossa né le
+statistiche delle bombe: le misure riportate in `docs/GAMEPLAY_RULES.md` sono state ottenute
+con script separati che pilotano lo stesso `chooseMove` di `src/sim/player.mjs`, contando la
+Catena **applicata** a ogni mossa (cioè `state.chain` prima della mossa) e leggendo
+`lastMove.bombeDetonate` e `state.stats`. Chi le rifà deve dichiarare profilo e numero di
+partite: **le serie prodotte da profili diversi non sono confrontabili cifra per cifra.**
+
+Rimisura del 6 settembre 2026, profilo `esperto`, 300 partite, 90.827 mosse — distribuzione
+della Catena applicata:
+
+| Livello | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Quota mosse | 4.8% | 5.2% | 5.8% | 6.9% | 7.8% | 9.9% | 12.4% | 14.1% | 15.2% | 17.8% |
+
+Mosse con Catena attiva: **95.2%**. Mosse al tetto: **17.8%**. Sono valori più alti di quelli
+citati in `docs/GAMEPLAY_RULES.md` per la regola attuale (79,5% e 13,6%), che vengono dal
+giocatore forte su 120 partite: **la conclusione qualitativa è la stessa** — la Catena è
+distribuita su tutta la scala e non incollata al tetto come nella seconda versione della
+regola, dove il 59,5% delle mosse si giocava a 9 — ma le due cifre non vanno mescolate.
+
+Bombe, profilo `normale`, 400 partite (40.697 mani, 121.636 mosse):
+
+| Indicatore | Valore |
+| --- | --- |
+| Mani con una bomba | 22.2% (costante dichiarata: 22%) |
+| Mosse che fanno detonare almeno una bomba | 6.5% |
+| Bombe detonate per partita | 21.6 |
+| Celle saltate oltre al gruppo, per partita | 35.2 |
+| Bombe per mossa con detonazione | 1.09 |
+
+L'ultimo numero è quello che ridimensiona la reazione a catena: nel gioco reale una
+detonazione ne innesca un'altra di rado.
 
 ## L'istogramma del riempimento al game over
 

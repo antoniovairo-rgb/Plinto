@@ -75,6 +75,7 @@ export const KEYS = {
   CURRENT_GAME: 'partita',
   CURRENT_CHALLENGE: 'partita-sfida',
   CHALLENGES: 'sfide',
+  PROGRESS: 'quadri',
   STATS: 'statistiche',
 };
 

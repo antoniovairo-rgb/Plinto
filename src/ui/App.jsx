@@ -6,6 +6,7 @@ import { impostaLingua } from '../i18n/formato.js';
 import { impostaAudio, suonoBottone, sbloccaAudio } from '../audio/suoni.js';
 import { impostaVibrazione } from '../feel/vibrazione.js';
 import { clearAll } from '../persistence/storage.js';
+import { deadPieces } from '../core/engine.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
 import { sfidaDelGiorno, storicoSfide } from '../persistence/sfide.js';
 import { SchermoGioco } from './SchermoGioco.jsx';
@@ -16,6 +17,11 @@ import { SchermoImpostazioni } from './schermate/Impostazioni.jsx';
 import { SchermoInfo } from './schermate/Info.jsx';
 import { SchermoSostieni } from './schermate/Sostieni.jsx';
 import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
+import { SchermoQuadri } from './schermate/Quadri.jsx';
+import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
+import { useQuadro } from '../state/useQuadro.js';
+import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
+import { quantiSuperati } from '../persistence/progressi.js';
 
 /**
  * Radice dell'applicazione.
@@ -24,6 +30,11 @@ import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
  * Meno dipendenze, avvio piu' rapido, e nessun URL da gestire in un gioco che
  * si apre e si chiude in pochi secondi.
  */
+/** Pezzi che non entrano piu': serve anche ai Quadri, che non passano da usePartita. */
+function deadPiecesDi(partita) {
+  return partita ? deadPieces(partita) : [];
+}
+
 export function App() {
   const [schermata, setSchermata] = useState('home');
   const [menuAperto, setMenuAperto] = useState(false);
@@ -46,6 +57,9 @@ export function App() {
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
   const [sfidaSalvata, setSfidaSalvata] = useState(() => cePartitaSalvata('sfida'));
   const [sfidaOggi, setSfidaOggi] = useState(() => sfidaDelGiorno());
+  const [quadriFatti, setQuadriFatti] = useState(() => quantiSuperati());
+
+  const quadri = useQuadro();
 
   const iniziaNuova = useCallback(() => {
     sbloccaAudio();
@@ -76,9 +90,11 @@ export function App() {
     setSalvataggioDisponibile(cePartitaSalvata());
     setSfidaSalvata(cePartitaSalvata('sfida'));
     setSfidaOggi(sfidaDelGiorno());
+    setQuadriFatti(quantiSuperati());
+    quadri.chiudi();
     setMenuAperto(false);
     setSchermata('home');
-  }, [abbandona, cePartitaSalvata]);
+  }, [abbandona, cePartitaSalvata, quadri]);
 
   const azzeraDati = useCallback(() => {
     clearAll();
@@ -86,7 +102,29 @@ export function App() {
     setSalvataggioDisponibile(false);
     setSfidaSalvata(false);
     setSfidaOggi(sfidaDelGiorno());
-  }, []);
+    setQuadriFatti(0);
+    quadri.chiudi();
+  }, [quadri]);
+
+  // --- Quadri --------------------------------------------------------------
+  const apriQuadro = useCallback((definizione) => {
+    sbloccaAudio();
+    suonoBottone();
+    quadri.apri(definizione);
+    setSchermata('quadro');
+  }, [quadri]);
+
+  const tornaAiQuadri = useCallback(() => {
+    setQuadriFatti(quantiSuperati());
+    quadri.chiudi();
+    setSchermata('quadri');
+  }, [quadri]);
+
+  const quadroSuccessivo = useCallback(() => {
+    const prossimo = quadroNumero((quadri.quadro?.numero ?? 0) + 1);
+    if (prossimo) apriQuadro(prossimo);
+    else tornaAiQuadri();
+  }, [quadri.quadro, apriQuadro, tornaAiQuadri]);
 
   // Partita finita: si passa automaticamente al riepilogo.
   const inGioco = partita && partita.status === 'playing';
@@ -121,6 +159,56 @@ export function App() {
     );
   }
 
+  // --- Quadro in corso, oppure il suo esito --------------------------------
+  if (schermata === 'quadro' && quadri.quadro && quadri.partita) {
+    if (quadri.esito) {
+      return (
+        <div className="pl-app">
+          <SchermoFineQuadro
+            quadro={quadri.quadro}
+            esito={quadri.esito}
+            ultimo={quadri.quadro.numero >= TOTALE_QUADRI}
+            onRiprova={quadri.riprova}
+            onProssimo={quadroSuccessivo}
+            onElenco={tornaAiQuadri}
+            t={t}
+          />
+        </div>
+      );
+    }
+    return (
+      <div className="pl-app">
+        <SchermoGioco
+          partita={quadri.partita}
+          record={record}
+          pezziMorti={deadPiecesDi(quadri.partita)}
+          onGioca={quadri.gioca}
+          onMenu={() => setMenuAperto(true)}
+          aiutoVisivo={impostazioni.aiutoVisivo}
+          animazioni={impostazioni.animazioni}
+          quadro={quadri.quadro}
+          statoQuadro={quadri.stato}
+          t={t}
+        />
+        {menuAperto ? (
+          <div className="pl-velo" onClick={() => setMenuAperto(false)}>
+            <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
+              <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
+                {t('comune.chiudi')}
+              </button>
+              <button type="button" className="pl-btn pl-btn--largo" onClick={() => { setMenuAperto(false); quadri.riprova(); }}>
+                {t('quadri.riprova')}
+              </button>
+              <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { setMenuAperto(false); tornaAiQuadri(); }}>
+                {t('quadri.elenco')}
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className="pl-app">
       {schermata === 'gioco' && inGioco ? (
@@ -142,12 +230,19 @@ export function App() {
           cePartitaSalvata={salvataggioDisponibile}
           sfidaOggi={sfidaOggi}
           sfidaInCorso={sfidaSalvata}
+          quadriFatti={quadriFatti}
+          quadriTotali={TOTALE_QUADRI}
+          onQuadri={() => setSchermata('quadri')}
           onGioca={iniziaNuova}
           onRiprendi={riprendiPartita}
           onSfida={apriSfida}
           onVai={setSchermata}
           t={t}
         />
+      ) : null}
+
+      {schermata === 'quadri' ? (
+        <SchermoQuadri onApri={apriQuadro} onIndietro={() => setSchermata('home')} t={t} />
       ) : null}
 
       {schermata === 'statistiche' ? (

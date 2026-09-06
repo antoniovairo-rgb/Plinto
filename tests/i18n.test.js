@@ -56,10 +56,19 @@ describe('traduzioni', () => {
 });
 
 describe('chiavi effettivamente usate', () => {
-  /** Tutte le chiavi passate a t('...') nel sorgente dell'interfaccia. */
+  /**
+   * Tutte le chiavi passate a t() nel sorgente dell'interfaccia.
+   *
+   * Riconosce due forme. Quella letterale, t('sezione.chiave'), e quella composta a
+   * runtime, t(`sezione.chiave.${variabile}`): della seconda si registra il prefisso,
+   * perche' quale chiave finale verra' usata dipende dai dati e non si puo' sapere
+   * leggendo il file. Senza questo, dieci chiavi degli obiettivi dei Quadri
+   * risultavano orfane pur essendo l'unica cosa che quella schermata mostra.
+   */
   function chiaviUsate() {
     const radice = new URL('../src/', import.meta.url).pathname;
     const trovate = new Set();
+    const prefissi = new Set();
     const visita = (cartella) => {
       for (const voce of readdirSync(cartella, { withFileTypes: true })) {
         const percorso = join(cartella, voce.name);
@@ -69,24 +78,32 @@ describe('chiavi effettivamente usate', () => {
         if (!/\.(jsx?|mjs)$/.test(voce.name)) continue;
         const testo = readFileSync(percorso, 'utf8');
         for (const m of testo.matchAll(/\bt\(\s*'([a-zA-Z0-9_.]+)'/g)) trovate.add(m[1]);
+        for (const m of testo.matchAll(/\bt\(\s*`([a-zA-Z0-9_.]+)\.\$\{/g)) prefissi.add(m[1]);
       }
     };
     visita(radice);
-    return trovate;
+    return { trovate, prefissi };
+  }
+
+  /** Una chiave e' usata se compare per intero, o se sta sotto un prefisso dinamico. */
+  function eUsata({ trovate, prefissi }, chiave) {
+    if (trovate.has(chiave)) return true;
+    return [...prefissi].some((p) => chiave.startsWith(`${p}.`));
   }
 
   it('non esistono chiavi definite che nessuno usa', () => {
     // Una chiave orfana e' un testo che qualcuno ha scritto e tradotto due volte
     // per niente, e che al primo sguardo sembra invece una funzionalita' esistente.
     const usate = chiaviUsate();
-    const orfane = chiavi(italiano).filter((k) => !usate.has(k));
+    const orfane = chiavi(italiano).filter((k) => !eUsata(usate, k));
     expect(orfane).toEqual([]);
   });
 
   it('non si usano chiavi che non esistono in nessun dizionario', () => {
     // Questo e' il difetto peggiore: a schermo comparirebbe la chiave grezza.
     const definite = new Set(chiavi(italiano));
-    const inventate = [...chiaviUsate()].filter((k) => !definite.has(k));
+    const { trovate } = chiaviUsate();
+    const inventate = [...trovate].filter((k) => !definite.has(k));
     expect(inventate).toEqual([]);
   });
 });

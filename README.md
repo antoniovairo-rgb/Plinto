@@ -15,10 +15,20 @@ Ricevi tre pezzi, li appoggi su una griglia 9x9 e li fai sparire completando una
 
 1. **Il quadrante.** Non si eliminano solo righe e colonne: anche i nove riquadri 3x3.
    Una sola mossa puo' chiuderne tre insieme.
-2. **La Catena.** Il moltiplicatore non si azzera quando sbagli: **scende di uno**.
-   La partita diventa una tensione continua invece di una serie di combo isolate.
-3. **Le diagonali.** Forme rare che obbligano a leggere la griglia in un altro modo.
-4. **Equita' dichiarata.** Nessuna difficolta' occulta. Le uniche regole nascoste che
+2. **La Catena.** Un moltiplicatore persistente che **sale di uno ogni volta che elimini
+   qualcosa** e **scende di uno quando stai fermo**, con una mossa di tolleranza prima di
+   iniziare a calare. Non si azzera mai di colpo: la partita diventa una tensione continua
+   ("non lasciarla scendere") invece di una serie di combo isolate. La regola e' stata
+   riscritta due volte, misurando: con la prima versione la Catena arrivava a 3 solo nel
+   2% delle mosse, con la seconda il 59,5% delle mosse si giocava al tetto massimo.
+   Entrambi i casi rendono il moltiplicatore un numero fisso. I dettagli e i numeri sono
+   in [docs/GAMEPLAY_RULES.md](docs/GAMEPLAY_RULES.md).
+3. **Le bombe.** Ogni tanto una cella di un pezzo e' una bomba. Non fa niente finche' sta
+   sulla plancia: esplode solo se viene **eliminata** insieme al suo gruppo, e allora porta
+   via anche le otto celle intorno — e le altre bombe che tocca. La probabilita' e' fissa e
+   non guarda come sta andando la partita.
+4. **Le diagonali.** Forme rare che obbligano a leggere la griglia in un altro modo.
+5. **Equita' dichiarata.** Nessuna difficolta' occulta. Le uniche regole nascoste che
    esistono servono ad *aiutare* il giocatore, e sono scritte in chiaro in
    [docs/GAMEPLAY_RULES.md](docs/GAMEPLAY_RULES.md).
 
@@ -26,8 +36,13 @@ Ricevi tre pezzi, li appoggi su una griglia 9x9 e li fai sparire completando una
 
 La partita si gioca **interamente da tastiera** (Tab per scegliere il pezzo, Invio per
 prenderlo, frecce per muoversi, Invio per appoggiarlo, Esc per annullare) e ogni mossa
-viene descritta a voce ai lettori di schermo. Tutti i contrasti sono misurati e
-documentati in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+viene descritta a voce ai lettori di schermo. I contrasti sono misurati, non stimati, e
+documentati uno per uno in [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) — compreso
+l'unico token che nel tema chiaro resta sotto la soglia WCAG AA.
+
+Le informazioni non passano mai dal solo colore: il cursore da tastiera e' un anello, la
+mossa illegale un bordo, e la bomba si riconosce da un segno geometrico al centro del
+blocco e non dalla sua tinta.
 
 ## Provarlo
 
@@ -46,6 +61,9 @@ npm run soak       # sessione lunga: fluidita', memoria, residui
 npm run sim        # simulazione di bilanciamento (migliaia di partite)
 npm run schermate  # rigenera le immagini per gli store, dal gioco vero
 npm run icone      # rigenera le icone PNG da public/icon.svg
+npm run prova-pages    # verifica che la build funzioni servita da una sottocartella
+npm run prova-desktop  # controlla l'aspetto su schermi grandi
+npm run quadri         # misura la difficolta' reale di ogni Quadro
 ```
 
 Gli script che usano il browser avviano da soli il server di sviluppo.

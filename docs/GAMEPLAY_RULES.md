@@ -2,23 +2,26 @@
 
 > Documento di riferimento sulle regole. Ogni numero qui dentro è stato letto in
 > `src/config/rules.js`, `src/core/grid.js`, `src/core/scoring.js`,
-> `src/core/generator.js` e `src/core/shapes.js`, e ogni esempio numerico è stato
-> ricalcolato eseguendo il codice. Fotografia del 6 settembre 2026.
+> `src/core/generator.js`, `src/core/engine.js` e `src/core/shapes.js`, e ogni esempio
+> numerico è stato ricalcolato eseguendo il codice. Fotografia del 6 settembre 2026.
 >
-> Avvertenza: quello che segue descrive il **motore**, coperto da 75 test unitari.
+> Avvertenza: quello che segue descrive il **motore**, coperto dalla suite unitaria
+> (147 test in 12 file, tutti verdi).
 > L'interfaccia è stata provata in un browser reale (Chromium, viewport 390x844) con lo
 > scenario automatico `npm run e2e`, che verifica trascinamento, anteprima, modalità a due
 > tocchi, salvataggio, ripresa, fine partita e navigazione. Non è ancora stata provata da
 > persone vere né su un telefono fisico.
 
-## Le regole in cinque righe
+## Le regole in sei righe
 
 1. Hai una griglia **9x9** e ricevi **tre pezzi** alla volta.
 2. Appoggi un pezzo su celle libere: non si ruota e non si sposta più.
 3. Quando una **riga**, una **colonna** o un **quadrante 3x3** è piena, sparisce e fa punti.
 4. I tre pezzi non si rinnovano uno alla volta: la nuova terna arriva **solo dopo che hai
    appoggiato tutti e tre**.
-5. La partita finisce quando nessuno dei pezzi che ti restano entra più da nessuna parte.
+5. Ogni tanto una cella di un pezzo è una **bomba**: quando viene eliminata insieme al suo
+   gruppo porta via anche le celle intorno.
+6. La partita finisce quando nessuno dei pezzi che ti restano entra più da nessuna parte.
 
 ## La griglia e i gruppi
 
@@ -60,12 +63,16 @@ sommaBase = somma dei punti base dei gruppi chiusi
 
 punti = celleAppoggiate * 1                                   (POINTS_PER_CELL)
       + [se numeroGruppi > 0]  round(sommaBase * intreccio * catena)
+      + round(celleEsploseDalleBombe * 6 * catena)            (PUNTI_CELLA_ESPLOSA)
       + [se numeroGruppi > 0 e griglia rimasta vuota]  300     (BOARD_CLEAR_BONUS)
 ```
 
-L'arrotondamento è **uno solo**, applicato al prodotto intero: `Math.round(sommaBase *
-intreccio * catena)`. I punti delle celle appoggiate e il bonus di svuotamento sono già interi
-e non vengono moltiplicati da nulla.
+Gli arrotondamenti sono **due e separati**: uno sul prodotto dei gruppi (`Math.round(sommaBase
+* intreccio * catena)`) e uno sui punti delle celle fatte saltare dalle bombe
+(`Math.round(celleEsplose * PUNTI_CELLA_ESPLOSA * catena)`). I punti delle celle appoggiate e
+il bonus di svuotamento sono già interi e non vengono moltiplicati da nulla. Le celle esplose
+seguono la Catena ma **non** l'Intreccio: il moltiplicatore dell'Intreccio si applica solo
+alla somma base dei gruppi.
 
 Punti base per gruppo (`GROUP_BASE_POINTS`):
 
@@ -89,28 +96,96 @@ Calcolati a mano e verificati chiamando `scoreMove`.
 | 4 celle, riga + colonna + quadrante, Catena 9 (×3.25) | `4 + round(63 × 2 × 3.25)` = `4 + round(409.5)` | **414** |
 | 6 celle, due quadranti, Catena 3 (×1.75) | `6 + round(54 × 1.5 × 1.75)` = `6 + 142` | **148** |
 | 1 cella, chiude una riga e svuota la griglia, Catena 0 | `1 + 18 + 300` | **319** |
+| 1 cella, chiude una riga, 4 celle saltate da una bomba, Catena 0 | `1 + round(18 × 1 × 1) + round(4 × 6 × 1)` | **43** |
+| 1 cella, chiude una riga, 8 celle saltate, Catena 4 (×2) | `1 + round(18 × 1 × 2) + round(8 × 6 × 2)` = `1 + 36 + 96` | **133** |
+
+Tutte le righe della tabella sono state rieseguite chiamando `scoreMove` il 6 settembre 2026 e
+coincidono. Il caso della Catena 9 merita una nota, perché è l'unico in cui l'arrotondamento
+si vede: `63 × 2 × 3.25 = 409.5`, e `Math.round` in JavaScript arrotonda **verso l'alto** i
+mezzi esatti, quindi 410 e non 409.
 
 Il punteggio di una mossa è sempre un intero e non è mai negativo (verificato da un test su
 tutte le combinazioni di Catena 0..9 e 0..4 gruppi).
 
 ## La Catena
 
-Il moltiplicatore persistente. Vive nel campo `state.chain`, parte da 0 ed è governato da
-`nextChainLevel`:
+Il moltiplicatore persistente, e la meccanica che è stata riscritta più volte di ogni altra.
 
-- **sale** di **quanti gruppi hai chiuso in quella mossa** (chiuderne tre la fa salire di 3),
-  fino a un massimo di `CHAIN_MAX = 9`;
-- **scende di 1** — `CHAIN_DECAY = 1` — dopo ogni mossa che non elimina nulla;
-- non scende sotto 0 e **non si azzera mai di colpo**.
+### La regola attuale
+
+Vive in **due** campi dello stato: `state.chain`, il livello, e `state.chainDigiuno`, quante
+mosse consecutive non hanno eliminato niente. Li aggiorna `nextChainState(livello, gruppi,
+digiuno)` in `src/core/scoring.js`:
+
+- **sale di uno** (`CHAIN_STEP_UP = 1`) a ogni mossa che chiude **almeno un gruppo**, fino al
+  tetto `CHAIN_MAX = 9`. Sale di uno anche se i gruppi chiusi sono tre: **non conta quanti**;
+- una mossa che elimina azzera il digiuno;
+- **la prima mossa a vuoto non fa scendere niente** (`CHAIN_GRACE = 1`): consuma solo la
+  tolleranza;
+- dalla **seconda mossa a vuoto consecutiva in poi**, ogni mossa a vuoto fa scendere il
+  livello di uno (`CHAIN_DECAY = 1`);
+- il livello non scende sotto 0 e **non si azzera mai di colpo**.
 
 | Livello | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Moltiplicatore | ×1 | ×1.25 | ×1.5 | ×1.75 | ×2 | ×2.25 | ×2.5 | ×2.75 | ×3 | ×3.25 |
 
-Perché non si azzera: una singola mossa a vuoto — che in un gioco a blocchi capita di
-continuo, anche giocando bene — non deve cancellare il lavoro di dieci mosse. Con il
-decadimento di 1 la partita diventa una tensione continua ("non lasciare che scenda") invece
-di una serie di combo isolate, e senza aggiungere una sola regola sul tabellone.
+Una sequenza concreta, ottenuta chiamando `nextChainState` una mossa alla volta a partire da
+livello 5 e digiuno 0:
+
+| Mossa | Elimina? | Livello dopo | Digiuno dopo |
+| --- | --- | --- | --- |
+| 1 | no | 5 | 1 |
+| 2 | no | 4 | 2 |
+| 3 | no | 3 | 3 |
+| 4 | sì (3 gruppi) | 4 | 0 |
+| 5 | no | 4 | 1 |
+| 6 | sì (1 gruppo) | 5 | 0 |
+
+Si legge in una riga: **la Catena sale di uno ogni volta che elimini e cala di uno ogni volta
+che stai fermo, con una mossa di respiro.**
+
+`respiroRimasto(digiuno)` restituisce quante mosse di tolleranza restano. È esportata e
+coperta da test, ma **nessun componente dell'interfaccia la usa**: al giocatore la tolleranza
+residua non viene mostrata.
+
+### Perché sale di uno e non di quanti gruppi
+
+Chiudere tre gruppi con una mossa è già premiato dal moltiplicatore Intreccio. Contarli anche
+qui li premiava due volte, e faceva schizzare la Catena al tetto dove poi restava: un
+moltiplicatore fisso, cioè non un moltiplicatore ma una costante.
+
+### Le tre versioni, con i numeri
+
+La regola è cambiata due volte, e ogni volta perché una misura diceva che non stava
+funzionando. I numeri vengono dal giocatore artificiale forte, non da persone.
+
+| Versione | Regola | Mosse con Catena attiva | Mosse al tetto |
+| --- | --- | --- | --- |
+| 1 | sale di *N* gruppi, cala a **ogni** mossa a vuoto | Catena ≥ 3 solo nel **2%** delle mosse, mai sopra 6 | — |
+| 2 | sale di *N* gruppi, **due** mosse di tolleranza | **93%** | **59,5%** |
+| 3 (attuale) | sale di **uno**, **una** mossa di tolleranza | **79,5%** | **13,6%** |
+
+- **Versione 1.** Il moltiplicatore che doveva essere la firma del gioco era decorativo: con
+  la Catena sopra 2 in due mosse su cento, il giocatore non aveva niente da proteggere.
+- **Versione 2.** Il problema opposto, e altrettanto grave: quasi sei mosse su dieci giocate
+  al tetto. Un numero fisso è inutile esattamente quanto un numero che non arriva mai.
+- **Versione 3.** Le due correzioni insieme — crescita di uno e tolleranza dimezzata —
+  distribuiscono la Catena su tutta la scala: **79,5%** delle mosse con Catena attiva,
+  **13,6%** al tetto, e una distribuzione piatta su tutti i livelli 0-9, fra il **6,0%** e il
+  **13,6%** per livello. È l'unica delle tre versioni in cui il numero sullo schermo cambia
+  abbastanza spesso da essere una tensione.
+
+**Nota onesta su questi numeri.** Le versioni 1 e 2 non sono più nel codice: le loro misure
+non sono riproducibili oggi e vanno prese come cronaca. Della versione 3 è riproducibile solo
+il metodo. Una rimisura indipendente fatta il 6 settembre 2026 con il profilo `esperto`
+(300 partite, 90.827 mosse, contando la Catena *applicata* a ogni mossa) dà valori più alti —
+95,2% di mosse con Catena attiva e 17,8% al tetto — perché il profilo e il numero di partite
+sono diversi. La conclusione qualitativa regge (la Catena è distribuita e non incollata al
+tetto), ma **le due serie non sono confrontabili cifra per cifra**: chi le rifà deve
+dichiarare profilo e numero di partite.
+
+### Trasparenza
 
 **Il moltiplicatore applicato è quello PRIMA della mossa**, cioè quello che il giocatore vede
 nell'interfaccia mentre decide. L'aumento vale dalla mossa successiva. È una scelta di
@@ -141,6 +216,90 @@ pezzo che non chiude niente, non stai svuotando nulla e non prendi il bonus.
 
 Ordine di grandezza: 300 punti sono più del doppio della mossa da 130 punti dell'esempio qui
 sopra. Nelle simulazioni con il profilo "normale" è successo 45 volte in 1200 partite.
+
+## Le bombe
+
+Ogni tanto una delle celle di un pezzo è una **bomba**. Non fa niente finché resta sulla
+plancia: esplode **solo** quando viene eliminata insieme al gruppo che la contiene, e allora
+porta via anche le celle intorno. È l'unica meccanica del gioco che tocca celle che il
+giocatore non ha completato.
+
+### Come finisce in mano
+
+`forseUnaBomba` in `src/core/generator.js`, eseguita come **ultimo** passo di `generateHand`,
+cioè dopo tutte le reti di sicurezza:
+
+- una sola estrazione per **mano**, contro `BOMBA_PROBABILITA = 0.22`;
+- se passa, **una sola cella di un solo pezzo** della terna diventa una bomba. Non esistono
+  due bombe nella stessa mano;
+- i candidati sono i pezzi con più di una cella: **la bomba non finisce mai su `p1`**, il
+  pezzo da una cella. Una bomba da appoggiare dove capita non è una decisione;
+- se nella terna non c'è nessun pezzo con più di una cella, la mano resta senza bomba;
+- la cella scelta dentro il pezzo è uniforme fra le sue celle.
+
+**La probabilità è fissa**, ed è la parola importante: `forseUnaBomba` riceve solo il
+generatore pseudo-casuale e i pezzi. Non guarda il punteggio, la Catena, l'andamento della
+partita né da quanto tempo non ne esce una. Chi sta andando bene non riceve più bombe per
+premiarlo né meno per rallentarlo — vale la stessa dichiarazione della sezione Equità.
+
+*Misurato* (400 partite, profilo `normale`, 40.697 mani estratte): **22,2%** delle mani
+contiene una bomba, contro il 22% dichiarato dalla costante.
+
+### La codifica nella griglia
+
+Non c'è un secondo array. Il valore di una cella è il colore (1..6); una bomba è
+**colore + `VALORE_BOMBA`**, cioè 11..16. Tre funzioni in `src/core/grid.js` bastano a
+gestirlo: `coloreDi(valore)`, `eBomba(valore)`, `conBomba(colore)`. La conseguenza pratica è
+che salvataggi, copie e simulazioni restano identici a prima: una bomba sopravvive al giro in
+JSON senza nessun campo aggiuntivo, e un test lo verifica.
+
+### L'esplosione
+
+`detonaBombe(grid, celleIniziali)` in `src/core/grid.js`, chiamata da `placePiece` **solo se
+`groups.length > 0`**, cioè solo se la mossa ha chiuso almeno un gruppo:
+
+- una bomba porta via il quadrato di raggio `BOMBA_RAGGIO = 1` attorno a sé, cioè il 3x3 che
+  la contiene. Sul bordo il quadrato viene ritagliato: una bomba nell'angolo elimina 4 celle
+  in tutto, non 9;
+- **le celle vuote non vengono toccate**: l'esplosione elimina, non scava;
+- **reazione a catena**: una bomba dentro il quadrato detona a sua volta, e la propagazione
+  continua finché non si aggiunge più nulla. Tre bombe adiacenti in fila portano via 15 celle;
+- **due bombe a distanza 2 non si innescano**: il raggio è 1, quindi solo le otto celle
+  adiacenti. Un test lo verifica di proposito.
+
+Le celle portate via **oltre** a quelle dei gruppi sono le `esplose`, e sono l'unica cosa che
+la bomba aggiunge al punteggio: `PUNTI_CELLA_ESPLOSA = 6` ciascuna, moltiplicate per la
+Catena (non per l'Intreccio). Una detonazione **non** aumenta il numero di gruppi chiusi:
+quindi non tocca il moltiplicatore Intreccio e non fa salire la Catena più in fretta.
+
+Due conseguenze che si notano giocando:
+
+- una bomba **può** completare uno svuotamento della griglia e quindi far scattare i 300 punti
+  di `BOARD_CLEAR_BONUS`, perché il controllo di griglia vuota avviene dopo l'eliminazione;
+- `moveTier` conta anche le celle saltate (`gruppi + floor(catena / 3) + floor(celleEsplose / 8)`),
+  quindi una mossa con una bomba viene celebrata di più a parità di gruppi chiusi.
+
+### Quanto pesano davvero
+
+*Misurato* su 400 partite del profilo `normale` (121.636 mosse):
+
+| Indicatore | Valore |
+| --- | --- |
+| Mani con una bomba | 22,2% |
+| Mosse che fanno detonare almeno una bomba | 6,5% |
+| Bombe detonate per partita | 21,6 |
+| Celle saltate (oltre al gruppo) per partita | 35,2 |
+| Celle saltate per bomba detonata | 1,63 |
+| Bombe per mossa con detonazione | 1,09 |
+
+L'ultima riga è quella che ridimensiona la reazione a catena: nel gioco reale una detonazione
+ne innesca un'altra di rado. E 1,63 celle saltate per bomba è molto meno del massimo teorico
+di 8, perché gran parte del quadrato attorno a una bomba che sta chiudendo una riga o è già
+dentro il gruppo eliminato, o è vuota.
+
+Il colore della bomba resta quello del pezzo: come ogni altro colore, non ha nessuna regola.
+Il segno che la distingue è geometrico (un anello al centro della cella) ed è documentato in
+`docs/DESIGN_SYSTEM.md`.
 
 ## Il catalogo delle forme
 
@@ -289,6 +448,8 @@ entrare da nessuna parte. La rete riduce le morti gratuite, non le elimina — e
 - Non aumenta mai la probabilità di un pezzo *perché sarebbe scomodo*.
 - Non toglie mai una terna già consegnata, e non la cambia dopo che l'hai vista.
 - Non ha nessuna modalità "il giocatore è troppo bravo".
+- **Non regola la frequenza delle bombe sull'andamento della partita**: `BOMBA_PROBABILITA`
+  è una costante, estratta una volta per mano e nient'altro (vedi "Le bombe").
 
 ### L'evidenza misurata
 
@@ -322,7 +483,8 @@ strutturato è stato ancora fatto.
 Il controllo è in `placePiece`, subito dopo l'appoggio e l'eventuale eliminazione. In ordine:
 
 1. Il pezzo viene appoggiato e la sua casella in mano diventa vuota.
-2. Si cercano e si eliminano i gruppi completi.
+2. Si cercano i gruppi completi; se ce n'è almeno uno, le eventuali bombe che contengono
+   detonano, e solo allora si svuotano tutte le celle in una volta sola.
 3. **Se e solo se tutti e tre gli slot sono vuoti**, viene generata una nuova terna sulla
    griglia com'è ora.
 4. Si guarda se esiste almeno un pezzo — fra quelli rimasti in mano, o fra i tre appena

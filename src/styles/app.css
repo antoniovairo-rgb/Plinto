@@ -909,3 +909,184 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .pl-blocco--bomba::after { animation: none; }
 }
+
+/* ----------------------------------------------------------- mappa dei quadri --- */
+.pl-mappa__testata {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.pl-mappa__conteggio {
+  margin: 0 0 6px;
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--pl-text);
+}
+.pl-mappa__barra {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pl-surface);
+  overflow: hidden;
+}
+.pl-mappa__riempimento {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pl-block-2), var(--pl-brand));
+  transition: width var(--pl-t-base) var(--pl-ease-out);
+}
+
+.pl-atto { margin-bottom: 26px; }
+.pl-atto--chiuso { opacity: 0.55; }
+
+.pl-atto__testata {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.pl-atto__nome {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pl-text-dim);
+}
+.pl-atto__conteggio {
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--pl-text-faint);
+}
+.pl-atto__obiettivo {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  color: var(--pl-text-faint);
+}
+
+/* Le tappe: una fila che va a capo, non una colonna infinita. Cento tappe in
+   colonna sarebbero un rotolo; a griglia si vedono un atto per schermata. */
+.pl-tappe {
+  list-style: none;
+  margin: 0;
+  /* Lo spazio in alto e' per Plinto, che sta appoggiato SOPRA la tappa corrente:
+     senza, finisce addosso al titolo dell'atto. */
+  padding: 26px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pl-tappa {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--pl-surface);
+  color: var(--pl-text-dim);
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.pl-tappa--fatta { background: var(--pl-ok); color: #06231d; }
+.pl-tappa--chiusa {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--pl-line);
+  color: var(--pl-text-faint);
+  cursor: default;
+}
+
+/* La tappa corrente: piu' grande, in ottone, con Plinto appoggiato sopra. */
+.pl-tappa--qui {
+  background: var(--pl-brand);
+  color: #1a1405;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pl-brand) 26%, transparent);
+}
+.pl-tappa__plinto {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+}
+
+/* ---------------------------------------------------- obiettivo in partita --- */
+.pl-obiettivo {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: min(96vw, 58vh);
+  margin: 0 auto;
+  padding: 8px 12px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface);
+}
+
+.pl-obiettivo__testi { display: grid; gap: 2px; min-width: 0; }
+.pl-obiettivo__frase {
+  font-size: 13.5px;
+  color: var(--pl-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pl-obiettivo__progressi { display: flex; gap: 8px; }
+.pl-obiettivo__quota {
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--pl-text-dim);
+}
+.pl-obiettivo__quota--completo { color: var(--pl-ok); }
+.pl-obiettivo__su { font-size: 11px; color: var(--pl-text-faint); }
+
+.pl-obiettivo__mosse { text-align: right; }
+.pl-obiettivo__mosse strong {
+  display: block;
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  color: var(--pl-text);
+}
+/* Rosso solo sull'ultima mossa: un contatore che allarma sempre non allarma piu'. */
+.pl-obiettivo__mosse--poche strong { color: var(--pl-danger); }
+
+.pl-quadro-esito {
+  margin: 6px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--pl-danger);
+}
+.pl-quadro-esito--vinto { color: var(--pl-ok); }
+
+/* --------------------------------------------------------------- Plinto --- */
+.pl-plinto { display: block; overflow: visible; }
+
+/* Un respiro appena percettibile: fermo del tutto sembra un'illustrazione, non un
+   personaggio. Lento e minimo, perche' non deve rubare l'attenzione al gioco. */
+.pl-plinto--vivo { animation: pl-plinto-respira 3.2s ease-in-out infinite; transform-origin: 50% 92%; }
+
+@keyframes pl-plinto-respira {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50%      { transform: translateY(-2.5%) scaleY(1.015); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-plinto--vivo { animation: none; }
+}
+
+.pl-fine__plinto { display: grid; place-items: center; margin: 14px 0 6px; }

@@ -194,6 +194,10 @@ function gioca(quadro) {
     mosse: partita.stats.moves,
     punti: partita.score,
     motivo: finale.motivo,
+    // Quanto lontano e' arrivato: serve a capire DOVE mettere il bersaglio invece
+    // di indovinarlo. Un quadro fallito al 90% e uno fallito al 10% sono due
+    // problemi diversi e vanno corretti in modo diverso.
+    progressi: finale.progressi.map((p) => ({ tipo: p.tipo, fatto: p.fatto, quanti: p.quanti })),
   };
 }
 
@@ -214,6 +218,14 @@ for (const quadro of QUADRI) {
   const motivi = {};
   prove.filter((p) => !p.vinto).forEach((p) => { motivi[p.motivo ?? 'ignoto'] = (motivi[p.motivo ?? 'ignoto'] ?? 0) + 1; });
 
+  // Per i quadri mai superati: quanto in media ci si e' avvicinati.
+  const perse = prove.filter((p) => !p.vinto);
+  const vicinanza = perse.length === 0 ? null : quadro.obiettivi.map((_, i) => {
+    const medi = perse.reduce((a, p) => a + (p.progressi[i]?.fatto ?? 0), 0) / perse.length;
+    const su = perse[0].progressi[i]?.quanti ?? 0;
+    return `${perse[0].progressi[i]?.tipo ?? '?'} ${medi.toFixed(1)}/${su}`;
+  }).join(', ');
+
   esiti.push({ quadro, percentuale, mosseMedie });
 
   const obiettivo = quadro.obiettivi.map((o) => `${o.tipo} ${o.quanti}`).join(' + ');
@@ -221,7 +233,8 @@ for (const quadro of QUADRI) {
   console.log(
     `  ${String(quadro.numero).padStart(2)}  ${quadro.nome.padEnd(17)} ${obiettivo.padEnd(24)} `
     + `${String(quadro.maxMosse ?? '-').padStart(5)}  ${barra} ${String(Math.round(percentuale)).padStart(3)}%  `
-    + `${String(mosseMedie ?? '-').padStart(11)}  ${Object.entries(motivi).map(([k, v]) => `${k} x${v}`).join(', ')}`,
+    + `${String(mosseMedie ?? '-').padStart(11)}  `
+    + `${percentuale === 0 ? `arrivato a ${vicinanza}` : Object.entries(motivi).map(([k, v]) => `${k} x${v}`).join(', ')}`,
   );
 }
 
