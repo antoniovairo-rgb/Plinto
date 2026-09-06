@@ -4,8 +4,9 @@
 # (Pro, Team o Enterprise). Con il piano gratuito questo flusso fallisce finche' la
 # repository non viene resa pubblica.
 #
-# Dopo il primo passaggio va abilitato una volta sola:
-#   Settings -> Pages -> Source: "GitHub Actions"
+# Pages viene abilitato dal flusso stesso (enablement: true), quindi non serve
+# nessun passaggio manuale in Settings. Il primo tentativo era fallito proprio li':
+# "Get Pages site failed... verify that the repository has Pages enabled".
 name: pubblica su Pages
 
 on:
@@ -45,7 +46,12 @@ jobs:
       - name: Build di produzione
         run: npm run build
 
+      # enablement: true abilita Pages sulla repository se non lo e' gia', usando il
+      # permesso pages:write dichiarato sopra. Senza, il flusso fallisce finche'
+      # qualcuno non apre Settings -> Pages a mano.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -36,22 +36,16 @@ Stessi comandi dal Prompt dei comandi o da PowerShell, dopo aver installato Node
 
 ## Online, su GitHub Pages
 
-Il flusso di pubblicazione è già pronto in `.github/workflows/pages.yml` e parte a ogni
-push su `main`. Va abilitato **una volta sola**:
+Il flusso di pubblicazione è in `.github/workflows/pages.yml` e parte a ogni push su
+`main`. **Non serve abilitare niente a mano**: il flusso attiva Pages da solo.
 
-**Settings → Pages → Source: `GitHub Actions`**
+L'indirizzo è `https://antoniovairo-rgb.github.io/Plinto/`.
 
-L'indirizzo sarà `https://antoniovairo-rgb.github.io/plinto/`.
-
-> **Vincolo da conoscere prima di provarci.** GitHub Pages su una repository
-> **privata** richiede un piano a pagamento (Pro, Team o Enterprise). Con il piano
-> gratuito il flusso fallisce finché la repository non viene resa pubblica
-> (Settings → General → Danger Zone → Change visibility).
->
-> Rendere pubblica la repository significa rendere pubblici codice, documentazione e
-> gioco **prima** che il nome PLINTO sia stato verificato da un professionista (vedi
-> `docs/RELEASE_CHECKLIST.md`). Non è un ostacolo tecnico, è una scelta da fare
-> consapevolmente.
+> **Nota sulla visibilità.** GitHub Pages su una repository *privata* richiede un
+> piano a pagamento. Questa repository è pubblica dal 6 settembre 2026, quindi Pages
+> funziona con il piano gratuito. Resta valido quanto scritto in
+> `docs/RELEASE_CHECKLIST.md`: il gioco è online **prima** che il nome PLINTO sia
+> stato verificato da un professionista.
 
 La build è verificata per funzionare da una sottocartella: `npm run prova-pages`.
 
