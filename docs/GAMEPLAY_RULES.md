@@ -333,7 +333,7 @@ teorico di 8: quando una bomba salta insieme a una riga, buona parte del quadrat
 circonda è già dentro il gruppo che sta sparendo, e il resto è spesso vuoto.
 
 Il colore della bomba resta quello del pezzo: come ogni altro colore, non ha nessuna regola.
-Il segno che la distingue è geometrico (una bomba disegnata, con la scintilla accesa sulla miccia) ed è documentato in
+Il segno che la distingue è geometrico (una bomba disegnata, con la scintilla accesa sulla miccia), è spiegato fra le quattro regole della presentazione al primo avvio ed è documentato in
 `docs/DESIGN_SYSTEM.md`.
 
 ## Il catalogo delle forme

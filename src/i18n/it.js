@@ -1,4 +1,17 @@
-/** Testi italiani. Lingua di riferimento del progetto: le altre traducono da qui. */
+/**
+ * Testi italiani. Lingua di riferimento del progetto: le altre traducono da qui.
+ *
+ * ACCENTI E APOSTROFI VANNO SCRITTI. Per parecchie versioni questo file e' stato in
+ * ASCII puro, e in italiano non e' una semplificazione tipografica: cambia le parole.
+ * "Un gruppo e una riga" significa "un gruppo E una riga"; quello che si voleva dire
+ * era "un gruppo E' una riga". Lo stesso valeva per "il gioco e gratuito", "la partita
+ * e la stessa per tutti" e per il pulsante "Si", che senza accento e' un pronome.
+ * Un gioco scritto in italiano che sbaglia gli accenti sembra tradotto male, e qui
+ * l'italiano e' la lingua di riferimento, non una traduzione.
+ *
+ * I commenti del codice restano in ASCII di proposito: quelli li leggono gli sviluppatori.
+ * Questi testi li legge chi gioca. tests/i18n.test.js impedisce di tornare indietro.
+ */
 export default {
   gioco: {
     claim: 'Riga, colonna, quadrante.',
@@ -27,7 +40,7 @@ export default {
   },
   fine: {
     titolo: 'Partita finita',
-    motivo: 'Nessuno dei pezzi rimasti entra piu sulla griglia.',
+    motivo: 'Nessuno dei pezzi rimasti entra più sulla griglia.',
     punteggio: 'Punteggio',
     nuovoRecord: 'Nuovo record!',
     recordCatena: 'Nuovo record di Catena!',
@@ -66,7 +79,7 @@ export default {
     lingua: 'Lingua',
     aiutoVisivo: 'Evidenzia i gruppi che stai per chiudere',
     azzera: 'Azzera i miei dati',
-    azzeraConferma: 'Cancella record, statistiche e partita in corso. Non si puo annullare.',
+    azzeraConferma: 'Cancella record, statistiche e partita in corso. Non si può annullare.',
     azzeraFatto: 'Dati cancellati.',
   },
   info: {
@@ -75,16 +88,16 @@ export default {
     privacyTitolo: 'Privacy',
     privacy:
       'PLINTO non raccoglie nulla. Nessun account, nessuna registrazione, nessun tracciamento, '
-      + 'nessuna pubblicita. Record e impostazioni restano nel tuo dispositivo e non vengono mai inviati altrove.',
+      + 'nessuna pubblicità. Record e impostazioni restano nel tuo dispositivo e non vengono mai inviati altrove.',
     licenzeTitolo: 'Risorse e licenze',
   },
   sostieni: {
     titolo: 'Sostieni il progetto',
     testo:
-      'Questo gioco e gratuito e senza pubblicita. Se ti sta piacendo e vuoi contribuire, '
+      'Questo gioco è gratuito e senza pubblicità. Se ti sta piacendo e vuoi contribuire, '
       + 'puoi lasciare una piccola donazione. Non sblocca niente: il gioco resta identico.',
     bottone: 'Dona con PayPal',
-    noGrazie: 'Magari piu avanti',
+    noGrazie: 'Magari più avanti',
   },
   quadri: {
     titolo: 'Livelli',
@@ -101,35 +114,35 @@ export default {
     vinto: 'Livello superato!',
     perso: 'Livello non superato',
     persoMosse: 'Hai finito le mosse.',
-    persoBloccato: 'Nessun pezzo entra piu sulla griglia.',
+    persoBloccato: 'Nessun pezzo entra più sulla griglia.',
     nuovoRecord: 'Nuovo record: {mosse} mosse',
     finito: 'Hai superato tutti i livelli.',
     consiglio: 'Come fare',
     hai: 'Hai {n} mosse. Se le finisci senza riuscirci, il livello ricomincia da capo.',
-    senzaLimite: 'Nessun limite di mosse: giochi finche i pezzi entrano.',
+    senzaLimite: 'Nessun limite di mosse: giochi finché i pezzi entrano.',
     spiegazioni: {
       righe: 'Una riga sono nove caselle in fila da sinistra a destra. Riempila tutta e sparisce.',
-      colonne: 'Una colonna sono nove caselle una sopra l altra, dall alto in basso.',
-      quadranti: 'Un quadrante e uno dei nove riquadri 3x3 separati dalle linee piu chiare. Nove caselle anche lui.',
-      gruppi: 'Un gruppo e una riga, una colonna o un quadrante completo: vale qualunque dei tre.',
+      colonne: 'Una colonna sono nove caselle una sopra l\'altra, dall\'alto in basso.',
+      quadranti: 'Un quadrante è uno dei nove riquadri 3x3 separati dalle linee più chiare. Nove caselle anche lui.',
+      gruppi: 'Un gruppo è una riga, una colonna o un quadrante completo: vale qualunque dei tre.',
       celle: 'Contano le caselle che spariscono, non le mosse che fai. Una riga chiusa ne vale nove.',
       punteggio: 'I punti arrivano dalle eliminazioni, non da quanti pezzi appoggi.',
       catena: 'La Catena sale di uno ogni volta che elimini qualcosa, e cala se stai fermo due mosse di fila.',
-      intreccio: 'Qui non basta chiudere piu gruppi: devi chiuderli con UNA SOLA mossa.',
+      intreccio: 'Qui non basta chiudere più gruppi: devi chiuderli con UNA SOLA mossa.',
       pulizia: 'Devi arrivare a lasciare la griglia completamente vuota.',
-      sopravvivi: 'Non c e niente da chiudere: devi solo riuscire a piazzare pezzi per tutte le mosse richieste.',
+      sopravvivi: 'Non c\'è niente da chiudere: devi solo riuscire a piazzare pezzi per tutte le mosse richieste.',
     },
     consigli: {
-      righe: 'Scegline una e finiscila, invece di riempirne tre a meta. E non lasciare buchi da una casella sola: poi serve esattamente il pezzo giusto.',
+      righe: 'Scegline una e finiscila, invece di riempirne tre a metà. E non lasciare buchi da una casella sola: poi serve esattamente il pezzo giusto.',
       colonne: 'I pezzi alti e stretti sono i tuoi amici. Tieni libera la colonna che stai costruendo.',
-      quadranti: 'Spesso e la strada piu corta: un quadrante lo riempi da tre lati invece che da uno solo.',
+      quadranti: 'Spesso è la strada più corta: un quadrante lo riempi da tre lati invece che da uno solo.',
       gruppi: 'Non sceglierne uno in anticipo: prendi ogni volta quello che si chiude prima.',
       celle: 'Chiudere due gruppi insieme fa salire il conto in fretta: nove caselle diventano diciotto in una mossa.',
       punteggio: 'Tieni viva la Catena: con il moltiplicatore alto le stesse eliminazioni valgono il doppio.',
-      catena: 'Meglio eliminare poco ma quasi a ogni mossa, che tanto ogni tre. Guarda l avviso sotto la barra.',
+      catena: 'Meglio eliminare poco ma quasi a ogni mossa, che tanto ogni tre. Guarda l\'avviso sotto la barra.',
       intreccio: 'Porta due gruppi a una casella dal completarsi, poi cerca il pezzo che li tocca entrambi. Gli incroci fra una riga e un quadrante sono il posto giusto.',
       pulizia: 'Verso la fine conta ogni casella: non appoggiare niente che non serva a chiudere qualcosa.',
-      sopravvivi: 'Non fare punti a tutti i costi: tieni la griglia sgombra, perche qui perdere significa restare senza spazio.',
+      sopravvivi: 'Non fare punti a tutti i costi: tieni la griglia sgombra, perché qui perdere significa restare senza spazio.',
     },
     obiettivi: {
       punteggio: 'Fai {n} punti',
@@ -151,7 +164,7 @@ export default {
   sfida: {
     titolo: 'Sfida del giorno',
     breve: 'Sfida del giorno',
-    spiegazione: 'Oggi la partita e la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine.',
+    spiegazione: 'Oggi la partita è la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine.',
     tuoRecordOggi: 'Il tuo record di oggi',
     tentativi: 'Tentativi',
     nuovoRecordOggi: 'Nuovo record di giornata!',
@@ -162,14 +175,16 @@ export default {
     uno: 'Trascina i pezzi sulla griglia. Non si ruotano.',
     due: 'Completa una riga, una colonna o un quadrante 3x3: sparisce e fa punti.',
     tre: 'Continua a eliminare senza saltare un turno e la Catena moltiplica tutto.',
+    quattro: 'Ogni tanto un blocco è una bomba. Non fa niente dove la appoggi: esplode quando la elimini, e porta via anche le otto caselle intorno.',
     esempio: 'quadrante chiuso',
+    esempioBomba: 'nove caselle via',
   },
   a11y: {
     riga: 'riga', righe: 'righe',
     colonna: 'colonna', colonne: 'colonne',
     quadrante: 'quadrante', quadranti: 'quadranti',
     eliminate: 'eliminate',
-    piu: 'piu',
+    piu: 'più',
     punti: 'punti',
     grigliaVuota: 'Griglia completamente svuotata',
     cella: 'Cella riga {r} colonna {c}',
@@ -179,14 +194,14 @@ export default {
   },
   varie: {
     licenzeTesto: 'Grafica, suoni e testi sono realizzati per questo progetto. Nessun font esterno, nessuna risorsa caricata da domini di terze parti.',
-    donazioneNonAttiva: 'Il link di donazione non e ancora stato configurato.',
+    donazioneNonAttiva: 'Il link di donazione non è ancora stato configurato.',
     pezzo: 'Pezzo {n}, {celle} celle',
-    pezzoMorto: 'non entra piu sulla griglia',
+    pezzoMorto: 'non entra più sulla griglia',
   },
   comune: {
     chiudi: 'Chiudi',
     indietro: 'Indietro',
-    si: 'Si',
+    si: 'Sì',
     no: 'No',
   },
 };

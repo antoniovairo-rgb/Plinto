@@ -162,7 +162,9 @@ export default {
     uno: 'Drag the pieces onto the grid. They do not rotate.',
     due: 'Complete a row, a column or a 3x3 quadrant: it clears and scores.',
     tre: 'Keep clearing without skipping a turn and the Chain multiplies everything.',
+    quattro: 'Now and then a block is a bomb. It does nothing where you put it: it goes off when you clear it, taking the eight squares around it too.',
     esempio: 'quadrant cleared',
+    esempioBomba: 'nine squares gone',
   },
   a11y: {
     riga: 'row', righe: 'rows',

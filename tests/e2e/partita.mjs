@@ -85,9 +85,16 @@ const punteggio = () => page.locator('.pl-hud__punteggio .pl-hud__valore').inner
 // ---------- 0. Primo avvio: la presentazione deve comparire una volta sola ----------
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 const introVisibile = await page.locator('.pl-intro__regole li').count();
+const bombaSpiegata = await page.locator('.pl-intro__bomba .pl-bomba').count();
 await page.screenshot({ path: `${OUT}/00-primo-avvio.png` });
-console.log('0. presentazione al primo avvio: regole mostrate', introVisibile);
-if (introVisibile !== 3) errori.push('PRIMO AVVIO: la presentazione non mostra le tre regole');
+console.log(`0. presentazione al primo avvio: regole mostrate ${introVisibile}, bomba illustrata: ${bombaSpiegata === 1}`);
+if (introVisibile !== 4) errori.push(`PRIMO AVVIO: la presentazione mostra ${introVisibile} regole invece di 4`);
+// La bomba e' l'unica regola che non si puo' dedurre giocando: un blocco appoggiato si
+// comporta come gli altri finche' non lo elimini, e a quel punto ne porta via otto.
+// Se sparisce da qui, il giocatore la scopre subendola.
+if (bombaSpiegata !== 1) errori.push('PRIMO AVVIO: la bomba non viene illustrata nella presentazione');
+const testoIntro = await page.locator('.pl-intro__regole').innerText();
+if (!/bomba/i.test(testoIntro)) errori.push('PRIMO AVVIO: le regole non nominano la bomba');
 await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.reload({ waitUntil: 'networkidle' });

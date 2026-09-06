@@ -7,6 +7,44 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.4] — 6 settembre 2026
+
+### Aggiunto
+
+**La bomba è spiegata nella presentazione (`src/ui/schermate/PrimoAvvio.jsx`)**
+- Le regole all'avvio erano tre e ora sono quattro. La quarta è la bomba, e la sua assenza
+  era un difetto vero: **è l'unica cosa del gioco che non si può dedurre giocando.** Un
+  blocco appoggiato si comporta come tutti gli altri finché non lo elimini, e a quel punto
+  ne porta via altri otto. Righe, colonne, quadranti e Catena si vedono accadere e si
+  capiscono dopo; la bomba no — a chi non la conosce succede e basta.
+- Accanto alle parole c'è il disegno: il blocco con il segno, e il quadrato 3x3 che porta
+  via. Verificato da `npm run e2e`, che controlla sia le quattro regole sia la presenza
+  dell'illustrazione.
+
+### Corretto
+
+**L'italiano adesso è scritto in italiano**
+- Tutto `src/i18n/it.js` era in **ASCII puro**: nessun accento, nessun apostrofo. In
+  italiano non è una semplificazione tipografica, **cambia le parole**. Alcuni esempi di
+  quello che il giocatore leggeva davvero:
+  - «Un gruppo **e** una riga, una colonna o un quadrante completo» — voleva dire «**è**».
+  - «Questo gioco **e** gratuito e senza **pubblicita**» — «**è**», «**pubblicità**».
+  - «Oggi la partita **e** la stessa per tutti» — «**è**».
+  - «Non **c e** niente da chiudere» — «non **c'è**».
+  - Il pulsante di conferma diceva «**Si**», che senza accento è un pronome, non «**Sì**».
+  - E poi `piu`, `puo`, `finche`, `perche`, `meta` in una dozzina di punti.
+- Non rompeva niente e si leggeva lo stesso: faceva solo sembrare tradotto male un gioco
+  che in italiano ci nasce. **L'italiano qui è la lingua di riferimento, non una
+  traduzione.**
+- `tests/i18n.test.js` ora rifiuta le parole che in italiano non esistono senza accento
+  (`piu`, `perche`, `puo`, `gia`, `cosi`, `meta`, `citta`, `sara`…), verifica che gli
+  accenti ci siano davvero — cioè che il file non torni in ASCII — e controlla il «Sì».
+  Non è un correttore ortografico e non pretende di esserlo: è una rete su una categoria
+  di errore precisa, già vista e facile da reintrodurre scrivendo in fretta.
+- I commenti del codice restano volutamente in ASCII: quelli li leggono gli sviluppatori,
+  questi testi li legge chi gioca.
+
+
 ## [0.2.3] — 6 settembre 2026
 
 Tre correzioni nate dallo stesso playtest umano della versione precedente.
@@ -97,10 +135,11 @@ copre il buco: è una schermata sola, si vede una volta e non si può più rileg
 
 - **Le bombe non sono spiegate da nessuna parte.** Il giocatore vede un anello bianco al
   centro di un blocco e nessun testo dell'applicazione dice che cosa faccia. È l'unico
-  elemento che cambia l'esito di una mossa, e compare già nella prima mano del Quadro 1.
+  elemento che cambia l'esito di una mossa, e compare già nella prima mano del livello 1.
+  *(Risolto nella 0.2.4: è la quarta regola della presentazione, con l'illustrazione.)*
 - **Non c'è modo di rileggere le regole.** L'introduzione compare una volta sola e non esiste
   una voce "Come si gioca". Non sono spiegati nemmeno l'Intreccio, la modalità a due tocchi e
-  il gioco da tastiera.
+  il gioco da tastiera. *(Ancora aperto.)*
 
 
 ## [0.2.1] — 6 settembre 2026

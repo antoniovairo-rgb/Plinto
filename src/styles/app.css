@@ -1351,3 +1351,24 @@ button {
   .pl-festa::after { animation: none; opacity: 0; }
   .pl-festa .pl-plinto { animation: none; }
 }
+
+/* La bomba nella presentazione: il blocco con il segno accanto al quadrato 3x3 che
+   porta via. Il disegno dice in un colpo quello che la riga a parole dice in due. */
+.pl-intro__bomba { margin-top: 10px; }
+
+.pl-intro__blocco-bomba { display: block; width: 40px; height: 40px; position: relative; }
+.pl-intro__blocco-bomba .pl-blocco { position: absolute; inset: 0; }
+
+.pl-intro__scoppio {
+  display: grid;
+  grid-template-columns: repeat(3, 12px);
+  grid-template-rows: repeat(3, 12px);
+  gap: 2px;
+}
+.pl-intro__scheggia {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--pl-danger) 40%, transparent);
+}
+/* La cella centrale e' la bomba stessa: piena, non velata, cosi' si capisce che le
+   otto intorno spariscono PER via sua e non insieme a lei per caso. */
+.pl-intro__scheggia--centro { background: var(--pl-danger); }

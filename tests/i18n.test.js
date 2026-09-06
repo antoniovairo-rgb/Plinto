@@ -107,3 +107,56 @@ describe('chiavi effettivamente usate', () => {
     expect(inventate).toEqual([]);
   });
 });
+
+/**
+ * L'italiano deve essere scritto in italiano.
+ *
+ * Per parecchie versioni tutto `it.js` e' stato in ASCII puro. In italiano non e' una
+ * semplificazione tipografica: cambia le parole. "Un gruppo e una riga" significa
+ * "un gruppo E una riga"; quello che si voleva dire era "un gruppo E' una riga". Lo
+ * stesso per "il gioco e gratuito", "la partita e la stessa per tutti" e per il
+ * pulsante "Si", che senza accento e' un pronome, non una risposta.
+ *
+ * Nessuno se n'era accorto perche' il testo si legge lo stesso e il difetto non rompe
+ * niente: semplicemente fa sembrare tradotto male un gioco che in italiano ci nasce.
+ *
+ * Qui si controllano le parole che in italiano NON esistono senza accento. Non e' un
+ * correttore ortografico e non pretende di esserlo: e' una rete su una categoria di
+ * errore precisa, gia' vista, e facile da reintrodurre scrivendo in fretta.
+ */
+describe('ortografia italiana', () => {
+  const SENZA_ACCENTO = [
+    'piu', 'perche', 'poiche', 'finche', 'benche', 'affinche',
+    'puo', 'gia', 'cosi', 'meta', 'citta', 'qualita', 'liberta', 'novita',
+    'pubblicita', 'sara', 'fara', 'verra', 'potra', 'dovra', 'cio', 'piu',
+  ];
+
+  /** Coppie chiave/testo di tutte le stringhe italiane. */
+  function testiItaliani(oggetto, prefisso = '') {
+    return Object.entries(oggetto).flatMap(([k, v]) => (
+      typeof v === 'object' && v !== null
+        ? testiItaliani(v, `${prefisso}${k}.`)
+        : [[`${prefisso}${k}`, v]]
+    ));
+  }
+
+  const testi = testiItaliani(italiano);
+
+  it('trova davvero delle stringhe (il test non deve passare a vuoto)', () => {
+    expect(testi.length).toBeGreaterThan(50);
+  });
+
+  it.each(SENZA_ACCENTO)('nessun testo contiene "%s" senza accento', (parola) => {
+    const rotti = testi.filter(([, testo]) => new RegExp(`\\b${parola}\\b`, 'i').test(testo));
+    expect(rotti.map(([chiave, testo]) => `${chiave}: "${testo}"`)).toEqual([]);
+  });
+
+  it('gli accenti ci sono davvero, cioe il file non e tornato in ASCII', () => {
+    const conAccento = testi.filter(([, testo]) => /[àèéìòù]/.test(testo));
+    expect(conAccento.length).toBeGreaterThan(10);
+  });
+
+  it('la risposta affermativa e "Si" con accento', () => {
+    expect(italiano.comune.si).toBe('Sì');
+  });
+});
