@@ -365,16 +365,53 @@ await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 
 // ---------- 7. Navigazione delle altre schermate ----------
-for (const [nome, selettore] of [['Statistiche', '.pl-lista'], ['Impostazioni', '.pl-interruttore'], ['Info', '.pl-testo']]) {
+const secondarie = [
+  ['Come si gioca', '.pl-aiuto__saluto'],
+  ['Statistiche', '.pl-lista'],
+  ['Impostazioni', '.pl-interruttore'],
+  ['Info', '.pl-testo'],
+];
+for (const [nome, selettore] of secondarie) {
   await page.getByRole('button', { name: nome }).click();
   await page.waitForTimeout(150);
   const ok = await page.locator(selettore).count();
-  await page.screenshot({ path: `${OUT}/07-${nome.toLowerCase()}.png` });
+  await page.screenshot({ path: `${OUT}/07-${nome.toLowerCase().replace(/ /g, '-')}.png` });
   if (ok === 0) errori.push(`NAVIGAZIONE: la schermata ${nome} non mostra contenuto`);
   await page.locator('.pl-pagina__testata .pl-hud__menu').click();
   await page.waitForTimeout(120);
 }
 console.log('7. schermate secondarie visitate');
+
+// ---------- 7b. "Come si gioca" deve spiegare davvero ----------
+// E' la pagina che esiste perche' la presentazione si vede una volta sola. Se si
+// svuotasse, il difetto tornerebbe senza che niente fallisca: la pagina ci sarebbe
+// ancora, vuota. Quindi si controlla il CONTENUTO, non la sua esistenza.
+await page.getByRole('button', { name: 'Come si gioca' }).click();
+await page.waitForSelector('.pl-aiuto__saluto');
+const regoleRilette = await page.locator('.pl-intro__regole li').count();
+const sezioni = await page.locator('.pl-sezione').count();
+const testoAiuto = await page.locator('.pl-scroll').innerText();
+const bombaSpiegataQui = await page.locator('.pl-aiuto__bomba .pl-bomba').count();
+console.log(`7b. come si gioca: ${regoleRilette} regole, ${sezioni} sezioni`);
+
+if (regoleRilette !== REGOLE_INTRO.length) {
+  errori.push(`AIUTO: rilegge ${regoleRilette} regole invece di ${REGOLE_INTRO.length}`);
+}
+if (sezioni < 5) errori.push(`AIUTO: solo ${sezioni} sezioni`);
+if (bombaSpiegataQui !== 1) errori.push('AIUTO: la bomba non e illustrata');
+// Le tre cose che prima non erano scritte da nessuna parte.
+for (const parola of ['Intreccio', 'Catena', 'tastiera', 'tocca']) {
+  if (!new RegExp(parola, 'i').test(testoAiuto)) {
+    errori.push(`AIUTO: non spiega "${parola}"`);
+  }
+}
+// I moltiplicatori sono presi da config/rules.js: se comparissero come segnaposto
+// il giocatore leggerebbe "{max}" al posto di un numero.
+if (/\{(n|max|tolleranza)\}/.test(testoAiuto)) {
+  errori.push('AIUTO: un segnaposto non e stato sostituito');
+}
+await page.locator('.pl-pagina__testata .pl-hud__menu').click();
+await page.waitForTimeout(120);
 
 await browser.close();
 if (server) server.kill();

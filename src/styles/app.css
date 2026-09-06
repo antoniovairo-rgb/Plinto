@@ -1372,3 +1372,23 @@ button {
 /* La cella centrale e' la bomba stessa: piena, non velata, cosi' si capisce che le
    otto intorno spariscono PER via sua e non insieme a lei per caso. */
 .pl-intro__scheggia--centro { background: var(--pl-danger); }
+
+/* ------------------------------------------------------ come si gioca --- */
+.pl-aiuto__saluto {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.pl-aiuto__bomba {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Nella pagina di aiuto le regole numerate hanno piu' aria che nella presentazione:
+   li' si scorrono, qui si leggono. */
+.pl-screen .pl-aiuto__saluto + .pl-sezione { margin-top: 18px; }

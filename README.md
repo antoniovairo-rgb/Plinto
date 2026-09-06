@@ -46,6 +46,12 @@ Le informazioni non passano mai dal solo colore: il cursore da tastiera e' un an
 mossa illegale un bordo, e la bomba si riconosce da un segno geometrico al centro del
 blocco e non dalla sua tinta.
 
+## Le regole si rileggono
+
+Dalla home, voce **"Come si gioca"**: le quattro regole, i due modi di muovere, la tastiera,
+l'Intreccio, la Catena, le bombe e la sezione sull'equita' dichiarata. La presentazione al
+primo avvio resta breve apposta; questa pagina la si apre quando serve.
+
 ## Provarlo
 
 Istruzioni passo passo, telefono compreso: **[AVVIO-RAPIDO.md](AVVIO-RAPIDO.md)**.

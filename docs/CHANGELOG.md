@@ -7,6 +7,43 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.2.6] — 6 settembre 2026
+
+### Aggiunto
+
+**"Come si gioca": le regole si possono rileggere (`src/ui/schermate/ComeSiGioca.jsx`)**
+
+La presentazione al primo avvio si vede **una volta e poi sparisce per sempre**. Che non
+torni va bene — chi ha già giocato non deve rileggerla ogni volta — ma che fosse
+**irraggiungibile** no: chi riapriva il gioco dopo un mese, o lo passava a qualcun altro,
+non aveva nessun posto dove guardare. Le uniche pagine esistenti parlavano di privacy e di
+licenze.
+
+- Nuova voce nel menu della home, **messa per prima** fra le secondarie: è l'unica di cui
+  un giocatore nuovo ha bisogno, le altre tre non servono a giocare.
+- **Contiene più della presentazione, ed è voluto.** La presentazione deve far cominciare a
+  giocare in cinque secondi, quindi dice il minimo; questa pagina la si apre apposta, e può
+  spiegare anche:
+  - l'**Intreccio** — chiudere più gruppi con una mossa, e dove conviene cercarlo;
+  - la **Catena**, con il moltiplicatore massimo e l'avviso prima che cali;
+  - i **due modi di muovere** (trascinamento e due tocchi) e il gioco **da tastiera**;
+  - le **bombe**, comprese le reazioni a catena fra bombe vicine;
+  - e la sezione **"Nessuna difficoltà nascosta"**, che dice per esteso una cosa finora
+    scritta solo nella documentazione interna: i pezzi non dipendono da come stai andando,
+    e le uniche regole che non vedi servono ad aiutarti.
+
+  Intreccio, due tocchi e tastiera **non erano scritti da nessuna parte**: un giocatore
+  poteva scoprirli solo per caso.
+- **Niente è ricopiato.** Le quattro regole arrivano dallo stesso `REGOLE_INTRO` della
+  presentazione, e i moltiplicatori da `config/rules.js`: le due schermate non possono dire
+  cose diverse fra loro, né dire cose diverse dal gioco. Un aiuto che descrive regole
+  diverse da quelle vere è peggio di nessun aiuto.
+- `npm run e2e` non si limita a verificare che la pagina esista — si svuoterebbe senza che
+  niente fallisca. Controlla il **contenuto**: le quattro regole, almeno cinque sezioni,
+  l'illustrazione della bomba, la presenza di Intreccio, Catena, tastiera e due tocchi, e
+  che nessun segnaposto (`{max}`, `{n}`) arrivi allo schermo non sostituito.
+
+
 ## [0.2.5] — 6 settembre 2026
 
 ### Aggiunto
@@ -148,7 +185,7 @@ copre il buco: è una schermata sola, si vede una volta e non si può più rileg
   *(Risolto nella 0.2.4: è la quarta regola della presentazione, con l'illustrazione.)*
 - **Non c'è modo di rileggere le regole.** L'introduzione compare una volta sola e non esiste
   una voce "Come si gioca". Non sono spiegati nemmeno l'Intreccio, la modalità a due tocchi e
-  il gioco da tastiera. *(Ancora aperto.)*
+  il gioco da tastiera. *(Risolto nella 0.2.6, comprese tutte e tre le omissioni.)*
 
 
 ## [0.2.1] — 6 settembre 2026

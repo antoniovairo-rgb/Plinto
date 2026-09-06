@@ -18,6 +18,7 @@ import { SchermoInfo } from './schermate/Info.jsx';
 import { SchermoSostieni } from './schermate/Sostieni.jsx';
 import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
 import { SchermoQuadri } from './schermate/Quadri.jsx';
+import { SchermoComeSiGioca } from './schermate/ComeSiGioca.jsx';
 import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
@@ -293,6 +294,10 @@ export function App() {
           onIndietro={() => setSchermata('home')}
           t={t}
         />
+      ) : null}
+
+      {schermata === 'aiuto' ? (
+        <SchermoComeSiGioca onIndietro={() => setSchermata('home')} t={t} />
       ) : null}
 
       {schermata === 'info' ? (

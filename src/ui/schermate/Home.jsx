@@ -57,6 +57,11 @@ export function SchermoHome({
       </div>
 
       <nav className="pl-home__menu">
+        {/* "Come si gioca" sta per primo fra le voci secondarie: e' l'unica di cui un
+            giocatore nuovo ha bisogno, e le altre tre non servono a giocare. */}
+        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('aiuto')}>
+          {t('aiuto.titolo')}
+        </button>
         <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('statistiche')}>
           {t('home.statistiche')}
         </button>

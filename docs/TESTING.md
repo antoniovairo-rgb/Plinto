@@ -140,7 +140,7 @@ Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
 
 | # | Passo | Cosa verifica davvero |
 | --- | --- | --- |
-| 0 | **Primo avvio** | la presentazione mostra esattamente 3 regole; dopo aver premuto "Gioca" e ricaricato, **non ricompare** |
+| 0 | **Primo avvio** | la presentazione mostra tante regole quante ne dichiara `REGOLE_INTRO` (non un numero scritto a mano: era la fonte di una pubblicazione fallita), **nomina la bomba** e la illustra; dopo aver premuto "Gioca" e ricaricato, **non ricompare** |
 | 1 | **Home** | la pagina carica e ha titolo |
 | 2 | **Avvio partita** | premendo "Gioca" compare la plancia |
 | 3 | **Trascinamento con mouse** | durante il drag compaiono celle in anteprima; al rilascio il numero di blocchi sulla griglia **aumenta** |
@@ -150,7 +150,8 @@ Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
 | 5 | **Persistenza** | ricaricando la pagina e premendo "Riprendi", punteggio e numero di blocchi coincidono con quelli di prima |
 | 6 | **Fine partita** | da uno stato costruito con una sola mossa possibile, la mossa porta alla schermata di riepilogo |
 | 6b | **Sfida del Giorno** | la sfida parte da griglia vuota; **aprirla non cancella la partita libera in corso** (slot di salvataggio separati) e la libera si riprende con lo stesso numero di blocchi; la mano della sfida è identica fra due accessi nello stesso giorno |
-| 7 | **Schermate secondarie** | Statistiche, Impostazioni e Info mostrano contenuto e il pulsante indietro riporta alla home |
+| 7 | **Schermate secondarie** | Come si gioca, Statistiche, Impostazioni e Info mostrano contenuto e il pulsante indietro riporta alla home |
+| 7b | **"Come si gioca"** | non che la pagina esista — si svuoterebbe senza che niente fallisca — ma che **spieghi davvero**: le stesse regole della presentazione, almeno cinque sezioni, l'illustrazione della bomba, e la presenza di Intreccio, Catena, tastiera e due tocchi. Più che nessun segnaposto (`{max}`, `{n}`) arrivi allo schermo non sostituito: i moltiplicatori vengono da `config/rules.js` e devono essere numeri, non parentesi graffe |
 
 ### Limiti dello scenario
 
@@ -161,7 +162,8 @@ Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
   (`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`). Su una macchina diversa lo scenario
   non parte finché quel percorso non viene corretto o reso configurabile.
 - **Non verifica l'audio.** Nessuna asserzione tocca la Web Audio API.
-- **Non verifica i contrasti né il tema chiaro.**
+- **Non verifica i contrasti né il tema chiaro.** Per i contrasti c'è `npm run contrasti`,
+  che però misura i token e non quello che il browser disegna davvero.
 - Le asserzioni sono `if (...) errori.push(...)`, non un framework: non c'è isolamento fra i
   passaggi e un fallimento a metà lascia lo stato per quelli successivi.
 
