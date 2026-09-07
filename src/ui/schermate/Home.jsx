@@ -25,7 +25,7 @@ import { Installa } from '../Installa.jsx';
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
   livelloCorrente, versione,
-  onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, t,
+  onGioca, onRiprendi, onSfida, onArchivio, onAnteprima, onQuadri, onGiocaLivello, onVai, t,
 }) {
   const progressoTesto = t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
@@ -89,6 +89,14 @@ export function SchermoHome({
         >
           <span>{etichettaSfida}</span>
           <span className="pl-sfida-avvio__esito">{sfidaTesto || '—'}</span>
+        </button>
+
+        {/* La modalita' con l'anteprima e' una MODALITA', non un'opzione: ha regole di
+            generazione diverse e record separati, quindi si sceglie prima di giocare e
+            non da un interruttore nelle impostazioni. Sta sotto la partita libera perche'
+            e' la sua variante, non un modo nuovo di cominciare. */}
+        <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onAnteprima}>
+          {t('anteprima.avvio')}
         </button>
 
         {/* L'archivio sta SOTTO la sfida di oggi e non accanto: oggi e' la sfida che

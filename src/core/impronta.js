@@ -15,11 +15,22 @@
  * catalogo delle forme. Cambiare un peso la cambia da sola; non cambiarla e' impossibile
  * se si e' cambiato qualcosa che conta.
  *
- * COSA COPRE, ed e' volutamente abbondante: ogni costante esportata da `config/rules.js`
- * e, di ogni forma, identificativo, celle e peso. Meglio un'impronta che cambia anche
- * per una costante che non tocca la generazione, che una che non cambia quando avrebbe
- * dovuto: nel primo caso si perde un confronto fra archivi, nel secondo si dichiara
- * identica una partita che identica non e'.
+ * COSA COPRE: ogni costante NUMERICA esportata da `config/rules.js` -- numeri singoli e
+ * strutture di soli numeri, come i punti base dei gruppi -- e, di ogni forma,
+ * identificativo, celle e peso.
+ *
+ * PERCHE' SOLO I NUMERI. La prima versione prendeva tutto, con l'idea che abbondare fosse
+ * piu' sicuro. Poi ho aggiunto a `rules.js` una costante che elenca i NOMI delle modalita'
+ * di gioco -- niente che tocchi la generazione -- e l'impronta e' cambiata: il gioco
+ * avrebbe marcato come "ottenuti con regole diverse" tutti i risultati passati di chi
+ * gioca da settimane, per una modifica che non ha spostato una sola estrazione. Un avviso
+ * sbagliato mostrato a tutti e' peggio di nessun avviso, perche' insegna a ignorarlo.
+ *
+ * La regola "solo valori numerici" e' meccanica e non richiede di decidere caso per caso
+ * quali costanti contino: le soglie, i pesi, le probabilita' e i punteggi sono numeri, e
+ * un'etichetta di testo non ha mai cambiato una partita. Se un giorno una costante di
+ * testo entrasse davvero nella generazione, questa regola andrebbe rivista -- ed e'
+ * scritto qui perche' chi la scrivesse lo legga.
  *
  * COSA NON E'. Non e' un controllo di integrita' e non protegge da niente: chi vuole
  * puo' modificarsela nel proprio storage. Serve solo a sapere se due partite sono state
@@ -30,10 +41,19 @@ import * as REGOLE from '../config/rules.js';
 import { SHAPES } from './shapes.js';
 import { seedFromString } from './rng.js';
 
+/** Il valore e' un numero, o una struttura fatta solo di numeri? */
+function soloNumeri(valore) {
+  if (typeof valore === 'number') return Number.isFinite(valore);
+  if (Array.isArray(valore)) return valore.every(soloNumeri);
+  if (valore && typeof valore === 'object') return Object.values(valore).every(soloNumeri);
+  return false;
+}
+
 /** Rappresentazione stabile e ordinata di tutto cio' che influenza una partita. */
 function materiale() {
   const costanti = Object.keys(REGOLE)
     .sort()
+    .filter((chiave) => soloNumeri(REGOLE[chiave]))
     .map((chiave) => `${chiave}=${JSON.stringify(REGOLE[chiave])}`)
     .join(';');
 

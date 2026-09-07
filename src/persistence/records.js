@@ -4,7 +4,7 @@
  * nessuna ricompensa a tempo. Si torna a giocare per battere se stessi.
  */
 
-import { KEYS } from './storage.js';
+import { KEYS, chiaveRecord } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 
 /**
@@ -31,8 +31,10 @@ const STATISTICHE_PREDEFINITE = {
 };
 
 /** @returns {{best:number, bestChain:number, bestMove:number, bestGroupsInOneMove:number}} */
-export function loadRecords() {
-  return leggiDocumento(KEYS.RECORDS, { versione: VERSIONE, predefiniti: RECORD_PREDEFINITI });
+export function loadRecords(modalita = 'libera') {
+  return leggiDocumento(chiaveRecord(modalita), {
+    versione: VERSIONE, predefiniti: RECORD_PREDEFINITI,
+  });
 }
 
 /** @returns {{partite:number, punteggioTotale:number, mosseTotali:number, gruppiTotali:number, griglieSvuotate:number, tempoTotaleMs:number}} */
@@ -45,8 +47,8 @@ export function loadStats() {
  * @param {object} summary output di summarize() del motore
  * @returns {{records:object, stats:object, nuoviRecord:string[]}}
  */
-export function recordGame(summary) {
-  const records = loadRecords();
+export function recordGame(summary, modalita = 'libera') {
+  const records = loadRecords(modalita);
   const stats = loadStats();
   const nuoviRecord = [];
 
@@ -65,7 +67,7 @@ export function recordGame(summary) {
   stats.griglieSvuotate += summary.boardClears;
   stats.tempoTotaleMs += summary.durationMs;
 
-  scriviDocumento(KEYS.RECORDS, VERSIONE, records);
+  scriviDocumento(chiaveRecord(modalita), VERSIONE, records);
   scriviDocumento(KEYS.STATS, VERSIONE, stats);
 
   return { records, stats, nuoviRecord };

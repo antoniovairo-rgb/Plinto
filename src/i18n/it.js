@@ -38,6 +38,7 @@ export default {
   modo: {
     libera: 'Partita libera',
     sfida: 'Sfida del giorno',
+    anteprima: 'Partita con anteprima',
   },
   gioca: {
     trascina: 'Trascina un pezzo sulla griglia',
@@ -103,6 +104,14 @@ export default {
       + 'puoi lasciare una piccola donazione. Non sblocca niente: il gioco resta identico.',
     bottone: 'Dona con PayPal',
     noGrazie: 'Magari più avanti',
+  },
+  anteprima: {
+    titolo: 'Prossima terna',
+    nessuna: 'Prossima terna: non ancora estratta',
+    conBomba: 'con bomba',
+    avvio: 'Partita con anteprima',
+    spiegazione: 'Vedi la terna successiva prima di finire quella in mano. È una modalità a parte, con record separati: vedere avanti è un vantaggio, e mescolare i punteggi vorrebbe dire dichiarare confrontabili due cose che non lo sono.',
+    tasto: 'Premi P per leggere la prossima terna',
   },
   scheda: {
     condividi: 'Condividi il risultato',

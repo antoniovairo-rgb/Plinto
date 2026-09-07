@@ -24,7 +24,7 @@ export function usePartita() {
   // del risultato. Le regole sono identiche, ed e' importante che restino tali.
   const [modalita, setModalita] = useState('libera');
   const [esitoSfida, setEsitoSfida] = useState(null);
-  const [record, setRecord] = useState(() => loadRecords());
+  const [record, setRecord] = useState(() => loadRecords('libera'));
   const [nuoviRecord, setNuoviRecord] = useState([]);
   const registrata = useRef(false);
 
@@ -37,10 +37,14 @@ export function usePartita() {
   }, []);
 
   const nuovaPartita = useCallback((opzioni = {}, quale = 'libera') => {
+    // La modalita' del MOTORE viaggia con le opzioni: 'anteprima' cambia quando la terna
+    // successiva viene estratta, e quindi cambia la partita. Non e' un'impostazione
+    // grafica, ed e' per questo che non e' un interruttore nelle impostazioni.
     registrata.current = false;
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
+    setRecord(loadRecords(quale));
     const stato = createGame(opzioni);
     setPartita(stato);
     write(chiavePartita(quale), serializeGame(stato));
@@ -68,6 +72,7 @@ export function usePartita() {
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
+    setRecord(loadRecords(quale));
     setPartita(stato);
     return stato;
   }, [partitaSalvata]);
@@ -100,7 +105,7 @@ export function usePartita() {
     registrata.current = true;
     remove(chiavePartita(modalita));
     const riepilogo = summarize(partita);
-    const esito = recordGame(riepilogo);
+    const esito = recordGame(riepilogo, modalita);
     // Il profilo di gioco: entrano partita libera e sfida, non i livelli. I livelli
     // partono da griglie costruite a mano e falserebbero la mappa degli appoggi
     // facendola somigliare al loro disegno invece che al modo di giocare di chi guarda.

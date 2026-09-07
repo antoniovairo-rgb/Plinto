@@ -22,6 +22,10 @@ import { SHAPES } from '../core/shapes.js';
 const GAMES = Number(process.argv[2] ?? 2000);
 const PROFILE = process.argv[3] ?? 'normale';
 const TETTO = Number(process.argv[4] ?? Infinity);
+// Quarta posizione: la modalita' di gioco. Serve al confronto fra il gioco base e la
+// modalita' anteprima, che NON e' una differenza di interfaccia -- cambia quando il
+// generatore legge la griglia, e quindi cambia la difficolta'.
+const MODALITA_SIM = process.argv[5] === 'anteprima' ? 'anteprima' : 'base';
 
 if (!PROFILE_NAMES.includes(PROFILE)) {
   console.error(`Profilo sconosciuto: ${PROFILE}. Disponibili: ${PROFILE_NAMES.join(', ')}`);
@@ -67,11 +71,15 @@ let veryEarlyDeaths = 0; // partite finite sotto le 8 mosse: potenziale ingiusti
 let boardClears = 0;
 let sopravvissute = 0;   // partite ancora vive al raggiungimento del tetto
 
-const rng = createRng(20260906);
+// Il seme della simulazione e' fisso per default (due esecuzioni identiche danno lo
+// stesso risultato) ma si puo' cambiare: serve a capire se una differenza fra due
+// misure e' un effetto vero o soltanto il campione che e' andato cosi'.
+const SEME_SIM = Number(process.env.PLINTO_SEME ?? 20260906);
+const rng = createRng(SEME_SIM);
 const t0 = Date.now();
 
 for (let g = 0; g < GAMES; g += 1) {
-  let state = createGame({ seed: rng.int(0xffffffff) });
+  let state = createGame({ seed: rng.int(0xffffffff) , modalita: MODALITA_SIM });
   state.hand.forEach((p) => { shapeCount[p.shapeId] += 1; });
 
   let guard = 0;
@@ -102,7 +110,7 @@ const elapsed = Date.now() - t0;
 const totalPieces = Object.values(shapeCount).reduce((a, b) => a + b, 0);
 const totalWeight = SHAPES.reduce((a, s) => a + s.weight, 0);
 
-console.log(`\nPLINTO — simulazione: ${GAMES} partite, profilo "${PROFILE}" (${elapsed} ms)\n`);
+console.log(`\nPLINTO — simulazione: ${GAMES} partite, profilo "${PROFILE}", modalita "${MODALITA_SIM}", tetto ${TETTO} (${elapsed} ms)\n`);
 console.log(`Punteggio     ${fmt(stats(scores))}`);
 console.log(`Mosse         ${fmt(stats(moves))}`);
 console.log(`Gruppi chiusi ${fmt(stats(durationsGroups))}`);

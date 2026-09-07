@@ -86,5 +86,19 @@ export const KEYS = {
  * la partita libera che il giocatore aveva lasciato a meta'.
  */
 export function chiavePartita(modalita) {
-  return modalita === 'sfida' ? KEYS.CURRENT_CHALLENGE : KEYS.CURRENT_GAME;
+  if (modalita === 'sfida') return KEYS.CURRENT_CHALLENGE;
+  if (modalita === 'anteprima') return `${KEYS.CURRENT_GAME}-anteprima`;
+  return KEYS.CURRENT_GAME;
+}
+
+/**
+ * Chiave dei record, per modalita'.
+ *
+ * La modalita' con l'anteprima ha i suoi: vedere la terna successiva e' un vantaggio
+ * informativo, e mettere i due punteggi nella stessa classifica vorrebbe dire dichiarare
+ * confrontabili due cose che non lo sono. Meglio due record piccoli e veri che uno grande
+ * e falso.
+ */
+export function chiaveRecord(modalita) {
+  return modalita === 'anteprima' ? `${KEYS.RECORDS}-anteprima` : KEYS.RECORDS;
 }

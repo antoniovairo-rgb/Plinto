@@ -27,6 +27,7 @@ import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
 import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
+import { MODALITA } from '../config/rules.js';
 import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
 
 /**
@@ -96,6 +97,22 @@ export function App() {
     suonoBottone();
     nuovaPartita();
     setSalvataggioDisponibile(false);
+    setMenuAperto(false);
+    setSchermata('gioco');
+  }, [nuovaPartita]);
+
+  /**
+   * La modalita' con l'anteprima della terna successiva.
+   *
+   * E' una modalita' del MOTORE, non un'opzione grafica: la terna successiva viene
+   * estratta quando viene consegnata quella corrente, quindi il generatore legge la
+   * griglia in un altro momento e la partita e' diversa. Slot di salvataggio e record
+   * sono separati per la stessa ragione.
+   */
+  const iniziaAnteprima = useCallback(() => {
+    sbloccaAudio();
+    suonoBottone();
+    nuovaPartita({ modalita: MODALITA.ANTEPRIMA }, 'anteprima');
     setMenuAperto(false);
     setSchermata('gioco');
   }, [nuovaPartita]);
@@ -342,6 +359,7 @@ export function App() {
           onRiprendi={riprendiPartita}
           onSfida={() => apriSfida()}
           onArchivio={() => setSchermata('archivio')}
+          onAnteprima={iniziaAnteprima}
           onVai={setSchermata}
           t={t}
         />

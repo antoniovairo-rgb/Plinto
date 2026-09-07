@@ -13,7 +13,7 @@
  * di celebrazione) senza sapere nulla di come verra' animato.
  */
 
-import { HAND_SIZE, CHAIN_MAX } from '../config/rules.js';
+import { HAND_SIZE, CHAIN_MAX, MODALITA } from '../config/rules.js';
 import {
   createGrid,
   placeShape,
@@ -90,16 +90,27 @@ export function createGame(options = {}) {
         : randomSeed();
 
   const grid = options.grigliaIniziale ? Uint8Array.from(options.grigliaIniziale) : createGrid();
+  const modalita = options.modalita === MODALITA.ANTEPRIMA ? MODALITA.ANTEPRIMA : MODALITA.BASE;
   const dealt = generateHand(grid, seed, []);
+
+  // In modalita' anteprima la terna successiva si estrae SUBITO, insieme alla prima, e
+  // da li' non cambia piu'. E' cio' che rende l'anteprima onesta -- quello che si vede
+  // e' quello che arriva -- ed e' anche cio' che la rende diversa dal gioco base, perche'
+  // il generatore legge la griglia di ADESSO invece di quella fra tre mosse.
+  const successiva = modalita === MODALITA.ANTEPRIMA
+    ? generateHand(grid, dealt.rngState, dealt.history)
+    : null;
 
   return {
     version: STATE_VERSION,
+    modalita,
     seedLabel: typeof options.seed === 'string' ? options.seed : null,
     seed,
-    rngState: dealt.rngState,
-    shapeHistory: dealt.history,
+    rngState: successiva ? successiva.rngState : dealt.rngState,
+    shapeHistory: successiva ? successiva.history : dealt.history,
     grid,
     hand: dealt.pieces,
+    manoSuccessiva: successiva ? successiva.pieces : null,
     score: 0,
     chain: 0,
     // Mosse consecutive senza eliminazioni. La Catena cala solo quando questo
@@ -189,11 +200,26 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
   let nextHand = hand;
   let handsDealt = state.stats.handsDealt;
 
+  let manoSuccessiva = state.manoSuccessiva ?? null;
+
   if (handEmpty) {
-    const dealt = generateHand(grid, rngState, shapeHistory);
-    nextHand = dealt.pieces;
-    rngState = dealt.rngState;
-    shapeHistory = dealt.history;
+    if (state.modalita === MODALITA.ANTEPRIMA && manoSuccessiva) {
+      // Si consegna ESATTAMENTE la terna che il giocatore ha visto. Non viene ricalcolata
+      // ne' ritoccata: se lo fosse, l'anteprima sarebbe una promessa non mantenuta, ed e'
+      // il difetto peggiore che questa modalita' possa avere in un gioco che promette di
+      // non nascondere niente.
+      nextHand = manoSuccessiva;
+      // E nello stesso istante si estrae quella dopo, sulla griglia di adesso.
+      const dopo = generateHand(grid, rngState, shapeHistory);
+      manoSuccessiva = dopo.pieces;
+      rngState = dopo.rngState;
+      shapeHistory = dopo.history;
+    } else {
+      const dealt = generateHand(grid, rngState, shapeHistory);
+      nextHand = dealt.pieces;
+      rngState = dealt.rngState;
+      shapeHistory = dealt.history;
+    }
     handsDealt += 1;
   }
 
@@ -231,6 +257,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     ...state,
     grid,
     hand: nextHand,
+    manoSuccessiva,
     rngState,
     shapeHistory,
     score: state.score + scored.points,
@@ -303,17 +330,22 @@ export function summarize(state, now = Date.now()) {
 }
 
 /** Stato -> oggetto JSON-safe (per il salvataggio della partita in corso). */
+/** Un pezzo in forma JSON-safe. */
+function pezzoSerializzato(p) {
+  return p ? { uid: p.uid, shapeId: p.shapeId, color: p.color, bombe: p.bombe ?? [] } : null;
+}
+
 export function serializeGame(state) {
   return {
     version: state.version,
+    modalita: state.modalita ?? MODALITA.BASE,
+    manoSuccessiva: state.manoSuccessiva ? state.manoSuccessiva.map(pezzoSerializzato) : null,
     seed: state.seed,
     seedLabel: state.seedLabel,
     rngState: state.rngState,
     shapeHistory: state.shapeHistory,
     grid: Array.from(state.grid),
-    hand: state.hand.map((p) => (
-      p ? { uid: p.uid, shapeId: p.shapeId, color: p.color, bombe: p.bombe ?? [] } : null
-    )),
+    hand: state.hand.map(pezzoSerializzato),
     score: state.score,
     chain: state.chain,
     chainDigiuno: state.chainDigiuno ?? 0,
@@ -349,18 +381,23 @@ export function deserializeGame(raw) {
     if (!numeroValido(raw.startedAt)) return null;
     if (!Array.isArray(raw.hand)) return null;
     const grid = Uint8Array.from(raw.grid);
-    const hand = raw.hand.map((p) =>
-      p ? {
-        uid: p.uid,
-        shapeId: p.shapeId,
-        shape: getShape(p.shapeId),
-        color: p.color,
-        bombe: Array.isArray(p.bombe) ? p.bombe.filter((i) => Number.isInteger(i) && i >= 0) : [],
-      } : null,
-    );
+    const ricostruisci = (p) => (p ? {
+      uid: p.uid,
+      shapeId: p.shapeId,
+      shape: getShape(p.shapeId),
+      color: p.color,
+      bombe: Array.isArray(p.bombe) ? p.bombe.filter((i) => Number.isInteger(i) && i >= 0) : [],
+    } : null);
+    const hand = raw.hand.map(ricostruisci);
     if (hand.length !== HAND_SIZE) return null;
     return {
       version: raw.version,
+      // Una partita salvata PRIMA che le modalita' esistessero e' una partita base: e'
+      // l'unica lettura possibile, ed e' anche quella giusta.
+      modalita: raw.modalita === MODALITA.ANTEPRIMA ? MODALITA.ANTEPRIMA : MODALITA.BASE,
+      manoSuccessiva: Array.isArray(raw.manoSuccessiva) && raw.manoSuccessiva.length === HAND_SIZE
+        ? raw.manoSuccessiva.map(ricostruisci)
+        : null,
       seed: raw.seed,
       seedLabel: raw.seedLabel ?? null,
       rngState: raw.rngState,

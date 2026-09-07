@@ -25,6 +25,7 @@ export default {
   modo: {
     libera: 'Free play',
     sfida: 'Daily challenge',
+    anteprima: 'Game with preview',
   },
   gioca: {
     trascina: 'Drag a piece onto the grid',
@@ -90,6 +91,14 @@ export default {
       + 'leave a small donation. It unlocks nothing: the game stays exactly the same.',
     bottone: 'Donate with PayPal',
     noGrazie: 'Maybe later',
+  },
+  anteprima: {
+    titolo: 'Next set',
+    nessuna: 'Next set: not drawn yet',
+    conBomba: 'with a bomb',
+    avvio: 'Game with preview',
+    spiegazione: 'You see the next set before finishing the one in hand. It is a separate mode with separate records: seeing ahead is an advantage, and mixing the scores would declare two things comparable when they are not.',
+    tasto: 'Press P to read the next set',
   },
   scheda: {
     condividi: 'Share your result',

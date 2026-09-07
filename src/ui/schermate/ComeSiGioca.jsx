@@ -84,6 +84,15 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
 
       <h2 className="pl-sezione">{t('aiuto.equitaTitolo')}</h2>
       <p className="pl-testo">{t('aiuto.equita')}</p>
+      {/* La modalita' con l'anteprima cambia il MOTORE, non solo cio' che si vede:
+          chi legge le regole deve trovarci anche questo, altrimenti la scopre dal
+          pulsante in home senza sapere che cosa comporta. */}
+      <section className="pl-regole__blocco">
+        <h2 className="pl-regole__titolo">{t('anteprima.avvio')}</h2>
+        <p className="pl-testo">{t('anteprima.spiegazione')}</p>
+        <p className="pl-nota">{t('anteprima.tasto')}</p>
+      </section>
+
     </Pagina>
   );
 }

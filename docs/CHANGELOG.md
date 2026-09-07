@@ -7,6 +7,86 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.0.0] — 7 settembre 2026
+
+Fase 6, l'ultima del piano evolutivo: **l'anteprima della prossima terna**. È l'unica che
+tocca il motore, ed è per questo che è arrivata per ultima.
+
+### Aggiunto
+
+**Una modalità in cui vedi la terna successiva** prima di finire quella in mano. Dalla
+home, «Partita con anteprima».
+
+Nel gioco base la terna successiva **non esiste** finché non serve: viene estratta quando
+la mano si è svuotata. Per mostrarla si può fare una cosa sola in modo onesto — estrarla
+nell'istante in cui viene consegnata quella corrente, e non toccarla più. L'alternativa
+(mostrarne una e rigenerarla all'uso) farebbe vedere una terna diversa da quella che
+arriva, ed è la peggiore funzionalità possibile in un gioco che promette di non nascondere
+niente.
+
+### Il prezzo, misurato e scritto
+
+Le reti di sicurezza del generatore leggono la griglia **al momento dell'estrazione**, che
+adesso arriva fino a tre mosse prima dell'uso, cioè su una griglia più vuota: **la modalità
+anteprima è più dura di quella base**, all'opposto dell'intuizione.
+
+Misurato su **due campioni indipendenti** da 3000 partite ciascuno
+(`node src/sim/run.mjs 3000 normale 250 <modalità>`): punteggio medio −1,3% e −2,7%, mosse
+medie −1,5% e −1,8%, partite ancora vive al tetto 42,2% → 41,4% e 42,6% → 40,7%. La
+direzione è la stessa in entrambi i campioni su tutte le righe, quindi l'effetto è
+credibile; **la misura è 1–2%, cioè piccola, e non è stato calcolato nessun intervallo di
+confidenza**. La coda che conta — i game over con la griglia sotto il 30%, quelli che si
+percepiscono come ingiusti — **non è peggiorata**. La tabella completa è in
+`docs/GAMEPLAY_RULES.md`.
+
+### Le altre conseguenze, tutte dichiarate
+
+- **Record separati**: vedere avanti è un vantaggio, e mescolare i punteggi dichiarerebbe
+  confrontabili due cose che non lo sono.
+- **Semi non compatibili**: estrarre prima cambia l'ordine di consumo del generatore, e lo
+  stesso seme produce una partita diversa. La mano iniziale coincide, il resto no.
+- **Forme sì, colori no**: il colore è estetico e mostrarlo suggerirebbe che conti. **La
+  bomba invece si vede**, perché quella cambia cosa conviene fare.
+- **Fuori dal ciclo di Tab**, con il tasto **P** dedicato: quel ciclo si percorre a ogni
+  mossa, e allungarlo per un'informazione che si consulta ogni tanto renderebbe più lento
+  tutto il resto.
+- **Il gioco base non è cambiato di una virgola.** Nessuna estrazione spostata: i 100
+  livelli tarati e tutte le sfide passate producono le partite di prima. C'è un test.
+
+### Corretto
+
+**L'impronta delle regole cambiava anche per costanti che non toccano la generazione.**
+Aggiungendo a `rules.js` l'elenco dei nomi delle modalità, l'impronta è cambiata — e il
+gioco avrebbe marcato come «ottenuti con regole diverse» tutti i risultati passati di chi
+gioca da settimane, per una modifica che non ha spostato una sola estrazione. Un avviso
+sbagliato mostrato a tutti è peggio di nessun avviso, perché insegna a ignorarlo. Ora
+l'impronta copre **solo i valori numerici**: soglie, pesi, probabilità e punteggi sono
+numeri, e un'etichetta di testo non ha mai cambiato una partita. **L'ha trovato il test che
+avevo scritto per un altro motivo** — «il riferimento è stato misurato con le regole di
+adesso».
+
+### Verifiche
+
+- **333 test in 21 file** (erano 321 in 20). Il test che conta: la terna mostrata è
+  identica a quella consegnata — forma e bombe — su **oltre mille mani**; ed è lo *stesso
+  oggetto*, quindi non c'è nemmeno lo spazio per ricalcolarla.
+- **`npm run anteprima`** (quattordicesimo controllo di `npm run verifica`) guarda la
+  stessa cosa a schermo. Collaudato rigenerando la terna all'uso: i test unitari falliscono
+  e lo scenario stampa quale terna è stata mostrata e quale consegnata.
+- **Un difetto era nel mio scenario**: il pilota provava a esaurire la mano cliccando le
+  celle finché una accettava il pezzo, e con un blocco 3×3 in mano non ci riusciva —
+  accusando il gioco di non consegnare la terna. Ora usa tre pezzi da una cella su griglia
+  vuota: esaurire la mano è deterministico.
+- `npm run verifica`: **14 controlli su 14 in 349 s**, sulla 1.0.0.
+
+### Perché 1.0.0
+
+Le sei fasi del piano evolutivo sono chiuse. Non vuol dire che il gioco sia finito — le tre
+voci aperte del gate di rilascio restano aperte, e sono scritte in
+`docs/RELEASE_CHECKLIST.md`: la **verifica professionale del marchio**, la **prova su
+dispositivi fisici veri** e il **playtest con persone**. Vuol dire che quello che era stato
+pianificato è stato fatto, misurato e dichiarato.
+
 ## [0.9.0] — 7 settembre 2026
 
 Fase 5 del piano evolutivo: **il suono dice il livello di Catena**.

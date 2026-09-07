@@ -1637,3 +1637,29 @@ button {
    esplicitamente una famiglia a spaziatura fissa, cosi' la riga resta dritta almeno
    dentro il gioco. Fuori, nelle chat, non possiamo decidere noi. */
 .pl-scheda__forma { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+
+/* ------------------------------------------- anteprima della prossima terna --- */
+/* Si distingue dalla mano vera per DIMENSIONE e POSIZIONE, non per opacita': se e'
+   informazione sta sopra AA come tutto il resto, e un'anteprima sbiadita e' la via
+   piu' rapida per far fallire npm run contrasti. */
+.pl-anteprima {
+  display: flex; align-items: center; gap: 10px;
+  margin: 2px auto 6px; padding: 4px 10px;
+  border: 1px solid var(--pl-line); border-radius: var(--pl-radius-sm);
+  background: var(--pl-ink-2);
+}
+.pl-anteprima:focus-visible { outline: 3px solid var(--pl-brand); outline-offset: 2px; }
+.pl-anteprima__etichetta {
+  font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--pl-text-dim); white-space: nowrap;
+}
+.pl-anteprima__pezzi { display: flex; align-items: center; gap: 10px; }
+.pl-anteprima__pezzo { display: grid; gap: 1px; }
+/* Sagome in grigio di struttura: il colore dei pezzi e' estetico, e mostrarlo qui
+   suggerirebbe che conti qualcosa. */
+.pl-anteprima__cella {
+  width: 6px; height: 6px; border-radius: 1px;
+  background: var(--pl-text-dim); position: relative;
+}
+.pl-anteprima__cella .pl-bomba { position: absolute; inset: -1px; }
+.pl-anteprima__vuoto { width: 6px; height: 6px; }

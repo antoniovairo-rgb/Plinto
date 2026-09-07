@@ -12,6 +12,8 @@ import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
 import { vibraRifiuto } from '../feel/vibrazione.js';
 import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf } from '../core/grid.js';
+import { AnteprimaTerna } from './AnteprimaTerna.jsx';
+import { MODALITA } from '../config/rules.js';
 
 /**
  * La schermata di gioco: e' l'unica che conta davvero.
@@ -44,6 +46,31 @@ export function SchermoGioco({
   }, []);
 
   useEffect(() => { campo.current?.imposta(animazioni); }, [animazioni]);
+
+  /**
+   * Il tasto P porta il fuoco sull'anteprima.
+   *
+   * Perche' un tasto dedicato invece di metterla nel ciclo di Tab: quel ciclo serve a
+   * scegliere il pezzo e appoggiarlo, e si percorre a OGNI mossa. Infilarci dentro un
+   * elemento che non si puo' appoggiare renderebbe piu' lenta ogni singola mossa di chi
+   * gioca da tastiera, per un'informazione che si consulta ogni tanto.
+   *
+   * Non fa niente mentre si sta scrivendo da qualche parte: rubare la "p" a un campo di
+   * testo e' il difetto classico delle scorciatoie a lettera singola.
+   */
+  useEffect(() => {
+    if (partita.modalita !== MODALITA.ANTEPRIMA) return undefined;
+    const ascolta = (evento) => {
+      if (evento.key !== 'p' && evento.key !== 'P') return;
+      if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
+      const attivo = document.activeElement;
+      if (attivo && (attivo.tagName === 'INPUT' || attivo.tagName === 'TEXTAREA' || attivo.isContentEditable)) return;
+      evento.preventDefault();
+      document.getElementById('pl-anteprima')?.focus();
+    };
+    window.addEventListener('keydown', ascolta);
+    return () => window.removeEventListener('keydown', ascolta);
+  }, [partita.modalita]);
 
   const effetti = useEffettiMossa({
     lastMove: partita.lastMove,
@@ -181,6 +208,12 @@ export function SchermoGioco({
       ) : (
         <p className="pl-modalita">{t(`modo.${modalita}`)}</p>
       )}
+
+      {/* L'anteprima sta SOPRA la plancia e sotto il nome della modalita': si vede
+          alzando lo sguardo, non spostando il pollice. */}
+      {partita.modalita === MODALITA.ANTEPRIMA ? (
+        <AnteprimaTerna mano={partita.manoSuccessiva} t={t} />
+      ) : null}
 
       {/* Catena, plancia e suggerimento formano un blocco unico centrato: su schermi
           alti lo spazio che avanza diventa respiro attorno al tavolo da gioco, non

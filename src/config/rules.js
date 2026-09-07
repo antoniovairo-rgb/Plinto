@@ -161,3 +161,24 @@ export const BOMBA_RAGGIO = 1;
 
 /** Punti per ogni cella portata via dall'esplosione oltre al gruppo eliminato. */
 export const PUNTI_CELLA_ESPLOSA = 6;
+
+/**
+ * Modalita' di gioco che cambiano il MOTORE, non solo l'interfaccia.
+ *
+ * 'base'      -> la terna successiva viene estratta quando serve, cioe' quando la mano
+ *                si e' svuotata, sulla griglia com'e' in quel momento.
+ * 'anteprima' -> la terna successiva viene estratta NELLO STESSO ISTANTE in cui viene
+ *                consegnata quella corrente, e da li' non cambia piu'. E' l'unico modo
+ *                onesto di mostrarla: rigenerarla all'uso vorrebbe dire far vedere una
+ *                terna diversa da quella che arriva.
+ *
+ * Le due modalita' NON sono confrontabili e non condividono i record: vedere avanti e'
+ * un vantaggio informativo. E lo stesso seme produce partite diverse, perche' estrarre
+ * prima cambia l'ordine di consumo del generatore -- per questo la modalita' entra nel
+ * seme (vedi `semeDiModalita` in core/engine.js).
+ *
+ * Il prezzo della modalita' anteprima e' misurato e dichiarato in docs/GAMEPLAY_RULES.md:
+ * le reti di sicurezza del generatore leggono la griglia al momento dell'ESTRAZIONE, che
+ * ora avviene fino a tre mosse prima dell'uso, cioe' su una griglia piu' vuota.
+ */
+export const MODALITA = Object.freeze({ BASE: 'base', ANTEPRIMA: 'anteprima' });

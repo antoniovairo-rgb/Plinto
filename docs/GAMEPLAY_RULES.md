@@ -640,3 +640,57 @@ dimentica dopo due mesi non è un archivio.
 
 Rigiocare un giorno dall'archivio non recupera niente e non sblocca niente: conserva solo il
 punteggio migliore di quel giorno, come per la sfida di oggi.
+
+## La modalità con l'anteprima, e quanto costa
+
+Nel gioco base la terna successiva **non esiste** finché serve: viene estratta quando la
+mano si è svuotata, sulla griglia com'è in quel momento. Per mostrarla in anticipo si può
+fare una cosa sola in modo onesto — **estrarla nell'istante in cui viene consegnata quella
+corrente, e non toccarla più**. L'alternativa (estrarla per mostrarla e rigenerarla
+all'uso) mostrerebbe una terna diversa da quella che arriva, ed è la peggiore funzionalità
+possibile in un gioco che promette di non nascondere niente.
+
+### Il prezzo, misurato
+
+Le cinque reti di sicurezza del generatore leggono la griglia **al momento
+dell'estrazione**. Con l'anteprima quel momento arriva fino a tre mosse prima dell'uso,
+cioè su una griglia **più vuota**. La rete n. 5 — «sopra il 60% di riempimento almeno un
+pezzo piccolo» — può quindi non scattare, perché all'estrazione il riempimento era ancora
+sotto soglia. **La modalità anteprima è più dura di quella base**, all'opposto
+dell'intuizione.
+
+Misurato con `node src/sim/run.mjs 3000 normale 250 <modalità>`, profilo «normale», tetto
+di 250 mosse, su **due campioni indipendenti** (semi 20260906 e 777):
+
+| | base | anteprima | base (2° campione) | anteprima (2° campione) |
+|---|---|---|---|---|
+| Punteggio medio | 4173,0 | 4118,2 | 4168,8 | 4057,4 |
+| Mosse medie | 177,7 | 175,0 | 176,8 | 173,6 |
+| Ancora vive a 250 mosse | 42,2% | 41,4% | 42,6% | 40,7% |
+| Partite sotto 15 mosse | 6 (0,2%) | 9 (0,3%) | 6 (0,2%) | 11 (0,4%) |
+| Game over sotto il 30% di riempimento | 21,9% | 21,9% | 22,4% | 21,8% |
+
+**Cosa dicono questi numeri, senza abbellirli.** L'effetto è nella direzione prevista e la
+direzione è la stessa in entrambi i campioni, su tutte le righe: la modalità anteprima è
+un po' più dura. La misura è **1–2%**, cioè piccola: due campioni concordi la rendono
+credibile, ma non è la stessa cosa di un intervallo di confidenza, e qui non ne è stato
+calcolato uno.
+
+**La coda che conta non è peggiorata.** I game over con la griglia sotto il 30% — quelli
+che un giocatore percepisce come ingiusti — restano uguali (21,9% contro 21,9%, e 22,4%
+contro 21,8% nel secondo campione). La differenza si concentra sulle partite molto corte,
+che passano da 6 a 9–11 su 3000: un caso ogni trecento partite circa.
+
+### Le altre conseguenze, tutte dichiarate
+
+- **Record separati.** Vedere avanti è un vantaggio informativo: mettere i due punteggi
+  nella stessa classifica vorrebbe dire dichiarare confrontabili due cose che non lo sono.
+- **Semi non compatibili.** Estrarre in anticipo cambia l'ordine di consumo del
+  generatore, quindi **lo stesso seme produce una partita diversa** nelle due modalità.
+  La mano iniziale coincide; tutto quello che viene dopo, no.
+- **L'anteprima mostra le forme, non i colori.** Il colore dei pezzi è dichiaratamente
+  estetico, e mostrarlo in anticipo suggerirebbe che conti qualcosa. **La bomba invece si
+  vede**: quella non è estetica, cambia cosa conviene fare.
+- **Il gioco base non è cambiato di una virgola.** Nessuna estrazione è stata spostata: i
+  100 livelli tarati e tutte le sfide passate producono esattamente le partite di prima.
+  C'è un test che lo verifica.
