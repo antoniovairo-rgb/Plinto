@@ -1621,3 +1621,19 @@ button {
   padding: 4px 0; border-radius: 4px; color: var(--pl-text);
   background: color-mix(in srgb, var(--pl-brand) calc(var(--intensita, 0) * 42%), var(--pl-ink-2));
 }
+
+/* --------------------------------------------------- scheda condivisibile --- */
+.pl-condividi { margin: 18px 0 4px; }
+/* Il testo della scheda si vede per intero: e' esattamente quello che verra'
+   condiviso, e vederlo prima e' l'unico modo di sapere cosa si sta mandando. */
+.pl-scheda {
+  margin: 10px 0 0; padding: 10px 12px;
+  background: var(--pl-ink-2); border: 1px solid var(--pl-line);
+  border-radius: var(--pl-radius-sm);
+  font-family: var(--pl-font-num); font-size: 0.78rem; line-height: 1.5;
+  color: var(--pl-text-dim); white-space: pre-wrap; word-break: break-word;
+}
+/* I blocchi hanno larghezze diverse in molti font di sistema: qui si chiede
+   esplicitamente una famiglia a spaziatura fissa, cosi' la riga resta dritta almeno
+   dentro il gioco. Fuori, nelle chat, non possiamo decidere noi. */
+.pl-scheda__forma { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }

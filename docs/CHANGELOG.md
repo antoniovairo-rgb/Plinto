@@ -7,6 +7,73 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.8.0] — 7 settembre 2026
+
+Fase 4 del piano evolutivo: **la scheda del risultato da condividere**.
+
+### Aggiunto
+
+**Sei righe da mandare agli amici**, sotto la schermata di fine partita. È il canale di
+crescita di un gioco che non fa pubblicità e non ha un budget: se qualcuno lo scopre, è
+perché qualcun altro gliel'ha mandato.
+
+```
+PLINTO — Sfida del 2026-09-12
+14.820 punti · 96 mosse
+Catena max 9 · Intreccio max 3
+Righe 11 · Colonne 8 · Quadranti 5
+Mossa migliore: 414
+▁▃▅▇█▇▅▂▄▆█▇▅▃▁▂
+https://antoniovairo-rgb.github.io/Plinto/#/sfida/2026-09-12
+```
+
+**L'ultima riga di blocchi è la forma della partita**: il livello di Catena campionato a
+intervalli regolari, con il **massimo** di ogni fetta e non la media — un picco di Catena
+è un momento della partita, e una media lo cancellerebbe proprio mentre si cerca di
+raccontarlo. Due partite con lo stesso punteggio hanno righe diverse.
+
+**Due divieti che vengono prima di tutto il resto.** Niente spoiler: mai la sequenza dei
+pezzi né la griglia finale, altrimenti il collegamento che mandi è proprio la cosa che
+rovina la sfida a chi lo riceve. E nessun parametro di provenienza nell'indirizzo: il link
+è quello della sfida e basta, uguale per tutti.
+
+### La parte che si sbaglia sempre
+
+**Il ripiego sugli appunti non è facoltativo.** `navigator.share` non c'è ovunque — su
+desktop manca quasi sempre — e un pulsante che in quel caso non fa niente è peggio di un
+pulsante che manca, perché chi lo tocca **crede** di aver condiviso. Tre gradini: si
+condivide; se non si può, si copia; se non si può nemmeno copiare, il testo resta a
+schermo selezionabile a mano. L'ultimo gradino non può fallire perché non chiede niente a
+nessuno. E chi annulla la finestra di condivisione non vede nessun messaggio: annullare
+non è un errore.
+
+**La scheda è testo, non un'immagine.** Un'immagine peserebbe di più, non sarebbe
+leggibile da un lettore di schermo e non si potrebbe incollare in chat come testo. Quello
+che si vede a schermo è **esattamente** quello che viene condiviso.
+
+**La riga di blocchi è decorativa**, e marcata come tale: ogni dato che contiene esiste
+anche a parole nelle righe sopra. Chi usa un lettore di schermo non perde niente, e chi ha
+un font che disallinea i blocchi nemmeno.
+
+### Modificato
+
+**Il motore registra la Catena mossa per mossa**, in ordine. L'istogramma della Fase 1 dice
+*quante* mosse a ciascun livello, non *in che ordine*: da lui si può disegnare una forma
+plausibile, non quella vera. Con la serie la riga di blocchi è la cronaca della partita
+invece di un suo riassunto riordinato. Se la serie manca — un salvataggio di prima — si
+ripiega sull'istogramma, che produce una riga ordinata e quindi visibilmente un riassunto.
+
+### Verifiche
+
+- **300 test in 19 file** (erano 282 in 18). 17 nuovi sulla scheda: che stia sempre
+  sotto i 280 caratteri **anche con numeri a sette cifre**, che il collegamento sia sempre
+  l'ultima riga, che non compaiano identificativi di forme, che non esistano `undefined`,
+  `NaN` o `null` in un messaggio che poi qualcuno manda davvero.
+- **`npm run condivisione`** (tredicesimo controllo di `npm run verifica`) **toglie
+  `navigator.share`** dal browser e verifica che il testo finisca comunque negli appunti,
+  identico a quello mostrato, con la conferma a schermo. Collaudato togliendo il ripiego:
+  lo scenario accusa sia la conferma mancante sia gli appunti vuoti.
+
 ## [0.7.0] — 7 settembre 2026
 
 Fase 3 del piano evolutivo: **il profilo di gioco**.

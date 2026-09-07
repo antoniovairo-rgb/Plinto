@@ -1,4 +1,5 @@
 import { numero } from '../../i18n/formato.js';
+import { Condividi } from '../Condividi.jsx';
 import { suonoRecord } from '../../audio/suoni.js';
 import { useEffect } from 'react';
 /**
@@ -37,7 +38,7 @@ function durata(ms) {
 }
 
 export function SchermoFine({
-  riepilogo, record, nuoviRecord, modalita, esitoSfida, onRigioca, onHome, t,
+  riepilogo, record, nuoviRecord, modalita, esitoSfida, giornoSfida, onRigioca, onHome, t,
 }) {
   const eSfida = modalita === 'sfida';
   // Nella Sfida del Giorno il confronto che conta e' con il proprio risultato di oggi,
@@ -90,6 +91,11 @@ export function SchermoFine({
             <Riga etichetta={t('sfida.tentativi')} valore={esitoSfida.partite} />
           ) : null}
         </div>
+
+        {/* La condivisione sta DENTRO l'area che scorre, sotto i numeri: e' una cosa che
+            si sceglie di fare dopo aver guardato il risultato, non un'alternativa al
+            pulsante per rigiocare. Quello resta il primo elemento sotto il pollice. */}
+        <Condividi riepilogo={riepilogo} giorno={eSfida ? giornoSfida : null} t={t} />
       </div>
 
       <div className="pl-fine__azioni">

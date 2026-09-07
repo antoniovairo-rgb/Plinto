@@ -216,6 +216,9 @@ export function App() {
           nuoviRecord={nuoviRecord}
           modalita={modalita}
           esitoSfida={esitoSfida}
+          // Il giorno serve alla scheda condivisibile: il collegamento in fondo deve
+          // aprire LA STESSA sfida, non la home ne' quella di oggi.
+          giornoSfida={partita?.seedLabel ?? null}
           onRigioca={modalita === 'sfida'
             // Il giorno e' quello della partita appena finita: dall'archivio si rigioca
             // il 12 marzo, non oggi. Senza la lambda, per giunta, React passerebbe

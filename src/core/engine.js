@@ -63,6 +63,11 @@ function emptyStats() {
     handsDealt: 0,
     // Le tre distribuzioni: non quanto, ma COME si e' giocato. Vedi distribuzioni.js.
     ...distribuzioniVuote(),
+    // La Catena applicata mossa per mossa, in ORDINE. L'istogramma dice quante mosse a
+    // ciascun livello, non in che ordine: da lui si puo' disegnare una forma plausibile,
+    // non quella vera. Questa serie e' cio' che rende la riga di blocchi della scheda
+    // condivisibile la cronaca della partita invece di un suo riassunto riordinato.
+    serieCatena: [],
   };
 }
 
@@ -204,6 +209,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
 
   const stats = {
     ...distribuzioni,
+    serieCatena: [...(state.stats.serieCatena ?? []), scored.chainUsed],
     moves: state.stats.moves + 1,
     piecesPlaced: state.stats.piecesPlaced + 1,
     cellsPlaced: state.stats.cellsPlaced + placed.cells.length,
@@ -292,6 +298,7 @@ export function summarize(state, now = Date.now()) {
     // Le distribuzioni escono da qui perche' e' da qui che passano il profilo di
     // gioco e la scheda condivisibile: nessuno dei due deve leggere lo stato interno.
     ...normalizzaDistribuzioni(state.stats),
+    serieCatena: Array.isArray(state.stats.serieCatena) ? state.stats.serieCatena.slice() : [],
   };
 }
 
@@ -368,7 +375,17 @@ export function deserializeGame(raw) {
       // un array della lunghezza sbagliata passerebbe intatto e romperebbe gli
       // istogrammi. E' lo stesso genere di errore che ha gia' spento il gioco una
       // volta (vedi il commento di registraTentativo in persistence/progressi.js).
-      stats: { ...emptyStats(), ...raw.stats, ...normalizzaDistribuzioni(raw.stats) },
+      stats: {
+        ...emptyStats(),
+        ...raw.stats,
+        ...normalizzaDistribuzioni(raw.stats),
+        // Una serie manomessa (non un array, o con valori non numerici) va scartata e
+        // non corretta a meta': se ne ricava una forma sbagliata invece di nessuna forma.
+        serieCatena: Array.isArray(raw.stats?.serieCatena)
+          && raw.stats.serieCatena.every((n) => Number.isInteger(n) && n >= 0 && n <= CHAIN_MAX)
+          ? raw.stats.serieCatena
+          : [],
+      },
       lastMove: null,
       startedAt: raw.startedAt,
       endedAt: raw.endedAt ?? null,

@@ -1,12 +1,12 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono dodici, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono tredici, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
  * un elenco che prima o poi si dimentica: qui e' scritto una volta sola, e il comando
- * fallisce se anche uno solo dei dodici fallisce.
+ * fallisce se anche uno solo dei tredici fallisce.
  *
  * L'ordine non e' casuale: prima i controlli che costano secondi e trovano gli errori
  * piu' grossolani, poi quelli che aprono un browser. Chi ha rotto la sintassi lo scopre
@@ -37,6 +37,7 @@ const VERIFICHE = [
   { nome: 'partita completa nel browser', comando: 'npm', argomenti: ['run', 'e2e'] },
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
   { nome: 'archivio delle sfide nel browser', comando: 'npm', argomenti: ['run', 'archivio'] },
+  { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
   { nome: 'precisione del trascinamento', comando: 'npm', argomenti: ['run', 'precisione'] },
   { nome: 'build servita da una sottocartella', comando: 'npm', argomenti: ['run', 'prova-pages'] },
   { nome: 'installabile, senza rete e aggiornabile', comando: 'npm', argomenti: ['run', 'installazione'] },

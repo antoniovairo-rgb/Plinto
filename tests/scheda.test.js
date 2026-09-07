@@ -1,0 +1,184 @@
+import { describe, it, expect } from 'vitest';
+import {
+  formattaScheda, formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA,
+} from '../src/core/scheda.js';
+import { CHAIN_MAX } from '../src/config/rules.js';
+import { createGame, placePiece, summarize } from '../src/core/engine.js';
+import { allPlacements } from '../src/core/grid.js';
+
+/**
+ * La scheda condivisibile.
+ *
+ * E' un testo, quindi sembra che non ci sia niente da provare. Le cose che si possono
+ * sbagliare, e che qui vengono controllate, sono tre: superare il limite e farsi tagliare
+ * proprio il collegamento; far comparire uno spoiler; e produrre "undefined" o "NaN"
+ * dentro un messaggio che poi qualcuno manda agli amici.
+ */
+
+const TESTI = {
+  gioco: 'PLINTO',
+  sfidaDel: 'Sfida del',
+  partitaLibera: 'Partita libera',
+  punti: 'punti',
+  mosse: 'mosse',
+  catenaMax: 'Catena max',
+  intrecciMax: 'Intreccio max',
+  righe: 'Righe',
+  colonne: 'Colonne',
+  quadranti: 'Quadranti',
+  mossaMigliore: 'Mossa migliore',
+  separatoreMigliaia: '.',
+};
+
+/** Una partita vera, per non provare la scheda su numeri inventati. */
+function partitaVera(seed, mosseMax = 400) {
+  let s = createGame({ seed, now: 0 });
+  let t = 0;
+  while (s.status === 'playing' && s.stats.moves < mosseMax) {
+    const mosse = [];
+    s.hand.forEach((p, i) => {
+      if (p) allPlacements(s.grid, p.shape).forEach(([r, c]) => mosse.push([i, r, c]));
+    });
+    if (mosse.length === 0) break;
+    t += 500;
+    s = placePiece(s, ...mosse[0], t);
+  }
+  return summarize(s, t);
+}
+
+describe('la forma della partita', () => {
+  it('ha al massimo sedici colonne, e meno se la partita e stata corta', () => {
+    expect(formaPartita(new Array(100).fill(0))).toHaveLength(COLONNE_FORMA);
+    expect(formaPartita([0, 1, 2])).toHaveLength(3);
+    expect(formaPartita([5])).toHaveLength(1);
+  });
+
+  it('non disegna niente quando non c e niente da disegnare', () => {
+    expect(formaPartita([])).toBe('');
+    expect(formaPartita(null)).toBe('');
+    expect(formaPartita(undefined)).toBe('');
+  });
+
+  it('una Catena sempre a zero e piatta in basso, una al massimo e piatta in alto', () => {
+    expect(formaPartita(new Array(20).fill(0))).toBe('▁'.repeat(COLONNE_FORMA));
+    expect(formaPartita(new Array(20).fill(CHAIN_MAX))).toBe('█'.repeat(COLONNE_FORMA));
+  });
+
+  it('un picco non viene cancellato dalla media', () => {
+    // Una salita in mezzo a una partita piatta e' un momento della partita: se la
+    // colonna facesse la media, sparirebbe proprio mentre si cerca di raccontarla.
+    const serie = new Array(32).fill(0);
+    serie[16] = CHAIN_MAX;
+    const forma = formaPartita(serie);
+    expect(forma).toContain('█');
+  });
+
+  it('usa solo i blocchi previsti', () => {
+    const forma = formaPartita(Array.from({ length: 50 }, (_, i) => i % (CHAIN_MAX + 1)));
+    expect(forma).toMatch(/^[▁▂▃▄▅▆▇█]+$/u);
+  });
+
+  it('da un istogramma si ricava una serie ordinata, non una inventata', () => {
+    expect(serieDaIstogramma([2, 0, 1])).toEqual([0, 0, 2]);
+    expect(serieDaIstogramma(null)).toEqual([]);
+  });
+});
+
+describe('formattaScheda', () => {
+  it('sta sempre sotto il limite, anche con numeri enormi', () => {
+    const testo = formattaScheda({
+      score: 9876543, moves: 999999, bestChain: 9, bestIntreccio: 10,
+      clearedRows: 12345, clearedCols: 12345, clearedQuadrants: 12345,
+      bestMovePoints: 1234567,
+      istogrammaCatena: new Array(CHAIN_MAX + 1).fill(50),
+    }, {
+      testi: TESTI,
+      giorno: '2026-09-12',
+      indirizzo: 'https://antoniovairo-rgb.github.io/Plinto/#/sfida/2026-09-12',
+    });
+    expect(testo.length).toBeLessThanOrEqual(LIMITE);
+  });
+
+  it('il collegamento c e sempre, ed e l ultima riga', () => {
+    const indirizzo = 'https://antoniovairo-rgb.github.io/Plinto/#/sfida/2026-09-12';
+    const testo = formattaScheda(partitaVera(5), { testi: TESTI, giorno: '2026-09-12', indirizzo });
+    expect(testo.split('\n').at(-1)).toBe(indirizzo);
+  });
+
+  it('NON contiene spoiler: ne la sequenza dei pezzi ne la griglia', () => {
+    const riepilogo = partitaVera(9);
+    const testo = formattaScheda(riepilogo, { testi: TESTI, giorno: '2026-09-12' });
+    // Gli identificativi delle forme (b33, h5, v3...) non devono comparire da nessuna
+    // parte: chi riceve il messaggio deve poter giocare la stessa sfida senza sapere
+    // gia' che cosa arriva.
+    expect(testo).not.toMatch(/\b[bhvpd]\d{1,2}\b/);
+    expect(testo).not.toContain('#');
+    expect(testo).not.toMatch(/mappaAppoggi|grid|griglia/i);
+  });
+
+  it('nessun parametro di provenienza nell indirizzo', () => {
+    const testo = formattaScheda(partitaVera(4), {
+      testi: TESTI,
+      indirizzo: 'https://antoniovairo-rgb.github.io/Plinto/#/sfida/2026-09-12',
+    });
+    expect(testo).not.toMatch(/[?&](utm_|ref=|from=|src=)/i);
+  });
+
+  it('mai "undefined", "NaN" o "null" in un messaggio che poi si manda', () => {
+    for (const riepilogo of [{}, undefined, { score: NaN, moves: undefined }]) {
+      const testo = formattaScheda(riepilogo, { testi: TESTI });
+      expect(testo).not.toMatch(/undefined|NaN|null/);
+    }
+  });
+
+  it('una partita vuota produce comunque un testo leggibile', () => {
+    const testo = formattaScheda({ score: 0, moves: 0 }, { testi: TESTI });
+    expect(testo.split('\n').length).toBeGreaterThanOrEqual(4);
+    expect(testo).toContain('0 punti');
+  });
+
+  it('la partita libera non dichiara un giorno che non ha', () => {
+    const libera = formattaScheda(partitaVera(6), { testi: TESTI });
+    expect(libera).toContain('Partita libera');
+    expect(libera).not.toContain('Sfida del');
+  });
+
+  it('una durata sopra l ora non compare: la scheda non parla di tempo', () => {
+    // Scelta dichiarata: il tempo non e' una misura di bravura in un gioco senza timer,
+    // e metterlo suggerirebbe che lo sia.
+    const testo = formattaScheda({ ...partitaVera(8), durationMs: 5_400_000 }, { testi: TESTI });
+    expect(testo).not.toMatch(/\d+\s*(h|min|ora|ore)/i);
+  });
+
+  it('ogni dato della riga di blocchi esiste anche a parole', () => {
+    // La riga di blocchi e' decorativa: chi non la vede -- lettore di schermo, font che
+    // la disallinea -- non deve perdere nessuna informazione.
+    const riepilogo = partitaVera(12);
+    const testo = formattaScheda(riepilogo, { testi: TESTI });
+    const senzaBlocchi = testo.replace(/[▁▂▃▄▅▆▇█]/gu, '');
+    expect(senzaBlocchi).toContain(`Catena max ${riepilogo.bestChain}`);
+  });
+
+  it('sei righe piu il collegamento, nell ordine dichiarato', () => {
+    const righe = formattaScheda(partitaVera(13), {
+      testi: TESTI, giorno: '2026-09-12', indirizzo: 'https://esempio/x',
+    }).split('\n');
+    expect(righe).toHaveLength(7);
+    expect(righe[0]).toContain('PLINTO');
+    expect(righe[1]).toContain('punti');
+    expect(righe[2]).toContain('Catena max');
+    expect(righe[3]).toContain('Righe');
+    expect(righe[4]).toContain('Mossa migliore');
+    expect(righe[5]).toMatch(/^[▁▂▃▄▅▆▇█]+$/u);
+  });
+
+  it('la forma viene dalla serie vera quando c e, non dall istogramma', () => {
+    const serie = [0, 0, 0, 0, 0, 0, 0, 0, 9, 9, 9, 9, 9, 9, 9, 9];
+    const conSerie = formattaScheda({ score: 1, moves: 16 }, { testi: TESTI, serie });
+    // Con la serie: prima bassa, poi alta. Dall'istogramma ordinato uscirebbe uguale
+    // solo per caso, e qui il caso e' escluso perche' l'istogramma non c'e' affatto.
+    const riga = conSerie.split('\n').find((r) => /^[▁▂▃▄▅▆▇█]+$/u.test(r));
+    expect(riga.startsWith('▁')).toBe(true);
+    expect(riga.endsWith('█')).toBe(true);
+  });
+});
