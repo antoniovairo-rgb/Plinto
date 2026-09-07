@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { COLOR_COUNT } from '../config/rules.js';
 import {
   suonoAppoggio, suonoEliminazione, suonoGrandeCombo, suonoGrigliaVuota, suonoFinePartita,
+  suonoCatenaGiu, suonoUltimaChiamata,
   suonoEsplosione,
 } from '../audio/suoni.js';
 import {
@@ -22,6 +23,7 @@ import {
  */
 
 import { DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI } from './durate.js';
+import { respiroRimasto } from '../core/scoring.js';
 
 /** Legge dal foglio di stile il colore reale di una famiglia cromatica. */
 function coloreBlocco(indice) {
@@ -37,6 +39,9 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
   const [celleEsplose, setCelleEsplose] = useState(null);
   const [puntiVolanti, setPuntiVolanti] = useState(null);
   const ultimaMossa = useRef(null);
+  // Il digiuno della mossa precedente: serve a far suonare l'ultima chiamata UNA volta,
+  // nel momento in cui il respiro finisce, e non a ogni mossa successiva.
+  const ultimoDigiuno = useRef(0);
 
   useEffect(() => {
     if (!lastMove || lastMove === ultimaMossa.current) return undefined;
@@ -61,7 +66,28 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     } else {
       suonoAppoggio();
       vibraAppoggio();
+      // La Catena e' scesa: si sente, un grado sotto e con un timbro piu' spento. Non
+      // e' un suono di errore, perche' perdere la Catena non e' un errore -- e' una
+      // conseguenza, e va raccontata come tale.
+      if (lastMove.chainAfter < lastMove.chainBefore) {
+        timers.push(setTimeout(() => suonoCatenaGiu(lastMove.chainBefore), 120));
+      }
     }
+
+    // ULTIMA CHIAMATA: il respiro e' finito e la Catena e' ancora accesa, quindi la
+    // prossima mossa a vuoto la fa calare. E' l'unica informazione del gioco che fino a
+    // ieri passava SOLO dagli occhi: chi non guarda la barra in quel momento non la
+    // riceveva affatto. Suona una volta sola, quando il respiro finisce, non a ogni
+    // mossa: un avviso che si ripete non e' un avviso.
+    if (
+      lastMove.chainAfter > 0
+      && respiroRimasto(lastMove.chainDigiunoAfter ?? 0) === 0
+      && (lastMove.chainDigiunoAfter ?? 0) > 0
+      && (ultimoDigiuno.current ?? 0) === 0
+    ) {
+      timers.push(setTimeout(() => suonoUltimaChiamata(lastMove.chainAfter), 200));
+    }
+    ultimoDigiuno.current = lastMove.chainDigiunoAfter ?? 0;
     if (lastMove.gameOver) {
       timers.push(setTimeout(() => { suonoFinePartita(); vibraFinePartita(); }, 420));
     }

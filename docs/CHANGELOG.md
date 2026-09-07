@@ -7,6 +7,70 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.9.0] — 7 settembre 2026
+
+Fase 5 del piano evolutivo: **il suono dice il livello di Catena**.
+
+### Modificato
+
+**Il sonoro smette di decorare e comincia a dire.** Dieci gradi di una **pentatonica
+minore di La**, uno per ogni livello di Catena: si capisce a orecchio se la Catena sta
+salendo o scendendo senza guardare la barra. Le frequenze sono **calcolate** dal
+temperamento equabile (La4 = 440 Hz), non trascritte: una tabella copiata a mano è una
+tabella in cui prima o poi c'è un numero sbagliato, e un numero sbagliato qui non rompe
+niente — si limita a stonare, che è il difetto che nessuno segnala.
+
+- **Eliminazione** → la nota del livello di Catena **applicato**.
+- **Intreccio da N gruppi** → arpeggio ascendente di N note: chiudere riga + colonna +
+  quadrante *suona* diverso da chiudere una riga sola.
+- **Catena che scende** → un grado sotto, timbro più spento e volume basso. Perdere la
+  Catena è una conseguenza del gioco, non un errore da sottolineare.
+- **Svuotamento della griglia** → l'arpeggio sale per tutta la scala e **risolve** sulla
+  fondamentale due ottave sopra. È l'evento più raro del gioco e merita l'unico suono
+  davvero grosso.
+
+**Il gioco aveva due scale.** Una pentatonica di Do maggiore per le celebrazioni e una per
+la Catena: due scale nello stesso gioco stonano fra loro — non abbastanza da far dire «è
+sbagliato», abbastanza da far suonare tutto un po' storto. Adesso ce n'è una.
+
+### Aggiunto
+
+**L'ultima chiamata.** Quando il respiro finisce e la Catena è ancora accesa — cioè la
+prossima mossa senza eliminazioni la fa calare — due note brevi e riconoscibili. È il
+suono più utile del gioco, perché è l'unico che dice qualcosa che non si è ancora visto:
+fino a ieri quell'informazione stava **solo** nella barra, cioè solo per chi la stava
+guardando in quel momento. Suona una volta sola, quando il respiro finisce: un avviso che
+si ripete non è un avviso.
+
+**Silenzio quando la scheda non è in primo piano.** Un gioco che continua a suonare da una
+scheda che non guardi più è il modo più rapido di farsi silenziare per sempre.
+
+**Tetto di voci e disconnessione dei nodi.** Ventiquattro voci simultanee al massimo, e
+ogni oscillatore viene **scollegato** a fine inviluppo: un oscillatore fermo ma ancora
+connesso resta agganciato al grafo audio, ed è una perdita di memoria lenta, invisibile in
+una partita di prova. `npm run soak` dopo la modifica: 375 mosse, memoria da 11,8 a
+12,6 MB, zero fotogrammi sopra i 50 ms su 2475.
+
+### Trovato per strada
+
+**L'arpeggio scendeva invece di salire, e non me ne sarei accorto.** La scala parte dal La3
+e arriva al Sol5, cioè copre già due ottave: riavvolgendola di dodici semitoni, il grado
+dopo il Sol5 era il La4 — più **basso** di dove eravamo. Succede solo chiudendo quattro
+gruppi con la Catena al massimo, cioè in una delle mosse più rare e più belle del gioco.
+L'ha trovato un test scritto prima di ascoltare: nessuno l'avrebbe segnalato, perché
+stonare non è un difetto che si racconta.
+
+### Verifiche
+
+- **321 test in 20 file** (erano 300 in 19). 21 nuovi sulla scala, tutti **puri**:
+  ogni nota confrontata con la tabella dichiarata, la scala che sale sempre, un livello
+  fuori scala che produce comunque una nota della scala, l'arpeggio che resta ascendente
+  anche oltre l'ultimo grado.
+- **Che il suono esca davvero resta una verifica manuale**, ed è scritto in
+  `docs/TESTING.md`: non esiste nessun test automatico che lo provi, e fingere il
+  contrario sarebbe peggio che non averlo.
+- `npm run verifica`: **13 controlli su 13 in 314 s**, sulla 0.9.0.
+
 ## [0.8.0] — 7 settembre 2026
 
 Fase 4 del piano evolutivo: **la scheda del risultato da condividere**.

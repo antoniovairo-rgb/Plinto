@@ -17,7 +17,7 @@
 | `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `plinto:`), `documenti.js` (documenti versionati e migrazioni), `profilo.js` (`aggrega` pura + lettura/scrittura), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
 | `src/styles/` | `tokens.css` (variabili del sistema di design, vedi `DESIGN_SYSTEM.md`), `app.css` (~770 righe, tutto il resto) | niente | browser |
 | `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
-| `src/audio/` | `suoni.js` — sintesi Web Audio: nove voci del gioco, **nessun file audio** | niente | browser (`AudioContext`) |
+| `src/audio/` | `scala.js` (le dieci note della Catena, **calcolate** dal temperamento equabile: puro, senza `AudioContext`) e `suoni.js` — sintesi Web Audio, **nessun file audio** | niente | browser (`AudioContext`) |
 | `src/feel/` | `useEffettiMossa.js` (traduce `lastMove` in effetti), `particelle.js` (classe `CampoParticelle`, un canvas), `vibrazione.js` (pattern per `navigator.vibrate`) | `config/`, `audio/`, React (solo l'hook) | browser |
 | `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` le schermate (fra cui `Quadri`, `AperturaQuadro`, `FineQuadro`, `AvanzamentoMappa`, `ComeSiGioca`, `Bomba`, `MiniGriglia`, `Salvagente`) più l'impalcatura comune `Pagina.jsx`, `Installa.jsx` (installazione sul telefono), `Archivio.jsx` (il calendario delle sfide), `Profilo.jsx` (il profilo di gioco), `Condividi.jsx` e `rotta.js` (l'unica àncora riconosciuta) | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
 | `src/state/` | `usePartita.js`, `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
@@ -27,7 +27,7 @@
 
 Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
 
-- `npm test` passa: **300 test in 19 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
+- `npm test` passa: **321 test in 20 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
   `invarianti.test.js`, che gioca 240 partite complete);
 - `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
 - `npm run sim` funziona;
@@ -87,7 +87,7 @@ Decisione presa. Motivi:
   definizione, nessun disallineamento fra tipi e realtà a runtime.
 - Il costo — perdere il controllo statico — è compensato in parte dai commenti `@param` /
   `@returns` presenti su tutte le funzioni pubbliche del `core/` e in parte dalla suite di
-  test, che sul `core/` resta la parte più densa: dei 300 test, 102 riguardano il `core/`
+  test, che sul `core/` resta la parte più densa: dei 321 test, 102 riguardano il `core/`
   (griglia, punteggio, bombe, generatore, motore, invarianti), 35 i Quadri (definizione, svolgimento e testi della schermata di apertura), 35 l'i18n (chiavi, traduzioni, ortografia italiana e regole della presentazione), 6 la
   Sfida del Giorno e 28 le promesse del progetto su se stesso (privacy, sintassi degli script,
   allineamento delle durate, contrasti WCAG, colori dell'icona).
@@ -181,6 +181,7 @@ salvata non si riproduce l'animazione dell'ultima mossa.
         |
         +--> audio/suoni.js        suonoEliminazione(gruppi, chainBefore) / suonoAppoggio /
         |                          suonoGrandeCombo / suonoGrigliaVuota / suonoFinePartita
+        |                          suonoCatenaGiu / suonoUltimaChiamata
         +--> feel/vibrazione.js    vibraAppoggio / vibraEliminazione / vibraCelebrazione /
         |                          vibraFinePartita
         +--> feel/particelle.js    campo.esplodi(punti, gruppi) sul canvas sovrapposto

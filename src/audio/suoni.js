@@ -8,24 +8,42 @@
  *   3. ESPRESSIVITA': il suono puo' seguire lo stato del gioco invece di essere fisso.
  *      La Catena, per esempio, sale davvero di intonazione mentre cresce.
  *
- * Scelte musicali: scala PENTATONICA MAGGIORE. Qualunque combinazione di note di
- * questa scala suona consonante, quindi anche una raffica di eliminazioni ravvicinate
- * resta piacevole invece di diventare un frastuono.
+ * Scelte musicali: scala PENTATONICA MINORE DI LA, dieci gradi, uno per ogni livello di
+ * Catena (vedi audio/scala.js, dove le frequenze sono CALCOLATE e non trascritte). In una
+ * pentatonica qualunque combinazione di note suona consonante, quindi anche una raffica
+ * di eliminazioni ravvicinate resta piacevole invece di diventare un frastuono.
+ *
+ * IL SUONO DICE IL LIVELLO DI CATENA. Non e' decorazione: si deve capire a orecchio se
+ * la Catena sta salendo o scendendo senza guardare la barra. E' anche un guadagno di
+ * accessibilita' reale -- l'ultima chiamata, cioe' "la prossima mossa a vuoto ti costa il
+ * moltiplicatore", passava solo dagli occhi.
  *
  * Il contesto audio viene creato solo al primo gesto del giocatore: i browser
- * bloccano l'audio non richiesto, e sarebbe comunque scorretto partire da soli.
+ * bloccano l'audio non richiesto, e sarebbe comunque scorretto partire da soli. Quando la
+ * scheda passa in secondo piano il contesto viene sospeso: un gioco che continua a
+ * suonare da una scheda che non guardi piu' e' il modo piu' rapido di farsi silenziare
+ * per sempre.
  */
 
-/** Do maggiore pentatonica su piu' ottave, in hertz. */
-const PENTATONICA = [
-  261.63, 293.66, 329.63, 392.00, 440.00,
-  523.25, 587.33, 659.25, 783.99, 880.00,
-  1046.50, 1174.66, 1318.51, 1567.98, 1760.00,
-];
+import {
+  frequenzaDiCatena, frequenzaCatenaGiu, noteIntreccio, frequenzaDiGrado,
+} from './scala.js';
+
 
 let ctx = null;
 let master = null;
 let attivo = true;
+
+/**
+ * Tetto di voci simultanee.
+ *
+ * Ogni nota crea un oscillatore e un guadagno. Senza un tetto, una raffica di
+ * eliminazioni con bombe puo' aprirne decine nello stesso istante: il suono diventa
+ * fango e la memoria cresce. Oltre il tetto le note nuove vengono semplicemente saltate
+ * -- meglio una nota in meno che un rumore in piu'.
+ */
+const VOCI_MAX = 24;
+let vociVive = 0;
 
 /** Crea il contesto audio, se non esiste. Va chiamato dentro un gesto dell'utente. */
 function assicuraContesto() {
@@ -48,6 +66,22 @@ export function impostaAudio(acceso) {
   attivo = acceso;
 }
 
+/**
+ * Silenzio quando la scheda non e' in primo piano.
+ *
+ * Registrato una volta sola, e non fa nulla finche' un contesto non esiste: se il
+ * giocatore non ha mai toccato niente, non c'e' niente da sospendere.
+ */
+try {
+  document.addEventListener('visibilitychange', () => {
+    if (!ctx) return;
+    if (document.hidden) ctx.suspend().catch(() => {});
+    else if (attivo) ctx.resume().catch(() => {});
+  });
+} catch {
+  // Nessun documento (test in Node): il gioco non ne ha bisogno per funzionare.
+}
+
 /** Da chiamare al primo tocco: sblocca l'audio sui browser che lo sospendono. */
 export function sbloccaAudio() {
   const c = assicuraContesto();
@@ -66,6 +100,8 @@ function nota(freq, {
   if (!c || !attivo) return;
   const t0 = c.currentTime + ritardo;
 
+  if (vociVive >= VOCI_MAX) return;
+
   const osc = c.createOscillator();
   osc.type = forma;
   osc.frequency.setValueAtTime(freq, t0);
@@ -80,6 +116,16 @@ function nota(freq, {
   gain.connect(master);
   osc.start(t0);
   osc.stop(t0 + durata + 0.02);
+
+  // I nodi vanno SCOLLEGATI a fine inviluppo. Un oscillatore fermo ma ancora connesso
+  // resta agganciato al grafo audio: e' una perdita di memoria lenta, invisibile in una
+  // partita di prova e misurabile dopo centinaia di mosse -- cioe' esattamente cio' che
+  // `npm run soak` va a cercare.
+  vociVive += 1;
+  osc.onended = () => {
+    vociVive = Math.max(0, vociVive - 1);
+    try { osc.disconnect(); gain.disconnect(); } catch { /* gia' scollegati */ }
+  };
 }
 
 /** Un colpo di rumore filtrato: serve per i suoni "fisici" come l'appoggio. */
@@ -107,11 +153,20 @@ function rumore({ ritardo = 0, durata = 0.06, volume = 0.12, taglio = 1800 } = {
   filtro.connect(gain);
   gain.connect(master);
   sorgente.start(t0);
+  sorgente.onended = () => {
+    try { sorgente.disconnect(); filtro.disconnect(); gain.disconnect(); } catch { /* gia' */ }
+  };
 }
 
-/** Nota della scala pentatonica, con indice limitato agli estremi. */
+/**
+ * Nota della scala, per grado, con le ottave sopra il decimo grado.
+ *
+ * Il gioco aveva DUE scale: una pentatonica di Do maggiore per le celebrazioni e questa
+ * per la Catena. Due scale nello stesso gioco stonano fra loro -- non abbastanza da far
+ * dire "e' sbagliato", abbastanza da far suonare tutto un po' storto. Adesso ce n'e' una.
+ */
 function gradino(indice) {
-  return PENTATONICA[Math.max(0, Math.min(PENTATONICA.length - 1, indice))];
+  return frequenzaDiGrado(indice);
 }
 
 // --------------------------------------------------------------------------
@@ -141,22 +196,41 @@ export function suonoRifiuto() {
  * @param {number} catena livello di Catena prima della mossa
  */
 export function suonoEliminazione(gruppi, catena) {
-  const base = Math.min(9, catena);
-  for (let i = 0; i < gruppi; i += 1) {
-    nota(gradino(base + i * 2), {
-      ritardo: i * 0.055,
-      durata: 0.3,
-      volume: 0.2,
-      forma: 'triangle',
-    });
-    nota(gradino(base + i * 2 + 5), {
-      ritardo: i * 0.055 + 0.01,
-      durata: 0.24,
-      volume: 0.08,
-      forma: 'sine',
-    });
-  }
+  // Le note vengono dalla scala: la prima E' il livello di Catena applicato, le
+  // successive salgono di un grado per ogni gruppo chiuso insieme.
+  noteIntreccio(gruppi, catena).forEach((freq, i) => {
+    nota(freq, { ritardo: i * 0.055, durata: 0.3, volume: 0.2, forma: 'triangle' });
+    nota(freq * 2, { ritardo: i * 0.055 + 0.01, durata: 0.24, volume: 0.07, forma: 'sine' });
+  });
   rumore({ durata: 0.09, volume: 0.07, taglio: 5200 });
+}
+
+/**
+ * La Catena scende di un gradino.
+ *
+ * Stessa scala, un grado sotto, timbro piu' spento e volume basso: si sente che si e'
+ * perso qualcosa senza che suoni come un errore. Perdere la Catena e' una conseguenza
+ * del gioco, non una punizione da sottolineare.
+ */
+export function suonoCatenaGiu(livelloPrecedente) {
+  nota(frequenzaCatenaGiu(livelloPrecedente), {
+    durata: 0.26, volume: 0.11, forma: 'sine', glide: 0.94,
+  });
+}
+
+/**
+ * ULTIMA CHIAMATA: il respiro e' finito, la prossima mossa senza eliminazioni fa calare
+ * il moltiplicatore.
+ *
+ * E' il suono piu' utile del gioco, perche' e' l'unico che dice qualcosa che non si e'
+ * ancora visto: fino a ieri quell'informazione stava solo nella barra, cioe' solo per
+ * chi la sta guardando in quel momento. Due note vicine e brevi, riconoscibili e non
+ * allarmanti: un avviso, non una sirena.
+ */
+export function suonoUltimaChiamata(livello) {
+  const base = frequenzaDiCatena(livello);
+  nota(base, { ritardo: 0, durata: 0.09, volume: 0.13, forma: 'square' });
+  nota(base, { ritardo: 0.13, durata: 0.09, volume: 0.1, forma: 'square' });
 }
 
 /** Mossa eccezionale: un accordo aperto sopra l'arpeggio. */
@@ -190,9 +264,13 @@ export function suonoEsplosione(bombe = 1) {
 
 /** Griglia completamente svuotata: evento raro, merita un suono che nessun altro evento usa. */
 export function suonoGrigliaVuota() {
-  [0, 3, 5, 8, 10].forEach((g, i) => {
-    nota(gradino(g), { ritardo: i * 0.07, durata: 0.7, volume: 0.17, forma: 'sine' });
+  // L'evento piu' raro del gioco (46 volte su 1200 partite nelle simulazioni): merita
+  // l'unico suono davvero grosso, e soprattutto l'unico che RISOLVE -- l'arpeggio sale
+  // per tutta la scala e si ferma sulla fondamentale un'ottava sopra.
+  [0, 2, 4, 6, 8].forEach((grado, i) => {
+    nota(frequenzaDiCatena(grado), { ritardo: i * 0.07, durata: 0.7, volume: 0.16, forma: 'sine' });
   });
+  nota(frequenzaDiCatena(0) * 4, { ritardo: 0.36, durata: 0.9, volume: 0.14, forma: 'triangle' });
 }
 
 /** Nuovo record. */
