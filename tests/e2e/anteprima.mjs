@@ -134,6 +134,36 @@ if (dimensioni.cellaTray > 0 && dimensioni.cella >= dimensioni.cellaTray) {
   );
 }
 
+// ---------- 1c. Sta SOTTO i pezzi in mano, e dentro lo schermo ----------
+// La terna successiva viene dopo quella che hai in mano, e si legge nell'ordine in cui
+// arriva. Sopra il tabellone -- dov'era la prima versione -- era lontana dai pezzi di
+// cui parla. Che sia sotto il tray non e' un gusto: e' l'ordine di lettura.
+const posizione = await page.evaluate(() => {
+  const anteprima = document.querySelector('.pl-anteprima')?.getBoundingClientRect();
+  const tray = document.querySelector('.pl-tray')?.getBoundingClientRect();
+  return {
+    anteprimaTop: anteprima ? Math.round(anteprima.top) : 0,
+    anteprimaBottom: anteprima ? Math.round(anteprima.bottom) : 0,
+    trayBottom: tray ? Math.round(tray.bottom) : 0,
+    finestra: window.innerHeight,
+  };
+});
+console.log(
+  `1c. tray finisce a ${posizione.trayBottom}, anteprima da ${posizione.anteprimaTop} `
+  + `a ${posizione.anteprimaBottom} (schermo ${posizione.finestra})`,
+);
+if (posizione.anteprimaTop < posizione.trayBottom) {
+  errori.push('ANTEPRIMA: non sta sotto i pezzi in mano');
+}
+// E deve starci: aggiungere una striscia in fondo e' anche il modo piu' facile di
+// spingere fuori schermo cio' che c'era gia'.
+if (posizione.anteprimaBottom > posizione.finestra) {
+  errori.push(
+    `ANTEPRIMA: finisce a ${posizione.anteprimaBottom} px, fuori dallo schermo `
+    + `alto ${posizione.finestra}`,
+  );
+}
+
 /** Le forme mostrate in anteprima, come dimensioni della griglietta. */
 const formeAnteprima = () => page.evaluate(() => (
   [...document.querySelectorAll('.pl-anteprima__pezzo')].map((p) => {

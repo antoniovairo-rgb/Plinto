@@ -209,12 +209,6 @@ export function SchermoGioco({
         <p className="pl-modalita">{t(`modo.${modalita}`)}</p>
       )}
 
-      {/* L'anteprima sta SOPRA la plancia e sotto il nome della modalita': si vede
-          alzando lo sguardo, non spostando il pollice. */}
-      {partita.modalita === MODALITA.ANTEPRIMA ? (
-        <AnteprimaTerna mano={partita.manoSuccessiva} t={t} />
-      ) : null}
-
       {/* Catena, plancia e suggerimento formano un blocco unico centrato: su schermi
           alti lo spazio che avanza diventa respiro attorno al tavolo da gioco, non
           tre buchi scollegati fra elementi che parlano della stessa cosa. */}
@@ -274,6 +268,14 @@ export function SchermoGioco({
         onTapPezzo={drag.selezionaPezzo}
         t={t}
       />
+
+      {/* L'anteprima sta SOTTO i pezzi in mano, e non sopra la plancia dov'era prima.
+          La terna successiva viene DOPO quella che hai in mano, e si legge nell'ordine
+          in cui arriva: sopra il tabellone era lontana dai pezzi di cui parla, e
+          costringeva a saltare avanti e indietro con lo sguardo per confrontarle. */}
+      {partita.modalita === MODALITA.ANTEPRIMA ? (
+        <AnteprimaTerna mano={partita.manoSuccessiva} t={t} />
+      ) : null}
 
       {pezzoTrascinato && drag.preso ? (
         <div

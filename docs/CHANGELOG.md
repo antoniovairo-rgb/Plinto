@@ -7,6 +7,22 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.0.2] — 7 settembre 2026
+
+### Modificato
+
+**L'anteprima della terna è passata sotto i pezzi in mano.** Stava sopra il tabellone, ed
+era il posto sbagliato: la terna successiva viene **dopo** quella che hai in mano, e si
+legge nell'ordine in cui arriva. Sopra la plancia era lontana dai pezzi di cui parla, e
+costringeva a saltare avanti e indietro con lo sguardo per confrontarle.
+
+Suggerito da chi gioca. Verificato che ci stia: su 393×873, 360×800 e 360×740 la striscia
+resta dentro lo schermo e la plancia non si accorcia — aggiungere qualcosa in fondo è
+anche il modo più facile di spingere fuori schermo ciò che c'era già.
+
+`npm run anteprima` ora controlla anche **dove** sta: sopra il tray, o fuori dallo
+schermo, è un errore.
+
 ## [1.0.1] — 7 settembre 2026
 
 Due segnalazioni di chi gioca, e in tutti e due i casi il controllo automatico **passava**.
