@@ -7,11 +7,13 @@
  * Per attivarlo si incolla qui il link creato su https://www.paypal.com/paypalme/.
  *
  * NOTA SUL NOME DEL LINK. "elevoraCPM" non e' il nome di questo gioco: e'
- * l'identificativo del conto, ed e' condiviso con l'altro progetto dello stesso
- * autore. PayPal consente UN SOLO link PayPal.Me per conto e non permette di
- * modificarlo dopo la creazione, quindi un link dedicato a PLINTO richiederebbe un
- * secondo conto. Scelta consapevole: chi dona legge l'identificativo del conto nella
- * pagina di pagamento, e va bene cosi'.
+ * l'identificativo del conto, condiviso con l'altro progetto dello stesso autore.
+ * PayPal consente UN SOLO link PayPal.Me per conto e non permette di modificarlo dopo
+ * la creazione, quindi un link dedicato richiederebbe un secondo conto. Non si spiega
+ * niente al giocatore: chi apre la pagina di PayPal vede il nome del conto, come
+ * succede con qualunque donazione, e non e' una cosa che vada giustificata dentro il
+ * gioco. Al momento della pubblicazione sugli store l'identita' sara' comunque
+ * diversa, quindi non vale la pena costruirci sopra.
  *
  * COSA NON PUO' DIVENTARE. Questa e' una donazione ESTERNA e volontaria: il gioco non
  * da' NIENTE in cambio -- nessun contenuto, nessun vantaggio, nessuna comparsa nei

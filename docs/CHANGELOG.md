@@ -7,6 +7,21 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.5.2] — 7 settembre 2026
+
+### Rimosso
+
+**La riga che spiegava il nome del conto PayPal.** L'avevo aggiunta nella 0.5.1 sotto il
+pulsante di donazione: «La pagina di PayPal mostrerà "elevoraCPM"…». Tolta su richiesta, e
+la richiesta ha ragione per due motivi. Il primo: il nome del conto lo si vede sulla pagina di
+PayPal come in **qualunque** donazione a chiunque, e giustificarlo dentro il gioco lo fa
+sembrare un problema invece di una normalità. Il secondo: alla pubblicazione sugli store
+l'identità del progetto sarà comunque un'altra, quindi era una spiegazione con la scadenza
+già scritta sopra.
+
+Resta il pulsante e basta. Il vincolo di PayPal — un solo link per conto, non modificabile —
+resta scritto in `src/config/progetto.js`, dove serve a chi legge il codice e non a chi gioca.
+
 ## [0.5.1] — 7 settembre 2026
 
 ### Aggiunto
