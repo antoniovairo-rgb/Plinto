@@ -13,7 +13,7 @@
 npm run verifica       # esegue TUTTI i controlli, in ordine, e riassume l'esito
 ```
 
-Undici controlli, un comando. Esiste perché i comandi separati vanno ricordati, e ricordarli
+Undici controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
 tutti non ha funzionato: una pubblicazione è stata bloccata dall'integrazione continua
 proprio sul controllo che non era stato eseguito in locale. Non si ferma al primo
 fallimento — arriva in fondo e stampa il quadro completo, perché sapere che tre cose sono

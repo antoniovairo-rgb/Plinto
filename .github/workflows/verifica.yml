@@ -1,5 +1,15 @@
 # Verifica automatica a ogni push e pull request.
-# Gira quello che gira in locale: test unitari, build, e le prove nel browser.
+#
+# UN SOLO COMANDO, E NON E' PIGRIZIA. Questo flusso elencava a mano sei dei controlli
+# del progetto, mentre in locale `npm run verifica` ne esegue undici. Due elenchi che
+# dicono cose diverse invecchiano in modo diverso, e il modo in cui invecchiano si e'
+# gia' visto: `npm run soak` era l'unico controllo fuori dall'elenco locale, si e'
+# rotto (cercava un pulsante che la home non aveva piu') ed e' rimasto rotto per due
+# versioni senza che nessuno se ne accorgesse.
+#
+# Quindi qui si esegue esattamente cio' che esegue chi lavora sul progetto. Aggiungere
+# un controllo in `tools/verifica-tutto.mjs` lo fa girare anche in integrazione
+# continua, senza doversi ricordare di aggiornare anche questo file.
 name: verifica
 
 on:
@@ -21,27 +31,24 @@ jobs:
 
       - run: npm ci
 
-      - name: Test unitari
-        run: npm test
-
-      - name: Build di produzione
-        run: npm run build
-
+      # I controlli nel browser sono cinque su undici: senza Chromium non parte nulla.
       - name: Browser per le prove
         run: npx playwright install --with-deps chromium
 
-      - name: Partita completa nel browser
-        run: npm run e2e
+      # Test unitari, contrasti, build, comunicazioni in due lingue, partita completa,
+      # livelli, precisione del trascinamento, build da sottocartella, service worker
+      # e installazione, aspetto su schermi grandi, resistenza dopo centinaia di mosse.
+      # Non si ferma al primo fallimento: arriva in fondo e stampa il quadro completo.
+      - name: Tutti i controlli
+        run: npm run verifica
 
-      - name: Precisione del trascinamento
-        run: npm run precisione
-
-      # GitHub Pages serve il sito da una sottocartella: e' un caso che si rompe in
-      # silenzio dando una pagina bianca, e nessuna prova fatta dalla radice lo vede.
-      - name: La build funziona anche da una sottocartella
-        run: node tools/prova-sottocartella.mjs
-
-      # Il gioco e' disegnato per il telefono: su un monitor la stessa interfaccia
-      # puo' sfilacciarsi senza che nessun test da viewport telefono se ne accorga.
-      - name: Aspetto su schermi grandi
-        run: node tools/prova-desktop.mjs
+      # Se qualcosa fallisce, il registro completo di OGNI controllo resta scaricabile.
+      # Un fallimento intermittente di cui si e' perso il messaggio e' peggio di un
+      # fallimento e basta: resta il sospetto e non resta niente su cui lavorare.
+      - name: Registro dei controlli
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verifica-log
+          path: verifica.log
+          if-no-files-found: warn

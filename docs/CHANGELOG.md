@@ -84,6 +84,13 @@ in `tail` per leggerne il riassunto, e la diagnosi è andata persa. Non si è pi
 in cinque esecuzioni successive, quindi **resta aperto e non archiviato come "flake"**: non
 so cosa fosse. Da adesso il messaggio non si perde più.
 
+**L'integrazione continua eseguiva sei controlli su undici.** Elencava a mano i propri
+passi, quindi comunicazioni, livelli nel browser, service worker e resistenza non
+giravano mai su GitHub. È lo stesso meccanismo che ha lasciato marcire il soak: due
+elenchi che dicono cose diverse invecchiano in modo diverso. Ora il flusso esegue
+`npm run verifica` e nient'altro, e se qualcosa fallisce `verifica.log` resta
+scaricabile dalla pagina della corsa.
+
 **`node --check` non vede tutto.** Chiudendo male un commento di blocco proprio in
 `tools/verifica-tutto.mjs`, l'intero corpo dello script è finito dentro il commento: file
 sintatticamente valido, `node --check` soddisfatto, programma che non faceva più niente.
