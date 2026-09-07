@@ -11,22 +11,22 @@
 | Cartella | Contenuto reale | Dipende da | Ambiente |
 | --- | --- | --- | --- |
 | `src/config/` | `rules.js` (costanti di regolamento), `progetto.js` (link di donazione, contatto, anno) | niente | neutro |
-| `src/core/` | `rng.js`, `shapes.js`, `grid.js`, `scoring.js`, `generator.js`, `engine.js` | solo `config/` e se stesso | neutro (né DOM né React) |
+| `src/core/` | `rng.js`, `shapes.js`, `grid.js`, `scoring.js`, `generator.js`, `engine.js`, `distribuzioni.js` | solo `config/` e se stesso | neutro (né DOM né React) |
 | `src/sim/` | `player.mjs` (giocatori artificiali), `run.mjs` (harness da riga di comando) | `core/`, `config/` | Node |
-| `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `plinto:`), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
+| `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `plinto:`), `documenti.js` (documenti versionati e migrazioni), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
 | `src/styles/` | `tokens.css` (variabili del sistema di design, vedi `DESIGN_SYSTEM.md`), `app.css` (~770 righe, tutto il resto) | niente | browser |
 | `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |
 | `src/audio/` | `suoni.js` — sintesi Web Audio: nove voci del gioco, **nessun file audio** | niente | browser (`AudioContext`) |
 | `src/feel/` | `useEffettiMossa.js` (traduce `lastMove` in effetti), `particelle.js` (classe `CampoParticelle`, un canvas), `vibrazione.js` (pattern per `navigator.vibrate`) | `config/`, `audio/`, React (solo l'hook) | browser |
 | `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` le schermate (fra cui `Quadri`, `AperturaQuadro`, `FineQuadro`, `AvanzamentoMappa`, `ComeSiGioca`, `Bomba`, `MiniGriglia`, `Salvagente`) più l'impalcatura comune `Pagina.jsx`, e `Installa.jsx` (installazione sul telefono) | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
 | `src/state/` | `usePartita.js`, `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
-| `tests/` | 14 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `quadri`, `i18n`, `sfide`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`) più gli scenari in `e2e/` (`partita`, `precisione`, `resistenza`, `quadri`, `comunicazioni`, `installazione`) | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
+| `tests/` | 16 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `distribuzioni`, `quadri`, `i18n`, `sfide`, `documenti`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`) più gli scenari in `e2e/` (`partita`, `precisione`, `resistenza`, `quadri`, `comunicazioni`, `installazione`) | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
 | `public/` | `icon.svg`, `icone/`, `manifest.webmanifest` e `sw.js` (service worker: installabilità e funzionamento senza rete) | niente | browser |
 | `tools/` | strumenti di misura e di produzione fuori dalla suite: `schermate`, `icone`, `prova-sottocartella`, `prova-desktop`, `quadri`, `taratura`, `genera-quadri`, `contrasti`, `misura-catena` | `core/`, `config/`, Playwright | Node |
 
 Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
 
-- `npm test` passa: **213 test in 14 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
+- `npm test` passa: **240 test in 16 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
   `invarianti.test.js`, che gioca 240 partite complete);
 - `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
 - `npm run sim` funziona;
@@ -86,7 +86,7 @@ Decisione presa. Motivi:
   definizione, nessun disallineamento fra tipi e realtà a runtime.
 - Il costo — perdere il controllo statico — è compensato in parte dai commenti `@param` /
   `@returns` presenti su tutte le funzioni pubbliche del `core/` e in parte dalla suite di
-  test, che sul `core/` resta la parte più densa: dei 213 test, 102 riguardano il `core/`
+  test, che sul `core/` resta la parte più densa: dei 240 test, 102 riguardano il `core/`
   (griglia, punteggio, bombe, generatore, motore, invarianti), 35 i Quadri (definizione, svolgimento e testi della schermata di apertura), 35 l'i18n (chiavi, traduzioni, ortografia italiana e regole della presentazione), 6 la
   Sfida del Giorno e 28 le promesse del progetto su se stesso (privacy, sintassi degli script,
   allineamento delle durate, contrasti WCAG, colori dell'icona).
@@ -298,6 +298,24 @@ file serviti. In cambio esiste un file che intercetta richieste, cioè esattamen
 codice che può violare in silenzio la promessa di `PRIVACY.md`: per questo
 `tests/privacy.test.js` lo legge e rifiuta domini esterni, `sendBeacon`, WebSocket e la
 scomparsa del controllo sull'origine.
+
+
+### ADR-9 — Documenti versionati su localStorage, e un contenitore per le mappe
+**Contesto.** Tutto cio' che PLINTO salva vive solo nel browser di chi gioca: non esiste
+nessuna copia altrove. Finora nessun documento diceva quale versione del gioco lo avesse
+scritto. Finche' i campi si aggiungono soltanto va bene (chi legge fonde sopra i valori
+predefiniti), ma il primo campo che cambia significato diventerebbe un difetto silenzioso.
+**Decisione.** Ogni documento porta un campo `versione` e passa da `persistence/documenti.js`,
+che dichiara quattro casi: assente, forma senza versione (migrata dalla 0), versione
+corrente, versione futura (letta in modo tollerante, con i campi sconosciuti che
+sopravvivono alla riscrittura). Sfide e avanzamento erano mappe nude e sono finite dentro
+un contenitore: un campo `versione` accanto alle date avrebbe creato un giorno che si
+chiama "versione".
+**Conseguenze.** Una migrazione futura e' possibile senza indovinare. In cambio due
+documenti hanno cambiato forma, e la migrazione da quella precedente e' codice che va
+mantenuto finche' esistono giocatori che non aggiornano — cioe' per sempre. E' provata
+sui dati veri in `tests/documenti.test.js`, e di rimbalzo da tutti gli scenari e2e, che
+scrivono `plinto:settings` e `plinto:records` nella forma senza versione.
 
 ## 7. Non ancora deciso
 

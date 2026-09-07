@@ -1,12 +1,12 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono dieci, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono undici, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
  * un elenco che prima o poi si dimentica: qui e' scritto una volta sola, e il comando
- * fallisce se anche uno solo dei dieci fallisce.
+ * fallisce se anche uno solo degli undici fallisce.
  *
  * L'ordine non e' casuale: prima i controlli che costano secondi e trovano gli errori
  * piu' grossolani, poi quelli che aprono un browser. Chi ha rotto la sintassi lo scopre
@@ -16,10 +16,18 @@
  * si stampa il quadro completo, perche' sapere che tre cose sono rotte e' piu' utile
  * che scoprirle una alla volta in tre esecuzioni.
  *
+ * Tutto l'output viene anche SCRITTO SU FILE (`verifica.log`). Serve per una ragione
+ * imparata sul posto: un controllo e' fallito una volta sola, il suo messaggio era a
+ * schermo, e chi guardava aveva incanalato l'output in `tail` per leggere il riassunto.
+ * Il riassunto e' arrivato, la diagnosi no, e il fallimento non si e' piu' ripresentato.
+ * Un fallimento intermittente di cui si e' perso il messaggio e' peggio di un
+ * fallimento e basta: resta il sospetto e non resta niente su cui lavorare.
+ *
  * Uso: npm run verifica
  */
 
 import { spawn } from 'node:child_process';
+import { createWriteStream } from 'node:fs';
 
 const VERIFICHE = [
   { nome: 'test unitari', comando: 'npm', argomenti: ['test'] },
@@ -32,12 +40,38 @@ const VERIFICHE = [
   { nome: 'build servita da una sottocartella', comando: 'npm', argomenti: ['run', 'prova-pages'] },
   { nome: 'installabile, senza rete e aggiornabile', comando: 'npm', argomenti: ['run', 'installazione'] },
   { nome: 'aspetto su schermi grandi', comando: 'npm', argomenti: ['run', 'prova-desktop'] },
+  // La prova di resistenza e' entrata in questo elenco dopo essersi rotta in silenzio:
+  // cercava un pulsante della home che non esisteva piu' da due versioni, e nessuno
+  // se n'era accorto perche' era l'unico controllo che restava fuori di qui. Un
+  // controllo che si lancia solo quando qualcuno se lo ricorda e' un controllo che
+  // prima o poi non si lancia piu'.
+  { nome: 'resistenza: memoria e fluidita dopo centinaia di mosse', comando: 'npm', argomenti: ['run', 'soak'] },
 ];
 
-/** Esegue un comando mostrandone l'output dal vivo. @returns {Promise<boolean>} */
+const LOG = new URL('../verifica.log', import.meta.url).pathname;
+const registro = createWriteStream(LOG, { flags: 'w' });
+
+/** Scrive a schermo e sul registro, senza incanalare niente. */
+function eco(testo, dove = 'stdout') {
+  process[dove].write(testo);
+  registro.write(testo);
+}
+
+/**
+ * Esegue un comando mostrandone l'output dal vivo e conservandolo sul registro.
+ * L'output NON viene incanalato in nessun altro comando: il codice di uscita di una
+ * pipeline e' quello dell'ultimo comando, e con `| tail` un fallimento risulta un
+ * successo. E' gia' successo, ed e' il motivo per cui questo file esiste.
+ * @returns {Promise<boolean>}
+ */
 function esegui({ comando, argomenti }) {
   return new Promise((risolvi) => {
-    const p = spawn(comando, argomenti, { stdio: 'inherit', shell: process.platform === 'win32' });
+    const p = spawn(comando, argomenti, {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      shell: process.platform === 'win32',
+    });
+    p.stdout.on('data', (d) => eco(d.toString()));
+    p.stderr.on('data', (d) => eco(d.toString(), 'stderr'));
     p.on('close', (codice) => risolvi(codice === 0));
     p.on('error', () => risolvi(false));
   });
@@ -48,22 +82,25 @@ const esiti = [];
 
 for (const verifica of VERIFICHE) {
   const da = Date.now();
-  console.log(`\n[1m▶ ${verifica.nome}[0m`);
+  eco(`\n\u001b[1m\u25b6 ${verifica.nome}\u001b[0m\n`);
   const ok = await esegui(verifica);
   esiti.push({ ...verifica, ok, secondi: Math.round((Date.now() - da) / 1000) });
 }
 
 const falliti = esiti.filter((e) => !e.ok);
 
-console.log(`\n${'='.repeat(60)}`);
-console.log(`VERIFICA COMPLETA — ${esiti.length} controlli in ${Math.round((Date.now() - inizio) / 1000)}s\n`);
+eco(`\n${'='.repeat(60)}\n`);
+eco(`VERIFICA COMPLETA \u2014 ${esiti.length} controlli in ${Math.round((Date.now() - inizio) / 1000)}s\n\n`);
 for (const e of esiti) {
-  console.log(`  ${e.ok ? '✓' : '✗'}  ${e.nome.padEnd(46)} ${String(e.secondi).padStart(4)}s`);
+  eco(`  ${e.ok ? '\u2713' : '\u2717'}  ${e.nome.padEnd(46)} ${String(e.secondi).padStart(4)}s\n`);
 }
-console.log('');
+eco('\n');
 
 if (falliti.length > 0) {
-  console.error(`${falliti.length} controlli su ${esiti.length} sono falliti. NON pubblicare.\n`);
-  process.exit(1);
+  eco(`${falliti.length} controlli su ${esiti.length} sono falliti. NON pubblicare.\n`, 'stderr');
+  eco(`Output completo di ogni controllo, senza niente perso: ${LOG}\n\n`, 'stderr');
+  registro.end(() => process.exit(1));
+} else {
+  eco(`Tutti i controlli sono passati. Registro: ${LOG}\n\n`);
+  registro.end();
 }
-console.log('Tutti i controlli sono passati.\n');

@@ -16,9 +16,33 @@
  * Nessun dato lascia il dispositivo: non esiste classifica perche' non esiste server.
  */
 
-import { read, write, KEYS } from './storage.js';
+import { KEYS } from './storage.js';
+import { leggiDocumento, scriviDocumento } from './documenti.js';
 
 const CHIAVE = KEYS.CHALLENGES;
+
+/**
+ * Versione del documento delle sfide.
+ *
+ * Alla 1 cambia la FORMA, non solo il timbro: prima il documento era la mappa nuda
+ * dei giorni (`{"2026-09-06": {...}}`), adesso i giorni stanno dentro un campo
+ * `giorni`. Serviva: con la mappa nuda, aggiungere un campo `versione` accanto alle
+ * date avrebbe creato un giorno che si chiama "versione", e ogni ciclo su
+ * `Object.keys` lo avrebbe trattato come una data. La migrazione dalla forma
+ * precedente e' automatica e non perde nessun risultato.
+ */
+const VERSIONE = 1;
+
+/** Dalla mappa nuda dei giorni alla forma con contenitore. */
+function migra(dati, da) {
+  if (da === 0) return { giorni: dati };
+  return dati;
+}
+
+/** Il documento completo, sempre nella forma corrente. */
+function documento() {
+  return leggiDocumento(CHIAVE, { versione: VERSIONE, predefiniti: { giorni: {} }, migra });
+}
 
 /** Quanti giorni di storico conservare. Oltre non serve e occupa spazio inutilmente. */
 const GIORNI_CONSERVATI = 60;
@@ -31,10 +55,10 @@ export function giornoDiOggi(adesso = new Date()) {
   return `${anno}-${mese}-${giorno}`;
 }
 
-/** @returns {Record<string, {best:number, partite:number}>} */
+/** @returns {Record<string, {best:number, partite:number}>} i giorni giocati */
 export function caricaSfide() {
-  const dati = read(CHIAVE, {});
-  return dati && typeof dati === 'object' ? dati : {};
+  const giorni = documento().giorni;
+  return giorni && typeof giorni === 'object' ? giorni : {};
 }
 
 /** Risultato del giocatore per un giorno. */
@@ -62,7 +86,7 @@ export function registraSfida(punteggio, giorno = giornoDiOggi()) {
     delete tutte[giorni.shift()];
   }
 
-  write(CHIAVE, tutte);
+  scriviDocumento(CHIAVE, VERSIONE, { giorni: tutte });
   return { ...tutte[giorno], nuovoRecordDiGiornata };
 }
 

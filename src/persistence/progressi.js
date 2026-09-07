@@ -10,12 +10,36 @@
  * attese perche' non esistono timer.
  */
 
-import { read, write, KEYS } from './storage.js';
+import { KEYS } from './storage.js';
+import { leggiDocumento, scriviDocumento } from './documenti.js';
+
+/**
+ * Versione del documento dell'avanzamento.
+ *
+ * Come per le sfide, alla 1 i livelli finiscono dentro un campo `livelli` invece di
+ * stare nudi nell'oggetto: un campo `versione` accanto ai numeri dei livelli sarebbe
+ * stato contato come un livello superato da `quantiSuperati`. La migrazione dalla
+ * forma precedente non perde nessun progresso.
+ */
+const VERSIONE = 1;
+
+/** Dalla mappa nuda dei livelli alla forma con contenitore. */
+function migra(dati, da) {
+  if (da === 0) return { livelli: dati };
+  return dati;
+}
+
+/** Salva la mappa dei livelli nella forma corrente. */
+function salva(livelli) {
+  return scriviDocumento(KEYS.PROGRESS, VERSIONE, { livelli });
+}
 
 /** @returns {Record<string, {mosse:number, punteggio:number, tentativi:number}>} */
 export function caricaProgressi() {
-  const dati = read(KEYS.PROGRESS, {});
-  return dati && typeof dati === 'object' ? dati : {};
+  const livelli = leggiDocumento(
+    KEYS.PROGRESS, { versione: VERSIONE, predefiniti: { livelli: {} }, migra },
+  ).livelli;
+  return livelli && typeof livelli === 'object' ? livelli : {};
 }
 
 /** Il Quadro e' stato superato almeno una volta? */
@@ -59,7 +83,7 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
   if (!superato) {
     // Anche un tentativo fallito viene contato, ma non crea un record dal nulla.
     if (precedente) progressi[numero] = { ...precedente, tentativi };
-    write(KEYS.PROGRESS, progressi);
+    salva(progressi);
     return { salvati: progressi, miglioramento: false, primaVolta: false };
   }
 
@@ -71,7 +95,7 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
     ? { mosse, punteggio, tentativi }
     : { ...precedente, tentativi };
 
-  write(KEYS.PROGRESS, progressi);
+  salva(progressi);
   return { salvati: progressi, miglioramento: meglio && Boolean(precedente), primaVolta: !precedente };
 }
 
@@ -84,7 +108,7 @@ export function registraTentativo(numero, { superato, mosse, punteggio }) {
  * nelle impostazioni, ed e' giusto che siano due cose distinte.
  */
 export function azzeraProgressi() {
-  write(KEYS.PROGRESS, {});
+  salva({});
 }
 
 /** Quanti Quadri sono stati superati. */

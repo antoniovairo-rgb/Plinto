@@ -4,30 +4,40 @@
  * nessuna ricompensa a tempo. Si torna a giocare per battere se stessi.
  */
 
-import { read, write, KEYS } from './storage.js';
+import { KEYS } from './storage.js';
+import { leggiDocumento, scriviDocumento } from './documenti.js';
+
+/**
+ * Versione dei due documenti di questo modulo.
+ * Alla 1 si passa dalla forma senza versione: i campi sono gli stessi, cambia solo
+ * il fatto che adesso il documento dice da dove viene.
+ */
+const VERSIONE = 1;
+
+const RECORD_PREDEFINITI = {
+  best: 0,
+  bestChain: 0,
+  bestMove: 0,
+  bestGroupsInOneMove: 0,
+};
+
+const STATISTICHE_PREDEFINITE = {
+  partite: 0,
+  punteggioTotale: 0,
+  mosseTotali: 0,
+  gruppiTotali: 0,
+  griglieSvuotate: 0,
+  tempoTotaleMs: 0,
+};
 
 /** @returns {{best:number, bestChain:number, bestMove:number, bestGroupsInOneMove:number}} */
 export function loadRecords() {
-  return {
-    best: 0,
-    bestChain: 0,
-    bestMove: 0,
-    bestGroupsInOneMove: 0,
-    ...(read(KEYS.RECORDS, {}) ?? {}),
-  };
+  return leggiDocumento(KEYS.RECORDS, { versione: VERSIONE, predefiniti: RECORD_PREDEFINITI });
 }
 
 /** @returns {{partite:number, punteggioTotale:number, mosseTotali:number, gruppiTotali:number, griglieSvuotate:number, tempoTotaleMs:number}} */
 export function loadStats() {
-  return {
-    partite: 0,
-    punteggioTotale: 0,
-    mosseTotali: 0,
-    gruppiTotali: 0,
-    griglieSvuotate: 0,
-    tempoTotaleMs: 0,
-    ...(read(KEYS.STATS, {}) ?? {}),
-  };
+  return leggiDocumento(KEYS.STATS, { versione: VERSIONE, predefiniti: STATISTICHE_PREDEFINITE });
 }
 
 /**
@@ -55,8 +65,8 @@ export function recordGame(summary) {
   stats.griglieSvuotate += summary.boardClears;
   stats.tempoTotaleMs += summary.durationMs;
 
-  write(KEYS.RECORDS, records);
-  write(KEYS.STATS, stats);
+  scriviDocumento(KEYS.RECORDS, VERSIONE, records);
+  scriviDocumento(KEYS.STATS, VERSIONE, stats);
 
   return { records, stats, nuoviRecord };
 }

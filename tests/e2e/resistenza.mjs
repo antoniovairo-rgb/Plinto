@@ -62,7 +62,12 @@ page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 await page.evaluate(() => window.localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true })));
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+// La partita libera, non il percorso a livelli: qui servono centinaia di mosse di
+// fila, e un livello finisce. Il nome del pulsante e' quello della home attuale --
+// questo script cercava ancora un pulsante "Gioca" che non esiste piu' da quando la
+// home e' stata ristrutturata, e non se n'era accorto nessuno perche' `npm run soak`
+// non faceva parte di `npm run verifica`. Adesso ne fa parte.
+await page.getByRole('button', { name: /Partita libera|Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
 
 /** Memoria JS occupata, se il browser la espone. */

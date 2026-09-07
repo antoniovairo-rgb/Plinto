@@ -315,3 +315,79 @@ describe('riproducibilita completa', () => {
     expect(gioca()).toEqual(gioca());
   });
 });
+
+describe('distribuzioni dentro lo stato di gioco', () => {
+  it('un salvataggio scritto PRIMA che esistessero riparte da zero senza rompersi', () => {
+    // E' il caso di chiunque aggiorni con una partita a meta'. Il salvataggio resta
+    // della versione 1 di proposito: alzare STATE_VERSION per un'aggiunta compatibile
+    // butterebbe via la partita in corso di ogni giocatore.
+    const stato = createGame({ seed: 4242 });
+    const salvato = serializeGame(stato);
+    delete salvato.stats.istogrammaCatena;
+    delete salvato.stats.istogrammaIntreccio;
+    delete salvato.stats.mappaAppoggi;
+
+    const ripreso = deserializeGame(salvato);
+    expect(ripreso, 'una partita in corso non deve andare persa').not.toBeNull();
+    expect(ripreso.stats.istogrammaCatena.every((n) => n === 0)).toBe(true);
+    expect(ripreso.stats.mappaAppoggi).toHaveLength(81);
+
+    // E da lì in poi conta regolarmente.
+    const dopo = placePiece(ripreso, ...primaMossa(ripreso));
+    expect(dopo.stats.istogrammaCatena.reduce((s, n) => s + n, 0)).toBe(1);
+  });
+
+  it('la mossa viene contata sulla Catena APPLICATA, non su quella che lascia dietro', () => {
+    // La distinzione non e' un dettaglio: e' la stessa regola di trasparenza del
+    // punteggio. Chiudendo una riga da Catena 0 si guadagna il livello 1, ma il
+    // moltiplicatore usato per quella mossa era ancora quello del livello 0, ed e'
+    // quello che il giocatore vedeva. Un istogramma indicizzato sulla Catena
+    // successiva racconterebbe una partita giocata meglio di com'e' andata.
+    const s = scenario('########.\n' + '.........\n'.repeat(7) + '#........', ['p1', 'v3', 'h4']);
+    const dopo = placePiece(s, 0, 0, 8);
+    expect(dopo.chain, 'la Catena sale davvero').toBe(1);
+    expect(dopo.stats.istogrammaCatena[0], 'la mossa vale come giocata a Catena 0').toBe(1);
+    expect(dopo.stats.istogrammaCatena[1], 'e NON a Catena 1').toBe(0);
+    expect(dopo.stats.istogrammaIntreccio[1]).toBe(1);
+    expect(dopo.stats.mappaAppoggi[0 * 9 + 8], 'ancorata dove e stata appoggiata').toBe(1);
+  });
+
+  it('un salvataggio con istogrammi della lunghezza sbagliata viene azzerato, non accettato', () => {
+    const salvato = serializeGame(createGame({ seed: 7 }));
+    salvato.stats.istogrammaCatena = [1, 2, 3];
+    const ripreso = deserializeGame(salvato);
+    expect(ripreso.stats.istogrammaCatena).toHaveLength(10);
+    expect(ripreso.stats.istogrammaCatena.every((n) => n === 0)).toBe(true);
+  });
+
+  it('salvataggio e ripristino conservano le distribuzioni gia accumulate', () => {
+    let stato = createGame({ seed: 99 });
+    for (let i = 0; i < 6 && stato.status === 'playing'; i += 1) {
+      stato = placePiece(stato, ...primaMossa(stato));
+    }
+    const ripreso = deserializeGame(serializeGame(stato));
+    expect(ripreso.stats.istogrammaCatena).toEqual(stato.stats.istogrammaCatena);
+    expect(ripreso.stats.mappaAppoggi).toEqual(stato.stats.mappaAppoggi);
+  });
+
+  it('summarize espone le distribuzioni e i totali combaciano con le mosse', () => {
+    let stato = createGame({ seed: 12345 });
+    for (let i = 0; i < 20 && stato.status === 'playing'; i += 1) {
+      stato = placePiece(stato, ...primaMossa(stato));
+    }
+    const r = summarize(stato);
+    expect(r.istogrammaCatena.reduce((s, n) => s + n, 0)).toBe(r.moves);
+    expect(r.mappaAppoggi.reduce((s, n) => s + n, 0)).toBe(r.piecesPlaced);
+  });
+});
+
+/** La prima mossa legale disponibile: serve solo a far avanzare la partita. */
+function primaMossa(stato) {
+  for (let i = 0; i < stato.hand.length; i += 1) {
+    const pezzo = stato.hand[i];
+    if (!pezzo) continue;
+    const posizioni = allPlacements(stato.grid, pezzo.shape);
+    if (posizioni.length > 0) return [i, posizioni[0][0], posizioni[0][1]];
+  }
+  return [0, 0, 0];
+}
