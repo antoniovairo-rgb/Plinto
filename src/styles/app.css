@@ -365,9 +365,30 @@ button {
 }
 
 /* ------------------------------------------------------------------ home --- */
+/*
+ * LA HOME NON DEVE MAI TAGLIARE NIENTE.
+ *
+ * Questa schermata era `justify-content: center` con `overflow: visible`, ed e' andata
+ * bene finche' il contenuto ci stava. Poi sono arrivate tre voci nuove -- archivio,
+ * profilo, partita con anteprima -- e su un telefono da 360x800, con una partita e una
+ * sfida entrambe in corso, il contenuto ha superato l'altezza dello schermo. Centrare
+ * qualcosa piu' alto del contenitore lo fa sporgere da TUTTE E DUE le parti, e senza
+ * scorrimento quella parte non e' solo invisibile: e' irraggiungibile. Il logo finiva
+ * sotto la barra di stato e la versione spariva sotto il bordo inferiore.
+ *
+ * Tre cose lo impediscono, e servono tutte e tre:
+ *   - `safe center`: il centraggio si comporta come un allineamento in alto appena il
+ *     contenuto non ci sta, invece di sporgere sopra. La riga senza `safe` resta come
+ *     ripiego per i browser che non la conoscono.
+ *   - `overflow-y: auto`: se anche cosi' non ci sta -- caratteri ingranditi, schermo
+ *     piccolo -- si scorre. Non ci si arrende a nascondere.
+ *   - un `gap` che si stringe sugli schermi bassi invece di restare a 5vh.
+ */
 .pl-home {
   justify-content: center;
-  gap: 5vh;
+  justify-content: safe center;
+  overflow-y: auto;
+  gap: clamp(10px, 5vh, 44px);
   padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
   text-align: center;
 }
@@ -1643,23 +1664,29 @@ button {
    informazione sta sopra AA come tutto il resto, e un'anteprima sbiadita e' la via
    piu' rapida per far fallire npm run contrasti. */
 .pl-anteprima {
-  display: flex; align-items: center; gap: 10px;
-  margin: 2px auto 6px; padding: 4px 10px;
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px auto 8px; padding: 7px 12px;
   border: 1px solid var(--pl-line); border-radius: var(--pl-radius-sm);
   background: var(--pl-ink-2);
 }
 .pl-anteprima:focus-visible { outline: 3px solid var(--pl-brand); outline-offset: 2px; }
 .pl-anteprima__etichetta {
-  font-size: 0.62rem; letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--pl-text-dim); white-space: nowrap;
 }
-.pl-anteprima__pezzi { display: flex; align-items: center; gap: 10px; }
+.pl-anteprima__pezzi { display: flex; align-items: center; gap: 14px; }
 .pl-anteprima__pezzo { display: grid; gap: 1px; }
 /* Sagome in grigio di struttura: il colore dei pezzi e' estetico, e mostrarlo qui
-   suggerirebbe che conti qualcosa. */
+   suggerirebbe che conti qualcosa.
+   LA DIMENSIONE E' STATA SBAGLIATA UNA VOLTA: celle da 6 px, striscia alta 23. Il
+   controllo nel browser verificava che la striscia CI FOSSE, non che si vedesse, e
+   passava; un giocatore l'ha aperta e ha detto "non vedo l'anteprima dei pezzi". Aveva
+   ragione: c'era ed era illeggibile. Adesso la cella e' grande la meta' di una del
+   tabellone -- abbastanza da leggere la forma a colpo d'occhio, abbastanza meno da non
+   confondersi con la mano vera. */
 .pl-anteprima__cella {
-  width: 6px; height: 6px; border-radius: 1px;
-  background: var(--pl-text-dim); position: relative;
+  width: 11px; height: 11px; border-radius: 2px;
+  background: var(--pl-text); position: relative;
 }
 .pl-anteprima__cella .pl-bomba { position: absolute; inset: -1px; }
-.pl-anteprima__vuoto { width: 6px; height: 6px; }
+.pl-anteprima__vuoto { width: 11px; height: 11px; }

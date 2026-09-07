@@ -7,6 +7,45 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.0.1] — 7 settembre 2026
+
+Due segnalazioni di chi gioca, e in tutti e due i casi il controllo automatico **passava**.
+
+### Corretto
+
+**La home tagliava il logo e la versione.** Su un telefono da 360×800 in giù, con una
+partita libera **e** una sfida entrambe in corso, il contenuto superava l'altezza dello
+schermo: `justify-content: center` senza scorrimento fa sporgere il contenuto da tutte e
+due le parti, e la parte fuori non era solo invisibile — era **irraggiungibile**. Il logo
+finiva sotto la barra di stato, la versione sotto il bordo inferiore.
+
+Non è comparso dal nulla: la home è cresciuta di **tre voci in tre versioni** — archivio,
+profilo, partita con anteprima — e ognuna, da sola, ci stava. Corretto con tre cose che
+servono tutte: `safe center` (il centraggio si comporta da allineamento in alto appena il
+contenuto non ci sta), `overflow-y: auto` (se avanza, si scorre) e un `gap` che si stringe
+sugli schermi bassi invece di restare a `5vh`.
+
+**L'anteprima della terna c'era e non si vedeva.** Striscia alta 23 px, celle da 6:
+presente nel DOM, illeggibile su un telefono. Portata a celle da 11 px contro le 18 del
+tray — abbastanza da leggere la forma a colpo d'occhio, abbastanza meno da non confondersi
+con la mano vera.
+
+### Le due prove che mancavano
+
+Entrambi i difetti erano **davanti agli occhi** e nessun controllo li vedeva, per la stessa
+ragione: verificavano che un elemento **esistesse**, non che qualcuno lo **vedesse**.
+
+- `npm run prova-desktop` ora apre la home anche su **quattro formati di telefono**
+  (393×873, 360×800, 360×740, 320×700) nello stato **più affollato possibile** — che è
+  l'unico in cui il difetto compare — e fallisce se la testata finisce sopra il bordo, se
+  la versione sparisce, se del contenuto resta fuori senza poter scorrere, o se il pulsante
+  principale scende sotto i 44 px.
+- `npm run anteprima` ora misura la striscia: celle sotto i 9 px o striscia sotto i 34 px
+  sono un errore, e lo sono anche celle **non più piccole** di quelle del tray.
+
+Collaudate rimettendo i difetti: la prima accusa il taglio su tre formati su quattro
+nominandoli, la seconda dice «celle da 6 px, illeggibili su un telefono».
+
 ## [1.0.0] — 7 settembre 2026
 
 Fase 6, l'ultima del piano evolutivo: **l'anteprima della prossima terna**. È l'unica che

@@ -99,6 +99,41 @@ console.log(`1. modalita a schermo: "${modalita}" | strisce di anteprima: ${stri
 if (!/anteprima/i.test(modalita)) errori.push(`ANTEPRIMA: la modalita a schermo dice "${modalita}"`);
 if (strisce !== 1) errori.push(`ANTEPRIMA: ${strisce} strisce invece di una`);
 
+// ---------- 1b. La striscia si deve VEDERE, non solo esistere ----------
+// Questo controllo esiste perche' la prima versione passava con celle da 6 px e una
+// striscia alta 23: c'era, e un giocatore ha aperto la modalita' e ha detto "non vedo
+// l'anteprima dei pezzi". Aveva ragione. Verificare che un elemento sia nel DOM non
+// e' verificare che qualcuno lo veda.
+const dimensioni = await page.evaluate(() => {
+  const striscia = document.querySelector('.pl-anteprima')?.getBoundingClientRect();
+  const cella = document.querySelector('.pl-anteprima__cella')?.getBoundingClientRect();
+  const tray = document.querySelector('.pl-tray .pl-pezzo .pl-pezzo__cella')?.getBoundingClientRect();
+  return {
+    altezza: striscia ? Math.round(striscia.height) : 0,
+    larghezza: striscia ? Math.round(striscia.width) : 0,
+    cella: cella ? Math.round(cella.width) : 0,
+    cellaTray: tray ? Math.round(tray.width) : 0,
+  };
+});
+console.log(
+  `1b. striscia ${dimensioni.larghezza}x${dimensioni.altezza} px, `
+  + `cella ${dimensioni.cella} px (nel tray ${dimensioni.cellaTray} px)`,
+);
+if (dimensioni.cella < 9) {
+  errori.push(`ANTEPRIMA: celle da ${dimensioni.cella} px, illeggibili su un telefono`);
+}
+if (dimensioni.altezza < 34) {
+  errori.push(`ANTEPRIMA: striscia alta ${dimensioni.altezza} px, passa inosservata`);
+}
+// E deve restare piu' piccola della mano vera: si distingue per DIMENSIONE, non per
+// opacita' -- un'anteprima sbiadita farebbe fallire i contrasti.
+if (dimensioni.cellaTray > 0 && dimensioni.cella >= dimensioni.cellaTray) {
+  errori.push(
+    `ANTEPRIMA: celle da ${dimensioni.cella} px, non piu' piccole di quelle del tray `
+    + `(${dimensioni.cellaTray} px): si confonde con la mano vera`,
+  );
+}
+
 /** Le forme mostrate in anteprima, come dimensioni della griglietta. */
 const formeAnteprima = () => page.evaluate(() => (
   [...document.querySelectorAll('.pl-anteprima__pezzo')].map((p) => {

@@ -1,10 +1,21 @@
 /**
- * Controllo dell'aspetto su schermo grande.
+ * Controllo dell'aspetto: schermi grandi, e telefoni piccoli con la home piu' affollata.
  *
- * Il gioco e' disegnato per il telefono e viene verificato su viewport da telefono:
- * su un monitor la stessa interfaccia puo' sfilacciarsi senza che nessun test se ne
- * accorga. Qui si misura una cosa concreta e non opinabile: la distanza fra la fine
- * del contenuto e il pulsante principale.
+ * DUE MISURE, DUE MOTIVI DIVERSI.
+ *
+ * 1. SU SCHERMO GRANDE il gioco puo' sfilacciarsi: e' disegnato per il telefono e
+ *    provato su viewport da telefono. Si misura la distanza fra la fine del contenuto
+ *    della presentazione e il pulsante principale.
+ *
+ * 2. SU TELEFONO PICCOLO la home puo' TAGLIARE. Ed e' successo davvero: la schermata
+ *    centrava il contenuto senza scorrimento, il contenuto e' cresciuto di tre voci in
+ *    tre versioni -- archivio, profilo, partita con anteprima -- e su un telefono da
+ *    360x800, con una partita e una sfida entrambe in corso, il logo e' finito sotto la
+ *    barra di stato e la versione sotto il bordo inferiore. Irraggiungibili, non solo
+ *    invisibili. L'ha segnalato un giocatore guardando lo schermo, non un test.
+ *
+ *    La home viene quindi aperta nello stato PIU' AFFOLLATO possibile -- che e' anche
+ *    l'unico in cui il difetto compare -- sui formati di telefono piu' stretti in giro.
  *
  * Uso: node tools/prova-desktop.mjs
  */
@@ -78,10 +89,86 @@ for (const schermo of SCHERMI) {
   await page.close();
 }
 
+// ---------------------------------------------------------------------------
+// La home nello stato piu' affollato, sui telefoni piu' piccoli.
+// ---------------------------------------------------------------------------
+const { createGame, serializeGame } = await import('../src/core/engine.js');
+// Una partita libera E una sfida entrambe in corso: e' la configurazione con piu' righe
+// possibili in home (compare anche "Nuova partita"), ed e' quella del giocatore che ha
+// segnalato il problema.
+const PARTITA = serializeGame(createGame({ seed: 1 }));
+const SFIDA = serializeGame(createGame({ seed: '2026-09-07' }));
+
+const TELEFONI = [
+  { nome: 'telefono-alto', width: 393, height: 873 },
+  { nome: 'telefono-comune', width: 360, height: 800 },
+  { nome: 'telefono-piccolo', width: 360, height: 740 },
+  { nome: 'telefono-stretto', width: 320, height: 700 },
+];
+
+for (const schermo of TELEFONI) {
+  const page = await browser.newPage({
+    viewport: { width: schermo.width, height: schermo.height }, locale: 'it-IT',
+  });
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await page.evaluate(([partita, sfida]) => {
+    window.localStorage.setItem('plinto:settings', JSON.stringify({
+      introVista: true, lingua: 'it', tema: 'scuro', animazioni: true, aiutoVisivo: true,
+    }));
+    window.localStorage.setItem('plinto:quadri', JSON.stringify({
+      versione: 1,
+      livelli: Object.fromEntries(
+        Array.from({ length: 20 }, (_, i) => [i + 1, { mosse: 8, punteggio: 400, tentativi: 1 }]),
+      ),
+    }));
+    window.localStorage.setItem('plinto:records', JSON.stringify({ versione: 1, best: 454 }));
+    window.localStorage.setItem('plinto:partita', JSON.stringify(partita));
+    window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(sfida));
+  }, [PARTITA, SFIDA]);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('.pl-home');
+
+  const misure = await page.evaluate(() => {
+    const home = document.querySelector('.pl-home');
+    const testata = document.querySelector('.pl-home__testata');
+    const versione = document.querySelector('.pl-home__versione');
+    const primo = document.querySelector('.pl-home__azioni .pl-btn');
+    return {
+      testataTop: testata ? Math.round(testata.getBoundingClientRect().top) : null,
+      versioneTrovata: Boolean(versione),
+      scorrimento: home.scrollHeight - home.clientHeight,
+      puoScorrere: getComputedStyle(home).overflowY !== 'visible',
+      primoAltezza: primo ? Math.round(primo.getBoundingClientRect().height) : 0,
+    };
+  });
+  await page.screenshot({ path: `${USCITA}/${schermo.nome}-home.png` });
+  console.log(
+    `${schermo.nome.padEnd(17)} ${schermo.width}x${schermo.height}  `
+    + `testata y=${String(misure.testataTop).padStart(4)}  `
+    + `${misure.scorrimento > 0 ? `da scorrere ${misure.scorrimento} px` : 'sta tutto'}`,
+  );
+
+  // Il taglio in alto e' il difetto vero: quello che si vede e non si puo' recuperare.
+  if (misure.testataTop < 0) {
+    errori.push(`${schermo.nome}: la testata e tagliata in alto (y=${misure.testataTop})`);
+  }
+  if (!misure.versioneTrovata) errori.push(`${schermo.nome}: la versione non c'e' in fondo alla home`);
+  // Se qualcosa avanza, deve essere raggiungibile: sporgere senza poter scorrere
+  // significa nascondere una parte della schermata per sempre.
+  if (misure.scorrimento > 0 && !misure.puoScorrere) {
+    errori.push(`${schermo.nome}: ${misure.scorrimento} px di contenuto fuori schermo e NON scorribili`);
+  }
+  // Il pulsante principale deve restare premibile col pollice anche quando si stringe.
+  if (misure.primoAltezza < 44) {
+    errori.push(`${schermo.nome}: il pulsante principale e alto ${misure.primoAltezza} px`);
+  }
+  await page.close();
+}
+
 await browser.close();
 if (server) server.kill();
 
 console.log('\n================ ESITO ================');
-if (errori.length === 0) console.log('Aspetto coerente su tutti gli schermi provati.');
+if (errori.length === 0) console.log('Aspetto coerente su tutti gli schermi provati, dal monitor al telefono stretto.');
 else errori.forEach((e) => console.log('PROBLEMA -', e));
 process.exit(errori.length === 0 ? 0 : 1);
