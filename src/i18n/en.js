@@ -25,7 +25,6 @@ export default {
   modo: {
     libera: 'Free play',
     sfida: 'Daily challenge',
-    anteprima: 'Game with preview',
   },
   gioca: {
     trascina: 'Drag a piece onto the grid',
@@ -96,8 +95,7 @@ export default {
     titolo: 'Next set',
     nessuna: 'Next set: not drawn yet',
     conBomba: 'with a bomb',
-    avvio: 'Game with preview',
-    spiegazione: 'You see the next set before finishing the one in hand. It is a separate mode with separate records: seeing ahead is an advantage, and mixing the scores would declare two things comparable when they are not.',
+    spiegazione: 'In the levels you see the next set before finishing the one in hand. A level is a problem with a solution: it has a stated goal, a move budget and a fixed grid, and you cannot reason about a piece you do not know is coming. Free play has nothing to solve — you last as long as you last, and not knowing what is coming is part of what makes it free.',
     tasto: 'Press P to read the next set',
   },
   scheda: {

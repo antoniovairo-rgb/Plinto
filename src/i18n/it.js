@@ -38,7 +38,6 @@ export default {
   modo: {
     libera: 'Partita libera',
     sfida: 'Sfida del giorno',
-    anteprima: 'Partita con anteprima',
   },
   gioca: {
     trascina: 'Trascina un pezzo sulla griglia',
@@ -109,8 +108,7 @@ export default {
     titolo: 'Prossima terna',
     nessuna: 'Prossima terna: non ancora estratta',
     conBomba: 'con bomba',
-    avvio: 'Partita con anteprima',
-    spiegazione: 'Vedi la terna successiva prima di finire quella in mano. È una modalità a parte, con record separati: vedere avanti è un vantaggio, e mescolare i punteggi vorrebbe dire dichiarare confrontabili due cose che non lo sono.',
+    spiegazione: 'Nei livelli vedi la terna successiva prima di finire quella che hai in mano. Un livello è un problema con una soluzione: ha un obiettivo dichiarato, un tetto di mosse e una griglia fissa, e su un pezzo che non sai se arriverà non si può ragionare. Nella partita libera invece non c\'è niente da risolvere — si dura finché si dura, e non sapere cosa arriva è parte di cosa la rende libera.',
     tasto: 'Premi P per leggere la prossima terna',
   },
   scheda: {

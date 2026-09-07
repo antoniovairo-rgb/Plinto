@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
-import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI } from '../src/core/quadro.js';
+import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI, MODALITA_QUADRI } from '../src/core/quadro.js';
 import { gridFromString, findCompletedGroups, filledCount, allPlacements, placeShape } from '../src/core/grid.js';
+import { createGame } from '../src/core/engine.js';
 import { traduttore, LINGUE } from '../src/i18n/index.js';
 import { celleDa } from '../src/ui/MiniGriglia.jsx';
 import { descriviObiettivo } from '../src/ui/schermate/Quadri.jsx';
-import { GRID_SIZE } from '../src/config/rules.js';
+import { GRID_SIZE, MODALITA, HAND_SIZE } from '../src/config/rules.js';
+import { MODALITA_TARATURA } from '../src/config/quadri.js';
 
 const memoria = new Map();
 vi.stubGlobal('window', {
@@ -70,6 +72,35 @@ describe('definizione dei Quadri', () => {
       const giocabile = partita.hand.some((p) => p && allPlacements(partita.grid, p.shape).length > 0);
       expect(giocabile, `quadro ${q.numero} (${q.nome}) parte gia bloccato`).toBe(true);
     });
+  });
+});
+
+describe('i Quadri si giocano vedendo la terna successiva', () => {
+  it('ogni livello si apre con l anteprima, senza che nessuno debba chiederla', () => {
+    // Non e' un'opzione e non e' una preferenza: e' come funziona il percorso. Se un
+    // giorno qualcuno la rendesse facoltativa, i cento bersagli tarati in una modalita'
+    // verrebbero giocati nell'altra.
+    for (const numero of [1, 25, 50, 75, 100]) {
+      const partita = iniziaQuadro(quadroNumero(numero), { now: 0 });
+      expect(partita.modalita, `quadro ${numero}`).toBe(MODALITA.ANTEPRIMA);
+      expect(partita.manoSuccessiva, `quadro ${numero}`).toHaveLength(HAND_SIZE);
+    }
+  });
+
+  it('i bersagli sono stati tarati NELLA modalita in cui si gioca', () => {
+    // Il difetto peggiore possibile qui non e' un bersaglio sbagliato: e' un bersaglio
+    // misurato su una partita che non esiste. Vedere avanti cambia l'ordine in cui il
+    // generatore legge la griglia, quindi lo stesso seme produce un'altra partita:
+    // otto livelli su cento cambiano completamente esito fra le due modalita'.
+    // `MODALITA_TARATURA` la scrive il generatore di src/config/quadri.js con la
+    // modalita' che ha davvero usato; qui si controlla che sia quella giocata.
+    expect(MODALITA_TARATURA).toBe(MODALITA_QUADRI);
+  });
+
+  it('la partita libera invece resta senza', () => {
+    // La' non c'e' niente da risolvere: non sapere cosa arriva e' parte di cosa la
+    // rende una partita libera.
+    expect(createGame({ seed: 'libera' }).modalita).toBe(MODALITA.BASE);
   });
 });
 

@@ -14,20 +14,30 @@
  * Non e' una misura di quanto sia difficile per una persona: e' un metro coerente che
  * mette tutti i Quadri sulla stessa scala. Serve a costruire una CURVA.
  *
- * Uso: node tools/taratura.mjs [tentativi]
+ * Uso: node tools/taratura.mjs [tentativi] [base|anteprima]
+ *
+ * La modalita' conta: con l'anteprima il giocatore vede la terna successiva e sceglie,
+ * fra sequenze quasi equivalenti, quella che le fa posto. Arriva piu' lontano, quindi
+ * il percentile si sposta, quindi i bersagli vanno rifatti. Tararli in una modalita' e
+ * giocarli in un'altra sarebbe la definizione di difficolta' nascosta.
  */
 
 import { QUADRI } from '../src/config/quadri.js';
-import { iniziaQuadro, OBIETTIVI } from '../src/core/quadro.js';
+import { iniziaQuadro, OBIETTIVI, MODALITA_QUADRI } from '../src/core/quadro.js';
 import { placePiece } from '../src/core/engine.js';
 import { createRng } from '../src/core/rng.js';
 import {
   allPlacements, placeShape, findCompletedGroups, clearGroups, fillRatio, idx,
   quadrantCells, QUADRANT_COUNT,
 } from '../src/core/grid.js';
-import { GRID_SIZE, QUADRANT_SIZE } from '../src/config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE, MODALITA } from '../src/config/rules.js';
+import { accoglienza } from '../src/sim/accoglienza.mjs';
 
 const TENTATIVI = Number(process.argv[2] ?? 12);
+// Il valore predefinito e' la modalita' in cui i Quadri si giocano DAVVERO: uno
+// strumento che misura di default qualcosa che nessuno gioca misura il livello
+// sbagliato. `base` resta esplicito, per il confronto fra le due modalita'.
+const MODO = process.argv[3] === 'base' ? MODALITA.BASE : MODALITA_QUADRI;
 
 function buchi(g) {
   let n = 0;
@@ -96,9 +106,16 @@ function valuta(dopo, gruppi, pref, rumore = 0) {
 }
 
 const AMPIEZZA = 7;
-function pianifica(grid, pezzi, pref, prof, rng) {
-  if (prof === 0) return { valore: 0, prima: null };
-  let migliore = null;
+// Gli stessi tre numeri di tools/quadri.mjs, e per la stessa ragione: i due strumenti
+// devono misurare con lo STESSO metro, altrimenti si tarano i bersagli con un giocatore
+// e si verifica la difficolta' con un altro.
+const ALTERNATIVE_CON_ANTEPRIMA = 10;
+const PESO_ANTEPRIMA = 0.6;
+const PENALITA_BLOCCO = 1200;
+
+/** Tutte le sequenze di primo livello, con il valore e la griglia a cui portano. */
+function ramiDiRadice(grid, pezzi, pref, prof, rng) {
+  const rami = [];
   for (let i = 0; i < pezzi.length; i += 1) {
     const pezzo = pezzi[i];
     if (!pezzo) continue;
@@ -113,25 +130,48 @@ function pianifica(grid, pezzi, pref, prof, rng) {
     const resto = pezzi.slice(); resto[i] = null;
     for (const c of cand) {
       const sotto = pianifica(c.dopo, resto, pref, prof - 1, rng);
-      const valore = c.valore + sotto.valore * 0.85;
-      if (migliore === null || valore > migliore.valore) {
-        migliore = { valore, prima: { handIndex: i, row: c.row, col: c.col } };
-      }
+      rami.push({
+        valore: c.valore + sotto.valore * 0.85,
+        prima: { handIndex: i, row: c.row, col: c.col },
+        griglia: sotto.griglia,
+      });
     }
   }
-  return migliore ?? { valore: 0, prima: null };
+  return rami;
+}
+
+function pianifica(grid, pezzi, pref, prof, rng) {
+  const fermarsi = { valore: 0, prima: null, griglia: grid };
+  if (prof === 0) return fermarsi;
+  return ramiDiRadice(grid, pezzi, pref, prof, rng)
+    .reduce((a, b) => (b.valore > a.valore ? b : a), fermarsi);
+}
+
+/** La mossa da giocare: con l'anteprima, scelta guardando anche la terna successiva. */
+function scegliMossa(partita, pref, rng) {
+  const rami = ramiDiRadice(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length, rng);
+  if (!rami.length) return null;
+  const dopo = partita.manoSuccessiva;
+  const candidate = dopo
+    ? [...rami].sort((a, b) => b.valore - a.valore).slice(0, ALTERNATIVE_CON_ANTEPRIMA)
+      .map((r) => {
+        const acc = accoglienza(r.griglia, dopo, (g, gruppi) => valuta(g, gruppi, pref));
+        return { ...r, valore: r.valore + PESO_ANTEPRIMA * acc.valore - (acc.bloccato ? PENALITA_BLOCCO : 0) };
+      })
+    : rami;
+  return candidate.reduce((a, b) => (b.valore > a.valore ? b : a)).prima;
 }
 
 /** Gioca il livello fino a esaurire le mosse, senza fermarsi a un obiettivo. */
 function giocaFinoInFondo(quadro, rng) {
-  let partita = iniziaQuadro(quadro, { now: 0 });
+  let partita = iniziaQuadro(quadro, { now: 0, modalita: MODO });
   const pref = preferenze(quadro);
   const tetto = quadro.maxMosse ?? 80;
   for (let m = 0; m < tetto; m += 1) {
     if (partita.status !== 'playing') break;
-    const piano = pianifica(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length, rng);
-    if (!piano.prima) break;
-    partita = placePiece(partita, piano.prima.handIndex, piano.prima.row, piano.prima.col, m * 1000);
+    const mossa = scegliMossa(partita, pref, rng);
+    if (!mossa) break;
+    partita = placePiece(partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
   }
   return partita;
 }
@@ -141,7 +181,7 @@ function percentile(valori, p) {
   return o[Math.max(0, Math.min(o.length - 1, Math.floor((p / 100) * o.length)))];
 }
 
-console.log(`\nPLINTO — taratura dei bersagli: ${QUADRI.length} quadri x ${TENTATIVI} partite senza obiettivo\n`);
+console.log(`\nPLINTO — taratura dei bersagli: ${QUADRI.length} quadri x ${TENTATIVI} partite senza obiettivo, modalita "${MODO}"\n`);
 console.log('  #  nome              tipo         mosse   raggiunge (min/mediana/max)   bersaglio ora   proposto');
 console.log('  ' + '-'.repeat(104));
 

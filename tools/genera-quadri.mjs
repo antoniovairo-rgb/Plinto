@@ -11,6 +11,13 @@
  * impossibili (1500 punti dove se ne fanno 325) e livelli che si superano senza
  * accorgersene.
  *
+ * LA MODALITA' FA PARTE DELLA TARATURA. I Quadri si giocano vedendo la terna
+ * successiva, e vedere avanti cambia due cose insieme: il giocatore sceglie meglio, e
+ * il generatore legge la griglia in un altro momento (quindi lo STESSO seme produce
+ * un'altra partita). Tarare i bersagli senza anteprima e poi giocarli con l'anteprima
+ * significherebbe pubblicare bersagli misurati su livelli che non esistono. Qui il
+ * giocatore artificiale gioca nella stessa modalita' in cui giochera' la persona.
+ *
  * Uso: node tools/genera-quadri.mjs [tentativi]   (riscrive src/config/quadri.js)
  */
 
@@ -24,6 +31,8 @@ import {
   clearGroups, fillRatio, idx, quadrantCells, QUADRANT_COUNT,
 } from '../src/core/grid.js';
 import { GRID_SIZE, QUADRANT_SIZE } from '../src/config/rules.js';
+import { MODALITA_QUADRI } from '../src/core/quadro.js';
+import { accoglienza } from '../src/sim/accoglienza.mjs';
 
 const TENTATIVI = Number(process.argv[2] ?? 7);
 const TOTALE = 100;
@@ -137,9 +146,14 @@ function valuta(dopo, gruppi, pref, rumore) {
   val += (v.row * pref.row + v.col * pref.col + v.quadrant * pref.quadrant) * 6;
   return val + rumore;
 }
-function pianifica(grid, pezzi, pref, prof, rng) {
-  if (prof === 0) return { valore: 0, prima: null };
-  let migliore = null;
+// Gli stessi tre numeri di tools/taratura.mjs e tools/quadri.mjs: chi tara e chi
+// verifica devono usare lo stesso metro.
+const ALTERNATIVE_CON_ANTEPRIMA = 10;
+const PESO_ANTEPRIMA = 0.6;
+const PENALITA_BLOCCO = 1200;
+
+function ramiDiRadice(grid, pezzi, pref, prof, rng) {
+  const rami = [];
   for (let i = 0; i < pezzi.length; i += 1) {
     const pezzo = pezzi[i];
     if (!pezzo) continue;
@@ -154,13 +168,36 @@ function pianifica(grid, pezzi, pref, prof, rng) {
     const resto = pezzi.slice(); resto[i] = null;
     for (const c of cand) {
       const sotto = pianifica(c.dopo, resto, pref, prof - 1, rng);
-      const valore = c.valore + sotto.valore * 0.85;
-      if (migliore === null || valore > migliore.valore) {
-        migliore = { valore, prima: { handIndex: i, row: c.row, col: c.col } };
-      }
+      rami.push({
+        valore: c.valore + sotto.valore * 0.85,
+        prima: { handIndex: i, row: c.row, col: c.col },
+        griglia: sotto.griglia,
+      });
     }
   }
-  return migliore ?? { valore: 0, prima: null };
+  return rami;
+}
+
+function pianifica(grid, pezzi, pref, prof, rng) {
+  const fermarsi = { valore: 0, prima: null, griglia: grid };
+  if (prof === 0) return fermarsi;
+  return ramiDiRadice(grid, pezzi, pref, prof, rng)
+    .reduce((a, b) => (b.valore > a.valore ? b : a), fermarsi);
+}
+
+/** La mossa da giocare: con l'anteprima, scelta guardando anche la terna successiva. */
+function scegliMossa(partita, pref, rng) {
+  const rami = ramiDiRadice(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length, rng);
+  if (!rami.length) return null;
+  const dopo = partita.manoSuccessiva;
+  const candidate = dopo
+    ? [...rami].sort((a, b) => b.valore - a.valore).slice(0, ALTERNATIVE_CON_ANTEPRIMA)
+      .map((r) => {
+        const acc = accoglienza(r.griglia, dopo, (g, gruppi) => valuta(g, gruppi, pref, 0));
+        return { ...r, valore: r.valore + PESO_ANTEPRIMA * acc.valore - (acc.bloccato ? PENALITA_BLOCCO : 0) };
+      })
+    : rami;
+  return candidate.reduce((a, b) => (b.valore > a.valore ? b : a)).prima;
 }
 
 function gioca(progetto, rng) {
@@ -168,13 +205,14 @@ function gioca(progetto, rng) {
     seed: seedFromString(`plinto-quadro-${progetto.numero}`),
     grigliaIniziale: progetto.griglia ? gridFromString(progetto.griglia, 3) : undefined,
     now: 0,
+    modalita: MODALITA_QUADRI,
   });
   const pref = preferenze(progetto.tipo);
   for (let m = 0; m < progetto.maxMosse; m += 1) {
     if (partita.status !== 'playing') break;
-    const piano = pianifica(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length, rng);
-    if (!piano.prima) break;
-    partita = placePiece(partita, piano.prima.handIndex, piano.prima.row, piano.prima.col, m * 1000);
+    const mossa = scegliMossa(partita, pref, rng);
+    if (!mossa) break;
+    partita = placePiece(partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
   }
   return partita;
 }
@@ -240,6 +278,13 @@ const file = `/**
  * Il percentile sale lungo il percorso: e' cosi' che cresce la difficolta'.
  * La prima stesura, scritta a mano, chiedeva 1500 punti dove se ne facevano 325.
  *
+ * TARATI NELLA MODALITA' "${MODALITA_QUADRI}", cioe' la stessa in cui i Quadri si giocano.
+ * Non e' un dettaglio: vedere la terna successiva cambia l'ordine in cui il generatore
+ * legge la griglia, quindi lo stesso seme produce un'altra partita. Un bersaglio tarato
+ * senza anteprima e giocato con l'anteprima e' un bersaglio misurato su un livello che
+ * non esiste. MODALITA_TARATURA qui sotto lo dichiara, e un test controlla che
+ * coincida con la modalita' davvero giocata.
+ *
  * Le griglie iniziali sono verificate: nessuna contiene una riga, una colonna o un
  * quadrante gia' completi, e nessuna e' fatta di celle isolate (un motivo del genere
  * rende il livello ingiocabile, ed e' un errore gia' commesso e gia' misurato).
@@ -249,6 +294,9 @@ const file = `/**
 const MOTIVI = {
 ${motiviTesto}
 };
+
+/** La modalita' di gioco in cui questi bersagli sono stati misurati. */
+export const MODALITA_TARATURA = '${MODALITA_QUADRI}';
 
 export const QUADRI = [
 ${righe.join('\n')}

@@ -15,17 +15,26 @@
  *   riuscite a zero                  -> il quadro e' probabilmente impossibile
  *   curva che scende irregolarmente  -> la progressione non e' una progressione
  *
- * Uso: npm run quadri [tentativi]
+ * Uso: npm run quadri [tentativi] [base|anteprima]
+ *
+ * NOTA SULLA MISURA. Fino alla versione 1.0.2 il pianificatore simulava le posate
+ * IGNORANDO le bombe (`placeShape` chiamata senza l'elenco dei blocchi esplosivi):
+ * pianificava su una griglia leggermente diversa da quella che poi otteneva davvero.
+ * Era un difetto del metro, non del gioco -- la mossa veniva comunque applicata dal
+ * motore vero -- ma falsava i numeri con cui si tarano i bersagli. E' corretto da
+ * qui in avanti, quindi le percentuali di riuscita NON sono confrontabili con quelle
+ * pubblicate prima: vanno rimisurate entrambe le modalita'.
  */
 
 import { QUADRI } from '../src/config/quadri.js';
-import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../src/core/quadro.js';
+import { iniziaQuadro, statoQuadro, giocaNelQuadro, MODALITA_QUADRI } from '../src/core/quadro.js';
 import { createRng } from '../src/core/rng.js';
 import {
   allPlacements, placeShape, findCompletedGroups, clearGroups, fillRatio, idx,
   quadrantCells, QUADRANT_COUNT,
 } from '../src/core/grid.js';
-import { GRID_SIZE, QUADRANT_SIZE } from '../src/config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE, MODALITA } from '../src/config/rules.js';
+import { accoglienza } from '../src/sim/accoglienza.mjs';
 
 /**
  * Un giocatore che SA qual e' l'obiettivo del Quadro.
@@ -104,8 +113,18 @@ function preferenze(quadro) {
   return p;
 }
 
-/** Valore di una griglia dopo una mossa, dal punto di vista dell'obiettivo. */
-function valuta(grigliaDopo, gruppi, pref) {
+/**
+ * Valore di una griglia dopo una mossa, dal punto di vista dell'obiettivo.
+ *
+ * `rumore` non e' un dettaglio. Senza, il pianificatore e' completamente deterministico:
+ * dieci tentativi dello stesso Quadro sono dieci volte la STESSA partita, e la colonna
+ * "riuscite" puo' valere solo 0% o 100%. Era esattamente cosi' fino alla versione 1.0.2,
+ * e sembrava una misura mentre era un tiro di moneta gia' truccato dal seme. Un pizzico
+ * di casualita' nel rompere i pareggi fa dei dieci tentativi dieci partite diverse, e
+ * la percentuale torna a dire qualcosa. La stessa lezione era gia' scritta in
+ * tools/taratura.mjs: qui non era mai stata applicata.
+ */
+function valuta(grigliaDopo, gruppi, pref, rumore = 0) {
   const vic = vicinanza(grigliaDopo);
   let valore = 0;
   // Non spezzare la Catena vale piu' di qualunque singolo gruppo in piu'.
@@ -115,15 +134,34 @@ function valuta(grigliaDopo, gruppi, pref) {
   valore -= buchiIsolati(grigliaDopo) * 16;
   valore -= fillRatio(grigliaDopo) * (45 + pref.svuotare);
   valore += (vic.row * pref.row + vic.col * pref.col + vic.quadrant * pref.quadrant) * pref.mira;
-  return valore;
+  return valore + rumore;
 }
 
 const AMPIEZZA = 7;
 
-/** Cerca la sequenza migliore usando tutti i pezzi rimasti in mano. */
-function pianifica(grid, pezzi, pref, profondita) {
-  if (profondita === 0) return { valore: 0, prima: null };
-  let migliore = null;
+// Quante sequenze complete della mano vengono rigiudicate alla luce della terna
+// successiva. Non serve rigiudicarle tutte: quelle sotto le prime dieci perdono gia'
+// sul merito della mano che si sta giocando, e il peso dell'anteprima non le
+// recupererebbe. Serve invece a scegliere FRA sequenze quasi equivalenti quella che
+// lascia il posto giusto -- che e' esattamente cio' che fa una persona quando vede
+// cosa sta per arrivare.
+const ALTERNATIVE_CON_ANTEPRIMA = 10;
+
+// L'anteprima conta, ma meno della mano che si ha davvero in mano: una mossa buona
+// adesso e' certa, una comodita' fra tre mosse e' una previsione.
+const PESO_ANTEPRIMA = 0.6;
+
+// Un pezzo della terna successiva che non trova posto e' la fine della partita, non
+// una mossa meno buona: pesa piu' di qualunque gruppo chiuso.
+const PENALITA_BLOCCO = 1200;
+
+/**
+ * Tutte le sequenze di primo livello, ciascuna con il suo valore e la griglia a cui
+ * porta. `pianifica` e' semplicemente la migliore fra queste: tenerle separate serve a
+ * poterle rigiudicare con la terna successiva senza duplicare la ricerca.
+ */
+function ramiDiRadice(grid, pezzi, pref, profondita, rng) {
+  const rami = [];
 
   for (let i = 0; i < pezzi.length; i += 1) {
     const pezzo = pezzi[i];
@@ -132,30 +170,52 @@ function pianifica(grid, pezzi, pref, profondita) {
     if (case_.length === 0) continue;
 
     const candidate = case_.map(([row, col]) => {
-      const { grid: posata } = placeShape(grid, pezzo.shape, row, col, 1);
+      const { grid: posata } = placeShape(grid, pezzo.shape, row, col, 1, pezzo.bombe);
       const gruppi = findCompletedGroups(posata);
       const { grid: dopo } = clearGroups(posata, gruppi);
-      return { row, col, dopo, valore: valuta(dopo, gruppi, pref) };
+      return { row, col, dopo, valore: valuta(dopo, gruppi, pref, rng.float() * 45) };
     }).sort((a, b) => b.valore - a.valore).slice(0, AMPIEZZA);
 
     const resto = pezzi.slice();
     resto[i] = null;
 
     for (const c of candidate) {
-      const sotto = pianifica(c.dopo, resto, pref, profondita - 1);
-      const valore = c.valore + sotto.valore * 0.85;
-      if (migliore === null || valore > migliore.valore) {
-        migliore = { valore, prima: { handIndex: i, row: c.row, col: c.col } };
-      }
+      const sotto = pianifica(c.dopo, resto, pref, profondita - 1, rng);
+      rami.push({
+        valore: c.valore + sotto.valore * 0.85,
+        prima: { handIndex: i, row: c.row, col: c.col },
+        griglia: sotto.griglia,
+      });
     }
   }
-  return migliore ?? { valore: 0, prima: null };
+  return rami;
+}
+
+/** Cerca la sequenza migliore usando tutti i pezzi rimasti in mano. */
+function pianifica(grid, pezzi, pref, profondita, rng) {
+  const fermarsi = { valore: 0, prima: null, griglia: grid };
+  if (profondita === 0) return fermarsi;
+  const rami = ramiDiRadice(grid, pezzi, pref, profondita, rng);
+  return rami.reduce((a, b) => (b.valore > a.valore ? b : a), fermarsi);
 }
 
 /** Sceglie la mossa per il Quadro dato. */
 function scegliMossa(partita, pref, rng) {
-  const piano = pianifica(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length);
-  if (piano.prima) return piano.prima;
+  const rami = ramiDiRadice(partita.grid, partita.hand, pref, partita.hand.filter(Boolean).length, rng);
+  if (rami.length) {
+    // Senza anteprima si prende la sequenza migliore e basta. Con l'anteprima le
+    // prime alternative vengono rigiudicate su quanto bene la griglia a cui portano
+    // accoglie la terna che il giocatore VEDE gia'.
+    const dopo = partita.manoSuccessiva;
+    const candidate = dopo
+      ? [...rami].sort((a, b) => b.valore - a.valore).slice(0, ALTERNATIVE_CON_ANTEPRIMA)
+        .map((r) => {
+          const acc = accoglienza(r.griglia, dopo, (g, gruppi) => valuta(g, gruppi, pref));
+          return { ...r, valore: r.valore + PESO_ANTEPRIMA * acc.valore - (acc.bloccato ? PENALITA_BLOCCO : 0) };
+        })
+      : rami;
+    return candidate.reduce((a, b) => (b.valore > a.valore ? b : a)).prima;
+  }
   // Nessun piano: si prova qualunque mossa legale pur di non fermarsi.
   for (let i = 0; i < partita.hand.length; i += 1) {
     const pezzo = partita.hand[i];
@@ -170,11 +230,17 @@ function scegliMossa(partita, pref, rng) {
 }
 
 const TENTATIVI = Number(process.argv[2] ?? 10);
+// Seconda posizione: la modalita'. `node tools/quadri.mjs 10 anteprima` misura gli
+// stessi cento livelli giocati vedendo la terna successiva.
+// Il valore predefinito e' la modalita' in cui i Quadri si giocano DAVVERO: uno
+// strumento che misura di default qualcosa che nessuno gioca misura il livello
+// sbagliato. `base` resta esplicito, per il confronto fra le due modalita'.
+const MODO = process.argv[3] === 'base' ? MODALITA.BASE : MODALITA_QUADRI;
 const rng = createRng(20260906);
 
 /** Gioca un Quadro fino alla fine. @returns {{vinto:boolean, mosse:number, punti:number}} */
 function gioca(quadro) {
-  let partita = iniziaQuadro(quadro, { now: 0 });
+  let partita = iniziaQuadro(quadro, { now: 0, modalita: MODO });
   const pref = preferenze(quadro);
   let guardia = 0;
   const tetto = quadro.maxMosse ?? 300;
@@ -201,7 +267,7 @@ function gioca(quadro) {
   };
 }
 
-console.log(`\nPLINTO — difficolta' dei Quadri: ${QUADRI.length} quadri x ${TENTATIVI} tentativi\n`);
+console.log(`\nPLINTO — difficolta' dei Quadri: ${QUADRI.length} quadri x ${TENTATIVI} tentativi, modalita "${MODO}"\n`);
 console.log('  #  nome              obiettivo                mosse  riuscite  mosse usate  motivo del fallimento');
 console.log('  ' + '-'.repeat(96));
 

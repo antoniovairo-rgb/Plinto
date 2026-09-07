@@ -13,7 +13,7 @@
 | `src/data/` | `riferimento-catena.json` — **generato** da `npm run catena`, mai scritto a mano: la distribuzione della Catena dello stratega con cui il profilo si confronta, insieme all'impronta delle regole con cui è stata misurata | niente | neutro |
 | `src/config/` | `rules.js` (costanti di regolamento), `progetto.js` (link di donazione, contatto, anno) | niente | neutro |
 | `src/core/` | `rng.js`, `shapes.js`, `grid.js`, `scoring.js`, `generator.js`, `engine.js`, `distribuzioni.js`, `sfida.js` (date, semi e limiti dell'archivio), `impronta.js`, `scheda.js` (il testo condivisibile) | solo `config/` e se stesso | neutro (né DOM né React) |
-| `src/sim/` | `player.mjs` (giocatori artificiali), `run.mjs` (harness da riga di comando) | `core/`, `config/` | Node |
+| `src/sim/` | `player.mjs` (giocatori artificiali), `accoglienza.mjs` (quanto una griglia accoglie la terna successiva), `run.mjs` (harness da riga di comando) | `core/`, `config/` | Node |
 | `src/persistence/` | `storage.js` (wrapper protetto su `localStorage`, chiavi con prefisso `plinto:`), `documenti.js` (documenti versionati e migrazioni), `profilo.js` (`aggrega` pura + lettura/scrittura), `records.js` (record personali e statistiche di vita), `sfide.js` (Sfida del Giorno: giorno locale, miglior punteggio di giornata, storico potato a 60 giorni) | fra loro | **browser** (usa `window`) |
 | `src/styles/` | `tokens.css` (variabili del sistema di design, vedi `DESIGN_SYSTEM.md`), `app.css` (~770 righe, tutto il resto) | niente | browser |
 | `src/i18n/` | `index.js` (`traduttore()`, `LINGUE`, `linguaDelBrowser()`), `it.js`, `en.js` | fra loro | browser (legge `navigator.language`, con `try/catch`) |

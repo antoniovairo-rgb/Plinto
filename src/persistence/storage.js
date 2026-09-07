@@ -87,18 +87,36 @@ export const KEYS = {
  */
 export function chiavePartita(modalita) {
   if (modalita === 'sfida') return KEYS.CURRENT_CHALLENGE;
-  if (modalita === 'anteprima') return `${KEYS.CURRENT_GAME}-anteprima`;
   return KEYS.CURRENT_GAME;
 }
 
 /**
  * Chiave dei record, per modalita'.
  *
- * La modalita' con l'anteprima ha i suoi: vedere la terna successiva e' un vantaggio
- * informativo, e mettere i due punteggi nella stessa classifica vorrebbe dire dichiarare
- * confrontabili due cose che non lo sono. Meglio due record piccoli e veri che uno grande
- * e falso.
+ * Per ora ce n'e' una sola: la partita libera e la Sfida del Giorno condividono i
+ * record, e i Quadri non ne hanno (si superano o no). La funzione resta perche' la
+ * separazione per modalita' e' una decisione che va presa in un posto, non sparsa fra
+ * i chiamanti.
  */
-export function chiaveRecord(modalita) {
-  return modalita === 'anteprima' ? `${KEYS.RECORDS}-anteprima` : KEYS.RECORDS;
+export function chiaveRecord() {
+  return KEYS.RECORDS;
+}
+
+/**
+ * Le chiavi di una modalita' che non esiste piu': la partita libera con l'anteprima.
+ *
+ * L'anteprima e' diventata parte dei Quadri e la modalita' a se' e' sparita dalla home.
+ * Chi aveva giocato in quella modalita' si ritroverebbe due voci di storage che nessuno
+ * legge piu': una partita a meta' che non si puo' riprendere e un record che non si puo'
+ * piu' battere. Non e' un dato prezioso da conservare -- e' una traccia di una cosa che
+ * non c'e' -- e lasciarla li' vorrebbe dire non sapere piu', fra un anno, se serve.
+ */
+const CHIAVI_ABBANDONATE = [
+  `${KEYS.CURRENT_GAME}-anteprima`,
+  `${KEYS.RECORDS}-anteprima`,
+];
+
+/** Cancella le voci delle modalita' che non esistono piu'. Si chiama una volta all'avvio. */
+export function ripulisciChiaviAbbandonate() {
+  CHIAVI_ABBANDONATE.forEach(remove);
 }

@@ -22,6 +22,7 @@ import {
 import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
 import { quadrantCells, QUADRANT_COUNT } from '../core/grid.js';
 import { createRng } from '../core/rng.js';
+import { accoglienza } from './accoglienza.mjs';
 
 /** Tutte le mosse legali disponibili nello stato corrente. */
 export function legalMoves(state) {
@@ -113,6 +114,17 @@ const PROFILES = {
 
 const BEAM = 8;
 
+// Quante sequenze complete della mano vengono rigiudicate alla luce della terna
+// successiva, quando il gioco la mostra. Non tutte: quelle sotto le prime dieci perdono
+// gia' sul merito della mano che si ha davanti.
+const ALTERNATIVE_CON_ANTEPRIMA = 10;
+// L'anteprima pesa meno della mano vera: una mossa buona adesso e' certa, una comodita'
+// fra tre mosse e' una previsione.
+const PESO_ANTEPRIMA = 0.6;
+// Un pezzo della terna successiva senza posto e' la fine della partita, non una mossa
+// meno buona.
+const PENALITA_BLOCCO = 1200;
+
 /** Applica una mossa alla sola griglia (senza motore): posa, chiude, svuota. */
 function applyToGrid(grid, shape, row, col) {
   const { grid: placed } = placeShape(grid, shape, row, col, 1);
@@ -133,15 +145,8 @@ function gridValue(grid, weights) {
  * Beam search: a ogni livello prova solo le BEAM posizioni piu' promettenti per pezzo.
  * @returns {{value:number, first:object|null}}
  */
-function planHand(grid, pieces, weights, depth) {
-  // Il valore "fermati qui" vale solo se davvero non si puo' piazzare piu' nulla:
-  // altrimenti una sequenza corta competerebbe contro sequenze lunghe misurate su
-  // una scala diversa, e la ricerca preferirebbe non giocare. Il giocatore invece
-  // DEVE piazzare, quindi il confronto va fatto solo fra sequenze complete.
-  const fermarsi = { value: gridValue(grid, weights), first: null };
-  if (depth === 0) return fermarsi;
-
-  let best = null;
+function ramiDiRadice(grid, pieces, weights, depth) {
+  const rami = [];
   for (let i = 0; i < pieces.length; i += 1) {
     const piece = pieces[i];
     if (!piece) continue;
@@ -166,13 +171,48 @@ function planHand(grid, pieces, weights, depth) {
 
     for (const option of ranked) {
       const sub = planHand(option.step.grid, rest, weights, depth - 1);
-      const value = option.step.groupCount * weights.groups + sub.value;
-      if (best === null || value > best.value) {
-        best = { value, first: { handIndex: i, row: option.row, col: option.col, piece } };
-      }
+      rami.push({
+        value: option.step.groupCount * weights.groups + sub.value,
+        first: { handIndex: i, row: option.row, col: option.col, piece },
+        griglia: sub.griglia,
+      });
     }
   }
-  return best ?? fermarsi;
+  return rami;
+}
+
+function planHand(grid, pieces, weights, depth) {
+  // Il valore "fermati qui" vale solo se davvero non si puo' piazzare piu' nulla:
+  // altrimenti una sequenza corta competerebbe contro sequenze lunghe misurate su
+  // una scala diversa, e la ricerca preferirebbe non giocare. Il giocatore invece
+  // DEVE piazzare, quindi il confronto va fatto solo fra sequenze complete.
+  const fermarsi = { value: gridValue(grid, weights), first: null, griglia: grid };
+  if (depth === 0) return fermarsi;
+  return ramiDiRadice(grid, pieces, weights, depth)
+    .reduce((a, b) => (b.value > a.value ? b : a), fermarsi);
+}
+
+/**
+ * Come `planHand`, ma sapendo gia' quale terna arrivera'.
+ *
+ * Lo stratega e' il metro del tetto di abilita': se il gioco mostra un'informazione e
+ * il metro non la usa, il metro non misura piu' il tetto. Fra le sequenze migliori
+ * della mano corrente sceglie quella che lascia la griglia piu' pronta ad accogliere la
+ * terna successiva -- che e' l'unica cosa che l'anteprima permette di fare davvero.
+ */
+function planHandConAnteprima(grid, pieces, weights, depth, manoDopo) {
+  const rami = ramiDiRadice(grid, pieces, weights, depth);
+  if (rami.length === 0) return { value: gridValue(grid, weights), first: null, griglia: grid };
+
+  const metro = (dopo, gruppi) => gruppi.length * weights.groups + gridValue(dopo, weights);
+  return [...rami]
+    .sort((a, b) => b.value - a.value)
+    .slice(0, ALTERNATIVE_CON_ANTEPRIMA)
+    .map((r) => {
+      const acc = accoglienza(r.griglia, manoDopo, metro);
+      return { ...r, value: r.value + PESO_ANTEPRIMA * acc.valore - (acc.bloccato ? PENALITA_BLOCCO : 0) };
+    })
+    .reduce((a, b) => (b.value > a.value ? b : a));
 }
 
 /**
@@ -188,7 +228,9 @@ export function chooseMove(state, profile, rng) {
 
   if (weights.lookahead) {
     const remaining = state.hand.filter(Boolean).length;
-    const plan = planHand(state.grid, state.hand, weights, remaining);
+    const plan = state.manoSuccessiva
+      ? planHandConAnteprima(state.grid, state.hand, weights, remaining, state.manoSuccessiva)
+      : planHand(state.grid, state.hand, weights, remaining);
     if (plan.first) return plan.first;
   }
 

@@ -31,8 +31,8 @@ const STATISTICHE_PREDEFINITE = {
 };
 
 /** @returns {{best:number, bestChain:number, bestMove:number, bestGroupsInOneMove:number}} */
-export function loadRecords(modalita = 'libera') {
-  return leggiDocumento(chiaveRecord(modalita), {
+export function loadRecords() {
+  return leggiDocumento(chiaveRecord(), {
     versione: VERSIONE, predefiniti: RECORD_PREDEFINITI,
   });
 }
@@ -47,8 +47,8 @@ export function loadStats() {
  * @param {object} summary output di summarize() del motore
  * @returns {{records:object, stats:object, nuoviRecord:string[]}}
  */
-export function recordGame(summary, modalita = 'libera') {
-  const records = loadRecords(modalita);
+export function recordGame(summary) {
+  const records = loadRecords();
   const stats = loadStats();
   const nuoviRecord = [];
 
@@ -67,7 +67,7 @@ export function recordGame(summary, modalita = 'libera') {
   stats.griglieSvuotate += summary.boardClears;
   stats.tempoTotaleMs += summary.durationMs;
 
-  scriviDocumento(chiaveRecord(modalita), VERSIONE, records);
+  scriviDocumento(chiaveRecord(), VERSIONE, records);
   scriviDocumento(KEYS.STATS, VERSIONE, stats);
 
   return { records, stats, nuoviRecord };

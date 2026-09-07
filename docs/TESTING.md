@@ -44,8 +44,22 @@ npm run installazione  # service worker: installabile, senza rete, e che si aggi
 npm run soak           # centinaia di mosse di fila: memoria, nodi, fluidita'
 npm run archivio       # archivio delle sfide: calendario, tastiera, giorno giusto
 npm run condivisione   # la scheda da mandare agli amici, e il ripiego sugli appunti
-npm run anteprima      # la terna mostrata e' quella consegnata, a schermo
+npm run anteprima      # nei livelli: la terna mostrata e' quella consegnata, a schermo
 npm run taratura       # ricalcola i bersagli dei Quadri facendoli giocare
+npm run confronto      # gli stessi cento livelli con e senza anteprima, a confronto
+```
+
+`npm run quadri` e `npm run taratura` accettano un secondo argomento con la **modalità**:
+senza argomento usano quella in cui i Quadri si giocano davvero (con l'anteprima), con
+`base` la disattivano. Serve solo a confrontare le due; il valore predefinito è quello
+giocato, perché uno strumento che di default misura qualcosa che nessuno gioca misura il
+livello sbagliato.
+
+```bash
+npm run quadri -- 10 base           # gli stessi livelli senza anteprima
+npm run taratura -- 12 base > /tmp/base.txt
+npm run taratura -- 12 anteprima > /tmp/ant.txt
+npm run confronto /tmp/base.txt /tmp/ant.txt
 ```
 
 Il simulatore accetta tre argomenti posizionali — **numero di partite**, **profilo** e

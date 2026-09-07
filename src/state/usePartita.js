@@ -24,7 +24,7 @@ export function usePartita() {
   // del risultato. Le regole sono identiche, ed e' importante che restino tali.
   const [modalita, setModalita] = useState('libera');
   const [esitoSfida, setEsitoSfida] = useState(null);
-  const [record, setRecord] = useState(() => loadRecords('libera'));
+  const [record, setRecord] = useState(() => loadRecords());
   const [nuoviRecord, setNuoviRecord] = useState([]);
   const registrata = useRef(false);
 
@@ -37,14 +37,14 @@ export function usePartita() {
   }, []);
 
   const nuovaPartita = useCallback((opzioni = {}, quale = 'libera') => {
-    // La modalita' del MOTORE viaggia con le opzioni: 'anteprima' cambia quando la terna
-    // successiva viene estratta, e quindi cambia la partita. Non e' un'impostazione
-    // grafica, ed e' per questo che non e' un interruttore nelle impostazioni.
+    // `opzioni` va dritto al motore: seme, griglia iniziale, modalita'. La partita
+    // libera e la Sfida del Giorno non ne passano nessuna di particolare -- i Quadri,
+    // che sono l'unica modalita' con l'anteprima, non passano di qui (vedi useQuadro).
     registrata.current = false;
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
-    setRecord(loadRecords(quale));
+    setRecord(loadRecords());
     const stato = createGame(opzioni);
     setPartita(stato);
     write(chiavePartita(quale), serializeGame(stato));
@@ -72,7 +72,7 @@ export function usePartita() {
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
-    setRecord(loadRecords(quale));
+    setRecord(loadRecords());
     setPartita(stato);
     return stato;
   }, [partitaSalvata]);
@@ -105,7 +105,7 @@ export function usePartita() {
     registrata.current = true;
     remove(chiavePartita(modalita));
     const riepilogo = summarize(partita);
-    const esito = recordGame(riepilogo, modalita);
+    const esito = recordGame(riepilogo);
     // Il profilo di gioco: entrano partita libera e sfida, non i livelli. I livelli
     // partono da griglie costruite a mano e falserebbero la mappa degli appoggi
     // facendola somigliare al loro disegno invece che al modo di giocare di chi guarda.

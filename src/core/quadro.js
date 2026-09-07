@@ -25,6 +25,28 @@
 import { createGame, placePiece } from './engine.js';
 import { gridFromString } from './grid.js';
 import { seedFromString } from './rng.js';
+import { MODALITA } from '../config/rules.js';
+
+/**
+ * I Quadri si giocano VEDENDO la terna successiva.
+ *
+ * PERCHE' STANDARD E NON UN'OPZIONE. Un Quadro e' un problema con una soluzione: ha un
+ * obiettivo dichiarato, un tetto di mosse e una griglia fissa. Un problema si risolve
+ * ragionando, e non si puo' ragionare su un pezzo che non si sa se arrivera'. Senza
+ * anteprima il livello resta in parte una scommessa; con l'anteprima quello che si
+ * chiede al giocatore e' esattamente quello che il livello promette.
+ *
+ * PERCHE' NON UNA SCELTA FRA DUE MODI. Vedere avanti cambia l'ordine in cui il
+ * generatore legge la griglia: lo stesso seme produce un'altra partita. Due modalita'
+ * vorrebbero dire due tarature dei cento bersagli, e nessuna delle due sarebbe quella
+ * vera per chi gioca nell'altra. Misurato: fra le due modalita' otto livelli su cento
+ * cambiano completamente esito, non perche' uno sia piu' difficile ma perche' sono
+ * problemi diversi con lo stesso numero.
+ *
+ * LA PARTITA LIBERA RESTA SENZA. La' non c'e' niente da risolvere: si dura finche' si
+ * dura, e non sapere cosa arriva e' parte di cosa la rende una partita libera.
+ */
+export const MODALITA_QUADRI = MODALITA.ANTEPRIMA;
 
 /**
  * Tipi di obiettivo riconosciuti.
@@ -52,13 +74,17 @@ export function semeDelQuadro(numero) {
 /**
  * Avvia la partita di un Quadro.
  * @param {object} quadro definizione presa da src/config/quadri.js
- * @param {object} [opzioni] `now` per rendere deterministica anche la durata
+ * @param {object} [opzioni] `now` per rendere deterministica anche la durata,
+ *   `modalita` solo per gli strumenti di misura, che devono poter giocare lo stesso
+ *   livello nei due modi per confrontarli. Il gioco non la passa mai: usa
+ *   MODALITA_QUADRI, che e' la definizione del percorso e non una preferenza.
  */
 export function iniziaQuadro(quadro, opzioni = {}) {
   return createGame({
     seed: semeDelQuadro(quadro.numero),
     grigliaIniziale: quadro.griglia ? gridFromString(quadro.griglia, 3) : undefined,
     now: opzioni.now,
+    modalita: opzioni.modalita ?? MODALITA_QUADRI,
   });
 }
 

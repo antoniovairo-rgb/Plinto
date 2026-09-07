@@ -7,6 +7,104 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.1.0] — 7 settembre 2026
+
+Il fulcro del gioco è la sfida a livelli. Questa versione porta lì l'anteprima della terna
+successiva, e per farlo ha dovuto prima rimettere in sesto gli strumenti che la misurano.
+
+### Aggiunto
+
+**L'anteprima della terna successiva è parte dei Quadri.** Un livello è un problema con una
+soluzione: obiettivo dichiarato, tetto di mosse, griglia fissa. Su un pezzo che non sai se
+arriverà non si può ragionare, e un livello che chiede di ragionare mentre nasconde metà del
+problema chiede due cose diverse insieme. La partita libera resta senza: lì non c'è niente da
+risolvere, e non sapere cosa arriva è parte di cosa la rende libera.
+
+Non è un'opzione. La decisione sta in un posto solo, `MODALITA_QUADRI` in `src/core/quadro.js`,
+e `src/config/quadri.js` dichiara con `MODALITA_TARATURA` la modalità in cui i bersagli sono
+stati misurati: un test controlla che le due coincidano. Due modalità avrebbero voluto dire due
+tarature dei cento bersagli, e nessuna delle due sarebbe stata quella vera per chi giocava
+nell'altra.
+
+**`src/sim/accoglienza.mjs`**: i giocatori artificiali adesso *usano* l'anteprima invece di
+subirla. Fra le sequenze quasi equivalenti scelgono quella che lascia la griglia più pronta a
+ricevere la terna che vedono arrivare.
+
+**`npm run confronto`**: mette a confronto gli stessi cento livelli con e senza anteprima.
+
+### Modificato
+
+**I cento bersagli sono stati ritarati**, giocando i livelli nella modalità in cui si giocano
+davvero (`node tools/genera-quadri.mjs`). Cambiano **56 bersagli su 100** — 26 in su e 30 in
+giù — mentre griglie e tetti di mosse restano identici. La taratura è deterministica: due
+esecuzioni indipendenti hanno prodotto i cento numeri uguali.
+
+Perché era obbligatorio: vedere avanti cambia l'ordine in cui il generatore legge la griglia,
+quindi **lo stesso seme produce un'altra partita**. Con i bersagli vecchi, otto livelli su cento
+cambiano completamente esito fra le due modalità (33, 61, 74, 76, 78, 89, 93 da 100% a 0%; il 69
+da 0% a 100%). Non erano diventati difficili: erano **altri livelli** con lo stesso numero.
+
+Effetto sulla curva di difficoltà, misurato con `npm run quadri 10` — prima era una riga piatta
+al 100% con qualche buco a zero, adesso scende:
+
+| livelli | prima | ora |
+|---|---|---|
+| 1–10 | 100% | 100% |
+| 11–20 | 100% | 90% |
+| 21–30 | 100% | 88% |
+| 31–40 | 100% | 91% |
+| 41–50 | 100% | 83% |
+| 51–60 | 100% | 96% |
+| 61–70 | 70% | 60% |
+| 71–80 | 100% | 73% |
+| 81–90 | 90% | 66% |
+| 91–100 | 90% | 67% |
+
+**I livelli già superati restano superati.** L'avanzamento non viene toccato.
+
+### Rimosso
+
+**«Partita con anteprima» non è più una modalità della partita libera.** Sparisce dalla home
+con le sue stringhe e i suoi record separati. Chi l'aveva giocata si ritroverebbe due voci in
+memoria che nessuno legge più — una partita a metà non riprendibile e un record non più
+battibile: all'avvio vengono cancellate, invece di restare lì a far dubitare fra un anno se
+servano.
+
+### Corretto
+
+**`npm run quadri` non stava misurando niente.** Il pianificatore era completamente
+deterministico: dieci tentativi dello stesso livello erano dieci volte la stessa partita, e la
+colonna «riuscite» poteva valere solo 0% o 100%. La stessa lezione era già scritta in
+`tools/taratura.mjs`, che apposta rompe i pareggi con un pizzico di casualità; a `quadri.mjs`
+non era mai stata applicata.
+
+**Lo stesso strumento simulava le posate ignorando le bombe**: pianificava su una griglia
+diversa da quella che poi otteneva. Non toccava il gioco — la mossa la applicava il motore vero
+— ma falsava i numeri con cui si tarano i bersagli. Le percentuali pubblicate prima della 1.1.0
+non sono confrontabili con queste.
+
+**`npm run quadri` e `npm run taratura` di default misuravano la modalità sbagliata.** Adesso
+usano quella in cui i Quadri si giocano davvero; `base` resta esplicito, per il confronto.
+
+### Verificato
+
+`npm run prova-desktop` apre ora anche il **livello 1** su quattro telefoni (393×873, 360×800,
+360×740, 320×700): un Quadro ha due righe che la partita libera non ha — la barra dell'obiettivo
+sopra la plancia e la striscia della terna sotto i pezzi — e il modo più facile di rompere quella
+schermata è aggiungere qualcosa in fondo. Su tutti e quattro la plancia resta fra 300 e 373 px e
+l'anteprima sta dentro lo schermo.
+
+`npm run anteprima` non prova più una modalità che non esiste: apre un livello, e confronta ciò
+che sta sullo schermo con ciò che il **motore** ha estratto, non con se stesso.
+
+### Ancora aperto
+
+**Sei livelli restano imbattibili al giocatore artificiale**: 61, 62, 66, 83, 84, 97. Cinque
+usano due griglie di ostacoli a scacchi (`##.##.##.` e `##..##..#`) su cui in 25–30 mosse il
+metro non chiude **nemmeno un gruppo**: minimo, mediana e massimo sono zero. Non è un bersaglio
+troppo alto — il bersaglio minimo possibile è 1, e neanche quello è raggiungibile. È la griglia,
+ed è un problema che esisteva già prima dell'anteprima.
+
 ## [1.0.2] — 7 settembre 2026
 
 ### Modificato

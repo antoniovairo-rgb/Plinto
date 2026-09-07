@@ -1,32 +1,42 @@
 /**
- * La modalita' con l'anteprima, in un browser vero.
+ * L'anteprima della terna successiva NEI LIVELLI, in un browser vero.
  *
  * Il test unitario prova che la terna mostrata e' quella consegnata su piu' di mille
  * mani. Questo scenario prova la cosa che il test unitario non puo' vedere: che quella
- * terna arrivi davvero SULLO SCHERMO, e che a mano esaurita quello che compare nel tray
- * sia proprio quello che era in anteprima.
+ * terna arrivi davvero SULLO SCHERMO, che si veda, che stia dove deve stare, e che a
+ * mano esaurita quello che compare nel tray sia proprio quello che era in anteprima.
+ *
+ * PERCHE' IN UN LIVELLO. Fino alla 1.0.2 l'anteprima era una modalita' della partita
+ * libera, scelta da un pulsante in home. Adesso e' parte dei Quadri e quel pulsante non
+ * esiste piu': provarla dove non c'e' piu' vorrebbe dire provare un'altra cosa. Il
+ * livello 1 e' senza ostacoli, quindi la plancia parte vuota e appoggiare tre pezzi non
+ * dipende dalla fortuna.
  *
  * Uso: npm run anteprima
  */
 
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
-import { createGame, serializeGame } from '../../src/core/engine.js';
-import { getShape } from '../../src/core/shapes.js';
+import { iniziaQuadro, MODALITA_QUADRI } from '../../src/core/quadro.js';
+import { quadroNumero } from '../../src/config/quadri.js';
 import { MODALITA } from '../../src/config/rules.js';
 
 /**
- * Una partita in modalita' anteprima con TRE PEZZI DA UNA CELLA in mano.
+ * La terna che il MOTORE dice che sara' mostrata nel livello 1.
  *
- * La prima versione di questo scenario provava a esaurire la mano cliccando le celle una
- * dopo l'altra finche' una accettava il pezzo: con un blocco 3x3 in mano non ci riusciva,
- * e lo scenario accusava il gioco di non consegnare la terna. Il difetto era nel pilota.
- * Con tre pezzi da una cella su griglia vuota, esaurire la mano e' deterministico -- e
- * cio' che si vuole misurare non e' il trascinamento, che ha gia' il suo scenario, ma la
- * consegna della terna.
- *
- * `manoSuccessiva` NON viene toccata: e' quella vera, estratta dal motore.
+ * Serve a confrontare cio' che si vede sullo schermo con cio' che il motore ha davvero
+ * estratto, invece di limitarsi a confrontare lo schermo con se stesso. Se un giorno
+ * l'interfaccia disegnasse una terna qualunque, questo confronto se ne accorgerebbe e
+ * quello fra anteprima e tray no.
  */
+const attesa = (() => {
+  const partita = iniziaQuadro(quadroNumero(1), { now: 0 });
+  if (partita.modalita !== MODALITA.ANTEPRIMA) {
+    console.error(`Il livello 1 non si apre in anteprima ma in "${partita.modalita}".`);
+    process.exit(1);
+  }
+  return partita.manoSuccessiva.map((p) => `${p.shape.height}x${p.shape.width}`);
+})();
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -75,29 +85,18 @@ await page.evaluate(() => {
 await page.reload({ waitUntil: 'networkidle' });
 
 // ---------- 1. Si entra nella modalita, e lo dice ----------
-const conTrePunti = (() => {
-  const base = createGame({ seed: 20260907, modalita: MODALITA.ANTEPRIMA });
-  return serializeGame({
-    ...base,
-    hand: [
-      { uid: 'n1', shapeId: 'p1', shape: getShape('p1'), color: 1 },
-      { uid: 'n2', shapeId: 'p1', shape: getShape('p1'), color: 2 },
-      { uid: 'n3', shapeId: 'p1', shape: getShape('p1'), color: 3 },
-    ],
-  });
-})();
-await page.evaluate((dati) => {
-  window.localStorage.setItem('plinto:partita-anteprima', JSON.stringify(dati));
-}, conTrePunti);
-await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Partita con anteprima/ }).click();
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await page.waitForSelector('.pl-tappe');
+await page.locator('.pl-tappa').first().click();
+await page.waitForSelector('.pl-apertura');
+await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
-const modalita = (await page.locator('.pl-modalita').innerText()).trim();
+const obiettivo = await page.locator('.pl-obiettivo').count();
 const strisce = await page.locator('.pl-anteprima').count();
 await page.screenshot({ path: `${OUT}/anteprima-01.png` });
-console.log(`1. modalita a schermo: "${modalita}" | strisce di anteprima: ${strisce}`);
-if (!/anteprima/i.test(modalita)) errori.push(`ANTEPRIMA: la modalita a schermo dice "${modalita}"`);
-if (strisce !== 1) errori.push(`ANTEPRIMA: ${strisce} strisce invece di una`);
+console.log(`1. livello 1 aperto (barre obiettivo: ${obiettivo}) | strisce di anteprima: ${strisce}`);
+if (strisce !== 1) errori.push(`ANTEPRIMA: ${strisce} strisce invece di una, dentro un livello`);
+console.log(`   modalita di taratura dei bersagli: "${MODALITA_QUADRI}"`);
 
 // ---------- 1b. La striscia si deve VEDERE, non solo esistere ----------
 // Questo controllo esiste perche' la prima versione passava con celle da 6 px e una
@@ -180,25 +179,44 @@ const formeTray = () => page.evaluate(() => (
 ));
 
 const previste = await formeAnteprima();
-console.log(`2. terna in anteprima: ${previste.join(', ')}`);
+console.log(`2. terna in anteprima: ${previste.join(', ')} | il motore dice: ${attesa.join(', ')}`);
 if (previste.length !== 3) errori.push(`ANTEPRIMA: mostra ${previste.length} pezzi invece di 3`);
+// Lo schermo contro il MOTORE, non contro se stesso.
+if (previste.join(',') !== attesa.join(',')) {
+  errori.push(
+    `ANTEPRIMA: a schermo "${previste.join(', ')}" ma il motore ha estratto "${attesa.join(', ')}"`,
+  );
+}
 
 // ---------- 3. Si esauriscono i tre pezzi in mano ----------
-/** Appoggia il primo pezzo disponibile su una cella vuota nota, a due tocchi. */
-async function appoggiaSu(cella) {
+/**
+ * Appoggia il primo pezzo in mano nella prima cella che lo accetta.
+ *
+ * Prova le celle in ordine invece di puntarne una scelta a mano: nel livello i pezzi
+ * sono quelli che il motore estrae, non tre quadratini scelti da noi, e una cella fissa
+ * andrebbe bene per un pezzo da una cella e non per un blocco 3x3. La prima versione di
+ * questo scenario aveva esattamente quel difetto, e accusava il gioco di non consegnare
+ * la terna quando era il pilota a non saper posare.
+ */
+async function appoggiaIlPrimo() {
   const prima = await page.locator('.pl-plancia .pl-blocco').count();
-  await page.locator('.pl-tray .pl-pezzo-presa').first().click();
-  await page.waitForTimeout(60);
-  await page.locator('.pl-plancia .pl-cella').nth(cella).click();
-  await page.waitForTimeout(80);
-  return (await page.locator('.pl-plancia .pl-blocco').count()) !== prima;
+  for (let cella = 0; cella < 81; cella += 1) {
+    // Il pezzo si riseleziona PRIMA di ogni tentativo: toccare una casella dove non
+    // ci sta annulla la selezione, e la prima versione di questo pilota selezionava
+    // una volta sola -- dopo il primo tentativo a vuoto cliccava su una plancia che
+    // non aveva piu' niente in mano, e accusava il gioco di non consegnare la terna.
+    await page.locator('.pl-tray .pl-pezzo-presa').first().click();
+    await page.waitForTimeout(40);
+    await page.locator('.pl-plancia .pl-cella').nth(cella).click();
+    await page.waitForTimeout(40);
+    if ((await page.locator('.pl-plancia .pl-blocco').count()) !== prima) return true;
+  }
+  return false;
 }
 
 let appoggiati = 0;
-// Tre celle libere e lontane fra loro: nessuna riga, colonna o quadrante si chiude,
-// quindi la mano si esaurisce senza che succeda nient'altro.
-for (const cella of [0, 40, 80]) {
-  if (await appoggiaSu(cella)) appoggiati += 1;
+for (let i = 0; i < 3; i += 1) {
+  if (await appoggiaIlPrimo()) appoggiati += 1;
 }
 await page.waitForTimeout(200);
 const consegnate = await formeTray();
@@ -224,20 +242,27 @@ const fuoco = await page.evaluate(() => document.activeElement?.id ?? '');
 console.log(`4. tasto P: fuoco su "${fuoco}"`);
 if (fuoco !== 'pl-anteprima') errori.push(`TASTIERA: il tasto P non porta all anteprima (fuoco su "${fuoco}")`);
 
-// ---------- 5. La partita base non ha nessuna anteprima ----------
+// ---------- 5. La partita libera invece NON ce l ha ----------
+// La' non c'e' niente da risolvere: si dura finche' si dura, e non sapere cosa arriva e'
+// parte di cosa la rende una partita libera. E il pulsante della vecchia modalita' a se'
+// non deve piu' esistere: due modi di vedere avanti vorrebbero dire due tarature.
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+const vecchioPulsante = await page.getByRole('button', { name: /Partita con anteprima/ }).count();
+if (vecchioPulsante !== 0) {
+  errori.push('ANTEPRIMA: in home c e ancora il pulsante della modalita a se stante');
+}
 await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
 const nellaBase = await page.locator('.pl-anteprima').count();
-console.log(`5. strisce di anteprima nella partita base: ${nellaBase}`);
-if (nellaBase !== 0) errori.push('ANTEPRIMA: compare anche nella partita base');
+console.log(`5. strisce di anteprima nella partita libera: ${nellaBase} (pulsante vecchio: ${vecchioPulsante})`);
+if (nellaBase !== 0) errori.push('ANTEPRIMA: compare anche nella partita libera');
 
 await browser.close();
 if (server) server.kill();
 
 console.log('\n================ ESITO ================');
 if (errori.length === 0) {
-  console.log('Anteprima: la terna mostrata e quella consegnata, e resta fuori dalla modalita base.');
+  console.log('Anteprima: nei livelli la terna mostrata e quella consegnata, e la partita libera ne resta fuori.');
 } else {
   errori.forEach((e) => console.error(`PROBLEMA - ${e}`));
   process.exit(1);

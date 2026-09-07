@@ -641,7 +641,7 @@ dimentica dopo due mesi non è un archivio.
 Rigiocare un giorno dall'archivio non recupera niente e non sblocca niente: conserva solo il
 punteggio migliore di quel giorno, come per la sfida di oggi.
 
-## La modalità con l'anteprima, e quanto costa
+## L'anteprima della terna successiva, e quanto costa
 
 Nel gioco base la terna successiva **non esiste** finché serve: viene estratta quando la
 mano si è svuotata, sulla griglia com'è in quel momento. Per mostrarla in anticipo si può
@@ -650,14 +650,84 @@ corrente, e non toccarla più**. L'alternativa (estrarla per mostrarla e rigener
 all'uso) mostrerebbe una terna diversa da quella che arriva, ed è la peggiore funzionalità
 possibile in un gioco che promette di non nascondere niente.
 
+### Dove c'è, e perché lì
+
+L'anteprima è **parte dei Quadri**, non una modalità da scegliere. Un Quadro è un problema
+con una soluzione: obiettivo dichiarato, tetto di mosse, griglia fissa. Su un pezzo che non
+sai se arriverà non si può ragionare, e un livello che chiede di ragionare mentre nasconde
+metà del problema chiede due cose diverse insieme. **La partita libera resta senza**: lì non
+c'è niente da risolvere — si dura finché si dura, e non sapere cosa arriva è parte di cosa la
+rende libera.
+
+Fino alla 1.0.2 l'anteprima era una modalità a sé della partita libera, con un pulsante in
+home e record separati. Non lo è più, e la ragione è misurata, non estetica: vedere avanti
+cambia l'ordine in cui il generatore legge la griglia, quindi **lo stesso seme produce
+un'altra partita**. Due modalità avrebbero voluto dire due tarature dei cento bersagli, e
+nessuna delle due sarebbe stata quella vera per chi giocava nell'altra.
+
+### Quanto cambia i livelli, misurato
+
+Il primo confronto che abbiamo pubblicato misurava solo il **costo** dell'estrazione
+anticipata, perché nessun giocatore artificiale leggeva la terna successiva: registrava lo
+svantaggio e non il vantaggio. Adesso il metro la usa — fra le sequenze quasi equivalenti
+sceglie quella che lascia posto a ciò che sta per arrivare (`src/sim/accoglienza.mjs`).
+
+Misurato con `node tools/taratura.mjs 12 base` e `node tools/taratura.mjs 12 anteprima`,
+confrontati con `npm run confronto <base> <anteprima>`. La misura è **fin dove arriva** il
+metro giocando il livello senza fermarsi all'obiettivo: è continua, mentre la percentuale di
+riuscite è schiacciata contro il 100% e non ha spazio per salire.
+
+| atto | mediana base | mediana anteprima | livelli meglio / uguale / peggio |
+|---|---|---|---|
+| 1–12 | 2,8 | 3,3 | 5 / 6 / 1 |
+| 13–26 | 62,3 | 70,6 | 7 / 5 / 2 |
+| 27–42 | 89,1 | 85,0 | 6 / 6 / 4 |
+| 43–58 | 65,9 | 68,6 | 5 / 9 / 2 |
+| 59–74 | 123,8 | 129,3 | 8 / 4 / 4 |
+| 75–90 | 97,2 | 102,9 | 4 / 8 / 4 |
+| 91–100 | 110,4 | 111,9 | 3 / 5 / 2 |
+
+**Su cento obiettivi: 38 il metro arriva più lontano, 43 uguale, 19 meno lontano.** Un
+miglioramento reale ma modesto: i livelli non diventano una passeggiata. Due cautele che
+vanno lette insieme al numero:
+
+- Il vantaggio è misurato con un modello **volutamente modesto** di come si usa l'anteprima.
+  Non allunga la ricerca di tre livelli — sarebbe costato centinaia di volte tanto, e le
+  misure sui cento livelli sarebbero passate da minuti a ore. Una persona brava può sfruttarla
+  meglio: 38/43/19 è un **limite inferiore** del vantaggio, non una stima centrata.
+- Le due righe in negativo non dicono che l'anteprima peggiori: sono dominate da pochi
+  livelli che con l'anteprima vanno a zero perché sono diventati un altro problema.
+
+### L'effetto principale non è la difficoltà: è l'identità dei livelli
+
+Giocando gli stessi cento livelli con i **bersagli vecchi** nelle due modalità
+(`npm run quadri 10 base` e `npm run quadri 10`), otto livelli su cento cambiano
+completamente esito:
+
+| livello | base | anteprima |
+|---|---|---|
+| 33, 61, 74, 76, 78, 89, 93 | 100% | 0% |
+| 69 | 0% | 100% |
+
+Non è che siano diventati difficili: sono **altri livelli** con lo stesso numero e lo stesso
+bersaglio. Per questo i cento bersagli sono stati **ritarati** giocandoli nella modalità in cui
+si giocano davvero (`node tools/genera-quadri.mjs`): 56 bersagli su 100 sono cambiati, 26 in su
+e 30 in giù, mentre griglie e tetti di mosse sono rimasti identici. `MODALITA_TARATURA` in
+`src/config/quadri.js` dichiara in che modalità sono stati misurati, e un test controlla che
+coincida con quella giocata.
+
 ### Il prezzo, misurato
 
 Le cinque reti di sicurezza del generatore leggono la griglia **al momento
 dell'estrazione**. Con l'anteprima quel momento arriva fino a tre mosse prima dell'uso,
 cioè su una griglia **più vuota**. La rete n. 5 — «sopra il 60% di riempimento almeno un
 pezzo piccolo» — può quindi non scattare, perché all'estrazione il riempimento era ancora
-sotto soglia. **La modalità anteprima è più dura di quella base**, all'opposto
+sotto soglia. **Estrarre in anticipo, di per sé, è uno svantaggio**, all'opposto
 dell'intuizione.
+
+Questo è il costo puro, misurato su un giocatore che **non usa** l'informazione: il profilo
+«normale» sceglie una mossa alla volta e non guarda la terna successiva. Va letto insieme al
+confronto qui sopra, che misura il vantaggio di usarla — il conto netto è quello, non questo.
 
 Misurato con `node src/sim/run.mjs 3000 normale 250 <modalità>`, profilo «normale», tetto
 di 250 mosse, su **due campioni indipendenti** (semi 20260906 e 777):
@@ -671,8 +741,8 @@ di 250 mosse, su **due campioni indipendenti** (semi 20260906 e 777):
 | Game over sotto il 30% di riempimento | 21,9% | 21,9% | 22,4% | 21,8% |
 
 **Cosa dicono questi numeri, senza abbellirli.** L'effetto è nella direzione prevista e la
-direzione è la stessa in entrambi i campioni, su tutte le righe: la modalità anteprima è
-un po' più dura. La misura è **1–2%**, cioè piccola: due campioni concordi la rendono
+direzione è la stessa in entrambi i campioni, su tutte le righe: estrarre in anticipo, da
+solo, è un po' più duro. La misura è **1–2%**, cioè piccola: due campioni concordi la rendono
 credibile, ma non è la stessa cosa di un intervallo di confidenza, e qui non ne è stato
 calcolato uno.
 
@@ -683,14 +753,14 @@ che passano da 6 a 9–11 su 3000: un caso ogni trecento partite circa.
 
 ### Le altre conseguenze, tutte dichiarate
 
-- **Record separati.** Vedere avanti è un vantaggio informativo: mettere i due punteggi
-  nella stessa classifica vorrebbe dire dichiarare confrontabili due cose che non lo sono.
 - **Semi non compatibili.** Estrarre in anticipo cambia l'ordine di consumo del
   generatore, quindi **lo stesso seme produce una partita diversa** nelle due modalità.
   La mano iniziale coincide; tutto quello che viene dopo, no.
 - **L'anteprima mostra le forme, non i colori.** Il colore dei pezzi è dichiaratamente
   estetico, e mostrarlo in anticipo suggerirebbe che conti qualcosa. **La bomba invece si
   vede**: quella non è estetica, cambia cosa conviene fare.
-- **Il gioco base non è cambiato di una virgola.** Nessuna estrazione è stata spostata: i
-  100 livelli tarati e tutte le sfide passate producono esattamente le partite di prima.
-  C'è un test che lo verifica.
+- **La partita libera e le Sfide non sono cambiate di una virgola.** Nessuna estrazione è
+  stata spostata: le sfide passate producono esattamente le partite di prima, e c'è un test
+  che lo verifica. **I 100 livelli invece sì**, ed è dichiarato: giocandosi ora con
+  l'anteprima sono partite diverse a parità di numero, e per questo i bersagli sono stati
+  rimisurati in quella modalità. I livelli già superati restano superati.

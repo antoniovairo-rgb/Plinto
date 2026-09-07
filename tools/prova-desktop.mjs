@@ -165,6 +165,77 @@ for (const schermo of TELEFONI) {
   await page.close();
 }
 
+// ----------------------------------------------------------------------------
+// Il livello sul telefono: adesso ha una riga in piu'.
+//
+// Un Quadro mostra la barra dell'obiettivo SOPRA la plancia e, da quando l'anteprima
+// e' parte del percorso, la striscia della terna successiva SOTTO i pezzi in mano. Sono
+// due righe che la partita libera non ha, sullo stesso schermo. Il modo piu' facile di
+// rompere questa schermata e' aggiungere qualcosa in fondo e spingere fuori la plancia:
+// qui si controlla che non succeda, sui telefoni piu' stretti.
+for (const schermo of TELEFONI) {
+  const page = await browser.newPage({
+    viewport: { width: schermo.width, height: schermo.height }, locale: 'it-IT',
+  });
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    window.localStorage.setItem('plinto:settings', JSON.stringify({
+      introVista: true, lingua: 'it', tema: 'scuro', animazioni: false, aiutoVisivo: true,
+    }));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').first().click();
+  await page.waitForSelector('.pl-apertura');
+  await page.getByRole('button', { name: /^Gioca$/ }).click();
+  await page.waitForSelector('.pl-plancia');
+
+  const gioco = await page.evaluate(() => {
+    const r = (sel) => {
+      const el = document.querySelector(sel);
+      return el ? el.getBoundingClientRect() : null;
+    };
+    const plancia = r('.pl-plancia');
+    const obiettivo = r('.pl-obiettivo');
+    const anteprima = r('.pl-anteprima');
+    const cella = r('.pl-anteprima__cella');
+    return {
+      planciaAlta: plancia ? Math.round(plancia.height) : 0,
+      planciaLarga: plancia ? Math.round(plancia.width) : 0,
+      obiettivoC: Boolean(obiettivo),
+      anteprimaFine: anteprima ? Math.round(anteprima.bottom) : null,
+      cellaAnteprima: cella ? Math.round(cella.width) : 0,
+      finestra: window.innerHeight,
+    };
+  });
+  await page.screenshot({ path: `${USCITA}/${schermo.nome}-livello.png` });
+  console.log(
+    `${schermo.nome.padEnd(17)} livello 1: plancia ${gioco.planciaLarga}x${gioco.planciaAlta}, `
+    + `anteprima finisce a ${gioco.anteprimaFine} (schermo ${gioco.finestra}), `
+    + `cella ${gioco.cellaAnteprima} px`,
+  );
+
+  if (!gioco.obiettivoC) errori.push(`${schermo.nome}: nel livello manca la barra dell'obiettivo`);
+  if (gioco.anteprimaFine === null) {
+    errori.push(`${schermo.nome}: nel livello non c'e' l'anteprima della terna successiva`);
+  } else if (gioco.anteprimaFine > gioco.finestra) {
+    errori.push(
+      `${schermo.nome}: l'anteprima finisce a ${gioco.anteprimaFine} px, `
+      + `fuori dallo schermo alto ${gioco.finestra}`,
+    );
+  }
+  // La plancia e' il gioco: se per far posto alle due righe si stringe sotto i 240 px
+  // di lato, si e' pagato con la cosa che conta di piu'.
+  if (gioco.planciaLarga < 240) {
+    errori.push(`${schermo.nome}: nel livello la plancia si e stretta a ${gioco.planciaLarga} px`);
+  }
+  if (gioco.cellaAnteprima < 9) {
+    errori.push(`${schermo.nome}: celle dell'anteprima da ${gioco.cellaAnteprima} px, illeggibili`);
+  }
+  await page.close();
+}
+
 await browser.close();
 if (server) server.kill();
 
