@@ -1581,3 +1581,43 @@ button {
 .pl-giorno:focus-visible {
   outline: 3px solid var(--pl-brand); outline-offset: 2px;
 }
+
+/* ----------------------------------------------------- profilo di gioco --- */
+.pl-profilo__blocco { margin: 0 0 22px; }
+.pl-profilo__titolo {
+  margin: 0 0 6px; font-size: 0.95rem; font-weight: 700; color: var(--pl-text);
+}
+.pl-dato {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 5px 0; border-bottom: 1px solid var(--pl-line);
+}
+.pl-dato__etichetta { font-size: 0.85rem; color: var(--pl-text-dim); }
+.pl-dato__valore { font-family: var(--pl-font-num); font-weight: 700; }
+
+.pl-tabella { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.pl-tabella th, .pl-tabella td { padding: 4px 6px; text-align: right; }
+.pl-tabella th[scope="row"] { text-align: left; font-weight: 600; white-space: nowrap; }
+.pl-tabella thead th { color: var(--pl-text-faint); font-weight: 600; font-size: 0.74rem; }
+.pl-tabella tbody tr { border-bottom: 1px solid var(--pl-line); }
+.pl-tabella__debole { color: var(--pl-text-dim); }
+
+/* La barra e' un aiuto a colpo d'occhio e nient'altro: il numero le sta sempre
+   accanto, e la barra e' nascosta ai lettori di schermo perche' ripeterebbe
+   quel numero in una forma che non si puo' leggere. */
+.pl-barra {
+  display: inline-block; width: 54px; height: 7px; margin-right: 6px;
+  background: var(--pl-line); border-radius: 4px; overflow: hidden; vertical-align: middle;
+}
+.pl-barra__pieno { display: block; height: 100%; background: var(--pl-brand); }
+
+.pl-mappa { width: 100%; border-collapse: separate; border-spacing: 2px; table-layout: fixed; }
+.pl-mappa th {
+  font-size: 0.62rem; color: var(--pl-text-faint); font-weight: 600; padding: 0; text-align: center;
+}
+/* L'intensita' e' una tinta sopra il fondo, non l'informazione: il numero c'e' sempre,
+   e resta leggibile anche sulla casella piu' calda. */
+.pl-mappa__cella {
+  text-align: center; font-size: 0.6rem; font-family: var(--pl-font-num);
+  padding: 4px 0; border-radius: 4px; color: var(--pl-text);
+  background: color-mix(in srgb, var(--pl-brand) calc(var(--intensita, 0) * 42%), var(--pl-ink-2));
+}

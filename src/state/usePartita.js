@@ -4,6 +4,7 @@ import {
 } from '../core/engine.js';
 import { read, write, remove, chiavePartita } from '../persistence/storage.js';
 import { loadRecords, recordGame } from '../persistence/records.js';
+import { registraPartita } from '../persistence/profilo.js';
 import { registraSfida } from '../persistence/sfide.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 
@@ -100,6 +101,10 @@ export function usePartita() {
     remove(chiavePartita(modalita));
     const riepilogo = summarize(partita);
     const esito = recordGame(riepilogo);
+    // Il profilo di gioco: entrano partita libera e sfida, non i livelli. I livelli
+    // partono da griglie costruite a mano e falserebbero la mappa degli appoggi
+    // facendola somigliare al loro disegno invece che al modo di giocare di chi guarda.
+    registraPartita(riepilogo);
     setRecord(esito.records);
     setNuoviRecord(esito.nuoviRecord);
     // Il giorno della sfida e' quello della partita giocata, non quello di oggi: con

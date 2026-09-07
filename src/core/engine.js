@@ -285,6 +285,10 @@ export function summarize(state, now = Date.now()) {
     boardClears: state.stats.boardClears,
     filledCells: filledCount(state.grid),
     piecesPlaced: state.stats.piecesPlaced,
+    // Le bombe non erano nel riepilogo perche' nessuno le leggeva: il profilo di gioco
+    // le legge, ed erano l'unica cosa del tabellone che il riepilogo non raccontava.
+    bombeEsplose: state.stats.bombeEsplose ?? 0,
+    celleEsplose: state.stats.celleEsplose ?? 0,
     // Le distribuzioni escono da qui perche' e' da qui che passano il profilo di
     // gioco e la scheda condivisibile: nessuno dei due deve leggere lo stato interno.
     ...normalizzaDistribuzioni(state.stats),

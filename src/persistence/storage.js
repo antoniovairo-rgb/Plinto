@@ -77,6 +77,7 @@ export const KEYS = {
   CHALLENGES: 'sfide',
   PROGRESS: 'quadri',
   STATS: 'statistiche',
+  PROFILO: 'profilo',
 };
 
 /**

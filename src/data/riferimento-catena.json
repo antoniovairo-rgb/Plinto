@@ -1,0 +1,23 @@
+{
+  "distribuzione": [
+    0.05613,
+    0.09894,
+    0.09123,
+    0.08815,
+    0.08258,
+    0.08248,
+    0.08835,
+    0.11762,
+    0.14438,
+    0.15014
+  ],
+  "media": 5.148,
+  "quotaAttiva": 0.7537,
+  "profilo": "stratega",
+  "partite": 120,
+  "tettoMosse": 250,
+  "mosse": 29825,
+  "regole": "f4dae600",
+  "misuratoIl": "2026-09-07",
+  "comando": "npm run catena 120 250"
+}

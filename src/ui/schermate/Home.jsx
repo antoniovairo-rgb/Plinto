@@ -111,6 +111,12 @@ export function SchermoHome({
         <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('statistiche')}>
           {t('home.statistiche')}
         </button>
+        {/* Il profilo sta nel menu accanto alle statistiche, non fra i pulsanti per
+            giocare: e' una cosa che si guarda fra una partita e l'altra, non un modo
+            di iniziare. */}
+        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('profilo')}>
+          {t('profilo.titolo')}
+        </button>
         <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('impostazioni')}>
           {t('home.impostazioni')}
         </button>

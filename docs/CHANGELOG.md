@@ -7,6 +7,74 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.7.0] — 7 settembre 2026
+
+Fase 3 del piano evolutivo: **il profilo di gioco**.
+
+### Aggiunto
+
+**Una schermata che dice COME giochi, non quanto hai fatto.** I record dicono il
+risultato migliore, le statistiche i totali: nessuno dei due dice il modo, ed è l'unica
+cosa che un giocatore non può ricavare da solo — per sapere che chiude quasi solo righe
+dovrebbe contarsele partita dopo partita. Dal menu della home, «Il tuo profilo di gioco».
+
+- **Come chiudi i gruppi**: righe, colonne, quadranti, con la quota di ciascuno. È il dato
+  che racconta davvero lo stile: un quadrante vale 27 punti base, una riga 9.
+- **Dove passi le tue mosse**: la distribuzione della Catena **applicata** — quella che
+  avevi prima di muovere, non quella che la mossa ti ha lasciato.
+- **Dove appoggi i pezzi**: la mappa 9×9 degli ancoraggi. È l'unica immagine davvero
+  personale del gioco: due giocatori con lo stesso punteggio hanno mappe diverse.
+- Bombe fatte esplodere, celle portate via, griglie svuotate, mossa migliore.
+
+**Il confronto con lo stratega, quando è onesto mostrarlo.** Il riferimento è **generato**
+da `npm run catena`, che ora scrive `src/data/riferimento-catena.json` con distribuzione,
+profilo, partite, tetto di mosse, data e **impronta delle regole**. Se quell'impronta non
+coincide con quella del gioco, il confronto **non si mostra affatto**: un paragone
+sbagliato somiglia troppo a uno giusto. E sotto al grafico c'è scritto per esteso che il
+riferimento è un **giocatore artificiale, non una media di persone** — è la differenza fra
+«gioco peggio di un programma» e «gioco peggio della gente», e la seconda non la sappiamo.
+
+**Ogni grafico ha il suo equivalente in tabella**, e non è una concessione: un grafico a
+barre fatto di `<div>` alti in percentuale, per chi ascolta, è silenzio. La mappa di calore
+in particolare — come immagine è una macchia, come tabella 9×9 con intestazioni è leggibile
+da chiunque. L'intensità del colore non porta mai da sola un'informazione: **accanto c'è
+sempre il numero**.
+
+**Esporta e cancella, in evidenza e non in un sottomenu.** Un gioco senza account che
+accumula statistiche deve dare la porta d'uscita senza farla cercare. «Cancella» tocca
+**solo** il profilo: record, statistiche, livelli e sfide restano dove sono.
+
+### Scelte dichiarate
+
+**Nel profilo entrano partita libera e Sfida del Giorno, non i livelli.** I livelli partono
+da griglie costruite a mano: falserebbero la mappa degli appoggi facendola somigliare al
+loro disegno invece che al modo di giocare di chi la guarda. È scritto anche nella
+schermata, non solo qui.
+
+**L'aggregazione è un aggregato, non un archivio**: contatori e somme, dimensione costante
+nel tempo. L'unica eccezione sono le ultime 20 partite, tenute per l'andamento.
+
+### Corretto
+
+**Il test sull'ortografia italiana accusava «cioè» di essere «cio» senza accento.** In
+JavaScript `\b` considera «parola» solo le lettere ASCII, quindi il confine cadeva fra la
+«o» e la «è». Sostituito con lookaround su `\p{L}`: adesso il confine cade dove cade in
+italiano. Collaudato in tutte e due le direzioni — «cioè» passa, un «piu» senza accento
+viene ancora accusato.
+
+### Verifiche
+
+- **282 test in 18 file** (erano 264 in 17). 18 nuovi su `aggrega`: profilo vuoto,
+  prima partita, **cento partite** con le invarianti della Fase 1 verificate sull'aggregato,
+  partita da zero mosse, riepilogo con campi mancanti (nessun `NaN`), profilo di una
+  versione vecchia, istogramma della lunghezza sbagliata, storage che lancia.
+- Due test **sul riferimento generato**: che abbia la forma giusta e che sia stato misurato
+  con le regole di adesso. Il secondo fallisce con scritto cosa fare — `npm run catena` —
+  invece di lasciare che il confronto sparisca in silenzio.
+- La schermata è attraversata in entrambe le lingue da `npm run comunicazioni`, con un
+  profilo popolato: senza, si sarebbe letta solo la riga di cortesia e nessuna tabella.
+- `npm run verifica`: **12 controlli su 12 in 311 s**, sulla 0.7.0.
+
 ## [0.6.0] — 7 settembre 2026
 
 Fase 2 del piano evolutivo: **l'archivio delle sfide**.

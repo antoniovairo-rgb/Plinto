@@ -148,7 +148,14 @@ describe('ortografia italiana', () => {
   });
 
   it.each(SENZA_ACCENTO)('nessun testo contiene "%s" senza accento', (parola) => {
-    const rotti = testi.filter(([, testo]) => new RegExp(`\\b${parola}\\b`, 'i').test(testo));
+    // Il confine di parola va calcolato sulle LETTERE, non su `\b`.
+    //
+    // In JavaScript `\b` considera "parola" solo [A-Za-z0-9_]: una lettera accentata
+    // non lo e', quindi `\bcio\b` trova "cio" dentro «cioè» -- e il test accusava di
+    // errore una parola scritta giusta. Con i lookaround su \p{L} il confine cade dove
+    // cade davvero in italiano, e «cioè» smette di somigliare a «cio».
+    const confine = new RegExp(`(?<!\\p{L})${parola}(?!\\p{L})`, 'iu');
+    const rotti = testi.filter(([, testo]) => confine.test(testo));
     expect(rotti.map(([chiave, testo]) => `${chiave}: "${testo}"`)).toEqual([]);
   });
 

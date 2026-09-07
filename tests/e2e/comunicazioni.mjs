@@ -97,6 +97,24 @@ for (const lingua of ['it', 'en']) {
 
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 
+  // Un profilo di gioco gia' popolato: senza, la schermata del profilo mostra la sua
+  // riga di cortesia ("serve almeno una partita finita") e nessuna delle tabelle, cioe'
+  // proprio i testi che qui si vogliono leggere. Il profilo si costruisce con numeri
+  // qualunque: quello che si controlla sono le parole, non i valori.
+  await page.evaluate(() => {
+    window.localStorage.setItem('plinto:profilo', JSON.stringify({
+      versione: 1,
+      partite: 12, mosse: 340, pezzi: 340, punteggioTotale: 41000, tempoTotaleMs: 900000,
+      migliorPunteggio: 8200, migliorMossa: 410, migliorCatena: 7, migliorIntreccio: 3,
+      righe: 40, colonne: 22, quadranti: 9, svuotamenti: 2, bombe: 11, celleEsplose: 63,
+      istogrammaCatena: [80, 60, 50, 40, 35, 30, 20, 15, 6, 4],
+      istogrammaIntreccio: [200, 100, 30, 8, 2, 0, 0, 0, 0, 0, 0],
+      mappaAppoggi: Array.from({ length: 81 }, (_, i) => (i * 7) % 13),
+      andamento: [{ punteggio: 100, mosse: 10 }],
+    }));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+
   // --- presentazione al primo avvio ---
   await page.waitForSelector('.pl-intro__regole');
   const regole = await page.locator('.pl-intro__regole li').count();

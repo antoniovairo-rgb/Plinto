@@ -27,7 +27,9 @@
  */
 
 import { createGame, placePiece } from '../src/core/engine.js';
+import { writeFileSync, mkdirSync } from 'node:fs';
 import { chooseMove, createRng } from '../src/sim/player.mjs';
+import { IMPRONTA_REGOLE } from '../src/core/impronta.js';
 import { CHAIN_MAX, CHAIN_STEP_UP, CHAIN_DECAY, CHAIN_GRACE } from '../src/config/rules.js';
 
 const PARTITE = Number(process.argv[2] ?? 120);
@@ -117,3 +119,37 @@ for (const { etichetta, tolleranza, passo } of CONFIGURAZIONI) {
   );
 }
 console.log('');
+
+// ---------------------------------------------------------------------------
+// Il riferimento per il profilo di gioco.
+//
+// PERCHE' VIENE SCRITTO E NON TRASCRITTO. La schermata del profilo confronta la
+// distribuzione della Catena del giocatore con quella dello stratega. Se quei numeri
+// li copiasse una persona dentro il codice, prima o poi resterebbero indietro rispetto
+// alle regole -- ed e' il caso peggiore, perche' un confronto sbagliato sembra un
+// confronto giusto. Quindi li scrive questo script, insieme a tutto cio' che serve per
+// sapere se sono ancora validi: profilo usato, partite, tetto di mosse, data e
+// IMPRONTA DELLE REGOLE. Se l'impronta non coincide con quella del gioco, la schermata
+// non mostra il confronto affatto: meglio nessun paragone che uno sbagliato.
+//
+// Si rigenera con: npm run catena
+// ---------------------------------------------------------------------------
+const attuale = misura(CHAIN_GRACE, 'uno');
+const riferimento = {
+  distribuzione: attuale.conteggio.map((n) => Number((n / mosseTotali).toFixed(5))),
+  media: Number(attuale.media.toFixed(3)),
+  quotaAttiva: Number((attuale.attiva / mosseTotali).toFixed(5)),
+  profilo: 'stratega',
+  partite: PARTITE,
+  tettoMosse: TETTO,
+  mosse: mosseTotali,
+  regole: IMPRONTA_REGOLE,
+  misuratoIl: new Date().toISOString().slice(0, 10),
+  comando: `npm run catena ${PARTITE} ${TETTO}`,
+};
+
+const DESTINAZIONE = new URL('../src/data/riferimento-catena.json', import.meta.url).pathname;
+mkdirSync(new URL('../src/data/', import.meta.url).pathname, { recursive: true });
+writeFileSync(DESTINAZIONE, `${JSON.stringify(riferimento, null, 2)}\n`);
+console.log(`  Riferimento scritto in src/data/riferimento-catena.json (impronta ${IMPRONTA_REGOLE}).`);
+console.log('  Lo legge la schermata del profilo; se l impronta non coincide, il confronto non si mostra.\n');
