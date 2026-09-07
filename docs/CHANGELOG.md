@@ -7,6 +7,95 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.5.0] — 7 settembre 2026
+
+Fase 1 del piano evolutivo: fondamenta. **Nessun cambiamento visibile giocando** — e' il
+prerequisito di quello che viene dopo (archivio delle sfide, profilo di gioco, scheda
+condivisibile). Nessuna regola di gioco e' cambiata: `docs/GAMEPLAY_RULES.md` non ha
+avuto bisogno di una riga nuova.
+
+### Aggiunto
+
+**Le tre distribuzioni di una partita (`src/core/distribuzioni.js`)**
+- I contatori che il gioco teneva sono massimi e somme: dicono il RISULTATO. Queste
+  dicono il MODO, e sono la materia prima del profilo di gioco: quante mosse a ciascun
+  livello di Catena, quante mosse hanno chiuso 0/1/2/... gruppi, e una mappa 9x9 di dove
+  vengono appoggiati i pezzi.
+- L'istogramma della Catena e' indicizzato sulla Catena **applicata** (`chainBefore`),
+  non su quella che la mossa lascia dietro. E' la stessa regola di trasparenza del
+  punteggio: si misura il moltiplicatore che il giocatore vedeva prima di muovere.
+  Indicizzare sull'altra racconterebbe una partita giocata meglio di com'e' andata, e
+  c'e' un test che rompe se qualcuno lo cambia.
+- **La lunghezza dell'istogramma dell'Intreccio non e' scritta a mano**: e' dedotta dal
+  catalogo delle forme provando ogni forma in ogni posizione. L'intuizione qui sbaglia —
+  sembra che una mossa possa chiudere tre o quattro gruppi, e invece un blocco 3x3 su un
+  incrocio di quadranti ne tocca **dieci** (3 righe + 3 colonne + 4 quadranti). Un array
+  dimensionato a occhio avrebbe perso in silenzio proprio le mosse piu' rare.
+- Un valore fuori scala viene **limitato agli estremi, mai scartato**: scartarlo
+  romperebbe l'invariante che tiene in piedi tutto il resto. Un conteggio nella casella
+  sbagliata si nota; un conteggio sparito, no.
+
+**Documenti versionati su localStorage (`src/persistence/documenti.js`)**
+- Ogni cosa salvata — record, statistiche, impostazioni, sfide, avanzamento nei livelli —
+  porta ora un campo `versione`. Finche' i campi si aggiungono e basta non serviva; il
+  primo campo che cambia SIGNIFICATO diventerebbe un difetto silenzioso, con il gioco che
+  legge un numero vecchio credendolo nuovo e nessun modo di accorgersene.
+- Quattro situazioni, tutte dichiarate e tutte provate: niente in memoria, forma senza
+  versione (migrata), versione corrente, e **versione futura** — il dato scritto da una
+  versione piu' recente non viene ne' frainteso ne' cancellato da una scheda rimasta
+  aperta sulla vecchia.
+- Sfide e livelli hanno richiesto un cambio di forma vero: erano mappe nude
+  (`{"2026-09-06": {...}}`), e infilarci accanto un campo `versione` avrebbe creato **un
+  giorno che si chiama "versione"** e un livello superato che si chiama "versione". Ora i
+  dati stanno dentro un contenitore, e la migrazione non perde un solo risultato.
+
+### Verifiche
+
+- **240 test in 16 file** (`npm test`), da 213 in 14.
+- Due invarianti nuove su partite intere (`tests/invarianti.test.js`), controllate dopo
+  **ogni** mossa di 240 partite giocate fino al game over: la somma dell'istogramma della
+  Catena e' il numero di mosse, la somma della mappa degli appoggi e' il numero di pezzi
+  appoggiati. Un istogramma sbagliato non rompe niente e non si vede: queste due somme
+  sono l'unico segnale che esista.
+- `tests/documenti.test.js` prova la migrazione **sui dati veri di chi gioca gia'**:
+  record, statistiche, sfide e livelli scritti dalla versione precedente. Un aggiornamento
+  che azzera mesi di record e' il danno peggiore che questo progetto possa fare, perche'
+  non esiste nessuna copia altrove da cui recuperarli. Prova anche uno storage che
+  **lancia**: nessuna eccezione esce dal modulo e la partita continua.
+- Tutti e tre i controlli sono stati **collaudati rompendo il codice di proposito**:
+  indicizzare sulla Catena sbagliata fa fallire il test della Catena applicata;
+  dimenticare di contare le mosse a vuoto fa fallire l'invariante con il messaggio
+  giusto; togliere la migrazione fa fallire quattro test, fra cui quelli sui dati veri.
+
+### Trovato per strada
+
+**La prova di resistenza era rotta da due versioni, e nessuno lo sapeva.**
+`npm run soak` cercava un pulsante «Gioca» che la home non ha più da quando è stata
+ristrutturata: falliva subito, con un timeout, senza misurare niente. Era l'unico
+controllo rimasto **fuori** da `npm run verifica`, e questo bastava a renderlo invisibile.
+Corretto, e soprattutto **aggiunto all'elenco** — ora i controlli sono undici. Un controllo
+che si lancia solo quando qualcuno se lo ricorda è un controllo che prima o poi non si
+lancia più. Esito dopo la correzione: 377 mosse valide, memoria da 10,9 a 11,7 MB, zero
+particelle rimaste, nessun fotogramma sopra i 50 ms su 2537.
+
+**`npm run verifica` ora scrive tutto anche su `verifica.log`.** Un controllo è fallito una
+volta sola durante questo lavoro; il suo messaggio era a schermo, ma l'output era incanalato
+in `tail` per leggerne il riassunto, e la diagnosi è andata persa. Non si è più ripresentato
+in cinque esecuzioni successive, quindi **resta aperto e non archiviato come "flake"**: non
+so cosa fosse. Da adesso il messaggio non si perde più.
+
+**`node --check` non vede tutto.** Chiudendo male un commento di blocco proprio in
+`tools/verifica-tutto.mjs`, l'intero corpo dello script è finito dentro il commento: file
+sintatticamente valido, `node --check` soddisfatto, programma che non faceva più niente.
+Il limite è ora dichiarato in `docs/TESTING.md` accanto al test che lo usa.
+
+### Nota tecnica
+
+`STATE_VERSION` della partita **resta 1**. `deserializeGame` rifiuta qualunque versione
+diversa, quindi alzarla per un'aggiunta compatibile butterebbe via la partita in corso di
+ogni giocatore che aggiorna. I salvataggi vecchi ripartono con gli istogrammi a zero, e
+c'e' un test che lo verifica.
+
 ## [0.4.0] — 6 settembre 2026
 
 ### Aggiunto

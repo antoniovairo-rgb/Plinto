@@ -75,6 +75,19 @@ function verificaStato(stato, contesto) {
   else expect(puoMuovere, `${dove}\npartita finita con mosse ancora possibili`).toBe(false);
 
   expect(filledCount(stato.grid), dove).toBeLessThanOrEqual(CELL_COUNT);
+
+  // Le tre distribuzioni devono tornare con i contatori che gia' esistevano. Se una
+  // mossa finisse fuori da un istogramma -- indice fuori scala, array della lunghezza
+  // sbagliata, un ramo del motore che dimentica di contarla -- il totale smetterebbe
+  // di combaciare, e sarebbe l'unico segnale: un istogramma sbagliato non rompe
+  // niente, si limita a raccontare una partita che non e' stata giocata.
+  const somma = (a) => a.reduce((s, n) => s + n, 0);
+  expect(somma(stato.stats.istogrammaCatena), `${dove}\nistogramma della Catena`)
+    .toBe(stato.stats.moves);
+  expect(somma(stato.stats.istogrammaIntreccio), `${dove}\nistogramma dell Intreccio`)
+    .toBe(stato.stats.moves);
+  expect(somma(stato.stats.mappaAppoggi), `${dove}\nmappa degli appoggi`)
+    .toBe(stato.stats.piecesPlaced);
 }
 
 describe('invarianti su partite complete', () => {

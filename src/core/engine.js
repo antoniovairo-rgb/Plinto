@@ -27,11 +27,21 @@ import {
   filledCount,
 } from './grid.js';
 import { generateHand, resetUid } from './generator.js';
+import { conMossa, distribuzioniVuote, normalizzaDistribuzioni } from './distribuzioni.js';
 import { getShape } from './shapes.js';
 import { scoreMove, moveTier } from './scoring.js';
 import { randomSeed, seedFromString } from './rng.js';
 
-/** Versione dello schema di stato: incrementarla se cambia la forma dei salvataggi. */
+/**
+ * Versione dello schema di stato: incrementarla se cambia la forma dei salvataggi.
+ *
+ * "Cambia la forma" vuol dire che un salvataggio vecchio non si puo' piu' leggere
+ * correttamente, perche' `deserializeGame` RIFIUTA qualunque versione diversa da
+ * questa: alzarla butta via la partita in corso di ogni giocatore che aggiorna. Per
+ * un'aggiunta compatibile -- come i tre istogrammi, che i salvataggi vecchi non
+ * hanno e che vengono semplicemente azzerati alla lettura -- il numero resta dov'e'.
+ * Il campo si alza quando serve, non quando cambia qualcosa.
+ */
 export const STATE_VERSION = 1;
 
 /** @returns {object} statistiche azzerate di una partita */
@@ -51,6 +61,8 @@ function emptyStats() {
     bombeEsplose: 0,
     celleEsplose: 0,
     handsDealt: 0,
+    // Le tre distribuzioni: non quanto, ma COME si e' giocato. Vedi distribuzioni.js.
+    ...distribuzioniVuote(),
   };
 }
 
@@ -183,7 +195,15 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
   // 6. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte.
   const alive = handHasMove(grid, nextHand);
 
+  const distribuzioni = conMossa(state.stats, {
+    catenaApplicata: scored.chainUsed,
+    gruppi: groups.length,
+    riga: row,
+    colonna: col,
+  });
+
   const stats = {
+    ...distribuzioni,
     moves: state.stats.moves + 1,
     piecesPlaced: state.stats.piecesPlaced + 1,
     cellsPlaced: state.stats.cellsPlaced + placed.cells.length,
@@ -264,6 +284,10 @@ export function summarize(state, now = Date.now()) {
     bestIntreccio: state.stats.bestIntreccio,
     boardClears: state.stats.boardClears,
     filledCells: filledCount(state.grid),
+    piecesPlaced: state.stats.piecesPlaced,
+    // Le distribuzioni escono da qui perche' e' da qui che passano il profilo di
+    // gioco e la scheda condivisibile: nessuno dei due deve leggere lo stato interno.
+    ...normalizzaDistribuzioni(state.stats),
   };
 }
 
@@ -336,7 +360,11 @@ export function deserializeGame(raw) {
       chain: raw.chain,
       chainDigiuno: Number.isInteger(raw.chainDigiuno) && raw.chainDigiuno >= 0 ? raw.chainDigiuno : 0,
       status: raw.status,
-      stats: { ...emptyStats(), ...raw.stats },
+      // Le distribuzioni di un salvataggio vanno normalizzate, non fuse alla cieca:
+      // un array della lunghezza sbagliata passerebbe intatto e romperebbe gli
+      // istogrammi. E' lo stesso genere di errore che ha gia' spento il gioco una
+      // volta (vedi il commento di registraTentativo in persistence/progressi.js).
+      stats: { ...emptyStats(), ...raw.stats, ...normalizzaDistribuzioni(raw.stats) },
       lastMove: null,
       startedAt: raw.startedAt,
       endedAt: raw.endedAt ?? null,

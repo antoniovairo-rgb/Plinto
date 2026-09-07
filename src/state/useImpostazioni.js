@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { read, write, KEYS } from '../persistence/storage.js';
+import { KEYS } from '../persistence/storage.js';
+import { leggiDocumento, scriviDocumento } from '../persistence/documenti.js';
 import { linguaDelBrowser } from '../i18n/index.js';
 
 /**
@@ -21,24 +22,33 @@ function menoMovimento() {
 }
 
 /**
+ * Versione del documento delle impostazioni.
+ * Alla 1 i campi sono gli stessi della forma senza versione: nessuna migrazione serve,
+ * il documento dice soltanto da dove viene.
+ */
+const VERSIONE = 1;
+
+/**
  * Impostazioni del giocatore, salvate in locale.
  * Tutte le preferenze partono da un valore che rispetta il giocatore: audio e
  * vibrazione accesi ma disattivabili, aiuto visivo acceso perche' chiarisce le
  * regole invece di nasconderle.
  */
 export function useImpostazioni() {
-  const [impostazioni, setImpostazioni] = useState(() => ({
-    audio: true,
-    vibrazione: true,
-    animazioni: !menoMovimento(),
-    aiutoVisivo: true,
-    tema: 'scuro',
-    lingua: linguaDelBrowser(),
-    introVista: false,
-    ...(read(KEYS.SETTINGS, {}) ?? {}),
+  const [impostazioni, setImpostazioni] = useState(() => leggiDocumento(KEYS.SETTINGS, {
+    versione: VERSIONE,
+    predefiniti: {
+      audio: true,
+      vibrazione: true,
+      animazioni: !menoMovimento(),
+      aiutoVisivo: true,
+      tema: 'scuro',
+      lingua: linguaDelBrowser(),
+      introVista: false,
+    },
   }));
 
-  useEffect(() => { write(KEYS.SETTINGS, impostazioni); }, [impostazioni]);
+  useEffect(() => { scriviDocumento(KEYS.SETTINGS, VERSIONE, impostazioni); }, [impostazioni]);
 
   useEffect(() => {
     const root = document.documentElement;

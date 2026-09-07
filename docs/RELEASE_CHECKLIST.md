@@ -20,7 +20,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Nucleo di gioco stabile | **FATTO** | 100 test unitari; invarianti verificate a ogni mossa su 240 partite complete |
+| Nucleo di gioco stabile | **FATTO** | 240 test in 16 file; invarianti verificate a ogni mossa su 240 partite complete |
 | Nessun difetto critico noto | **FATTO** | Nessuno aperto al momento di questa revisione |
 | Bilanciamento misurato | **FATTO** | Simulazioni su migliaia di partite, quattro profili di abilità, `npm run sim` |
 | Equità verificata con numeri | **FATTO** | Il 91% delle partite finisce con la griglia fra il 40% e il 70%; sotto il 30% è lo 0,7% |
@@ -46,7 +46,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Fluidità in sessione lunga | **FATTO** | `npm run soak`: 400 mosse, fotogramma mediano 16,7 ms, nessuno oltre 50 ms |
+| Fluidità in sessione lunga | **FATTO** | `npm run soak`: 377 mosse valide su 400 tentativi, fotogramma mediano 16,7 ms, nessuno oltre 50 ms su 2537, memoria da 10,9 a 11,7 MB, zero particelle rimaste. La prova era rimasta rotta per due versioni perché era l'unico controllo fuori da `npm run verifica`: ora ne fa parte |
 | Nessuna perdita di memoria | **FATTO** | Memoria piatta a fine sessione; canvas ripulito a riposo |
 | Peso del pacchetto | **FATTO** | Circa 63 kB compressi in totale |
 | Prestazioni su dispositivo lento reale | **APERTO** | Misurato solo su un contenitore, non su un telefono di fascia bassa |
