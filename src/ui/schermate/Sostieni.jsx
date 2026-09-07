@@ -16,10 +16,17 @@ export function SchermoSostieni({ onIndietro, t }) {
       <p className="pl-testo">{t('sostieni.testo')}</p>
 
       {PAYPAL_URL ? (
-        <a className="pl-btn pl-btn--primario pl-btn--largo" href={PAYPAL_URL}
-           target="_blank" rel="noopener noreferrer">
-          {t('sostieni.bottone')}
-        </a>
+        <>
+          <a className="pl-btn pl-btn--primario pl-btn--largo" href={PAYPAL_URL}
+             target="_blank" rel="noopener noreferrer">
+            {t('sostieni.bottone')}
+          </a>
+          {/* Il nome che compare su PayPal e' l'identificativo del conto, non quello del
+              gioco: PayPal consente un solo link per conto e non permette di cambiarlo.
+              Chi sta per pagare deve poter capire subito di essere nel posto giusto,
+              invece di chiudere la pagina nel dubbio di aver sbagliato destinatario. */}
+          <p className="pl-nota">{t('sostieni.nota')}</p>
+        </>
       ) : (
         <p className="pl-nota">{t('varie.donazioneNonAttiva')}</p>
       )}

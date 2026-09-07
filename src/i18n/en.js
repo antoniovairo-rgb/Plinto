@@ -89,6 +89,7 @@ export default {
       'This game is free and ad-free. If you are enjoying it and want to chip in, you can '
       + 'leave a small donation. It unlocks nothing: the game stays exactly the same.',
     bottone: 'Donate with PayPal',
+    nota: 'The PayPal page will show "elevoraCPM": that is the author\'s account, not another project.',
     noGrazie: 'Maybe later',
   },
   quadri: {

@@ -82,7 +82,11 @@ describe('promessa di privacy', () => {
       for (const m of testo.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
         const dominio = m[1].toLowerCase();
         if (dominio === 'www.w3.org') continue;                 // spazio dei nomi SVG
-        if (dominio.endsWith('paypal.com') && relativo === 'config/progetto.js') continue;
+        // Il link della donazione vive su paypal.me, non su paypal.com: e' un dominio
+        // diverso e va ammesso esplicitamente, altrimenti attivare la donazione fa
+        // fallire questo test -- che e' esattamente cio' che deve succedere se
+        // l'indirizzo comparisse in un file qualunque invece che nella configurazione.
+        if (/^(www\.)?paypal\.(com|me)$/.test(dominio) && relativo === 'config/progetto.js') continue;
         fuoriPosto.push(`${relativo}: ${dominio}`);
       }
     }

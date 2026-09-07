@@ -7,6 +7,38 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.5.1] — 7 settembre 2026
+
+### Aggiunto
+
+**La donazione volontaria è attiva.** `PAYPAL_URL` era vuoto per scelta — nessuno può
+inventare l'indirizzo di donazione di qualcun altro — e la schermata «Sostieni il progetto»
+dichiarava apertamente che la donazione non era ancora attiva. Ora c'è il link reale, deciso
+dal proprietario del progetto, ed era l'ultima voce **BLOCCATA** del gate di rilascio che
+dipendesse solo da lui.
+
+**Una riga che spiega il nome che comparirà su PayPal.** Il link è `paypal.me/elevoraCPM`:
+«elevoraCPM» è l'identificativo del conto, condiviso con l'altro gioco dello stesso autore,
+e non il nome di PLINTO. PayPal consente **un solo link PayPal.Me per conto** e non permette
+di modificarlo dopo la creazione, quindi un link dedicato richiederebbe un secondo conto —
+scelta rimandata a quando avrà senso. Chi sta per pagare legge sotto il pulsante di che conto
+si tratta: senza quella riga, un donatore che vede un nome sconosciuto nella pagina di
+pagamento chiude nel dubbio di aver sbagliato destinatario.
+
+**Resta una donazione, non un acquisto.** Il gioco non dà niente in cambio: nessun contenuto,
+nessun vantaggio, nessuna comparsa nei ringraziamenti. È la condizione con cui il progetto si
+dichiara senza acquisti in-app, ed è scritta nel file di configurazione perché chi un domani
+volesse «solo aggiungere un ringraziamento» sappia che sta cambiando categoria di prodotto.
+
+### Corretto
+
+**Il test sulla privacy ammetteva `paypal.com`, ma il link vive su `paypal.me`.** Sono domini
+diversi, quindi attivare la donazione faceva fallire il controllo «l'unico dominio esterno è
+PayPal, e sta solo nel file di configurazione» — che è esattamente ciò che quel test deve
+fare se l'indirizzo compare altrove. Ammessi entrambi i domini, e **solo** in
+`config/progetto.js`. Verificato mettendo il link in una schermata: il test lo accusa,
+nominando il file.
+
 ## [0.5.0] — 7 settembre 2026
 
 Fase 1 del piano evolutivo: fondamenta. **Nessun cambiamento visibile giocando** — e' il

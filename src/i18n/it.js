@@ -102,6 +102,7 @@ export default {
       'Questo gioco è gratuito e senza pubblicità. Se ti sta piacendo e vuoi contribuire, '
       + 'puoi lasciare una piccola donazione. Non sblocca niente: il gioco resta identico.',
     bottone: 'Dona con PayPal',
+    nota: 'La pagina di PayPal mostrerà «elevoraCPM»: è il conto dell\'autore, non un altro progetto.',
     noGrazie: 'Magari più avanti',
   },
   quadri: {
