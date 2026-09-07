@@ -1,42 +1,59 @@
 /**
- * Sfida del Giorno.
+ * I risultati delle Sfide del Giorno, giorno per giorno.
  *
- * Ogni giorno il seme della partita e' la data: tutti ricevono la stessa griglia e la
- * stessa sequenza di pezzi. E' l'unica forma di "evento ricorrente" del gioco, ed e'
- * volutamente povera di meccanica:
+ * La sfida e' volutamente povera di meccanica:
  *   - non c'e' un limite di tentativi (un tentativo solo, senza classifica, sarebbe
  *     solo frustrazione);
  *   - non c'e' nulla da sbloccare, nessuna ricompensa, nessuna valuta;
  *   - non c'e' una serie da mantenere e quindi non c'e' niente da "perdere" saltando
  *     un giorno. Le serie giornaliere funzionano perche' fanno paura, e questo gioco
- *     non usa la paura per farsi riaprire.
+ *     non usa la paura per farsi riaprire. Vale anche per l'archivio: rigiocare un
+ *     giorno passato non recupera niente, perche' non c'era niente da perdere.
  * Resta solo il motivo onesto per tornare: oggi la partita e' la stessa per tutti e
  * puoi provare a giocarla meglio di ieri.
+ *
+ * QUI NON SI SALVANO PARTITE, SOLO RISULTATI. Le sfide passate non sono conservate:
+ * vengono ricalcolate dal giorno (vedi `core/sfida.js`). Quello che sta qui e' una riga
+ * per ogni giorno giocato -- punteggio migliore, tentativi, impronta delle regole -- e
+ * un anno di gioco quotidiano resta nell'ordine delle decine di kilobyte. C'e' un test
+ * che lo misura su 365 giorni invece di fidarsi di questa frase.
+ *
+ * NIENTE PIU' POTATURA. Fino alla 0.5.2 lo storico veniva tagliato ai 60 giorni piu'
+ * recenti, per un'idea di risparmio che non regge il conto: un archivio che dimentica
+ * dopo due mesi non e' un archivio, ed e' proprio l'archivio la ragione per cui questi
+ * dati esistono. I risultati piu' vecchi restano.
  *
  * Nessun dato lascia il dispositivo: non esiste classifica perche' non esiste server.
  */
 
 import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
+import { IMPRONTA_REGOLE } from '../core/impronta.js';
+import { giornoDiOggi } from '../core/sfida.js';
 
 const CHIAVE = KEYS.CHALLENGES;
 
 /**
  * Versione del documento delle sfide.
  *
- * Alla 1 cambia la FORMA, non solo il timbro: prima il documento era la mappa nuda
- * dei giorni (`{"2026-09-06": {...}}`), adesso i giorni stanno dentro un campo
- * `giorni`. Serviva: con la mappa nuda, aggiungere un campo `versione` accanto alle
- * date avrebbe creato un giorno che si chiama "versione", e ogni ciclo su
- * `Object.keys` lo avrebbe trattato come una data. La migrazione dalla forma
- * precedente e' automatica e non perde nessun risultato.
+ *   1 -> i giorni entrano in un contenitore (`{versione, giorni}`), perche' un campo
+ *        `versione` accanto alle date sarebbe diventato un giorno di nome "versione".
+ *   2 -> ogni giorno porta l'impronta delle regole con cui e' stato ottenuto quel
+ *        punteggio. I risultati piu' vecchi non ce l'hanno e non se la possono
+ *        inventare: restano con `regole: null`, che vuol dire "non lo so" ed e'
+ *        un'informazione onesta, al contrario di un'impronta messa a caso.
  */
-const VERSIONE = 1;
+const VERSIONE = 2;
 
-/** Dalla mappa nuda dei giorni alla forma con contenitore. */
+/** Migrazione dalle forme precedenti. Non perde un solo risultato. */
 function migra(dati, da) {
-  if (da === 0) return { giorni: dati };
-  return dati;
+  const giorni = da === 0 ? dati : (dati.giorni ?? {});
+  const conImpronta = {};
+  for (const [giorno, voce] of Object.entries(giorni ?? {})) {
+    if (!voce || typeof voce !== 'object') continue;
+    conImpronta[giorno] = { regole: null, ...voce };
+  }
+  return { giorni: conImpronta };
 }
 
 /** Il documento completo, sempre nella forma corrente. */
@@ -44,18 +61,7 @@ function documento() {
   return leggiDocumento(CHIAVE, { versione: VERSIONE, predefiniti: { giorni: {} }, migra });
 }
 
-/** Quanti giorni di storico conservare. Oltre non serve e occupa spazio inutilmente. */
-const GIORNI_CONSERVATI = 60;
-
-/** Data locale in formato AAAA-MM-GG. Locale e non UTC: il "giorno" e' quello del giocatore. */
-export function giornoDiOggi(adesso = new Date()) {
-  const anno = adesso.getFullYear();
-  const mese = String(adesso.getMonth() + 1).padStart(2, '0');
-  const giorno = String(adesso.getDate()).padStart(2, '0');
-  return `${anno}-${mese}-${giorno}`;
-}
-
-/** @returns {Record<string, {best:number, partite:number}>} i giorni giocati */
+/** @returns {Record<string, {best:number, partite:number, regole:string|null}>} */
 export function caricaSfide() {
   const giorni = documento().giorni;
   return giorni && typeof giorni === 'object' ? giorni : {};
@@ -63,31 +69,45 @@ export function caricaSfide() {
 
 /** Risultato del giocatore per un giorno. */
 export function sfidaDelGiorno(giorno = giornoDiOggi()) {
-  return caricaSfide()[giorno] ?? { best: 0, partite: 0 };
+  return caricaSfide()[giorno] ?? { best: 0, partite: 0, regole: null };
 }
 
 /**
  * Registra una partita della sfida. Conserva solo il punteggio migliore del giorno.
- * @returns {{best:number, partite:number, nuovoRecordDiGiornata:boolean}}
+ *
+ * L'impronta si aggiorna solo quando il punteggio migliora: un record vecchio deve
+ * restare accompagnato dalle regole con cui e' stato ottenuto, altrimenti l'unica cosa
+ * che l'impronta serve a dire -- "questi due punteggi non sono confrontabili" --
+ * diventerebbe falsa proprio nel caso in cui serve.
+ *
+ * @returns {{best:number, partite:number, regole:string|null, nuovoRecordDiGiornata:boolean}}
  */
 export function registraSfida(punteggio, giorno = giornoDiOggi()) {
   const tutte = caricaSfide();
-  const precedente = tutte[giorno] ?? { best: 0, partite: 0 };
+  const precedente = tutte[giorno] ?? { best: 0, partite: 0, regole: null };
   const nuovoRecordDiGiornata = punteggio > precedente.best;
 
   tutte[giorno] = {
     best: Math.max(precedente.best, punteggio),
     partite: precedente.partite + 1,
+    regole: nuovoRecordDiGiornata ? IMPRONTA_REGOLE : (precedente.regole ?? null),
   };
-
-  // Potatura dello storico: si tengono solo i giorni piu' recenti.
-  const giorni = Object.keys(tutte).sort();
-  while (giorni.length > GIORNI_CONSERVATI) {
-    delete tutte[giorni.shift()];
-  }
 
   scriviDocumento(CHIAVE, VERSIONE, { giorni: tutte });
   return { ...tutte[giorno], nuovoRecordDiGiornata };
+}
+
+/**
+ * Il punteggio di quel giorno e' stato ottenuto con le regole di adesso?
+ *
+ * `null` quando non si puo' dire: nessun punteggio, oppure un risultato salvato prima
+ * che l'impronta esistesse. "Non lo so" e "sono diverse" sono due cose diverse, e
+ * confonderle farebbe comparire un avviso su ogni risultato vecchio di chi gioca da
+ * mesi -- che e' il modo piu' rapido di rendere un avviso invisibile.
+ */
+export function regoleCoincidono(voce) {
+  if (!voce || !voce.regole) return null;
+  return voce.regole === IMPRONTA_REGOLE;
 }
 
 /** Gli ultimi giorni giocati, dal piu' recente. Usato dalla schermata statistiche. */
@@ -98,4 +118,9 @@ export function storicoSfide(quanti = 14) {
     .reverse()
     .slice(0, quanti)
     .map((giorno) => ({ giorno, ...tutte[giorno] }));
+}
+
+/** Quanti giorni sono stati giocati in tutto. Serve all'intestazione dell'archivio. */
+export function giorniGiocati() {
+  return Object.keys(caricaSfide()).length;
 }

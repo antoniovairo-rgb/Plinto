@@ -18,19 +18,26 @@ import { SchermoInfo } from './schermate/Info.jsx';
 import { SchermoSostieni } from './schermate/Sostieni.jsx';
 import { PrimoAvvio } from './schermate/PrimoAvvio.jsx';
 import { SchermoQuadri } from './schermate/Quadri.jsx';
+import { SchermoArchivio } from './schermate/Archivio.jsx';
 import { SchermoComeSiGioca } from './schermate/ComeSiGioca.jsx';
 import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
 import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
+import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
+import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
 
 /**
  * Radice dell'applicazione.
  *
  * Niente router: le schermate sono poche e la navigazione e' un valore di stato.
- * Meno dipendenze, avvio piu' rapido, e nessun URL da gestire in un gioco che
- * si apre e si chiude in pochi secondi.
+ * Meno dipendenze, avvio piu' rapido, e nessun URL da gestire in un gioco che si apre e
+ * si chiude in pochi secondi.
+ *
+ * L'unica eccezione e' l'ancora `#/sfida/AAAA-MM-GG` (vedi ui/rotta.js), che serve a una
+ * cosa sola: aprire la sfida di un giorno preciso arrivando da un collegamento. Non e'
+ * una navigazione, e' un punto d'ingresso.
  */
 /** Pezzi che non entrano piu': serve anche ai Quadri, che non passano da usePartita. */
 function deadPiecesDi(partita) {
@@ -70,6 +77,19 @@ export function App() {
 
   const quadri = useQuadro();
 
+  /**
+   * Un collegamento del tipo `#/sfida/2026-09-12` apre quella sfida all'avvio.
+   *
+   * Aspetta che la presentazione iniziale sia stata vista: buttare un giocatore al
+   * primo avvio dentro una partita senza avergli detto le regole e' il modo piu' rapido
+   * di fargli chiudere il gioco. Il collegamento non si perde, viene solo servito dopo.
+   *
+   * Un giorno non giocabile (il futuro, o una data inventata scritta a mano
+   * nell'indirizzo) non fa niente e lascia la home: meglio una schermata normale che un
+   * messaggio d'errore per una cosa che il giocatore non ha sbagliato.
+   */
+  const rotta = usaRotta();
+
   const iniziaNuova = useCallback(() => {
     sbloccaAudio();
     suonoBottone();
@@ -83,17 +103,45 @@ export function App() {
     if (riprendi()) setSchermata('gioco');
   }, [riprendi]);
 
-  /** Sfida del Giorno: se ne era rimasta una a meta' oggi, si riprende invece di ricominciare. */
-  const apriSfida = useCallback(() => {
+  /**
+   * Apre la sfida di un giorno. Senza argomenti e' quella di oggi.
+   *
+   * Se era rimasta a meta' una partita della sfida, si riprende invece di ricominciare
+   * -- ma SOLO se e' dello stesso giorno che si sta aprendo. Con l'archivio le due cose
+   * non coincidono piu': riprendere la sfida di ieri quando si chiede quella del 12
+   * marzo darebbe al giocatore una partita che non ha chiesto, con il punteggio che
+   * finisce nel giorno sbagliato.
+   */
+  const apriSfida = useCallback((giorno = giornoDiOggi()) => {
+    if (!sfidaGiocabile(giorno)) return;
     sbloccaAudio();
     suonoBottone();
-    if (cePartitaSalvata('sfida') && riprendi('sfida')) { setSchermata('gioco'); return; }
-    nuovaSfida();
+    const salvata = cePartitaSalvata('sfida') ? riprendi('sfida') : null;
+    if (salvata && salvata.seedLabel === giorno) {
+      scriviRotta(rottaSfida(giorno));
+      setSchermata('gioco');
+      return;
+    }
+    if (salvata) abbandona();
+    if (!nuovaSfida(giorno)) return;
     setSfidaSalvata(false);
+    scriviRotta(rottaSfida(giorno));
     setSchermata('gioco');
-  }, [cePartitaSalvata, riprendi, nuovaSfida]);
+  }, [cePartitaSalvata, riprendi, nuovaSfida, abbandona]);
+
+  useEffect(() => {
+    if (!rotta || rotta.nome !== 'sfida') return;
+    if (!impostazioni.introVista) return;
+    // Gia' dentro quella sfida: non si ricomincia da capo a ogni ridisegno.
+    if (modalita === 'sfida' && partita?.seedLabel === rotta.giorno) return;
+    apriSfida(rotta.giorno);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rotta, impostazioni.introVista]);
 
   const tornaAllaHome = useCallback(() => {
+    // L'ancora della sfida non deve sopravvivere all'uscita: chi ricarica la pagina
+    // dalla home si ritroverebbe dentro una partita che aveva appena abbandonato.
+    scriviRotta('');
     abbandona();
     setStatistiche(loadStats());
     setSalvataggioDisponibile(cePartitaSalvata());
@@ -167,7 +215,12 @@ export function App() {
           nuoviRecord={nuoviRecord}
           modalita={modalita}
           esitoSfida={esitoSfida}
-          onRigioca={modalita === 'sfida' ? apriSfida : iniziaNuova}
+          onRigioca={modalita === 'sfida'
+            // Il giorno e' quello della partita appena finita: dall'archivio si rigioca
+            // il 12 marzo, non oggi. Senza la lambda, per giunta, React passerebbe
+            // l'evento del click al posto del giorno.
+            ? () => apriSfida(partita?.seedLabel ?? giornoDiOggi())
+            : iniziaNuova}
           onHome={tornaAllaHome}
           t={t}
         />
@@ -283,8 +336,17 @@ export function App() {
           onGiocaLivello={giocaLivelloCorrente}
           onGioca={iniziaNuova}
           onRiprendi={riprendiPartita}
-          onSfida={apriSfida}
+          onSfida={() => apriSfida()}
+          onArchivio={() => setSchermata('archivio')}
           onVai={setSchermata}
+          t={t}
+        />
+      ) : null}
+
+      {schermata === 'archivio' ? (
+        <SchermoArchivio
+          onApri={apriSfida}
+          onIndietro={() => setSchermata('home')}
           t={t}
         />
       ) : null}

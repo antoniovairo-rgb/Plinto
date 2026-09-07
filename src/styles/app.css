@@ -1531,3 +1531,53 @@ button {
   color: var(--pl-text-dim);
   text-align: left;
 }
+
+/* ------------------------------------------------------- archivio sfide --- */
+/* Il calendario e' una <table> vera, quindi lo stile deve disfare un po' di
+   comportamento nativo della tabella senza toglierle la semantica: `border-collapse`
+   e cornici via padding, mai `display: block`, che cancellerebbe righe e colonne
+   proprio per chi ne ha bisogno. */
+.pl-archivio__navigazione {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; margin: 14px 0 10px;
+}
+.pl-archivio__mese {
+  margin: 0; font-size: 1.05rem; font-weight: 700; text-align: center;
+  color: var(--pl-text); flex: 1;
+}
+.pl-archivio__freccia {
+  min-width: 44px; min-height: 44px; padding: 0; font-size: 1.4rem; line-height: 1;
+}
+
+.pl-calendario {
+  width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed;
+}
+.pl-calendario th {
+  font-size: 0.72rem; font-weight: 600; color: var(--pl-text-faint);
+  padding: 2px 0; text-align: center;
+}
+.pl-calendario__settimana { width: 1.4rem; font-size: 0.66rem; }
+.pl-calendario__fuori { background: none; }
+
+/* La casella e' un pulsante alto abbastanza da essere premuto con il pollice:
+   44px e' il minimo sotto il quale un bersaglio si sbaglia, e un calendario e'
+   fatto di bersagli piccoli e vicini. */
+.pl-giorno {
+  width: 100%; min-height: 44px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1px;
+  padding: 2px; border: 1px solid var(--pl-line); border-radius: var(--pl-radius-sm);
+  background: var(--pl-ink-2); color: var(--pl-text); cursor: pointer;
+  font: inherit; line-height: 1.1;
+}
+.pl-giorno__numero { font-size: 0.86rem; font-weight: 600; }
+.pl-giorno__punti { font-size: 0.6rem; color: var(--pl-text-faint); }
+/* Il segno geometrico esiste perche' "giocato" non puo' essere solo un colore. */
+.pl-giorno__segno { font-size: 0.5rem; color: var(--pl-brand); line-height: 1; }
+.pl-giorno--giocato { border-color: var(--pl-brand); }
+.pl-giorno--oggi { border-width: 2px; border-color: var(--pl-text); font-weight: 700; }
+.pl-giorno--spento {
+  background: none; color: var(--pl-text-faint); border-style: dashed; cursor: default;
+}
+.pl-giorno:focus-visible {
+  outline: 3px solid var(--pl-brand); outline-offset: 2px;
+}

@@ -578,3 +578,65 @@ quello che uccide, perché va appoggiato sulla griglia più piena.
 A fine partita `summarize()` restituisce: punteggio, mosse, durata, gruppi chiusi (totali e
 divisi per riga/colonna/quadrante), Catena massima raggiunta, mossa migliore, Intreccio
 massimo, numero di svuotamenti totali e celle ancora piene.
+
+## La Sfida del Giorno e il suo archivio
+
+Ogni giorno la partita è **la stessa per tutti**: il seme del generatore è la data
+(`semeDaData` in `src/core/sfida.js`), quindi griglia iniziale e sequenza dei pezzi
+coincidono per chiunque giochi quel giorno. Non c'è nessun limite di tentativi, niente da
+sbloccare, nessuna serie da mantenere: saltare un giorno non toglie niente, perché non
+c'era niente da perdere.
+
+Da qui discende l'**archivio**: se il seme è la data, anche i giorni passati sono
+giocabili, e non perché siano stati salvati — **non esiste nessun archivio di partite** —
+ma perché si possono ricalcolare. Chi installa il gioco oggi trova mesi di sfide già
+pronte.
+
+### Quattro decisioni dichiarate
+
+**1. Il giorno è quello locale del dispositivo, non UTC.** Chi gioca alle 23:30 sta
+giocando la sfida di oggi, non quella di domani. La conversione da data a giorno avviene
+in **un solo punto** del codice (`giornoDiOggi`), perché due conversioni scritte in due
+posti finiscono sempre per non essere d'accordo su qualche fuso. Il cambio dell'ora legale
+non fa saltare né ripetere un giorno: c'è un test che attraversa entrambe le notti, in
+marzo e in ottobre, un giorno alla volta.
+
+**2. Il futuro è chiuso, il passato no.** Non si può aprire la sfida di domani: sarebbe un
+modo per arrivare preparati al giorno dopo. Il passato è aperto senza limiti fino al
+**6 settembre 2026**, giorno in cui la Sfida del Giorno è entrata nel gioco. Prima di quella
+data una sfida non è mai esistita, e offrirla sarebbe inventare un passato che non c'è
+stato: nessuno l'ha giocata quel giorno, quindi non sarebbe «la stessa partita per tutti».
+
+**3. L'orologio del dispositivo non è verificabile, e non proviamo a verificarlo.** Senza un
+server non si può: chiunque può spostare l'orologio avanti e aprire la sfida di domani. Non
+esiste nessuna classifica globale da proteggere, quindi l'unico danno che uno si fa è a sé
+stesso. È scritto anche nella schermata dell'archivio. Una finta protezione darebbe
+l'impressione di una garanzia che non c'è, ed è peggio di nessuna protezione.
+
+**4. Una partita rigiocata dopo un aggiornamento può non essere la stessa.** Il generatore
+è deterministico: se cambia un peso in `shapes.js` o una costante in `rules.js`, lo stesso
+seme produce una partita diversa. La sfida del 12 marzo rigiocata dopo un aggiornamento non
+è più quella che hanno giocato gli altri quel giorno. **È inevitabile, e va detto invece che
+nascosto.**
+
+Per poterlo dire, ogni risultato salvato porta l'**impronta delle regole** con cui è stato
+ottenuto (`src/core/impronta.js`). Non è un numero di versione da alzare a mano — che prima
+o poi qualcuno dimentica di alzare, ed è proprio il caso in cui il dato diventa una bugia —
+ma un valore **calcolato** da tutte le costanti di regolamento e da tutto il catalogo delle
+forme: cambiare un peso la cambia da sola. Quando l'impronta di un risultato non coincide
+con quella corrente, la casella di quel giorno lo dice in una riga, senza allarmismi.
+
+I risultati salvati prima che l'impronta esistesse restano marcati come **sconosciuti**, non
+come «diversi»: sono due cose diverse, e confonderle farebbe comparire un avviso su ogni
+risultato vecchio di chi gioca da mesi — il modo più rapido di rendere un avviso invisibile.
+
+### Che cosa viene salvato
+
+Una riga per ogni giorno **giocato**: punteggio migliore, numero di tentativi, impronta
+delle regole. Nient'altro. Un anno di gioco quotidiano occupa **circa 22 kB** (misurato su
+365 giorni in `tests/sfide.test.js`), quindi non c'è nessuna ragione di cancellare niente:
+la potatura ai 60 giorni che esisteva fino alla 0.5.2 è stata tolta, perché un archivio che
+dimentica dopo due mesi non è un archivio.
+
+Rigiocare un giorno dall'archivio non recupera niente e non sblocca niente: conserva solo il
+punteggio migliore di quel giorno, come per la sfida di oggi.

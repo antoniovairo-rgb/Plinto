@@ -91,6 +91,29 @@ export default {
     bottone: 'Donate with PayPal',
     noGrazie: 'Maybe later',
   },
+  archivio: {
+    titolo: 'Challenge archive',
+    spiegazione:
+      'Every past day has its own challenge, and you can still play it: these are not '
+      + 'saved games, they are recomputed from the date. The future is not open yet.',
+    giorni: 'M,T,W,T,F,S,S',
+    mesi: 'January,February,March,April,May,June,July,August,September,October,November,December',
+    mesePrecedente: 'Previous month',
+    meseSuccessivo: 'Next month',
+    settimana: 'Week',
+    settimanaN: 'Week {n}',
+    didascalia: 'Challenges in {mese}: pick a day to play',
+    oggi: 'Today\'s challenge',
+    tuoPunteggio: 'Your best: {punti}',
+    regoleDiverse: 'Scored on an earlier version of the game',
+    nonAncora: 'Not yet: this day is in the future',
+    troppoIndietro: 'Before this date the challenge did not exist',
+    riepilogo: 'You have played {giocati} days in {mese}.',
+    orologio:
+      'The game trusts your device clock: without a server it cannot verify it. There is '
+      + 'no leaderboard to protect, so moving it forward only spoils the surprise for you.',
+    daQuando: 'The first challenge is the one from {giorno}: there was none before that.',
+  },
   quadri: {
     titolo: 'Levels',
     avanzamento: '{fatti} of {totale}',
