@@ -7,6 +7,85 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [0.6.0] — 7 settembre 2026
+
+Fase 2 del piano evolutivo: **l'archivio delle sfide**.
+
+### Aggiunto
+
+**Ogni giorno passato è ancora giocabile.** Il seme della Sfida del Giorno è la data,
+quindi le sfide passate non vanno conservate: si **ricalcolano**. Chi installa il gioco
+oggi trova mesi di partite pronte invece di una schermata sola, e non perché qualcuno
+abbia salvato qualcosa — in `localStorage` finiscono solo i risultati, mai le partite.
+
+**Un calendario che è una `<table>` vera** (`src/ui/schermate/Archivio.jsx`). Un
+calendario *è* una tabella: ogni casella appartiene a un giorno della settimana e a una
+settimana, e quelle due appartenenze sono l'informazione. Con dei `<div>` un lettore di
+schermo annuncia quaranta numeri di fila senza dire che il 12 è un giovedì. Frecce per
+muoversi fra i giorni, PagSu/PagGiu fra i mesi, e una sola casella nel ciclo di Tab
+invece di quaranta.
+
+**Quattro stati distinti non dal solo colore**: giorno non giocato (il numero), giocato
+(numero, punteggio e un **segno geometrico**), oggi (contorno pieno e la parola «oggi»
+nell'etichetta), non apribile (casella spenta che dice **perché** — futura, o precedente
+alla prima sfida). Una casella disattivata che non spiega niente è l'unico caso in cui un
+giocatore pensa che il gioco sia rotto.
+
+**Un collegamento apre direttamente una sfida**: `#/sfida/2026-09-12`. È nell'àncora e non
+nel percorso perché GitHub Pages risponde 404 a qualunque percorso che non sia un file, e
+il service worker che rende il gioco installabile va in rete per primo sul documento:
+l'àncora invece non arriva nemmeno al server. Meno elegante, e l'unica che funziona da una
+sottocartella, offline e da un'applicazione installata.
+
+**L'impronta delle regole** (`src/core/impronta.js`). Il generatore è deterministico: se
+cambia un peso delle forme o una costante di regolamento, lo stesso seme produce una
+partita diversa, e la sfida del 12 marzo rigiocata dopo un aggiornamento non è più quella
+che hanno giocato gli altri. È inevitabile, e va **detto**. L'impronta non è un numero da
+alzare a mano — che prima o poi qualcuno dimentica, ed è proprio il caso in cui il dato
+diventa una bugia — ma un valore calcolato da tutte le costanti e da tutto il catalogo
+delle forme: cambiare un peso la cambia da sola.
+
+### Modificato
+
+**Niente più potatura dello storico.** Fino alla 0.5.2 i risultati venivano tagliati ai 60
+giorni più recenti. Con l'archivio quella potatura cancellava esattamente i dati che
+l'archivio esiste per mostrare. Misurato invece che supposto: **365 giorni occupano circa
+22 kB**, quindi non c'era niente da risparmiare.
+
+**Il punteggio finisce nel giorno giocato, non in oggi.** Prima dell'archivio i due
+coincidevano sempre, quindi il codice registrava su `giornoDiOggi()` e non poteva
+sbagliare. Adesso può: la partita porta con sé la data che le ha fatto da seme.
+
+### Corretto
+
+**Le chiavi di traduzione non si compongono a runtime.** Tre chiavi dell'archivio erano
+costruite al volo (`t(condizione ? 'a' : 'b')`), e il test sull'i18n — che cerca le chiavi
+nel sorgente — le segnalava come definite e mai usate. Aveva ragione: quel test è l'unica
+cosa che impedisce a una traduzione mancante di arrivare a schermo come testo grezzo, e una
+chiave costruita al volo gli sfugge. Riscritte per esteso.
+
+### Verifiche
+
+- **264 test in 17 file**, di cui 18 nuovi sulle date: cambio dell'ora legale attraversato
+  un giorno alla volta in marzo e in ottobre, 29 febbraio, passaggi di anno, dieci anni di
+  calendario senza un mese che perda giorni, e 3.653 date senza due semi uguali.
+- **`npm run archivio`**, dodicesimo controllo di `npm run verifica`: apre l'archivio in un
+  browser vero, controlla che il calendario sia una tabella con intestazioni di riga e di
+  colonna, che i giorni spenti dicano perché, che le frecce muovano il fuoco, apre un
+  giorno passato, lo finisce e verifica che il punteggio finisca **in quel giorno**.
+- Collaudato rompendo il codice: registrando il punteggio su oggi invece che sul giorno
+  giocato, lo scenario fallisce nominando entrambe le date.
+- **Il controllo sulle comunicazioni ha trovato una regressione vera**: aggiungendo la
+  voce «Archivio» in home, il passaggio che apriva la Sfida del Giorno prendeva
+  *l'ultimo* pulsante della schermata — che adesso è l'archivio. Selettore posizionale
+  sostituito con uno per nome, e l'archivio è ora attraversato in entrambe le lingue,
+  etichette delle caselle comprese: quelle non compaiono a schermo, le legge solo chi
+  ascolta, ed è l'unico posto del gioco in cui un testo può restare rotto senza vedersi.
+- **Un difetto era nel mio scenario, non nel gioco**: la partita di prova riempiva la
+  griglia lasciando otto righe già complete, quindi la mossa finale svuotava il tabellone
+  invece di chiudere la partita. Lo scenario accusava il gioco di non registrare il
+  punteggio. Ora la griglia ha due celle libere per ogni riga, colonna e quadrante.
+
 ## [0.5.2] — 7 settembre 2026
 
 ### Rimosso

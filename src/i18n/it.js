@@ -104,6 +104,30 @@ export default {
     bottone: 'Dona con PayPal',
     noGrazie: 'Magari più avanti',
   },
+  archivio: {
+    titolo: 'Archivio delle sfide',
+    spiegazione:
+      'Ogni giorno passato ha la sua sfida, e si può ancora giocare: non sono partite '
+      + 'salvate, vengono ricalcolate dalla data. Il futuro no, quello si aspetta.',
+    giorni: 'L,M,M,G,V,S,D',
+    mesi: 'gennaio,febbraio,marzo,aprile,maggio,giugno,luglio,agosto,settembre,ottobre,novembre,dicembre',
+    mesePrecedente: 'Mese precedente',
+    meseSuccessivo: 'Mese successivo',
+    settimana: 'Settimana',
+    settimanaN: 'Settimana {n}',
+    didascalia: 'Sfide di {mese}: scegli un giorno da giocare',
+    oggi: 'La sfida di oggi',
+    tuoPunteggio: 'Il tuo record: {punti}',
+    regoleDiverse: 'Ottenuto con una versione precedente del gioco',
+    nonAncora: 'Non ancora: è un giorno futuro',
+    troppoIndietro: 'Prima di questa data la sfida non esisteva',
+    riepilogo: 'Hai giocato {giocati} giorni di {mese}.',
+    orologio:
+      'Il gioco si fida dell\'orologio del telefono: senza un server non può verificarlo. '
+      + 'Non c\'è nessuna classifica da proteggere, quindi spostarlo avanti serve solo a '
+      + 'rovinarsi la sorpresa da soli.',
+    daQuando: 'La prima sfida è quella del {giorno}: prima non esisteva.',
+  },
   quadri: {
     titolo: 'Livelli',
     avanzamento: '{fatti} di {totale}',

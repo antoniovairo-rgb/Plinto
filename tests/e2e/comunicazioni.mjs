@@ -160,7 +160,25 @@ for (const lingua of ['it', 'en']) {
   await page.waitForSelector('.pl-tappe');
   await page.locator('.pl-pagina__testata .pl-hud__menu').click();
   await page.waitForSelector('.pl-home');
+  // --- archivio delle sfide: e' una schermata di soli testi e numeri, quindi e'
+  //     esattamente il posto in cui una chiave non tradotta passerebbe inosservata ---
   await page.locator('.pl-home__azioni .pl-btn').last().click();
+  await page.waitForSelector('.pl-calendario');
+  controlla('archivio delle sfide', await page.locator('.pl-scroll').innerText(), lingua);
+  const etichette = await page.locator('button.pl-giorno').evaluateAll(
+    (nodi) => nodi.map((n) => n.getAttribute('aria-label') ?? ''),
+  );
+  // Le etichette delle caselle non compaiono a schermo: le legge solo chi ascolta, ed
+  // e' l'unico posto del gioco in cui un testo puo' restare rotto senza che si veda.
+  controlla('archivio, etichette delle caselle', etichette.join(' · '), lingua);
+  if (etichette.some((e) => !e.trim())) errori.push(`${lingua} · archivio: una casella non ha etichetta`);
+  await page.locator('.pl-pagina__testata .pl-hud__menu').click();
+  await page.waitForSelector('.pl-home');
+
+  // La sfida di oggi si prende PER NOME e non per posizione: questo passaggio usava
+  // l'ultimo pulsante della home, e ha smesso di funzionare appena sotto la sfida e'
+  // comparso l'archivio. Un selettore posizionale racconta la schermata di ieri.
+  await page.locator('.pl-home__azioni .pl-sfida-avvio').last().click();
   await page.waitForSelector('.pl-plancia');
   controlla('sfida del giorno', await page.locator('.pl-screen--gioco').innerText(), lingua);
 
@@ -169,7 +187,7 @@ for (const lingua of ['it', 'en']) {
     errori.push(`${lingua} · e entrata in funzione la rete di sicurezza`);
   }
 
-  console.log(`${lingua}: attraversate presentazione, partita, home, ${voci} pagine, mappa, apertura, livello e sfida`);
+  console.log(`${lingua}: attraversate presentazione, partita, home, ${voci} pagine, mappa, apertura, livello, archivio e sfida`);
   await page.close();
 }
 

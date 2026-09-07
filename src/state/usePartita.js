@@ -4,7 +4,8 @@ import {
 } from '../core/engine.js';
 import { read, write, remove, chiavePartita } from '../persistence/storage.js';
 import { loadRecords, recordGame } from '../persistence/records.js';
-import { registraSfida, giornoDiOggi } from '../persistence/sfide.js';
+import { registraSfida } from '../persistence/sfide.js';
+import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 
 /**
  * Collega il motore puro a React.
@@ -45,8 +46,19 @@ export function usePartita() {
     return stato;
   }, []);
 
-  /** Avvia la Sfida del Giorno: il seme e' la data, quindi e' uguale per tutti. */
-  const nuovaSfida = useCallback(() => nuovaPartita({ seed: giornoDiOggi() }, 'sfida'), [nuovaPartita]);
+  /**
+   * Avvia la sfida di un giorno: il seme e' la data, quindi la partita e' uguale per
+   * tutti quelli che giocano quel giorno.
+   *
+   * Il giorno e' un parametro perche' esiste l'archivio: le sfide passate non sono
+   * salvate da nessuna parte, si RICALCOLANO dalla data. Un giorno non giocabile (il
+   * futuro, o una data precedente alla prima sfida) non avvia niente e restituisce
+   * null: il controllo sta qui e non solo nell'interfaccia, perche' l'indirizzo si puo'
+   * scrivere a mano.
+   */
+  const nuovaSfida = useCallback((giorno = giornoDiOggi()) => (
+    sfidaGiocabile(giorno) ? nuovaPartita({ seed: giorno }, 'sfida') : null
+  ), [nuovaPartita]);
 
   const riprendi = useCallback((quale = 'libera') => {
     const stato = partitaSalvata(quale);
@@ -90,7 +102,13 @@ export function usePartita() {
     const esito = recordGame(riepilogo);
     setRecord(esito.records);
     setNuoviRecord(esito.nuoviRecord);
-    if (modalita === 'sfida') setEsitoSfida(registraSfida(riepilogo.score));
+    // Il giorno della sfida e' quello della partita giocata, non quello di oggi: con
+    // l'archivio le due cose non coincidono piu'. `seedLabel` conserva la data usata
+    // come seme, quindi la partita sa da sola a quale giorno appartiene -- anche se e'
+    // stata ripresa il giorno dopo averla lasciata a meta'.
+    if (modalita === 'sfida') {
+      setEsitoSfida(registraSfida(riepilogo.score, partita.seedLabel ?? giornoDiOggi()));
+    }
   }, [partita, modalita]);
 
   return {

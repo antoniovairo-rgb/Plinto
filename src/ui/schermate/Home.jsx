@@ -25,7 +25,7 @@ import { Installa } from '../Installa.jsx';
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
   livelloCorrente, versione,
-  onGioca, onRiprendi, onSfida, onQuadri, onGiocaLivello, onVai, t,
+  onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, t,
 }) {
   const progressoTesto = t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
@@ -89,6 +89,13 @@ export function SchermoHome({
         >
           <span>{etichettaSfida}</span>
           <span className="pl-sfida-avvio__esito">{sfidaTesto || '—'}</span>
+        </button>
+
+        {/* L'archivio sta SOTTO la sfida di oggi e non accanto: oggi e' la sfida che
+            conta, quella che stanno giocando tutti. I giorni passati sono un di piu'
+            che si va a cercare, non un'alternativa messa sullo stesso piano. */}
+        <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onArchivio}>
+          {t('archivio.titolo')}
         </button>
       </div>
 
