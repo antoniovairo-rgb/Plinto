@@ -7,6 +7,160 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.2.0] — 8 settembre 2026
+
+Regola nuova, data da chi gioca: **nessun livello dev'essere imbattibile — dev'essere un
+gioco divertente, non una tortura.** Non è rimasta un auspicio: è diventata un controllo che
+il generatore impone, e tre difetti che nessuno vedeva sono venuti fuori applicandola.
+
+### Aggiunto
+
+**`npm run livelli`: tutti e cento i livelli vinti giocandoli nell'app.** `npm run quadri`
+chiama il motore e non tocca l'interfaccia; fra i due ci sono la mano da toccare, la casella
+da centrare, il conteggio delle mosse e la schermata di fine. Questa prova calcola con il
+motore una sequenza vincente per ogni livello e poi la **rigioca nel browser**, toccando il
+pezzo e poi la casella. Misura: **100 livelli su 100, 1620 mosse**, media 16 a livello.
+Entra nel cancello di rilascio, che passa da 14 a 15 controlli.
+
+**Il generatore garantisce che ogni livello sia superabile.** Dopo la taratura gioca ogni
+livello puntando al suo bersaglio; se non lo supera abbastanza spesso, il bersaglio scende di
+un gradino alla volta. Se nemmeno al minimo ci arriva, **la generazione fallisce** nominando
+il livello: a quel punto il problema è il progetto — griglia, mosse, tipo di obiettivo — e
+nasconderlo con un numero più basso sarebbe la cosa sbagliata.
+
+**Il generatore prova a giocare ogni griglia di ostacoli** prima di usarla, e si rifiuta di
+produrre i livelli se su una non si chiude nemmeno un gruppo in trenta mosse.
+
+**Il generatore dichiara i bersagli che non ha misurato**, quelli imposti dal pavimento
+dell'arrotondamento anziché da una misura.
+
+**`src/sim/giocatore-quadri.mjs`**: il giocatore che mira all'obiettivo, in un posto solo.
+
+### Corretto
+
+**La Sfida del Giorno non diceva quale sfida fosse.** La striscia sopra la plancia mostrava il
+nome della modalità — «Sfida del giorno» — e nient'altro: dentro la partita, la sfida di oggi e
+una qualunque riaperta dall'archivio erano **indistinguibili**, e non c'era scritto da nessuna
+parte che cosa la sfida chiedesse (a differenza di un livello, che ha il suo obiettivo in alto).
+Segnalato da chi gioca. Ora l'intestazione dice il giorno — «Sfida di oggi, 8 settembre» oppure
+«Sfida del 6 settembre» — e sotto, in piccolo, che cosa chiede. `npm run archivio` fallisce se
+l'intestazione non nomina il giorno che si sta giocando, o se presenta una sfida passata come
+quella di oggi.
+
+La riga di spiegazione è **precisa e non ottimista**, e per scriverla ho dovuto correggere un
+errore nella documentazione. `docs/GAMEPLAY_RULES.md` diceva che «griglia iniziale e sequenza
+dei pezzi coincidono per chiunque giochi quel giorno»: la prima parte è vera, la seconda no. Il
+generatore legge la griglia per decidere che cosa estrarre, quindi due persone che giocano
+diversamente ricevono pezzi diversi — misurato su due modi di giocare opposti, le prime **sei
+mani** coincidono e poi divergono. A schermo c'è scritto «la partita parte uguale per tutti»,
+che è vero; «stessi pezzi per tutti» sarebbe stata la frase comoda ed è falsa.
+
+**Due griglie di ostacoli bloccavano la plancia.** `assedio` lasciava i vuoti come celle
+singole isolate — colonne 2, 5 e 8 di una riga altrimenti piena — e chiudere quella riga
+chiedeva tre pezzi da una cella; `fitto` spezzava ogni quadrante in due domino separati.
+Quattro livelli erano imbattibili per questo. **Non era la densità**: `labirinto` riempie 43
+celle su 81, il più pieno di tutti, e ci si chiudono 14 gruppi in trenta mosse; quelle due ne
+riempivano 36 e ne chiudevano zero. Ridisegnate, ora giocano come le altre.
+
+**Il livello 97 chiedeva una cosa impossibile.** Svuotare completamente la plancia in 40
+mosse: misurato con un giocatore che ottimizza *solo* quello, su trenta partite, svuotata zero
+volte con 40 mosse, zero con 80, zero con 160, zero con 320 — il riempimento non scende mai
+sotto l'11%. Nella partita libera lo svuotamento capita, ma una volta ogni ~2400 mosse di
+gioco esperto: in un livello da 40 mosse è un biglietto della lotteria. `pulizia` non è più un
+tipo di livello; resta un obiettivo che il motore sa leggere, e resta il bonus più bello del
+gioco quando capita.
+
+**Chi tarava e chi verificava usavano due giocatori diversi.** Il generatore evitava sempre di
+spezzare la Catena, `npm run quadri` solo su certi obiettivi: così il generatore poteva
+promuovere un livello che il verificatore bocciava, ed è successo col quadro 44 (superato una
+volta su dieci). Una garanzia rilasciata e controllata con due metri diversi vale solo contro
+sé stessa. Ora è lo stesso modulo, e un test guarda il **codice** per impedire che si separino
+di nuovo.
+
+**`npm run quadri` usava un solo generatore casuale condiviso**, che avanzava di livello in
+livello: il terzo tentativo del quadro 44 dipendeva da quante mosse avevano richiesto i 43
+livelli prima. Cambiare un bersaglio qualunque cambiava i risultati di tutti i livelli
+successivi. Ora il seme dipende solo dal livello e dal numero del tentativo, ed è lo stesso
+che usa il generatore: **il tentativo i-esimo di un livello è la stessa partita** per chi
+rilascia la garanzia e per chi la controlla.
+
+### Modificato
+
+**Bersagli ritarati** con le griglie nuove e con il controllo di superabilità. Quattro
+abbassati perché sotto la soglia: 44 (325→300), 84 (625→600), 93 (525→450), 97 (135→129).
+
+**La soglia è quattro riuscite su dodici**, e ci sono voluti tre giri per arrivarci. «Una su
+quattro» toglieva i muri ma non le torture: restavano livelli superati una volta su dieci.
+«Due su sei» sembrava sistemarlo e non lo faceva — con sei prove non si distingue un livello
+al 10% da uno al 40%, ed è così che il 44 era passato. «Tre su dodici» **suona** più severo e
+non lo è: lascia passare una macina con la stessa frequenza dell'11%. Le probabilità che un
+livello con quella riuscita vera passi il criterio:
+
+| criterio | p=0,10 | p=0,20 | p=0,30 | p=0,40 | p=0,60 |
+|---|---|---|---|---|---|
+| 1 su 4 | 34,4% | 59,0% | 76,0% | 87,0% | 97,4% |
+| 2 su 6 | 11,4% | 34,5% | 58,0% | 76,7% | 95,9% |
+| 3 su 12 | 11,1% | 44,2% | 74,7% | 91,7% | 99,7% |
+| **4 su 12** | **2,6%** | 20,5% | 50,7% | 77,5% | 98,5% |
+| 5 su 12 | 0,4% | 7,3% | 27,6% | 56,2% | 94,3% |
+
+Quattro su dodici lascia passare una macina due volte su cento e conserva tre livelli duri su
+quattro. Cinque su dodici ne boccerebbe metà, e i livelli duri sono il senso degli ultimi atti.
+
+### Misurato
+
+Verifica indipendente, 12 tentativi per livello:
+
+| | |
+|---|---|
+| livelli mai superati | **nessuno** |
+| livelli sotto il 25% | **nessuno** |
+| i tre più duri | 59, 84 e 90, tutti al 33% |
+| media su cento livelli | 87,8% |
+
+**Il prezzo, detto senza abbellirlo: la curva si è appiattita.** Prima scendeva da 100% a 69%
+fra il primo e l'ultimo atto, adesso va da 96% a 83%. Imporre un pavimento a ogni livello alza
+la parte bassa della distribuzione, e la parte bassa era ciò che dava alla curva la sua
+pendenza. Non si possono avere entrambe le cose: o si accettano livelli superati una volta su
+dieci, o si accetta una salita più dolce.
+
+E questa curva descrive **il giocatore artificiale**, non una persona. La difficoltà che sente
+chi gioca viene dai bersagli e dai tetti di mosse, che continuano a salire lungo tutto il
+percorso: 14 mosse e bersagli al 14° percentile nel primo atto, 32 mosse e 56° percentile
+nell'ultimo.
+
+### La strada non si chiude mai
+
+**Dopo otto tentativi su uno stesso livello, il successivo si apre lo stesso.** Un percorso a
+catena ha un difetto che non si vede finché non capita: un solo livello che non riesce non
+rende difficile *quel* livello, chiude tutti quelli dopo. Il generatore garantisce che nessun
+livello sia imbattibile per il giocatore artificiale — ma quello non è una persona, e la
+garanzia copre il progetto dei livelli, non l'incontro fra un livello e chi lo gioca.
+
+Otto: abbastanza da voler dire «ci ho provato davvero» e non «mi è andata male una volta»,
+pochi abbastanza da non trasformare la via d'uscita in una seconda tortura. Un livello dura in
+media sedici mosse, quindi otto tentativi sono una decina di minuti sullo stesso problema.
+
+**E non racconta bugie mentre apre la porta.** Il livello resta non superato: niente spunta,
+fuori dal conteggio, e resta lì da riprendere quando si vuole. Sulla schermata di sconfitta
+compare l'avviso e un pulsante secondario per andare avanti — il pulsante grande resta
+«Riprova», perché è un permesso, non un invito ad andarsene. Se lo contasse come vinto sarebbe
+un premio di consolazione travestito, ed è peggio di un percorso che si blocca.
+
+**E il pulsante «continua» della home riparte da dopo l'ultimo livello superato**, non dal
+primo non superato. Sembravano la stessa cosa e lo erano finché un livello si apriva solo
+superando il precedente: con la via d'uscita, la vecchia regola avrebbe riportato sul livello
+5, a ogni avvio e per sempre, chi il 5 lo ha lasciato e ha poi superato il 6, il 7 e l'8.
+Nemmeno «il livello aperto più avanti» andava bene: spingerebbe oltre già all'ottava sconfitta,
+mentre chi ha appena perso probabilmente vuole riprovare.
+
+**Un difetto trovato scrivendo il test, non a occhio.** I tentativi ora si contano anche sui
+livelli mai superati — prima si tenevano solo per quelli già vinti, cioè proprio quelli che
+questa via d'uscita non serve ad aprire. La voce che ne nasce non ha il campo `mosse`, ed è così
+che si distingue «ci ha provato N volte» da «superato». Ma il confronto «meno mosse della volta
+scorsa» veniva fatto contro una volta scorsa che non esisteva: dava falso, e **vincere dopo aver
+perso otto volte non registrava la vittoria**.
+
 ## [1.1.0] — 7 settembre 2026
 
 Il fulcro del gioco è la sfida a livelli. Questa versione porta lì l'anteprima della terna

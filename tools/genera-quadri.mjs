@@ -33,6 +33,14 @@ import {
 import { GRID_SIZE, QUADRANT_SIZE } from '../src/config/rules.js';
 import { MODALITA_QUADRI } from '../src/core/quadro.js';
 import { accoglienza } from '../src/sim/accoglienza.mjs';
+// Il giocatore che MIRA all'obiettivo: lo stesso, identico, che usa `npm run quadri` per
+// verificare. Qui sotto ce n'e' un altro, che gioca SENZA obiettivo e serve a tarare: sono
+// due mestieri diversi e vanno tenuti distinti. Quello che non si puo' fare -- e fino alla
+// 1.1.0 si faceva -- e' avere due versioni diverse del giocatore che MIRA, una per chi
+// promette che il livello e' superabile e una per chi lo controlla.
+import {
+  preferenze as preferenzeObiettivo, scegliMossa as scegliMossaObiettivo,
+} from '../src/sim/giocatore-quadri.mjs';
 
 const TENTATIVI = Number(process.argv[2] ?? 7);
 const TOTALE = 100;
@@ -40,6 +48,16 @@ const TOTALE = 100;
 // ---------------------------------------------------------------- le griglie ---
 // Ogni motivo e' pensato per lasciare corridoi veri: le celle isolate una per una
 // rendono il quadro ingiocabile, ed e' un errore gia' commesso e gia' misurato.
+//
+// NON E' LA DENSITA', E' LA FORMA DEI VUOTI. Misurato: `labirinto` riempie 43 celle su 81
+// -- il piu' pieno di tutti -- e il giocatore artificiale ci chiude 14 gruppi in trenta
+// mosse. Le due versioni precedenti di `fitto` e `assedio` ne riempivano 36 e ne chiudevano
+// zero. La differenza: `assedio` lasciava i vuoti come CELLE SINGOLE isolate (colonne 2, 5
+// e 8 di una riga altrimenti piena), e chiudere quella riga chiedeva tre pezzi da una cella
+// che non arrivano a comando; `fitto` spezzava ogni quadrante in due domino separati. Un
+// motivo deve lasciare tratti liberi lunghi almeno due, e regioni libere connesse.
+//
+// Il controllo piu' in basso non descrive questa regola: la MISURA, giocando ogni motivo.
 const MOTIVI = {
   nessuno: null,
   angoli:   ['##.....##', '##.....##', '.........', '.........', '.........', '.........', '.........', '##.....##', '##.....##'],
@@ -53,14 +71,27 @@ const MOTIVI = {
   diagonale:['##.......', '.##......', '..##.....', '...##....', '....##...', '.....##..', '......##.', '.......##', '........#'],
   clessidra:['#######..', '.#####...', '..###....', '...#.....', '.........', '.....#...', '....###..', '...#####.', '..#######'],
   blocchi:  ['##...##..', '##...##..', '.....##..', '..##.....', '..##...##', '.......##', '##...##..', '##...##..', '.........'],
-  fitto:    ['##..##..#', '##..##..#', '..##..##.', '..##..##.', '##..##..#', '##..##..#', '..##..##.', '..##..##.', '.........'],
+  fitto:    ['###...###', '###...###', '.........', '...###...', '...###...', '.........', '###...###', '###...###', '.........'],
   labirinto:['#.#####.#', '#.......#', '#.#####.#', '#.#...#.#', '..#.#.#..', '#.#...#.#', '#.#####.#', '#.......#', '#.#####.#'],
-  assedio:  ['##.##.##.', '##.##.##.', '.........', '.##.##.##', '.##.##.##', '.........', '##.##.##.', '##.##.##.', '.........'],
+  assedio:  ['###...###', '##.....##', '#.......#', '.........', '.........', '.........', '#.......#', '##.....##', '###...###'],
   briciole: ['#........', '.#.......', '..#......', '.........', '.........', '.........', '......#..', '.......#.', '........#'],
 };
 
 // ------------------------------------------------------------------ la curva ---
 // Il percorso e' diviso in atti. Ogni atto introduce qualcosa e alza l'asticella.
+//
+// NIENTE `pulizia` FRA I TIPI, ED E' UNA MISURA NON UN GUSTO. L'ultimo atto chiedeva, al
+// quadro 97, di svuotare completamente la plancia in 40 mosse. Misurato con un giocatore
+// che ottimizza SOLO quello -- il riempimento pesa piu' di ogni altra cosa -- su trenta
+// partite: svuotata zero volte con 40 mosse, zero con 80, zero con 160, zero con 320. Il
+// riempimento non e' mai sceso sotto l'11%, e non scendeva piu' a nessun tetto di mosse:
+// dare piu' tempo non serviva a niente. Nella partita libera lo svuotamento capita, ma
+// una volta ogni ~2400 mosse di gioco esperto: in un livello da 40 mosse e' un biglietto
+// della lotteria, non una prova di abilita'.
+//
+// Un livello che promette un obiettivo deve poterlo mantenere. `pulizia` resta un tipo di
+// obiettivo che il motore sa leggere -- e resta il bonus piu' bello del gioco quando
+// capita -- ma non ci si costruisce sopra un livello.
 const ATTI = [
   { da:  1, a: 10, nome: 'Le basi',      tipi: ['righe','colonne','quadranti','gruppi'],                          motivi: ['nessuno'],                                  mosse: [12, 16], percentile: [10, 18] },
   { da: 11, a: 24, nome: 'Il ritmo',     tipi: ['gruppi','catena','punteggio','quadranti','celle'],               motivi: ['nessuno','angoli','croce'],                 mosse: [16, 22], percentile: [16, 26] },
@@ -68,7 +99,7 @@ const ATTI = [
   { da: 41, a: 58, nome: 'La pressione', tipi: ['catena','intreccio','gruppi','punteggio','quadranti'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42] },
   { da: 59, a: 76, nome: 'Il mestiere',  tipi: ['punteggio','gruppi','catena','celle','righe','colonne'],          motivi: ['clessidra','labirinto','fitto','assedio','isole'], mosse: [20, 30], percentile: [34, 50] },
   { da: 77, a: 92, nome: 'La maestria',  tipi: ['intreccio','catena','punteggio','quadranti','gruppi'],            motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58] },
-  { da: 93, a:100, nome: 'La vetta',     tipi: ['punteggio','catena','intreccio','gruppi','pulizia'],              motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64] },
+  { da: 93, a:100, nome: 'La vetta',     tipi: ['punteggio','catena','intreccio','gruppi','celle'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64] },
 ];
 
 const NOMI = {
@@ -217,6 +248,48 @@ function gioca(progetto, rng) {
   return partita;
 }
 
+/**
+ * Gioca un Quadro PUNTANDO al suo bersaglio, e dice se ce l'ha fatta.
+ *
+ * Differenza dal `gioca` qui sopra, che serve a tarare: quello gioca senza obiettivo e
+ * arriva in fondo alle mosse, perche' misura FIN DOVE si arriva. Questo si ferma appena
+ * il bersaglio e' raggiunto, perche' misura una cosa sola: il livello si supera, si' o no.
+ */
+function superato(progetto, bersaglio, rng) {
+  const leggi = OBIETTIVI[progetto.tipo].progresso;
+  let partita = createGame({
+    seed: seedFromString(`plinto-quadro-${progetto.numero}`),
+    grigliaIniziale: progetto.griglia ? gridFromString(progetto.griglia, 3) : undefined,
+    now: 0,
+    modalita: MODALITA_QUADRI,
+  });
+  // `preferenze` del modulo condiviso vuole il QUADRO, non il tipo: prende l'obiettivo
+  // dalla stessa forma che ha il livello in src/config/quadri.js.
+  const pref = preferenzeObiettivo({ obiettivi: [{ tipo: progetto.tipo, quanti: bersaglio }] });
+  for (let m = 0; m < progetto.maxMosse; m += 1) {
+    if (leggi(partita) >= bersaglio) return true;
+    if (partita.status !== 'playing') break;
+    const mossa = scegliMossaObiettivo(partita, pref, rng);
+    if (!mossa) break;
+    partita = placePiece(partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
+  }
+  return leggi(partita) >= bersaglio;
+}
+
+/** Il gradino sotto un bersaglio, nella scala del suo tipo. */
+function scendiDiUno(tipo, bersaglio) {
+  if (tipo === 'punteggio') return Math.max(100, bersaglio - 25);
+  if (tipo === 'celle') return Math.max(9, bersaglio - 3);
+  return Math.max(1, bersaglio - 1);
+}
+
+/** Il bersaglio piu' basso che il tipo ammette: sotto, il livello sarebbe gia' vinto. */
+function fondoScala(tipo) {
+  if (tipo === 'punteggio') return 100;
+  if (tipo === 'celle') return 9;
+  return 1;
+}
+
 function percentile(v, p) {
   const o = [...v].sort((a, b) => a - b);
   return o[Math.max(0, Math.min(o.length - 1, Math.floor((p / 100) * o.length)))];
@@ -231,7 +304,55 @@ for (const [nome, righe] of Object.entries(MOTIVI)) {
   if (filledCount(g) > 48) throw new Error(`motivo "${nome}" riempie troppo: ${filledCount(g)} celle`);
   if (righe.length !== 9 || righe.some((r) => r.length !== 9)) throw new Error(`motivo "${nome}" malformato`);
 }
-console.log(`Motivi verificati: ${Object.keys(MOTIVI).length - 1}, nessuno con gruppi gia' completi.\n`);
+console.log(`Motivi verificati: ${Object.keys(MOTIVI).length - 1}, nessuno con gruppi gia' completi.`);
+
+/**
+ * E poi il controllo che mancava: ogni motivo dev'essere GIOCABILE.
+ *
+ * I due controlli qui sopra guardano la griglia FERMA -- nessun gruppo gia' chiuso, non
+ * troppo piena, nove per nove -- e li passavano anche due motivi su cui il giocatore
+ * artificiale, in trenta mosse, non chiudeva NEMMENO UN GRUPPO. Minimo, mediana e massimo
+ * a zero: non un bersaglio troppo alto (il minimo possibile e' 1, e neanche quello era
+ * raggiungibile) ma una griglia che blocca la plancia. Cinque livelli su cento erano
+ * imbattibili per questo, e nessun controllo se ne accorgeva perche' nessuno PROVAVA A
+ * GIOCARLI.
+ *
+ * Il difetto tipico non e' la densita': e' la FORMA dei vuoti. Un motivo che lascia buchi
+ * da una cella isolata chiede pezzi da una cella, e quelli non arrivano a comando.
+ * Questo controllo non prova a descrivere la regola -- la misura.
+ */
+const PROVE_MOTIVO = 3;
+const MOSSE_PROVA = 30;
+console.log(`\nGiocabilita' dei motivi: ${PROVE_MOTIVO} partite da ${MOSSE_PROVA} mosse ciascuno`);
+const inguocabili = [];
+for (const [nome, righe] of Object.entries(MOTIVI)) {
+  if (!righe) continue;
+  const chiusi = [];
+  for (let p = 0; p < PROVE_MOTIVO; p += 1) {
+    const finto = {
+      numero: 9000 + p, nome, tipo: 'gruppi', motivo: nome,
+      maxMosse: MOSSE_PROVA, percentile: 50, griglia: righe.join('\n'),
+    };
+    const fine = gioca(finto, createRng(seedFromString(`motivo-${nome}-${p}`)));
+    chiusi.push(fine.stats.clearedRows + fine.stats.clearedCols + fine.stats.clearedQuadrants);
+  }
+  const minimo = Math.min(...chiusi);
+  const media = chiusi.reduce((a, b) => a + b, 0) / chiusi.length;
+  console.log(
+    `  ${nome.padEnd(10)} celle piene ${String(filledCount(gridFromString(righe.join('\n'), 3))).padStart(2)}`
+    + `  gruppi chiusi: ${chiusi.join(', ')}  (minimo ${minimo}, media ${media.toFixed(1)})`,
+  );
+  // La soglia e' bassa di proposito: non si chiede che il motivo sia facile, si chiede
+  // che sia GIOCABILE. Chiudere un gruppo in trenta mosse e' il minimo sindacale.
+  if (minimo < 1) inguocabili.push(`${nome} (gruppi chiusi: ${chiusi.join(', ')})`);
+}
+if (inguocabili.length) {
+  throw new Error(
+    `Motivi su cui in ${MOSSE_PROVA} mosse non si chiude nemmeno un gruppo: `
+    + `${inguocabili.join('; ')}. I livelli che li usano sarebbero imbattibili.`,
+  );
+}
+console.log('');
 
 // ------------------------------------------------------------------ taratura ---
 const quadri = [];
@@ -249,6 +370,142 @@ for (let n = 1; n <= TOTALE; n += 1) {
 
   quadri.push({ ...progetto, bersaglio, mediana: percentile(valori, 50), max: Math.max(...valori) });
   if (n % 10 === 0) process.stdout.write(`  tarati ${n}/${TOTALE}\n`);
+}
+
+/**
+ * NESSUN LIVELLO IMBATTIBILE. Non un auspicio: un controllo che ferma la generazione.
+ *
+ * Un percorso a livelli si gioca in fila, e ogni livello si apre superando il precedente:
+ * un solo muro non rende difficile QUEL livello, chiude tutti i novantanove che vengono
+ * dopo. Il gioco deve essere divertente, non una tortura, e "divertente" qui ha un
+ * significato che si puo' misurare: ogni livello dev'essere superabile.
+ *
+ * Il bersaglio viene da un percentile di quanto il giocatore artificiale ottiene giocando
+ * SENZA obiettivo. E' una buona stima, ma resta una stima: chi punta a una cosa gioca
+ * diversamente da chi gioca bene e basta, e su qualche livello i due possono non
+ * coincidere. Qui il livello viene giocato PUNTANDO al suo bersaglio, e se non si arriva
+ * alla soglia il bersaglio scende di un gradino alla volta finche' non ci si arriva.
+ *
+ * QUANTO ALTA LA SOGLIA, E QUANTE PROVE. Ci sono voluti tre giri per arrivarci, e i due
+ * scarti valgono piu' del risultato.
+ *
+ * Una riuscita su quattro bastava a togliere i MURI -- nessun livello imbattibile -- ma non
+ * le TORTURE: restavano livelli superati una volta su dieci. Possibile non e' divertente.
+ *
+ * Due riuscite su sei sembravano sistemarlo e non lo facevano: con sei prove non si
+ * distingue un livello al 10% da uno al 40%. E' esattamente cosi' che il quadro 44 e'
+ * passato -- per fortuna, non per merito.
+ *
+ * La tentazione successiva era "tre su dodici", che suona piu' severo. Non lo e'. Ecco la
+ * probabilita' che un livello con la riuscita vera indicata in colonna passi il criterio:
+ *
+ *     criterio      p=0,10   p=0,20   p=0,30   p=0,40   p=0,60
+ *     1 su  4        34,4%    59,0%    76,0%    87,0%    97,4%
+ *     2 su  6        11,4%    34,5%    58,0%    76,7%    95,9%
+ *     3 su 12        11,1%    44,2%    74,7%    91,7%    99,7%
+ *     4 su 12         2,6%    20,5%    50,7%    77,5%    98,5%
+ *     5 su 12         0,4%     7,3%    27,6%    56,2%    94,3%
+ *
+ * "Tre su dodici" lascia passare un livello al 10% con la stessa frequenza di "due su
+ * sei": alzare le prove senza alzare la soglia non misura meglio, misura solo piu' a
+ * lungo. "Cinque su dodici" invece boccerebbe la meta' dei livelli al 40%, che sono i
+ * livelli duri legittimi -- il senso degli ultimi atti.
+ *
+ * QUATTRO SU DODICI e' il compromesso: lascia passare un livello-macina due volte su
+ * cento, e ne conserva tre su quattro fra quelli che si superano il 40% delle volte.
+ *
+ * Se nemmeno al fondo della scala ci si arriva, la generazione FALLISCE nominando il
+ * livello: vuol dire che il problema non e' il bersaglio ma il progetto -- la griglia, il
+ * tetto di mosse, il tipo di obiettivo -- e va corretto qui sopra, non nascosto con un
+ * numero piu' basso.
+ *
+ * Cosa NON garantisce: il metro non e' una persona. "Superato due volte su sei dal
+ * giocatore artificiale" e' una soglia misurabile e ripetibile, non una promessa che il
+ * livello sia piacevole. Quella la puo' dire solo chi gioca.
+ */
+const PROVE_SUPERAMENTO = 12;
+const MINIME_RIUSCITE = 4;
+console.log(
+  `  Controllo che ogni livello sia superabile: almeno ${MINIME_RIUSCITE} riuscite `
+  + `su ${PROVE_SUPERAMENTO} tentativi`,
+);
+const abbassati = [];
+const muri = [];
+for (const q of quadri) {
+  // I sei semi sono gli STESSI a ogni gradino della discesa. Non e' un dettaglio: con lo
+  // stesso seme il giocatore fa le stesse mosse e si ferma solo prima, quindi un bersaglio
+  // piu' basso non puo' mai riuscire meno di uno piu' alto. Con semi nuovi a ogni gradino
+  // la discesa diventerebbe un sorteggio, e si fermerebbe al primo colpo fortunato.
+  const prova = (bersaglio) => {
+    let vinte = 0;
+    for (let i = 0; i < PROVE_SUPERAMENTO; i += 1) {
+      if (superato(q, bersaglio, createRng(seedFromString(`prova-${q.numero}-${i}`)))) {
+        vinte += 1;
+        if (vinte >= MINIME_RIUSCITE) return true;
+      }
+      // Se le prove rimaste non bastano piu' a raggiungere la soglia, e' gia' deciso.
+      if (vinte + (PROVE_SUPERAMENTO - i - 1) < MINIME_RIUSCITE) return false;
+    }
+    return false;
+  };
+
+  if (prova(q.bersaglio)) continue;
+
+  const partenza = q.bersaglio;
+  let bersaglio = q.bersaglio;
+  const fondo = fondoScala(q.tipo);
+  let riuscito = false;
+  while (bersaglio > fondo) {
+    bersaglio = scendiDiUno(q.tipo, bersaglio);
+    if (prova(bersaglio)) { riuscito = true; break; }
+  }
+  if (!riuscito) {
+    muri.push(`quadro ${q.numero} (${q.tipo}, ${q.maxMosse} mosse, motivo "${q.motivo}")`);
+    continue;
+  }
+  q.bersaglio = bersaglio;
+  abbassati.push(`quadro ${q.numero}: ${q.tipo} da ${partenza} a ${bersaglio}`);
+}
+
+if (abbassati.length) {
+  console.log(`  Bersagli abbassati perche' sotto la soglia (${abbassati.length}):`);
+  abbassati.forEach((r) => console.log(`    ${r}`));
+} else {
+  console.log('  Nessun bersaglio da abbassare: ogni livello si supera com era tarato.');
+}
+if (muri.length) {
+  throw new Error(
+    `Livelli sotto la soglia anche al bersaglio minimo: ${muri.join('; ')}. `
+    + 'Non e il bersaglio a essere sbagliato: e il progetto del livello.',
+  );
+}
+
+/**
+ * I bersagli che NON sono stati misurati, ma inventati da un arrotondamento.
+ *
+ * I tre `Math.max` qui sopra danno un pavimento al bersaglio -- 100 punti, 9 celle, 1
+ * gruppo -- perche' un bersaglio zero sarebbe un livello gia' vinto. Ma quando il
+ * giocatore artificiale non arriva MAI a niente, cioe' quando il massimo misurato e' zero,
+ * quel pavimento smette di essere una protezione e diventa esattamente la cosa che questo
+ * file dichiara di non fare: un numero scritto a mano, spacciato per misura. Il livello
+ * risulta imbattibile e il file non lo dice.
+ *
+ * Non e' un errore da fermare la generazione: "il metro non ci arriva mai" non e'
+ * "nessuno ci arriva mai", e un obiettivo come svuotare la plancia una persona che ci
+ * punta lo raggiunge dove un giocatore avido non ci prova. Ma va DETTO, ogni volta.
+ */
+const inventati = quadri.filter((q) => q.max === 0);
+if (inventati.length) {
+  console.log('\n  ATTENZIONE — bersagli non misurati ma imposti dal pavimento:');
+  inventati.forEach((q) => {
+    console.log(
+      `    quadro ${String(q.numero).padStart(3)}  ${q.tipo.padEnd(10)} bersaglio ${q.bersaglio}  `
+      + `(il metro non ci e' mai arrivato in ${q.maxMosse} mosse, su ${TENTATIVI} partite)`,
+    );
+  });
+  console.log('    Questi livelli risultano imbattibili al metro. Non e una misura: e un pavimento.\n');
+} else {
+  console.log('\n  Nessun bersaglio imposto dal pavimento: tutti misurati davvero.\n');
 }
 
 // -------------------------------------------------------------------- scrive ---

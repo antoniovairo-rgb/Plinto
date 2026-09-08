@@ -187,6 +187,92 @@ describe('avanzamento nel percorso', () => {
     expect(progressi.quadroSuperato(1)).toBe(false);
     expect(progressi.quadroSbloccato(2)).toBe(false);
   });
+});
+
+/**
+ * La via d'uscita: dopo abbastanza tentativi il livello successivo si apre lo stesso.
+ *
+ * Un percorso a catena ha un difetto che non si vede finche' non capita: un solo livello
+ * che non riesce non rende difficile QUEL livello, chiude tutti quelli dopo. Il generatore
+ * garantisce che nessun livello sia imbattibile per il giocatore artificiale, ma quello non
+ * e' una persona.
+ *
+ * Il test che conta di piu' qui non e' che la porta si apra: e' che il gioco NON dica una
+ * bugia mentre la apre. Un livello aperto per insistenza resta non superato, senza spunta,
+ * fuori dal conteggio. Se lo contasse come vinto, la via d'uscita diventerebbe un premio di
+ * consolazione travestito, ed e' peggio di un percorso che si blocca.
+ */
+describe('la strada non si chiude mai', () => {
+  beforeEach(() => memoria.clear());
+
+  const fallisci = (numero, volte) => {
+    for (let i = 0; i < volte; i += 1) {
+      progressi.registraTentativo(numero, { superato: false, mosse: 12, punteggio: 100 });
+    }
+  };
+
+  it('prima della soglia il successivo resta chiuso', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE - 1);
+    expect(progressi.tentativiDi(1)).toBe(progressi.TENTATIVI_PER_APRIRE - 1);
+    expect(progressi.quadroSbloccato(2)).toBe(false);
+  });
+
+  it('alla soglia il successivo si apre', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE);
+    expect(progressi.quadroSbloccato(2)).toBe(true);
+    expect(progressi.apertoPerInsistenza(2)).toBe(true);
+  });
+
+  it('ma il livello NON risulta superato, e non entra nel conteggio', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE + 5);
+    expect(progressi.quadroSuperato(1), 'un livello aperto per insistenza non e vinto').toBe(false);
+    expect(progressi.quantiSuperati(), 'il conteggio dei superati non deve gonfiarsi').toBe(0);
+    expect(progressi.prossimoQuadro(TOTALE_QUADRI), 'resta lui il prossimo da superare').toBe(1);
+  });
+
+  it('superandolo davvero, l apertura non e piu per insistenza', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE);
+    progressi.registraTentativo(1, { superato: true, mosse: 9, punteggio: 400 });
+    expect(progressi.quadroSuperato(1)).toBe(true);
+    expect(progressi.apertoPerInsistenza(2)).toBe(false);
+    expect(progressi.quantiSuperati()).toBe(1);
+  });
+
+  it('la home punta avanti, non riporta indietro al livello lasciato', () => {
+    // Chi ha scelto di andare oltre non deve vedersi riportare sul livello che ha
+    // lasciato a ogni avvio: sarebbe annullargli la scelta in silenzio.
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE);
+    expect(progressi.prossimoQuadro(TOTALE_QUADRI), 'il primo resta il prossimo da superare').toBe(1);
+
+    progressi.registraTentativo(2, { superato: true, mosse: 9, punteggio: 400 });
+    expect(progressi.prossimoQuadro(TOTALE_QUADRI), 'superato il secondo, si va sul terzo').toBe(3);
+    expect(progressi.quadroSuperato(1), 'il primo resta non superato').toBe(false);
+    expect(progressi.quadroSbloccato(1), 'e resta riprendibile').toBe(true);
+  });
+
+  it('la porta si apre di UNO alla volta, non su tutto il resto del percorso', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE);
+    expect(progressi.quadroSbloccato(2)).toBe(true);
+    expect(progressi.quadroSbloccato(3), 'il terzo non deve aprirsi da solo').toBe(false);
+  });
+
+  it('i tentativi si contano anche sul livello mai superato', () => {
+    // Prima si tenevano SOLO per i livelli gia' vinti, cioe' proprio quelli che questa
+    // via d'uscita non serve ad aprire: il contatore restava a zero per sempre.
+    fallisci(7, 3);
+    expect(progressi.tentativiDi(7)).toBe(3);
+  });
+
+  it('un avanzamento salvato prima che questa via esistesse si legge uguale', () => {
+    progressi.registraTentativo(1, { superato: true, mosse: 9, punteggio: 400 });
+    expect(progressi.quadroSuperato(1)).toBe(true);
+    expect(progressi.quantiSuperati()).toBe(1);
+    expect(progressi.quadroSbloccato(2)).toBe(true);
+  });
+});
+
+describe('avanzamento nel percorso, seguito', () => {
+  beforeEach(() => memoria.clear());
 
   it('conserva il risultato migliore: meno mosse, poi piu punti', () => {
     progressi.registraTentativo(5, { superato: true, mosse: 10, punteggio: 500 });

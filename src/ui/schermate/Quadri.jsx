@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { QUADRI, ATTI, TOTALE_QUADRI } from '../../config/quadri.js';
-import { caricaProgressi, quadroSbloccato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
+import { caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 
 /**
@@ -62,7 +62,10 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
 
             <ol className="pl-tappe">
               {dellAtto.map((quadro) => {
-                const fatto = progressi[quadro.numero];
+                // `quadroSuperato` e non la semplice presenza della voce: da quando i
+                // tentativi si contano anche sui livelli mai superati, esiste una voce
+                // che dice solo "ci ha provato N volte" e non merita la spunta.
+                const fatto = quadroSuperato(quadro.numero, progressi) ? progressi[quadro.numero] : null;
                 const aperto = quadroSbloccato(quadro.numero, progressi);
                 const qui = quadro.numero === corrente;
                 const classi = ['pl-tappa'];

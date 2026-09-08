@@ -45,9 +45,42 @@ npm run soak           # centinaia di mosse di fila: memoria, nodi, fluidita'
 npm run archivio       # archivio delle sfide: calendario, tastiera, giorno giusto
 npm run condivisione   # la scheda da mandare agli amici, e il ripiego sugli appunti
 npm run anteprima      # nei livelli: la terna mostrata e' quella consegnata, a schermo
+npm run livelli        # tutti e cento i livelli vinti giocandoli nell'app, col dito
 npm run taratura       # ricalcola i bersagli dei Quadri facendoli giocare
 npm run confronto      # gli stessi cento livelli con e senza anteprima, a confronto
 ```
+
+### `npm run livelli`: il cuore del gioco, dalla porta principale
+
+`npm run quadri` gioca i livelli chiamando il **motore**: risponde a «il livello è
+superabile?» e non tocca l'interfaccia. Fra il motore e chi gioca ci sono però la mano da
+toccare, la casella da centrare, il conteggio delle mosse e la schermata di fine: un
+livello può essere superabile nel motore e irraggiungibile nell'app.
+
+`npm run livelli` calcola con il motore una sequenza vincente per ogni livello — stesso
+giocatore e stessi dodici semi con cui il generatore garantisce che sia superabile — e poi
+la **rigioca nel browser**, toccando il pezzo e poi la casella. Un tratto solo:
+`npm run livelli -- 1 20`.
+
+Ultima misura: **100 livelli su 100 vinti, 1620 mosse giocate nell'app**, media 16 mosse
+per livello.
+
+**Tre volte questa prova ha accusato l'app di un difetto che aveva lei**, e vale la pena
+scriverlo perché è la trappola specifica di uno scenario che pilota l'interfaccia:
+
+1. Toccava la cella dell'**origine** del pezzo, mentre il tocco a due passaggi **centra**
+   il pezzo sulla casella toccata. Risolto importando `origineDaCella` dall'app invece di
+   riscriverne la formula.
+2. Contava i blocchi sulla plancia per capire se la mossa fosse stata accettata: una mossa
+   che **chiude un gruppo** aggiunge celle e poi ne toglie nove, e il conto può tornare
+   identico. Dieci livelli risultavano falliti proprio quando la mossa era riuscita meglio,
+   tutti su righe e colonne multiple di tre. Risolto leggendo il contatore delle mosse.
+3. (Nello scenario dell'anteprima) selezionava il pezzo una volta sola e poi provava le
+   caselle in fila, ma toccare una casella dove il pezzo non ci sta **annulla la
+   selezione**.
+
+Una prova che fallisce va indagata come una che passa: la prima può inventare un guasto,
+la seconda può nasconderlo, e cercare un guasto che non esiste costa più.
 
 `npm run quadri` e `npm run taratura` accettano un secondo argomento con la **modalità**:
 senza argomento usano quella in cui i Quadri si giocano davvero (con l'anteprima), con

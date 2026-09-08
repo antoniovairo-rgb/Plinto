@@ -534,6 +534,34 @@ I dieci tipi di obiettivo sono in `OBIETTIVI` (`src/core/quadro.js`): righe, col
 quadranti, gruppi (uno qualunque dei tre), celle eliminate, punteggio, Catena, Intreccio,
 pulizia della griglia, sopravvivenza.
 
+### Nessun livello è imbattibile, e nessuno può bloccare il percorso
+
+Due garanzie diverse, e conviene tenerle distinte perché coprono due rischi diversi.
+
+**La prima riguarda il progetto dei livelli**, e la impone il generatore: si rifiuta di
+produrre i cento livelli se una griglia di ostacoli non permette di chiudere almeno un gruppo
+in trenta mosse, o se un livello non viene superato almeno **4 volte su 12** dal giocatore
+artificiale. Se un bersaglio è troppo alto scende di un gradino alla volta finché non lo è
+più; se nemmeno al minimo si supera, la generazione fallisce nominando il livello — perché a
+quel punto il problema è la griglia, il tetto di mosse o il tipo di obiettivo, e nasconderlo
+con un numero più basso sarebbe la cosa sbagliata.
+
+Perché 4 su 12 e non «almeno una volta»: con poche prove non si distingue un livello che si
+supera il 10% delle volte da uno al 40%, e una soglia bassa lascia passare le macine per puro
+caso. La tabella completa delle probabilità è nel commento di `tools/genera-quadri.mjs`.
+
+**La seconda riguarda l'incontro fra un livello e chi lo gioca**, e la prima non la copre: il
+giocatore artificiale è un metro coerente, non una persona. Un percorso a catena ha un difetto
+che non si vede finché non capita — un solo livello che non riesce non rende difficile *quel*
+livello, chiude tutti quelli dopo. Perciò **dopo otto tentativi sullo stesso livello, il
+successivo si apre lo stesso**.
+
+Otto: abbastanza da voler dire «ci ho provato davvero», pochi abbastanza da non diventare una
+seconda tortura. E il gioco non mente mentre apre la porta: il livello resta **non superato**,
+senza spunta e fuori dal conteggio, e resta lì da riprendere quando si vuole. Sulla schermata
+di sconfitta compare l'avviso e un pulsante secondario per andare avanti; il pulsante grande
+resta «Riprova», perché è un permesso, non un invito ad andarsene.
+
 ### Ogni livello si apre spiegando che cosa chiede
 
 `src/ui/schermate/AperturaQuadro.jsx`. Plinto dice la frase dell'obiettivo, che cosa significa,
@@ -581,11 +609,18 @@ massimo, numero di svuotamenti totali e celle ancora piene.
 
 ## La Sfida del Giorno e il suo archivio
 
-Ogni giorno la partita è **la stessa per tutti**: il seme del generatore è la data
-(`semeDaData` in `src/core/sfida.js`), quindi griglia iniziale e sequenza dei pezzi
-coincidono per chiunque giochi quel giorno. Non c'è nessun limite di tentativi, niente da
-sbloccare, nessuna serie da mantenere: saltare un giorno non toglie niente, perché non
-c'era niente da perdere.
+Ogni giorno la partita **parte uguale per tutti**: il seme del generatore è la data
+(`semeDaData` in `src/core/sfida.js`), quindi griglia iniziale e primi pezzi coincidono per
+chiunque giochi quel giorno. Non c'è nessun limite di tentativi, niente da sbloccare, nessuna
+serie da mantenere: saltare un giorno non toglie niente, perché non c'era niente da perdere.
+
+**Non è però la stessa sequenza di pezzi fino in fondo, e va detto.** Il generatore legge la
+griglia per decidere che cosa estrarre — sono le cinque reti di sicurezza descritte sopra —
+quindi due persone che giocano diversamente ricevono pezzi diversi. Misurato su due modi di
+giocare opposti a parità di giorno: le prime **sei mani** coincidono, poi divergono. È lo
+stesso problema per tutti, non la stessa partita registrata: la differenza è che non si può
+imparare a memoria una sequenza, e che il confronto fra due punteggi resta onesto perché la
+divergenza nasce da come si è giocato.
 
 Da qui discende l'**archivio**: se il seme è la data, anche i giorni passati sono
 giocabili, e non perché siano stati salvati — **non esiste nessun archivio di partite** —

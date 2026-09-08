@@ -17,6 +17,7 @@ import { quadroNumero, TOTALE_QUADRI } from '../../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
 import { createRng } from '../../src/core/rng.js';
+import { TENTATIVI_PER_APRIRE } from '../../src/persistence/progressi.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -437,6 +438,47 @@ console.log('5. avanzamento conservato dopo la ricarica');
     }
   }
 }
+
+// ---------- 7. La strada non si chiude mai ----------
+/**
+ * Dopo abbastanza tentativi il livello successivo si apre lo stesso.
+ *
+ * Il controllo importante non e' che la porta si apra: e' che il gioco NON menta mentre la
+ * apre. Il livello resta senza spunta e fuori dal conteggio dei superati. Se lo contasse
+ * come vinto, la via d'uscita sarebbe un premio di consolazione travestito -- peggio di un
+ * percorso che si blocca.
+ *
+ * I tentativi si scrivono direttamente nella memoria del browser invece di perdere otto
+ * partite vere: perdere e' gia' provato al passaggio 3c, e otto sconfitte pilotate
+ * renderebbero questo scenario lungo il doppio senza controllare niente di nuovo.
+ */
+await page.evaluate((soglia) => {
+  window.localStorage.setItem('plinto:quadri', JSON.stringify({
+    versione: 1,
+    livelli: { 1: { tentativi: soglia } },
+  }));
+}, TENTATIVI_PER_APRIRE);
+await page.reload({ waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await page.waitForSelector('.pl-tappe');
+const apertiPerInsistenza = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
+const spunte = await page.locator('.pl-tappa--fatta').count();
+await page.screenshot({ path: `${OUT}/7-strada-aperta.png` });
+console.log(
+  `7. dopo ${TENTATIVI_PER_APRIRE} tentativi falliti sul primo: ${apertiPerInsistenza} livelli aperti, `
+  + `${spunte} con la spunta`,
+);
+if (apertiPerInsistenza !== 2) {
+  errori.push(`INSISTENZA: ${apertiPerInsistenza} livelli aperti invece di 2 dopo ${TENTATIVI_PER_APRIRE} tentativi`);
+}
+if (spunte !== 0) {
+  errori.push(`INSISTENZA: ${spunte} livelli con la spunta di superato, e non ne e stato superato nessuno`);
+}
+// E il secondo si deve poter aprire davvero, non solo sembrare aperto.
+await page.locator('.pl-tappa').nth(1).click();
+await page.waitForSelector('.pl-apertura', { timeout: 4000 }).catch(() => {
+  errori.push('INSISTENZA: il secondo livello sembra aperto ma non si apre');
+});
 
 await browser.close();
 if (server) server.kill();

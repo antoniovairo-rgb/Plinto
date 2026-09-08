@@ -186,9 +186,28 @@ const ripresa = await page.evaluate(() => ({
   modalita: document.querySelector('.pl-modalita')?.textContent ?? '',
 }));
 await page.screenshot({ path: `${OUT}/archivio-02.png` });
-console.log(`4. sfida del ${GIORNO} ripresa: ${ripresa.blocchi} blocchi sulla plancia, modalita "${ripresa.modalita}"`);
+console.log(`4. sfida del ${GIORNO} ripresa: ${ripresa.blocchi} blocchi sulla plancia, intestazione "${ripresa.modalita.replace(/\s+/g, ' ').trim()}"`);
 if (ripresa.blocchi !== 63) {
   errori.push(`ARCHIVIO: la partita ripresa ha ${ripresa.blocchi} blocchi invece dei 63 salvati`);
+}
+
+/**
+ * L'intestazione deve dire QUALE giorno si sta giocando.
+ *
+ * Diceva solo "Sfida del giorno", cioe' il nome della modalita': dentro la partita, la
+ * sfida di oggi e una qualunque riaperta dall'archivio erano indistinguibili. Un giocatore
+ * ha aperto la schermata e ha detto "non si capisce qual e' la sfida del giorno" -- e aveva
+ * ragione due volte, perche' non si capiva ne' quale giorno ne' che cosa chiedesse.
+ */
+const giornoDelMese = String(Number(GIORNO.slice(8)));
+if (!ripresa.modalita.includes(giornoDelMese)) {
+  errori.push(
+    `ARCHIVIO: l intestazione dice "${ripresa.modalita.replace(/\s+/g, ' ').trim()}" `
+    + `e non nomina il giorno ${giornoDelMese} che si sta giocando`,
+  );
+}
+if (/di oggi/i.test(ripresa.modalita)) {
+  errori.push('ARCHIVIO: una sfida passata viene presentata come quella di oggi');
 }
 
 // ---------- 5. Il punteggio finisce nel giorno giusto ----------

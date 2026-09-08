@@ -14,6 +14,8 @@ import { vibraRifiuto } from '../feel/vibrazione.js';
 import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf } from '../core/grid.js';
 import { AnteprimaTerna } from './AnteprimaTerna.jsx';
 import { MODALITA } from '../config/rules.js';
+import { giornoDiOggi } from '../core/sfida.js';
+import { dataDistesa } from '../i18n/formato.js';
 
 /**
  * La schermata di gioco: e' l'unica che conta davvero.
@@ -22,6 +24,37 @@ import { MODALITA } from '../config/rules.js';
  * e la Catena stanno in alto perche' li si guarda tra una mossa e l'altra; i pezzi
  * stanno in basso perche' li' arriva il pollice.
  */
+/**
+ * L'intestazione della Sfida del Giorno: QUALE sfida, e che cosa chiede.
+ *
+ * Prima diceva soltanto "Sfida del giorno", cioe' il nome della modalita'. Chi apriva la
+ * schermata non poteva sapere due cose, e le voleva sapere entrambe: quale giorno stesse
+ * giocando -- l'archivio permette di riaprire i giorni passati, e da dentro la partita
+ * erano indistinguibili da quella di oggi -- e che cosa fosse "la sfida", visto che a
+ * differenza di un livello non c'e' nessun obiettivo scritto da nessuna parte.
+ *
+ * La riga sotto e' precisa e non ottimista. Il seme e' la data, quindi la partita PARTE
+ * uguale per tutti; ma il generatore legge la griglia per decidere i pezzi, quindi due
+ * persone che giocano diversamente ricevono pezzi diversi dopo poche mani (misurato: le
+ * prime sei mani coincidono, poi divergono). "Stessi pezzi per tutti" sarebbe stata la
+ * frase comoda ed e' falsa; "parte uguale per tutti" e' vera.
+ */
+function IntestazioneSfida({ giorno, t }) {
+  const oggi = giornoDiOggi();
+  const eOggi = !giorno || giorno === oggi;
+  const quando = dataDistesa(giorno ?? oggi);
+  return (
+    <div className="pl-modalita pl-modalita--sfida">
+      <span className="pl-modalita__titolo">
+        {t(eOggi ? 'modo.sfidaOggi' : 'modo.sfidaDelGiorno').replace('{giorno}', quando)}
+      </span>
+      <span className="pl-modalita__nota">
+        {t(eOggi ? 'modo.sfidaCosa' : 'modo.sfidaCosaPassata')}
+      </span>
+    </div>
+  );
+}
+
 export function SchermoGioco({
   partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
   quadro = null, statoQuadro = null, modalita = 'libera', t,
@@ -205,6 +238,8 @@ export function SchermoGioco({
           si legge. */}
       {quadro && statoQuadro ? (
         <BarraObiettivo quadro={quadro} stato={statoQuadro} t={t} />
+      ) : modalita === 'sfida' ? (
+        <IntestazioneSfida giorno={partita.seedLabel} t={t} />
       ) : (
         <p className="pl-modalita">{t(`modo.${modalita}`)}</p>
       )}

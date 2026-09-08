@@ -38,6 +38,10 @@ export default {
   modo: {
     libera: 'Partita libera',
     sfida: 'Sfida del giorno',
+    sfidaOggi: 'Sfida di oggi, {giorno}',
+    sfidaDelGiorno: 'Sfida del {giorno}',
+    sfidaCosa: 'Oggi la partita parte uguale per tutti. Fai più punti che puoi.',
+    sfidaCosaPassata: 'La partita di quel giorno, ricalcolata. Fai più punti che puoi.',
   },
   gioca: {
     trascina: 'Trascina un pezzo sulla griglia',
@@ -202,6 +206,7 @@ export default {
     mosse: 'Mosse',
     tuoRecord: 'Il tuo record: {mosse} mosse',
     riprova: 'Riprova',
+    apertoPerInsistenza: 'Il livello successivo si è aperto lo stesso: ci hai provato abbastanza. Questo resta da superare, quando vorrai.',
     prossimo: 'Livello successivo',
     elenco: 'Torna ai livelli',
     vinto: 'Livello superato!',

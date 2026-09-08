@@ -1,6 +1,7 @@
 import { descriviObiettivi, descriviObiettivo } from './Quadri.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
+import { quadroSbloccato } from '../../persistence/progressi.js';
 
 
 /**
@@ -20,6 +21,8 @@ export function SchermoFineQuadro({
 }) {
   const vinto = esito.completato;
   const motivo = esito.motivo === 'mosse' ? t('quadri.persoMosse') : t('quadri.persoBloccato');
+  // Il livello successivo si e' aperto lo stesso, per quante volte ci si e' provati.
+  const sbloccaIlProssimo = !vinto && !ultimo && quadroSbloccato(quadro.numero + 1);
 
   return (
     <div className="pl-screen pl-fine">
@@ -35,6 +38,14 @@ export function SchermoFineQuadro({
           {vinto ? t('quadri.vinto') : t('quadri.perso')}
         </p>
         <p className="pl-fine__motivo">{vinto ? descriviObiettivi(quadro, t) : motivo}</p>
+
+        {/* La via d'uscita si annuncia QUI, nel momento in cui serve, e non in un menu:
+            chi ha appena perso l'ottava volta deve sapere che la strada non e' chiusa.
+            E si dice per intero, senza spacciarla per una vittoria: il livello resta da
+            superare, e in elenco resta senza spunta. */}
+        {!vinto && sbloccaIlProssimo ? (
+          <p className="pl-fine__extra">{t('quadri.apertoPerInsistenza')}</p>
+        ) : null}
 
         {vinto ? (
           <div className="pl-fine__punteggio">
@@ -82,6 +93,13 @@ export function SchermoFineQuadro({
             {t('quadri.riprova')}
           </button>
         )}
+        {/* Dopo una sconfitta il pulsante grande resta "Riprova": la via d'uscita e' un
+            permesso, non un invito ad andarsene. Chi la vuole usare la trova qui sotto. */}
+        {sbloccaIlProssimo ? (
+          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onProssimo}>
+            {t('quadri.prossimo')}
+          </button>
+        ) : null}
         <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onElenco}>
           {t('quadri.elenco')}
         </button>

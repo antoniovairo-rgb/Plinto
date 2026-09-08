@@ -25,6 +25,10 @@ export default {
   modo: {
     libera: 'Free play',
     sfida: 'Daily challenge',
+    sfidaOggi: "Today's challenge, {giorno}",
+    sfidaDelGiorno: 'Challenge of {giorno}',
+    sfidaCosa: 'Today everyone starts from the same game. Score as much as you can.',
+    sfidaCosaPassata: 'That day\'s game, recomputed. Score as much as you can.',
   },
   gioca: {
     trascina: 'Drag a piece onto the grid',
@@ -188,6 +192,7 @@ export default {
     mosse: 'Moves',
     tuoRecord: 'Your best: {mosse} moves',
     riprova: 'Try again',
+    apertoPerInsistenza: 'The next level has opened anyway: you have tried enough. This one is still there to beat, whenever you want.',
     prossimo: 'Next level',
     elenco: 'Back to levels',
     vinto: 'Level cleared!',

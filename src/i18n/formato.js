@@ -27,6 +27,24 @@ export function numero(valore) {
   }
 }
 
+/**
+ * Data distesa: "8 settembre" invece di "8 set".
+ *
+ * Serve dove la data e' il TITOLO di quello che si sta guardando -- la sfida che si sta
+ * giocando -- e non un'etichetta di contorno: li' l'abbreviazione fa risparmiare tre
+ * lettere e costa un attimo di lettura in piu' proprio a chi sta cercando di capire dove
+ * si trova.
+ */
+export function dataDistesa(giornoIso) {
+  try {
+    return new Date(`${giornoIso}T12:00:00`).toLocaleDateString(linguaCorrente, {
+      day: 'numeric', month: 'long',
+    });
+  } catch {
+    return giornoIso;
+  }
+}
+
 /** Data in formato AAAA-MM-GG resa leggibile nella lingua corrente. */
 export function data(giornoIso) {
   try {

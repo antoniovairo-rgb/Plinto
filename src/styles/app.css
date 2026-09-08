@@ -1505,6 +1505,30 @@ button {
   color: var(--pl-text-faint);
 }
 
+/* La Sfida del Giorno dice QUALE giorno e che cosa chiede: due righe, non una. */
+.pl-modalita--sfida {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 12px;
+}
+
+/* Il giorno e' il titolo: si legge per primo, ed e' l'unica cosa che distingue questa
+   sfida da quella di ieri riaperta dall'archivio. */
+.pl-modalita__titolo {
+  color: var(--pl-text-soft);
+}
+
+/* La riga che spiega non e' un titolo: minuscola, senza spaziatura tirata, e piu' quieta
+   del giorno. Si legge una volta e poi si smette di vederla, che e' quello che deve fare. */
+.pl-modalita__nota {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--pl-text-faint);
+}
+
 /* --------------------------------------------------- rete di sicurezza --- */
 /* Quello che si vede se un errore ferma il gioco. Deve essere leggibile senza
    dipendere da niente di complicato: se siamo qui, qualcosa non ha funzionato. */
