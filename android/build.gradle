@@ -1,0 +1,5 @@
+// Progetto vuoto di proposito: tutta la configurazione sta in app/build.gradle.
+// Una TWA e' un solo modulo.
+plugins {
+    id 'com.android.application' version '8.7.3' apply false
+}

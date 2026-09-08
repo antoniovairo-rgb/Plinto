@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Gli stessi due colori del manifest web del sito: la barra di stato e la schermata
+         di avvio devono essere indistinguibili dal gioco, altrimenti all'apertura si vede
+         un lampo di un altro colore. -->
+    <color name="coloreTema">#0E1118</color>
+    <color name="coloreSfondo">#0E1118</color>
+    <color name="sfondoIcona">#0E1118</color>
+</resources>

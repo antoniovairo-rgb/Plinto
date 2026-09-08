@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Il tema della sola schermata d'avvio.
+
+      Trasparente e senza barra del titolo: l'Activity non disegna niente di suo, serve
+      solo ad aprire la finestra di fiducia. Un tema normale farebbe comparire per un
+      istante uno sfondo bianco prima del gioco.
+    -->
+    <style name="Theme.Avvio" parent="android:Theme.Translucent.NoTitleBar">
+        <item name="android:windowBackground">@color/coloreSfondo</item>
+    </style>
+</resources>

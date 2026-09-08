@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">PLINTO</string>
+
+    <!-- L'indirizzo che l'app apre. La barra finale conta: senza, alcuni server
+         rispondono con un reindirizzamento e la finestra di fiducia parte due volte. -->
+    <string name="urlIniziale" translatable="false">https://antoniovairo-rgb.github.io/Plinto/</string>
+
+    <!--
+      La meta' "app" del patto con il sito.
+
+      L'altra meta' e' il file .well-known/assetlinks.json pubblicato sul dominio, e le due
+      devono corrispondere: questa dice "mi fido di quel sito", quella dice "mi fido di
+      questa app". Se una manca o non combacia, Android non toglie la barra dell'indirizzo
+      e NON dice perche'. Le virgolette vanno protette con la barra rovesciata perche'
+      questo e' un file XML che contiene del JSON.
+    -->
+    <string name="assetStatements" translatable="false">
+        [{
+          \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+          \"target\": {
+            \"namespace\": \"web\",
+            \"site\": \"https://antoniovairo-rgb.github.io\"
+          }
+        }]
+    </string>
+</resources>

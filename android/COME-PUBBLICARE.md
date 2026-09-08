@@ -1,9 +1,8 @@
 # PLINTO sul Play Store — quello che serve, in ordine
 
 Questo non è un tutorial generico: è la sequenza esatta per **questo** progetto, con i
-valori già decisi. Il pacchetto Android non è stato costruito qui perché la rete di questo
-ambiente blocca `dl.google.com` e quindi l'SDK Android non è scaricabile: i comandi sotto
-vanno lanciati su una macchina con rete libera.
+valori già decisi. Il progetto Android è scritto e sta in questa cartella; va aperto e
+compilato in Android Studio su una macchina con rete libera.
 
 ## Cos'è che si pubblica
 
@@ -24,31 +23,54 @@ per sempre: cambiarlo significa pubblicare un'app diversa e perdere installazion
 Se un giorno si passa a un dominio proprio (es. `plinto.app`), il *pacchetto* può restare
 questo — cambia solo `assetlinks.json`.
 
-**Orientamento: verticale.** Il gioco è pensato per il pollice su una mano sola.
+**Orientamento: nessun blocco, da nessuna parte.** Va detto perché è facile crederlo il
+contrario: il gioco è disegnato per il pollice su una mano sola, ma né il manifest web né
+quello Android impongono il verticale. Ruotando il telefono l'app ruota, e la disposizione
+si adatta — le prove su schermi larghi passano — ma la plancia diventa piccola e i pezzi
+finiscono lontani dal pollice.
+
+È una decisione aperta, non un difetto: si può bloccare in verticale aggiungendo
+`"orientation": "portrait"` a `public/manifest.webmanifest`. Meglio lì che nel manifest
+Android — così vale anche per chi gioca dal browser, e la regola resta in un posto solo.
 
 **Notifiche: disattivate.** PLINTO non manda notifiche e non ne chiederà il permesso.
 
 ## La sequenza
 
-### 1. Costruire il pacchetto (su macchina con rete libera)
+### 1. Costruire il pacchetto, in Android Studio
 
-```bash
-npm install -g @bubblewrap/cli
-cd android
-bubblewrap init --manifest https://antoniovairo-rgb.github.io/Plinto/manifest.webmanifest
-# accetta di scaricare JDK 17 e Android SDK quando li chiede
-bubblewrap build
-```
+Il progetto Android e' **gia' scritto** in questa cartella. Non serve Bubblewrap, non serve
+scaricare un JDK ne' un SDK: usa la catena di strumenti di Android Studio.
 
-`bubblewrap init` chiede conferma dei valori: quelli giusti sono già in `twa-manifest.json`
-di questa cartella — si può copiarlo al posto di quello generato e rilanciare `build`.
+*Perche' non Bubblewrap.* E' lo strumento ufficiale di Google e genera esattamente questo
+progetto, ma si porta dietro una PROPRIA catena -- JDK 17 e SDK Android da scaricare --
+accanto a quella gia' installata. Su una macchina dove Android Studio c'e' gia', sono
+mezzo giga di download e un punto di rottura in piu' per zero vantaggi.
 
-Alla prima esecuzione crea `plinto-upload.keystore`: è la **chiave di caricamento**.
+**Apri il progetto:** Android Studio → *Open* → seleziona la cartella `android` di questo
+repository. Alla prima apertura Gradle sincronizza e scarica le sue dipendenze (qualche
+minuto, una volta sola).
 
-⚠️ **Conservare quella chiave e la sua password fuori dal repository.** Non va committata: un
-repository pubblico la renderebbe leggibile a chiunque. Se si perde, si può chiedere a Google
-un ripristino della chiave di caricamento (non è la fine del mondo come per la vecchia chiave
-di firma, ma è una scocciatura evitabile).
+**Genera il pacchetto firmato:** *Build → Generate Signed App Bundle / APK → Android App
+Bundle → Create new…*
+
+| campo | valore |
+| --- | --- |
+| Key store path | **fuori dal repository**, es. `C:\Users\<tu>\chiavi\plinto.jks` |
+| Alias | `plinto` |
+| Validita' | 25 anni o piu' |
+
+⚠️ **Quella chiave e le sue password decidono chi potra' aggiornare PLINTO, per sempre.**
+Tienile in un gestore di password e fanne una copia altrove. Il `.gitignore` di questa
+cartella esclude `*.keystore` e `*.jks`, ma la strada piu' sicura e' non metterla proprio
+dentro il repository.
+
+Scegli **release** e compila. Esce `app/release/app-release.aab`.
+
+**Per provarlo subito sul telefono** senza passare dallo store, ripeti con *APK* invece di
+*Android App Bundle*: ottieni un file installabile via cavo. Attenzione pero': un APK
+firmato in locale porta l'impronta della TUA chiave, mentre quello che arriva dal Play
+Store porta quella di Google. Servono entrambe in `assetlinks.json` (vedi passo 4).
 
 ### 2. Caricare su Play Console
 

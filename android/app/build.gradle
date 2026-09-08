@@ -1,0 +1,53 @@
+/*
+ * PLINTO per Android: una Trusted Web Activity.
+ *
+ * NON C'E' CODICE. L'unica Activity la fornisce `androidbrowserhelper`, la libreria
+ * ufficiale di Google: apre a tutto schermo il sito gia' pubblicato, usando il motore di
+ * Chrome installato sul telefono. Il gioco resta uno solo -- pubblicando una versione nuova
+ * su GitHub Pages, l'app si aggiorna da sola. L'`.aab` si ricarica sullo store solo se
+ * cambiano icona, nome o permessi.
+ *
+ * PERCHE' SCRITTO A MANO E NON GENERATO. Lo strumento ufficiale (Bubblewrap) genera questo
+ * stesso progetto, ma si porta dietro una PROPRIA catena di strumenti -- JDK 17 e SDK
+ * Android da scaricare -- accanto a quella gia' installata. Su questa macchina quel
+ * download si e' impiantato due volte. Questo progetto usa invece la catena di Android
+ * Studio, che qui ha gia' compilato un'altra app: si apre e si compila, senza scaricare
+ * niente.
+ */
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.antoniovairo_rgb.plinto'
+    compileSdk 35
+
+    defaultConfig {
+        // NON SI PUO' PIU' CAMBIARE dopo la prima pubblicazione sul Play Store: e'
+        // l'identita' dell'app per sempre. Cambiarlo significa pubblicare un'app diversa,
+        // perdendo installazioni e recensioni.
+        applicationId 'io.github.antoniovairo_rgb.plinto'
+        minSdk 21
+        targetSdk 35
+        versionCode 10301
+        versionName '1.3.1'
+    }
+
+    buildTypes {
+        release {
+            // `shrinkResources` non si attiva: non c'e' quasi niente da ridurre, e
+            // toglierebbe risorse che la libreria carica per nome a tempo di esecuzione.
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // L'unica dipendenza del progetto.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
