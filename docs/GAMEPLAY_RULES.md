@@ -698,6 +698,23 @@ vanno lette insieme al numero:
 - Le due righe in negativo non dicono che l'anteprima peggiori: sono dominate da pochi
   livelli che con l'anteprima vanno a zero perché sono diventati un altro problema.
 
+**Su cosa viene speso il vantaggio, misurato.** Nella partita libera con il tetto a 120 mosse
+(`node src/sim/run.mjs 150 stratega 120 <modalità>`), lo stratega con l'anteprima **sopravvive
+meglio e segna meno**:
+
+| | base | anteprima |
+|---|---|---|
+| Mosse (minimo su 150 partite) | 86 | 120 — nessuna partita finita prima del tetto |
+| Riempimento finale medio | 19,5% | 17,1% |
+| Gruppi chiusi (media) | 46,8 | 47,8 |
+| Punteggio medio | 2649,7 | 2448,7 |
+| Catena massima (media) | 7,6 | 6,0 |
+
+Non è una proprietà dell'anteprima: è una proprietà del **mio** metro. `accoglienza` premia il
+fare posto, non il tenere viva la Catena, quindi il giocatore artificiale spende l'informazione
+in sicurezza invece che in punti. Una persona la spenderebbe probabilmente in modo diverso —
+ed è un'altra ragione per cui 38/43/19 è un limite inferiore.
+
 ### L'effetto principale non è la difficoltà: è l'identità dei livelli
 
 Giocando gli stessi cento livelli con i **bersagli vecchi** nelle due modalità
