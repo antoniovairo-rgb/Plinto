@@ -1,0 +1,18 @@
+# La chiave di firma e le sue password non entrano mai in un repository pubblico.
+# Perderle e' una scocciatura; pubblicarle e' un incidente.
+*.keystore
+*.jks
+keystore.properties
+local.properties
+
+# Prodotti della compilazione: si rigenerano, non si versionano.
+app/
+gradle/
+gradlew
+gradlew.bat
+build.gradle
+settings.gradle
+gradle.properties
+*.aab
+*.apk
+store_icon.png
