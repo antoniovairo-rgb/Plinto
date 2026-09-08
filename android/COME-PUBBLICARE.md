@@ -52,7 +52,20 @@ di firma, ma è una scocciatura evitabile).
 
 ### 2. Caricare su Play Console
 
-Crea l'app, carica `app-release-bundle.aab` in un canale di test.
+Crea l'app, carica `app-release-bundle.aab` in **test interno**.
+
+⚠️ **Il test interno NON conta per i 14 giorni.** Su un account personale aperto dopo
+novembre 2023, per ottenere l'accesso alla produzione servono almeno **12 tester iscritti a
+un TEST CHIUSO per 14 giorni consecutivi**. Il test interno serve solo a verificare che la
+TWA funzioni; il conteggio parte da un test chiuso.
+
+Sequenza giusta: test interno per i passi 3-5 qui sotto (bastano un account e un telefono),
+poi **test chiuso** con 12 persone, poi — dopo 14 giorni — richiesta di accesso alla
+produzione.
+
+**L'accesso alla produzione si sblocca una volta sola per ACCOUNT, non per app.** Quale app
+faccia i 14 giorni non conta: conta che qualcuna li faccia. Conviene farli fare all'app che
+e' pronta prima.
 
 ### 3. Prendere l'impronta VERA e solo allora scrivere assetlinks
 

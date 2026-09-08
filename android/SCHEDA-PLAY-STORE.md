@@ -103,3 +103,19 @@ Non è nel repository e va preparato a parte:
 - **Schermate del telefono**: da 2 a 8, minimo 320px di lato corto — **da fare**
   (le più efficaci: la plancia a metà partita con una Catena alta, la mappa dei livelli,
   un livello con l'obiettivo in cima, la sfida del giorno)
+
+---
+
+## Il vincolo che detta i tempi
+
+Su un account personale aperto dopo novembre 2023, l'accesso alla produzione richiede un
+**test chiuso con almeno 12 tester per 14 giorni consecutivi**. Il **test interno non conta**:
+serve solo a verificare che l'app funzioni.
+
+I 14 giorni partono da quando i 12 tester risultano iscritti, non da quando l'app e' finita.
+Conviene quindi far partire il test chiuso appena la verifica della TWA e' passata, e usare
+quel tempo per la grafica dello store.
+
+I 12 tester hanno anche una funzione che non e' burocratica: su questo progetto sarebbero le
+prime persone diverse dall'autore a toccare il gioco. Tutto cio' che e' stato misurato finora
+riguarda il progetto dei livelli, non l'incontro fra il gioco e una persona.
