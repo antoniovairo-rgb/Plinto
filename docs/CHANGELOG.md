@@ -7,6 +7,37 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.3.1] — 8 settembre 2026
+
+Preparativi per il Play Store. Nessuna modifica al gioco.
+
+### Aggiunto
+
+**Una pagina pubblica per l'informativa privacy**, a
+`https://antoniovairo-rgb.github.io/Plinto/privacy.html`. La Play Console richiede un
+indirizzo pubblico che apra l'informativa, e il progetto ne aveva una sola in Markdown dentro
+`docs/`.
+
+**È generata, non riscritta** (`npm run privacy`). Copiarla a mano vorrebbe dire avere due
+informative: quella vera e quella che legge la gente. Prima o poi ne cambia una sola, e il
+documento che il giocatore legge dice una cosa che il codice non fa più — con l'aggravante
+che un'informativa privacy inesatta non è un difetto estetico. Un test confronta la pagina
+con il Markdown e fallisce se divergono.
+
+**`android/twa-manifest.json` e `android/COME-PUBBLICARE.md`**: la configurazione della TWA e
+la sequenza esatta per pubblicare, con le tre trappole silenziose documentate — l'impronta di
+firma sbagliata che Bubblewrap propone di default, il `.nojekyll` senza cui GitHub Pages non
+serve `.well-known`, e l'identificativo del pacchetto che non si può più cambiare.
+
+**`android/SCHEDA-PLAY-STORE.md`**: i testi della scheda, pronti da incollare.
+
+### Corretto
+
+**Il test dell'informativa non poteva fallire.** Importava lo strumento per confrontare la
+pagina con il Markdown, ma importarlo lo eseguiva: rigenerava il file un istante prima di
+guardarlo, quindi passava sempre per costruzione. Ora la scrittura avviene solo quando lo
+script viene lanciato davvero.
+
 ## [1.3.0] — 8 settembre 2026
 
 Domanda di chi gioca: «sei sicuro che la difficoltà sia bilanciata e crescente?». Misurata, la

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informativa privacy — PLINTO</title>
+<meta name="description" content="Informativa privacy di PLINTO: il gioco non raccoglie nulla.">
+<!-- GENERATA DA docs/PRIVACY.md — non modificare a mano: usa npm run privacy -->
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 32px 20px 64px;
+    background: #0E1118; color: #E6E9F0;
+    font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 44rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 1.2rem; }
+  h2 { font-size: 1.2rem; margin: 2.2rem 0 .7rem; color: #FFC94A; }
+  h3 { font-size: 1.02rem; margin: 1.6rem 0 .5rem; }
+  p, li { color: #D2D7E3; }
+  a { color: #7FB4FF; }
+  code { background: #1A1F2B; padding: .1em .35em; border-radius: 4px; font-size: .92em; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  th, td { text-align: left; padding: .55rem .6rem; border-bottom: 1px solid #262C3A; vertical-align: top; }
+  th { color: #FFFFFF; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .35rem 0; }
+  em { color: #9AA3B8; }
+  .torna { display: inline-block; margin-top: 2.5rem; color: #7FB4FF; }
+</style>
+</head>
+<body>
+<main>
+<h1>Informativa privacy di PLINTO</h1>
+<p>*Ultimo aggiornamento: 6 settembre 2026. Questo testo descrive ciò che il codice fa</p>
+<p>davvero: se un giorno il gioco raccogliesse qualcosa, questo documento va cambiato</p>
+<p><strong>prima</strong> di quella modifica, non dopo.*</p>
+<h2>In breve</h2>
+<p>PLINTO non raccoglie nulla. Nessun account, nessuna registrazione, nessun</p>
+<p>identificativo, nessuna analitica, nessuna pubblicità, nessun servizio di terze parti.</p>
+<h2>Cosa viene salvato, e dove</h2>
+<p>Il gioco salva alcune informazioni <strong>esclusivamente nel tuo dispositivo</strong>, nell'archivio</p>
+<p>locale del browser (<code>localStorage</code>), sotto le chiavi con prefisso <code>plinto:</code>:</p>
+<table><thead><tr><th>Dato</th><th>A cosa serve</th></tr></thead><tbody>
+<tr><td>Record personali</td><td>Mostrarti il tuo miglior punteggio</td></tr>
+<tr><td>Statistiche di gioco</td><td>Partite giocate, mosse, gruppi chiusi, tempo totale</td></tr>
+<tr><td>Partita in corso</td><td>Riprendere la partita se chiudi il gioco</td></tr>
+<tr><td>Risultati della Sfida del Giorno</td><td>Il tuo miglior punteggio di ciascun giorno, per gli ultimi 60 giorni</td></tr>
+<tr><td>Impostazioni</td><td>Audio, vibrazione, animazioni, tema, lingua</td></tr>
+</tbody></table>
+<p>Questi dati <strong>non lasciano mai il dispositivo</strong>. Non esiste alcun server a cui possano</p>
+<p>essere inviati: il gioco è un'applicazione che gira interamente nel browser.</p>
+<h2>Cosa NON viene fatto</h2>
+<ul>
+<li>Nessuna richiesta di rete verso domini di terze parti. Non ci sono font esterni, librerie caricate da CDN, pixel di tracciamento o servizi di analisi.</li>
+<li>Nessun cookie.</li>
+<li>Nessun identificativo pubblicitario, nessuna profilazione.</li>
+<li>Nessuna raccolta di dati personali: il gioco non chiede né il nome, né l'email, né l'età, né la posizione.</li>
+<li>Nessuna condivisione con nessuno, perché non c'è nulla da condividere.</li>
+</ul>
+<h2>L'unica eccezione: il collegamento alla donazione</h2>
+<p>Nella schermata "Sostieni il progetto" c'è un collegamento a PayPal. **Il collegamento</p>
+<p>non fa nulla finché non lo tocchi tu.** Se lo tocchi, si apre il sito di PayPal, che ha</p>
+<p>una propria informativa privacy sulla quale non abbiamo alcun controllo. Il gioco non</p>
+<p>comunica a PayPal chi sei, perché non lo sa.</p>
+<h2>Il service worker (installazione e uso senza rete)</h2>
+<p>Da quando il gioco si può installare sul telefono esiste un file, <code>public/sw.js</code>, che il</p>
+<p>browser esegue per conto del sito. Serve a due cose: rendere il gioco installabile e</p>
+<p>farlo funzionare <strong>senza connessione</strong>, tenendone una copia locale.</p>
+<p>Merita di essere detto per intero, perché è codice che vede passare le richieste:</p>
+<ul>
+<li>Conserva <strong>solo</strong> i file del gioco stesso (la pagina, il JavaScript, il foglio di stile, le icone), presi dallo stesso indirizzo da cui il gioco è servito.</li>
+<li>Le richieste verso qualunque altro dominio **le lascia passare senza toccarle e senza registrarle**: c'è una riga esplicita che le esclude, ed è verificata da un test (<code>tests/privacy.test.js</code>).</li>
+<li>Non manda niente a nessuno: nessun invio in sottofondo, nessuna statistica, nessuna connessione aperta.</li>
+<li>Sparisce cancellando i dati del sito dal browser, o disinstallando l'applicazione.</li>
+</ul>
+<h2>Cancellare i tuoi dati</h2>
+<p>Due modi, entrambi immediati e definitivi:</p>
+<ul>
+<li><strong>Impostazioni → Azzera i miei dati</strong>, dentro il gioco.</li>
+<li>Cancellando i dati del sito dal tuo browser.</li>
+</ul>
+<p>Non esiste una copia altrove: cancellati lì, sono cancellati e basta.</p>
+<h2>Minori</h2>
+<p>Il gioco non raccoglie dati, quindi non raccoglie dati di minori. Non contiene</p>
+<p>pubblicità, acquisti, chat, contenuti generati dagli utenti né collegamenti esterni</p>
+<p>oltre a quello della donazione.</p>
+<h2>Come verificarlo</h2>
+<p>Il codice sorgente è ispezionabile. Le uniche funzioni che scrivono dati sono in</p>
+<p><code>src/persistence/storage.js</code>, e usano solo <code>window.localStorage</code>. Le uniche richieste di</p>
+<p>rete dell'intero progetto sono quelle che il service worker fa per **riscaricare i file del</p>
+<p>gioco stesso** dallo stesso indirizzo da cui il gioco è servito: nessuna riga di codice si</p>
+<p>rivolge a un altro dominio. È possibile controllarlo anche senza leggere il codice, con il</p>
+<p>pannello Rete degli strumenti per sviluppatori del browser: giocando una partita intera non</p>
+<p>compare nessuna chiamata verso l'esterno.</p>
+<a class="torna" href="./">← Torna al gioco</a>
+</main>
+</body>
+</html>

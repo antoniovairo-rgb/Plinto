@@ -171,3 +171,39 @@ describe('il service worker non parla con nessuno', () => {
     expect(sw).toContain("searchParams.get('v')");
   });
 });
+
+/**
+ * La pagina pubblica dell'informativa deve dire quello che dice il documento.
+ *
+ * Il Play Store vuole un indirizzo pubblico che apra l'informativa privacy, e quella pagina
+ * e' generata da `docs/PRIVACY.md` (npm run privacy). Se qualcuno modifica il Markdown e
+ * dimentica di rigenerare, il giocatore legge una versione vecchia: due informative, di cui
+ * una falsa. Su un documento che dichiara che cosa il codice fa dei dati altrui, la
+ * divergenza non e' un difetto estetico.
+ */
+describe('la pagina pubblica dell informativa', () => {
+  const RADICE_P = new URL('..', import.meta.url).pathname;
+  const md = readFileSync(join(RADICE_P, 'docs/PRIVACY.md'), 'utf8');
+  const html = readFileSync(join(RADICE_P, 'public/privacy.html'), 'utf8');
+
+  it('e allineata al documento: e identica a quella che genera lo strumento', async () => {
+    // Importare lo strumento NON deve riscrivere il file: se lo facesse, questo controllo
+    // si sistemerebbe da solo un istante prima di guardare, e passerebbe sempre.
+    const { pagina } = await import('../tools/privacy-html.mjs');
+    expect(html, 'public/privacy.html non e aggiornata: lancia npm run privacy')
+      .toBe(pagina(md));
+  });
+
+  it('contiene ogni titolo del documento', () => {
+    const titoli = [...md.matchAll(/^#{1,3}\s+(.+)$/gm)].map((m) => m[1].trim());
+    expect(titoli.length).toBeGreaterThan(5);
+    titoli.forEach((t) => {
+      const atteso = t.replace(/\*\*/g, '').replace(/`/g, '');
+      expect(html.replace(/<[^>]+>/g, ''), `manca il titolo "${t}"`).toContain(atteso);
+    });
+  });
+
+  it('dice ancora la cosa che conta di piu', () => {
+    expect(html).toContain('PLINTO non raccoglie nulla');
+  });
+});
