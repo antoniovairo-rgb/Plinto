@@ -7,6 +7,95 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.3.0] — 8 settembre 2026
+
+Domanda di chi gioca: «sei sicuro che la difficoltà sia bilanciata e crescente?». Misurata, la
+risposta era **no**, e non di poco: la correlazione fra il numero del livello e quanto è
+difficile valeva **−0,05**, cioè nessuna. Il percorso era appena meglio di un ordine casuale.
+
+### Misurato
+
+| | prima | ora |
+|---|---|---|
+| correlazione posizione ↔ difficoltà (rho di Spearman) | −0,05 | **−0,48** |
+| coppie di livelli in cui il più avanti è più facile | 36% | 31% |
+| livelli banali (vinti quasi sempre con >45% di mosse avanzate) | 17 | **1** |
+| riuscite medie del metro | 86,8% | 64,1% |
+| livelli mai superati | nessuno | **nessuno** |
+| livelli vinti giocandoli nell'app | 100/100 | **100/100** |
+
+Comando: `npm run quadri 30` e `npm run livelli`.
+
+### Le quattro cause, tutte diverse
+
+**1. La difficoltà la decideva il TIPO di obiettivo, non la posizione.** Misurato su 30
+tentativi per livello: intreccio 98%, colonne 94%, righe 93%, gruppi 92%, quadranti 91%,
+catena 88%, punteggio 69%, celle 68%. Trenta punti fra il tipo più facile e il più difficile,
+ovunque si trovino nel percorso — e i tipi ruotavano con un ciclo fisso dentro ogni atto,
+quindi la difficoltà oscillava con il ciclo mentre la curva dei percentili saliva piano. Il
+caso peggiore: `celle`, il tipo più duro, stava ai livelli 11-24. Ora i due tipi duri entrano
+dal quarto atto in poi.
+
+**2. Il tetto di mosse era una costante dell'atto, uguale per ogni obiettivo.** «Chiudi 1
+colonna» e «fai 500 punti» non chiedono lo stesso tempo. Ora si **misura** quante mosse
+servono davvero e il tetto è quel numero (70° percentile, non la mediana: dove la varianza è
+enorme la mediana dà un tetto da partita fortunata) moltiplicato per il margine dell'atto —
+1,30 all'inizio, 1,05 alla fine. È questa la leva che fa salire la difficoltà, e l'unica che
+funzioni sugli obiettivi di picco come `intreccio`, dove il bersaglio non ha spazio per
+crescere.
+
+**3. Il percorso si RIPETEVA.** È la causa della segnalazione più concreta arrivata da chi
+gioca — «il livello 6 è molto banale». Chiedeva «chiudi 1 colonna»: identico ai livelli 2 e
+10. E il livello 5 chiedeva «1 riga» dopo che il livello 1 ne aveva chieste 2 — il bersaglio
+**scendeva**. In tutto il percorso «intreccio 2» compariva otto volte, «gruppi 5» sei,
+«quadranti 8» cinque. Ora, dentro uno stesso tipo, il bersaglio non scende mai e non si
+ripete due volte di fila — ma solo fin dove la misura dice che si può arrivare: meglio una
+ripetizione onesta di un bersaglio inventato. Il primo atto adesso è una progressione:
+righe 2→2→3, colonne 1→2→3, quadranti 3→4.
+
+**Nessuno dei controlli esistenti poteva vedere questo difetto**, perché tutti guardano un
+livello alla volta. Che il percorso, letto in fila, si ripeta e a volte torni indietro esiste
+solo nella *sequenza*.
+
+**4. C'era il pavimento e non il tetto.** Il generatore si rifiutava di produrre un livello
+troppo difficile e non aveva niente da dire su uno banale: la regola era «divertente, non una
+tortura» e valeva da un lato solo. Ora un livello vinto oltre l'85% delle volte **e** con più
+del 45% di mosse avanzate viene stretto; se il tetto è già al minimo, si alza il bersaglio.
+
+### Corretto
+
+**Il pavimento del tetto di mosse era 4, e produceva monetine invece di livelli.** «325 punti
+in 4 mosse» si vinceva sempre alla prima mossa, e chiedendone 350 non ci si arrivava quasi
+mai: fra i due valori non c'è una salita, c'è un gradino — in quattro mosse o capita la
+catena giusta o non capita. Il pavimento è ora **8 mosse**.
+
+**Il controllo di banalità e quello di superabilità giocavano partite diverse.** Il quadro 55
+risultava vinto 12 volte su 12 al primo e meno di 4 su 12 al secondo, sullo **stesso**
+bersaglio: non era rumore, erano semi diversi. È la terza volta che questo progetto inciampa
+nella stessa lezione — chi decide e chi verifica devono usare lo stesso metro — e stavolta
+nel codice scritto poche ore prima, per lo scrupolo di «non riusare lo stesso campione». Due
+controlli che devono accordarsi sullo stesso livello non sono due esperimenti indipendenti:
+sono due letture della stessa cosa.
+
+### Ancora aperto
+
+**Il livello 47 resta banale per il metro**: chiede «intreccio 2» e il giocatore artificiale
+ci arriva sempre entro 8 mosse. Non è stato tolto, ed è una scelta: chiudere due gruppi in
+una mossa è la meccanica firma del gioco, e il metro non sa distinguere «banale» da «richiede
+di vedere l'unica mossa giusta» — sono la stessa cosa per un risolutore e due cose opposte per
+una persona.
+
+**Il percorso è diventato molto più duro** (riuscite medie da 86,8% a 64,1%), ed è l'effetto
+inevitabile di aver tolto il tempo in eccesso ovunque. Nessun livello è imbattibile, ma se sia
+*giusto* così lo dice solo giocarci.
+
+**L'ultima decina risale** (40% → 61%): è l'atto «La vetta», che ha meno livelli e tipi
+diversi. È il punto più debole della curva.
+
+**Le coppie invertite scendono poco** (36% → 31%). La curva sale in generale ma resta
+frastagliata da vicino, perché i bersagli restano vincolati a quello che la misura dice
+raggiungibile su ciascuna griglia, e griglie diverse hanno tetti diversi.
+
 ## [1.2.0] — 8 settembre 2026
 
 Regola nuova, data da chi gioca: **nessun livello dev'essere imbattibile — dev'essere un
