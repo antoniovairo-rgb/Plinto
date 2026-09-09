@@ -107,6 +107,21 @@ describe('gli XML sono ben formati', () => {
   }
 });
 
+describe('orientamento', () => {
+  // Due file diversi devono dire la stessa cosa: l'app dello store legge il manifest
+  // Android, chi installa dal browser legge quello web. Bloccarne uno solo produce due
+  // giochi che si comportano in modo diverso senza che nessuno se ne accorga.
+  it('il manifest web e quello Android bloccano lo stesso orientamento', () => {
+    const web = JSON.parse(
+      readFileSync(join(RADICE, 'public/manifest.webmanifest'), 'utf8'),
+    ).orientation;
+    const android = manifest.match(
+      /SCREEN_ORIENTATION"\s*\n?\s*android:value="([^"]+)"/,
+    )?.[1];
+    expect(android).toBe(web);
+  });
+});
+
 describe('il patto con il sito', () => {
   it('il manifest e assetlinks.json parlano dello stesso pacchetto', () => {
     const assetlinks = JSON.parse(

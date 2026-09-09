@@ -57,6 +57,16 @@
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR"
                 android:resource="@color/coloreTema" />
 
+            <!-- La plancia e' quadrata e i pezzi stanno sotto: in orizzontale non ci
+                 sta niente al posto giusto. Il gioco non guadagna nulla dalla rotazione e
+                 ci perde in leggibilita', quindi si blocca.
+                 Va dichiarato QUI e non basta il manifest web: l'app dello store e' una
+                 finestra di fiducia, e la finestra la apre Android leggendo questo file,
+                 non il sito. Il manifest web copre l'altro caso, chi installa dal browser. -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
+                android:value="portrait" />
+
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
                 android:resource="@drawable/splash" />
