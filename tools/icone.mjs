@@ -75,12 +75,23 @@ const MISURE = [
     trasparente: true,
     uso: 'Android, primo piano dell\'icona adattiva',
   },
+  // L'icona CLASSICA di Android, quella usata dove l'adattiva non arriva. Non e' un
+  // residuo storico: alcuni sistemi (MIUI in particolare) applicano una propria maschera
+  // anche a questa, e il marchio a tutto campo ci finisce sotto. Stesso margine
+  // dell'adattiva, ma con il fondo dipinto: qui non c'e' un livello sotto a metterlo.
+  {
+    nome: 'icona-android-classica-432.png',
+    lato: 432,
+    margine: 0.18,
+    soloMarchio: true,
+    uso: 'Android, icona classica',
+  },
 ];
 
 await mkdir(USCITA, { recursive: true });
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 
-for (const { nome, lato, margine, trasparente = false } of MISURE) {
+for (const { nome, lato, margine, trasparente = false, soloMarchio = false } of MISURE) {
   const page = await browser.newPage({ viewport: { width: lato, height: lato } });
   const inserto = Math.round(lato * margine);
   await page.setContent(`
@@ -89,7 +100,7 @@ for (const { nome, lato, margine, trasparente = false } of MISURE) {
       .cornice { width: ${lato}px; height: ${lato}px; display: grid; place-items: center; }
       .cornice svg { width: ${lato - inserto * 2}px; height: ${lato - inserto * 2}px; }
     </style>
-    <div class="cornice">${trasparente ? svgSoloMarchio : svg}</div>
+    <div class="cornice">${trasparente || soloMarchio ? svgSoloMarchio : svg}</div>
   `);
   await page.screenshot({ path: `${USCITA}${nome}`, omitBackground: trasparente });
   await page.close();
@@ -101,7 +112,7 @@ await browser.close();
 // file uguali in due cartelle diverse restano uguali finche' qualcuno se ne ricorda.
 const ANDROID = new URL('../android/app/src/main/res/mipmap-xxxhdpi/', import.meta.url).pathname;
 copyFileSync(`${USCITA}icona-android-primopiano-432.png`, `${ANDROID}ic_launcher_foreground.png`);
-copyFileSync(`${USCITA}icona-512.png`, `${ANDROID}ic_launcher.png`);
+copyFileSync(`${USCITA}icona-android-classica-432.png`, `${ANDROID}ic_launcher.png`);
 
 console.log(`\nIcone generate in public/icone/ da public/icon.svg:`);
 MISURE.forEach(({ nome, lato, uso }) => console.log(`  ${nome.padEnd(34)} ${lato}px  ${uso}`));
