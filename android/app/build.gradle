@@ -34,10 +34,12 @@ android {
         // Google Play RIFIUTA il caricamento sotto 36 dal 31 agosto 2026. Non e' una
         // raccomandazione: e' un errore bloccante in fase di caricamento.
         targetSdk 36
-        // Va alzato a ogni caricamento sullo store, anche se il gioco non e' cambiato:
-        // Play rifiuta un app bundle con un versionCode gia' visto. 10302 e' la seconda
-        // compilazione della 1.3.1, non una versione nuova del gioco.
-        versionCode 10304
+        // Va alzato a OGNI caricamento sullo store, anche se il gioco non e' cambiato.
+        // Play rifiuta un app bundle con un versionCode gia' visto, e "gia' visto"
+        // comprende le bozze di release poi cancellate: il numero resta bruciato lo
+        // stesso. Non e' la versione del gioco (quella e' `versionName`), e' un
+        // contatore di caricamenti.
+        versionCode 10305
         versionName '1.3.1'
     }
 
