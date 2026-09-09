@@ -11,8 +11,12 @@
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { createGame, serializeGame, placePiece } from '../src/core/engine.js';
-import { gridFromString, allPlacements } from '../src/core/grid.js';
+import { gridFromString, allPlacements, fillRatio } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
+import { COLOR_COUNT } from '../src/config/rules.js';
+import { createRng } from '../src/core/rng.js';
+import { chooseMove } from '../src/sim/player.mjs';
+import { findCompletedGroups, placeShape } from '../src/core/grid.js';
 import { existsSync } from 'node:fs';
 
 /**
@@ -64,7 +68,7 @@ const impostazioni = {
   audio: true, vibrazione: true, animazioni: true, aiutoVisivo: true,
 };
 
-async function prepara({ partita = null, record = null, statistiche = null, sfide = null }) {
+async function prepara({ partita = null, record = null, statistiche = null, sfide = null, quadri = null }) {
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
   await page.evaluate((dati) => {
     window.localStorage.clear();
@@ -73,19 +77,114 @@ async function prepara({ partita = null, record = null, statistiche = null, sfid
     if (dati.record) window.localStorage.setItem('plinto:records', JSON.stringify(dati.record));
     if (dati.statistiche) window.localStorage.setItem('plinto:statistiche', JSON.stringify(dati.statistiche));
     if (dati.sfide) window.localStorage.setItem('plinto:sfide', JSON.stringify(dati.sfide));
-  }, { impostazioni, partita, record, statistiche, sfide });
+    if (dati.quadri) window.localStorage.setItem('plinto:quadri', JSON.stringify(dati.quadri));
+  }, { impostazioni, partita, record, statistiche, sfide, quadri });
   await page.reload({ waitUntil: 'networkidle' });
 }
 
-function partitaCon(grigliaTesto, forme, punteggio, catena = 0) {
+/**
+ * Ridipinge una griglia con tutti i colori.
+ *
+ * `gridFromString` riempie ogni cella con lo stesso colore, perche' nasce per i test,
+ * dove il colore non conta. In una schermata dello store conta eccome: una plancia
+ * monocroma non e' il gioco che si vede giocando, e non c'e' motivo di mostrarne una.
+ * Il seme e' fisso, quindi la stessa griglia produce sempre gli stessi colori.
+ */
+function colora(grid, seme) {
+  const rng = createRng(seme);
+  const fuori = new Uint8Array(grid);
+  for (let i = 0; i < fuori.length; i += 1) {
+    if (fuori[i] !== 0) fuori[i] = rng.int(COLOR_COUNT) + 1;
+  }
+  return fuori;
+}
+
+/**
+ * @param {object} [opzioni]
+ * @param {boolean} [opzioni.manoPiazzabile=true] pretende che ogni pezzo in mano abbia un
+ *   posto dove andare. Va spento SOLO per la schermata di fine partita, dove i pezzi che
+ *   non entrano non sono un difetto: sono il motivo per cui la partita e' finita.
+ */
+function partitaCon(grigliaTesto, forme, punteggio, catena = 0, seme = 77, { manoPiazzabile = true } = {}) {
   const base = createGame({ seed: 77, now: 0 });
+  const grid = colora(gridFromString(grigliaTesto), seme);
+
+  // Una schermata con dei pezzi che non entrano mostra tre riquadri spenti nel punto
+  // in cui l'occhio cerca la mossa successiva. E' successo: la prima versione di questo
+  // strumento ne produceva due su tre. Qui si controlla, invece di guardare l'immagine
+  // e sperare.
+  const senzaPosto = forme.filter((id) => allPlacements(grid, getShape(id)).length === 0);
+  if (manoPiazzabile && senzaPosto.length > 0) {
+    throw new Error(`Pezzi senza posto sulla griglia: ${senzaPosto.join(', ')}`);
+  }
+
   return serializeGame({
     ...base,
-    grid: gridFromString(grigliaTesto),
+    grid,
     hand: forme.map((id, i) => ({ uid: `s${i}`, shapeId: id, shape: getShape(id), color: (i % 6) + 1 })),
     score: punteggio,
     chain: catena,
   });
+}
+
+/**
+ * Una partita VERA, giocata fino a quando lo stato serve.
+ *
+ * Le griglie scritte a mano hanno un difetto che si vede solo guardando l'immagine
+ * finita: non sono posizioni che il gioco produce. Una di esse lasciava due pezzi su
+ * tre senza un posto dove andare -- tre riquadri spenti nel punto in cui l'occhio
+ * cerca la mossa successiva. Qui gioca il giocatore simulato, con il motore vero:
+ * qualunque stato esca e' uno stato raggiungibile, e finche' la partita non e' finita
+ * almeno un pezzo entra per costruzione.
+ *
+ * @param {number} seme
+ * @param {(stato:object) => boolean} basta si ferma al primo stato che soddisfa questa
+ * @returns {object} lo stato del motore, non serializzato
+ */
+function giocaFinche(seme, basta, { profilo = 'esperto', massimo = 400 } = {}) {
+  let stato = createGame({ seed: seme, now: 0 });
+  const rng = createRng((seme ^ 0x9e3779b9) >>> 0);
+  for (let m = 0; m < massimo; m += 1) {
+    if (stato.status !== 'playing') break;
+    if (basta(stato)) return stato;
+    const mossa = chooseMove(stato, profilo, rng);
+    if (!mossa) break;
+    stato = placePiece(stato, mossa.handIndex, mossa.row, mossa.col, m * 1000);
+  }
+  return stato;
+}
+
+/** La mossa in mano che chiude piu' gruppi, se ce n'e' una. */
+function mossaPiuGrossa(stato) {
+  let migliore = null;
+  stato.hand.forEach((pezzo, handIndex) => {
+    if (!pezzo) return;
+    for (const [row, col] of allPlacements(stato.grid, pezzo.shape)) {
+      const { grid } = placeShape(stato.grid, pezzo.shape, row, col, pezzo.color, pezzo.bombe);
+      const gruppi = findCompletedGroups(grid).length;
+      if (gruppi > (migliore?.gruppi ?? 0)) migliore = { handIndex, row, col, gruppi, pezzo };
+    }
+  });
+  return migliore;
+}
+
+/**
+ * Dove toccare per posare un pezzo con l'origine in (row, col).
+ * Il gesto a due tocchi CENTRA il pezzo sulla cella toccata: l'inversa di
+ * `origineDaCella` in `src/ui/useTrascinamento.js`. Scritta qui e non importata perche'
+ * e' l'unico punto in cui serve, ma se quella cambia questa va cambiata con lei.
+ */
+function cellaDaToccare(shape, row, col) {
+  return { row: row + Math.floor((shape.height - 1) / 2), col: col + Math.floor((shape.width - 1) / 2) };
+}
+
+/** Avanzamento finto: i primi `quanti` livelli superati, per mostrare la mappa viva. */
+function progressiFinoA(quanti) {
+  const livelli = {};
+  for (let n = 1; n <= quanti; n += 1) {
+    livelli[n] = { mosse: 9 + (n % 5), punteggio: 400 + n * 37, tentativi: 1 + (n % 3) };
+  }
+  return { versione: 1, livelli };
 }
 
 const RECORD = { best: 18740, bestChain: 7, bestMove: 612, bestGroupsInOneMove: 3 };
@@ -99,51 +198,34 @@ await prepara({ record: RECORD, sfide: { [new Date().toISOString().slice(0, 10)]
 await page.screenshot({ path: `${USCITA}1-home.png` });
 
 // --- 2. Partita in corso, con la Catena accesa --------------------------------
-await prepara({
-  record: RECORD,
-  partita: partitaCon(`
-    ###...##.
-    ##..##.#.
-    #..###..#
-    .###..##.
-    ##..##..#
-    .#.##..##
-    ##..#.##.
-    .##..##..
-    #.##..#.#
-  `, ['a5ne', 'b22', 'h3'], 7460, 5),
-});
+// Lo stato non e' scritto a mano: e' il primo momento, in una partita vera giocata dal
+// giocatore simulato, in cui la Catena e' alta, la plancia e' piena a meta' e tutti e
+// tre i pezzi hanno un posto dove andare.
+const CATENA_ALTA = (x) => x.score >= 6000 && x.chain >= 6
+  && x.hand.filter(Boolean).length === 3
+  && x.hand.every((p) => allPlacements(x.grid, p.shape).length > 0);
+
+const inCorso = giocaFinche(1, (x) => CATENA_ALTA(x) && fillRatio(x.grid) >= 0.33 && fillRatio(x.grid) <= 0.46);
+if (!inCorso) throw new Error('Nessuno stato adatto alla schermata 2');
+await prepara({ record: RECORD, partita: serializeGame(inCorso) });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
+await page.waitForTimeout(250);
 await page.screenshot({ path: `${USCITA}2-partita.png` });
 
 // --- 3. Il momento dell'eliminazione, con particelle e punti ------------------
-await prepara({
-  record: RECORD,
-  partita: partitaCon(`
-    ########.
-    ##.###.##
-    #.##..###
-    ###.###.#
-    .##.##.##
-    ##.###..#
-    #.##..##.
-    .###.##.#
-    ##.#.##..
-  `, ['p1', 'b22', 'h3'], 9880, 6),
-});
+// Stessa partita, e la mossa che chiude due gruppi insieme: e' l'Intreccio, la mossa
+// che il gioco esiste per insegnare. Viene eseguita davvero, con i due tocchi.
+const primaDelColpo = giocaFinche(1, (x) => CATENA_ALTA(x) && (mossaPiuGrossa(x)?.gruppi ?? 0) >= 2);
+if (!primaDelColpo) throw new Error('Nessuno stato adatto alla schermata 3');
+const colpo = mossaPiuGrossa(primaDelColpo);
+const tocco = cellaDaToccare(colpo.pezzo.shape, colpo.row, colpo.col);
+
+await prepara({ record: RECORD, partita: serializeGame(primaDelColpo) });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
-const bersaglio = await page.evaluate(() => {
-  const c = document.querySelectorAll('.pl-plancia .pl-cella')[8].getBoundingClientRect();
-  const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
-  const cella = p.firstElementChild ? null : null;
-  return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
-});
-await page.mouse.move(bersaglio.px, bersaglio.py);
-await page.mouse.down();
-await page.mouse.move(bersaglio.cx, bersaglio.cy, { steps: 8 });
-await page.mouse.up();
+await page.locator('.pl-tray .pl-pezzo').nth(colpo.handIndex).click();
+await page.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
 await page.waitForTimeout(150);   // a meta' animazione: particelle in volo e punti visibili
 await page.screenshot({ path: `${USCITA}3-eliminazione.png` });
 
@@ -158,7 +240,10 @@ await prepara({
     ];
     const righe = Array.from({ length: 9 }, () => Array(9).fill('#'));
     vuote.forEach(([r, c]) => { righe[r][c] = '.'; });
-    return partitaCon(righe.map((r) => r.join('')).join('\n'), ['p1', 'b33', 'h5'], 15230, 4);
+    return partitaCon(
+      righe.map((r) => r.join('')).join('\n'), ['p1', 'b33', 'h5'], 15230, 4, 77,
+      { manoPiazzabile: false },   // e' la fine partita: e' proprio questo il punto
+    );
   })(),
 });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
@@ -187,8 +272,52 @@ await page.getByRole('button', { name: 'Impostazioni' }).click();
 await page.waitForTimeout(200);
 await page.screenshot({ path: `${USCITA}6-impostazioni.png` });
 
+// --- 7. La mappa dei livelli, con un percorso gia' fatto ----------------------
+// Cento livelli sono la meta' del gioco, e finora nessuna schermata li mostrava.
+await prepara({ record: RECORD, quadri: progressiFinoA(23) });
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await page.waitForSelector('.pl-tappa');
+await page.evaluate(() => window.scrollTo(0, 0));
+await page.waitForTimeout(300);
+await page.screenshot({ path: `${USCITA}7-mappa-livelli.png` });
+
+// --- 8. L'apertura di un livello: l'obiettivo detto prima di giocare ----------
+await page.locator('.pl-tappa').nth(23).click();
+await page.waitForSelector('.pl-apertura');
+await page.waitForTimeout(300);
+await page.screenshot({ path: `${USCITA}8-apertura-livello.png` });
+
+// --- 9. Un livello in corso, con obiettivo e mosse in cima -------------------
+// Appena aperto, un livello e' quasi vuoto e l'obiettivo segna zero: non e' il livello,
+// e' il suo primo istante. Qui se ne giocano alcune mosse davvero, cercando a tentativi
+// una posa valida -- non serve sapere quale sia, serve solo che il gioco l'accetti.
+await page.getByRole('button', { name: /^Gioca$/ }).click();
+await page.waitForSelector('.pl-plancia');
+
+const mosseRimaste = () => page.locator('.pl-obiettivo__mosse strong').innerText();
+for (let fatte = 0; fatte < 6; fatte += 1) {
+  const prima = await mosseRimaste();
+  let riuscita = false;
+  for (let pezzo = 0; pezzo < 3 && !riuscita; pezzo += 1) {
+    for (let cella = 0; cella < 81 && !riuscita; cella += 1) {
+      // Le celle centrali per prime: una plancia che si riempie dal centro si legge
+      // meglio di una che si riempie dai bordi.
+      const ordinata = (cella * 37 + 40) % 81;
+      await page.locator('.pl-tray .pl-pezzo').nth(pezzo).click().catch(() => {});
+      await page.locator('.pl-plancia .pl-cella').nth(ordinata).click().catch(() => {});
+      if (await mosseRimaste() !== prima) riuscita = true;
+    }
+  }
+  if (!riuscita) break;
+  await page.waitForTimeout(120);
+}
+await page.waitForTimeout(400);
+await page.screenshot({ path: `${USCITA}9-livello.png` });
+
 await browser.close();
 if (server) server.kill();
 
 console.log(`\nSchermate generate in store/ a ${LARGHEZZA * DENSITA}x${ALTEZZA * DENSITA} px:`);
-console.log('  1-home  2-partita  3-eliminazione  4-fine-partita  5-statistiche  6-impostazioni');
+console.log('  1-home            2-partita          3-eliminazione');
+console.log('  4-fine-partita    5-statistiche      6-impostazioni');
+console.log('  7-mappa-livelli   8-apertura-livello 9-livello');
