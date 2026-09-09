@@ -20,16 +20,24 @@ plugins {
 
 android {
     namespace 'io.github.antoniovairo_rgb.plinto'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         // NON SI PUO' PIU' CAMBIARE dopo la prima pubblicazione sul Play Store: e'
         // l'identita' dell'app per sempre. Cambiarlo significa pubblicare un'app diversa,
         // perdendo installazioni e recensioni.
         applicationId 'io.github.antoniovairo_rgb.plinto'
-        minSdk 21
-        targetSdk 35
-        versionCode 10301
+        // Android 7.0. Non e' una scelta: e' il minimo dichiarato da
+        // `androidbrowserhelper` 2.7, e la libreria e' l'unica cosa che questa app
+        // contiene. Alzarlo esclude Android 5.x e 6.x.
+        minSdk 24
+        // Google Play RIFIUTA il caricamento sotto 36 dal 31 agosto 2026. Non e' una
+        // raccomandazione: e' un errore bloccante in fase di caricamento.
+        targetSdk 36
+        // Va alzato a ogni caricamento sullo store, anche se il gioco non e' cambiato:
+        // Play rifiuta un app bundle con un versionCode gia' visto. 10302 e' la seconda
+        // compilazione della 1.3.1, non una versione nuova del gioco.
+        versionCode 10302
         versionName '1.3.1'
     }
 
@@ -48,6 +56,8 @@ android {
 }
 
 dependencies {
-    // L'unica dipendenza del progetto.
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+    // L'unica dipendenza del progetto. La 2.7 e' la prima versione che sa stare in una
+    // app che targetta SDK 36: Android 16 impone il disegno "edge-to-edge" e toglie il
+    // modo di rinunciarvi, e la schermata d'avvio la disegna questa libreria, non noi.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.3'
 }

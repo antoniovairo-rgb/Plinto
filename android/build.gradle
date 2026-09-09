@@ -1,5 +1,8 @@
 // Progetto vuoto di proposito: tutta la configurazione sta in app/build.gradle.
 // Una TWA e' un solo modulo.
+// La versione del plugin non e' libera: `compileSdk 36` richiede AGP >= 8.9.1, che a
+// sua volta richiede Gradle >= 8.11.1. Se Android Studio si lamenta della versione di
+// Gradle, accetta l'aggiornamento che propone.
 plugins {
-    id 'com.android.application' version '8.7.3' apply false
+    id 'com.android.application' version '8.9.1' apply false
 }

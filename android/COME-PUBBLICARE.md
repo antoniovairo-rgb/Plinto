@@ -35,6 +35,27 @@ Android — così vale anche per chi gioca dal browser, e la regola resta in un 
 
 **Notifiche: disattivate.** PLINTO non manda notifiche e non ne chiederà il permesso.
 
+## Il livello API, che scade
+
+Google alza periodicamente il livello API minimo per i NUOVI caricamenti, e il rifiuto
+arriva al momento del caricamento, non prima. Dal **31 agosto 2026** il minimo e' **36**
+(Android 16): il primo caricamento di PLINTO fu respinto proprio per questo, perche' il
+progetto era stato scritto per 35.
+
+Le tre righe si muovono insieme, e cambiarne una sola non compila:
+
+| voce | dove | valore | perche' e' legato |
+| --- | --- | --- | --- |
+| `targetSdk` / `compileSdk` | `app/build.gradle` | 36 | lo impone Play |
+| AGP | `build.gradle` | >= 8.9.1 | il minimo per `compileSdk 36` |
+| Gradle | wrapper, locale | >= 8.11.1 | il minimo per AGP 8.9 |
+| `androidbrowserhelper` | `app/build.gradle` | 2.7.3 | la prima che disegna la
+  schermata d'avvio "edge-to-edge", che Android 16 impone senza possibilita' di rinuncia |
+| `minSdk` | `app/build.gradle` | 24 | non e' una scelta: e' il minimo della 2.7 |
+
+Quando questa soglia si rialzera' ancora, il sintomo sara' identico: un errore rosso in
+"Crea release" che parla di livello API target. Si riparte da questa tabella.
+
 ## La sequenza
 
 ### 1. Costruire il pacchetto, in Android Studio
