@@ -44,10 +44,17 @@ una sola impronta nell'elenco, su quei dispositivi il confronto fallisce e l'app
 apre con la barra dell'indirizzo -- senza nessun errore, come tutto il resto di questo
 meccanismo.
 
-E' successo alla prima installazione: `assetlinks.json` conteneva solo l'impronta della
-chiave in uso, e l'app appariva come una scheda del browser. Il campo e' un elenco
-apposta: elencarle entrambe non ha controindicazioni, e ometterne una si paga in
-mezz'ora di indagine su un difetto che non parla.
+E' successo alla prima installazione, ed e' VERIFICATO, non supposto: `assetlinks.json`
+conteneva solo l'impronta della chiave in uso e l'app si apriva come una scheda del
+browser; aggiunta la seconda e reinstallata l'app, la barra e' sparita. Nient'altro e'
+cambiato in mezzo.
+
+Un dettaglio da non farsi ingannare: la Console mostrava quella chiave con "Installazioni
+attive 0%", e quel numero aveva quasi fatto scartare l'ipotesi giusta. Con due sole
+installazioni al mondo la percentuale non significa niente.
+
+Il campo e' un elenco apposta: elencarle entrambe non ha controindicazioni, e ometterne
+una si paga in un'ora di indagine su un difetto che non dice niente.
 
 ## Come si pubblica
 
