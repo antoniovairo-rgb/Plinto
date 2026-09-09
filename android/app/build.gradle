@@ -40,7 +40,11 @@ android {
         // stesso. Non e' la versione del gioco (quella e' `versionName`), e' un
         // contatore di caricamenti.
         versionCode 10305
-        versionName '1.3.1'
+        // Deve seguire la versione del gioco (`version` in package.json): il
+        // contenitore non ha una vita propria, mostra il sito. Un tester che legge
+        // "1.3.1" in Informazioni app mentre il gioco dice 1.3.4 segnala un difetto
+        // che non esiste.
+        versionName '1.3.4'
     }
 
     buildTypes {

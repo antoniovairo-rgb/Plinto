@@ -117,6 +117,14 @@ describe('gli XML sono ben formati', () => {
   }
 });
 
+describe('versione', () => {
+  it('il contenitore Android dichiara la stessa versione del gioco', () => {
+    const gioco = JSON.parse(readFileSync(join(RADICE, 'package.json'), 'utf8')).version;
+    const gradle = readFileSync(join(RADICE, 'android/app/build.gradle'), 'utf8');
+    expect(gradle.match(/versionName '([^']+)'/)[1]).toBe(gioco);
+  });
+});
+
 describe('orientamento', () => {
   // Due file diversi devono dire la stessa cosa: l'app dello store legge il manifest
   // Android, chi installa dal browser legge quello web. Bloccarne uno solo produce due
