@@ -7,6 +7,66 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.4.0] — 9 settembre 2026
+
+### Aggiunto
+
+**La Tinta: un gruppo chiuso vale di più se molte delle sue caselle hanno lo stesso
+colore.** Da 5 caselle uguali in su comincia a pagare, e a nove uguali arriva a +20%.
+
+L'ha chiesta una tester, ma il motivo per cui è stata fatta non è la richiesta: è che
+**due persone su tre hanno dato per scontato che il colore contasse**, e una lo credeva
+«fin dall'inizio». Per tre versioni il colore è stato dichiarato «puramente estetico», e
+la riga che lo diceva stava in `rules.js`, dove nessun giocatore la legge. Sei colori
+accesi su una plancia che si riempie *sembrano* una regola: un gioco che mostra qualcosa
+di apparentemente significativo senza che lo sia spreca l'attenzione di chi guarda.
+
+Tre decisioni, tutte scritte accanto alla regola:
+
+**Paga la maggioranza, non il monocromatico.** Il colore dei pezzi lo estrae il
+generatore, il giocatore non lo sceglie: premiare solo il gruppo interamente di un colore
+premierebbe la fortuna. La maggioranza invece si costruisce decidendo *dove* posare, che
+è l'unica leva che il giocatore ha davvero ed è già l'asse su cui si gioca tutto il resto.
+
+**La soglia è 5 e non è arbitraria.** Con sei colori, nove caselle riempite a caso danno
+una maggioranza attorno a 3. Far partire il bonus da 5 significa che non scatta mai per
+caso: se scatta, è perché qualcuno ci ha pensato.
+
+**Entra nel valore del gruppo, non dopo.** Passa sotto Intreccio e Catena come tutto il
+resto. Un bonus che scavalcasse la Catena sarebbe punteggio scollegato dal ritmo della
+partita. Una prova verifica proprio questo: che il rapporto fra una mossa con Catena e la
+stessa senza resti esattamente il moltiplicatore.
+
+**Si vede.** Sotto i punti che salgono compare `TINTA 7`. Sarebbe stato assurdo correggere
+una regola invisibile aggiungendone un'altra invisibile.
+
+**È scritta.** «Come si gioca» ora si chiama «Intreccio, Catena e Tinta».
+
+**Le bombe contano per il loro colore.** Sulla plancia una bomba è un blocco colorato come
+gli altri: se non contasse, una riga che *sembra* tutta arancione non pagherebbe, senza
+che niente spieghi perché.
+
+### Cambiato
+
+**Ricalibrati i bersagli a punti.** Il generatore ha rimisurato tutti e cento i livelli
+giocandoli: **sono cambiati 11 livelli su 100, tutti e soli quelli con obiettivo a punti**
+(50, 59, 64, 69, 74, 77, 82, 87, 92, 93, 98). Gli altri 89 sono identici byte per byte —
+la prova migliore che la Tinta tocca il punteggio e nient'altro.
+
+I bersagli salgono del 4-5%: è quanto la Tinta regala a chi *non* la cerca, perché il
+giocatore artificiale non la insegue e la incassa per caso. Chi mette i colori vicini di
+proposito troverà quei livelli un po' più facili di prima, che è il senso di aggiungere
+una meccanica.
+
+**L'impronta delle regole è cambiata** (`f4dae600` → `dee85df4`). È il meccanismo che
+segnala quando un risultato passato è stato ottenuto con regole diverse, e ha funzionato
+da solo: una prova ha fermato la pubblicazione finché il riferimento dello stratega non è
+stato rimisurato.
+
+**Le traduzioni sostituiscono i segnaposto.** `t('chiave', { valore })` riempie `{valore}`;
+un segnaposto senza valore resta scritto com'è, a vista, perché una frase che mostra
+`{quante}` si nota subito mentre una che ha perso un numero in silenzio sembra corretta.
+
 ## [1.3.4] — 9 settembre 2026
 
 ### Corretto

@@ -4,7 +4,7 @@ import { Bomba } from '../Bomba.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
-import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE } from '../../config/rules.js';
+import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE , TINTA_SOGLIA, TINTA_PASSO } from '../../config/rules.js';
 
 /**
  * "Come si gioca": le regole, rileggibili quando si vuole.
@@ -71,6 +71,9 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
       </p>
       <p className="pl-testo">
         {t('aiuto.catena').replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
+      </p>
+      <p className="pl-testo">
+        {t('aiuto.tinta', { soglia: TINTA_SOGLIA, massimo: Math.round(TINTA_PASSO * 5 * 100) })}
       </p>
 
       <h2 className="pl-sezione">{t('aiuto.bombeTitolo')}</h2>

@@ -163,6 +163,34 @@ export const BOMBA_RAGGIO = 1;
 export const PUNTI_CELLA_ESPLOSA = 6;
 
 /**
+ * LA TINTA: quanto vale chiudere un gruppo di un colore solo.
+ *
+ * PERCHE' ESISTE. Per tre versioni il colore e' stato dichiarato "puramente estetico",
+ * e questa riga qui sopra lo diceva. Alla prima prova con persone vere, due su tre hanno
+ * dato per scontato che contasse -- una lo credeva "fin dall'inizio". Sei colori accesi
+ * su una plancia che si riempie SEMBRANO una regola, e un gioco che mostra qualcosa di
+ * apparentemente significativo senza che lo sia spreca l'attenzione di chi guarda.
+ *
+ * PERCHE' COSI' E NON "TUTTO DI UN COLORE". Il colore dei pezzi lo estrae il generatore,
+ * il giocatore non lo sceglie: premiare solo il gruppo interamente monocromatico
+ * premierebbe la fortuna. Qui invece paga la MAGGIORANZA, e la maggioranza si costruisce
+ * decidendo DOVE posare un pezzo -- che e' l'unica leva che il giocatore ha davvero, ed
+ * e' gia' l'asse su cui si gioca tutto il resto.
+ *
+ * LA SOGLIA NON E' ARBITRARIA. Con sei colori, le nove celle di un gruppo riempite a
+ * caso danno una maggioranza attorno a 3. Far partire il bonus da 5 significa che non
+ * scatta mai per caso: se scatta, e' perche' qualcuno ci ha pensato.
+ */
+export const TINTA_SOGLIA = 5;
+
+/**
+ * Quanto aggiunge ogni cella oltre la soglia, in frazione del valore del gruppo.
+ * Al massimo (9 celle uguali) sono +20%: si sente, ma la partita continua a decidersi
+ * su Catena e Intreccio, che sono le meccaniche che distinguono questo gioco.
+ */
+export const TINTA_PASSO = 0.04;
+
+/**
  * Modalita' di gioco che cambiano il MOTORE, non solo l'interfaccia.
  *
  * 'base'      -> la terna successiva viene estratta quando serve, cioe' quando la mano

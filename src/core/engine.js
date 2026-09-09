@@ -187,6 +187,9 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     chainFast: state.chainDigiuno ?? 0,
     boardCleared,
     explodedCellCount: detonazione.esplose.length,
+    // La griglia con il pezzo gia' appoggiato e i gruppi ancora pieni: dopo `svuotaCelle`
+    // i colori non esistono piu'.
+    grid: placed.grid,
   });
 
   // 5. Mano: si rigenera solo quando tutti i pezzi sono stati usati.

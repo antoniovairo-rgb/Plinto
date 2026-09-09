@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { scoreMove, chainMultiplier, intrecciMultiplier, nextChainState, respiroRimasto, moveTier } from '../src/core/scoring.js';
-import { CHAIN_MAX, CHAIN_GRACE, BOARD_CLEAR_BONUS, GROUP_BASE_POINTS } from '../src/config/rules.js';
+import {
+  CHAIN_MAX, CHAIN_GRACE, BOARD_CLEAR_BONUS, GROUP_BASE_POINTS,
+  TINTA_SOGLIA, TINTA_PASSO, COLOR_COUNT,
+} from '../src/config/rules.js';
+import { maggioranzaColore, fattoreTinta } from '../src/core/scoring.js';
+import { createGrid, rowCells, idx } from '../src/core/grid.js';
 
 const row = { type: 'row' };
 const col = { type: 'col' };
@@ -153,5 +158,70 @@ describe('livello di celebrazione', () => {
     expect(moveTier(2, 0)).toBe('ottima');
     expect(moveTier(3, 3)).toBe('eccellente');
     expect(moveTier(3, 9)).toBe('perfetta');
+  });
+});
+
+
+describe('la Tinta', () => {
+  /** Una riga con `quante` celle del colore 1 e il resto di colori diversi fra loro. */
+  function rigaCon(quante) {
+    const grid = createGrid();
+    const celle = rowCells(0);
+    celle.forEach((cella, i) => { grid[cella] = i < quante ? 1 : 2 + (i % (COLOR_COUNT - 1)); });
+    return { grid, celle };
+  }
+
+  it('conta la maggioranza, non il totale', () => {
+    const { grid, celle } = rigaCon(6);
+    expect(maggioranzaColore(grid, celle)).toBe(6);
+  });
+
+  it('le bombe contano per il loro colore', () => {
+    // Sulla plancia una bomba e' un blocco colorato come gli altri: chi guarda vede
+    // arancione. Se non contasse, una riga che SEMBRA monocromatica non pagherebbe.
+    const grid = createGrid();
+    const celle = rowCells(0);
+    celle.forEach((cella, i) => { grid[cella] = i === 0 ? 1 + 10 : 1; });
+    expect(maggioranzaColore(grid, celle)).toBe(9);
+  });
+
+  it('sotto la soglia non paga niente', () => {
+    for (let m = 0; m < TINTA_SOGLIA; m += 1) expect(fattoreTinta(m)).toBe(0);
+  });
+
+  it('cresce di un passo per ogni cella oltre la soglia', () => {
+    expect(fattoreTinta(TINTA_SOGLIA)).toBeCloseTo(TINTA_PASSO);
+    expect(fattoreTinta(TINTA_SOGLIA + 1)).toBeCloseTo(TINTA_PASSO * 2);
+  });
+
+  it('al massimo aggiunge il 20 per cento: resta un contorno', () => {
+    // Se questo numero salisse, il colore diventerebbe piu' importante della Catena e
+    // dell'Intreccio, che sono le meccaniche su cui il gioco si regge.
+    expect(fattoreTinta(9)).toBeCloseTo(0.2);
+  });
+
+  it('una maggioranza casuale non la fa scattare', () => {
+    // Nove celle su sei colori danno una maggioranza attorno a 3: la soglia esiste
+    // perche' la Tinta non arrivi mai per caso.
+    expect(fattoreTinta(3)).toBe(0);
+    expect(fattoreTinta(4)).toBe(0);
+  });
+
+  it('passa sotto Intreccio e Catena, non li scavalca', () => {
+    const grid = createGrid();
+    for (const cella of rowCells(0)) grid[cella] = 1;
+    const gruppo = [{ type: 'row', index: 0, cells: rowCells(0) }];
+    const semplice = scoreMove({ placedCellCount: 0, groups: gruppo, chainLevel: 0, boardCleared: false, grid });
+    const conCatena = scoreMove({ placedCellCount: 0, groups: gruppo, chainLevel: 4, boardCleared: false, grid });
+    // Il rapporto fra i due deve essere il solo moltiplicatore Catena: se la Tinta fosse
+    // aggiunta DOPO, il rapporto sarebbe piu' basso.
+    expect(conCatena.points / semplice.points).toBeCloseTo(chainMultiplier(4), 1);
+  });
+
+  it('senza griglia il punteggio resta quello di prima', () => {
+    const gruppo = [{ type: 'row', index: 0, cells: rowCells(0) }];
+    const senza = scoreMove({ placedCellCount: 0, groups: gruppo, chainLevel: 0, boardCleared: false });
+    expect(senza.points).toBe(GROUP_BASE_POINTS.row);
+    expect(senza.breakdown.tinta).toBe(0);
   });
 });

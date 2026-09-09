@@ -25,8 +25,25 @@ function leggi(obj, percorso) {
   return percorso.split('.').reduce((acc, k) => (acc == null ? undefined : acc[k]), obj);
 }
 
-/** @returns {(chiave: string) => string} funzione di traduzione per la lingua data */
+/**
+ * Sostituisce i segnaposto `{nome}` con i valori dati.
+ *
+ * Un segnaposto senza valore resta scritto com'e', a vista: una frase che mostra
+ * "{quante}" e' un difetto che si nota subito, mentre una che ha silenziosamente perso
+ * un numero sembra corretta e non lo e'.
+ */
+function riempi(testo, valori) {
+  if (!valori) return testo;
+  return String(testo).replace(/\{(\w+)\}/g, (intero, nome) => (
+    Object.prototype.hasOwnProperty.call(valori, nome) ? String(valori[nome]) : intero
+  ));
+}
+
+/**
+ * @returns {(chiave: string, valori?: object) => string} funzione di traduzione per la
+ * lingua data
+ */
 export function traduttore(lingua) {
   const scelte = LINGUE[lingua]?.strings ?? it;
-  return (chiave) => leggi(scelte, chiave) ?? leggi(it, chiave) ?? chiave;
+  return (chiave, valori) => riempi(leggi(scelte, chiave) ?? leggi(it, chiave) ?? chiave, valori);
 }

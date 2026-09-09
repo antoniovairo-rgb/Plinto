@@ -125,6 +125,10 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
         chiave: lastMove.moveNumber,
         punti: lastMove.points,
         tier: lastMove.tier,
+        // Quante celle dello stesso colore aveva il gruppo chiuso. Senza portarla fin
+        // qui la Tinta pagherebbe in silenzio, e sarebbe di nuovo una regola che il
+        // giocatore deve indovinare: e' esattamente il difetto da cui e' nata.
+        tinta: lastMove.breakdown?.tintaMassima ?? 0,
         cella: lastMove.placedCells[0],
       });
       timers.push(setTimeout(() => setPuntiVolanti(null), DURATA_PUNTI));

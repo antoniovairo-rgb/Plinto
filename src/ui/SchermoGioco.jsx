@@ -13,7 +13,7 @@ import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
 import { vibraRifiuto } from '../feel/vibrazione.js';
 import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf } from '../core/grid.js';
 import { AnteprimaTerna } from './AnteprimaTerna.jsx';
-import { MODALITA } from '../config/rules.js';
+import { MODALITA , TINTA_SOGLIA } from '../config/rules.js';
 import { giornoDiOggi } from '../core/sfida.js';
 import { dataDistesa } from '../i18n/formato.js';
 
@@ -282,6 +282,11 @@ export function SchermoGioco({
                 +{puntiVolanti.punti}
                 {puntiVolanti.tier && puntiVolanti.tier !== 'buona' ? (
                   <span className="pl-etichetta-mossa">{puntiVolanti.tier}</span>
+                ) : null}
+                {puntiVolanti.tinta >= TINTA_SOGLIA ? (
+                  <span className="pl-etichetta-tinta">
+                    {t('gioca.tinta', { quante: puntiVolanti.tinta })}
+                  </span>
                 ) : null}
               </span>
             ) : null}

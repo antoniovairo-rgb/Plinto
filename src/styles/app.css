@@ -692,6 +692,17 @@ button {
   opacity: 0.9;
 }
 
+/* La Tinta si annuncia sotto il punteggio, piu' piccola dell'etichetta della mossa:
+   e' un contorno anche nel punteggio, e deve esserlo anche nell'occhio. */
+.pl-etichetta-tinta {
+  display: block;
+  font-size: 0.34em;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.75;
+}
+
 /* Il punteggio in testata reagisce quando cresce. */
 .pl-hud__valore--scatta { animation: pl-scatta var(--pl-t-base) var(--pl-ease-pop) both; }
 @keyframes pl-scatta {
