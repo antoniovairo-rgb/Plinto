@@ -37,14 +37,33 @@ classica -> Fingerprint del certificato SHA-256.
 
 ## Come si pubblica
 
-Il repository `antoniovairo-rgb.github.io` deve contenere:
+Il repository `antoniovairo-rgb.github.io` deve contenere TRE file:
 
     .well-known/assetlinks.json     <- copia di questo file
-    .nojekyll                       <- vuoto, ma OBBLIGATORIO
+    .nojekyll                       <- vuoto
+    _config.yml                     <- con `include: [".well-known"]`
 
-Senza `.nojekyll`, GitHub Pages passa il sito da Jekyll, che **salta le cartelle il cui
-nome comincia con un punto**: `.well-known/` sparirebbe e l'indirizzo risponderebbe 404,
-senza che niente segnali l'errore.
+GitHub Pages passa il sito da Jekyll, che **salta le cartelle il cui nome comincia con
+un punto**: `.well-known/` sparisce e l'indirizzo risponde 404, senza che niente segnali
+l'errore.
+
+### `.nojekyll` DA SOLO NON E' BASTATO
+
+Questo merita di essere scritto perche' contraddice tutta la documentazione, compresa
+quella ufficiale di GitHub, che indica `.nojekyll` come LA soluzione per questo problema
+esatto. Il 9 settembre 2026 il repository conteneva `.nojekyll`, vuoto, alla radice, con
+il nome giusto (verificato leggendo l'albero git, non guardando lo schermo), tre
+deployment andati a buon fine -- e l'indirizzo rispondeva comunque 404. Ha funzionato
+solo dopo aver aggiunto `_config.yml`, cioe' la correzione *dal lato di Jekyll*: la
+prova che Jekyll stava girando lo stesso.
+
+Un dettaglio che aveva portato fuori strada: `README.md` veniva servito come testo
+grezzo, e sembrava provare che Jekyll fosse spento. Non lo prova. Jekyll trasforma solo
+i file che iniziano con un blocco `---`; tutti gli altri li copia identici. Un file
+servito "come sta" non dice niente su chi lo abbia servito.
+
+Tenere entrambi i file costa nulla e copre entrambi i comportamenti: se un giorno
+`.nojekyll` iniziasse a funzionare come documentato, `_config.yml` verrebbe ignorato.
 
 ## Come si verifica
 
