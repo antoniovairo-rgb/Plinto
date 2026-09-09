@@ -28,6 +28,7 @@ import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
 import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
+import { useTastoIndietro, GENITORE } from './useTastoIndietro.js';
 
 /**
  * Radice dell'applicazione.
@@ -206,6 +207,25 @@ export function App() {
   useEffect(() => {
     if (quadri.esito?.completato) setQuadriFatti(quantiSuperati());
   }, [quadri.esito]);
+
+  // --- Tasto Indietro di Android -------------------------------------------
+  // Un passo indietro alla volta, nello stesso ordine dei pulsanti sullo schermo: prima
+  // si chiude il menu se e' aperto, poi si risale di una schermata. Dalla home non si
+  // fa niente, e il tasto torna a fare il suo mestiere: uscire dall'app.
+  const passoIndietro = useCallback(() => {
+    if (menuAperto) { setMenuAperto(false); return; }
+    if (schermata === 'quadro') { tornaAiQuadri(); return; }
+    if (schermata === 'gioco') { tornaAllaHome(); return; }
+    setSchermata(GENITORE[schermata] ?? 'home');
+  }, [menuAperto, schermata, tornaAiQuadri, tornaAllaHome]);
+
+  useTastoIndietro(
+    menuAperto || schermata !== 'home',
+    passoIndietro,
+    // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
+    // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
+    useCallback(() => { if (schermata === 'home') scriviRotta(''); }, [schermata]),
+  );
 
   // Partita finita: si passa automaticamente al riepilogo.
   const inGioco = partita && partita.status === 'playing';

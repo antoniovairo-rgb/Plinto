@@ -7,6 +7,60 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.3.2] — 9 settembre 2026
+
+La prima volta che PLINTO è finito su un telefono vero, in mano a due persone. Tutti e
+tre i difetti trovati in quel quarto d'ora erano invisibili alle 382 prove automatiche,
+perché riguardano cose che un browser da scrivania non ha: un tasto di sistema, una
+maschera per le icone, un orientamento.
+
+### Corretto
+
+**Il tasto Indietro chiudeva il gioco.** Da dentro un livello, dalla mappa dei livelli,
+da una partita: premere Indietro non tornava indietro, usciva. PLINTO cambia schermata
+con lo stato di React, quindi la cronologia del browser resta ferma su una voce sola e
+il tasto trova subito il fondo. Sul sito è un dettaglio; nell'app installata è il gesto
+principale per uscire da una schermata.
+
+Ora il gioco tiene una voce fittizia nella cronologia finché c'è qualcosa da cui tornare,
+e risale una schermata alla volta seguendo le stesse strade dei pulsanti disegnati sullo
+schermo: prima chiude il menu se è aperto, poi torna al livello precedente, poi alla home.
+Dalla home il tasto torna a fare il suo mestiere e chiude l'app.
+
+Due cose sono andate storte scrivendolo, ed entrambe le ha trovate `npm run indietro`,
+non una persona:
+
+- l'effetto che rimetteva la voce dipendeva solo da «sono dentro o no». Passando da un
+  livello alla mappa si resta dentro in entrambi i casi, l'effetto non ripartiva, e il
+  secondo Indietro usciva dall'app.
+- l'ancora `#/sfida/AAAA-MM-GG` viene scritta sulla voce di cronologia corrente. La voce
+  fittizia ne aggiungeva un'altra sopra, e tornando indietro si atterrava su quella
+  vecchia, con l'ancora ancora dentro: invece della home si riapriva la sfida.
+
+**L'icona era tagliata sulla schermata home.** Il primo piano dell'icona adattiva
+riusava il file «maskable» del web: la specifica web garantisce visibile l'80% della
+tela, Android ne mostra 72 su 108, cioè il 66%. Ora `npm run icone` genera un file
+dedicato, con il marchio al 64% e senza la piastrella di fondo, che nell'icona adattiva
+è compito del livello sotto.
+
+Non è bastato: su MIUI restava tagliata, perché il launcher usa l'icona **classica** e ci
+applica una propria maschera. Anche quella ora ha lo stesso margine. Si vedeva mettendo
+a confronto due schermate dello stesso telefono: in «Informazioni app» l'icona era
+intera, sulla home no.
+
+**L'app si chiudeva all'avvio.** `androidbrowserhelper` attiva all'apertura alcuni
+componenti che si aspetta di trovare dichiarati, senza verificare che esistano. Ne
+mancava uno, giudicato superfluo. Non è un errore di compilazione né di caricamento
+sullo store: è un'app che muore, e l'unico modo di accorgersene era installarla.
+`tests/android.test.js` ora controlla il manifest, 19 verifiche.
+
+### Cambiato
+
+**Il gioco è bloccato in verticale.** La plancia è quadrata e i tre pezzi stanno sotto:
+in orizzontale non c'è niente al posto giusto. Dichiarato in due file che non si leggono
+fra loro — il manifest Android per l'app dello store, quello web per chi installa dal
+browser — con un test che verifica che dicano la stessa cosa.
+
 ## [1.3.1] — 8 settembre 2026
 
 Preparativi per il Play Store. Nessuna modifica al gioco.
