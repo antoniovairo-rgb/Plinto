@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.antoniovairo_rgb.plinto",
+      "sha256_cert_fingerprints": [
+        "81:EF:0B:F5:4F:84:6D:BE:FA:B9:90:F0:FD:02:84:42:4F:E3:63:13:65:C8:D0:25:FB:F0:23:B7:7E:4A:C0:72"
+      ]
+    }
+  }
+]
