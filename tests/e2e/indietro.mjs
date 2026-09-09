@@ -99,6 +99,35 @@ const ancoraNelGioco = await page.evaluate(() => document.querySelector('.pl-app
 verifica(!ancoraNelGioco || (await page.evaluate(() => window.history.length)) < voci,
   'dalla home Indietro esce, invece di lasciare il gioco bloccato');
 
+// 3b. La prova che riguarda l'app installata: dopo un Indietro deve essere gia' rimasta
+// una voce in cronologia. In una finestra di fiducia non c'e' nessuna pagina sotto il
+// gioco, e Chrome decide se chiudere l'applicazione in base a quante voci restano --
+// subito, non dopo il ridisegno. Se la voce venisse rimessa da un effetto di React
+// arriverebbe tardi, e il secondo Indietro chiuderebbe il gioco dalla mappa dei livelli.
+// Qui si misura proprio quello: quante voci ci sono NELL'ISTANTE dopo il passo indietro.
+const vergine = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
+await vergine.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await vergine.evaluate(() => {
+  window.localStorage.setItem('plinto:settings', JSON.stringify({
+    introVista: true, tema: 'scuro', lingua: 'it',
+    audio: false, vibrazione: false, animazioni: false, aiutoVisivo: true,
+  }));
+});
+await vergine.reload({ waitUntil: 'networkidle' });
+const base = await vergine.evaluate(() => window.history.length);
+await vergine.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await vergine.waitForSelector('.pl-tappa');
+await vergine.locator('.pl-tappa').first().click();
+await vergine.waitForSelector('.pl-apertura');
+await vergine.getByRole('button', { name: /^Gioca$/ }).click();
+await vergine.waitForSelector('.pl-plancia');
+await vergine.goBack();
+await vergine.waitForSelector('.pl-tappa');
+const dopoUnIndietro = await vergine.evaluate(() => window.history.length);
+verifica(dopoUnIndietro > base,
+  'dopo un Indietro resta gia una voce in cronologia (nell app installata: non si chiude)');
+await vergine.close();
+
 // 4. Il menu si chiude senza cambiare schermata. Si prova nella partita libera, che e'
 // dove il menu esiste davvero: nella mappa dei livelli non c'e'.
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });

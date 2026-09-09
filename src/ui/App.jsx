@@ -212,11 +212,16 @@ export function App() {
   // Un passo indietro alla volta, nello stesso ordine dei pulsanti sullo schermo: prima
   // si chiude il menu se e' aperto, poi si risale di una schermata. Dalla home non si
   // fa niente, e il tasto torna a fare il suo mestiere: uscire dall'app.
+  // Restituisce `true` se dopo questo passo c'e' ancora qualcosa da cui tornare: serve
+  // a chi lo chiama per rimettere subito la voce in cronologia, senza aspettare il
+  // ridisegno. Vedi useTastoIndietro.js.
   const passoIndietro = useCallback(() => {
-    if (menuAperto) { setMenuAperto(false); return; }
-    if (schermata === 'quadro') { tornaAiQuadri(); return; }
-    if (schermata === 'gioco') { tornaAllaHome(); return; }
-    setSchermata(GENITORE[schermata] ?? 'home');
+    if (menuAperto) { setMenuAperto(false); return schermata !== 'home'; }
+    if (schermata === 'quadro') { tornaAiQuadri(); return true; }
+    if (schermata === 'gioco') { tornaAllaHome(); return false; }
+    const genitore = GENITORE[schermata] ?? 'home';
+    setSchermata(genitore);
+    return genitore !== 'home';
   }, [menuAperto, schermata, tornaAiQuadri, tornaAllaHome]);
 
   useTastoIndietro(

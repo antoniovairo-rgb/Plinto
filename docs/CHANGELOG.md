@@ -7,6 +7,32 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.3.3] — 9 settembre 2026
+
+Due difetti visti solo sul telefono, subito dopo che la 1.3.2 ne aveva risolto un altro.
+
+### Corretto
+
+**Il secondo Indietro chiudeva ancora l'app.** Dal livello si tornava alla mappa, ma
+dalla mappa si usciva invece di arrivare alla home. Sul browser da scrivania la stessa
+sequenza funzionava, e la prova automatica passava: la differenza è che in una finestra
+di fiducia non c'è nessuna pagina sotto il gioco, e Chrome decide se chiudere
+l'applicazione in base a quante voci di cronologia restano — subito, non dopo il
+ridisegno. La voce veniva rimessa da un effetto di React, che arriva dopo. Ora si rimette
+dentro il gestore dell'evento, prima che finisca.
+
+`npm run indietro` ha una verifica in più che misura proprio questo: quante voci ci sono
+nell'istante successivo al passo indietro, non alla fine del ridisegno.
+
+**La home scorreva.** Sette voci più il marchio, e un respiro fra i gruppi proporzionale
+all'altezza dello schermo con un tetto troppo alto: su uno schermo da 640px sforava di
+una cinquantina di pixel. Si nota di più ora che l'app non ha la barra dell'indirizzo,
+perché uno scorrimento di pochi pixel sulla prima schermata sembra un errore.
+
+`npm run impaginazione` misura l'altezza della home su sei formati di telefono, nello
+stato più pieno che il gioco possa produrre: partita libera in corso, sfida in corso,
+livelli superati, record.
+
 ## [1.3.2] — 9 settembre 2026
 
 La prima volta che PLINTO è finito su un telefono vero, in mano a due persone. Tutti e

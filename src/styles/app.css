@@ -388,8 +388,13 @@ button {
   justify-content: center;
   justify-content: safe center;
   overflow-y: auto;
-  gap: clamp(10px, 5vh, 44px);
-  padding: 24px 24px calc(20px + env(safe-area-inset-bottom));
+  /* Il respiro fra i gruppi e' proporzionale all'altezza, ma con un tetto basso: la
+     home ha sette voci piu' il marchio, e su uno schermo da 640px il ritmo precedente
+     (5vh, fino a 44px) la faceva sforare di una cinquantina di pixel. Una home che
+     scorre e' un difetto che si nota subito, perche' e' la prima cosa che si vede.
+     Le misure sono verificate su cinque formati da tests/e2e/impaginazione.mjs. */
+  gap: clamp(8px, 3vh, 30px);
+  padding: 16px 24px calc(16px + env(safe-area-inset-bottom));
   text-align: center;
 }
 .pl-home__testata { display: grid; place-items: center; gap: 12px; }

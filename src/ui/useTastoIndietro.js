@@ -28,8 +28,17 @@ import { useEffect, useRef, useState } from 'react';
  * specifica arriva prima di `hashchange`: cosi' chi ascolta l'ancora legge quella
  * corretta invece di quella appena lasciata.
  *
+ * QUANDO SI RIMETTE LA VOCE. Dentro il gestore di `popstate`, non in un effetto. La
+ * differenza si vede solo su un telefono: in una finestra di fiducia, Chrome decide se
+ * chiudere l'applicazione in base a quante voci restano, e lo decide subito. Un effetto
+ * di React arriva dopo il ridisegno -- sul browser da scrivania in tempo, nell'app
+ * installata troppo tardi, e il secondo Indietro chiudeva il gioco dalla mappa dei
+ * livelli invece di riportare alla home. Qui la voce c'e' gia' prima che il gestore
+ * finisca.
+ *
  * @param {boolean} dentro c'e' qualcosa da cui tornare indietro
- * @param {() => void} passoIndietro esegue UN passo indietro
+ * @param {() => boolean} passoIndietro esegue UN passo indietro e dice se, dopo, c'e'
+ *   ancora qualcosa da cui tornare
  * @param {() => void} [normalizza] rimette l'indirizzo coerente con la schermata
  */
 export function useTastoIndietro(dentro, passoIndietro, normalizza) {
@@ -68,9 +77,15 @@ export function useTastoIndietro(dentro, passoIndietro, normalizza) {
         rimetti.current?.();
         return;
       }
-      setSentinella(false);
       rimetti.current?.();
-      passo.current();
+      const restaDentro = passo.current();
+      if (restaDentro) {
+        // Subito, non fra un ridisegno: e' questa riga a impedire che il prossimo
+        // Indietro chiuda l'app.
+        window.history.pushState({ plinto: 'indietro' }, '');
+      } else {
+        setSentinella(false);
+      }
     };
     window.addEventListener('popstate', suIndietro);
     return () => window.removeEventListener('popstate', suIndietro);

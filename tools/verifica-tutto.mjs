@@ -40,6 +40,7 @@ const VERIFICHE = [
   { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
+  { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },
   // Il cuore del gioco: tutti e cento i livelli vinti giocandoli nell'app, toccando il
   // pezzo e poi la casella. `e2e-quadri` prova che il percorso FUNZIONI (vittoria,
   // sconfitta, sblocco) su due livelli; questo prova che i cento livelli siano davvero
