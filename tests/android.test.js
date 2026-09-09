@@ -84,6 +84,16 @@ describe('schermata di avvio', () => {
     expect(new Set(autorita).size).toBe(1);
   });
 
+  it.runIf(chiedeLaSchermata)('l\'immagine d\'avvio dichiara la propria densita\'', () => {
+    // In `res/drawable/`, senza qualificatore, Android assume 1x e MOLTIPLICA per la
+    // densita' dello schermo: l'immagine da 512px diventava 1536px su un telefono a 3x,
+    // e riempiva lo schermo per due secondi. Il qualificatore non e' una rifinitura.
+    expect(existsSync(join(MAIN, 'res/drawable/splash.png'))).toBe(false);
+    const qualificate = readdirSync(join(MAIN, 'res'))
+      .filter((d) => d.startsWith('drawable-') && existsSync(join(MAIN, 'res', d, 'splash.png')));
+    expect(qualificate.length).toBeGreaterThan(0);
+  });
+
   it.runIf(chiedeLaSchermata)('espone la cartella che la libreria usa davvero', () => {
     const percorsi = join(MAIN, 'res/xml/filepaths.xml');
     expect(existsSync(percorsi)).toBe(true);

@@ -20,7 +20,7 @@
  */
 
 import { chromium } from 'playwright';
-import { readFileSync, copyFileSync } from 'node:fs';
+import { readFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
@@ -86,6 +86,21 @@ const MISURE = [
     soloMarchio: true,
     uso: 'Android, icona classica',
   },
+  // La schermata d'avvio. 768 = 192dp alla densita' xxxhdpi: un marchio grande ma non
+  // invadente, sopra il colore di fondo che mette la libreria.
+  //
+  // La misura non e' un dettaglio estetico. Prima qui c'era l'icona a 512px messa in
+  // `res/drawable/`, la cartella SENZA densita': Android la interpreta come 1x e la
+  // moltiplica per la densita' dello schermo, quindi su un telefono a 3x diventava un
+  // marchio da 1536px che riempiva lo schermo per due secondi. Sta in `drawable-xxxhdpi/`
+  // proprio per dire ad Android a quale densita' e' disegnata.
+  {
+    nome: 'icona-splash-768.png',
+    lato: 768,
+    margine: 0.28,
+    trasparente: true,
+    uso: 'Android, schermata d\'avvio',
+  },
 ];
 
 await mkdir(USCITA, { recursive: true });
@@ -111,9 +126,12 @@ await browser.close();
 // Il progetto Android non tiene una copia da aggiornare a mano: la riceve da qui. Due
 // file uguali in due cartelle diverse restano uguali finche' qualcuno se ne ricorda.
 const ANDROID = new URL('../android/app/src/main/res/mipmap-xxxhdpi/', import.meta.url).pathname;
+const SPLASH = new URL('../android/app/src/main/res/drawable-xxxhdpi/', import.meta.url).pathname;
 copyFileSync(`${USCITA}icona-android-primopiano-432.png`, `${ANDROID}ic_launcher_foreground.png`);
 copyFileSync(`${USCITA}icona-android-classica-432.png`, `${ANDROID}ic_launcher.png`);
+mkdirSync(SPLASH, { recursive: true });
+copyFileSync(`${USCITA}icona-splash-768.png`, `${SPLASH}splash.png`);
 
 console.log(`\nIcone generate in public/icone/ da public/icon.svg:`);
 MISURE.forEach(({ nome, lato, uso }) => console.log(`  ${nome.padEnd(34)} ${lato}px  ${uso}`));
-console.log('\nCopiate nel progetto Android: ic_launcher_foreground.png, ic_launcher.png');
+console.log('\nCopiate nel progetto Android: ic_launcher_foreground.png, ic_launcher.png, drawable-xxxhdpi/splash.png');
