@@ -7,6 +7,25 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.3.4] — 9 settembre 2026
+
+### Corretto
+
+**Il secondo Indietro chiudeva ancora l'app**, nonostante la 1.3.3. Dal livello si
+tornava alla mappa, dalla mappa si usciva. La 1.3.3 rimetteva la voce di cronologia
+*durante* il ritorno indietro invece che dopo il ridisegno: sul browser da scrivania
+funzionava — e la prova automatica passava — ma sul telefono no, e non è stato possibile
+riprodurlo fuori da un dispositivo.
+
+La correzione non è un tempismo migliore: è l'eliminazione del tempismo. Ora il gioco
+tiene in cronologia **una voce per ogni livello di profondità**, messa nel momento in cui
+si entra. Quando arriva un Indietro, la voce che serve al prossimo c'è già da prima, e
+nessun istante conta più.
+
+Regola generale, pagata due volte in un pomeriggio: quando un difetto non si riproduce
+sull'ambiente in cui si lavora, la correzione giusta raramente è aggiustare il momento in
+cui una cosa succede. È togliere la dipendenza da quel momento.
+
 ## [1.3.3] — 9 settembre 2026
 
 Due difetti visti solo sul telefono, subito dopo che la 1.3.2 ne aveva risolto un altro.

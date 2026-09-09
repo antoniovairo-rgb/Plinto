@@ -28,7 +28,7 @@ import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
 import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
-import { useTastoIndietro, GENITORE } from './useTastoIndietro.js';
+import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
 
 /**
  * Radice dell'applicazione.
@@ -212,20 +212,17 @@ export function App() {
   // Un passo indietro alla volta, nello stesso ordine dei pulsanti sullo schermo: prima
   // si chiude il menu se e' aperto, poi si risale di una schermata. Dalla home non si
   // fa niente, e il tasto torna a fare il suo mestiere: uscire dall'app.
-  // Restituisce `true` se dopo questo passo c'e' ancora qualcosa da cui tornare: serve
-  // a chi lo chiama per rimettere subito la voce in cronologia, senza aspettare il
-  // ridisegno. Vedi useTastoIndietro.js.
   const passoIndietro = useCallback(() => {
-    if (menuAperto) { setMenuAperto(false); return schermata !== 'home'; }
-    if (schermata === 'quadro') { tornaAiQuadri(); return true; }
-    if (schermata === 'gioco') { tornaAllaHome(); return false; }
-    const genitore = GENITORE[schermata] ?? 'home';
-    setSchermata(genitore);
-    return genitore !== 'home';
+    if (menuAperto) { setMenuAperto(false); return; }
+    if (schermata === 'quadro') { tornaAiQuadri(); return; }
+    if (schermata === 'gioco') { tornaAllaHome(); return; }
+    setSchermata(GENITORE[schermata] ?? 'home');
   }, [menuAperto, schermata, tornaAiQuadri, tornaAllaHome]);
 
   useTastoIndietro(
-    menuAperto || schermata !== 'home',
+    // Il menu conta come un gradino: si chiude col tasto Indietro senza uscire dalla
+    // schermata sotto, come ci si aspetta da qualunque app Android.
+    (PROFONDITA[schermata] ?? 1) + (menuAperto ? 1 : 0),
     passoIndietro,
     // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.

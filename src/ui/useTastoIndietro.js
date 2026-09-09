@@ -1,54 +1,46 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Il tasto Indietro di Android, dentro un gioco che non ha un router.
  *
  * PERCHE' ESISTE. PLINTO cambia schermata con lo stato di React: la cronologia del
  * browser resta ferma su una sola voce, e il tasto Indietro trova subito il fondo. Sul
- * sito e' un dettaglio; nell'app installata dal Play Store e' un difetto grave, perche'
- * la' Indietro e' il gesto principale per uscire da una schermata, e chiudeva il gioco
- * di colpo da dentro un livello. L'ha trovato la prima persona che ha tenuto in mano
- * l'app: nessuna delle prove automatiche puo' premere un tasto di sistema.
+ * sito e' un dettaglio; nell'app installata dal Play Store e' il gesto principale per
+ * uscire da una schermata, e chiudeva il gioco da dentro un livello.
  *
- * COME. Finche' c'e' qualcosa da cui tornare indietro, si tiene UNA voce fittizia nella
- * cronologia. Quando arriva `popstate` quella voce e' gia' stata consumata: si esegue un
- * passo indietro nel gioco e, se si resta dentro, se ne mette un'altra. Se invece si
- * torna alla home con un pulsante, la voce fittizia va tolta, altrimenti il primo
- * Indietro dalla home non farebbe niente e sembrerebbe un blocco.
+ * COME, E PERCHE' COSI'. Si tiene in cronologia UNA VOCE PER OGNI LIVELLO DI PROFONDITA',
+ * messa nel momento in cui si entra. Dalla home (0) alla mappa (1) se ne aggiunge una;
+ * dalla mappa a un livello (2) un'altra. Il tasto Indietro consuma una voce e il gioco
+ * risale di un gradino: i due conteggi restano allineati senza che nessuno debba
+ * aggiungere niente mentre l'evento e' in corso.
  *
- * Non si toccano ne' il percorso ne' l'ancora: `#/sfida/AAAA-MM-GG` continua a essere
- * l'unico indirizzo del gioco, e questa voce e' senza indirizzo proprio.
+ * La versione precedente teneva una voce sola e la rimetteva DURANTE il ritorno indietro.
+ * Sul browser da scrivania funzionava, e la prova automatica passava; nell'app installata
+ * no, e il secondo Indietro chiudeva il gioco dalla mappa dei livelli. Non e' stato
+ * possibile riprodurlo fuori da un telefono, e per questo la soluzione non e' un
+ * tempismo migliore ma l'eliminazione del tempismo: qui, quando arriva un Indietro, la
+ * voce che serve al prossimo c'e' gia' da prima.
  *
- * L'ANCORA. Il gioco riscrive `#/sfida/AAAA-MM-GG` sulla voce di cronologia corrente
- * (`scriviRotta`, che usa `replaceState` per non sporcare la cronologia). La voce
- * fittizia ne aggiunge un'altra sopra: tornando indietro si atterra su quella di prima,
- * che l'ancora ce l'ha ancora, e il gioco riapre la sfida invece di andare alla home.
- * Per questo, subito dopo un ritorno indietro provocato da noi, si chiama `normalizza`,
- * che rimette l'indirizzo giusto. Va fatto DENTRO il gestore di `popstate`, che per
- * specifica arriva prima di `hashchange`: cosi' chi ascolta l'ancora legge quella
- * corretta invece di quella appena lasciata.
+ * Quando si risale con un pulsante disegnato sullo schermo, invece, le voci in piu' vanno
+ * tolte: si torna indietro di quanti gradini si e' saliti, e il `popstate` che ne deriva
+ * si riconosce e si ignora. Senza, il primo Indietro dopo un pulsante non farebbe niente.
  *
- * QUANDO SI RIMETTE LA VOCE. Dentro il gestore di `popstate`, non in un effetto. La
- * differenza si vede solo su un telefono: in una finestra di fiducia, Chrome decide se
- * chiudere l'applicazione in base a quante voci restano, e lo decide subito. Un effetto
- * di React arriva dopo il ridisegno -- sul browser da scrivania in tempo, nell'app
- * installata troppo tardi, e il secondo Indietro chiudeva il gioco dalla mappa dei
- * livelli invece di riportare alla home. Qui la voce c'e' gia' prima che il gestore
- * finisca.
+ * L'ANCORA. Il gioco riscrive `#/sfida/AAAA-MM-GG` sulla voce corrente (`scriviRotta`,
+ * che usa `replaceState`). Le voci lasciate indietro se la tengono: tornandoci sopra, il
+ * gioco riaprirebbe la sfida invece di andare alla home. Per questo dopo ogni ritorno
+ * indietro si chiama `normalizza`, dentro il gestore di `popstate`, che per specifica
+ * arriva prima di `hashchange`: chi ascolta l'ancora legge quella giusta.
  *
- * @param {boolean} dentro c'e' qualcosa da cui tornare indietro
- * @param {() => boolean} passoIndietro esegue UN passo indietro e dice se, dopo, c'e'
- *   ancora qualcosa da cui tornare
+ * @param {number} profondita quanti gradini si e' scesi dalla schermata iniziale
+ * @param {() => void} passoIndietro risale di UN gradino
  * @param {() => void} [normalizza] rimette l'indirizzo coerente con la schermata
  */
-export function useTastoIndietro(dentro, passoIndietro, normalizza) {
-  // Stato e non riferimento, e la differenza non e' stilistica: passando da un livello
-  // alla mappa si resta "dentro" in entrambi i casi, quindi un effetto che dipendesse
-  // solo da `dentro` non ripartirebbe e la voce fittizia non verrebbe rimessa. Il
-  // secondo Indietro uscirebbe dall'app. E' successo, e l'ha trovato tests/e2e/indietro.mjs.
-  const [sentinella, setSentinella] = useState(false);
-  // Il `popstate` provocato da noi stessi non e' una richiesta dell'utente.
-  const nostro = useRef(false);
+export function useTastoIndietro(profondita, passoIndietro, normalizza) {
+  // Quante voci abbiamo messo noi. Riferimento e non stato: cambia dentro il gestore di
+  // un evento, e deve essere gia' aggiornato quando l'effetto lo rilegge.
+  const messe = useRef(0);
+  // Quanti `popstate` in arrivo sono provocati da noi e non dall'utente.
+  const daIgnorare = useRef(0);
   const passo = useRef(passoIndietro);
   passo.current = passoIndietro;
   const rimetti = useRef(normalizza);
@@ -56,36 +48,35 @@ export function useTastoIndietro(dentro, passoIndietro, normalizza) {
 
   useEffect(() => {
     try {
-      if (dentro && !sentinella) {
-        window.history.pushState({ plinto: 'indietro' }, '');
-        setSentinella(true);
-      } else if (!dentro && sentinella) {
-        nostro.current = true;
-        setSentinella(false);
-        window.history.back();
+      if (profondita > messe.current) {
+        for (let i = messe.current; i < profondita; i += 1) {
+          window.history.pushState({ plinto: i + 1 }, '');
+        }
+        messe.current = profondita;
+      } else if (profondita < messe.current) {
+        // Si e' risaliti con un pulsante: le voci in piu' vanno consumate, altrimenti
+        // il prossimo Indietro le troverebbe e sembrerebbe non fare niente.
+        const gradini = messe.current - profondita;
+        messe.current = profondita;
+        daIgnorare.current += 1;   // `go(-n)` produce un solo popstate
+        window.history.go(-gradini);
       }
     } catch {
       // Un browser che non permette di scrivere la cronologia non deve rompere il gioco:
       // si perde solo il tasto Indietro, e i pulsanti sullo schermo restano.
     }
-  }, [dentro, sentinella]);
+  }, [profondita]);
 
   useEffect(() => {
     const suIndietro = () => {
-      if (nostro.current) {
-        nostro.current = false;
+      if (daIgnorare.current > 0) {
+        daIgnorare.current -= 1;
         rimetti.current?.();
         return;
       }
+      messe.current = Math.max(0, messe.current - 1);
       rimetti.current?.();
-      const restaDentro = passo.current();
-      if (restaDentro) {
-        // Subito, non fra un ridisegno: e' questa riga a impedire che il prossimo
-        // Indietro chiuda l'app.
-        window.history.pushState({ plinto: 'indietro' }, '');
-      } else {
-        setSentinella(false);
-      }
+      passo.current();
     };
     window.addEventListener('popstate', suIndietro);
     return () => window.removeEventListener('popstate', suIndietro);
@@ -93,12 +84,27 @@ export function useTastoIndietro(dentro, passoIndietro, normalizza) {
 }
 
 /**
- * Da quale schermata si torna a quale.
+ * Quanti gradini sotto la home sta ogni schermata.
  *
- * E' la stessa cosa che fanno i pulsanti "indietro" disegnati sullo schermo, raccolta in
- * un posto solo: se le due strade divergessero, il tasto di sistema e il pulsante
+ * E' la stessa cosa che raccontano i pulsanti "indietro" disegnati sullo schermo, scritta
+ * in un posto solo: se le due strade divergessero, il tasto di sistema e il pulsante
  * porterebbero in due punti diversi.
  */
+export const PROFONDITA = {
+  home: 0,
+  gioco: 1,
+  quadri: 1,
+  quadro: 2,
+  archivio: 1,
+  profilo: 1,
+  statistiche: 1,
+  impostazioni: 1,
+  aiuto: 1,
+  info: 1,
+  sostieni: 2,
+};
+
+/** Da quale schermata si torna a quale. */
 export const GENITORE = {
   gioco: 'home',
   quadro: 'quadri',
