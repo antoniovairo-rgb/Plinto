@@ -35,6 +35,20 @@ Si rilegge in Play Console: Protetto con Play -> Protezione del Play Store ->
 Gestisci la firma dell'app di Google Play -> Chiave di firma dell'app -> Chiave
 classica -> Fingerprint del certificato SHA-256.
 
+### LE IMPRONTE SONO DUE, E LA SECONDA NON E' FACOLTATIVA
+
+Nella stessa pagina, sotto, c'e' una sezione "Chiavi di firma dell'app precedenti".
+Se contiene qualcosa, quella chiave e' ancora in circolazione: Google puo' consegnare
+a certi dispositivi un APK firmato con la vecchia invece che con quella "in uso". Con
+una sola impronta nell'elenco, su quei dispositivi il confronto fallisce e l'app si
+apre con la barra dell'indirizzo -- senza nessun errore, come tutto il resto di questo
+meccanismo.
+
+E' successo alla prima installazione: `assetlinks.json` conteneva solo l'impronta della
+chiave in uso, e l'app appariva come una scheda del browser. Il campo e' un elenco
+apposta: elencarle entrambe non ha controindicazioni, e ometterne una si paga in
+mezz'ora di indagine su un difetto che non parla.
+
 ## Come si pubblica
 
 Il repository `antoniovairo-rgb.github.io` deve contenere TRE file:

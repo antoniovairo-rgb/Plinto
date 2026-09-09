@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "io.github.antoniovairo_rgb.plinto",
       "sha256_cert_fingerprints": [
-        "81:EF:0B:F5:4F:84:6D:BE:FA:B9:90:F0:FD:02:84:42:4F:E3:63:13:65:C8:D0:25:FB:F0:23:B7:7E:4A:C0:72"
+        "81:EF:0B:F5:4F:84:6D:BE:FA:B9:90:F0:FD:02:84:42:4F:E3:63:13:65:C8:D0:25:FB:F0:23:B7:7E:4A:C0:72",
+        "71:21:DA:83:2F:72:18:76:09:13:49:42:32:7E:7D:6E:1C:3D:9E:C7:B4:DE:5A:5E:D9:E6:1D:EC:35:64:D9:81"
       ]
     }
   }
