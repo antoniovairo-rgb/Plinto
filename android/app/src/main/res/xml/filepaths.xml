@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le cartelle che il FileProvider puo' condividere.
+
+  Una sola, e non e' una scelta nostra: `twa_splash/` e' il nome che
+  `androidbrowserhelper` usa per scriverci dentro l'immagine d'avvio prima di passarla
+  al browser. Cambiarlo significa che il browser non trova l'immagine.
+-->
+<paths>
+    <files-path path="twa_splash/" name="twa_splash" />
+</paths>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Nessun permesso. PLINTO non accede a rete, posizione, contatti o archivio: il
          contenuto lo carica il browser di sistema, che i suoi permessi ce li ha gia'. -->
@@ -9,7 +10,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
         android:roundIcon="@mipmap/ic_launcher"
-        android:supportsRtl="true">
+        android:supportsRtl="true"
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
 
         <!-- La dichiarazione che lega app e sito. Deve corrispondere a quella pubblicata
              su https://antoniovairo-rgb.github.io/.well-known/assetlinks.json: e' il patto
@@ -18,6 +20,25 @@
         <meta-data
             android:name="asset_statements"
             android:resource="@string/assetStatements" />
+
+        <!--
+          NON E' FACOLTATIVA, anche se sembra un dettaglio delle impostazioni di sistema.
+
+          E' l'Activity dietro la voce "Cancella dati" nelle impostazioni Android dell'app.
+          All'avvio `LauncherActivity.launchTwa` chiama `addSiteSettingsShortcut`, che prova
+          ad ATTIVARE questo componente, e lo fa senza prima verificare che esista. Se non
+          e' dichiarato, il sistema risponde `IllegalArgumentException: Component class ...
+          does not exist` e l'app muore prima di mostrare qualsiasi cosa.
+
+          E' successo davvero, alla prima installazione su un telefono vero: era stata
+          giudicata superflua leggendo il progetto di riferimento di Google, e omessa "per
+          ridurre il rischio".
+        -->
+        <activity android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="@string/urlIniziale" />
+        </activity>
 
         <activity
             android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
@@ -46,6 +67,16 @@
                 android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
                 android:value="300" />
 
+            <!-- SENZA QUESTA RIGA L'APP SI CHIUDE ALL'AVVIO.
+                 Le tre meta-data qui sopra chiedono una schermata d'avvio, ma l'immagine
+                 non la disegna questa app: la disegna il browser, in un altro processo,
+                 e per riceverla ha bisogno di un FileProvider. Questa dice alla libreria
+                 quale. Mancava, e la prima installazione su un telefono vero e' morta
+                 all'apertura, l'unico controllo che poteva accorgersene. -->
+            <meta-data
+                android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
+                android:value="@string/providerAutorita" />
+
             <!-- Da dove parte l'app: l'icona sul telefono. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,11 +95,33 @@
             </intent-filter>
         </activity>
 
+        <!-- Serve alla libreria per riportare in primo piano la finestra di fiducia
+             quando l'app viene riaperta dall'icona. Non ha interfaccia propria. -->
+        <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />
+
+        <!-- Il canale attraverso cui l'immagine d'avvio arriva al browser. Non espone
+             niente: `exported="false"` e una sola cartella condivisa, quella dichiarata
+             in res/xml/filepaths.xml. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="@string/providerAutorita"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
         <!-- Il servizio che tiene viva la finestra di fiducia. Lo usa la libreria; non ha
              niente a che vedere con le notifiche, che PLINTO non manda. -->
+        <!-- `exported="true"` non e' una svista: chi ci si collega e' il BROWSER, che e'
+             un'altra applicazione. Con `false` non puo', ed era l'altra differenza rispetto
+             al progetto di riferimento di Google. Il controllo di chi puo' collegarsi lo fa
+             la libreria stessa, non un permesso di sistema: da qui l'avviso da ignorare. -->
         <service
             android:name="com.google.androidbrowserhelper.trusted.DelegationService"
-            android:exported="false">
+            android:exported="true"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="android.support.customtabs.trusted.TRUSTED_WEB_ACTIVITY_SERVICE" />
                 <category android:name="android.intent.category.DEFAULT" />

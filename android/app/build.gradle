@@ -37,7 +37,7 @@ android {
         // Va alzato a ogni caricamento sullo store, anche se il gioco non e' cambiato:
         // Play rifiuta un app bundle con un versionCode gia' visto. 10302 e' la seconda
         // compilazione della 1.3.1, non una versione nuova del gioco.
-        versionCode 10302
+        versionCode 10303
         versionName '1.3.1'
     }
 

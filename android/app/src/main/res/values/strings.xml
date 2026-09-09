@@ -2,6 +2,14 @@
 <resources>
     <string name="appName">PLINTO</string>
 
+    <!--
+      Il nome con cui il FileProvider di questa app si presenta al sistema. Deve essere
+      unico sul telefono: si usa il nome del pacchetto come prefisso, che unico lo e' per
+      definizione. Compare in due posti (il `<provider>` e la meta-data che lo indica alla
+      libreria) e i due DEVONO combaciare.
+    -->
+    <string name="providerAutorita" translatable="false">io.github.antoniovairo_rgb.plinto.fileprovider</string>
+
     <!-- L'indirizzo che l'app apre. La barra finale conta: senza, alcuni server
          rispondono con un reindirizzamento e la finestra di fiducia parte due volte. -->
     <string name="urlIniziale" translatable="false">https://antoniovairo-rgb.github.io/Plinto/</string>
