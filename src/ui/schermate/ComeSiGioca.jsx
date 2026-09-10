@@ -65,14 +65,22 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
       <p className="pl-testo">{t('aiuto.dueTocchi')}</p>
       <p className="pl-testo">{t('aiuto.tastiera')}</p>
 
+      {/* Qui i tre paragrafi stanno sotto UN titolo solo, quindi ognuno ha bisogno della
+          sua etichetta. Nella guida a passi ogni meccanica ha gia' il titolo del passo,
+          e ripetere la parola due righe piu' sotto la faceva sembrare un errore.
+          L'etichetta viene dalle stesse chiavi che intitolano quei passi: scritta due
+          volte, prima o poi sarebbero diventate due parole diverse per la stessa cosa. */}
       <h2 className="pl-sezione">{t('aiuto.punteggioTitolo')}</h2>
       <p className="pl-testo">
+        <strong>{t('guida.intreccioTitolo')}</strong>{' — '}
         {t('aiuto.intreccio').replace('{n}', intreccioTre)}
       </p>
       <p className="pl-testo">
+        <strong>{t('guida.catenaTitolo')}</strong>{' — '}
         {t('aiuto.catena').replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
       </p>
       <p className="pl-testo">
+        <strong>{t('guida.tintaTitolo')}</strong>{' — '}
         {t('aiuto.tinta', { soglia: TINTA_SOGLIA, massimo: Math.round(TINTA_PASSO * 5 * 100) })}
       </p>
 

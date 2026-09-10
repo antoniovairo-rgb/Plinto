@@ -69,9 +69,15 @@ if (regole !== REGOLE_INTRO.length) {
   errori.push(`la presentazione mostra ${regole} regole invece di ${REGOLE_INTRO.length}`);
 }
 
-await page.getByRole('button', { name: /^Gioca$/ }).click();
+// La guida si salta -- qui interessa che gli asset arrivino da una sottocartella, non
+// come si legge -- e da li' si passa dalla home alla partita libera.
+await page.getByRole('button', { name: /Non mostrarmela/ }).click();
+await page.waitForSelector('.pl-home', { timeout: 5000 }).catch(() => {
+  errori.push('la home non compare dopo aver chiuso la guida');
+});
+await page.locator('.pl-home__azioni .pl-sfida-avvio').nth(1).click();
 await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => {
-  errori.push('la plancia non compare dopo aver premuto Gioca');
+  errori.push('la plancia non compare dopo aver avviato la partita libera');
 });
 const celle = await page.locator('.pl-plancia .pl-cella').count();
 if (celle !== 81) errori.push(`la griglia ha ${celle} celle invece di 81`);

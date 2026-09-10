@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono diciassette, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono diciotto, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -37,6 +37,10 @@ const VERIFICHE = [
   { nome: 'comunicazioni (ogni schermata, ogni lingua)', comando: 'npm', argomenti: ['run', 'comunicazioni'] },
   { nome: 'partita completa nel browser', comando: 'npm', argomenti: ['run', 'e2e'] },
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
+  // La guida al primo avvio: e' l'unica schermata che ogni giocatore vede una volta
+  // sola, quindi un suo difetto non lo segnala mai nessuno. Chi lo incontra e' nuovo,
+  // non sa che sia un difetto, e non torna indietro a raccontarlo.
+  { nome: 'guida al primo avvio (sei passi, due modi di saltarla)', comando: 'npm', argomenti: ['run', 'guida'] },
   { nome: 'archivio delle sfide nel browser', comando: 'npm', argomenti: ['run', 'archivio'] },
   { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },

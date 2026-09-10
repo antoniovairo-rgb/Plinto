@@ -64,7 +64,10 @@ for (const schermo of SCHERMI) {
 
   const misure = await page.evaluate(() => {
     const esempio = document.querySelector('.pl-intro__esempio');
-    const bottone = document.querySelector('.pl-intro__azioni .pl-btn');
+    // Il pulsante PRINCIPALE, non il primo che capita: da quando la guida ha anche
+    // "Indietro", il primo `.pl-btn` e' quello, e la misura raccontava la sua larghezza
+    // al posto di quella dell'azione che il giocatore deve trovare.
+    const bottone = document.querySelector('.pl-intro__azioni .pl-btn--primario');
     if (!esempio || !bottone) return null;
     const e = esempio.getBoundingClientRect();
     const b = bottone.getBoundingClientRect();
@@ -80,8 +83,11 @@ for (const schermo of SCHERMI) {
     errori.push(`${schermo.nome}: ${misure.distanza} px di vuoto fra il contenuto e il pulsante GIOCA`);
   }
 
-  // E si deve poter giocare, non solo guardare.
-  await page.getByRole('button', { name: /^Gioca$/ }).click();
+  // E si deve poter giocare, non solo guardare. La guida si chiude -- i suoi sei passi
+  // hanno una prova tutta loro -- e dalla home si avvia la partita libera.
+  await page.getByRole('button', { name: /Non mostrarmela/ }).click();
+  await page.waitForSelector('.pl-home', { timeout: 5000 }).catch(() => errori.push(`${schermo.nome}: la home non compare dopo la guida`));
+  await page.locator('.pl-home__azioni .pl-sfida-avvio').nth(1).click();
   await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => errori.push(`${schermo.nome}: la plancia non compare`));
   const plancia = await page.locator('.pl-plancia').boundingBox();
   if (plancia && plancia.height < 240) errori.push(`${schermo.nome}: plancia alta solo ${Math.round(plancia.height)} px`);

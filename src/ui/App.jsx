@@ -53,6 +53,15 @@ export function App() {
   // Info si torna a Info, dalla home alla home. Senza, il tasto Indietro dalla home
   // porterebbe dentro una schermata che il giocatore non ha mai aperto.
   const [sostieniDa, setSostieniDa] = useState('info');
+  /**
+   * La guida saltata "per ora": vale per questa sessione e basta.
+   *
+   * NON si salva. E' esattamente la differenza fra i due pulsanti: "non mostrarmela
+   * piu'" scrive `introVista` e vale per sempre, "salta per ora" no e la guida torna al
+   * prossimo avvio. Salvare anche questo li renderebbe lo stesso pulsante scritto in
+   * due modi.
+   */
+  const [guidaSaltata, setGuidaSaltata] = useState(false);
   const [statistiche, setStatistiche] = useState(() => loadStats());
 
   const { impostazioni, cambia, inverti } = useImpostazioni();
@@ -141,12 +150,15 @@ export function App() {
 
   useEffect(() => {
     if (!rotta || rotta.nome !== 'sfida') return;
-    if (!impostazioni.introVista) return;
+    // Basta essere USCITI dalla guida, non averla conclusa: chi arriva da un
+    // collegamento a una sfida e sceglie "salta per ora" deve trovarci la sua sfida,
+    // non la home. Il collegamento non si perde, viene solo servito dopo.
+    if (!impostazioni.introVista && !guidaSaltata) return;
     // Gia' dentro quella sfida: non si ricomincia da capo a ogni ridisegno.
     if (modalita === 'sfida' && partita?.seedLabel === rotta.giorno) return;
     apriSfida(rotta.giorno);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rotta, impostazioni.introVista]);
+  }, [rotta, impostazioni.introVista, guidaSaltata]);
 
   const tornaAllaHome = useCallback(() => {
     // L'ancora della sfida non deve sopravvivere all'uscita: chi ricarica la pagina
@@ -266,13 +278,52 @@ export function App() {
     );
   }
 
-  // Presentazione al primo avvio: una volta sola, e chi ha gia' giocato non la vede mai.
-  if (!impostazioni.introVista) {
+  /**
+   * Presentazione al primo avvio: una volta sola, e chi ha gia' giocato non la vede mai.
+   *
+   * "INIZIA" PORTA ALLA HOME, e non dentro una partita. Questa riga e' stata sbagliata a
+   * lungo, e vale la pena scrivere sia il difetto sia la correzione mancata.
+   *
+   * Il difetto: "Inizia" avviava la PARTITA LIBERA. Dei tester hanno raccontato di non
+   * essersi accorti che esistesse una modalita' a livelli, e di aver creduto che PLINTO
+   * fosse solo il gioco senza fine. Il percorso a cento livelli e' il gioco; la partita
+   * libera e' l'alternativa.
+   *
+   * La correzione mancata: farlo entrare nel LIVELLO 1. Cura il sintomo e crea quello
+   * speculare -- chi parte dentro un livello non vede la partita libera, ne' la sfida
+   * del giorno, ne' l'archivio. Il problema non era in quale modalita' si finiva: era
+   * che al primo avvio LA HOME NON LA VEDEVA NESSUNO, cioe' proprio nel momento in cui
+   * il giocatore si sta facendo un'idea di che cosa sia questo gioco. Saltarla verso una
+   * destinazione diversa resta saltarla.
+   *
+   * La home e' l'unica schermata che mostra la FORMA del gioco: il percorso col livello
+   * a cui sei arrivato nel pulsante piu' grande, la mappa, la partita libera, la sfida
+   * di oggi. Costa un tocco, e quel tocco lo sceglie il giocatore.
+   *
+   * Non si usa `tornaAllaHome`, che sarebbe sembrata la funzione giusta: quella cancella
+   * anche l'ancora dell'indirizzo, e chi arriva da un collegamento a una sfida se la
+   * vedrebbe buttare via proprio mentre la presentazione gliela stava tenendo da parte.
+   * Qui non c'e' niente da abbandonare -- e' il primo avvio -- e basta scegliere dove
+   * mostrarsi.
+   *
+   * `sbloccaAudio` va chiamato QUI perche' questo e' il primo tocco della sessione, e i
+   * browser sbloccano l'audio solo dentro un gesto dell'utente. Prima lo faceva
+   * `iniziaNuova`, che da questa strada non passa piu'.
+   */
+  if (!impostazioni.introVista && !guidaSaltata) {
+    const esci = (perSempre) => {
+      sbloccaAudio();
+      suonoBottone();
+      if (perSempre) cambia('introVista', true);
+      else setGuidaSaltata(true);
+      setSchermata('home');
+    };
     return (
       <div className="pl-app">
         <PrimoAvvio
           t={t}
-          onInizia={() => { cambia('introVista', true); iniziaNuova(); }}
+          onInizia={() => esci(true)}
+          onSaltaPerOra={() => esci(false)}
         />
       </div>
     );

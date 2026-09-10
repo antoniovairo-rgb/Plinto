@@ -4,6 +4,7 @@ import { Plinto } from '../Plinto.jsx';
 import { QUADRI, ATTI, TOTALE_QUADRI } from '../../config/quadri.js';
 import { caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
+import { CondividiPercorso } from '../Condividi.jsx';
 
 /**
  * La mappa del percorso.
@@ -48,6 +49,21 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
           </div>
         </div>
       </div>
+
+      {/* Condividere il percorso sta QUI, accanto al numero che racconta, e non in fondo
+          alla mappa. In fondo ci sono cento livelli di distanza: una cosa che nessuno
+          trova e' una cosa che non esiste.
+
+          Il primo tester che ha superato dei livelli non aveva modo di dirlo a nessuno:
+          la scheda condivisibile esisteva solo per la partita libera, cioe' per la
+          modalita' secondaria. Il percorso, che e' il gioco, era l'unica cosa muta.
+
+          Compare solo dopo il primo livello superato: "0 livelli su 100" non e' un
+          vanto, e un pulsante per raccontare che non hai ancora fatto niente e' una
+          domanda a cui nessuno vuole rispondere. */}
+      {superati > 0 ? (
+        <CondividiPercorso superati={superati} totale={TOTALE_QUADRI} t={t} />
+      ) : null}
 
       {ATTI.map((atto) => {
         const dellAtto = QUADRI.filter((q) => q.numero >= atto.da && q.numero <= atto.a);

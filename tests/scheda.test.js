@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formattaScheda, formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA,
+  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso,
+  formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA,
 } from '../src/core/scheda.js';
 import { CHAIN_MAX } from '../src/config/rules.js';
 import { createGame, placePiece, summarize } from '../src/core/engine.js';
@@ -180,5 +181,85 @@ describe('formattaScheda', () => {
     const riga = conSerie.split('\n').find((r) => /^[▁▂▃▄▅▆▇█]+$/u.test(r));
     expect(riga.startsWith('▁')).toBe(true);
     expect(riga.endsWith('█')).toBe(true);
+  });
+});
+
+describe('la scheda di un livello', () => {
+  const TESTI = {
+    gioco: 'PLINTO',
+    livello: 'Livello {n}',
+    superatoIn: 'Superato in {mosse} mosse',
+    record: 'record personale',
+    percorso: 'Percorso {fatti} di {totale}',
+  };
+  const DATI = { numero: 47, obiettivo: 'Fai 3 Intrecci', mosse: 22, superati: 47, totale: 100 };
+
+  it('racconta le mosse, non i punti', () => {
+    // Nel percorso il punteggio non distingue nessuno: due giocatori che superano il
+    // quadro 47 hanno fatto la stessa cosa, e li separa in quante mosse ci sono
+    // riusciti. Se un giorno qui ricomparissero i punti, questa prova lo direbbe.
+    const testo = formattaSchedaQuadro(DATI, { testi: TESTI });
+    expect(testo).toContain('Livello 47');
+    expect(testo).toContain('Fai 3 Intrecci');
+    expect(testo).toContain('Superato in 22 mosse');
+    expect(testo).toContain('Percorso 47 di 100');
+    expect(testo).not.toContain('punti');
+  });
+
+  it('il record personale si dice solo quando c e', () => {
+    expect(formattaSchedaQuadro(DATI, { testi: TESTI })).not.toContain('record personale');
+    expect(formattaSchedaQuadro({ ...DATI, record: true }, { testi: TESTI }))
+      .toContain('record personale');
+  });
+
+  it('non supera mai il limite delle applicazioni di messaggistica', () => {
+    // Il caso peggiore possibile: obiettivo lunghissimo e collegamento lungo. Se si
+    // sfora, l'applicazione taglia la fine -- cioe' proprio il collegamento, l'unica
+    // riga che serve a chi riceve.
+    const testo = formattaSchedaQuadro(
+      { ...DATI, obiettivo: 'x'.repeat(300), record: true },
+      { testi: TESTI, indirizzo: `https://esempio.example/${'y'.repeat(80)}`, serie: [1, 2, 3] },
+    );
+    expect(testo.length).toBeLessThanOrEqual(LIMITE);
+  });
+
+  it('senza serie della Catena non inventa una riga di blocchi', () => {
+    const righe = formattaSchedaQuadro(DATI, { testi: TESTI }).split('\n');
+    expect(righe.some((r) => /^[▁▂▃▄▅▆▇█]+$/u.test(r))).toBe(false);
+  });
+});
+
+describe('la scheda del percorso', () => {
+  const TESTI = {
+    gioco: 'PLINTO',
+    percorsoTitolo: 'Il percorso',
+    livelliSu: '{fatti} livelli su {totale}',
+  };
+
+  it('la barra e lunga COLONNE_FORMA e si riempie in proporzione', () => {
+    const meta = formattaSchedaPercorso({ superati: 50, totale: 100 }, { testi: TESTI })
+      .split('\n').find((r) => /^[█▁]+$/u.test(r));
+    expect(meta).toHaveLength(COLONNE_FORMA);
+    expect([...meta].filter((c) => c === '█')).toHaveLength(COLONNE_FORMA / 2);
+  });
+
+  it('a zero la barra e vuota, a percorso finito e piena', () => {
+    const riga = (s, tot) => formattaSchedaPercorso({ superati: s, totale: tot }, { testi: TESTI })
+      .split('\n').find((r) => /^[█▁]+$/u.test(r));
+    expect(riga(0, 100)).toBe('▁'.repeat(COLONNE_FORMA));
+    expect(riga(100, 100)).toBe('█'.repeat(COLONNE_FORMA));
+  });
+
+  it('piu livelli superati del totale non fanno traboccare la barra', () => {
+    // Non dovrebbe succedere, ma se il totale cambiasse fra una versione e l'altra i
+    // progressi salvati potrebbero superarlo, e una barra piu' lunga della sua cornice
+    // sarebbe l'unico segno visibile di un dato incoerente.
+    const riga = formattaSchedaPercorso({ superati: 250, totale: 100 }, { testi: TESTI })
+      .split('\n').find((r) => /^[█▁]+$/u.test(r));
+    expect(riga).toHaveLength(COLONNE_FORMA);
+  });
+
+  it('un totale a zero non divide per zero', () => {
+    expect(() => formattaSchedaPercorso({ superati: 0, totale: 0 }, { testi: TESTI })).not.toThrow();
   });
 });

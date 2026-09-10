@@ -39,12 +39,12 @@ android {
         // comprende le bozze di release poi cancellate: il numero resta bruciato lo
         // stesso. Non e' la versione del gioco (quella e' `versionName`), e' un
         // contatore di caricamenti.
-        versionCode 10305
+        versionCode 10306
         // Deve seguire la versione del gioco (`version` in package.json): il
         // contenitore non ha una vita propria, mostra il sito. Un tester che legge
         // "1.3.1" in Informazioni app mentre il gioco dice 1.3.4 segnala un difetto
         // che non esiste.
-        versionName '1.5.0'
+        versionName '1.6.0'
     }
 
     buildTypes {

@@ -136,3 +136,83 @@ export function formattaScheda(riepilogo, contesto = {}) {
   if (testo.length <= LIMITE) return testo;
   return righe.filter((riga) => riga !== forma).join('\n').slice(0, LIMITE);
 }
+
+/**
+ * La scheda di un LIVELLO superato.
+ *
+ * Perche' non basta quella della partita libera. Nel percorso a livelli il punteggio
+ * non e' il punto: due giocatori che superano il quadro 47 hanno fatto la stessa cosa,
+ * e quello che li distingue e' in quante MOSSE ci sono riusciti. La scheda della
+ * partita libera racconta i punti, e qui racconterebbe la cosa sbagliata.
+ *
+ * Che cosa dice, in ordine: quale livello, che cosa chiedeva, in quante mosse, e a che
+ * punto sei del percorso. L'ultima riga e' quella che fa venire voglia di provare a chi
+ * legge, perche' dice che i livelli sono cento e che tu sei a meta'.
+ *
+ * L'OBIETTIVO NON E' UNO SPOILER. Il divieto scritto in cima a questo file riguarda la
+ * sequenza dei pezzi e la griglia finale, cioe' le cose che tolgono a chi riceve la
+ * possibilita' di giocare la stessa partita. L'obiettivo di un livello e' la prima cosa
+ * che il gioco stesso mostra quando quel livello si apre, ed e' anche l'unica che rende
+ * comprensibile il vanto: "superato in 22 mosse" da solo non dice niente.
+ *
+ * @param {object} dati
+ * @param {number} dati.numero        il numero del livello
+ * @param {string} dati.obiettivo     l'obiettivo, gia' tradotto
+ * @param {number} dati.mosse         le mosse usate
+ * @param {boolean} [dati.record]     se e' il proprio record personale
+ * @param {number} dati.superati      quanti livelli superati in tutto
+ * @param {number} dati.totale        quanti livelli esistono
+ * @param {object} contesto           come in `formattaScheda`
+ */
+export function formattaSchedaQuadro(dati = {}, contesto = {}) {
+  const { testi = {}, indirizzo, serie } = contesto;
+  const { numero: n = 0, obiettivo = '', mosse = 0, record = false } = dati;
+  const superati = dati.superati ?? 0;
+  const totale = dati.totale ?? 0;
+
+  const inMosse = (testi.superatoIn ?? 'Superato in {mosse} mosse').replace('{mosse}', mosse);
+  const righe = [
+    `${testi.gioco ?? 'PLINTO'} — ${(testi.livello ?? 'Livello {n}').replace('{n}', n)}`,
+    obiettivo,
+    record ? `${inMosse} · ${testi.record ?? 'record personale'}` : inMosse,
+    (testi.percorso ?? 'Percorso {fatti} di {totale}')
+      .replace('{fatti}', superati).replace('{totale}', totale),
+    formaPartita(serie),
+    indirizzo ?? '',
+  ].filter((riga) => riga !== '');
+
+  const testo = righe.join('\n');
+  if (testo.length <= LIMITE) return testo;
+  return righe.filter((riga) => riga !== formaPartita(serie)).join('\n').slice(0, LIMITE);
+}
+
+/**
+ * La scheda dell'AVANZAMENTO sul percorso, senza aver appena finito niente.
+ *
+ * Esiste perche' la condivisione a fine livello si puo' cogliere solo nell'istante in
+ * cui quel livello finisce: chi vuole raccontare a che punto e' arrivato dovrebbe
+ * rigiocare un livello apposta. Questa si prende dalla mappa, quando gli pare.
+ *
+ * LA BARRA E' FATTA COI BLOCCHI PIENI, non con i gradini della Catena. Sono due cose
+ * diverse e devono sembrarlo: la forma della partita racconta un andamento, questa dice
+ * quanta strada e' fatta. Usare gli stessi simboli per due significati diversi e' il
+ * modo piu' rapido di rendere illeggibili tutte e due.
+ */
+export function formattaSchedaPercorso(dati = {}, contesto = {}) {
+  const { testi = {}, indirizzo } = contesto;
+  const superati = Math.max(0, dati.superati ?? 0);
+  const totale = Math.max(1, dati.totale ?? 1);
+
+  const pieni = Math.round((Math.min(superati, totale) / totale) * COLONNE_FORMA);
+  const barra = '█'.repeat(pieni) + '▁'.repeat(COLONNE_FORMA - pieni);
+
+  const righe = [
+    `${testi.gioco ?? 'PLINTO'} — ${testi.percorsoTitolo ?? 'Il percorso'}`,
+    (testi.livelliSu ?? '{fatti} livelli su {totale}')
+      .replace('{fatti}', superati).replace('{totale}', totale),
+    barra,
+    indirizzo ?? '',
+  ].filter((riga) => riga !== '');
+
+  return righe.join('\n').slice(0, LIMITE);
+}

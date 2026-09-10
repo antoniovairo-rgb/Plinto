@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formattaScheda } from '../core/scheda.js';
+import { formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso } from '../core/scheda.js';
 import { rottaSfida } from './rotta.js';
 
 /**
@@ -31,28 +31,31 @@ function indirizzoDelGioco(giorno) {
   }
 }
 
-export function Condividi({ riepilogo, giorno, t }) {
+/**
+ * Il meccanismo: condividi, altrimenti copia, altrimenti mostra.
+ *
+ * Sta in un componente suo perche' i posti da cui si condivide sono diventati tre --
+ * fine partita, fine livello, mappa dei livelli -- e la scala dei tre ripieghi deve
+ * restare UNA. Tre copie della stessa logica vorrebbe dire che prima o poi due si
+ * comportano diversamente, e il posto in cui accadrebbe per primo e' proprio il ramo
+ * che quasi nessuno vede: quello di chi non puo' nemmeno copiare.
+ *
+ * L'ANTEPRIMA SI PUO' SPEGNERE, e in un posto sola lo e'. Di norma la scheda sta a
+ * schermo prima ancora di toccare il pulsante: quello che si vede e' esattamente quello
+ * che verra' condiviso, e non c'e' niente da scoprire dopo. Sulla mappa dei livelli
+ * invece la scheda starebbe fra l'avanzamento e i cento livelli, spingendoli tutti piu'
+ * giu' per mostrare un testo che nessuno ha ancora chiesto di vedere.
+ *
+ * Anche spenta, l'anteprima RIAPPARE quando serve davvero: se copiare non riesce, il
+ * testo torna a schermo da solo. Il terzo gradino del ripiego non puo' dipendere da un
+ * parametro, perche' e' l'unico che non ha altro sotto di se'.
+ *
+ * @param {string} testo      la scheda gia' composta
+ * @param {string} etichetta  il testo del pulsante
+ * @param {boolean} [anteprima] false per mostrare la scheda solo dopo l'azione
+ */
+export function CondividiTesto({ testo, etichetta, anteprima = true, t }) {
   const [esito, setEsito] = useState(null);   // null | 'condiviso' | 'copiato' | 'manuale'
-
-  const testo = formattaScheda(riepilogo, {
-    giorno,
-    indirizzo: indirizzoDelGioco(giorno),
-    serie: riepilogo?.serieCatena,
-    testi: {
-      gioco: 'PLINTO',
-      sfidaDel: t('scheda.sfidaDel'),
-      partitaLibera: t('scheda.partitaLibera'),
-      punti: t('scheda.punti'),
-      mosse: t('scheda.mosse'),
-      catenaMax: t('scheda.catenaMax'),
-      intrecciMax: t('scheda.intrecciMax'),
-      righe: t('scheda.righe'),
-      colonne: t('scheda.colonne'),
-      quadranti: t('scheda.quadranti'),
-      mossaMigliore: t('scheda.mossaMigliore'),
-      separatoreMigliaia: t('scheda.separatoreMigliaia'),
-    },
-  });
 
   async function condividi() {
     try {
@@ -77,16 +80,17 @@ export function Condividi({ riepilogo, giorno, t }) {
   return (
     <div className="pl-condividi">
       <button type="button" className="pl-btn pl-btn--largo" onClick={condividi}>
-        {t('scheda.condividi')}
+        {etichetta}
       </button>
 
       {esito === 'copiato' ? <p className="pl-nota">{t('scheda.copiato')}</p> : null}
       {esito === 'condiviso' ? <p className="pl-nota">{t('scheda.condiviso')}</p> : null}
       {esito === 'manuale' ? <p className="pl-nota">{t('scheda.copiaAMano')}</p> : null}
 
-      {/* Il testo e' sempre a schermo: e' la card, ed e' leggibile da chiunque. La riga
-          di blocchi e' decorativa e viene nascosta a chi ascolta, perche' ripeterebbe
+      {/* Il testo e' sempre a schermo: e' la card, ed e' leggibile da chiunque. Le righe
+          di blocchi sono decorative e vengono nascoste a chi ascolta, perche' ripeterebbero
           in simboli quello che le righe sopra dicono a parole. */}
+      {anteprima || esito !== null ? (
       <pre className="pl-scheda" aria-label={t('scheda.anteprima')}>
         {testo.split('\n').map((riga, i) => (
           /^[▁▂▃▄▅▆▇█]+$/u.test(riga)
@@ -94,6 +98,79 @@ export function Condividi({ riepilogo, giorno, t }) {
             : <span key={i}>{`${riga}\n`}</span>
         ))}
       </pre>
+      ) : null}
     </div>
+  );
+}
+
+export function Condividi({ riepilogo, giorno, t }) {
+  const testo = formattaScheda(riepilogo, {
+    giorno,
+    indirizzo: indirizzoDelGioco(giorno),
+    serie: riepilogo?.serieCatena,
+    testi: {
+      gioco: 'PLINTO',
+      sfidaDel: t('scheda.sfidaDel'),
+      partitaLibera: t('scheda.partitaLibera'),
+      punti: t('scheda.punti'),
+      mosse: t('scheda.mosse'),
+      catenaMax: t('scheda.catenaMax'),
+      intrecciMax: t('scheda.intrecciMax'),
+      righe: t('scheda.righe'),
+      colonne: t('scheda.colonne'),
+      quadranti: t('scheda.quadranti'),
+      mossaMigliore: t('scheda.mossaMigliore'),
+      separatoreMigliaia: t('scheda.separatoreMigliaia'),
+    },
+  });
+
+  return <CondividiTesto testo={testo} etichetta={t('scheda.condividi')} t={t} />;
+}
+
+/**
+ * La scheda di un livello superato.
+ *
+ * L'obiettivo arriva gia' tradotto da chi chiama: la frase che lo descrive vive in
+ * `Quadri.jsx` insieme alla schermata che la mostra, e duplicarla qui vorrebbe dire
+ * due frasi per la stessa cosa, destinate a divergere alla prima modifica.
+ */
+export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, totale, serie, t }) {
+  const testo = formattaSchedaQuadro(
+    { numero, obiettivo, mosse, record, superati, totale },
+    {
+      indirizzo: indirizzoDelGioco(null),
+      serie,
+      testi: {
+        gioco: 'PLINTO',
+        livello: t('scheda.livello'),
+        superatoIn: t('scheda.superatoIn'),
+        record: t('scheda.record'),
+        percorso: t('scheda.percorso'),
+      },
+    },
+  );
+  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} t={t} />;
+}
+
+/** La scheda dell'avanzamento sul percorso, presa dalla mappa. */
+export function CondividiPercorso({ superati, totale, t }) {
+  const testo = formattaSchedaPercorso(
+    { superati, totale },
+    {
+      indirizzo: indirizzoDelGioco(null),
+      testi: {
+        gioco: 'PLINTO',
+        percorsoTitolo: t('scheda.percorsoTitolo'),
+        livelliSu: t('scheda.livelliSu'),
+      },
+    },
+  );
+  return (
+    <CondividiTesto
+      testo={testo}
+      etichetta={t('scheda.condividiPercorso')}
+      anteprima={false}
+      t={t}
+    />
   );
 }

@@ -134,6 +134,16 @@ export default {
     quadranti: 'Quadranti',
     mossaMigliore: 'Mossa migliore',
     separatoreMigliaia: '.',
+    // La scheda dei livelli racconta le MOSSE, non i punti: nel percorso due giocatori
+    // che superano lo stesso quadro hanno fatto la stessa cosa, e li distingue quello.
+    condividiQuadro: 'Racconta come è andata',
+    condividiPercorso: 'Condividi il tuo percorso',
+    livello: 'Livello {n}',
+    superatoIn: 'Superato in {mosse} mosse',
+    record: 'record personale',
+    percorso: 'Percorso {fatti} di {totale}',
+    percorsoTitolo: 'Il percorso',
+    livelliSu: '{fatti} livelli su {totale}',
   },
   profilo: {
     titolo: 'Il tuo profilo di gioco',
@@ -297,6 +307,21 @@ export default {
     esempio: 'quadrante chiuso',
     esempioBomba: 'nove caselle via',
   },
+  guida: {
+    passo: 'Passo {n} di {totale}',
+    avanti: 'Avanti',
+    indietro: 'Indietro',
+    // Due intenzioni diverse: "ho fretta adesso" e "ho deciso". Con un solo pulsante
+    // si costringerebbe a scegliere fra rileggerla per sempre e rinunciarci per sempre.
+    saltaPerOra: 'Salta per ora',
+    nonMostrare: 'Non mostrarmela più',
+    catenaTitolo: 'La Catena',
+    intreccioTitolo: 'L\'Intreccio',
+    tintaTitolo: 'La Tinta',
+    percorsoTitolo: 'Il percorso',
+    percorso: 'Il gioco vero sono {n} livelli, ognuno con un obiettivo suo e un numero di mosse per riuscirci. Si apre uno alla volta, e ognuno ti spiega che cosa devi fare prima di cominciare.',
+    altreModalita: 'Ci sono anche la partita libera, che non finisce mai e serve a fare punti, e la sfida del giorno: la stessa identica partita per tutti, una al giorno.',
+  },
   aiuto: {
     titolo: 'Come si gioca',
     intro: 'Le regole stanno tutte qui. Non ce ne sono altre nascoste: quello che leggi è tutto quello che succede.',
@@ -306,9 +331,9 @@ export default {
     dueTocchi: 'Oppure tocca il pezzo una volta per prenderlo, poi tocca la casella dove appoggiarlo. Comodo con una mano sola.',
     tastiera: 'Si gioca anche da tastiera: Tab per scegliere il pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia, Invio per appoggiarlo, Esc per annullare. Ogni mossa viene descritta a voce ai lettori di schermo.',
     punteggioTitolo: 'Intreccio, Catena e Tinta',
-    intreccio: 'Intreccio: chiudere più gruppi con una sola mossa moltiplica i punti di quella mossa. Tre gruppi insieme valgono ×{n}. Una riga e un quadrante che si incrociano sono il modo più semplice per riuscirci.',
-    catena: 'Catena: sale di uno ogni volta che elimini qualcosa e moltiplica tutto, fino a ×{max}. Cala se stai {n} mosse di fila senza eliminare niente, e la barra ti avvisa prima che succeda. Il moltiplicatore che vedi è esattamente quello che ti verrà applicato: non c\'è nessun calcolo nascosto fra quello che leggi e quello che incassi.',
-    tinta: 'Tinta: un gruppo chiuso vale di più se molte delle sue caselle hanno lo stesso colore. Da {soglia} caselle uguali in su comincia a pagare, e a nove uguali arriva a +{massimo}%. Non è fortuna: i colori dei pezzi non li scegli, ma scegli dove metterli, ed è così che si costruisce una maggioranza.',
+    intreccio: 'Chiudere più gruppi con una sola mossa moltiplica i punti di quella mossa. Tre gruppi insieme valgono ×{n}. Una riga e un quadrante che si incrociano sono il modo più semplice per riuscirci.',
+    catena: 'Sale di uno ogni volta che elimini qualcosa e moltiplica tutto, fino a ×{max}. Cala se stai {n} mosse di fila senza eliminare niente, e la barra ti avvisa prima che succeda. Il moltiplicatore che vedi è esattamente quello che ti verrà applicato: non c\'è nessun calcolo nascosto fra quello che leggi e quello che incassi.',
+    tinta: 'Un gruppo chiuso vale di più se molte delle sue caselle hanno lo stesso colore. Da {soglia} caselle uguali in su comincia a pagare, e a nove uguali arriva a +{massimo}%. Non è fortuna: i colori dei pezzi non li scegli, ma scegli dove metterli, ed è così che si costruisce una maggioranza.',
     bombeTitolo: 'Le bombe',
     bombe: 'Ogni tanto una delle caselle di un pezzo è una bomba. Sulla griglia non fa niente: esplode solo quando viene eliminata insieme al gruppo che la contiene, e allora porta via anche le otto caselle intorno.',
     bombeCatena: 'Le bombe vicine si innescano a vicenda: tre in fila portano via quindici caselle. Quelle a due caselle di distanza no. Le caselle fatte saltare valgono punti e seguono la Catena.',

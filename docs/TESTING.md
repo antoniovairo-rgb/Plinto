@@ -13,7 +13,7 @@
 npm run verifica       # esegue TUTTI i controlli, in ordine, e riassume l'esito
 ```
 
-Quattordici controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
+Diciotto controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
 tutti non ha funzionato: una pubblicazione è stata bloccata dall'integrazione continua
 proprio sul controllo che non era stato eseguito in locale. Non si ferma al primo
 fallimento — arriva in fondo e stampa il quadro completo, perché sapere che tre cose sono
@@ -44,6 +44,9 @@ npm run installazione  # service worker: installabile, senza rete, e che si aggi
 npm run soak           # centinaia di mosse di fila: memoria, nodi, fluidita'
 npm run archivio       # archivio delle sfide: calendario, tastiera, giorno giusto
 npm run condivisione   # la scheda da mandare agli amici, e il ripiego sugli appunti
+npm run guida          # la guida al primo avvio: i sei passi, e i due modi di saltarla
+npm run indietro       # il tasto Indietro di Android, schermata per schermata
+npm run impaginazione  # la home entra nello schermo, su sei formati di telefono
 npm run anteprima      # nei livelli: la terna mostrata e' quella consegnata, a schermo
 npm run livelli        # tutti e cento i livelli vinti giocandoli nell'app, col dito
 npm run taratura       # ricalcola i bersagli dei Quadri facendoli giocare

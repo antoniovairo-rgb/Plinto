@@ -19,7 +19,7 @@
 
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
-import { REGOLE_INTRO } from '../../src/config/intro.js';
+import { REGOLE_INTRO, PASSI_GUIDA } from '../../src/config/intro.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -130,11 +130,31 @@ for (const lingua of ['it', 'en']) {
   if (regole !== REGOLE_INTRO.length) {
     errori.push(`${lingua} · presentazione: ${regole} regole invece di ${REGOLE_INTRO.length}`);
   }
-  controlla('presentazione', await page.locator('.pl-intro').innerText(), lingua);
-  await page.locator('.pl-intro__azioni .pl-btn--primario').click();
-  await page.waitForSelector('.pl-plancia');
+  // Tutti e sei i passi, uno per uno: e' la schermata che ogni giocatore nuovo vede una
+  // volta sola, quindi una frase non tradotta qui non la segnala mai nessuno -- chi la
+  // incontra e' nuovo, non sa che sia un difetto, e non torna indietro a raccontarlo.
+  for (let i = 0; i < PASSI_GUIDA.length; i += 1) {
+    controlla(`guida, passo ${i + 1} (${PASSI_GUIDA[i]})`, await page.locator('.pl-guida .pl-scroll').innerText(), lingua);
+    if (i < PASSI_GUIDA.length - 1) await page.locator('.pl-guida__navigazione .pl-btn--primario').click();
+  }
+  // I due modi di saltarla sono l'unica cosa di questa schermata che si puo' rompere
+  // senza che si veda: devono esserci entrambi, in tutte le lingue.
+  const modiPerSaltare = await page.locator('.pl-guida__salta .pl-guida__link').count();
+  if (modiPerSaltare !== 2) {
+    errori.push(`${lingua} · guida: ${modiPerSaltare} modi per saltarla invece di 2`);
+  }
+  controlla('guida, come saltarla', await page.locator('.pl-guida__salta').innerText(), lingua);
+
+  // Dalla guida si esce nella home, non dentro una partita.
+  await page.locator('.pl-guida__navigazione .pl-btn--primario').click();
+  await page.waitForSelector('.pl-home');
 
   // --- partita libera: il nome della modalita' deve esserci ---
+  // I tre pulsanti con due scritte sono, in ordine: mappa, partita libera, sfida di
+  // oggi. Si prendono per posizione perche' il nome cambia con la lingua e questo
+  // scenario gira in tutte e due; il commento serve a poterli cambiare senza indovinare.
+  await page.locator('.pl-home__azioni .pl-sfida-avvio').nth(1).click();
+  await page.waitForSelector('.pl-plancia');
   const modalita = (await page.locator('.pl-modalita').innerText().catch(() => '')).trim();
   if (!modalita) errori.push(`${lingua} · partita: la modalita non e scritta`);
   controlla('partita libera', await page.locator('.pl-screen--gioco').innerText(), lingua);
@@ -214,7 +234,7 @@ for (const lingua of ['it', 'en']) {
     errori.push(`${lingua} · e entrata in funzione la rete di sicurezza`);
   }
 
-  console.log(`${lingua}: attraversate presentazione, partita, home, ${voci} pagine, mappa, apertura, livello, archivio e sfida`);
+  console.log(`${lingua}: attraversati i ${PASSI_GUIDA.length} passi della guida, partita, home, ${voci} pagine, mappa, apertura, livello, archivio e sfida`);
   await page.close();
 }
 

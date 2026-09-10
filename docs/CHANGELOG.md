@@ -7,6 +7,124 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.6.0] — 10 settembre 2026
+
+Due riscontri dai tester, e il primo e' il piu' grave che sia arrivato finora.
+
+### Corretto
+
+**Al primo avvio la home non la vedeva nessuno.** Dei tester hanno detto di non essersi
+accorti che esistesse una modalita' a livelli, e di aver creduto che PLINTO fosse solo la
+partita senza fine. Il percorso a cento livelli e' il gioco; la partita libera e'
+l'alternativa.
+
+La causa non era la dimensione dei pulsanti della home, che dal 6 settembre ha il livello
+nel pulsante piu' grande. Era una riga sola: dalla presentazione iniziale si usciva
+**dentro la partita libera**, quindi la home al primo avvio non si vedeva affatto. La
+prima partita di chiunque era la modalita' secondaria, e li' ognuno si faceva l'idea di
+che gioco fosse.
+
+Adesso "Inizia" porta alla **home**.
+
+La prima correzione scritta era diversa — far partire il livello 1 — e sarebbe stata
+sbagliata: cura il sintomo e crea quello speculare, perche' chi comincia dentro un
+livello non vede la partita libera, ne' la sfida del giorno, ne' l'archivio. Il difetto
+non era in quale modalita' si finiva. Era che la home veniva saltata **nel momento in cui
+il giocatore si sta facendo un'idea di che cosa sia questo gioco**, e saltarla verso una
+destinazione diversa resta saltarla. La home e' l'unica schermata che ne mostra la forma
+intera, costa un tocco, e quel tocco lo sceglie chi gioca.
+
+Vale la pena scrivere anche il resto: la spiegazione dei livelli era stata scritta,
+disegnata e provata, ed era giusta. Il difetto era che non ci arrivava nessuno. Una
+funzionalita' che l'utente non incontra non e' fatta a meta': per lui non esiste.
+
+### Aggiunto
+
+**Una guida al primo avvio, in sei passi, che si puo' saltare in due modi diversi.**
+Prima era una schermata sola, e il commento nel codice diceva perche': «un corso
+introduttivo su un gioco che si capisce guardandolo sarebbe una tassa d'ingresso
+inutile». Il ragionamento non era sbagliato, era incompleto, e i primi giocatori veri lo
+hanno mostrato in due modi: uno, hanno creduto che PLINTO fosse solo la partita senza
+fine e non si sono accorti che esistessero cento livelli; due, hanno dato per scontato
+che il colore contasse qualcosa, cioe' hanno immaginato una regola che non c'era. Un
+gioco che si capisce guardandolo viene capito, si', ma non e' detto che venga capito
+**giusto**.
+
+I sei passi, in quest'ordine: le regole · la Catena · l'Intreccio · la Tinta · la bomba ·
+il percorso a cento livelli. Il percorso sta per ultimo di proposito: e' l'informazione
+che ai primi tester e' mancata, ed e' anche l'ultima cosa letta prima di giocare.
+
+**Non e' una tassa, e la differenza sta nei due pulsanti in fondo.** «Salta per ora»
+porta subito alla home e la guida torna al prossimo avvio, perche' aver fretta oggi non
+vuol dire non volerla mai; «non mostrarmela piu'» la chiude per sempre. Sono due
+intenzioni diverse e meritano due pulsanti diversi: un solo «Salta» costringerebbe a
+scegliere fra rileggerla per sempre e rinunciarci per sempre. Arrivare in fondo vale come
+il secondo. E «Come si gioca» resta nel menu della home, perche' una porta che si chiude
+alle spalle non e' una scelta.
+
+**I testi non sono scritti due volte.** I sei passi pescano dalle stesse chiavi di «Come
+si gioca» e dalle stesse costanti di `rules.js` da cui il gioco calcola davvero i punti.
+Una guida che spiega regole diverse da quelle applicate e' peggio di nessuna guida, e
+l'unico modo per impedirlo e' non averne due copie. Per la stessa ragione le etichette
+«Intreccio», «Catena» e «Tinta» sono uscite dal corpo del testo e vivono in una chiave
+sola: erano scritte due volte, e sarebbero diventate due parole diverse per la stessa
+cosa.
+
+`npm run guida` e' un controllo nuovo dentro `npm run verifica`, che passa da diciassette
+a diciotto. Verifica i sei passi uno per uno, il ritorno indietro, e soprattutto che i due
+modi di saltarla si comportino **davvero** in modo diverso: fanno la stessa cosa adesso e
+cose opposte domani, e un errore che li rendesse identici non si vedrebbe provando il
+gioco per cinque minuti. Questa schermata la vede ogni giocatore nuovo una volta sola: chi
+ci trova un difetto e' nuovo, non sa che sia un difetto, e non torna indietro a
+raccontarlo.
+
+**Si puo' raccontare anche il percorso.** La scheda condivisibile esisteva solo per la
+partita libera e per la sfida, cioe' per le due modalita' secondarie: il core del gioco
+era l'unica cosa muta. Adesso ci sono due schede nuove.
+
+**A fine livello**, dopo una vittoria: quale livello, che cosa chiedeva, in quante mosse,
+e a che punto sei del percorso. Racconta le MOSSE e non i punti, perche' nel percorso due
+giocatori che superano il quadro 47 hanno fatto la stessa cosa e li distingue solo in
+quante mosse ci sono riusciti — la scheda della partita libera, che racconta i punti,
+qui direbbe la cosa sbagliata.
+
+Sta in fondo all'area che scorre e solo dopo una vittoria. In fondo perche' fra un
+livello e il successivo non deve esserci un ostacolo: il pulsante grande resta "Livello
+successivo". Solo dopo una vittoria perche' offrire di condividere una sconfitta, nel
+momento in cui qualcuno ha appena perso, e' il modo piu' rapido di sembrare sordi.
+
+**Dalla mappa**, in qualunque momento: quanti livelli su cento, con una barra. Esiste
+perche' la condivisione a fine livello si puo' cogliere solo nell'istante in cui quel
+livello finisce, e chi vuole raccontare a che punto e' arrivato dovrebbe altrimenti
+rigiocarne uno apposta. Compare solo dopo il primo livello superato: "0 livelli su 100"
+non e' un vanto.
+
+**Il collegamento porta al gioco, non al livello.** Sarebbe stato naturale far aprire a
+chi riceve il livello 47; sarebbe stato anche il modo migliore di rovinargli il gioco,
+buttandolo dentro il quarantasettesimo problema senza avergli fatto vedere i primi
+quarantasei.
+
+**Le tre condivisioni usano un meccanismo solo.** Condividi, altrimenti copia, altrimenti
+mostra il testo a schermo: tre copie della stessa scala di ripieghi vorrebbe dire che
+prima o poi due si comportano diversamente, e il primo posto in cui accadrebbe e' il ramo
+che quasi nessuno vede — quello di chi non puo' nemmeno copiare.
+
+### Cambiato
+
+**Due prove misuravano "il primo pulsante" e da oggi ne trovano un altro.** Lo scenario
+sugli schermi grandi cercava `.pl-intro__azioni .pl-btn` per misurare quanto vuoto ci
+fosse fra il contenuto e l'azione principale: con la guida a passi il primo pulsante e'
+diventato "Indietro", e la misura raccontava la larghezza di quello. Ora chiede il
+pulsante PRINCIPALE, che e' quello che stava cercando fin dall'inizio. Un selettore che
+dice "il primo" descrive la schermata di ieri.
+
+**Una prova falliva una volta su otto, e non era colpa del codice.** Lo scenario della
+partita contava i blocchi appena la plancia compariva, cioe' un istante prima che i
+blocchi ci fossero: quando la macchina era lenta usciva zero, e il messaggio accusava il
+salvataggio di aver perso una partita che invece era li'. Ora aspetta i blocchi. Se il
+salvataggio si rompesse davvero, l'attesa scadrebbe e il difetto verrebbe fuori lo
+stesso: l'attesa non nasconde niente, misura la cosa giusta.
+
 ## [1.5.0] — 10 settembre 2026
 
 ### Cambiato

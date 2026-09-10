@@ -1,7 +1,9 @@
 import { descriviObiettivi, descriviObiettivo } from './Quadri.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
+import { CondividiQuadro } from '../Condividi.jsx';
 import { quadroSbloccato } from '../../persistence/progressi.js';
+import { TOTALE_QUADRI } from '../../config/quadri.js';
 
 
 /**
@@ -81,6 +83,30 @@ export function SchermoFineQuadro({
         ) : null}
 
         {vinto && ultimo ? <p className="pl-fine__extra">{t('quadri.finito')}</p> : null}
+
+        {/* La condivisione sta in FONDO all'area che scorre, sotto l'avanzamento, e solo
+            dopo una vittoria. Due ragioni, in quest'ordine.
+
+            Sta in fondo perche' fra un livello e il successivo non deve esserci un
+            ostacolo: il pulsante grande in basso resta "Livello successivo", e chi ha
+            appena vinto puo' premerlo senza scorrere niente. Chi invece vuole
+            raccontarlo scorre e lo trova.
+
+            Solo dopo una vittoria perche' condividere una sconfitta non e' una cosa che
+            qualcuno vuole fare, e offrirgliela nel momento in cui ha appena perso e'
+            il modo piu' rapido di sembrare sordi. */}
+        {vinto ? (
+          <CondividiQuadro
+            numero={quadro.numero}
+            obiettivo={descriviObiettivi(quadro, t)}
+            mosse={esito.riepilogo.moves}
+            record={Boolean(esito.primaVolta || esito.miglioramento)}
+            superati={superatiTotali}
+            totale={TOTALE_QUADRI}
+            serie={esito.riepilogo.serieCatena}
+            t={t}
+          />
+        ) : null}
       </div>
 
       <div className="pl-fine__azioni">

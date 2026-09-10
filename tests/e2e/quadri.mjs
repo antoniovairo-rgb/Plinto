@@ -281,6 +281,28 @@ if (!sequenza) {
   if (!stradaVisibile) errori.push('AVANZAMENTO: il percorso non viene mostrato dopo la vittoria');
   if (tappeMostrate < 3) errori.push(`AVANZAMENTO: solo ${tappeMostrate} tappe mostrate`);
   if (plintoAvanzato !== 1) errori.push(`AVANZAMENTO: Plinto compare ${plintoAvanzato} volte sulla tappa corrente invece di 1`);
+  // ---------- 3c. Raccontarlo: la scheda del livello ----------
+  // Per tre versioni il percorso e' stato l'unica modalita' MUTA: la scheda
+  // condivisibile esisteva solo per la partita libera, cioe' per la modalita'
+  // secondaria. Chi superava un livello non aveva modo di dirlo a nessuno.
+  {
+    const schedaQuadro = (await page.locator('.pl-fine .pl-scheda').innerText().catch(() => '')).trim();
+    console.log(`3c. scheda del livello: ${schedaQuadro.split('\n').length} righe`);
+    if (!schedaQuadro) {
+      errori.push('SCHEDA LIVELLO: dopo la vittoria non compare nessuna scheda da condividere');
+    } else {
+      // Le mosse, non i punti: nel percorso due giocatori che superano lo stesso
+      // quadro hanno fatto la stessa cosa, e li distingue solo in quante mosse.
+      if (!/mosse/i.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice le mosse — "${schedaQuadro}"`);
+      if (!/Livello 1\b/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice quale livello — "${schedaQuadro}"`);
+      if (!/1 di 100/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice l avanzamento — "${schedaQuadro}"`);
+      if (!/https?:\/\//.test(schedaQuadro)) errori.push('SCHEDA LIVELLO: manca il collegamento al gioco');
+      if (/undefined|NaN|null/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: valore rotto — "${schedaQuadro}"`);
+      // Niente spoiler: gli identificativi delle forme non devono comparire.
+      if (/\b[bhvpd]\d{1,2}\b/.test(schedaQuadro)) errori.push('SCHEDA LIVELLO: contiene identificativi di forme');
+    }
+  }
+
   // Il livello 1 e' appena stato superato: il conteggio deve dire 1, non 0. E' il
   // difetto piu' facile da fare qui — mostrare il valore letto PRIMA della vittoria.
   if (barra !== '1') errori.push(`AVANZAMENTO: la barra dice ${barra} livelli superati invece di 1`);
@@ -292,7 +314,7 @@ if (!sequenza) {
   }
 }
 
-// ---------- 3c. PERDERE un livello non deve rompere niente ----------
+// ---------- 3d. PERDERE un livello non deve rompere niente ----------
 // La schermata di sconfitta e' rimasta scoperta per tre versioni, e ci si e' rotta
 // dentro: schermo nero, gioco bloccato, nessun modo di uscirne. L'ha trovata un
 // giocatore. Qui si perde il livello 2 apposta e si controlla che la schermata ci sia
@@ -328,7 +350,7 @@ if (!sequenza) {
     const righe = await page.locator('.pl-fine__riga').count();
     const riprova = await page.getByRole('button', { name: /Riprova/ }).count();
     await page.screenshot({ path: `${OUT}/3c-sconfitta.png` });
-    console.log(`3c. sconfitta: "${esitoPerso}", ${righe} righe di obiettivo`);
+    console.log(`3d. sconfitta: "${esitoPerso}", ${righe} righe di obiettivo`);
 
     // Due modi in cui questo passaggio puo' andare male, ed entrambi sono fatali per
     // quelli successivi: la pagina vuota (React ha smontato tutto) oppure la rete di

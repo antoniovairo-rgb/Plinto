@@ -158,6 +158,58 @@ if (nascosta !== 1) {
   errori.push('ACCESSIBILITA: la riga di blocchi non e marcata come decorativa');
 }
 
+// ---------- 5. La scheda del PERCORSO, presa dalla mappa ----------
+// Esiste perche' la condivisione a fine livello si puo' cogliere solo nell'istante in
+// cui quel livello finisce: chi vuole raccontare a che punto e' arrivato dovrebbe
+// altrimenti rigiocare un livello apposta.
+await page.evaluate(() => {
+  // Sette livelli superati: abbastanza da riempire un pezzo di barra e non tutta.
+  // La forma e' quella di `progressi.js`: un contenitore con `versione` e `livelli`,
+  // e un livello si considera superato dalla presenza di `mosse`.
+  const livelli = {};
+  for (let n = 1; n <= 7; n += 1) livelli[n] = { mosse: 10, punteggio: 100, tentativi: 1 };
+  window.localStorage.setItem('plinto:quadri', JSON.stringify({ livelli, versione: 1 }));
+});
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await page.waitForSelector('.pl-tappe');
+
+const pulsantePercorso = page.getByRole('button', { name: /Condividi il tuo percorso/ });
+const cePercorso = await pulsantePercorso.count();
+// Sulla mappa l'anteprima e' spenta: la scheda starebbe fra l'avanzamento e i cento
+// livelli, spingendoli tutti piu' giu' per mostrare un testo che nessuno ha chiesto.
+const anteprimaPrima = await page.locator('.pl-condividi .pl-scheda').count();
+console.log(`5. mappa: pulsante del percorso presente ${cePercorso === 1}, anteprima prima del tocco ${anteprimaPrima}`);
+if (cePercorso !== 1) {
+  errori.push('PERCORSO: dalla mappa non si puo condividere l avanzamento');
+} else {
+  if (anteprimaPrima !== 0) errori.push('PERCORSO: l anteprima occupa la mappa prima ancora di toccare il pulsante');
+  await pulsantePercorso.click();
+  await page.waitForTimeout(400);
+  const schedaPercorso = await page.evaluate(() => navigator.clipboard.readText().catch(() => ''));
+  schedaPercorso.split('\n').forEach((r) => console.log(`     ${r}`));
+  if (!/PLINTO/.test(schedaPercorso)) errori.push('PERCORSO: la scheda non nomina il gioco');
+  if (!/7 livelli su 100/.test(schedaPercorso)) errori.push(`PERCORSO: avanzamento sbagliato — "${schedaPercorso}"`);
+  if (!/[█▁]{16}/u.test(schedaPercorso)) errori.push('PERCORSO: manca la barra dell avanzamento');
+  if (!/https?:\/\//.test(schedaPercorso)) errori.push('PERCORSO: manca il collegamento al gioco');
+  if (/undefined|NaN|null/.test(schedaPercorso)) errori.push(`PERCORSO: valore rotto — "${schedaPercorso}"`);
+  // Il terzo gradino del ripiego non dipende da un parametro: se copiare non riesce, il
+  // testo deve tornare a schermo anche dove l'anteprima e' spenta.
+  const anteprimaDopo = await page.locator('.pl-condividi .pl-scheda').count();
+  if (anteprimaDopo !== 1) errori.push('PERCORSO: dopo il tocco la scheda non compare a schermo');
+  await page.screenshot({ path: `${OUT}/condivisione-02-percorso.png`, fullPage: true });
+}
+
+// ---------- 6. A zero livelli il pulsante non c'e' ----------
+// "0 livelli su 100" non e' un vanto, ed e' una domanda a cui nessuno vuole rispondere.
+await page.evaluate(() => window.localStorage.removeItem('plinto:quadri'));
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+await page.waitForSelector('.pl-tappe');
+const aZero = await page.getByRole('button', { name: /Condividi il tuo percorso/ }).count();
+console.log(`6. senza nessun livello superato il pulsante non compare: ${aZero === 0}`);
+if (aZero !== 0) errori.push('PERCORSO: si puo condividere un percorso ancora vuoto');
+
 await browser.close();
 if (server) server.kill();
 

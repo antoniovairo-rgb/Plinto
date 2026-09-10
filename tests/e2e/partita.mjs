@@ -86,20 +86,27 @@ const punteggio = () => page.locator('.pl-hud__punteggio .pl-hud__valore').inner
 // ---------- 0. Primo avvio: la presentazione deve comparire una volta sola ----------
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 const introVisibile = await page.locator('.pl-intro__regole li').count();
-const bombaSpiegata = await page.locator('.pl-intro__bomba .pl-bomba').count();
 await page.screenshot({ path: `${OUT}/00-primo-avvio.png` });
-console.log(`0. presentazione al primo avvio: regole mostrate ${introVisibile}, bomba illustrata: ${bombaSpiegata === 1}`);
+console.log(`0. guida al primo avvio: regole mostrate al primo passo ${introVisibile}`);
 if (introVisibile !== REGOLE_INTRO.length) {
-  errori.push(`PRIMO AVVIO: la presentazione mostra ${introVisibile} regole invece di ${REGOLE_INTRO.length}`);
+  errori.push(`PRIMO AVVIO: il primo passo mostra ${introVisibile} regole invece di ${REGOLE_INTRO.length}`);
 }
-// La bomba e' l'unica regola che non si puo' dedurre giocando: un blocco appoggiato si
-// comporta come gli altri finche' non lo elimini, e a quel punto ne porta via otto.
-// Se sparisce da qui, il giocatore la scopre subendola.
-if (bombaSpiegata !== 1) errori.push('PRIMO AVVIO: la bomba non viene illustrata nella presentazione');
 const testoIntro = await page.locator('.pl-intro__regole').innerText();
 if (!/bomba/i.test(testoIntro)) errori.push('PRIMO AVVIO: le regole non nominano la bomba');
-await page.getByRole('button', { name: /^Gioca$/ }).click();
-await page.waitForSelector('.pl-plancia');
+// La bomba ha un passo tutto suo e viene verificata li' (`npm run guida`): da quando la
+// presentazione e' diventata una guida a piu' passi, cercarla sulla prima schermata
+// vorrebbe dire pretendere che tutto stia di nuovo insieme.
+// Dalla guida si esce nella HOME, non dentro una partita: e' l'unica schermata che
+// mostra la forma del gioco, ed e' quella che al primo avvio non vedeva nessuno. Chi
+// la salta -- verso la partita libera come faceva prima, o verso il livello 1 --
+// lascia il giocatore a farsi un'idea sbagliata di che gioco sia questo.
+// I sei passi della guida hanno una prova tutta loro (`npm run guida`): qui si chiude
+// e basta.
+await page.getByRole('button', { name: /Non mostrarmela/ }).click();
+await page.waitForSelector('.pl-home');
+if (await page.locator('.pl-plancia').count() > 0) {
+  errori.push('PRIMO AVVIO: la presentazione butta dentro una partita invece di mostrare la home');
+}
 await page.reload({ waitUntil: 'networkidle' });
 if (await page.locator('.pl-intro__regole').count() !== 0) {
   errori.push('PRIMO AVVIO: la presentazione ricompare dopo il primo avvio');
@@ -341,6 +348,18 @@ if (riprendiVisibile === 0) {
 } else {
   await page.getByRole('button', { name: /Riprendi la partita/ }).click();
   await page.waitForSelector('.pl-plancia');
+  // I blocchi si contano quando ci SONO, non appena esiste la plancia. `.pl-plancia`
+  // compare un istante prima dei blocchi che ci stanno sopra, e contarli in quell'
+  // istante da' zero: questa prova e' fallita una volta su otto esattamente cosi',
+  // annunciando una partita salvata che si era persa e che invece era li'.
+  //
+  // L'attesa non nasconde niente. Se la partita fosse davvero andata persa, i blocchi
+  // non arriverebbero mai e l'attesa scadrebbe: il difetto verrebbe fuori lo stesso,
+  // solo con un messaggio diverso.
+  await page.waitForFunction(
+    () => document.querySelectorAll('.pl-plancia .pl-blocco').length > 0,
+    null, { timeout: 5000 },
+  ).catch(() => {});
   const blocchiRipresi = await contaBlocchi();
   if (blocchiRipresi !== blocchiLibera) {
     errori.push(`SFIDA: la partita libera ripresa ha ${blocchiRipresi} blocchi invece di ${blocchiLibera}`);

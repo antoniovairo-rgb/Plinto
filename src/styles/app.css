@@ -830,6 +830,82 @@ button {
   width: 100%;
 }
 
+/* ------------------------------------------------------------- guida a passi --- */
+/* Il conteggio dei passi: piccolo e spento, ma sempre presente. Chi apre un gioco per
+   la prima volta deve sapere quanto dura la cosa che sta leggendo, altrimenti la salta
+   per prudenza invece che per scelta. */
+.pl-guida__passo {
+  margin: 0 0 4px;
+  color: var(--pl-text-faint);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pl-guida .pl-sezione { margin-top: 0; }
+
+/* "Indietro" resta della sua larghezza e "Avanti" prende il resto: cosi' il pulsante
+   principale sta sempre nello stesso punto sotto il pollice, passo dopo passo. */
+.pl-guida__navigazione {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+.pl-guida__navigazione .pl-btn--largo { flex: 1; }
+.pl-guida__navigazione .pl-btn[disabled] { opacity: 0.35; cursor: default; }
+
+.pl-guida__salta {
+  margin: 12px 0 0;
+  text-align: center;
+  color: var(--pl-text-faint);
+  font-size: 12px;
+}
+.pl-guida__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pl-text-faint);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pl-guida__link:hover { color: var(--pl-text-dim); }
+
+/* La barra della Catena disegnata ferma: serve a farla RICONOSCERE durante la partita,
+   non a spiegarla una seconda volta. */
+.pl-guida__barra {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--pl-surface-2);
+  overflow: hidden;
+  margin: 18px 0 6px;
+}
+.pl-guida__riempimento {
+  height: 100%;
+  background: var(--pl-brand);
+  border-radius: 999px;
+}
+
+/* Sette caselle su nove dello stesso colore: la maggioranza si vede, non si spiega.
+   Ogni casella e' un contenitore con posizione propria: `.pl-blocco` e' `position:
+   absolute; inset: 0`, perche' sulla plancia riempie la sua cella. Appoggiato
+   direttamente in una griglia, si ancora al primo antenato posizionato che trova --
+   che qui sarebbe la pagina -- e finisce nell'angolo in alto a sinistra dello schermo.
+   E' successo esattamente cosi'. */
+.pl-guida__tinta {
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  gap: 4px;
+  justify-content: center;
+  margin: 18px 0 6px;
+}
+.pl-guida__cella {
+  position: relative;
+  width: 34px;
+  height: 34px;
+}
+
 /* ------------------------------------------------------- schermo orizzontale --- */
 /* Su un telefono coricato la colonna verticale non ci sta: plancia a sinistra,
    punteggio e pezzi a destra, senza cambiare un solo componente. */
