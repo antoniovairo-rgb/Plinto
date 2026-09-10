@@ -195,6 +195,33 @@ const STATISTICHE = {
 
 // --- 1. Home ------------------------------------------------------------------
 await prepara({ record: RECORD, sfide: { [new Date().toISOString().slice(0, 10)]: { best: 4120, partite: 3 } } });
+
+/**
+ * La versione mostrata dev'essere QUESTA versione.
+ *
+ * E' successo davvero: un server di sviluppo rimasto acceso da prima di un cambio di
+ * versione ha prodotto schermate che dicevano `v1.6.0` mentre il gioco era alla 1.7.0.
+ * Il numero della versione viene iniettato quando il server PARTE, non a ogni richiesta,
+ * quindi le modifiche al codice si vedevano e quella no: il tipo di sbaglio che passa
+ * inosservato proprio perche' tutto il resto e' aggiornato.
+ *
+ * Non e' un dettaglio da poco: queste immagini finiscono sulla scheda del Play Store, e
+ * una schermata che dichiara una versione che non esiste piu' e' l'unica bugia che il
+ * negozio racconterebbe al posto tuo.
+ */
+{
+  const { readFile } = await import('node:fs/promises');
+  const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  const mostrata = (await page.locator('.pl-home__versione').innerText().catch(() => '')).trim();
+  if (mostrata !== `v${pkg.version}`) {
+    throw new Error(
+      `La home mostra "${mostrata}" invece di "v${pkg.version}". `
+      + 'Quasi sempre e\' un server di sviluppo rimasto acceso da prima del cambio di '
+      + 'versione: fermalo e rilancia questo comando.',
+    );
+  }
+}
+
 await page.screenshot({ path: `${USCITA}1-home.png` });
 
 // --- 2. Partita in corso, con la Catena accesa --------------------------------

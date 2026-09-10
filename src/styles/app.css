@@ -446,6 +446,24 @@ button {
 }
 .pl-home__sostieni:hover { color: var(--pl-text-dim); }
 
+/* L'icona e la sua parola sono UNA cosa sola: `inline-flex` le tiene incollate e le
+   allinea al centro, invece di lasciare l'icona appoggiata alla linea di base dove
+   sembrerebbe caduta. Il sottolineato resta solo sotto la parola, perche' passa sotto
+   il testo e non sotto un disegno. */
+.pl-home__sostieni {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+.pl-home__sostieni .pl-icona + * { text-decoration: underline; text-underline-offset: 3px; }
+/* Un filo piu' grande del testo: a 12px un disegno della stessa altezza delle lettere
+   sembra piu' piccolo di loro, perche' le lettere hanno le aste e lui no.
+   Piu' di 12 non si puo': misurato, a 14px la riga va a capo su uno schermo da 360
+   e la home ricomincia a scorrere -- lo stesso difetto che la 1.3.3 aveva appena
+   tolto, e che `npm run impaginazione` ha ripreso al primo tentativo. */
+.pl-icona { width: 12px; height: 12px; flex: none; }
+
 /* ------------------------------------------------------------------ fine --- */
 .pl-fine { text-align: center; }
 .pl-fine .pl-scroll { padding-top: 8vh; }

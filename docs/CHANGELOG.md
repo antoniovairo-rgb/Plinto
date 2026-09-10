@@ -7,6 +7,50 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.7.1] — 10 settembre 2026
+
+### Aggiunto
+
+**Due iconcine nel pie' di pagina della home**: una tazza di caffe' accanto a «Sostieni il
+progetto», una lampadina che spunta da una busta accanto a «Idee e segnalazioni».
+
+Disegnate a mano in SVG dentro il codice, come il marchio, Plinto e la bomba: nessuna
+libreria di icone, nessun file, nessuna licenza da tracciare e nessuna richiesta di rete.
+E' anche quello che permette all'informativa di dire che il gioco non contatta nessuno.
+
+**Sono a tratto e non piene**, perche' a dodici pixel una forma piena diventa una
+macchia: il tratto tiene aperti i buchi — il manico della tazza, il lembo della busta —
+e sono i buchi a far riconoscere l'oggetto. Prendono il colore dal testo accanto con
+`currentColor`, cosi' si schiariscono insieme a lui e non c'e' un secondo posto dove
+ricordarsi di cambiare il grigio.
+
+**Per le segnalazioni una figura sola, non due.** Due icone separate a quella misura si
+leggono come un unico scarabocchio in cui non si riconosce nessuna delle due; una
+lampadina che esce da una busta dice la stessa cosa — un'idea che ti arriva per posta — e
+si legge alla prima occhiata.
+
+Due cose sono state corrette guardando il disegno ingrandito, non i test. La prima
+lampadina era un arco con una riga sotto e si leggeva come un palloncino con lo spago:
+mancava lo zoccolo, che e' la parte che dice «si avvita». E le icone erano a 14px: a
+quella misura la riga andava a capo su uno schermo da 360 e la home ricominciava a
+scorrere, cioe' il difetto che la 1.3.3 aveva appena tolto. `npm run impaginazione` lo ha
+ripreso al primo tentativo.
+
+### Corretto
+
+**Le schermate per lo store potevano dichiarare una versione sbagliata.** E' successo:
+un server di sviluppo rimasto acceso da prima di un cambio di versione ha prodotto
+immagini che dicevano `v1.6.0` mentre il gioco era alla 1.7.0. Il numero viene iniettato
+quando il server PARTE e non a ogni richiesta, quindi le modifiche al codice si vedevano
+e quella no — il tipo di sbaglio che passa inosservato proprio perche' tutto il resto e'
+aggiornato.
+
+Non e' un dettaglio: quelle immagini finiscono sulla scheda del Play Store, e una
+schermata che dichiara una versione che non esiste piu' e' l'unica bugia che il negozio
+racconterebbe al posto tuo. Adesso `npm run schermate` confronta la versione mostrata con
+quella di `package.json` e si ferma, spiegando che quasi sempre basta fermare il server e
+rilanciare. Ha bloccato la generazione al primo tentativo utile.
+
 ## [1.7.0] — 10 settembre 2026
 
 Il gioco non ha pubblicita' e non ha un budget: se qualcuno lo scopre, e' perche' qualcun

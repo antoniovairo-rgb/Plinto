@@ -2,6 +2,7 @@ import { Logo } from '../Logo.jsx';
 import { numero } from '../../i18n/formato.js';
 import { Installa } from '../Installa.jsx';
 import { CONTATTO } from '../../config/progetto.js';
+import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
 
 /**
  * La home.
@@ -141,7 +142,8 @@ export function SchermoHome({
           e' anche il posto giusto per entrambi. */}
       <p className="pl-home__pie">
         <button type="button" className="pl-home__sostieni" onClick={onSostieni}>
-          {t('home.sostieni')}
+          <IconaCaffe />
+          <span>{t('home.sostieni')}</span>
         </button>
         {CONTATTO ? (
           <>
@@ -153,7 +155,8 @@ export function SchermoHome({
               className="pl-home__sostieni"
               href={`mailto:${CONTATTO}?subject=${encodeURIComponent(`PLINTO ${versione} - idee e segnalazioni`)}`}
             >
-              {t('home.feedback')}
+              <IconaIdea />
+              <span>{t('home.feedback')}</span>
             </a>
           </>
         ) : null}
