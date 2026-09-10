@@ -1,6 +1,7 @@
 import { Logo } from '../Logo.jsx';
 import { numero } from '../../i18n/formato.js';
 import { Installa } from '../Installa.jsx';
+import { CONTATTO } from '../../config/progetto.js';
 
 /**
  * La home.
@@ -25,7 +26,7 @@ import { Installa } from '../Installa.jsx';
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
   livelloCorrente, versione,
-  onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, t,
+  onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, onSostieni, t,
 }) {
   const progressoTesto = t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
@@ -125,10 +126,40 @@ export function SchermoHome({
         </button>
       </nav>
 
+      {/* Il sostegno sta in fondo e in piccolo, sotto tutto il resto e sopra la sola
+          versione. Non e' timidezza: un gioco senza pubblicita' e senza acquisti perde
+          la sua promessa nel momento in cui chiede soldi con la stessa voce con cui
+          dice "gioca". Chi vuole cercarlo lo trova; a chi vuole solo giocare non
+          capita davanti. */}
       {/* Versione in chiaro: serve a chi segnala un problema e a chi lo deve capire,
           per sapere quale build era sullo schermo. Stava solo dentro Info, cioe' dove
-          nessuno la cerca proprio quando servirebbe. */}
-      <p className="pl-home__versione">v{versione}</p>
+          nessuno la cerca proprio quando servirebbe.
+
+          Sostegno e versione stanno sulla STESSA riga, e non e' una scelta estetica:
+          messo su una riga propria, il collegamento faceva scorrere la home su uno
+          schermo da 640px (lo ha misurato `npm run impaginazione`). Un pie' di pagina
+          e' anche il posto giusto per entrambi. */}
+      <p className="pl-home__pie">
+        <button type="button" className="pl-home__sostieni" onClick={onSostieni}>
+          {t('home.sostieni')}
+        </button>
+        {CONTATTO ? (
+          <>
+            <span aria-hidden="true"> · </span>
+            {/* La versione finisce nell'oggetto del messaggio: chi segnala un problema
+                quasi mai sa dire quale versione aveva, e senza quel dato una
+                segnalazione vale meta'. */}
+            <a
+              className="pl-home__sostieni"
+              href={`mailto:${CONTATTO}?subject=${encodeURIComponent(`PLINTO ${versione} - idee e segnalazioni`)}`}
+            >
+              {t('home.feedback')}
+            </a>
+          </>
+        ) : null}
+        <span aria-hidden="true"> · </span>
+        <span className="pl-home__versione">v{versione}</span>
+      </p>
     </div>
   );
 }

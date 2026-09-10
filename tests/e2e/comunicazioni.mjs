@@ -77,8 +77,17 @@ function controlla(dove, testo, lingua) {
     errori.push(`${lingua} · ${dove}: la schermata non mostra nessun testo`);
     return;
   }
+  // Un indirizzo di posta non e' una frase, e va tolto prima di guardare il testo:
+  // dentro "qualcuno@gmail.com" c'e' "gmail.com", che alla trappola delle chiavi non
+  // risolte somiglia in tutto e per tutto a "quadri.spiegazioni.righe". E' successo
+  // davvero, appena l'indirizzo di contatto e' comparso nella schermata Info.
+  //
+  // Si toglie l'indirizzo invece di aggiungere "gmail.com" ai domini ammessi: quell'
+  // elenco descriverebbe l'indirizzo di OGGI, e il giorno che cambia il controllo
+  // tornerebbe a fallire senza che niente sia rotto davvero.
+  const visibile = testo.replace(/\S+@\S+\.\S+/g, ' ');
   for (const trappola of TRAPPOLE) {
-    const trovato = testo.match(trappola.regola);
+    const trovato = visibile.match(trappola.regola);
     if (!trovato) continue;
     if (trappola.ammesse?.some((ok) => ok.test(trovato[0]))) continue;
     errori.push(`${lingua} · ${dove}: ${trappola.nome} — "${trovato[0]}"`);

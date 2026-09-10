@@ -62,6 +62,10 @@ export const OBIETTIVI = {
   celle:      { progresso: (s) => s.stats.clearedCells },
   catena:     { progresso: (s) => s.stats.bestChain },
   intreccio:  { progresso: (s) => s.stats.bestIntreccio },
+  // Quante volte, non quanto in alto. Il `?? 0` non e' difensivo per abitudine: una
+  // partita salvata prima che questo contatore esistesse non ce l'ha, e senza il
+  // ripiego un livello ripreso mostrerebbe NaN al posto dell'avanzamento.
+  intrecci:   { progresso: (s) => s.stats.intrecci ?? 0 },
   pulizia:    { progresso: (s) => s.stats.boardClears },
   sopravvivi: { progresso: (s) => s.stats.moves },
 };

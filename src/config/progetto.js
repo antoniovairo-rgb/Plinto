@@ -23,8 +23,20 @@
  */
 export const PAYPAL_URL = 'https://paypal.me/elevoraCPM';
 
-/** Contatto mostrato nella schermata Info. Vuoto = non mostrato. */
-export const CONTATTO = '';
+/**
+ * Dove arrivano idee e segnalazioni. Vuoto = il collegamento non compare, come per
+ * PayPal: meglio niente che un pulsante che non porta da nessuna parte.
+ *
+ * E' un `mailto:`, non un modulo. Un modulo vorrebbe dire un servizio di terze parti,
+ * cioe' una richiesta di rete verso un altro dominio, cioe' l'unica cosa che
+ * l'informativa privacy di questo gioco promette di non fare. Un `mailto:` apre
+ * l'applicazione di posta del telefono e non contatta nessun server: il gioco non sa
+ * nemmeno se il messaggio e' stato scritto.
+ *
+ * ATTENZIONE: questo indirizzo diventa PUBBLICO. Compare nel gioco e sulla scheda del
+ * Play Store. Cambiarlo qui lo cambia ovunque.
+ */
+export const CONTATTO = 'antoniovairo@gmail.com';
 
 /** Anno di partenza del progetto, per la nota di copyright. */
 export const ANNO = 2026;

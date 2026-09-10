@@ -113,20 +113,36 @@ const MOTIVI = {
  *
  * Adesso i due tipi duri (`punteggio` e `celle`) entrano dal quarto atto in poi, e i due
  * facili (`intreccio`, `colonne`) escono di scena presto.
+ *
+ * L'INTRECCIO E' STATO SOSTITUITO DAL SUO CONTEGGIO. `intreccio` misura un PICCO -- la
+ * mossa migliore della partita -- e un picco non cresce: praticamente si ferma a 2,
+ * perche' tre gruppi con una mossa sola sono un evento raro. Misurato con il metro che
+ * ci prova: l'Intreccio da 3 arriva 2 volte su 40 sul quadro 47, 1 su 40 sul 52. Il
+ * controllo di superabilita' ne chiede 4 su 12, quindi chiedere 3 sarebbe un muro.
+ *
+ * Un obiettivo che non cresce non puo' stare in un atto avanzato: il tetto di mosse e'
+ * l'unica leva rimasta, e su un livello che si vince alla seconda mossa non morde. Il
+ * quadro 47 e' rimasto banale per tre generazioni proprio per questo, e nessuna delle
+ * cure automatiche poteva prenderlo.
+ *
+ * `intrecci` conta invece QUANTE VOLTE si e' chiuso piu' di un gruppo insieme. E' un
+ * cumulo come `righe` o `celle`, quindi si puo' chiedere in dose crescente, il generatore
+ * lo tara come tutti gli altri, e la stessa meccanica smette di essere un colpo di
+ * fortuna per diventare una richiesta di costanza.
  */
 const ATTI = [
   { da:  1, a: 10, nome: 'Le basi',      tipi: ['righe','colonne','quadranti','gruppi'],                          motivi: ['nessuno'],                                  mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22] },
   { da: 11, a: 24, nome: 'Il ritmo',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['nessuno','angoli','croce'],                 mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20] },
   { da: 25, a: 40, nome: 'Gli ostacoli', tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['scala','isole','cornice','colonne','blocchi'], mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18] },
-  { da: 41, a: 58, nome: 'La pressione', tipi: ['catena','intreccio','gruppi','quadranti','punteggio'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16] },
+  { da: 41, a: 58, nome: 'La pressione', tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16] },
   { da: 59, a: 76, nome: 'Il mestiere',  tipi: ['punteggio','catena','gruppi','celle','righe'],                    motivi: ['clessidra','labirinto','fitto','assedio','isole'], mosse: [20, 30], percentile: [34, 50], margine: [1.16, 1.12] },
   { da: 77, a: 92, nome: 'La maestria',  tipi: ['punteggio','catena','celle','quadranti','gruppi'],               motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08] },
-  { da: 93, a:100, nome: 'La vetta',     tipi: ['punteggio','celle','catena','gruppi','intreccio'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05] },
+  { da: 93, a:100, nome: 'La vetta',     tipi: ['punteggio','celle','catena','gruppi','intrecci'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05] },
 ];
 
 const NOMI = {
   righe: 'righe', colonne: 'colonne', quadranti: 'quadranti', gruppi: 'gruppi',
-  catena: 'catena', punteggio: 'punti', celle: 'celle', intreccio: 'intreccio',
+  catena: 'catena', punteggio: 'punti', celle: 'celle', intreccio: 'intreccio', intrecci: 'intrecci',
   pulizia: 'pulizia', sopravvivi: 'resistenza',
 };
 
@@ -196,7 +212,7 @@ function preferenze(tipo) {
   else if (tipo === 'quadranti') p.quadrant = 6;
   else if (tipo === 'pulizia') { p.svuotare = 320; p.nonSpezzare = 40; }
   else if (tipo === 'catena') p.nonSpezzare = 900;
-  else if (tipo === 'intreccio') p.nonSpezzare = 40;
+  else if (tipo === 'intreccio' || tipo === 'intrecci') p.nonSpezzare = 40;
   return p;
 }
 function valuta(dopo, gruppi, pref, rumore) {

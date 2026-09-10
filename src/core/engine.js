@@ -57,6 +57,12 @@ function emptyStats() {
     bestMovePoints: 0,
     bestChain: 0,
     bestIntreccio: 0,
+    // QUANTE VOLTE si e' chiuso piu' di un gruppo con una mossa sola, non solo il
+    // massimo raggiunto. `bestIntreccio` e' un PICCO: sale a 2 la prima volta e non si
+    // muove piu', quindi un obiettivo costruito su di lui e' un colpo solo e non puo'
+    // crescere. Contare le occorrenze lo rende una richiesta di costanza, che si puo'
+    // chiedere in dose crescente come tutte le altre.
+    intrecci: 0,
     boardClears: 0,
     bombeEsplose: 0,
     celleEsplose: 0,
@@ -250,6 +256,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     bestMovePoints: Math.max(state.stats.bestMovePoints, scored.points),
     bestChain: Math.max(state.stats.bestChain, scored.chainAfter),
     bestIntreccio: Math.max(state.stats.bestIntreccio, groups.length),
+    intrecci: state.stats.intrecci + (groups.length > 1 ? 1 : 0),
     boardClears: state.stats.boardClears + (boardCleared ? 1 : 0),
     bombeEsplose: (state.stats.bombeEsplose ?? 0) + detonazione.bombe.length,
     celleEsplose: (state.stats.celleEsplose ?? 0) + detonazione.esplose.length,
@@ -318,6 +325,7 @@ export function summarize(state, now = Date.now()) {
     bestChain: state.stats.bestChain,
     bestMovePoints: state.stats.bestMovePoints,
     bestIntreccio: state.stats.bestIntreccio,
+    intrecci: state.stats.intrecci,
     boardClears: state.stats.boardClears,
     filledCells: filledCount(state.grid),
     piecesPlaced: state.stats.piecesPlaced,

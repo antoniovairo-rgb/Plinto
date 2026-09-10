@@ -49,6 +49,10 @@ function deadPiecesDi(partita) {
 export function App() {
   const [schermata, setSchermata] = useState('home');
   const [menuAperto, setMenuAperto] = useState(false);
+  // "Sostieni" si apre da due posti, e il ritorno deve riportare a quello giusto: da
+  // Info si torna a Info, dalla home alla home. Senza, il tasto Indietro dalla home
+  // porterebbe dentro una schermata che il giocatore non ha mai aperto.
+  const [sostieniDa, setSostieniDa] = useState('info');
   const [statistiche, setStatistiche] = useState(() => loadStats());
 
   const { impostazioni, cambia, inverti } = useImpostazioni();
@@ -216,13 +220,17 @@ export function App() {
     if (menuAperto) { setMenuAperto(false); return; }
     if (schermata === 'quadro') { tornaAiQuadri(); return; }
     if (schermata === 'gioco') { tornaAllaHome(); return; }
+    if (schermata === 'sostieni') { setSchermata(sostieniDa); return; }
     setSchermata(GENITORE[schermata] ?? 'home');
-  }, [menuAperto, schermata, tornaAiQuadri, tornaAllaHome]);
+  }, [menuAperto, schermata, sostieniDa, tornaAiQuadri, tornaAllaHome]);
 
   useTastoIndietro(
     // Il menu conta come un gradino: si chiude col tasto Indietro senza uscire dalla
     // schermata sotto, come ci si aspetta da qualunque app Android.
-    (PROFONDITA[schermata] ?? 1) + (menuAperto ? 1 : 0),
+    // "Sostieni" sta a due gradini se ci si e' arrivati da Info, a uno se dalla home:
+    // la profondita' non e' una proprieta' della schermata, e' del percorso fatto.
+    (schermata === 'sostieni' ? (sostieniDa === 'home' ? 1 : 2) : (PROFONDITA[schermata] ?? 1))
+      + (menuAperto ? 1 : 0),
     passoIndietro,
     // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
@@ -369,6 +377,7 @@ export function App() {
           onSfida={() => apriSfida()}
           onArchivio={() => setSchermata('archivio')}
           onVai={setSchermata}
+          onSostieni={() => { setSostieniDa('home'); setSchermata('sostieni'); }}
           t={t}
         />
       ) : null}
@@ -425,13 +434,13 @@ export function App() {
       {schermata === 'info' ? (
         <SchermoInfo
           onIndietro={() => setSchermata('home')}
-          onSostieni={() => setSchermata('sostieni')}
+          onSostieni={() => { setSostieniDa('info'); setSchermata('sostieni'); }}
           t={t}
         />
       ) : null}
 
       {schermata === 'sostieni' ? (
-        <SchermoSostieni onIndietro={() => setSchermata('info')} t={t} />
+        <SchermoSostieni onIndietro={() => setSchermata(sostieniDa)} t={t} />
       ) : null}
 
       {menuAperto ? (

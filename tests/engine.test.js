@@ -396,3 +396,42 @@ function primaMossa(stato) {
   }
   return [0, 0, 0];
 }
+
+describe('il conteggio degli Intrecci', () => {
+  /**
+   * Una griglia in cui UNA casella chiude insieme la riga 0 e la colonna 0.
+   * Tutto pieno tranne l'angolo (0,0): posarci sopra un pezzo da una cella chiude
+   * entrambe -- e chiude anche il quadrante in alto a sinistra, quindi i gruppi sono tre.
+   */
+  function incrocio() {
+    const righe = Array.from({ length: 9 }, (_, r) => (
+      r === 0 ? '.########' : '#' + '.'.repeat(8)
+    ));
+    return righe.join('\n');
+  }
+
+  it('conta le mosse che chiudono piu di un gruppo, non il picco raggiunto', () => {
+    const s = scenario(incrocio(), ['p1', 'p1', 'p1']);
+    expect(s.stats.intrecci).toBe(0);
+    const dopo = placePiece(s, 0, 0, 0);
+    expect(dopo.lastMove.groups.length).toBeGreaterThan(1);
+    expect(dopo.stats.intrecci).toBe(1);
+    // Il picco dice QUANTO in alto si e' arrivati, il conteggio QUANTE volte: sono due
+    // domande diverse, ed e' il motivo per cui il secondo esiste.
+    expect(dopo.stats.bestIntreccio).toBe(dopo.lastMove.groups.length);
+  });
+
+  it('una mossa che chiude un gruppo solo non conta come Intreccio', () => {
+    const s = scenario('########.\n' + '.........\n'.repeat(7) + '#........', ['p1', 'v3', 'h4']);
+    const dopo = placePiece(s, 0, 0, 8);
+    expect(dopo.lastMove.groups).toHaveLength(1);
+    expect(dopo.stats.intrecci).toBe(0);
+    expect(dopo.stats.bestIntreccio).toBe(1);
+  });
+
+  it('una partita salvata prima che il contatore esistesse vale zero, non NaN', async () => {
+    const { OBIETTIVI } = await import('../src/core/quadro.js');
+    expect(OBIETTIVI.intrecci.progresso({ stats: {} })).toBe(0);
+    expect(OBIETTIVI.intrecci.progresso({ stats: { intrecci: 4 } })).toBe(4);
+  });
+});

@@ -424,6 +424,28 @@ button {
 }
 .pl-home__menu .pl-btn { padding: 0 12px; font-size: 14px; }
 
+/* Piu' piccolo e piu' spento delle voci di menu: e' l'ultima cosa della pagina, e
+   deve leggersi come tale. */
+.pl-home__pie {
+  margin: 0;
+  text-align: center;
+  color: var(--pl-text-faint);
+  font-size: 12px;
+}
+.pl-home__sostieni {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pl-text-faint);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pl-home__sostieni:hover { color: var(--pl-text-dim); }
+
 /* ------------------------------------------------------------------ fine --- */
 .pl-fine { text-align: center; }
 .pl-fine .pl-scroll { padding-top: 8vh; }

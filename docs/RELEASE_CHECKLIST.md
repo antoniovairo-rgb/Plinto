@@ -1,9 +1,12 @@
 # Gate di rilascio — PLINTO
 
-Stato al **6 settembre 2026**. Il gioco **non è pronto per la pubblicazione**: le voci
-aperte sono elencate per prime, senza addolcirle.
+Stato al **10 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
+Store (canale Alpha, versione approvata e installata su telefoni veri). Non è ancora in
+produzione: Play chiede 12 tester per 14 giorni consecutivi prima di consentirlo, e quel
+conteggio non è ancora completo. Le voci aperte restano elencate per prime, senza
+addolcirle.
 
-Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOCCATO** dipende da una decisione o da un dato che non abbiamo · **DA VERIFICARE FUORI** richiede una competenza che questo progetto non ha.
+Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATTO, in corso** una parte è verificata e la nota dice quale pezzo manca · **APERTO** da fare · **BLOCCATO** dipende da una decisione o da un dato che non abbiamo · **DA VERIFICARE FUORI** richiede una competenza che questo progetto non ha.
 
 ---
 
@@ -13,8 +16,8 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 | --- | --- | --- |
 | Link PayPal per la donazione | **FATTO** | `PAYPAL_URL = 'https://paypal.me/elevoraCPM'`, deciso dal proprietario del progetto. Il nome del link è l'identificativo del conto ed è condiviso con l'altro gioco dello stesso autore: PayPal consente **un solo link PayPal.Me per conto** e non permette di modificarlo dopo la creazione ([FAQ PayPal.Me](https://www.paypal.com/us/cshelp/article/paypalme-frequently-asked-questions-help432)), quindi un link dedicato richiederebbe un secondo conto. Scelta consapevole: nel gioco non compare nessuna spiegazione, perché il nome del conto lo si vede sulla pagina di PayPal come in qualunque donazione, e all'uscita sugli store l'identità sarà comunque un'altra. Resta una donazione **esterna e senza nulla in cambio**: nessun acquisto in-app |
 | Verifica di anteriorità sul nome PLINTO | **DA VERIFICARE FUORI** | La ricerca fatta (vedi `DIFFERENZIAZIONE.md`) non ha trovato collisioni nella categoria puzzle, ma **non è una verifica legale**: non è stato consultato nessun registro di marchi e le schede degli store non erano raggiungibili. Serve una ricerca professionale nelle classi pertinenti |
-| Prova su dispositivi fisici | **APERTO** | Tutto è stato verificato in Chromium su viewport simulate. Nessun telefono vero, nessun iOS, nessuna prova con dita vere. È il divario più grande fra ciò che sappiamo e ciò che l'utente sperimenterà |
-| Playtest con persone reali | **APERTO** | Nessun essere umano ha ancora giocato. Le domande "è divertente" e "ho voglia di rigiocare" non hanno risposta: nessuna simulazione può darla |
+| Prova su dispositivi fisici | **FATTO, in parte** | Il gioco gira su telefoni Android veri, installato dal Play Store come applicazione (finestra di fiducia). Quel primo quarto d'ora ha trovato sei difetti che 382 prove automatiche non potevano vedere — un blocco all'avvio, l'icona tagliata dalla maschera del sistema, l'avvio a schermo intero sbagliato, il tasto Indietro che chiudeva l'app, la home che scorreva, la barra dell'indirizzo visibile — corretti nelle 1.3.2, 1.3.3 e 1.3.4. **Resta aperto iOS**: nessuna prova su iPhone |
+| Playtest con persone reali | **FATTO, in corso** | Le prime persone hanno giocato. Il primo riscontro ha già cambiato il gioco: due su tre davano per scontato che il colore contasse qualcosa, e da lì è nata la Tinta (1.4.0). Il test chiuso è aperto e il numero di tester sta salendo: "è divertente" e "ho voglia di rigiocare" hanno ora un modo di ricevere risposta |
 
 ## Prodotto
 
@@ -60,7 +63,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 | Informativa privacy | **FATTO** | `PRIVACY.md`, coerente col codice e protetta da un test automatico |
 | Audit di differenziazione | **FATTO** | `DIFFERENZIAZIONE.md`, con i limiti della ricerca dichiarati |
 | Revisione legale del prodotto | **DA VERIFICARE FUORI** | Nessuno può dichiarare "legalmente sicuro" senza un professionista, e questo documento non lo fa |
-| Informativa pubblicata in una pagina raggiungibile | **APERTO** | Serve quando ci sarà un indirizzo pubblico |
+| Informativa pubblicata in una pagina raggiungibile | **FATTO** | `public/privacy.html`, pubblicata insieme al gioco e collegata dalla scheda del Play Store |
 
 ## Materiali di pubblicazione
 
@@ -69,10 +72,10 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **APERTO** da fare · **BLOC
 | Icona | **FATTO** | SVG originale, coerente con il marchio |
 | Manifest PWA | **FATTO** | Nome, colori, icona; vincolo di orientamento rimosso perché esiste il layout orizzontale |
 | Schermate per gli store | **FATTO** | Generate da `npm run schermate`, dal gioco vero |
-| Icona in PNG alle dimensioni richieste dagli store | **APERTO** | Ora esiste solo l'SVG |
-| Schermata di avvio | **APERTO** | |
-| Descrizione del prodotto | **APERTO** | Il messaggio è deciso (Catena, niente pubblicità, accessibilità); il testo va scritto |
-| Account sviluppatore sugli store | **BLOCCATO** | Dipende dal proprietario del progetto |
+| Icona in PNG alle dimensioni richieste dagli store | **FATTO** | `npm run icone` le genera tutte dall'SVG, compresi il primo piano adattivo, l'icona classica e quella di avvio per Android, copiate nel progetto Android dallo stesso comando |
+| Schermata di avvio | **FATTO** | Generata da `npm run icone` e dichiarata nel manifest Android; sta in una cartella qualificata per densità, altrimenti Android la moltiplica per la densità dello schermo e la mostra gigante |
+| Descrizione del prodotto | **FATTO** | Scritta e pubblicata sulla scheda del Play Store, insieme alle schermate e all'immagine in evidenza 1024×500 (`npm run immagine-store`) |
+| Account sviluppatore sugli store | **FATTO** | Account Google Play attivo e verificato, nome del pacchetto registrato, firma dell'app gestita da Play |
 
 ---
 

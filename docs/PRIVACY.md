@@ -35,12 +35,26 @@ essere inviati: il gioco è un'applicazione che gira interamente nel browser.
   né l'età, né la posizione.
 - Nessuna condivisione con nessuno, perché non c'è nulla da condividere.
 
-## L'unica eccezione: il collegamento alla donazione
+## Le due eccezioni: due collegamenti che portano fuori
 
-Nella schermata "Sostieni il progetto" c'è un collegamento a PayPal. **Il collegamento
-non fa nulla finché non lo tocchi tu.** Se lo tocchi, si apre il sito di PayPal, che ha
-una propria informativa privacy sulla quale non abbiamo alcun controllo. Il gioco non
-comunica a PayPal chi sei, perché non lo sa.
+**Il collegamento alla donazione.** Nella schermata "Sostieni il progetto" c'è un
+collegamento a PayPal. **Il collegamento non fa nulla finché non lo tocchi tu.** Se lo
+tocchi, si apre il sito di PayPal, che ha una propria informativa privacy sulla quale non
+abbiamo alcun controllo. Il gioco non comunica a PayPal chi sei, perché non lo sa.
+
+**Il collegamento per le segnalazioni.** In fondo alla schermata iniziale c'è "Idee e
+segnalazioni". È un indirizzo di posta, non un modulo: toccandolo si apre l'applicazione
+di posta del tuo telefono con un messaggio già intestato, e **il gioco non contatta
+nessun server**. Non sa se scrivi, non sa cosa scrivi e non sa se invii. Se decidi di
+mandarlo, quello che arriva è quello che hai scritto tu, con il tuo indirizzo di posta,
+esattamente come per qualunque email.
+
+Nell'oggetto del messaggio è precompilato il numero di versione del gioco. Serve a capire
+di quale versione parla una segnalazione, ed è l'unico dato che il gioco aggiunge: nessun
+identificativo, niente sul dispositivo, niente sulle tue partite.
+
+Un modulo di contatto avrebbe voluto dire un servizio di terze parti, cioè una richiesta di
+rete verso un altro dominio: l'unica cosa che questa informativa promette di non fare.
 
 ## Il service worker (installazione e uso senza rete)
 

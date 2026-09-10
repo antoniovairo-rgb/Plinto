@@ -7,6 +7,106 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.5.0] — 10 settembre 2026
+
+### Cambiato
+
+**L'Intreccio adesso si chiede più volte, non una volta sola.** Cinque livelli (42, 47,
+52, 57, 97) chiedevano «chiudi 2 gruppi in una mossa». Sembrava una richiesta crescente e
+non lo era: quell'obiettivo leggeva un **picco**, `bestIntreccio`, che sale a 2 la prima
+volta che capita e poi non si muove più. Un picco non ha dosaggio. Il livello 47 si
+superava con una mossa in un livello che ne concedeva otto, e il controllo di banalità del
+generatore lo segnalava a ogni rigenerazione.
+
+Ora il motore conta anche **quante volte** succede (`stats.intrecci`), e i cinque livelli
+chiedono 3 Intrecci (42, 47, 52, 97) o 2 (57), con 24-36 mosse per farli. La richiesta è
+la stessa di prima ripetuta: costanza, non un colpo fortunato.
+
+**Prima è stata provata la strada sbagliata, e i numeri l'hanno bocciata.** L'idea di
+partenza era alzare l'asticella dello stesso picco: «chiudi **3** gruppi in una mossa».
+Più pulita da scrivere, e il generatore l'ha rifiutata due volte. Misurata di forza sui
+livelli interessati, il giocatore simulato la superava **2 volte su 40** sul livello 47 e
+**1 su 40** sul 52, contro il minimo di 4 riuscite su 12 tentativi che il cancello di
+superabilità pretende. Il triplo Intreccio richiede tre gruppi a una casella dalla fine
+*nello stesso istante*: non è difficile, è quasi impossibile senza il pezzo giusto al
+momento giusto.
+
+La lezione, scritta accanto al codice: un obiettivo elegante da leggere non è un obiettivo
+raggiungibile finché qualcuno non lo gioca. Qui è stato dichiarato elegante prima di
+misurarlo, e la misura ha detto no.
+
+**Il generatore non segnala più nessuna banalità.** Il blocco `ATTENZIONE — livelli
+ancora banali col tetto stretto al minimo` è sparito dall'esecuzione, che ora chiude con
+«Nessun livello banale da correggere».
+
+**L'impronta delle regole non cambia.** Nessuna costante di `rules.js` è stata toccata:
+i punteggi della 1.4.0 restano confrontabili con questi. Cambia cosa i livelli chiedono,
+non quanto valgono le mosse.
+
+### Misurato
+
+Comando: `node tools/quadri.mjs 12` — cento livelli, dodici partite ciascuno, giocati dal
+giocatore simulato.
+
+| | valore |
+|---|---|
+| livelli mai superati | **nessuno** |
+| i cinque livelli riscritti (42 / 47 / 52 / 57 / 97) | 67% · 67% · 67% · 33% · 83% |
+| correlazione posizione ↔ riuscite (rho di Spearman) | **−0,48** |
+| coppie di livelli in cui il più avanti è più facile | **28%** |
+| riuscite medie | 64,3% |
+| livelli banali segnalati dal generatore | **nessuno** (prima: il 47) |
+
+Il livello 47 passava con una mossa sola; ora si supera 8 volte su 12, cioè è diventato un
+livello invece di un formalismo. Il 57 sta a 4 su 12, esattamente sul minimo che il
+cancello di superabilità pretende: è il più duro dei cinque e resta dalla parte giusta
+della soglia, ma senza margine.
+
+**Attenzione a come si leggono questi due numeri.** Il rho e le coppie invertite della
+1.3.0 (−0,48 e 31%) erano misurati su **30** partite per livello, questi su **12**: meno
+partite vuol dire percentuali più ballerine, quindi i valori si assomigliano ma non sono
+la stessa misura. Quello che si può dire con certezza è che la curva non è peggiorata.
+
+### Aggiunto
+
+**Un piè di pagina nella home: sostegno, idee e segnalazioni, versione.** Tutto su una
+riga sola, in piccolo e in fondo. Il sostegno stava solo dentro Info, cioè a due schermate
+di distanza da chiunque; ora si vede dalla prima, ma sotto tutto il resto e con la voce
+più bassa della pagina. La riga singola non è estetica: su uno schermo da 640px un
+collegamento su riga propria faceva riapparire lo scorrimento che la 1.3.3 aveva appena
+tolto, e `npm run impaginazione` lo ha misurato.
+
+**«Idee e segnalazioni» apre l'applicazione di posta**, con la versione già scritta
+nell'oggetto. È un `mailto:`, non un modulo: un modulo vorrebbe dire un servizio di terze
+parti, cioè una richiesta di rete verso un altro dominio, cioè l'unica cosa che
+l'informativa promette di non fare. Il gioco non sa nemmeno se il messaggio è stato poi
+scritto.
+
+L'informativa privacy adesso dichiara **due** eccezioni invece di una — PayPal e la posta
+— e spiega che il numero di versione nell'oggetto è l'unico dato che il gioco aggiunge.
+
+**Il tasto Indietro sa da dove si è arrivati a «Sostieni».** Da Info torna a Info, dalla
+home torna alla home. La profondità di quella schermata non è una sua proprietà, è del
+percorso fatto per arrivarci, e ora il codice la tratta così.
+
+### Corretto
+
+**Il controllo delle comunicazioni scambiava l'indirizzo di posta per un errore.**
+Dentro `qualcuno@gmail.com` c'e' `gmail.com`, e la trappola che cerca le chiavi di
+traduzione non risolte (`quadri.spiegazioni.righe`) ci vede esattamente la stessa forma:
+due parole minuscole separate da un punto. Il gate ha bloccato la pubblicazione della
+1.5.0 per questo, il giorno stesso in cui l'indirizzo e' comparso a schermo.
+
+La correzione toglie gli indirizzi di posta dal testo prima di guardarlo, invece di
+aggiungere `gmail.com` all'elenco dei domini ammessi. Quell'elenco descriverebbe
+l'indirizzo di oggi: il giorno che cambia, il controllo tornerebbe a fallire senza che
+niente sia rotto davvero.
+
+**Il giocatore simulato non sapeva cosa fosse un obiettivo a Intrecci ripetuti** e lo
+giocava alla cieca: nessuna preferenza, nessuna mira. Un obiettivo che il simulatore non
+capisce viene misurato più difficile di quanto sia, e il generatore ci costruisce sopra
+bilanciamenti sbagliati. Ora lo insegue, come già faceva per tutti gli altri tipi.
+
 ## [1.4.0] — 9 settembre 2026
 
 ### Aggiunto

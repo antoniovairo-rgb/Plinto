@@ -77,7 +77,7 @@ function vicinanza(grid) {
  * metro che giocava per il punteggio invece che per l'obiettivo.
  */
 export function preferenze(quadro) {
-  const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, mira: 6, nonSpezzare: 0 };
+  const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, mira: 6, nonSpezzare: 0, intreccio: 0 };
   for (const { tipo } of quadro.obiettivi) {
     if (tipo === 'righe') p.row = 6;
     else if (tipo === 'colonne') p.col = 6;
@@ -87,6 +87,23 @@ export function preferenze(quadro) {
     // punta a non spezzarla mai.
     else if (tipo === 'catena') p.nonSpezzare = 900;
     else if (tipo === 'punteggio') p.nonSpezzare = 500;
+    /**
+     * L'INTRECCIO MANCAVA, e la mancanza si e' vista molto piu' tardi.
+     *
+     * Senza questo caso, un livello che chiede "chiudi N gruppi con una sola mossa"
+     * faceva giocare il metro con le preferenze predefinite: nessuna mira. Il generatore
+     * chiedeva "riesci ad arrivare a 3?", il metro non ci provava, e la risposta era no.
+     * Il quadro 47 e' rimasto per due generazioni un livello banale che nessuno riusciva
+     * ad alzare -- non perche' fosse impossibile, perche' nessuno stava provando.
+     *
+     * Un Intreccio non si trova, si PREPARA: servono una riga, una colonna e un quadrante
+     * vicini alla chiusura nello stesso punto. Alzare le tre mire INSIEME e' il modo di
+     * dire "portale avanti in parallelo" invece di finirne una e perdere le altre due.
+     */
+    else if (tipo === 'intreccio' || tipo === 'intrecci') {
+      p.row = 4; p.col = 4; p.quadrant = 4;
+      p.intreccio = 900;
+    }
   }
   return p;
 }
@@ -108,7 +125,9 @@ function valuta(grigliaDopo, gruppi, pref, rumore = 0) {
   // Non spezzare la Catena vale piu' di qualunque singolo gruppo in piu'.
   if (gruppi.length === 0) valore -= pref.nonSpezzare;
   for (const g of gruppi) valore += 150 * pref[g.type];
-  valore += gruppi.length > 1 ? 120 * (gruppi.length - 1) : 0;   // gli intrecci valgono
+  // Gli intrecci valgono sempre; su un livello che li chiede valgono moltissimo, al punto
+  // che chiudere un gruppo da solo diventa uno spreco della vicinanza che serviva.
+  valore += gruppi.length > 1 ? (120 + pref.intreccio) * (gruppi.length - 1) : 0;
   valore -= buchiIsolati(grigliaDopo) * 16;
   valore -= fillRatio(grigliaDopo) * (45 + pref.svuotare);
   valore += (vic.row * pref.row + vic.col * pref.col + vic.quadrant * pref.quadrant) * pref.mira;

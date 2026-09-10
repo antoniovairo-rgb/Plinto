@@ -1,12 +1,13 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono quattordici, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono diciassette, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
  * un elenco che prima o poi si dimentica: qui e' scritto una volta sola, e il comando
- * fallisce se anche uno solo dei quattordici fallisce.
+ * fallisce se anche uno solo di loro fallisce. Il numero non si ripete a parole piu' di
+ * una volta di proposito: era rimasto "quattordici" per tre controlli aggiunti dopo.
  *
  * L'ordine non e' casuale: prima i controlli che costano secondi e trovano gli errori
  * piu' grossolani, poi quelli che aprono un browser. Chi ha rotto la sintassi lo scopre
