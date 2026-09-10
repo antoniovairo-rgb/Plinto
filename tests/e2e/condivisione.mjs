@@ -190,7 +190,7 @@ if (cePercorso !== 1) {
   schedaPercorso.split('\n').forEach((r) => console.log(`     ${r}`));
   if (!/PLINTO/.test(schedaPercorso)) errori.push('PERCORSO: la scheda non nomina il gioco');
   if (!/7 livelli su 100/.test(schedaPercorso)) errori.push(`PERCORSO: avanzamento sbagliato — "${schedaPercorso}"`);
-  if (!/[█▁]{16}/u.test(schedaPercorso)) errori.push('PERCORSO: manca la barra dell avanzamento');
+  if (!/[■□]{16}/u.test(schedaPercorso)) errori.push('PERCORSO: manca la barra dell avanzamento');
   if (!/https?:\/\//.test(schedaPercorso)) errori.push('PERCORSO: manca il collegamento al gioco');
   if (/undefined|NaN|null/.test(schedaPercorso)) errori.push(`PERCORSO: valore rotto — "${schedaPercorso}"`);
   // Il terzo gradino del ripiego non dipende da un parametro: se copiare non riesce, il

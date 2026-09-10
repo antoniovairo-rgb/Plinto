@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda,
-  formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA,
+  formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA, RIGA_DISEGNATA,
 } from '../src/core/scheda.js';
 import { CHAIN_MAX } from '../src/config/rules.js';
 import { createGame, placePiece, summarize } from '../src/core/engine.js';
@@ -238,16 +238,16 @@ describe('la scheda del percorso', () => {
 
   it('la barra e lunga COLONNE_FORMA e si riempie in proporzione', () => {
     const meta = formattaSchedaPercorso({ superati: 50, totale: 100 }, { testi: TESTI })
-      .split('\n').find((r) => /^[█▁]+$/u.test(r));
+      .split('\n').find((r) => /^[■□]+$/u.test(r));
     expect(meta).toHaveLength(COLONNE_FORMA);
-    expect([...meta].filter((c) => c === '█')).toHaveLength(COLONNE_FORMA / 2);
+    expect([...meta].filter((c) => c === '■')).toHaveLength(COLONNE_FORMA / 2);
   });
 
   it('a zero la barra e vuota, a percorso finito e piena', () => {
     const riga = (s, tot) => formattaSchedaPercorso({ superati: s, totale: tot }, { testi: TESTI })
-      .split('\n').find((r) => /^[█▁]+$/u.test(r));
-    expect(riga(0, 100)).toBe('▁'.repeat(COLONNE_FORMA));
-    expect(riga(100, 100)).toBe('█'.repeat(COLONNE_FORMA));
+      .split('\n').find((r) => /^[■□]+$/u.test(r));
+    expect(riga(0, 100)).toBe('□'.repeat(COLONNE_FORMA));
+    expect(riga(100, 100)).toBe('■'.repeat(COLONNE_FORMA));
   });
 
   it('piu livelli superati del totale non fanno traboccare la barra', () => {
@@ -255,7 +255,7 @@ describe('la scheda del percorso', () => {
     // progressi salvati potrebbero superarlo, e una barra piu' lunga della sua cornice
     // sarebbe l'unico segno visibile di un dato incoerente.
     const riga = formattaSchedaPercorso({ superati: 250, totale: 100 }, { testi: TESTI })
-      .split('\n').find((r) => /^[█▁]+$/u.test(r));
+      .split('\n').find((r) => /^[■□]+$/u.test(r));
     expect(riga).toHaveLength(COLONNE_FORMA);
   });
 
@@ -299,5 +299,22 @@ describe('il collegamento in fondo alla scheda', () => {
       base: SITO, giorno: '2026-01-02', play: PLAY, ancora: (g) => `#/x/${g}`,
     });
     expect(link).toBe(`${SITO}#/x/2026-01-02`);
+  });
+});
+
+describe('le righe disegnate della scheda', () => {
+  it('riconosce sia la forma della partita sia la barra del percorso', () => {
+    // Chi mostra la scheda a schermo le nasconde a chi ascolta, perche' ripetono in
+    // simboli quello che le righe sopra dicono a parole. Quando la barra e' passata dai
+    // blocchi pieni ai quadrati questo elenco viveva dentro il componente e sarebbe
+    // rimasto indietro: la riga avrebbe continuato a comparire uguale, e l'unico a
+    // notarlo sarebbe stato qualcuno che il gioco lo ascolta invece di guardarlo.
+    expect(RIGA_DISEGNATA.test('▂▃▅█▃▂')).toBe(true);
+    expect(RIGA_DISEGNATA.test('■■■■□□□□□□□□□□□□')).toBe(true);
+    expect(RIGA_DISEGNATA.test('□'.repeat(16))).toBe(true);
+    // Una frase non e' un disegno, e non va nascosta a nessuno.
+    expect(RIGA_DISEGNATA.test('23 livelli su 100')).toBe(false);
+    expect(RIGA_DISEGNATA.test('PLINTO — Il percorso')).toBe(false);
+    expect(RIGA_DISEGNATA.test('')).toBe(false);
   });
 });

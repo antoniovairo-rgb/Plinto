@@ -27,7 +27,7 @@
  * Uso: npm run verifica
  */
 
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 
 const VERIFICHE = [
@@ -63,6 +63,75 @@ const VERIFICHE = [
   { nome: 'resistenza: memoria e fluidita dopo centinaia di mosse', comando: 'npm', argomenti: ['run', 'soak'] },
 ];
 
+/**
+ * LA CORSIA VELOCE, E PERCHE' NON SI FIDA DI CHI LA USA.
+ *
+ * Il controllo dei cento livelli e' 56 minuti sui 63 di questo comando. Per una modifica
+ * a un'icona o a un testo e' sproporzionato, e chi rilascia tre volte in un pomeriggio
+ * finisce per saltarlo -- che e' esattamente il modo in cui questo file e' nato, dopo
+ * una pubblicazione fatta saltando un controllo e bloccata dall'integrazione continua.
+ *
+ * Quindi la scorciatoia esiste, ma NON decide chi la lancia: decide il diff. Con
+ * `--veloce` il comando guarda quali file sono cambiati rispetto a cio' che e' gia'
+ * pubblicato e salta i cento livelli solo se nessuno di quelli elencati qui sotto e'
+ * stato toccato. Se anche uno solo lo e', rifiuta e fa il giro intero.
+ *
+ * COSA C'E' NELL'ELENCO, e perche' e' piu' lungo di "il motore". Quel controllo non
+ * prova solo le regole: prova che i cento livelli si vincano TOCCANDO pezzi e caselle
+ * nell'app vera. Quindi ci entra anche tutto cio' che sposta la plancia sotto il dito --
+ * il foglio di stile compreso. Non e' prudenza eccessiva: due caratteri di icona in piu'
+ * hanno fatto tornare lo scorrimento della home nella 1.7.1.
+ *
+ * Al posto dei cento livelli resta `e2e-quadri`, che gioca vittoria e sconfitta su due
+ * livelli veri: non e' la stessa cosa, e infatti il riassunto lo dice a chiare lettere.
+ */
+const TOCCA_IL_GIOCO = [
+  // Tutto il motore, TRANNE la scheda condivisibile: `scheda.js` sta qui dentro per
+  // comodita' di collocazione, ma e' un formattatore di testo puro che nessuna parte del
+  // gioco importa -- solo la condivisione e le sue prove. Verificato prima di scriverlo,
+  // e se un giorno qualcuno gliela facesse importare da altrove questa riga andrebbe
+  // tolta.
+  /^src\/core\/(?!scheda\.js$)/,
+  /^src\/sim\//,
+  /^src\/state\//,
+  /^src\/styles\//,
+  /^src\/config\/(rules|quadri)\.js$/,
+  // I componenti con cui si gioca davvero: la plancia, i pezzi, come si trascinano.
+  /^src\/ui\/(Plancia|Tray|Pezzo|Bomba|MiniGriglia|Hud|BarraObiettivo|AnteprimaTerna|Salvagente|SchermoGioco)\.jsx$/,
+  /^src\/ui\/use(Trascinamento|Tastiera)\.js$/,
+  /^src\/ui\/schermate\/(AperturaQuadro|FineQuadro|Quadri)\.jsx$/,
+  /^tools\/genera-quadri\.mjs$/,
+  /^tests\/e2e\/tutti-i-livelli\.mjs$/,
+  /^index\.html$/,
+  /^vite\.config\.js$/,
+];
+
+/**
+ * I file cambiati rispetto a quello che e' gia' pubblicato.
+ *
+ * Due insiemi uniti: quello che non e' ancora committato, e quello che e' committato ma
+ * non ancora spinto. Insieme rispondono alla domanda giusta -- "cosa e' cambiato da
+ * quando il gioco e' online" -- invece che a "cosa sto scrivendo adesso".
+ *
+ * Se git non risponde, la funzione restituisce `null` e la corsia veloce si chiude: non
+ * sapere quali file sono cambiati e' esattamente il caso in cui non si prendono
+ * scorciatoie.
+ */
+function fileCambiati() {
+  const leggi = (argomenti) => execFileSync('git', argomenti, { encoding: 'utf8' })
+    .split('\n').map((r) => r.trim()).filter(Boolean);
+  try {
+    const cambiati = new Set([
+      ...leggi(['diff', '--name-only', 'HEAD']),
+      ...leggi(['ls-files', '--others', '--exclude-standard']),
+      ...leggi(['diff', '--name-only', 'origin/main...HEAD']),
+    ]);
+    return [...cambiati];
+  } catch {
+    return null;
+  }
+}
+
 const LOG = new URL('../verifica.log', import.meta.url).pathname;
 const registro = createWriteStream(LOG, { flags: 'w' });
 
@@ -95,7 +164,28 @@ function esegui({ comando, argomenti }) {
 const inizio = Date.now();
 const esiti = [];
 
-for (const verifica of VERIFICHE) {
+// --- La corsia veloce: si apre solo se il diff lo permette ---------------------
+let saltati = [];
+if (process.argv.includes('--veloce')) {
+  const cambiati = fileCambiati();
+  if (cambiati === null) {
+    eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: git non risponde, quindi non so che cosa e\''
+      + ' cambiato. Faccio il giro completo.\n');
+  } else {
+    const rischiosi = cambiati.filter((f) => TOCCA_IL_GIOCO.some((r) => r.test(f)));
+    if (rischiosi.length > 0) {
+      eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: questi file toccano come si gioca, quindi i'
+        + ' cento livelli vanno rigiocati.\n');
+      rischiosi.forEach((f) => eco(`  - ${f}\n`));
+    } else {
+      saltati = ['tutti e cento i livelli, giocati nell app'];
+      eco(`\n\u001b[1mCorsia veloce\u001b[0m: ${cambiati.length} file cambiati, nessuno tocca come`
+        + ' si gioca. Salto i cento livelli e mi tengo e2e-quadri.\n');
+    }
+  }
+}
+
+for (const verifica of VERIFICHE.filter((v) => !saltati.includes(v.nome))) {
   const da = Date.now();
   eco(`\n\u001b[1m\u25b6 ${verifica.nome}\u001b[0m\n`);
   const ok = await esegui(verifica);
@@ -110,6 +200,16 @@ for (const e of esiti) {
   eco(`  ${e.ok ? '\u2713' : '\u2717'}  ${e.nome.padEnd(46)} ${String(e.secondi).padStart(4)}s\n`);
 }
 eco('\n');
+
+// Il salto si dice a chiare lettere, sia a schermo sia nel registro: un riassunto che
+// non distingue "passato" da "non eseguito" e' peggio di nessun riassunto.
+for (const nome of saltati) {
+  eco(`  \u25cb  ${nome.padEnd(46)}  SALTATO (corsia veloce)\n`);
+}
+if (saltati.length > 0) {
+  eco('\nAttenzione: i cento livelli NON sono stati rigiocati. Al loro posto e2e-quadri ha'
+    + ' provato vittoria e sconfitta su due livelli, che non e\' la stessa cosa.\n');
+}
 
 if (falliti.length > 0) {
   eco(`${falliti.length} controlli su ${esiti.length} sono falliti. NON pubblicare.\n`, 'stderr');

@@ -7,6 +7,43 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.7.2] — 10 settembre 2026
+
+### Cambiato
+
+**La barra dell'avanzamento nelle schede condivise e' fatta di quadrati.** Provata su un
+telefono vero, la versione con i blocchi pieni si leggeva come una lastra bianca con una
+lineetta accanto: forte, e per giunta somigliante alla riga della Catena, che usa proprio
+quei caratteri per dire un'altra cosa. Due significati con gli stessi simboli e' il modo
+piu' rapido di rendere illeggibili tutti e due. I quadrati si contano a colpo d'occhio e
+somigliano alle caselle del gioco.
+
+**Cambiare quei due caratteri ne rompeva un terzo, in silenzio.** Le righe disegnate
+della scheda vengono nascoste a chi ascolta, perche' ripetono in simboli quello che le
+righe sopra dicono a parole; l'elenco dei caratteri che le riconosce viveva dentro il
+componente, e senza i quadrati la barra sarebbe uscita dall'elenco. La riga avrebbe
+continuato a comparire uguale, e l'unico ad accorgersene sarebbe stato qualcuno che il
+gioco lo ascolta invece di guardarlo. Ora l'elenco sta accanto ai caratteri che disegna,
+si chiama `RIGA_DISEGNATA` ed e' provato.
+
+**`npm run verifica --veloce`: una scorciatoia che non si fida di chi la usa.** Il
+controllo dei cento livelli e' 56 minuti sui 63 del gate. Per un'icona o due caratteri e'
+sproporzionato, e chi rilascia tre volte in un pomeriggio finisce per saltarlo del tutto
+— che e' precisamente il modo in cui questo comando e' nato.
+
+Adesso la scorciatoia c'e', ma **decide il diff e non chi lancia il comando**: salta i
+cento livelli solo se nessun file cambiato rispetto a cio' che e' pubblicato tocca come
+si gioca. Se anche uno solo lo tocca, rifiuta ed elenca i colpevoli; se git non risponde,
+rifiuta. L'elenco comprende il foglio di stile, perche' quel controllo prova che i livelli
+si vincano toccando pezzi e caselle nell'app vera, e nella 1.7.1 due caratteri di icona in
+piu' avevano fatto tornare lo scorrimento della home.
+
+Il riassunto scrive «SALTATO» accanto al controllo non eseguito e avverte che al suo posto
+ne e' girato uno piu' debole: un riepilogo che confonde «passato» con «non eseguito» e'
+peggio di nessun riepilogo.
+
+Misurato su questa stessa versione: **447 secondi invece di 3776**.
+
 ## [1.7.1] — 10 settembre 2026
 
 ### Aggiunto

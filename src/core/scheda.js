@@ -26,6 +26,34 @@ import { CHAIN_MAX } from '../config/rules.js';
 /** Gli otto gradini dei blocchi, dal piu' basso al piu' alto. */
 const BLOCCHI = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'];
 
+/**
+ * I due caratteri della barra dell'avanzamento: casella fatta, casella da fare.
+ *
+ * Quadrati e non blocchi pieni, e non e' una scelta di gusto. Il blocco pieno sommato
+ * al trattino basso, provato su un telefono vero, si legge come una lastra bianca con
+ * una lineetta accanto: forte, e per giunta somigliante alla riga della Catena, che usa
+ * proprio quei caratteri per dire un'altra cosa. Due significati con gli stessi simboli
+ * e' il modo piu' rapido di rendere illeggibili tutti e due.
+ *
+ * I quadrati si contano a colpo d'occhio e somigliano alle caselle del gioco.
+ */
+const PERCORSO_FATTO = '■';
+const PERCORSO_DA_FARE = '□';
+
+/**
+ * Le righe della scheda che sono un DISEGNO e non una frase.
+ *
+ * Serve a chi mostra la scheda a schermo: queste righe vanno nascoste a chi ascolta,
+ * perche' ripetono in simboli quello che le righe sopra dicono a parole, e lette da un
+ * lettore di schermo diventano una filastrocca di nomi di caratteri.
+ *
+ * Sta qui, accanto ai caratteri che disegna, per una ragione imparata subito: quando la
+ * barra dell'avanzamento e' passata dai blocchi pieni ai quadrati, l'elenco viveva
+ * dentro il componente e sarebbe rimasto indietro. La riga avrebbe continuato a
+ * comparire uguale, e l'unico a notarlo sarebbe stato qualcuno che il gioco lo ascolta.
+ */
+export const RIGA_DISEGNATA = /^[▁▂▃▄▅▆▇█■□]+$/u;
+
 /** Quante colonne ha la riga di blocchi. Sedici sta su una riga di chat ovunque. */
 export const COLONNE_FORMA = 16;
 
@@ -204,7 +232,7 @@ export function formattaSchedaPercorso(dati = {}, contesto = {}) {
   const totale = Math.max(1, dati.totale ?? 1);
 
   const pieni = Math.round((Math.min(superati, totale) / totale) * COLONNE_FORMA);
-  const barra = '█'.repeat(pieni) + '▁'.repeat(COLONNE_FORMA - pieni);
+  const barra = PERCORSO_FATTO.repeat(pieni) + PERCORSO_DA_FARE.repeat(COLONNE_FORMA - pieni);
 
   const righe = [
     `${testi.gioco ?? 'PLINTO'} — ${testi.percorsoTitolo ?? 'Il percorso'}`,

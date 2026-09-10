@@ -44,7 +44,7 @@ android {
         // contenitore non ha una vita propria, mostra il sito. Un tester che legge
         // "1.3.1" in Informazioni app mentre il gioco dice 1.3.4 segnala un difetto
         // che non esiste.
-        versionName '1.7.1'
+        versionName '1.7.2'
     }
 
     buildTypes {

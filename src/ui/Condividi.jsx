@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda } from '../core/scheda.js';
+import {
+  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda, RIGA_DISEGNATA,
+} from '../core/scheda.js';
 import { rottaSfida } from './rotta.js';
 import { PLAY_URL } from '../config/progetto.js';
 
@@ -114,7 +116,7 @@ export function CondividiTesto({ testo, etichetta, anteprima = true, t }) {
       {anteprima || esito !== null ? (
       <pre className="pl-scheda" aria-label={t('scheda.anteprima')}>
         {testo.split('\n').map((riga, i) => (
-          /^[▁▂▃▄▅▆▇█]+$/u.test(riga)
+          RIGA_DISEGNATA.test(riga)
             ? <span key={i} aria-hidden="true" className="pl-scheda__forma">{`${riga}\n`}</span>
             : <span key={i}>{`${riga}\n`}</span>
         ))}

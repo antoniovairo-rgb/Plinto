@@ -11,6 +11,7 @@
 
 ```bash
 npm run verifica       # esegue TUTTI i controlli, in ordine, e riassume l'esito
+npm run verifica -- --veloce   # come sopra, ma salta i cento livelli SE il diff lo permette
 ```
 
 Diciotto controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
@@ -22,6 +23,32 @@ rotte è più utile che scoprirle una alla volta.
 **Attenzione alle pipe.** Lanciare una prova come `node prova.mjs | tail -3` restituisce il
 codice di uscita di `tail`, non quello della prova: è sempre 0, e un fallimento passa
 inosservato. È già successo. `npm run verifica` non usa pipe.
+
+### `--veloce`: la scorciatoia che non si fida di chi la usa
+
+Il controllo dei cento livelli è **56 minuti sui 63** di questo comando. Per una modifica
+a un'icona o a un testo è sproporzionato, e chi rilascia tre volte in un pomeriggio
+finisce per saltarlo del tutto — che è esattamente il modo in cui `verifica-tutto.mjs` è
+nato, dopo una pubblicazione fatta saltando un controllo e bloccata dalla CI.
+
+Quindi la scorciatoia esiste, ma **non decide chi la lancia: decide il diff**. Con
+`--veloce` il comando guarda quali file sono cambiati rispetto a ciò che è già
+pubblicato — quello non ancora committato, più quello committato e non ancora spinto — e
+salta i cento livelli solo se nessuno di quei file tocca come si gioca. Se anche uno solo
+lo tocca, rifiuta, elenca i colpevoli e fa il giro intero. Se git non risponde, rifiuta:
+non sapere cosa è cambiato è il caso in cui non si prendono scorciatoie.
+
+L'elenco dei file che chiudono la corsia è più lungo di «il motore», e a ragione: quel
+controllo non prova solo le regole, prova che i cento livelli si vincano **toccando pezzi
+e caselle nell'app vera**. Ci entra quindi tutto ciò che sposta la plancia sotto il dito,
+foglio di stile compreso — due caratteri di icona in più hanno fatto tornare lo
+scorrimento della home nella 1.7.1.
+
+Al posto dei cento livelli resta `e2e-quadri`, che gioca vittoria e sconfitta su due
+livelli veri. Non è la stessa cosa, e il riassunto finale lo scrive a chiare lettere
+invece di far passare un controllo non eseguito per un controllo superato.
+
+Misurato: 447 secondi invece di 3776.
 
 ## Come si eseguono
 
