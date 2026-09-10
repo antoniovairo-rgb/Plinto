@@ -74,7 +74,50 @@ const server = createServer(async (req, res) => {
     res.writeHead(404); res.end('non trovato');
   }
 });
-await new Promise((r) => server.listen(4174, r));
+/**
+ * Mettersi in ascolto sulla porta, aspettando che si liberi.
+ *
+ * `server.listen()` senza un gestore di `error` fa MORIRE il processo con un'eccezione
+ * non gestita: niente porta, niente motivo, solo un `throw er` di Node. E' successo
+ * durante un giro completo -- i controlli di questo file erano tutti passati e l'esito
+ * diceva che il gioco e' installabile, ma il comando e' uscito in errore lo stesso, e
+ * dal messaggio non si capiva da dove venisse.
+ *
+ * La causa e' banale e transitoria: nel gate girano di fila parecchi script che aprono
+ * un server, e ogni tanto la porta e' ancora occupata da quello di prima. Quindi si
+ * riprova per qualche secondo invece di arrendersi al primo colpo, e se davvero non si
+ * libera si esce dicendo QUALE porta e CHI potrebbe tenerla.
+ *
+ * Il gate ha fatto la cosa giusta comunque: il controllo era passato, ma il processo e'
+ * uscito diverso da zero e la pubblicazione si e' fermata. Un esito buono con un codice
+ * di uscita cattivo dev'essere un fallimento, non una sfumatura.
+ */
+async function ascolta(porta, tentativi = 10) {
+  for (let i = 0; i < tentativi; i += 1) {
+    try {
+      await new Promise((risolvi, rifiuta) => {
+        const suErrore = (e) => { server.removeListener('listening', suOk); rifiuta(e); };
+        const suOk = () => { server.removeListener('error', suErrore); risolvi(); };
+        server.once('error', suErrore);
+        server.once('listening', suOk);
+        server.listen(porta);
+      });
+      return;
+    } catch (errore) {
+      if (errore?.code !== 'EADDRINUSE' || i === tentativi - 1) {
+        console.error(
+          `Impossibile mettersi in ascolto sulla porta ${porta}: ${errore?.code ?? errore}.`
+          + ' Di solito e\' un altro controllo del gate che non l\'ha ancora liberata;'
+          + ` con "lsof -i :${porta}" si vede chi la tiene.`,
+        );
+        process.exit(1);
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
+}
+
+await ascolta(4174);
 const INDIRIZZO = `http://localhost:4174${BASE}`;
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });

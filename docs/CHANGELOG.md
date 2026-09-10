@@ -7,6 +7,87 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.7.4] — 10 settembre 2026
+
+### Cambiato
+
+**L'indirizzo per le segnalazioni non e' piu' personale.** Era quello con nome e cognome
+dell'autore, e nel gioco era l'unico posto in cui comparivano in chiaro davanti a chi
+gioca — piu' esposto del nome del pacchetto dentro un URL, che non legge nessuno. Adesso
+e' lo stesso indirizzo che il profilo sviluppatore mostra gia' sul Play Store, quindi i
+due coincidono e non c'e' un secondo dato in giro.
+
+### Aggiunto
+
+**«Come si gioca» dice anche com'e' fatto il gioco.** La pagina spiegava benissimo come
+si muovono i pezzi, l'Intreccio, la Catena, la Tinta e le bombe, e non diceva da nessuna
+parte che il gioco sono cento livelli, ne' che esistono la partita libera e la sfida del
+giorno. Era l'unica informazione che viveva soltanto nell'ultimo passo della guida
+iniziale: chi tocca «non mostrarmela piu'» al primo avvio non la leggeva mai piu'.
+
+Sta **in cima**, subito dopo il saluto e prima delle regole. Chi ne ha piu' bisogno e'
+proprio il giocatore che ha saltato la guida e non sa che il percorso esista, e in fondo
+alla pagina, sotto le bombe, non ci arriverebbe mai. Prima che cos'e' il gioco, poi come
+si gioca.
+
+**E la guida NON si puo' riaprire da qui**, che era la prima idea ed era peggiore. Le due
+schermate pescano dalle stesse chiavi, quindi un pulsante «rivedi la guida» avrebbe
+aggiunto una seconda strada — a passi, con meno contenuto — verso quello che questa
+pagina dice gia' meglio. Il wizard serve ad accogliere chi arriva; chi gioca da un mese
+non ha bisogno di essere accolto, ha bisogno di controllare una regola. Quello che
+mancava non era la strada, era il contenuto, e adesso c'e'.
+
+### Corretto
+
+**Il controllo sull'installazione poteva morire senza dire perche'.** `server.listen()`
+senza un gestore di `error` fa uscire il processo con un `throw` di Node: niente porta,
+niente motivo. E' successo durante un giro completo — i controlli erano tutti passati e
+l'esito diceva che il gioco e' installabile, ma il comando e' uscito diverso da zero e la
+pubblicazione si e' fermata. Il gate ha fatto la cosa giusta: un esito buono con un
+codice di uscita cattivo e' un fallimento, non una sfumatura.
+
+La causa era transitoria: nel gate girano di fila parecchi script che aprono un server, e
+ogni tanto la porta e' ancora occupata da quello prima. Adesso aspetta qualche secondo che
+si liberi, e se davvero non si libera scrive quale porta e come vedere chi la tiene.
+
+**La corsia veloce sbagliava domanda.** Confrontava con cio' che e' PUBBLICATO, quindi
+dopo un giro completo andato bene bastava correggere una riga in uno script di prova per
+dover rigiocare cento livelli gia' verificati su quel medesimo codice: la stessa ora
+buttata che la corsia doveva evitare.
+
+Adesso la domanda e' «il codice che decide come si gioca e' ancora quello su cui i cento
+livelli sono passati?», e la risposta sono le impronte dei file, una per file. Un giro
+completo verde le registra; la corsia si apre solo se sono tutte identiche, e quando
+rifiuta elenca quali sono cambiate. Su una macchina dove nessun giro completo e' mai
+passato, rifiuta.
+
+## [1.7.3] — 10 settembre 2026
+
+### Corretto
+
+**«Info» restava appoggiato a sinistra.** Il menu della home ha cinque voci su due
+colonne, e la quinta occupava la colonna di sinistra da sola: si legge come un errore di
+impaginazione, non come una scelta. Adesso una voce spaiata prende tutta la riga e si
+centra.
+
+La regola e' `:last-child:nth-child(odd)` e non il solo `:last-child`, cosi' vale anche il
+giorno in cui le voci diventano sei senza che nessuno debba ricordarsene: con un numero
+pari l'ultima ha la sua vicina e non va toccata.
+
+**E sopra i 460px il difetto c'era lo stesso, dove lo spazio non mancava affatto.** La
+regola per gli schermi larghi metteva `repeat(4, auto)`, scritto quando le voci erano
+quattro, ed era rimasta indietro: la quinta finiva da sola su una seconda riga. Adesso e'
+`auto-fit`, che conta le voci da solo. Il commento sopra la regola diceva ancora
+«quattro voci»: e' il tipo di numero scritto a parole che smette di essere vero senza
+fare rumore.
+
+### Verifica
+
+Il foglio di stile e' nell'elenco dei file che chiudono la corsia veloce, quindi questa
+versione ha rifatto il giro completo: 18 controlli su 18. E' il comportamento voluto —
+una regola di impaginazione globale puo' spostare la plancia sotto il dito, e nella 1.7.1
+due caratteri di icona in piu' lo avevano gia' fatto.
+
 ## [1.7.2] — 10 settembre 2026
 
 ### Cambiato

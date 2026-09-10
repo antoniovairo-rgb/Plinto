@@ -4,6 +4,7 @@ import { Bomba } from '../Bomba.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
+import { TOTALE_QUADRI } from '../../config/quadri.js';
 import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE , TINTA_SOGLIA, TINTA_PASSO } from '../../config/rules.js';
 
 /**
@@ -41,6 +42,23 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
         <Plinto espressione="contento" dimensione={64} className="pl-plinto--vivo" />
         <p className="pl-testo">{t('aiuto.intro')}</p>
       </div>
+
+      {/* COM'E' FATTO IL GIOCO, e sta in cima di proposito.
+
+          Questa pagina spiegava benissimo come si muovono i pezzi e non diceva da
+          nessuna parte che il gioco sono cento livelli. Chi ne ha piu' bisogno e'
+          proprio il giocatore che ha saltato la guida iniziale e non sa che il percorso
+          esista: se la sezione stesse in fondo, sotto le bombe, non ci arriverebbe mai.
+          Prima che cos'e' il gioco, poi come si gioca.
+
+          I due paragrafi arrivano dalle stesse chiavi dell'ultimo passo della guida.
+          Riscritti qui sarebbero due testi per la stessa cosa, destinati a divergere
+          alla prima modifica -- ed e' anche il motivo per cui la guida NON si puo'
+          riaprire da qui: sarebbe una seconda strada, piu' povera, verso quello che
+          questa pagina dice gia' meglio. */}
+      <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
+      <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI)}</p>
+      <p className="pl-testo">{t('guida.altreModalita')}</p>
 
       <h2 className="pl-sezione">{t('aiuto.baseTitolo')}</h2>
       <ol className="pl-intro__regole">

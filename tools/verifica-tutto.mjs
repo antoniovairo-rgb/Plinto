@@ -28,7 +28,8 @@
  */
 
 import { spawn, execFileSync } from 'node:child_process';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const VERIFICHE = [
   { nome: 'test unitari', comando: 'npm', argomenti: ['test'] },
@@ -107,26 +108,46 @@ const TOCCA_IL_GIOCO = [
 ];
 
 /**
- * I file cambiati rispetto a quello che e' gia' pubblicato.
+ * L'IMPRONTA DEL GIOCO: che aspetto aveva il codice l'ultima volta che i cento livelli
+ * sono stati rigiocati per intero e sono passati.
  *
- * Due insiemi uniti: quello che non e' ancora committato, e quello che e' committato ma
- * non ancora spinto. Insieme rispondono alla domanda giusta -- "cosa e' cambiato da
- * quando il gioco e' online" -- invece che a "cosa sto scrivendo adesso".
+ * Prima la corsia veloce confrontava con cio' che e' PUBBLICATO, e sbagliava domanda.
+ * Dopo un giro completo andato bene, correggere una riga in uno script di prova
+ * costringeva a rigiocare cento livelli gia' verificati su quel medesimo codice: la
+ * stessa ora buttata che la corsia doveva evitare.
  *
- * Se git non risponde, la funzione restituisce `null` e la corsia veloce si chiude: non
- * sapere quali file sono cambiati e' esattamente il caso in cui non si prendono
- * scorciatoie.
+ * La domanda giusta e' un'altra: "il codice che decide come si gioca e' ancora quello su
+ * cui i cento livelli sono passati?". Si risponde con le impronte dei file, non con un
+ * giudizio, e la risposta e' un si' o un no verificabile.
+ *
+ * Il registro non si versiona: descrive che cosa e' stato eseguito SU QUESTA MACCHINA.
+ * Una copia appena clonata non ce l'ha, quindi fa il giro completo -- che e' giusto,
+ * perche' li' nessuno ha mai rigiocato niente.
  */
-function fileCambiati() {
-  const leggi = (argomenti) => execFileSync('git', argomenti, { encoding: 'utf8' })
-    .split('\n').map((r) => r.trim()).filter(Boolean);
+const REGISTRO_LIVELLI = new URL('../verifica-livelli.json', import.meta.url).pathname;
+
+/** Le impronte di tutti i file che decidono come si gioca, una per file. */
+function improntaDelGioco() {
   try {
-    const cambiati = new Set([
-      ...leggi(['diff', '--name-only', 'HEAD']),
-      ...leggi(['ls-files', '--others', '--exclude-standard']),
-      ...leggi(['diff', '--name-only', 'origin/main...HEAD']),
-    ]);
-    return [...cambiati];
+    const tutti = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
+      .split('\n').map((r) => r.trim()).filter(Boolean);
+    const impronte = {};
+    for (const file of tutti.filter((f) => TOCCA_IL_GIOCO.some((r) => r.test(f)))) {
+      impronte[file] = createHash('sha256').update(readFileSync(file)).digest('hex').slice(0, 16);
+    }
+    return impronte;
+  } catch {
+    return null;
+  }
+}
+
+/** Che cosa e' cambiato rispetto all'ultimo giro completo passato. `null` = non lo so. */
+function cambiatoDallUltimoGiro(adesso) {
+  if (!adesso || !existsSync(REGISTRO_LIVELLI)) return null;
+  try {
+    const prima = JSON.parse(readFileSync(REGISTRO_LIVELLI, 'utf8')).impronte ?? {};
+    const nomi = new Set([...Object.keys(prima), ...Object.keys(adesso)]);
+    return [...nomi].filter((f) => prima[f] !== adesso[f]);
   } catch {
     return null;
   }
@@ -166,22 +187,21 @@ const esiti = [];
 
 // --- La corsia veloce: si apre solo se il diff lo permette ---------------------
 let saltati = [];
+const improntaOra = improntaDelGioco();
 if (process.argv.includes('--veloce')) {
-  const cambiati = fileCambiati();
+  const cambiati = cambiatoDallUltimoGiro(improntaOra);
   if (cambiati === null) {
-    eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: git non risponde, quindi non so che cosa e\''
-      + ' cambiato. Faccio il giro completo.\n');
+    eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: non risulta nessun giro completo passato su'
+      + ' questa macchina, quindi i cento livelli non li ha mai rigiocati nessuno qui.\n');
+  } else if (cambiati.length > 0) {
+    eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: dall\'ultimo giro completo sono cambiati file'
+      + ' che decidono come si gioca.\n');
+    cambiati.forEach((f) => eco(`  - ${f}\n`));
   } else {
-    const rischiosi = cambiati.filter((f) => TOCCA_IL_GIOCO.some((r) => r.test(f)));
-    if (rischiosi.length > 0) {
-      eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: questi file toccano come si gioca, quindi i'
-        + ' cento livelli vanno rigiocati.\n');
-      rischiosi.forEach((f) => eco(`  - ${f}\n`));
-    } else {
-      saltati = ['tutti e cento i livelli, giocati nell app'];
-      eco(`\n\u001b[1mCorsia veloce\u001b[0m: ${cambiati.length} file cambiati, nessuno tocca come`
-        + ' si gioca. Salto i cento livelli e mi tengo e2e-quadri.\n');
-    }
+    saltati = ['tutti e cento i livelli, giocati nell app'];
+    eco('\n\u001b[1mCorsia veloce\u001b[0m: il codice che decide come si gioca e\' identico,'
+      + ' file per file, a quello dell\'ultimo giro completo passato. Salto i cento livelli e'
+      + ' mi tengo e2e-quadri.\n');
   }
 }
 
@@ -209,6 +229,23 @@ for (const nome of saltati) {
 if (saltati.length > 0) {
   eco('\nAttenzione: i cento livelli NON sono stati rigiocati. Al loro posto e2e-quadri ha'
     + ' provato vittoria e sconfitta su due livelli, che non e\' la stessa cosa.\n');
+}
+
+// Un giro COMPLETO andato bene lascia l'impronta: e' quello che permette alla prossima
+// corsia veloce di dire "questi cento livelli li ho gia' giocati su questo identico
+// codice" invece di doverlo dare per buono.
+if (falliti.length === 0 && saltati.length === 0 && improntaOra) {
+  try {
+    writeFileSync(REGISTRO_LIVELLI, `${JSON.stringify({
+      quando: new Date().toISOString(),
+      impronte: improntaOra,
+    }, null, 2)}\n`);
+    eco('Impronta del gioco registrata: la prossima verifica potra\' saltare i cento livelli'
+      + ' finche\' quel codice non cambia.\n');
+  } catch {
+    eco('Non sono riuscito a registrare l\'impronta del gioco: la prossima verifica fara\' il'
+      + ' giro completo.\n', 'stderr');
+  }
 }
 
 if (falliti.length > 0) {

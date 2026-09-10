@@ -35,8 +35,14 @@ export const PAYPAL_URL = 'https://paypal.me/elevoraCPM';
  *
  * ATTENZIONE: questo indirizzo diventa PUBBLICO. Compare nel gioco e sulla scheda del
  * Play Store. Cambiarlo qui lo cambia ovunque.
+ *
+ * NON E' UN INDIRIZZO PERSONALE, ed e' una scelta. Il primo che era scritto qui portava
+ * nome e cognome dell'autore, ed era l'unico posto in tutto il gioco in cui comparivano
+ * in chiaro davanti a chi gioca: piu' esposto del nome del pacchetto dentro un URL, che
+ * non legge nessuno. Questo e' lo stesso indirizzo che il profilo sviluppatore mostra
+ * gia' sul Play Store, quindi i due coincidono e non c'e' un secondo dato in giro.
  */
-export const CONTATTO = 'antoniovairo@gmail.com';
+export const CONTATTO = 'korward.devteam@gmail.com';
 
 /**
  * Dove vive il gioco sul web. Serve dove serve un indirizzo ASSOLUTO, cioe' nei tag

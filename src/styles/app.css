@@ -1592,10 +1592,10 @@ button {
 
 /* ------------------------------------------------- home: modalita e versione --- */
 
-/* Il menu in fondo alla home ha quattro voci da quando c'e' "Come si gioca". In fila
-   non ci stavano: prima quella voce andava a capo su tre righe (sembrava un errore,
-   non una scelta), poi restava "Info" da solo sulla seconda riga.
-   Due colonne per due righe: bilanciato, prevedibile, e ogni voce resta su una riga. */
+/* Il menu in fondo alla home ha CINQUE voci: come si gioca, statistiche, profilo,
+   impostazioni, info. In fila non ci stavano: prima "Come si gioca" andava a capo su
+   tre righe (sembrava un errore, non una scelta), poi restava "Info" da solo.
+   Due colonne: bilanciato, prevedibile, e ogni voce resta su una riga. */
 .pl-home__menu {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1608,9 +1608,28 @@ button {
   white-space: nowrap;
   min-height: 44px;
 }
-/* Dove c'e' spazio tornano tutte in fila, che resta la forma migliore. */
-@media (min-width: 460px) {
-  .pl-home__menu { grid-template-columns: repeat(4, auto); justify-content: center; }
+/* Con un numero DISPARI di voci l'ultima resterebbe appoggiata alla colonna di
+   sinistra, come se quella accanto fosse sparita: si legge come un errore, non come
+   una scelta. Occupando tutta la riga e centrandosi, la colonna vuota non si vede.
+
+   `:nth-child(odd)` e non il solo `:last-child`: con un numero pari l'ultima voce ha la
+   sua vicina e non va toccata. Cosi' la regola vale anche il giorno in cui le voci
+   diventano sei, senza che nessuno debba ricordarsene. */
+.pl-home__menu .pl-btn:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+/* Dove c'e' spazio tornano tutte in fila, che resta la forma migliore. `auto-fit` e non
+   un numero: il numero era 4 ed e' rimasto indietro quando le voci sono diventate 5,
+   lasciando di nuovo "Info" da solo -- stavolta su uno schermo grande, dove lo spazio
+   c'era eccome. */
+@media (min-width: 560px) {
+  .pl-home__menu {
+    grid-template-columns: repeat(auto-fit, minmax(0, max-content));
+    justify-content: center;
+  }
+  /* In fila l'ultima voce non e' piu' spaiata: la regola di sopra non deve applicarsi. */
+  .pl-home__menu .pl-btn:last-child:nth-child(odd) { grid-column: auto; }
 }
 
 .pl-home__versione {
