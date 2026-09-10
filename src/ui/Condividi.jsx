@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso } from '../core/scheda.js';
+import { formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda } from '../core/scheda.js';
 import { rottaSfida } from './rotta.js';
+import { PLAY_URL } from '../config/progetto.js';
 
 /**
  * Condividere il risultato.
@@ -20,15 +21,35 @@ import { rottaSfida } from './rotta.js';
  * si vede qui e' esattamente quello che verra' condiviso.
  */
 
-/** Dove vive il gioco. Serve a costruire il collegamento da mettere nella scheda. */
+/**
+ * Il collegamento da mettere in fondo alla scheda.
+ *
+ * DUE DESTINAZIONI DIVERSE, e la differenza non e' un dettaglio.
+ *
+ * Per la SFIDA DEL GIORNO e' sempre l'indirizzo del sito con il giorno nell'ancora:
+ * quel collegamento serve a far giocare a chi lo riceve la STESSA identica partita, e
+ * il giorno e' il dato che glielo permette. Nessun indirizzo del Play Store puo'
+ * portarlo, quindi li' non si tocca.
+ *
+ * Per tutto il resto e' la scheda del Play Store, quando c'e': chi riceve un risultato
+ * e ha voglia di provare deve poter INSTALLARE il gioco, non aprirlo una volta sola nel
+ * browser e dimenticarselo. Se `PLAY_URL` e' vuota si ricade sul sito, che e' anche
+ * quello che succede finche' la scheda del Play Store non e' pubblica.
+ *
+ * L'indirizzo del sito si legge da `window.location` e non da una costante, perche' il
+ * gioco gira anche da una sottocartella e da un'applicazione installata: scritto a mano
+ * sarebbe giusto in un posto solo.
+ */
 function indirizzoDelGioco(giorno) {
+  let base = '';
   try {
     const { origin, pathname } = window.location;
-    const base = `${origin}${pathname}`.replace(/index\.html$/, '');
-    return giorno ? `${base}${rottaSfida(giorno)}` : base;
+    base = `${origin}${pathname}`.replace(/index\.html$/, '');
   } catch {
-    return '';
+    // Un contesto senza `location` non deve far saltare la condivisione: resta il
+    // collegamento allo store, che e' assoluto e non dipende da dove gira il gioco.
   }
+  return collegamentoScheda({ base, giorno, play: PLAY_URL, ancora: rottaSfida });
 }
 
 /**

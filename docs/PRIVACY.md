@@ -35,7 +35,7 @@ essere inviati: il gioco è un'applicazione che gira interamente nel browser.
   né l'età, né la posizione.
 - Nessuna condivisione con nessuno, perché non c'è nulla da condividere.
 
-## Le due eccezioni: due collegamenti che portano fuori
+## Le tre eccezioni: tre collegamenti che portano fuori
 
 **Il collegamento alla donazione.** Nella schermata "Sostieni il progetto" c'è un
 collegamento a PayPal. **Il collegamento non fa nulla finché non lo tocchi tu.** Se lo
@@ -55,6 +55,27 @@ identificativo, niente sul dispositivo, niente sulle tue partite.
 
 Un modulo di contatto avrebbe voluto dire un servizio di terze parti, cioè una richiesta di
 rete verso un altro dominio: l'unica cosa che questa informativa promette di non fare.
+
+**Il collegamento nelle schede da condividere.** Quando mandi a qualcuno il risultato di
+una partita o il tuo avanzamento, in fondo al messaggio c'è un collegamento alla scheda
+del gioco sul Play Store. Serve a chi lo riceve per installarlo, se gli va. Anche qui il
+gioco non contatta nessuno: scrive un indirizzo dentro un testo, e sei tu a decidere se
+mandarlo e a chi.
+
+**Nel collegamento non c'è niente che ti riguardi.** Nessun codice di invito, nessun
+identificativo, nessun parametro che dica da chi arriva. È lo stesso identico indirizzo
+per tutti, e questo significa anche che chi ha scritto il gioco non può sapere quante
+persone lo hanno installato grazie a te. È una rinuncia consapevole: l'alternativa
+sarebbe tracciarti.
+
+L'unica eccezione alla frase qui sopra è il collegamento della **sfida del giorno**, che
+porta scritta la data della sfida. Non è un dato su di te: serve a far giocare a chi lo
+riceve la stessa identica partita, ed è la ragione per cui quel collegamento esiste.
+
+**L'anteprima che si vede in chat.** Quando incolli il collegamento del gioco in una
+conversazione, l'applicazione di messaggistica mostra un riquadro con un'immagine. Quel
+riquadro lo costruisce lei, leggendo la pagina del gioco, e l'immagine arriva dallo stesso
+indirizzo del gioco: nessun servizio di terze parti è coinvolto.
 
 ## Il service worker (installazione e uso senza rete)
 

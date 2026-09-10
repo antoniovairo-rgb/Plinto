@@ -38,5 +38,31 @@ export const PAYPAL_URL = 'https://paypal.me/elevoraCPM';
  */
 export const CONTATTO = 'antoniovairo@gmail.com';
 
+/**
+ * Dove vive il gioco sul web. Serve dove serve un indirizzo ASSOLUTO, cioe' nei tag
+ * dell'anteprima dei collegamenti: quelli non possono essere relativi, perche' chi li
+ * legge e' il server di WhatsApp o di Facebook e non ha nessuna pagina da cui contare.
+ */
+export const SITO = 'https://antoniovairo-rgb.github.io/Plinto/';
+
+/**
+ * La scheda del gioco sul Play Store. Vuoto = si condivide il sito.
+ *
+ * PERCHE' IL PLAY STORE E NON IL SITO. Chi riceve un risultato e vuole giocare deve
+ * poter INSTALLARE il gioco, non solo aprirlo una volta nel browser. Dal sito ci si
+ * arriva comunque, ma il passaggio in piu' lo fa quasi nessuno.
+ *
+ * ATTENZIONE, E' UNA DECISIONE CHE HA UNA DATA. Finche' l'app e' in test chiuso questa
+ * pagina NON e' pubblica: chi non e' fra i tester iscritti apre il link e non trova
+ * niente. Lasciare la costante vuota fino all'accesso alla produzione significa
+ * continuare a condividere il sito, che funziona per tutti e su qualunque sistema.
+ *
+ * LA SFIDA DEL GIORNO NON LA USA MAI, e non e' una dimenticanza: il suo collegamento
+ * porta scritto il giorno (`#/sfida/2026-09-12`) e serve a far giocare al destinatario
+ * la stessa identica partita. Un indirizzo del Play Store non puo' portare quel dato, e
+ * sostituirlo li' vorrebbe dire cancellare la funzione invece di migliorarla.
+ */
+export const PLAY_URL = 'https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto';
+
 /** Anno di partenza del progetto, per la nota di copyright. */
 export const ANNO = 2026;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso,
+  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda,
   formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA,
 } from '../src/core/scheda.js';
 import { CHAIN_MAX } from '../src/config/rules.js';
@@ -261,5 +261,43 @@ describe('la scheda del percorso', () => {
 
   it('un totale a zero non divide per zero', () => {
     expect(() => formattaSchedaPercorso({ superati: 0, totale: 0 }, { testi: TESTI })).not.toThrow();
+  });
+});
+
+describe('il collegamento in fondo alla scheda', () => {
+  const SITO = 'https://esempio.example/plinto/';
+  const PLAY = 'https://play.google.com/store/apps/details?id=io.github.esempio.plinto';
+
+  it('la sfida del giorno porta SEMPRE il giorno, anche col Play Store configurato', () => {
+    // E' la prova piu' importante di questo file. Il collegamento di una sfida non
+    // serve a far scaricare il gioco: serve a far giocare a chi lo riceve la STESSA
+    // partita, e il giorno e' l'unico dato che glielo permette. Sostituirlo con un
+    // indirizzo dello store non peggiora la condivisione, cancella la funzione -- e
+    // non se ne accorgerebbe nessuno, perche' la scheda continuerebbe a comparire.
+    const link = collegamentoScheda({ base: SITO, giorno: '2026-09-12', play: PLAY });
+    expect(link).toBe(`${SITO}#/sfida/2026-09-12`);
+    expect(link).not.toContain('play.google.com');
+  });
+
+  it('tutto il resto preferisce il Play Store', () => {
+    expect(collegamentoScheda({ base: SITO, play: PLAY })).toBe(PLAY);
+  });
+
+  it('senza Play Store si ricade sul sito', () => {
+    // E' il caso di oggi finche' la scheda sullo store non e' pubblica, e deve
+    // funzionare: meglio il sito che un collegamento vuoto.
+    expect(collegamentoScheda({ base: SITO, play: '' })).toBe(SITO);
+    expect(collegamentoScheda({ base: SITO })).toBe(SITO);
+  });
+
+  it('senza sito e senza store non inventa un indirizzo', () => {
+    expect(collegamentoScheda({})).toBe('');
+  });
+
+  it('usa la funzione dell ancora quando gliela si passa', () => {
+    const link = collegamentoScheda({
+      base: SITO, giorno: '2026-01-02', play: PLAY, ancora: (g) => `#/x/${g}`,
+    });
+    expect(link).toBe(`${SITO}#/x/2026-01-02`);
   });
 });

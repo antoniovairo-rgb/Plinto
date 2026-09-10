@@ -69,12 +69,27 @@ describe('promessa di privacy', () => {
     expect(colpevoli).toEqual([]);
   });
 
-  it('l unico dominio esterno e PayPal, e sta solo nel file di configurazione', () => {
+  it('i domini esterni sono solo quelli dichiarati, e solo nella configurazione', () => {
     // Un font da Google, una libreria da un CDN, un'immagine remota: tutti casi in cui
     // il browser del giocatore contatterebbe un terzo senza che lui lo sappia.
-    // L'informativa dichiara UNA sola eccezione, il collegamento alla donazione, che
-    // per giunta non parte da solo: deve essere il giocatore a toccarlo. Questo test
-    // verifica che l'eccezione resti una sola e resti confinata dove e' dichiarata.
+    //
+    // Le eccezioni dichiarate dall'informativa sono COLLEGAMENTI, non richieste: nessuna
+    // parte da sola, tutte aspettano che sia il giocatore a toccarle. Questo test
+    // verifica che restino quelle e che restino confinate dove sono dichiarate, cioe'
+    // nella configurazione. Un indirizzo esterno che compare in un file qualunque e' il
+    // modo in cui una promessa smette di essere vera senza che nessuno se ne accorga.
+    //
+    // AMMESSI, uno per uno e con il motivo:
+    //   paypal.me      la donazione, facoltativa e senza niente in cambio;
+    //   play.google.com la scheda del gioco, messa in fondo alle schede da condividere
+    //                  perche' chi riceve un risultato deve poter installare il gioco;
+    //   il sito stesso  non e' un terzo: e' il gioco. Serve scritto per esteso perche'
+    //                  l'anteprima dei collegamenti vuole indirizzi assoluti.
+    const AMMESSI = [
+      /^(www\.)?paypal\.(com|me)$/,
+      /^play\.google\.com$/,
+      /^antoniovairo-rgb\.github\.io$/,
+    ];
     const fuoriPosto = [];
     for (const percorso of file) {
       const relativo = percorso.replace(RADICE, '');
@@ -82,11 +97,7 @@ describe('promessa di privacy', () => {
       for (const m of testo.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
         const dominio = m[1].toLowerCase();
         if (dominio === 'www.w3.org') continue;                 // spazio dei nomi SVG
-        // Il link della donazione vive su paypal.me, non su paypal.com: e' un dominio
-        // diverso e va ammesso esplicitamente, altrimenti attivare la donazione fa
-        // fallire questo test -- che e' esattamente cio' che deve succedere se
-        // l'indirizzo comparisse in un file qualunque invece che nella configurazione.
-        if (/^(www\.)?paypal\.(com|me)$/.test(dominio) && relativo === 'config/progetto.js') continue;
+        if (relativo === 'config/progetto.js' && AMMESSI.some((r) => r.test(dominio))) continue;
         fuoriPosto.push(`${relativo}: ${dominio}`);
       }
     }

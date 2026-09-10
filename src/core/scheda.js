@@ -216,3 +216,34 @@ export function formattaSchedaPercorso(dati = {}, contesto = {}) {
 
   return righe.join('\n').slice(0, LIMITE);
 }
+
+/**
+ * Quale collegamento va in fondo alla scheda.
+ *
+ * Sta qui, puro e senza DOM, perche' e' una REGOLA e non un dettaglio di rendering, e
+ * perche' sbagliarla non si vede: la scheda continua a comparire, il testo e' giusto, e
+ * l'unico che se ne accorge e' chi riceve il messaggio e non riesce a giocare.
+ *
+ * La regola ha due rami e uno solo dei due e' negoziabile.
+ *
+ * La SFIDA DEL GIORNO tiene sempre l'indirizzo del sito con il giorno nell'ancora. Quel
+ * collegamento non serve a far scaricare il gioco, serve a far giocare a chi lo riceve
+ * la STESSA identica partita: il giorno e' il dato che glielo permette, e un indirizzo
+ * del Play Store non puo' portarlo. Sostituirlo li' non migliorerebbe la condivisione,
+ * cancellerebbe la funzione.
+ *
+ * TUTTO IL RESTO preferisce la scheda del Play Store, quando c'e': chi riceve un
+ * risultato e ha voglia di provare deve poter installare il gioco, non aprirlo una
+ * volta nel browser e dimenticarselo. Senza `play` si ricade sul sito, che e' anche
+ * quello che serve finche' la scheda sullo store non e' pubblica.
+ *
+ * @param {object} dove
+ * @param {string} dove.base   l'indirizzo del gioco sul web, senza ancora
+ * @param {string} [dove.giorno] il giorno della sfida, se e' una sfida
+ * @param {string} [dove.play]   la scheda del Play Store, se esiste
+ * @param {(g:string)=>string} dove.ancora  come si scrive l'ancora di una sfida
+ */
+export function collegamentoScheda({ base = '', giorno = null, play = '', ancora }) {
+  if (giorno) return `${base}${ancora ? ancora(giorno) : `#/sfida/${giorno}`}`;
+  return play || base;
+}

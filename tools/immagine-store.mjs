@@ -134,4 +134,14 @@ await browser.close();
 
 // Play rifiuta qualunque misura diversa da 1024x500 esatti.
 if (width !== 1024 || height !== 500) throw new Error(`Misura sbagliata: ${width}x${height}`);
+
+// La stessa immagine finisce anche in `public/`, cioe' dentro il sito pubblicato: e'
+// quella che WhatsApp, Telegram e Facebook mostrano quando qualcuno incolla il link
+// del gioco. Copiata dal comando invece che a mano, perche' due copie della stessa
+// immagine tenute allineate da qualcuno che se ne ricorda restano allineate finche'
+// qualcuno se ne ricorda.
+const { copyFile } = await import('node:fs/promises');
+await copyFile(`${USCITA}immagine-in-evidenza.png`, `${RADICE}public/anteprima-social.png`);
+
 console.log('store/immagine-in-evidenza.png — 1024x500');
+console.log('public/anteprima-social.png — la stessa, per l\'anteprima dei collegamenti');

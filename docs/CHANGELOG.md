@@ -7,6 +7,68 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.7.0] — 10 settembre 2026
+
+Il gioco non ha pubblicita' e non ha un budget: se qualcuno lo scopre, e' perche' qualcun
+altro gliel'ha mandato. Questa versione lavora su quel passaggio, che finora era rotto in
+due punti diversi senza che si vedesse.
+
+### Aggiunto
+
+**Il collegamento del gioco adesso ha un'anteprima.** In `index.html` non c'era nessun
+tag Open Graph: chi incollava il link in WhatsApp, in una storia o su Facebook mandava un
+indirizzo nudo. Adesso esce un riquadro con l'immagine del tabellone, il nome e una frase
+che dice che cos'e'. E' la differenza fra «l'ho mandato» e «l'hanno aperto», e costa una
+decina di righe.
+
+L'immagine e' la stessa 1024×500 della scheda del Play Store: la copia in `public/` la fa
+`npm run immagine-store`, non una mano. Due copie della stessa immagine tenute allineate
+da chi se ne ricorda restano allineate finche' qualcuno se ne ricorda.
+
+Gli indirizzi in quei tag sono **assoluti**, unica eccezione in una pagina che usa
+percorsi relativi ovunque perche' il gioco gira anche da una sottocartella. Il motivo e'
+che a leggerli non e' il browser del giocatore ma un server dall'altra parte del mondo,
+che non ha nessuna pagina da cui contare i `../`.
+
+`tests/anteprima-collegamento.test.js` sorveglia tutto questo, ed e' un controllo che
+serve piu' di quanto sembri: quel riquadro e' l'unica cosa del progetto che non si vede
+mai usando il gioco. Si puo' romperla rinominando un'immagine, e chi se ne accorge e' una
+persona a cui e' arrivato un indirizzo spoglio invece di un gioco, che non lo dira' mai a
+nessuno.
+
+### Cambiato
+
+**Le schede da condividere portano al Play Store, non piu' al sito.** Chi riceve un
+risultato e ha voglia di provare deve poter INSTALLARE il gioco, non aprirlo una volta nel
+browser e dimenticarselo.
+
+**La sfida del giorno e' l'eccezione, e non e' una dimenticanza.** Il suo collegamento
+porta scritto il giorno (`#/sfida/2026-09-12`) e serve a far giocare a chi lo riceve la
+stessa identica partita: un indirizzo del Play Store non puo' portare quel dato, e
+sostituirlo li' non avrebbe migliorato la condivisione, avrebbe cancellato la funzione.
+
+La regola sta in una funzione pura, `collegamentoScheda`, e non dentro il componente.
+Sbagliarla non si vedrebbe: la scheda comparirebbe lo stesso, il testo sarebbe giusto, e
+l'unico ad accorgersene sarebbe chi riceve il messaggio e non riesce a giocare. Una prova
+verifica proprio che il ramo della sfida non venga inghiottito dall'altro.
+
+**Attenzione alla data di questa decisione.** Finche' l'app e' in test chiuso la scheda
+del Play Store NON e' pubblica: chi non e' fra i tester iscritti apre il collegamento e
+non trova niente. `PLAY_URL` in `config/progetto.js` e' una costante sola, e svuotarla fa
+tornare tutto a condividere il sito.
+
+**L'informativa dichiara tre eccezioni invece di due**, e dice una cosa che vale la pena
+scrivere: nel collegamento non c'e' nessun codice di invito e nessun parametro di
+provenienza. E' lo stesso identico indirizzo per tutti, il che significa anche che non e'
+possibile sapere quante persone hanno installato il gioco grazie a te. E' una rinuncia
+consapevole: l'alternativa sarebbe tracciare chi gioca.
+
+**Il controllo sulla privacy ha fatto il suo lavoro.** Aggiungendo `play.google.com` alla
+configurazione, `tests/privacy.test.js` ha fatto fallire la suite: quel test pretende che
+ogni dominio esterno sia dichiarato e confinato nel file di configurazione. Adesso i
+domini ammessi sono elencati uno per uno con accanto il motivo, invece di un'unica
+eccezione scritta a mano.
+
 ## [1.6.0] — 10 settembre 2026
 
 Due riscontri dai tester, e il primo e' il piu' grave che sia arrivato finora.
