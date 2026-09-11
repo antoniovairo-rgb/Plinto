@@ -1,6 +1,6 @@
 # Gate di rilascio — PLINTO
 
-Stato al **10 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
+Stato all'**11 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
 Store (canale Alpha, versione approvata e installata su telefoni veri). Non è ancora in
 produzione: Play chiede 12 tester per 14 giorni consecutivi prima di consentirlo, e quel
 conteggio non è ancora completo. Le voci aperte restano elencate per prime, senza
@@ -71,11 +71,30 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATT
 | --- | --- | --- |
 | Icona | **FATTO** | SVG originale, coerente con il marchio |
 | Manifest PWA | **FATTO** | Nome, colori, icona; vincolo di orientamento rimosso perché esiste il layout orizzontale |
-| Schermate per gli store | **FATTO** | Generate da `npm run schermate`, dal gioco vero |
+| Schermate per gli store | **FATTO, in parte** | Generate da `npm run schermate`, dal gioco vero, e rigenerate a ogni versione. **Quelle in linea sulla scheda del Play Store sono però più vecchie**: mostrano una home senza «Sostieni il progetto» e «Idee e segnalazioni» (arrivate con la 1.7.x) e nessuna frase di incitamento (1.9.0). Vanno ricaricate, vedi «Da fare dopo i 14 giorni» |
 | Icona in PNG alle dimensioni richieste dagli store | **FATTO** | `npm run icone` le genera tutte dall'SVG, compresi il primo piano adattivo, l'icona classica e quella di avvio per Android, copiate nel progetto Android dallo stesso comando |
 | Schermata di avvio | **FATTO** | Generata da `npm run icone` e dichiarata nel manifest Android; sta in una cartella qualificata per densità, altrimenti Android la moltiplica per la densità dello schermo e la mostra gigante |
 | Descrizione del prodotto | **FATTO** | Scritta e pubblicata sulla scheda del Play Store, insieme alle schermate e all'immagine in evidenza 1024×500 (`npm run immagine-store`) |
 | Account sviluppatore sugli store | **FATTO** | Account Google Play attivo e verificato, nome del pacchetto registrato, firma dell'app gestita da Play |
+
+## Da fare dopo i 14 giorni di test chiuso
+
+Queste due cose sono pronte nel repository e **volutamente non ancora caricate**. Il
+motivo è uno solo: finché il conteggio dei 14 giorni consecutivi con 12 tester non è
+completo, non si tocca nulla sul Play Console che non sia necessario. Le fonti di terze
+parti dicono che un nuovo rilascio non azzera il contatore, ma la pagina ufficiale di
+Google non è stata letta direttamente, e il rischio è asimmetrico: si guadagnano giorni
+di estetica, se ne perdono settimane di attesa.
+
+| Voce | Stato | Nota |
+| --- | --- | --- |
+| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è già a 10307 e `versionName` a 1.9.1. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
+| Attualizzare le schermate sulla scheda | **APERTO** | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, già aggiornate alla versione corrente. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
+
+Nota su cosa richiede cosa: il caricamento delle schermate è una modifica alla **scheda**,
+non un rilascio, quindi non ha bisogno di un AAB nuovo. Si fanno comunque in
+quest'ordine, perché delle schermate che mostrano una versione non ancora distribuita
+raccontano un'app che nessuno può ancora installare.
 
 ---
 
