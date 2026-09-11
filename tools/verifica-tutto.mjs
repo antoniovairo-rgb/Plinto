@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono venti, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono ventuno, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -31,6 +31,9 @@ import { spawn, execFileSync } from 'node:child_process';
 import { createWriteStream, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
+/** Il nome del controllo della geometria, citato in piu' punti. */
+const NOME_GEOMETRIA = 'geometria della plancia e dei tocchi';
+
 const VERIFICHE = [
   { nome: 'test unitari', comando: 'npm', argomenti: ['test'] },
   { nome: 'contrasti WCAG', comando: 'npm', argomenti: ['run', 'contrasti'] },
@@ -56,6 +59,13 @@ const VERIFICHE = [
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
   { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },
+  // La geometria del tavolo: dove sono le caselle e dove finisce un tocco. Costa dieci
+  // secondi ed e' cio' che permette a una modifica di solo disegno di non pagarne
+  // tremilaottocento: il giro completo registra questa firma, e la corsia veloce la
+  // riconfronta invece di dare per scontato che il foglio di stile abbia spostato
+  // qualcosa. Trova anche una cosa che prima non guardava nessuno: qualsiasi
+  // sovrimpressione che si metta davanti alla griglia e si mangi i tocchi.
+  { nome: NOME_GEOMETRIA, comando: 'npm', argomenti: ['run', 'geometria'] },
   // Il cuore del gioco: tutti e cento i livelli vinti giocandoli nell'app, toccando il
   // pezzo e poi la casella. `e2e-quadri` prova che il percorso FUNZIONI (vittoria,
   // sconfitta, sblocco) su due livelli; questo prova che i cento livelli siano davvero
@@ -95,7 +105,35 @@ const VERIFICHE = [
  * Al posto dei cento livelli resta `e2e-quadri`, che gioca vittoria e sconfitta su due
  * livelli veri: non e' la stessa cosa, e infatti il riassunto lo dice a chiare lettere.
  */
-const TOCCA_IL_GIOCO = [
+/**
+ * DUE ELENCHI, NON UNO, E LA DIFFERENZA E' UN'ORA DI CONTROLLI.
+ *
+ * Il primo elenco raccoglie i file che DECIDONO come si gioca: il motore, il
+ * generatore, la configurazione dei livelli, i componenti con cui si posa un pezzo. Se
+ * cambia uno di questi, i cento livelli vanno rigiocati e non c'e' misura che possa
+ * sostituirli: solo giocarli dice se sono ancora vincibili.
+ *
+ * Il secondo raccoglie i file che DISEGNANO il tavolo senza decidere le regole: il
+ * foglio di stile e i componenti che stanno intorno alla plancia. Qui la regola
+ * precedente era grossolana e lo pagava chi lavorava: qualunque riga di CSS costava
+ * un'ora, un anello attorno alla barra della Catena quanto una riscrittura della
+ * plancia. Segnalato da chi usa questo progetto, tre volte, e aveva ragione tutte e tre.
+ *
+ * La domanda giusta non e' "e' cambiato il foglio di stile?" ma "la plancia e' ancora
+ * quella su cui i cento livelli sono stati vinti, e un tocco arriva ancora dove deve?".
+ * A quella risponde `npm run geometria` in una decina di secondi, misurando la
+ * geometria della griglia sui formati stretto e comune e provando il tocco al centro di
+ * tutte e ottantuno le caselle e di ogni pezzo in mano. Se la firma e' identica a quella
+ * registrata all'ultimo giro completo andato bene, i cento livelli non hanno niente di
+ * nuovo da dire.
+ *
+ * QUESTO CONTROLLO E' PIU' SEVERO DEL PRECEDENTE, NON MENO. La regola vecchia guardava
+ * i nomi dei file e non guardava affatto le sovrimpressioni: un elemento messo davanti
+ * alla griglia che si mangia i tocchi passava inosservato se il suo file non era
+ * nell'elenco. Verificato che il controllo nuovo lo trovi: con un velo sopra la plancia
+ * segnala tutte e ottantuno le caselle, su entrambi i formati.
+ */
+const DECIDE_IL_GIOCO = [
   // Tutto il motore, TRANNE la scheda condivisibile: `scheda.js` sta qui dentro per
   // comodita' di collocazione, ma e' un formattatore di testo puro che nessuna parte del
   // gioco importa -- solo la condivisione e le sue prove. Verificato prima di scriverlo,
@@ -104,10 +142,10 @@ const TOCCA_IL_GIOCO = [
   /^src\/core\/(?!scheda\.js$)/,
   /^src\/sim\//,
   /^src\/state\//,
-  /^src\/styles\//,
   /^src\/config\/(rules|quadri)\.js$/,
-  // I componenti con cui si gioca davvero: la plancia, i pezzi, come si trascinano.
-  /^src\/ui\/(Plancia|Tray|Pezzo|Bomba|MiniGriglia|Hud|BarraObiettivo|AnteprimaTerna|Salvagente|SchermoGioco)\.jsx$/,
+  // I componenti con cui si posa davvero un pezzo. Il vassoio resta qui e non fra i
+  // "disegnano": quale pezzo si afferra non e' una questione di geometria.
+  /^src\/ui\/(Plancia|Tray|Pezzo|Bomba|MiniGriglia|Salvagente|SchermoGioco)\.jsx$/,
   /^src\/ui\/use(Trascinamento|Tastiera)\.js$/,
   /^src\/ui\/schermate\/(AperturaQuadro|FineQuadro|Quadri)\.jsx$/,
   /^tools\/genera-quadri\.mjs$/,
@@ -115,6 +153,17 @@ const TOCCA_IL_GIOCO = [
   /^index\.html$/,
   /^vite\.config\.js$/,
 ];
+
+/** Disegnano il tavolo senza decidere le regole: basta che la geometria non cambi. */
+const DISEGNA_IL_GIOCO = [
+  /^src\/styles\//,
+  // Stanno sopra e sotto la plancia: possono cambiarle lo spazio, e quindi la misura
+  // delle celle, ma quel cambiamento lo vede la firma della geometria.
+  /^src\/ui\/(Hud|BarraObiettivo|AnteprimaTerna)\.jsx$/,
+  /^tests\/e2e\/geometria\.mjs$/,
+];
+
+const TOCCA_IL_GIOCO = [...DECIDE_IL_GIOCO, ...DISEGNA_IL_GIOCO];
 
 /**
  * L'IMPRONTA DEL GIOCO: che aspetto aveva il codice l'ultima volta che i cento livelli
@@ -168,6 +217,44 @@ function improntaDelGioco() {
   }
 }
 
+const FIRMA_GEOMETRIA = new URL('../geometria.json', import.meta.url).pathname;
+
+/** La firma appena misurata da `npm run geometria`, o null se non c'e'. */
+function leggiGeometria() {
+  try { return JSON.parse(readFileSync(FIRMA_GEOMETRIA, 'utf8')); } catch { return null; }
+}
+
+/**
+ * In che cosa il tavolo differisce da quello dell'ultimo giro completo. `null` = non lo
+ * so, e non sapere vale come "e' cambiato": si rigiocano i cento livelli.
+ *
+ * Il confronto e' su numeri arrotondati al pixel, non sui byte del foglio di stile: una
+ * regola CSS riscritta che produce la stessa identica plancia non ha niente da dire ai
+ * cento livelli, e una che sposta una casella ce l'ha anche se ha cambiato un carattere.
+ */
+function geometriaCambiata(adesso) {
+  if (!adesso) return null;
+  let prima;
+  try {
+    prima = JSON.parse(readFileSync(REGISTRO_LIVELLI, 'utf8')).geometria;
+  } catch { return null; }
+  if (!prima) return null;
+
+  const differenze = [];
+  const formati = new Set([...Object.keys(prima), ...Object.keys(adesso)]);
+  for (const formato of formati) {
+    const a = prima[formato];
+    const b = adesso[formato];
+    if (!a || !b) { differenze.push(`formato ${formato}: misurato solo in uno dei due giri`); continue; }
+    for (const chiave of new Set([...Object.keys(a), ...Object.keys(b)])) {
+      const va = JSON.stringify(a[chiave]);
+      const vb = JSON.stringify(b[chiave]);
+      if (va !== vb) differenze.push(`${formato} · ${chiave}: ${va} -> ${vb}`);
+    }
+  }
+  return differenze;
+}
+
 /** Che cosa e' cambiato rispetto all'ultimo giro completo passato. `null` = non lo so. */
 function cambiatoDallUltimoGiro(adesso) {
   if (!adesso || !existsSync(REGISTRO_LIVELLI)) return null;
@@ -214,16 +301,55 @@ const esiti = [];
 
 // --- La corsia veloce: si apre solo se il diff lo permette ---------------------
 let saltati = [];
+// I controlli gia' eseguiti per decidere la corsia: si registrano come fatti, non si
+// rifanno. Sono cosa diversa da `saltati`, che sono quelli NON eseguiti.
+const giaFatti = new Set();
 const improntaOra = improntaDelGioco();
+let geometriaOra = null;
 if (process.argv.includes('--veloce')) {
   const cambiati = cambiatoDallUltimoGiro(improntaOra);
+  const decidono = (cambiati ?? []).filter((f) => DECIDE_IL_GIOCO.some((r) => r.test(f)));
+  const disegnano = (cambiati ?? []).filter((f) => DISEGNA_IL_GIOCO.some((r) => r.test(f)));
+
   if (cambiati === null) {
     eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: non risulta nessun giro completo passato su'
       + ' questa macchina, quindi i cento livelli non li ha mai rigiocati nessuno qui.\n');
-  } else if (cambiati.length > 0) {
+  } else if (decidono.length > 0) {
     eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: dall\'ultimo giro completo sono cambiati file'
-      + ' che decidono come si gioca.\n');
-    cambiati.forEach((f) => eco(`  - ${f}\n`));
+      + ' che DECIDONO come si gioca. Solo giocarli dice se i livelli sono ancora vincibili.\n');
+    decidono.forEach((f) => eco(`  - ${f}\n`));
+  } else if (disegnano.length > 0) {
+    // Sono cambiati solo file che DISEGNANO il tavolo. La domanda non e' piu' "quali
+    // file", e' "la plancia e' ancora quella?": si misura, e la misura decide.
+    eco('\n\u001b[1mCorsia veloce\u001b[0m: sono cambiati solo file che disegnano il tavolo,'
+      + ' non le regole. Misuro la geometria prima di decidere.\n');
+    disegnano.forEach((f) => eco(`  - ${f}\n`));
+
+    const daQui = Date.now();
+    const misurata = await esegui({
+      nome: NOME_GEOMETRIA, comando: 'npm', argomenti: ['run', 'geometria'],
+    });
+    const secondiGeometria = Math.round((Date.now() - daQui) / 1000);
+    giaFatti.add(NOME_GEOMETRIA);
+    esiti.push({ nome: NOME_GEOMETRIA, ok: misurata, secondi: secondiGeometria });
+    geometriaOra = leggiGeometria();
+    const differenze = geometriaCambiata(geometriaOra);
+
+    if (!misurata) {
+      eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: la misura della geometria e\' fallita.\n');
+    } else if (differenze === null) {
+      eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: l\'ultimo giro completo non ha registrato'
+        + ' nessuna geometria, quindi non c\'e\' niente con cui confrontare.\n');
+    } else if (differenze.length > 0) {
+      eco('\n\u001b[1mCorsia veloce NEGATA\u001b[0m: il tavolo non e\' piu\' quello su cui i'
+        + ' cento livelli sono stati vinti.\n');
+      differenze.forEach((d) => eco(`  - ${d}\n`));
+    } else {
+      saltati = ['tutti e cento i livelli, giocati nell app'];
+      eco('\n\u001b[1mCorsia veloce\u001b[0m: la geometria della plancia e i tocchi sono'
+        + ' identici a quelli dell\'ultimo giro completo. I cento livelli non hanno niente di'
+        + ' nuovo da dire: li salto e mi tengo e2e-quadri.\n');
+    }
   } else {
     saltati = ['tutti e cento i livelli, giocati nell app'];
     eco('\n\u001b[1mCorsia veloce\u001b[0m: il codice che decide come si gioca e\' identico,'
@@ -232,7 +358,7 @@ if (process.argv.includes('--veloce')) {
   }
 }
 
-for (const verifica of VERIFICHE.filter((v) => !saltati.includes(v.nome))) {
+for (const verifica of VERIFICHE.filter((v) => !saltati.includes(v.nome) && !giaFatti.has(v.nome))) {
   const da = Date.now();
   eco(`\n\u001b[1m\u25b6 ${verifica.nome}\u001b[0m\n`);
   const ok = await esegui(verifica);
@@ -266,6 +392,10 @@ if (falliti.length === 0 && saltati.length === 0 && improntaOra) {
     writeFileSync(REGISTRO_LIVELLI, `${JSON.stringify({
       quando: new Date().toISOString(),
       impronte: improntaOra,
+      // La geometria su cui questi cento livelli sono stati vinti. E' cio' che permette
+      // a una modifica di solo disegno di non pagare un'ora: si confronta questa,
+      // invece di dare per scontato che il foglio di stile abbia spostato qualcosa.
+      geometria: leggiGeometria(),
     }, null, 2)}\n`);
     eco('Impronta del gioco registrata: la prossima verifica potra\' saltare i cento livelli'
       + ' finche\' quel codice non cambia.\n');

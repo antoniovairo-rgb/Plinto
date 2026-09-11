@@ -57,7 +57,7 @@ export function BarraCatena({ livello, digiuno = 0, t }) {
     <div className="pl-catena">
       <span className="pl-hud__etichetta">{t('hud.catena')}</span>
       <div
-        className="pl-catena__barra"
+        className={`pl-catena__barra ${ultimaChiamata ? 'pl-catena__barra--ultima' : ''}`}
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={CHAIN_MAX}
@@ -73,8 +73,18 @@ export function BarraCatena({ livello, digiuno = 0, t }) {
       <span className={`pl-catena__valore ${attiva ? 'pl-catena__valore--attiva' : ''}`}>
         &times;{moltiplicatore.toFixed(2)}
       </span>
+      {/* L'AVVISO E' SULLA BARRA, NON SCRITTO. Era una riga di testo rosso sotto la
+          barra, e il rosso in questa interfaccia e' il colore di cio' che cancella i
+          dati: diceva "stai per perdere qualcosa di grave" per un moltiplicatore che
+          scende di uno. Adesso lo dice la barra stessa, con il suo colore e un respiro.
+
+          MA RESTA SCRITTO PER CHI NON VEDE LO SCHERMO. Toglierlo dalla vista e' una
+          scelta grafica; toglierlo anche dall'annuncio vorrebbe dire che un giocatore
+          cieco perde l'avviso e basta, perche' una barra che pulsa non la sente
+          nessuno. Il testo e' lo stesso di prima, in una regione che i lettori di
+          schermo leggono e gli occhi no. */}
       {ultimaChiamata && (
-        <span className="pl-catena__respiro" role="status">{t('hud.respiroFinito')}</span>
+        <span className="pl-sr" role="status">{t('hud.respiroFinito')}</span>
       )}
     </div>
   );

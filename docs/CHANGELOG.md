@@ -7,6 +7,33 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.9.3] — 11 settembre 2026
+
+### Cambiato
+
+**L'avviso della Catena lo dice la barra, non una riga di testo rosso.**
+Segnalato da chi ci gioca: «il messaggio rosso e' bruttino e non armonioso con il resto
+della grafica». Aveva ragione, e il motivo e' preciso: quel rosso e' `--pl-danger`, lo
+stesso colore del pulsante che cancella i dati del giocatore. Diceva «stai per perdere
+qualcosa di grave» per un moltiplicatore che scende di uno, e ignorava il linguaggio di
+colore della Catena, che e' verde-arancio.
+
+Adesso l'avviso sta dove sta gia' l'informazione: la barra prende un anello del colore
+della Catena e il riempimento respira lentamente. Nessun rosso, nessuna riga in piu'.
+
+**Il testo resta per chi non vede lo schermo.** Toglierlo dalla vista e' una scelta
+grafica; toglierlo anche dall'annuncio vorrebbe dire che un giocatore cieco perde
+l'avviso e basta, perche' una barra che pulsa non la sente nessuno. La frase e' la stessa
+di prima, in una regione che i lettori di schermo leggono e gli occhi no: verificata
+giocando fino a quello stato, presente con `role="status"` e larga un pixel.
+
+**Il respiro si spegne** per chi ha chiesto meno movimento al sistema, ma lo stato resta
+visibile: il riempimento rimane acceso invece di tornare normale.
+
+Misurato prima di intervenire: l'avviso faceva crescere la riga della Catena di 22 pixel
+ma **non** rimpiccioliva la plancia, che restava a 384 pixel con e senza. Era un problema
+di armonia, non di spazio, e valeva la pena saperlo prima di decidere dove metterlo.
+
 ## [1.9.2] — 11 settembre 2026
 
 ### Corretto

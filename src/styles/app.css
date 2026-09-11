@@ -1437,12 +1437,26 @@ button {
 
 /* Ultima chiamata della Catena: il momento in cui il giocatore sta per perdere il
    moltiplicatore. Va sulla riga sotto, allineato al valore, senza mai coprirlo. */
-.pl-catena__respiro {
-  flex-basis: 100%;
-  text-align: right;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: var(--pl-danger);
+/* L'ULTIMA CHIAMATA DELLA CATENA, detta dalla barra.
+   Un anello del colore della Catena e un respiro lento sul riempimento: il segnale sta
+   dove sta gia' l'informazione, invece di aggiungere una riga di testo rosso sotto.
+   Il respiro serve perche' senza parole un contorno fermo non lo nota nessuno. */
+.pl-catena__barra--ultima {
+  box-shadow: 0 0 0 1px var(--pl-brand-deep), 0 0 10px rgba(242, 193, 78, 0.22);
+}
+.pl-catena__barra--ultima .pl-catena__riempimento {
+  animation: pl-catena-avviso 1.5s ease-in-out infinite;
+}
+@keyframes pl-catena-avviso {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.65); }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Niente respiro, ma lo stato deve restare visibile: il riempimento resta acceso. */
+  .pl-catena__barra--ultima .pl-catena__riempimento {
+    animation: none;
+    filter: brightness(1.4);
+  }
 }
 
 /* --------------------------------------------------- apertura di un Quadro --- */

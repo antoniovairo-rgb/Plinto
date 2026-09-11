@@ -59,7 +59,7 @@ describe('allineamento fra durate JavaScript e CSS', () => {
     // Le uniche eccezioni ammesse sono i cicli continui di "vita" (respiri, pulsazioni):
     // non sono effetti di mossa, non hanno controparte in JavaScript e ognuno di essi
     // deve avere il proprio interruttore sotto prefers-reduced-motion.
-    const CICLI_CONTINUI = ['pl-pulsa', 'pl-bomba-respira', 'pl-plinto-respira'];
+    const CICLI_CONTINUI = ['pl-pulsa', 'pl-bomba-respira', 'pl-plinto-respira', 'pl-catena-avviso'];
 
     expect(letterali.filter((l) => !CICLI_CONTINUI.includes(l.nome))).toEqual([]);
 
