@@ -444,3 +444,43 @@ export function deserializeGame(raw) {
 }
 
 export { resetUid };
+
+/**
+ * Si puo' annullare l'ultima mossa?
+ *
+ * NON E' UN "TORNA INDIETRO", e' un "rimetti a posto": serve a correggere il dito, non
+ * la decisione. Il gioco si gioca con un dito solo su uno schermo piccolo, e lasciare il
+ * pezzo una casella piu' in la' di dove si voleva capita piu' volte per partita. Punire
+ * quello non aggiunge profondita', aggiunge rumore.
+ *
+ * DUE CONDIZIONI, e ognuna chiude una porta precisa.
+ *
+ * 1. La mossa non deve aver ELIMINATO niente. Se non hai chiuso nessun gruppo, tornare
+ *    indietro non ti fa sapere niente che non sapessi gia': dove finiva il pezzo lo
+ *    vedevi durante il trascinamento, e la terna successiva e' mostrata in anteprima.
+ *    Se invece hai chiuso qualcosa, le conseguenze non sono piu' prevedibili -- una
+ *    bomba dentro il gruppo ne porta via altre otto e puo' innescarne altre. Poter
+ *    provare e disfare, li', vuol dire esplorare le conseguenze prima di decidere: non
+ *    e' correggere il dito, e' cercare la soluzione a tentativi.
+ *
+ * 2. La mossa non deve aver CHIUSO LA PARTITA. Altrimenti si annulla, si prova altrove,
+ *    si annulla di nuovo, e il "hai perso" diventa un oracolo per trovare la casella in
+ *    cui si sopravvive. E' la stessa porta della condizione 1, aperta da un'altra parte.
+ *
+ * Con queste due, annullare non da' NESSUN vantaggio: non e' una meccanica, e' il tasto
+ * che cancella l'ultima lettera. Per questo non si guadagna e non si conta.
+ *
+ * Il ripristino e' esatto perche' il motore e' puro: lo stato di prima non e' stato
+ * toccato, e dentro ci sono anche la posizione del generatore casuale e la terna in
+ * anteprima. La sfida del giorno resta identica per tutti, e i punti della posa e il
+ * contatore delle mosse tornano indietro insieme al resto.
+ *
+ * @param {object} prima lo stato prima della mossa
+ * @param {object} dopo  lo stato dopo
+ */
+export function annullabile(prima, dopo) {
+  if (!prima || !dopo || prima === dopo) return false;
+  if (dopo.stats.moves !== prima.stats.moves + 1) return false;   // non e' una singola mossa
+  if (dopo.status !== 'playing') return false;                    // ha chiuso la partita
+  return (dopo.lastMove?.groups?.length ?? 0) === 0;              // non ha eliminato niente
+}

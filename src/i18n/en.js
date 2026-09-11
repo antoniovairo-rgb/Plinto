@@ -32,6 +32,7 @@ export default {
     sfidaCosaPassata: 'That day\'s game, recomputed. Score as much as you can.',
   },
   gioca: {
+    annulla: 'Put the piece back',
     tinta: 'TINT {quante}',
     trascina: 'Drag a piece onto the grid',
     tocca: 'Tap a piece, then tap where to put it',
@@ -312,6 +313,7 @@ export default {
     trascinare: 'Drag the piece where you want it. While you move it you see a preview of where it will land, and if it does not fit you are told before you let go.',
     dueTocchi: 'Or tap the piece once to pick it up, then tap the square to put it down. Handy one-handed.',
     tastiera: 'You can also play from the keyboard: Tab to choose a piece, Enter to pick it up, arrows to move on the grid, Enter to drop it, Esc to cancel. Every move is announced to screen readers.',
+    rimetti: 'If you drop a piece where you did not mean to, "Put the piece back" appears under the grid and the game returns exactly as it was. It only works when that move cleared nothing and did not end the game: it is there to fix your finger, not to change your mind.',
     punteggioTitolo: 'Interlace, Chain and Tint',
     intreccio: 'Clearing several groups with a single move multiplies that move. Three groups at once are worth x{n}. A row crossing a quadrant is the easiest way to pull it off.',
     catena: 'It goes up by one every time you clear something and multiplies everything, up to x{max}. It drops if you go {n} moves in a row without clearing, and the bar warns you before that happens. The multiplier you see is exactly the one that will be applied: there is no hidden maths between what you read and what you get.',

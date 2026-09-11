@@ -82,6 +82,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
       <p className="pl-testo">{t('aiuto.trascinare')}</p>
       <p className="pl-testo">{t('aiuto.dueTocchi')}</p>
       <p className="pl-testo">{t('aiuto.tastiera')}</p>
+      <p className="pl-testo">{t('aiuto.rimetti')}</p>
 
       {/* Qui i tre paragrafi stanno sotto UN titolo solo, quindi ognuno ha bisogno della
           sua etichetta. Nella guida a passi ogni meccanica ha gia' il titolo del passo,

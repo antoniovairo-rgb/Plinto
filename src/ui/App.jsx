@@ -80,6 +80,7 @@ export function App() {
   const {
     partita, modalita, esitoSfida, record, nuoviRecord, pezziMorti, riepilogo,
     nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
+    siPuoAnnullare, annulla,
   } = usePartita();
 
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
@@ -366,6 +367,8 @@ export function App() {
       <div className="pl-app">
         <SchermoGioco
           partita={quadri.partita}
+          siPuoAnnullare={quadri.siPuoAnnullare}
+          onAnnulla={quadri.annulla}
           record={record}
           pezziMorti={deadPiecesDi(quadri.partita)}
           onGioca={quadri.gioca}
@@ -400,6 +403,8 @@ export function App() {
       {schermata === 'gioco' && inGioco ? (
         <SchermoGioco
           partita={partita}
+          siPuoAnnullare={siPuoAnnullare}
+          onAnnulla={annulla}
           record={record}
           pezziMorti={pezziMorti}
           onGioca={gioca}

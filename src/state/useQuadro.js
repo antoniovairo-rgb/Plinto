@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useAnnulla } from './useAnnulla.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../core/quadro.js';
 import { summarize } from '../core/engine.js';
 import { registraTentativo } from '../persistence/progressi.js';
@@ -82,9 +83,15 @@ export function useQuadro() {
     });
   }, [quadro, registrato]);
 
+  // Anche nei livelli: e' anzi il posto dove serve di piu', perche' li' ogni mossa e'
+  // contata e uno scivolone costa il record.
+  const { siPuoAnnullare, annulla } = useAnnulla(partita, setPartita);
+
   return {
     quadro,
     partita,
+    siPuoAnnullare,
+    annulla,
     esito,
     daPresentare,
     stato: quadro && partita ? statoQuadro(quadro, partita) : null,

@@ -88,12 +88,68 @@ for (const [larghezza, altezza, nome] of FORMATI) {
   await page.close();
 }
 
+// ---------------------------------------------------------------------------
+// Dentro un LIVELLO: il tavolo da gioco non deve sbordare sui pezzi in mano.
+//
+// Perche' un controllo a se'. La plancia era limitata da `min(96vw, 58vh)`, cioe' da
+// una frazione dello schermo, che pero' non sa che cos'altro c'e' sopra. Nei livelli
+// ci sono in piu' la fascia dell'obiettivo e l'avviso della Catena: su 360x640 il
+// blocco del tavolo diventava alto 416px in uno spazio di 355, sbordava di 61 e --
+// essendo centrato -- ne colava meta' sotto, sopra i pezzi in mano. La scritta
+// "Trascina un pezzo sulla griglia" si leggeva addosso ai pezzi.
+//
+// In partita libera non succedeva, perche' quei due elementi non ci sono. E' il motivo
+// per cui e' passato inosservato: chi prova il gioco apre la partita libera, e la
+// schermata che si rompe e' l'altra.
+console.log('\nDentro un livello: il tavolo non sborda sui pezzi');
+for (const [larghezza, altezza, nome] of FORMATI) {
+  const page = await browser.newPage({ viewport: { width: larghezza, height: altezza }, locale: 'it-IT' });
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await page.evaluate(() => {
+    window.localStorage.clear();
+    window.localStorage.setItem('plinto:settings', JSON.stringify({
+      introVista: true, tema: 'scuro', lingua: 'it', animazioni: false, aiutoVisivo: true,
+    }));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('.pl-home__azioni .pl-btn--primario').click();
+  await page.waitForSelector('.pl-apertura');
+  await page.locator('.pl-apertura__azioni .pl-btn--primario').click();
+  await page.waitForSelector('.pl-plancia');
+  await page.waitForTimeout(250);
+
+  const m = await page.evaluate(() => {
+    const area = document.querySelector('.pl-plancia-area').getBoundingClientRect();
+    const tavolo = document.querySelector('.pl-tavolo').getBoundingClientRect();
+    const suggerimento = document.querySelector('.pl-suggerimento')?.getBoundingClientRect();
+    const pezzi = [...document.querySelectorAll('.pl-tray .pl-pezzo')]
+      .map((p) => p.getBoundingClientRect());
+    const piuAlto = pezzi.length ? Math.min(...pezzi.map((r) => r.top)) : Infinity;
+    return {
+      sborda: Math.round(tavolo.height - area.height),
+      // Quanto il tavolo entra dentro il pezzo piu' alto: e' il difetto visibile.
+      sovrapposizione: Math.round(Math.max(0, tavolo.bottom - piuAlto)),
+      suggerimentoSuiPezzi: suggerimento
+        ? Math.round(Math.max(0, suggerimento.bottom - piuAlto)) : 0,
+    };
+  });
+  const rotto = m.sborda > 0 || m.sovrapposizione > 0;
+  console.log(`  ${rotto ? 'NO  ' : 'ok  '}${nome.padEnd(18)} ${larghezza}x${altezza}  `
+    + `tavolo ${m.sborda > 0 ? `sborda di ${m.sborda}px` : 'entra'}`
+    + `${m.sovrapposizione > 0 ? `, copre i pezzi di ${m.sovrapposizione}px` : ''}`);
+  if (m.sborda > 0) errori.push(`${nome} (${larghezza}x${altezza}): il tavolo sborda di ${m.sborda}px`);
+  if (m.sovrapposizione > 0) {
+    errori.push(`${nome} (${larghezza}x${altezza}): il tavolo copre i pezzi in mano di ${m.sovrapposizione}px`);
+  }
+  await page.close();
+}
+
 await browser.close();
 if (server) server.kill();
 
 if (errori.length) {
-  console.error(`\n${errori.length} formati su ${FORMATI.length} fanno scorrere la home:`);
+  console.error(`\n${errori.length} problemi di impaginazione:`);
   errori.forEach((e) => console.error(`  - ${e}`));
   process.exit(1);
 }
-console.log('\nLa home entra su tutti i formati provati.');
+console.log('\nLa home entra su tutti i formati provati, e nei livelli il tavolo non tocca i pezzi.');

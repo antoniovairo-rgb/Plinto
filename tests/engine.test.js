@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   createGame, placePiece, canPlaceHandPiece, handHasMove, deadPieces,
-  serializeGame, deserializeGame, summarize, STATE_VERSION,
+  serializeGame, deserializeGame, summarize, STATE_VERSION, annullabile,
 } from '../src/core/engine.js';
 import { getShape } from '../src/core/shapes.js';
 import {
@@ -433,5 +433,45 @@ describe('il conteggio degli Intrecci', () => {
     const { OBIETTIVI } = await import('../src/core/quadro.js');
     expect(OBIETTIVI.intrecci.progresso({ stats: {} })).toBe(0);
     expect(OBIETTIVI.intrecci.progresso({ stats: { intrecci: 4 } })).toBe(4);
+  });
+});
+
+describe('il "rimetti a posto"', () => {
+  /**
+   * La regola in se', senza browser. Ogni condizione chiude una porta precisa, e sono
+   * le porte che trasformerebbero una correzione del dito in una ricerca a tentativi.
+   */
+  const base = { stats: { moves: 3 }, status: 'playing', lastMove: { groups: [] } };
+  const dopoPulita = { stats: { moves: 4 }, status: 'playing', lastMove: { groups: [] } };
+
+  it('si puo annullare una mossa che non ha eliminato niente', () => {
+    expect(annullabile(base, dopoPulita)).toBe(true);
+  });
+
+  it('NON si annulla una mossa che ha eliminato qualcosa', () => {
+    // E' la condizione piu' importante: con un'eliminazione le conseguenze non sono
+    // prevedibili -- una bomba nel gruppo ne porta via altre otto e puo' innescarne
+    // altre. Poter provare e disfare li' vuol dire esplorare le conseguenze prima di
+    // decidere, che non e' correggere il dito.
+    const conGruppo = { ...dopoPulita, lastMove: { groups: [{ type: 'row' }] } };
+    expect(annullabile(base, conGruppo)).toBe(false);
+  });
+
+  it('NON si annulla una mossa che ha chiuso la partita', () => {
+    // Altrimenti si annulla, si prova altrove, si annulla di nuovo, e il "hai perso"
+    // diventa un oracolo per trovare la casella in cui si sopravvive.
+    expect(annullabile(base, { ...dopoPulita, status: 'over' })).toBe(false);
+  });
+
+  it('la memoria e lunga UNA mossa sola', () => {
+    // Due mosse di distanza non si annullano: non e' una pila per riavvolgere la
+    // partita, e' il tasto che cancella l'ultima lettera.
+    expect(annullabile(base, { ...dopoPulita, stats: { moves: 5 } })).toBe(false);
+  });
+
+  it('non si annulla il nulla', () => {
+    expect(annullabile(null, dopoPulita)).toBe(false);
+    expect(annullabile(base, null)).toBe(false);
+    expect(annullabile(base, base)).toBe(false);
   });
 });

@@ -57,7 +57,8 @@ function IntestazioneSfida({ giorno, t }) {
 
 export function SchermoGioco({
   partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
-  quadro = null, statoQuadro = null, modalita = 'libera', t,
+  quadro = null, statoQuadro = null, modalita = 'libera',
+  siPuoAnnullare = false, onAnnulla = null, t,
 }) {
   const cellRefs = useRef([]);
   const plancia = useRef(null);
@@ -292,8 +293,25 @@ export function SchermoGioco({
             ) : null}
           </div>
 
+          {/* Una riga sola per tre cose che non capitano mai insieme: come si muove, dove
+              appoggiare, e il "rimetti a posto". L'altezza e' riservata sempre, anche
+              quando c'e' solo del testo: se crescesse all'apparire del pulsante, la
+              plancia si restringerebbe di colpo a meta' partita, e un tabellone che
+              cambia misura sotto il dito e' peggio del difetto che si voleva curare.
+
+              L'ordine di precedenza non e' casuale. Se un pezzo e' gia' in mano, quello
+              che serve sapere e' dove appoggiarlo: l'annulla puo' aspettare, e comunque
+              resta disponibile appena si lascia la presa. */}
           <p className="pl-suggerimento">
-            {drag.selezionato !== null ? t('gioca.tocca') : t('gioca.trascina')}
+            {drag.selezionato !== null ? (
+              t('gioca.tocca')
+            ) : siPuoAnnullare ? (
+              <button type="button" className="pl-annulla" onClick={onAnnulla}>
+                {t('gioca.annulla')}
+              </button>
+            ) : (
+              t('gioca.trascina')
+            )}
           </p>
           <p className="pl-sr">{t('a11y.istruzioni')}</p>
         </div>

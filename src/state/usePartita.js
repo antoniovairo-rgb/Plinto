@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createGame, placePiece, serializeGame, deserializeGame, summarize, deadPieces,
 } from '../core/engine.js';
+import { useAnnulla } from './useAnnulla.js';
 import { read, write, remove, chiavePartita } from '../persistence/storage.js';
 import { loadRecords, recordGame } from '../persistence/records.js';
 import { registraPartita } from '../persistence/profilo.js';
@@ -121,8 +122,16 @@ export function usePartita() {
     }
   }, [partita, modalita]);
 
+  // Il "rimetti a posto" vale anche qui: lo scivolone del dito capita in partita libera
+  // e nella sfida come nei livelli. Ripristinare uno stato precedente e' sicuro perche'
+  // il motore e' puro -- dentro quello stato ci sono anche il generatore casuale e la
+  // terna in anteprima, quindi la sfida del giorno resta identica per tutti.
+  const { siPuoAnnullare, annulla } = useAnnulla(partita, setPartita);
+
   return {
     partita,
+    siPuoAnnullare,
+    annulla,
     modalita,
     esitoSfida,
     record,

@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono diciotto, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono diciannove, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -42,6 +42,10 @@ const VERIFICHE = [
   // sola, quindi un suo difetto non lo segnala mai nessuno. Chi lo incontra e' nuovo,
   // non sa che sia un difetto, e non torna indietro a raccontarlo.
   { nome: 'guida al primo avvio (sei passi, due modi di saltarla)', comando: 'npm', argomenti: ['run', 'guida'] },
+  // Il "rimetti a posto": la regola sta nei test unitari, qui si prova il collegamento
+  // fra regola e schermo, che vive fra tre hook e un componente e nessun test unitario
+  // puo' vedere.
+  { nome: 'rimetti a posto il pezzo', comando: 'npm', argomenti: ['run', 'annulla'] },
   { nome: 'archivio delle sfide nel browser', comando: 'npm', argomenti: ['run', 'archivio'] },
   { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },

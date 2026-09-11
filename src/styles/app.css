@@ -182,10 +182,26 @@ button {
 /* --------------------------------------------------------------- plancia --- */
 /* La plancia prende lo spazio che avanza, ma il tray non deve mai schiacciarsi:
    su schermi bassi si stringe la plancia, non i pezzi da prendere in mano. */
+/* IL TAVOLO SI ADATTA ALLO SPAZIO CHE HA, e non a una frazione dello schermo.
+
+   Prima la plancia era limitata solo da `min(96vw, 58vh)`: una misura presa dal
+   viewport, che pero' non sa che cosa altro c'e' sullo schermo. Nei livelli ci sono in
+   piu' la fascia dell'obiettivo e l'avviso della Catena, e su uno schermo da 360x640 il
+   blocco del tavolo diventava alto 416px in uno spazio di 355. Sbordava di 61 pixel, e
+   siccome era centrato ne colava meta' sopra e meta' sotto: quella sotto finiva SOPRA i
+   pezzi in mano, e la scritta "Trascina un pezzo sulla griglia" si leggeva addosso a
+   loro. In partita libera non succedeva, perche' quei due elementi non ci sono -- ed e'
+   il motivo per cui non se n'era accorto nessuno.
+
+   Adesso l'involucro della plancia e' l'elemento elastico della colonna: quando lo
+   spazio manca si stringe lui, la plancia lo segue perche' ha `max-height: 100%`, e
+   `aspect-ratio` le fa perdere anche in larghezza restando quadrata. Il tetto in `vh`
+   resta come limite massimo su schermi alti, dove serviva. */
 .pl-plancia-area {
   flex: 1;
   display: grid;
-  place-items: center;
+  justify-items: center;
+  align-items: stretch;
   min-height: 0;
   padding: 4px 10px;
 }
@@ -193,8 +209,11 @@ button {
 /* Il tavolo da gioco: barra della Catena, plancia e suggerimento restano attaccati. */
 .pl-tavolo {
   width: 100%;
-  display: grid;
-  justify-items: center;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 .pl-tavolo .pl-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
@@ -203,6 +222,10 @@ button {
   position: relative;
   width: 100%;
   max-width: min(96vw, 58vh);
+  /* Il tetto vero: lo spazio che l'involucro ha in questo momento. Con `aspect-ratio`
+     una riduzione in altezza si trasferisce alla larghezza, quindi la plancia resta
+     quadrata mentre rimpicciolisce. */
+  max-height: 100%;
   aspect-ratio: 1;
   padding: 6px;
   border-radius: var(--pl-radius-lg);
@@ -328,13 +351,39 @@ button {
 }
 
 /* ------------------------------------------------------------- messaggi --- */
+/* Una riga che ospita tre cose diverse -- come si muove, dove appoggiare, il "rimetti
+   a posto" -- e riserva SEMPRE l'altezza del pulsante, anche quando mostra solo testo.
+   Se crescesse all'apparire del pulsante, la plancia si restringerebbe di colpo a meta'
+   partita: un tabellone che cambia misura sotto il dito e' peggio del difetto che il
+   pulsante cura. */
 .pl-suggerimento {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 12.5px;
   color: var(--pl-text-faint);
-  padding: 6px 20px 0;
-  min-height: 18px;
+  padding: 2px 20px 0;
+  min-height: 44px;
 }
+
+/* Bersaglio pieno da 44px, come ogni altra cosa che si tocca in questo gioco: lo tocca
+   chi ha appena sbagliato la mira, quindi e' l'ultimo posto dove si puo' fare piccolo.
+   Resta pero' SPENTO -- niente riempimento, niente colore acceso: e' una correzione, non
+   un'azione da invitare a fare. */
+.pl-annulla {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--pl-line-strong);
+  border-radius: 999px;
+  background: none;
+  color: var(--pl-text-dim);
+  font: inherit;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.pl-annulla:hover { color: var(--pl-text); border-color: var(--pl-text-faint); }
 
 /* Il bersaglio da toccare e' TUTTO lo slot, non il disegno del pezzo.
    Misurato prima della correzione: un pezzo da una cella offriva 34x34 px su uno
@@ -661,6 +710,11 @@ button {
 .pl-plancia-involucro {
   position: relative;
   width: 100%;
+  /* L'elemento che cede per primo quando lo spazio manca. `min-height: 0` non e'
+     decorativo: senza, un figlio di flex non scende sotto la propria altezza naturale e
+     la colonna sborda invece di stringersi. */
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   place-items: center;
 }

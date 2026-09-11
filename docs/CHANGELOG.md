@@ -7,6 +7,74 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.8.0] — 10 settembre 2026
+
+### Aggiunto
+
+**«Rimetti a posto il pezzo».** Non e' un annulla, e' una correzione del dito: hai
+lasciato il pezzo una casella piu' in la' di dove volevi, e prima di fare altro lo
+riprendi in mano. La partita torna esattamente com'era.
+
+Nasce da chi ci gioca davvero: «sto giocando in equilibrio instabile con un solo dito,
+mi e' capitato due o tre volte in una partita». Punire quello non aggiunge profondita',
+aggiunge rumore.
+
+**Due condizioni, e ognuna chiude una porta precisa.** La mossa non deve aver eliminato
+niente: se non hai chiuso nessun gruppo, tornare indietro non ti fa sapere niente che non
+sapessi gia', perche' dove finiva il pezzo lo vedevi durante il trascinamento e la terna
+successiva e' mostrata in anteprima. Se invece hai chiuso qualcosa, le conseguenze non
+sono piu' prevedibili — una bomba dentro il gruppo ne porta via altre otto e puo'
+innescarne altre — e poter provare e disfare vorrebbe dire esplorarle prima di decidere.
+E la mossa non deve aver chiuso la partita: altrimenti si annulla, si prova altrove, si
+annulla ancora, e il «hai perso» diventa un oracolo per trovare la casella in cui si
+sopravvive.
+
+Con queste due, annullare non da' **nessun** vantaggio. Per questo non si guadagna, non
+si conta e non ha un limite: e' il tasto che cancella l'ultima lettera.
+
+**Il ripristino e' esatto**, e lo e' perche' il motore e' una funzione pura: lo stato di
+prima non era stato toccato, e dentro ci sono anche la posizione del generatore casuale e
+la terna in anteprima. La sfida del giorno resta identica per tutti; i punti della posa e
+il contatore delle mosse tornano indietro con il resto, quindi un livello «superato in 18
+mosse» continua a voler dire diciotto mosse.
+
+**La memoria e' lunga una mossa sola, di proposito.** Una pila sarebbe un'altra cosa: la
+possibilita' di riavvolgere la partita, che e' esattamente quello che questo non vuole
+essere.
+
+Il pulsante vive nella riga sotto la griglia, che ora riserva sempre l'altezza di un
+bersaglio da 44px anche quando mostra solo del testo: se crescesse all'apparire del
+pulsante, la plancia si restringerebbe di colpo a meta' partita, e un tabellone che cambia
+misura sotto il dito sarebbe peggio del difetto da curare. Ed e' spento — nessun
+riempimento, nessun colore acceso — perche' e' una correzione, non un'azione da invitare
+a fare.
+
+`npm run annulla` e' il diciannovesimo controllo del gate. La regola sta nei test unitari,
+dove costa millisecondi; il browser prova l'altra meta', cioe' che il collegamento fra
+regola e schermo funzioni: che il pulsante compaia quando deve, che ripristini blocchi,
+mano e punteggio, e che poi sparisca.
+
+### Corretto
+
+**Il tavolo da gioco sbordava sui pezzi in mano.** Nei livelli la scritta «Trascina un
+pezzo sulla griglia» finiva addosso ai pezzi. Segnalato da chi giocava, e riprodotto
+misurando: su 360×640 il blocco del tavolo era alto 416px in uno spazio di 355, sbordava
+di 61 pixel e — essendo centrato — ne colava meta' sopra e meta' sotto.
+
+La causa era che la plancia si limitava con `min(96vw, 58vh)`, cioe' con una frazione
+dello schermo, che pero' non sa che cos'altro c'e' sopra: nei livelli ci sono in piu' la
+fascia dell'obiettivo e l'avviso della Catena. In partita libera quei due elementi non
+esistono e il difetto non si vedeva — ed e' il motivo per cui e' vissuto indisturbato:
+chi prova il gioco apre la partita libera, e la schermata che si rompe e' l'altra.
+
+Adesso l'involucro della plancia e' l'elemento che cede quando lo spazio manca, la plancia
+lo segue e resta quadrata perche' `aspect-ratio` trasferisce alla larghezza la riduzione
+in altezza. Il tetto in `vh` resta come limite massimo dove serviva.
+
+`npm run impaginazione` ha una seconda parte che misura questo su sei formati di telefono.
+Verificato che serva: con il foglio di stile vecchio fallisce su due formati (61 e 67
+pixel di sbordo, 30 di sovrapposizione), con quello nuovo passa.
+
 ## [1.7.4] — 10 settembre 2026
 
 ### Cambiato
