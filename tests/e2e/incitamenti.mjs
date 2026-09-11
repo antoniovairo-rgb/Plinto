@@ -215,6 +215,11 @@ for (let giro = 0; giro < 160 && visti < 8; giro += 1) {
   if (await riparti()) continue;
   if (!(await unaMossa())) continue;
 
+  // La frase entra dopo i punti, non insieme (ATTESA_INCITAMENTO in src/feel/durate.js):
+  // leggerla subito dopo la mossa significherebbe leggere lo schermo prima che compaia,
+  // e concludere che non compare mai.
+  await page.waitForSelector('.pl-incitamento', { timeout: 1500 }).catch(() => {});
+
   const stato = await page.evaluate(() => {
     const nodo = document.querySelector('.pl-incitamento');
     if (!nodo) return { c: false };
@@ -290,7 +295,7 @@ let pulsanteVisto = false;
 for (let giro = 0; giro < 40 && !pulsanteVisto; giro += 1) {
   if (await riparti()) continue;
   if (!(await unaMossa(false))) continue;    // una mossa che non chiude niente
-  await page.waitForTimeout(1400);           // l'eventuale frase sparisce
+  await page.waitForTimeout(2100);           // l'eventuale frase entra e se ne va
   if (!(await page.locator('.pl-annulla').count())) continue;
   pulsanteVisto = true;
   mkdirSync(RITRATTI, { recursive: true });

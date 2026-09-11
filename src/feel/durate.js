@@ -20,3 +20,19 @@ export const DURATA_PUNTI = 950;
  * ostacolo fra il giocatore e la mossa successiva.
  */
 export const DURATA_INCITAMENTO = 1250;
+
+/**
+ * Quanto la frase aspetta prima di comparire.
+ *
+ * PERCHE' NON ARRIVA SUBITO. La frase sta al centro della plancia e i punti salgono
+ * dalla cella dove hai appoggiato: quando quella cella e' al centro, il riquadro della
+ * frase si mette davanti al numero. Visto su una schermata dello store: "+198" letto
+ * come "+1 98", con l'etichetta della Tinta tagliata a meta'.
+ *
+ * Spostare la frase non risolve, perche' i punti possono partire da qualunque casella.
+ * Separarli nel TEMPO invece si': i punti durano 950ms, la frase entra a 480 e resta
+ * fino a 1730. Si sovrappongono per meno di mezzo secondo, mentre il numero sta gia'
+ * sbiadendo, e la celebrazione diventa una sequenza -- prima quanto hai fatto, poi
+ * com'e' andata -- invece di due cose che si contendono lo stesso punto dello schermo.
+ */
+export const ATTESA_INCITAMENTO = 480;

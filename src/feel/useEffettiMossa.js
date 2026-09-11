@@ -24,6 +24,7 @@ import {
 
 import {
   DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
+  ATTESA_INCITAMENTO,
 } from './durate.js';
 import { respiroRimasto } from '../core/scoring.js';
 import { incitamento } from '../core/incitamenti.js';
@@ -111,8 +112,12 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     if (premio) {
       const quante = VARIANTI_INCITA[premio.categoria] ?? 1;
       const variante = sacchetti.current(premio.categoria, quante);
-      setIncita({ chiave: lastMove.moveNumber, ...premio, variante });
-      timers.push(setTimeout(() => setIncita(null), DURATA_INCITAMENTO));
+      // La frase entra DOPO i punti, non insieme: vedi ATTESA_INCITAMENTO in durate.js.
+      timers.push(setTimeout(
+        () => setIncita({ chiave: lastMove.moveNumber, ...premio, variante }),
+        ATTESA_INCITAMENTO,
+      ));
+      timers.push(setTimeout(() => setIncita(null), ATTESA_INCITAMENTO + DURATA_INCITAMENTO));
     }
 
     if (!animazioni) return () => timers.forEach(clearTimeout);

@@ -304,8 +304,36 @@ await page.screenshot({ path: `${USCITA}6-impostazioni.png` });
 await prepara({ record: RECORD, quadri: progressiFinoA(23) });
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
-await page.evaluate(() => window.scrollTo(0, 0));
+// LA MAPPA SI PORTA DA SOLA SUL LIVELLO CORRENTE, e in una schermata dello store quel
+// punto di arrivo taglia a meta' il pulsante "Condividi il tuo percorso": resta sotto
+// l'intestazione, e la prima immagine della scheda mostrerebbe un elemento mozzato.
+//
+// Qui c'era `window.scrollTo(0, 0)`, che era CODICE MORTO: a scorrere non e' la
+// finestra ma un contenitore interno, `div.pl-scroll`, quindi window.scrollY era gia'
+// zero e quella riga non ha mai spostato niente. Sembrava una precauzione presa, e per
+// questo nessuno e' andato a controllare il risultato.
+await page.evaluate(() => {
+  const scorrevole = [...document.querySelectorAll('*')].find((n) => n.scrollTop > 0);
+  if (scorrevole) scorrevole.scrollTop = 0;
+});
 await page.waitForTimeout(300);
+// E si verifica, invece di sperarlo: niente di cliccabile deve restare sotto la testata.
+const mozzato = await page.evaluate(() => {
+  const testata = document.querySelector('.pl-pagina__testata, header');
+  const sotto = testata ? testata.getBoundingClientRect().bottom : 0;
+  // I comandi DENTRO la testata non sono mozzati: sono la testata. La prima stesura di
+  // questo controllo li segnalava, e il primo che ha fermato la generazione era la
+  // freccia "indietro". Un controllo che grida al primo giro insegna a spegnerlo.
+  const sopra = [...document.querySelectorAll('button')]
+    .filter((b) => !testata || !testata.contains(b))
+    .map((b) => ({ testo: b.textContent.trim().slice(0, 40), top: Math.round(b.getBoundingClientRect().top) }))
+    .filter((b) => b.top < sotto - 1 && b.top > -200);
+  return { sotto: Math.round(sotto), sopra };
+});
+if (mozzato.sopra.length) {
+  throw new Error(`La mappa dei livelli ha ${mozzato.sopra.length} comandi sotto la testata `
+    + `(che finisce a ${mozzato.sotto}px): ${mozzato.sopra.map((b) => `"${b.testo}" a ${b.top}px`).join(', ')}`);
+}
 await page.screenshot({ path: `${USCITA}7-mappa-livelli.png` });
 
 // --- 8. L'apertura di un livello: l'obiettivo detto prima di giocare ----------

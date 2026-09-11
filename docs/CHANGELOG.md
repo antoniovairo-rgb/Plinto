@@ -7,6 +7,51 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.9.2] — 11 settembre 2026
+
+### Corretto
+
+**La frase di incitamento copriva i punti.**
+Le due cose arrivavano insieme: la frase al centro della plancia, i punti in volo dalla
+casella appena giocata. Quando quella casella era al centro, il riquadro della frase si
+metteva davanti al numero. Visto su una schermata dello store: «+198» che si leggeva
+«+1 98», con l'etichetta della Tinta tagliata a meta'.
+
+Spostare la frase non risolveva, perche' i punti possono partire da qualunque casella.
+Sono stati separati nel TEMPO: la frase entra 480 millisecondi dopo, si sovrappongono per
+meno di mezzo secondo mentre il numero sta gia' sbiadendo, e la celebrazione diventa una
+sequenza -- prima quanto hai fatto, poi com'e' andata -- invece di due cose che si
+contendono lo stesso punto dello schermo.
+
+**La schermata della mappa dei livelli usciva tagliata.**
+Il pulsante «Condividi il tuo percorso» finiva sotto l'intestazione. Nel generatore
+c'era una riga `window.scrollTo(0, 0)` che era **codice morto**: a scorrere non e' la
+finestra ma un contenitore interno, quindi quella riga non ha mai spostato niente.
+Sembrava una precauzione presa, e per questo nessuno era andato a guardare il risultato.
+Adesso si scorre l'elemento giusto, e un controllo ferma la generazione se un comando
+resta sotto la testata.
+
+### Aggiunto
+
+**`npm run video`: il montaggio per la scheda dello store.**
+Un minuto, sei parti in un ordine deciso: la home, la mappa dei cento livelli, l'apertura
+di un livello con l'obiettivo detto prima di giocare, il livello giocato, la vittoria, e
+la partita libera. Il gioco gira per davvero e i pezzi vengono TRASCINATI, non toccati:
+la prima stesura usava la modalita' a due tocchi e a video il pezzo spariva dal vassoio
+per ricomparire sulla griglia, che sembrava un gioco che scatta. Non era il gioco, era il
+modo di filmarlo.
+
+Limiti dichiarati: nessun audio (lo strumento registra solo l'immagine, e il sonoro
+legato alla Catena si perde), e chi gioca e' un algoritmo che non esita e non sbaglia
+mai.
+
+**I testi della scheda dello Store, riscritti e tradotti.**
+`android/SCHEDA-PLAY-STORE.md` era fermo a prima delle bombe, della Tinta, dell'anteprima
+della terna, dell'archivio delle sfide, delle statistiche e della condivisione:
+raccontava un gioco piu' piccolo di quello che si scarica. I cento livelli sono stati
+portati in apertura, e c'e' ora anche la versione inglese, visto che il gioco e' gia'
+tradotto dentro.
+
 ## [1.9.1] — 11 settembre 2026
 
 ### Corretto

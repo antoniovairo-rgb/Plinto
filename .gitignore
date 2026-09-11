@@ -25,3 +25,8 @@ verifica-livelli.json
 # sta lavorando su una modifica grafica, non al negozio: quelle del negozio le genera
 # `npm run schermate` e stanno in store/ senza sottocartella.
 store/prove/
+
+# Il montaggio per lo store. Non si versiona: e' un file da un megabyte e mezzo che si
+# rifa' a ogni versione con `npm run video`, e la storia di git non ha motivo di
+# portarsene dietro una copia per ogni giro.
+store/video/
