@@ -214,7 +214,7 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 .pl-tavolo .pl-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
 
@@ -314,15 +314,18 @@ button {
   grid-template-columns: repeat(3, 1fr);
   align-items: center;
   gap: 8px;
-  padding: 10px 14px calc(16px + env(safe-area-inset-bottom));
+  padding: 4px 14px calc(10px + env(safe-area-inset-bottom));
 }
 
 .pl-tray__posto {
   display: grid;
   place-items: center;
-  /* Su schermi alti lo spazio che avanza va ai pezzi da prendere, non al vuoto:
-     bersagli piu' grandi da afferrare e forme piu' leggibili prima di muovere. */
-  height: clamp(96px, 17vh, 152px);
+  /* Lo spazio che avanza va ai pezzi da prendere, non al vuoto: bersagli piu' grandi
+     da afferrare e forme piu' leggibili prima di muovere.
+     RIDOTTO DOPO AVERLO MISURATO: a 17vh il riquadro era alto 129px per disegnarci
+     dentro un pezzo da 60, e quei 40px di vuoto li pagava la plancia. Il bersaglio
+     resta il riquadro intero, cioe' due volte e mezza i 44px raccomandati. */
+  height: clamp(84px, 12vh, 124px);
   border-radius: var(--pl-radius-md);
   background: var(--pl-cella-vuota);
   transition: background var(--pl-t-fast) var(--pl-ease-out);
@@ -373,7 +376,7 @@ button {
   text-align: center;
   font-size: 12.5px;
   color: var(--pl-text-faint);
-  padding: 2px 20px 0;
+  padding: 0 20px;
   min-height: 44px;
 }
 
@@ -1904,7 +1907,7 @@ button {
    piu' rapida per far fallire npm run contrasti. */
 .pl-anteprima {
   display: flex; align-items: center; gap: 12px;
-  margin: 4px auto 8px; padding: 7px 12px;
+  margin: 2px auto 6px; padding: 5px 12px;
   border: 1px solid var(--pl-line); border-radius: var(--pl-radius-sm);
   background: var(--pl-ink-2);
 }

@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.8.2] — 11 settembre 2026
+
+### Cambiato
+
+**La plancia torna grande, e lo spazio lo pagano i blocchi che ne avevano di avanzo.**
+La 1.8.1 aveva rimpicciolito il tabellone da 380 a 310 pixel per farlo stare dentro il
+suo riquadro: corretto, ma il prezzo lo aveva pagato tutto la cosa piu' importante dello
+schermo. Segnalato da chi ci gioca: «la griglia la riporterei alla grandezza di prima e
+ridimensionerei il resto».
+
+Misurata l'altezza blocco per blocco su un telefono da 756px utili, la risposta era
+evidente: **i riquadri dei pezzi in mano erano alti 129 pixel per disegnarci dentro un
+pezzo da 60**. Quaranta pixel di vuoto per riquadro, e li pagava la plancia. Portati a
+91, con il bersaglio da toccare che resta il riquadro intero — cioe' due volte i 44px
+raccomandati, non meno.
+
+Il resto viene dai margini: lo spazio fra la barra della Catena, il tabellone e la riga
+del suggerimento, e i bordi attorno ai pezzi e alla striscia della prossima terna. Nessun
+testo e' stato rimpicciolito, e le celle della prossima terna restano a 11px: erano state
+portate a quella misura dopo che un giocatore aveva detto «non vedo l'anteprima», e
+tornare indietro sarebbe stato disfare una correzione per farne un'altra.
+
+Risultato su quel telefono: plancia da 310 a **374**, praticamente la misura di prima —
+ma stavolta dentro il suo riquadro invece che sopra il pulsante.
+
 ## [1.8.1] — 11 settembre 2026
 
 ### Corretto
