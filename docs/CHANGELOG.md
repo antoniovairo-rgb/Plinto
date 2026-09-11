@@ -7,6 +7,50 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.8.1] — 11 settembre 2026
+
+### Corretto
+
+**La plancia copriva il pulsante «Rimetti a posto il pezzo».** Segnalato appena
+pubblicata la 1.8.0, con una schermata in cui del pulsante si vedeva solo una fetta sotto
+il bordo del tabellone. Difetto mio, e grave: la funzione appena aggiunta era inutilizzabile
+su mezzo parco telefoni.
+
+**La causa e' una direzione sbagliata, non una misura sbagliata.** La plancia era scritta
+come `width: 100%` piu' `aspect-ratio: 1`: l'altezza era una conseguenza della larghezza,
+e in quel verso un `max-height` non la fa rimpicciolire. Il risultato e' che la plancia
+sforava il proprio riquadro senza che il blocco che la contiene risultasse sbordare —
+misurato sul formato che l'ha trovato: riquadro 312px, plancia 380px, 68 di troppo che
+finivano sopra il pulsante.
+
+Adesso si parte dall'altezza: quella e' definita, la larghezza la segue, e `max-width` la
+riporta indietro sui riquadri stretti. I due vecchi tetti restano dentro il `min` perche'
+servivano a non far diventare enorme la plancia sugli schermi alti, e quel compito ce
+l'hanno ancora.
+
+**Conseguenza da dire, non da nascondere: la plancia e' piu' piccola.** Su un telefono
+comune passa da 380 a 310 pixel. Non e' una perdita, e' la misura vera: 380 era la misura
+che non ci stava, ed era anche la causa della segnalazione precedente — la scritta che
+finiva addosso ai pezzi. Lo stesso difetto, visto due volte da due parti diverse.
+
+### Cambiato
+
+**Lo scenario di impaginazione provava lo stato sbagliato, in due modi.**
+
+Provava il livello **appena aperto**, cioe' l'unico istante in cui il pulsante non c'e'
+ancora: guardava proprio il fotogramma in cui il difetto non esiste. Adesso fa una mossa
+prima di misurare, e verifica anche che il pulsante ci sia — altrimenti lo scenario non
+prova quello che dice di provare.
+
+E provava le altezze **nominali** dei telefoni. Su uno schermo vero la barra di stato e
+quella di navigazione si prendono un centinaio di pixel, e il gioco ne riceve molti meno:
+412x915 passava, 412x805 no. Adesso ogni formato viene provato due volte, con e senza le
+barre. Provare la misura della scatola invece di quella dello schermo vuol dire non
+provare niente.
+
+Verificato che serva: con il foglio di stile della 1.8.0 il controllo nuovo fallisce su
+**otto** formati, con quello corretto passa su tutti e dodici.
+
 ## [1.8.0] — 10 settembre 2026
 
 ### Aggiunto

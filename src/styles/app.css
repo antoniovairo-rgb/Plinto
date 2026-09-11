@@ -218,14 +218,24 @@ button {
 }
 .pl-tavolo .pl-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
 
+/* LA PLANCIA SI MISURA IN ALTEZZA, non in larghezza, e la differenza non e' teorica.
+   
+   Con `width: 100%` piu' `aspect-ratio`, l'altezza e' una conseguenza della larghezza:
+   il vincolo viaggia in un verso solo, e un `max-height` non la fa rimpicciolire. E'
+   costato un difetto grave pubblicato: la plancia sforava il proprio riquadro di 68
+   pixel e finiva SOPRA il pulsante "Rimetti a posto il pezzo", che spariva a meta'.
+   Misurato: involucro 312px, plancia 380px.
+   
+   Partendo dall'altezza il vincolo viaggia nel verso giusto -- l'altezza e' definita,
+   la larghezza la segue, e `max-width` la riporta indietro se il riquadro e' stretto.
+   I due vecchi tetti (96vw e 58vh) restano dentro il `min`: servivano a non far
+   diventare enorme la plancia sugli schermi molto alti, e quel compito ce l'hanno
+   ancora. */
 .pl-plancia {
   position: relative;
-  width: 100%;
-  max-width: min(96vw, 58vh);
-  /* Il tetto vero: lo spazio che l'involucro ha in questo momento. Con `aspect-ratio`
-     una riduzione in altezza si trasferisce alla larghezza, quindi la plancia resta
-     quadrata mentre rimpicciolisce. */
-  max-height: 100%;
+  height: min(100%, 96vw, 58vh);
+  width: auto;
+  max-width: 100%;
   aspect-ratio: 1;
   padding: 6px;
   border-radius: var(--pl-radius-lg);

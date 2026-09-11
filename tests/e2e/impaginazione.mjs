@@ -36,6 +36,20 @@ const FORMATI = [
   [412, 915, 'Redmi / Galaxy'],
 ];
 
+/**
+ * Gli stessi telefoni, ma con l'altezza che il gioco ha DAVVERO.
+ *
+ * I numeri qui sopra sono quelli nominali dei dispositivi. Sullo schermo di un telefono
+ * vero, pero', la barra di stato in alto e quella di navigazione in basso si prendono
+ * un pezzo di quell'altezza: l'applicazione ne riceve un centinaio di pixel in meno.
+ *
+ * Non e' una sottigliezza. Un difetto grave e' stato pubblicato proprio perche' questo
+ * scenario provava 412x915 -- dove tutto entrava -- mentre il telefono che lo ha trovato
+ * aveva circa 400x756, e li' la plancia copriva un pulsante. Provare la misura della
+ * scatola invece di quella dello schermo vuol dire non provare niente.
+ */
+const FORMATI_CON_BARRE = FORMATI.map(([l, a, nome]) => [l, a - 110, `${nome} (con barre)`]);
+
 const errori = [];
 
 async function serverRisponde() {
@@ -101,8 +115,8 @@ for (const [larghezza, altezza, nome] of FORMATI) {
 // In partita libera non succedeva, perche' quei due elementi non ci sono. E' il motivo
 // per cui e' passato inosservato: chi prova il gioco apre la partita libera, e la
 // schermata che si rompe e' l'altra.
-console.log('\nDentro un livello: il tavolo non sborda sui pezzi');
-for (const [larghezza, altezza, nome] of FORMATI) {
+console.log('\nDentro un livello, DOPO una mossa: niente si copre a vicenda');
+for (const [larghezza, altezza, nome] of [...FORMATI, ...FORMATI_CON_BARRE]) {
   const page = await browser.newPage({ viewport: { width: larghezza, height: altezza }, locale: 'it-IT' });
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
   await page.evaluate(() => {
@@ -118,6 +132,23 @@ for (const [larghezza, altezza, nome] of FORMATI) {
   await page.waitForSelector('.pl-plancia');
   await page.waitForTimeout(250);
 
+  // UNA MOSSA, perche' e' dopo una mossa che compare "Rimetti a posto il pezzo" -- ed e'
+  // esattamente lo stato in cui la plancia lo copriva. Provare il livello appena aperto
+  // guardava l'unico istante in cui il difetto non c'era.
+  const g = await page.evaluate(() => {
+    const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+    const c = document.querySelectorAll('.pl-plancia .pl-cella')[40].getBoundingClientRect();
+    return {
+      px: p.left + p.width / 2, py: p.top + p.height / 2,
+      cx: c.left + c.width / 2, cy: c.top + c.height / 2,
+    };
+  });
+  await page.mouse.move(g.px, g.py);
+  await page.mouse.down();
+  await page.mouse.move(g.cx, g.cy, { steps: 10 });
+  await page.mouse.up();
+  await page.waitForTimeout(250);
+
   const m = await page.evaluate(() => {
     const area = document.querySelector('.pl-plancia-area').getBoundingClientRect();
     const tavolo = document.querySelector('.pl-tavolo').getBoundingClientRect();
@@ -125,19 +156,35 @@ for (const [larghezza, altezza, nome] of FORMATI) {
     const pezzi = [...document.querySelectorAll('.pl-tray .pl-pezzo')]
       .map((p) => p.getBoundingClientRect());
     const piuAlto = pezzi.length ? Math.min(...pezzi.map((r) => r.top)) : Infinity;
+    const plancia = document.querySelector('.pl-plancia').getBoundingClientRect();
+    const involucro = document.querySelector('.pl-plancia-involucro').getBoundingClientRect();
     return {
       sborda: Math.round(tavolo.height - area.height),
       // Quanto il tavolo entra dentro il pezzo piu' alto: e' il difetto visibile.
       sovrapposizione: Math.round(Math.max(0, tavolo.bottom - piuAlto)),
       suggerimentoSuiPezzi: suggerimento
         ? Math.round(Math.max(0, suggerimento.bottom - piuAlto)) : 0,
+      // La plancia dentro il proprio riquadro: e' il difetto della 1.8.0, dove sforava
+      // e finiva sopra il pulsante senza che il tavolo risultasse sbordare.
+      planciaSfora: Math.round(Math.max(0, plancia.height - involucro.height)),
+      planciaSulSuggerimento: suggerimento
+        ? Math.round(Math.max(0, plancia.bottom - suggerimento.top)) : 0,
+      pulsante: !!document.querySelector('.pl-annulla'),
     };
   });
-  const rotto = m.sborda > 0 || m.sovrapposizione > 0;
-  console.log(`  ${rotto ? 'NO  ' : 'ok  '}${nome.padEnd(18)} ${larghezza}x${altezza}  `
+  const rotto = m.sborda > 0 || m.sovrapposizione > 0 || m.planciaSfora > 0
+    || m.planciaSulSuggerimento > 0;
+  console.log(`  ${rotto ? 'NO  ' : 'ok  '}${nome.padEnd(22)} ${larghezza}x${altezza}  `
     + `tavolo ${m.sborda > 0 ? `sborda di ${m.sborda}px` : 'entra'}`
+    + `${m.planciaSfora > 0 ? `, plancia fuori dal riquadro di ${m.planciaSfora}px` : ''}`
+    + `${m.planciaSulSuggerimento > 0 ? `, copre il pulsante di ${m.planciaSulSuggerimento}px` : ''}`
     + `${m.sovrapposizione > 0 ? `, copre i pezzi di ${m.sovrapposizione}px` : ''}`);
+  if (!m.pulsante) errori.push(`${nome} (${larghezza}x${altezza}): dopo la mossa il pulsante non c'e, lo scenario non prova quello che dice`);
   if (m.sborda > 0) errori.push(`${nome} (${larghezza}x${altezza}): il tavolo sborda di ${m.sborda}px`);
+  if (m.planciaSfora > 0) errori.push(`${nome} (${larghezza}x${altezza}): la plancia esce dal suo riquadro di ${m.planciaSfora}px`);
+  if (m.planciaSulSuggerimento > 0) {
+    errori.push(`${nome} (${larghezza}x${altezza}): la plancia copre il pulsante di ${m.planciaSulSuggerimento}px`);
+  }
   if (m.sovrapposizione > 0) {
     errori.push(`${nome} (${larghezza}x${altezza}): il tavolo copre i pezzi in mano di ${m.sovrapposizione}px`);
   }
