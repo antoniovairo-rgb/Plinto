@@ -135,10 +135,28 @@ const TOCCA_IL_GIOCO = [
  */
 const REGISTRO_LIVELLI = new URL('../verifica-livelli.json', import.meta.url).pathname;
 
-/** Le impronte di tutti i file che decidono come si gioca, una per file. */
+/**
+ * Le impronte di tutti i file che decidono come si gioca, una per file.
+ *
+ * SI CHIEDONO A GIT ANCHE I FILE NON ANCORA VERSIONATI, e non e' un dettaglio. La prima
+ * versione usava `git ls-files` e basta, che elenca solo cio' che e' gia' committato: un
+ * file nuovo, scritto ma non ancora aggiunto, era invisibile all'impronta. E' successo
+ * davvero -- `src/core/incitamenti.js` e' rimasto fuori dal registro di un giro completo
+ * andato a buon fine, perche' al momento di scriverlo non era ancora versionato.
+ *
+ * Quella volta e' finita nel verso innocuo: al giro dopo il file risultava "comparso dal
+ * nulla" e la corsia veloce e' stata negata. Ma il verso pericoloso e' l'altro. Un file
+ * che decide come si gioca e che resta non versionato non viene visto CAMBIARE, e la
+ * corsia veloce salterebbe i cento livelli su codice modificato: esattamente la cosa che
+ * questo meccanismo esiste per impedire.
+ *
+ * `--others --exclude-standard` aggiunge i file presenti ma non versionati, rispettando
+ * il .gitignore: cosi' l'impronta descrive il codice che c'e' sul disco, che e' quello
+ * che i cento livelli hanno davvero giocato.
+ */
 function improntaDelGioco() {
   try {
-    const tutti = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
+    const tutti = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { encoding: 'utf8' })
       .split('\n').map((r) => r.trim()).filter(Boolean);
     const impronte = {};
     for (const file of tutti.filter((f) => TOCCA_IL_GIOCO.some((r) => r.test(f)))) {

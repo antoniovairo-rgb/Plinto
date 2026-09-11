@@ -7,6 +7,58 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.9.1] — 11 settembre 2026
+
+### Corretto
+
+**L'icona sul telefono arrivava con gli angoli rasati.**
+Segnalato da chi ce l'ha installata, con una schermata della home: «icona tagliata». Il
+marchio di PLINTO e' quadrato e occupava quasi tutta la tela, quindi la maschera del
+launcher gli mangiava gli angoli. Con una maschera a cerchio, che diversi produttori
+usano, i quattro blocchi venivano proprio massacrati.
+
+**La causa e' una misura guardata al posto di un'altra.** Un'icona adattiva Android ha
+una tela di 108dp; il sistema ne mostra al massimo 72 centrali, ma la porzione garantita
+visibile QUALUNQUE forma scelga il produttore e' un **cerchio** di 66dp su 108. Il
+margine era stato scelto sul quadrato visibile invece che sul cerchio garantito, e su un
+marchio quadrato la differenza fra le due misure e' esattamente cio' che si perde agli
+angoli. Misurato: il marchio arrivava a 187 pixel dal centro su una tela da 432, dove la
+zona sicura ne ammette 132. Sporgeva di 55.
+
+Il margine passa da 0,18 a 0,28 per lato: il raggio scende a 129 pixel, dentro i 132. Con
+quattro margini provati e guardati sotto le maschere vere (cerchio e squircle), 0,25 era
+ancora fuori di 14 pixel. Stessa correzione sull'icona «maskable» del sito, dove la
+specifica web ammette un cerchio dell'80% del lato e il marchio ne usava il 91%.
+
+**Il commento nel generatore dichiarava proprio la proprieta' che non valeva.** C'era
+scritto che il marchio stava «dentro il cerchio sicuro di Android»: non era una svista di
+scrittura, era una misura mai presa. Adesso `npm run icone` misura il raggio sul PNG vero
+e si ferma se e' fuori, e un test rilegge quelle misure a ogni rilascio, perche' il gate
+non rigenera le icone. Verificato che il controllo fallisca davvero rimettendo i vecchi
+margini: si ferma, dicendo di quanti pixel si sporge e dove correggere.
+
+### Corretto anche
+
+**La corsia veloce del gate poteva non vedere un file nuovo.**
+L'elenco dei file che decidono come si gioca veniva chiesto a `git ls-files`, che elenca
+solo cio' che e' gia' versionato: un file scritto ma non ancora aggiunto era invisibile
+all'impronta. E' successo davvero, con `src/core/incitamenti.js`, rimasto fuori dal
+registro di un giro completo andato a buon fine.
+
+Quella volta e' finita nel verso innocuo: al giro dopo il file risultava comparso dal
+nulla e la corsia veloce e' stata negata, rigiocando i cento livelli. Ma il verso
+pericoloso e' l'altro: un file che decide come si gioca e che resta non versionato non
+viene visto CAMBIARE, e la corsia veloce salterebbe i cento livelli su codice modificato.
+Adesso l'elenco chiede anche i file non versionati, rispettando il `.gitignore`.
+Verificato che la differenza esista davvero: con un file finto in `src/core/`, il vecchio
+metodo non lo vedeva e quello corretto si'.
+
+### Nota per chi pubblica
+
+La correzione arriva subito a chi usa il sito o l'ha installato dal browser. **L'icona di
+chi l'ha presa dal Play Store sta dentro l'app bundle**, quindi cambia solo ricompilando
+e ricaricando l'AAB. Il `versionCode` e' gia' pronto a 10307.
+
 ## [1.9.0] — 11 settembre 2026
 
 ### Aggiunto

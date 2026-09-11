@@ -22,7 +22,8 @@
 import { chromium } from 'playwright';
 import { readFileSync, copyFileSync, mkdirSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
+import { MISURE, REGISTRO } from './misure-icone.js';
 
 /**
  * Percorso del browser.
@@ -56,55 +57,51 @@ if (!svg.includes(FONDO) || !svg.includes(VISTA)) {
 }
 const svgSoloMarchio = svg.replace(FONDO, '').replace(VISTA, 'viewBox="3 3 42 42"');
 
-/** Dimensioni richieste dalle piattaforme, con la ragione di ciascuna. */
-const MISURE = [
-  { nome: 'icona-192.png', lato: 192, margine: 0, uso: 'PWA, elenco applicazioni' },
-  { nome: 'icona-512.png', lato: 512, margine: 0, uso: 'PWA, schermata iniziale' },
-  { nome: 'icona-maskable-512.png', lato: 512, margine: 0.12, uso: 'Android, ritaglio adattivo' },
-  { nome: 'icona-apple-180.png', lato: 180, margine: 0, uso: 'iOS, aggiunta alla schermata home' },
-  { nome: 'icona-1024.png', lato: 1024, margine: 0, uso: 'schede degli store' },
-  { nome: 'favicon-32.png', lato: 32, margine: 0, uso: 'scheda del browser' },
-  // 432 = 108dp alla densita' xxxhdpi, la tela di un'icona adattiva. Margine 0,20 per
-  // lato lascia il marchio al 60% della tela, dentro il cerchio sicuro di Android.
-  {
-    nome: 'icona-android-primopiano-432.png',
-    lato: 432,
-    // 0,18 per lato lascia il marchio al 64% della tela: sta dentro i 72dp su 108 che
-    // Android garantisce visibili, e sfiora il cerchio sicuro invece di perdersi al centro.
-    margine: 0.18,
-    trasparente: true,
-    uso: 'Android, primo piano dell\'icona adattiva',
-  },
-  // L'icona CLASSICA di Android, quella usata dove l'adattiva non arriva. Non e' un
-  // residuo storico: alcuni sistemi (MIUI in particolare) applicano una propria maschera
-  // anche a questa, e il marchio a tutto campo ci finisce sotto. Stesso margine
-  // dell'adattiva, ma con il fondo dipinto: qui non c'e' un livello sotto a metterlo.
-  {
-    nome: 'icona-android-classica-432.png',
-    lato: 432,
-    margine: 0.18,
-    soloMarchio: true,
-    uso: 'Android, icona classica',
-  },
-  // La schermata d'avvio. 768 = 192dp alla densita' xxxhdpi: un marchio grande ma non
-  // invadente, sopra il colore di fondo che mette la libreria.
-  //
-  // La misura non e' un dettaglio estetico. Prima qui c'era l'icona a 512px messa in
-  // `res/drawable/`, la cartella SENZA densita': Android la interpreta come 1x e la
-  // moltiplica per la densita' dello schermo, quindi su un telefono a 3x diventava un
-  // marchio da 1536px che riempiva lo schermo per due secondi. Sta in `drawable-xxxhdpi/`
-  // proprio per dire ad Android a quale densita' e' disegnata.
-  {
-    nome: 'icona-splash-768.png',
-    lato: 768,
-    margine: 0.28,
-    trasparente: true,
-    uso: 'Android, schermata d\'avvio',
-  },
-];
-
 await mkdir(USCITA, { recursive: true });
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
+
+/**
+ * Quanto lontano dal centro arriva il pixel dipinto piu' esterno, in frazione del lato.
+ *
+ * SI MISURA IL PNG, NON SI CALCOLA DALL'SVG. Fra le due cose c'e' il rendering vero, con
+ * i suoi arrotondamenti e l'antialiasing, ed e' il PNG quello che finisce nel telefono.
+ * La soglia sull'alfa esclude il velo dell'antialiasing, che altrimenti farebbe sembrare
+ * il marchio piu' grande di quanto si veda.
+ *
+ * Sulle icone con il fondo dipinto si ignora il colore del fondo: li' il "marchio" sono
+ * i blocchi, non la piastrella che li porta.
+ */
+async function raggioDelMarchio(percorso, lato, conFondo) {
+  const page = await browser.newPage({ viewport: { width: 8, height: 8 } });
+  const dati = `data:image/png;base64,${readFileSync(percorso).toString('base64')}`;
+  const raggio = await page.evaluate(async ([src, L, fondo]) => {
+    const img = new Image();
+    img.src = src;
+    await img.decode();
+    const c = document.createElement('canvas');
+    c.width = L; c.height = L;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0, L, L);
+    const p = ctx.getImageData(0, 0, L, L).data;
+    const centro = L / 2;
+    let massimo = 0;
+    for (let y = 0; y < L; y += 1) {
+      for (let x = 0; x < L; x += 1) {
+        const i = (y * L + x) * 4;
+        if (p[i + 3] < 24) continue;
+        if (fondo) {
+          const vicino = Math.abs(p[i] - 14) + Math.abs(p[i + 1] - 17) + Math.abs(p[i + 2] - 24);
+          if (vicino < 24) continue;
+        }
+        const d = Math.hypot(x - centro + 0.5, y - centro + 0.5);
+        if (d > massimo) massimo = d;
+      }
+    }
+    return massimo / L;
+  }, [dati, lato, conFondo]);
+  await page.close();
+  return raggio;
+}
 
 for (const { nome, lato, margine, trasparente = false, soloMarchio = false } of MISURE) {
   const page = await browser.newPage({ viewport: { width: lato, height: lato } });
@@ -121,7 +118,30 @@ for (const { nome, lato, margine, trasparente = false, soloMarchio = false } of 
   await page.close();
 }
 
+// --- la verifica, sui file appena scritti ------------------------------------------
+// Non e' una formalita': l'icona che si e' dovuta correggere aveva un commento che
+// dichiarava proprio questa proprieta'. Un numero misurato vale piu' di una frase.
+const misurate = [];
+const fuori = [];
+for (const { nome, lato, margine, zonaSicura, trasparente = false, soloMarchio = false } of MISURE) {
+  if (!zonaSicura) continue;
+  const raggio = await raggioDelMarchio(`${USCITA}${nome}`, lato, !trasparente || soloMarchio);
+  misurate.push({ nome, lato, margine, zonaSicura, raggio: Number(raggio.toFixed(5)) });
+  if (raggio > zonaSicura) {
+    fuori.push(`${nome}: il marchio arriva a ${Math.round(raggio * lato)}px dal centro, `
+      + `la zona sicura ne ammette ${Math.round(zonaSicura * lato)}px `
+      + `(sporge di ${Math.round((raggio - zonaSicura) * lato)}px). Aumenta il margine in tools/misure-icone.js.`);
+  }
+}
+writeFileSync(REGISTRO, `${JSON.stringify({ misurate }, null, 2)}\n`);
+
 await browser.close();
+
+if (fuori.length) {
+  console.error('\nIl marchio esce dalla zona sicura e il launcher lo taglierebbe:');
+  fuori.forEach((r) => console.error(`  - ${r}`));
+  process.exit(1);
+}
 
 // Il progetto Android non tiene una copia da aggiornare a mano: la riceve da qui. Due
 // file uguali in due cartelle diverse restano uguali finche' qualcuno se ne ricorda.
@@ -135,3 +155,7 @@ copyFileSync(`${USCITA}icona-splash-768.png`, `${SPLASH}splash.png`);
 console.log(`\nIcone generate in public/icone/ da public/icon.svg:`);
 MISURE.forEach(({ nome, lato, uso }) => console.log(`  ${nome.padEnd(34)} ${lato}px  ${uso}`));
 console.log('\nCopiate nel progetto Android: ic_launcher_foreground.png, ic_launcher.png, drawable-xxxhdpi/splash.png');
+console.log('\nMarchio dentro la zona sicura:');
+misurate.forEach(({ nome, lato, raggio, zonaSicura }) => console.log(
+  `  ${nome.padEnd(34)} raggio ${String(Math.round(raggio * lato)).padStart(4)}px `
+  + `su ${Math.round(zonaSicura * lato)}px ammessi`));

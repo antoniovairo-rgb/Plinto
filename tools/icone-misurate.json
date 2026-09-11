@@ -1,0 +1,25 @@
+{
+  "misurate": [
+    {
+      "nome": "icona-maskable-512.png",
+      "lato": 512,
+      "margine": 0.18,
+      "zonaSicura": 0.4,
+      "raggio": 0.3826
+    },
+    {
+      "nome": "icona-android-primopiano-432.png",
+      "lato": 432,
+      "margine": 0.28,
+      "zonaSicura": 0.3055555555555556,
+      "raggio": 0.2997
+    },
+    {
+      "nome": "icona-android-classica-432.png",
+      "lato": 432,
+      "margine": 0.28,
+      "zonaSicura": 0.3055555555555556,
+      "raggio": 0.2997
+    }
+  ]
+}
