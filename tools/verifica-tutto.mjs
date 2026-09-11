@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono diciannove, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono venti, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -46,6 +46,11 @@ const VERIFICHE = [
   // fra regola e schermo, che vive fra tre hook e un componente e nessun test unitario
   // puo' vedere.
   { nome: 'rimetti a posto il pezzo', comando: 'npm', argomenti: ['run', 'annulla'] },
+  // Le frasi di incitamento. QUALE frase dire e' provato dai test unitari; qui si prova
+  // che compaia sopra la plancia senza rubarle il tocco. E' la stessa famiglia di
+  // difetto della 1.8.0 -- qualcosa di decorativo che si mette davanti a una cosa che
+  // si tocca -- e quella volta se ne accorse un giocatore, non un controllo.
+  { nome: 'frasi di incitamento sulla plancia', comando: 'npm', argomenti: ['run', 'incitamenti'] },
   { nome: 'archivio delle sfide nel browser', comando: 'npm', argomenti: ['run', 'archivio'] },
   { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },

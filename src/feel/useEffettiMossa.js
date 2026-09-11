@@ -22,8 +22,13 @@ import {
  * bella del gioco passerebbe inosservata.
  */
 
-import { DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI } from './durate.js';
+import {
+  DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
+} from './durate.js';
 import { respiroRimasto } from '../core/scoring.js';
+import { incitamento } from '../core/incitamenti.js';
+import { VARIANTI_INCITA } from '../i18n/index.js';
+import { creaSacchetti } from './sacchetto.js';
 
 /** Legge dal foglio di stile il colore reale di una famiglia cromatica. */
 function coloreBlocco(indice) {
@@ -38,7 +43,13 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
   const [esplosioni, setEsplosioni] = useState(null);
   const [celleEsplose, setCelleEsplose] = useState(null);
   const [puntiVolanti, setPuntiVolanti] = useState(null);
+  const [incita, setIncita] = useState(null);
   const ultimaMossa = useRef(null);
+  // I sacchetti delle frasi, uno per categoria: si pesca senza rimettere dentro, cosi'
+  // escono tutte prima che una si ripeta. Vivono in un ref e non in uno stato perche'
+  // cambiarli non deve ridisegnare niente: sono memoria, non interfaccia.
+  const sacchetti = useRef(null);
+  if (sacchetti.current === null) sacchetti.current = creaSacchetti();
   // Il digiuno della mossa precedente: serve a far suonare l'ultima chiamata UNA volta,
   // nel momento in cui il respiro finisce, e non a ogni mossa successiva.
   const ultimoDigiuno = useRef(0);
@@ -92,6 +103,18 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
       timers.push(setTimeout(() => { suonoFinePartita(); vibraFinePartita(); }, 420));
     }
 
+    // --- la frase di incitamento ---------------------------------------------
+    // Sta PRIMA della guardia sulle animazioni di proposito. Chi ha spento gli effetti
+    // ha chiesto uno schermo piu' calmo, non un gioco che smette di parlargli: la frase
+    // resta, e' il modo in cui compare che cambia (lo decide il foglio di stile).
+    const premio = incitamento(lastMove);
+    if (premio) {
+      const quante = VARIANTI_INCITA[premio.categoria] ?? 1;
+      const variante = sacchetti.current(premio.categoria, quante);
+      setIncita({ chiave: lastMove.moveNumber, ...premio, variante });
+      timers.push(setTimeout(() => setIncita(null), DURATA_INCITAMENTO));
+    }
+
     if (!animazioni) return () => timers.forEach(clearTimeout);
 
     // --- pop delle celle appena appoggiate ----------------------------------
@@ -137,5 +160,5 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     return () => timers.forEach(clearTimeout);
   }, [lastMove, campo, cellRefs, plancia, animazioni]);
 
-  return { appoggiate, esplosioni, celleEsplose, puntiVolanti };
+  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita };
 }

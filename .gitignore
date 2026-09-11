@@ -20,3 +20,8 @@ coverage/
 .prova-sw/
 verifica.log
 verifica-livelli.json
+
+# Le schermate che i controlli nel browser scattano per farsi guardare. Servono a chi
+# sta lavorando su una modifica grafica, non al negozio: quelle del negozio le genera
+# `npm run schermate` e stanno in store/ senza sottocartella.
+store/prove/

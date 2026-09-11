@@ -50,6 +50,64 @@ export default {
     trascina: 'Trascina un pezzo sulla griglia',
     tocca: 'Tocca un pezzo, poi tocca dove metterlo',
   },
+  /**
+   * Le frasi che il gioco dice dopo una mossa riuscita.
+   *
+   * PIU' D'UNA PER CATEGORIA, E NON PER SFIZIO. La "buona" esce una mossa ogni sei:
+   * con una frase sola, in una partita da duecento mosse la si legge trenta volte, e
+   * alla terza non e' piu' un complimento ma un tic. Quante piu' varianti dove il
+   * messaggio e' frequente, poche dove e' raro.
+   *
+   * CORTE PERCHE' LO SPAZIO E' QUELLO. Stanno nella riga sotto la plancia, alta 44
+   * pixel e larga quanto lo schermo meno i margini: su un telefono stretto ci stanno
+   * poco piu' di trenta caratteri. Una frase che va a capo fa saltare la riga, e con
+   * lei la plancia.
+   */
+  incita: {
+    buona: [
+      'Bene', 'Via una', 'Pulito', 'Giusto', 'Bene così', 'Avanti così',
+      'Ci sta', 'Fatta', 'Una in meno', 'Ordine', 'Si respira', 'Un po\' di spazio',
+      'Netto', 'Tutto a posto', 'Continua così', 'Va bene', 'Spazio guadagnato',
+      'Come si deve', 'Senza sbavature', 'Mossa pulita', 'Quella ci voleva',
+      'Un passo avanti', 'Niente da dire', 'Buon posto', 'Piano e bene',
+      'Così si tiene', 'Sempre così', 'Ecco', 'Al posto giusto', 'Pulita',
+    ],
+    ottima: [
+      'Bella mossa', 'Così si fa', 'Bel colpo', 'Mossa precisa', 'Ottima',
+      'Che pulizia', 'Proprio lì', 'Colpo secco', 'Mossa giusta', 'Molto bene',
+      'Bella chiusura', 'Da manuale', 'Ben vista', 'Che occhio', 'Bel taglio',
+      'Niente sprechi', 'Mossa da tenere', 'Così si gioca', 'Bella pulita',
+      'Gran posto', 'Centrata', 'Bel ragionamento', 'Ottima scelta',
+      'Non era facile', 'Bella trovata', 'Tutto liscio',
+    ],
+    eccellente: [
+      'Eccellente!', 'Che mossa!', 'Gran colpo!', 'Notevole!', 'Bellissima!',
+      'Che pulizia!', 'Colpo magistrale!', 'Che occhio!', 'Roba da applausi!',
+      'Mossa superba!', 'Grandissima!', 'Che classe!', 'Niente male davvero!',
+      'Che spettacolo!',
+    ],
+    perfetta: [
+      'Combinazione perfetta!', 'Perfetta!', 'Capolavoro!', 'Da incorniciare!',
+      'Incredibile!', 'Che intreccio!', 'Roba da fuoriclasse!', 'Mossa perfetta!',
+    ],
+    catenaMassima: [
+      'Catena al massimo!', 'Catena piena!', 'Catena in cima!', 'Non si sale più!',
+      'Catena al limite!', 'Massimo raggiunto!',
+    ],
+    catena: [
+      'Catena {quanti}!', 'Sei a Catena {quanti}!', 'Catena {quanti}, si sale!',
+      'Ecco Catena {quanti}!', 'Catena {quanti} agganciata!', 'Su fino a {quanti}!',
+    ],
+    recupero: [
+      'Che recupero!', 'Bel salvataggio!', 'Ci voleva!', 'Che respiro!',
+      'Proprio in tempo!', 'Tabellone salvo!', 'Si torna a giocare!',
+      'Rimessa in piedi!', 'Che uscita!', 'Riaperta!',
+    ],
+    svuotata: [
+      'Griglia pulita!', 'Tabellone vuoto!', 'Tutto pulito!', 'Non è rimasto niente!',
+      'Ripulita tutta!', 'Tabellone azzerato!',
+    ],
+  },
   fine: {
     titolo: 'Partita finita',
     motivo: 'Nessuno dei pezzi rimasti entra più sulla griglia.',

@@ -297,6 +297,18 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
       boardCleared,
       handRefilled: handEmpty,
       gameOver: !alive,
+      // Il record di Catena PRIMA di questa mossa. Serve a distinguere "ci sei
+      // arrivato" da "ci sei tornato": la Catena tocca il tetto, cala di un livello e
+      // risale di continuo, quindi festeggiare ogni risalita significa festeggiare una
+      // volta ogni ventuno mosse. Con questo dato il traguardo si dice la prima volta
+      // per partita, che e' quando vuol dire qualcosa.
+      catenaMigliorePrima: state.stats.bestChain,
+      // `fillBefore` accanto a `fillAfter`: da soli dicono quanto era piena la griglia,
+      // insieme dicono se la mossa ha fatto RESPIRARE il tabellone. E' il dato su cui
+      // l'interfaccia riconosce il recupero -- la griglia quasi piena che torna
+      // giocabile -- che e' il momento in cui un incoraggiamento serve davvero,
+      // perche' e' il momento in cui si sta per mollare.
+      fillBefore: fillRatio(state.grid),
       fillAfter: fillRatio(grid),
     },
   };

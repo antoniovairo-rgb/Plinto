@@ -37,6 +37,51 @@ export default {
     trascina: 'Drag a piece onto the grid',
     tocca: 'Tap a piece, then tap where to put it',
   },
+  incita: {
+    buona: [
+      'Nice', 'One down', 'Clean', 'Good', 'Nicely done', 'Keep going',
+      'That works', 'Done', 'One less', 'Tidy', 'Room to breathe', 'A bit of space',
+      'Neat', 'All in order', 'Keep it up', 'That will do', 'Space gained',
+      'Just right', 'No fuss', 'Clean move', 'That helped',
+      'A step ahead', 'Nothing to fault', 'Good spot', 'Slow and steady',
+      'That holds', 'Same again', 'There we go', 'Right place', 'Cleared',
+    ],
+    ottima: [
+      'Nice move', 'That is how', 'Good hit', 'Precise move', 'Well played',
+      'What a clean-up', 'Right there', 'Sharp hit', 'Good call', 'Very good',
+      'Nice close', 'Textbook', 'Well spotted', 'Good eye', 'Clean cut',
+      'Nothing wasted', 'One to keep', 'That is the way', 'Nice and clean',
+      'Great spot', 'On target', 'Smart thinking', 'Excellent choice',
+      'That was not easy', 'Nice find', 'All smooth',
+    ],
+    eccellente: [
+      'Excellent!', 'What a move!', 'Great hit!', 'Remarkable!', 'Beautiful!',
+      'What a clean-up!', 'Masterful hit!', 'What an eye!', 'Worth applause!',
+      'Superb move!', 'Outstanding!', 'What class!', 'Really something!',
+      'What a show!',
+    ],
+    perfetta: [
+      'Perfect combo!', 'Perfect!', 'Masterpiece!', 'One for the wall!',
+      'Unbelievable!', 'What an interlock!', 'Pure class!', 'Perfect move!',
+    ],
+    catenaMassima: [
+      'Chain maxed out!', 'Chain full!', 'Chain at the top!', 'No higher than this!',
+      'Chain at the limit!', 'Top reached!',
+    ],
+    catena: [
+      'Chain {quanti}!', 'You are on Chain {quanti}!', 'Chain {quanti}, climbing!',
+      'Here comes Chain {quanti}!', 'Chain {quanti} locked in!', 'Up to {quanti}!',
+    ],
+    recupero: [
+      'What a save!', 'Great save!', 'Just what was needed!', 'What a relief!',
+      'Just in time!', 'Board saved!', 'Back in the game!', 'Back on its feet!',
+      'What a way out!', 'Opened up again!',
+    ],
+    svuotata: [
+      'Board cleared!', 'Empty board!', 'All clean!', 'Nothing left!',
+      'Swept clean!', 'Board wiped!',
+    ],
+  },
   fine: {
     titolo: 'Game over',
     motivo: 'None of the remaining pieces fits on the grid.',

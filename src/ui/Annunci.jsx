@@ -1,3 +1,5 @@
+import { incitamento } from '../core/incitamenti.js';
+
 /**
  * Regione di cortesia per i lettori di schermo.
  *
@@ -16,10 +18,23 @@ export function Annunci({ testo }) {
   );
 }
 
-/** Costruisce la frase da annunciare dopo una mossa. */
+/**
+ * Costruisce la frase da annunciare dopo una mossa.
+ *
+ * L'incitamento apre l'annuncio invece di essere solo disegnato sulla griglia. Una
+ * funzione che incoraggia solo chi guarda lo schermo e' una funzione che decide chi
+ * merita di essere incoraggiato.
+ *
+ * Qui la variante e' sempre la prima, e non sorteggiata come nel disegno: un lettore di
+ * schermo legge una frase alla volta in mezzo a dei numeri, la varieta' non si nota, e
+ * un annuncio che cambia a caso e' piu' difficile da seguire, non piu' vivace.
+ */
 export function frasePerMossa(lastMove, t) {
   if (!lastMove) return '';
   const parti = [];
+
+  const premio = incitamento(lastMove);
+  if (premio) parti.push(t(`incita.${premio.categoria}.0`, { quanti: premio.catena }));
 
   if (lastMove.groups.length > 0) {
     const tipi = { row: 0, col: 0, quadrant: 0 };

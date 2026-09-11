@@ -20,6 +20,13 @@
   /* Tinta delle celle libere. E' un token e non un bianco trasparente scritto a mano
      perche' su fondo chiaro un velo bianco e' semplicemente invisibile. */
   --pl-cella-vuota: rgba(255, 255, 255, 0.03);
+  /* Il velo sotto la frase di incitamento, che sta SOPRA la griglia. Deve essere
+     abbastanza coprente da rendere il testo leggibile anche quando sotto c'e' un
+     blocco saturo, e abbastanza breve da non far dimenticare dov'erano i pezzi.
+     E' un token e non un nero trasparente scritto a mano perche' nel tema chiaro
+     dev'essere l'opposto: un velo scuro su fondo chiaro sarebbe una macchia. */
+  --pl-velo: rgba(10, 13, 19, 0.88);
+  --pl-velo-bordo: rgba(255, 255, 255, 0.10);
 
   /* --- Testo -------------------------------------------------------------- */
   /* Contrasti misurati sul fondo piu' chiaro dell'interfaccia (--pl-surface-2):
@@ -84,6 +91,12 @@
   --pl-t-atterraggio: 260ms;
   --pl-t-esplosione: 420ms;
   --pl-t-punti: 950ms;
+  /* La frase di incitamento. NON compare nel blocco prefers-reduced-motion qui sotto,
+     ed e' l'unica durata che non ci compare: le altre misurano un movimento, questa
+     misura per quanto tempo si puo' LEGGERE un testo. Azzerarla non toglierebbe del
+     moto a chi ne ha chiesto di meno, gli toglierebbe il messaggio. Sotto quella
+     preferenza cambia l'animazione, non la permanenza. */
+  --pl-t-incitamento: 1250ms;
   /* Festeggiamento fra un livello e l'altro: coriandoli, salto di Plinto e barra
      dell'avanzamento. Lunga perche' e' un momento da guardare, non un riscontro. */
   --pl-t-festa: 900ms;
@@ -111,6 +124,8 @@
   --pl-surface-2: #f0f2f7;
   --pl-line: #d8dce7;
   --pl-line-strong: #a9b1c6;
+  --pl-velo: rgba(255, 255, 255, 0.93);
+  --pl-velo-bordo: rgba(0, 0, 0, 0.10);
 
   /* Contrasti misurati con `node tools/contrasti.mjs` sul fondo PIU' SCURO
      dell'interfaccia chiara (--pl-ink-2, #e9ebf2): 14.44, 5.98 e 4.69.

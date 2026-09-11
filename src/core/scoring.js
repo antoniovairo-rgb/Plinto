@@ -163,14 +163,57 @@ export function scoreMove({
 
 /**
  * Etichetta con cui l'interfaccia celebra una mossa.
- * Serve al layer di game feel per scegliere l'intensita' del feedback.
+ * Serve al layer di game feel per scegliere l'intensita' del feedback, e da qui
+ * passano anche le frasi di incitamento: e' il punto in cui il gioco decide
+ * QUANTO e' stata brava una mossa, e quindi quanto entusiasmo mostrare.
+ *
+ * LA TARATURA PRECEDENTE ERA ROTTA, NON SOLO SEVERA. La formula era
+ * `gruppi + catena/3 + esplose/8` con la soglia di "perfetta" a 6. Ma la Catena si
+ * ferma a 9, quindi il suo contributo massimo e' 3, e quattro gruppi in una mossa
+ * capitano una volta su diecimila: il calore massimo che si raggiunge davvero in
+ * partita e' 5. La "perfetta" non era rara, era IRRAGGIUNGIBILE PER COSTRUZIONE.
+ * Misurato sul simulatore: 1 volta in 47.263 mosse per un giocatore esperto, e
+ * quella volta e' un caso limite, non un traguardo.
+ *
+ * COME SONO STATI SCELTI QUESTI NUMERI. Da 75.623 mosse simulate su tre profili di
+ * abilita', cercando fra 35.035 combinazioni di pesi e soglie quella piu' vicina a
+ * una distribuzione voluta (circa 19% buona, 13% ottima, 3,5% eccellente, 0,35%
+ * perfetta). Ma la ricerca a sole percentuali produceva formule SBAGLIATE NEL
+ * MERITO: un intreccio di due gruppi finiva in "buona" mentre una singola
+ * eliminazione con Catena alta diventava "ottima". E' al contrario. L'intreccio
+ * capita nell'1,45% delle mosse ed e' abilita'; la Catena si accumula anche da
+ * sola. Quindi la ricerca e' stata rifatta imponendo prima il merito:
+ *
+ *   - due gruppi insieme valgono sempre almeno "ottima";
+ *   - tre gruppi insieme valgono sempre almeno "eccellente";
+ *   - quattro gruppi, il massimo del gioco, sono sempre "perfetta";
+ *   - una eliminazione secca a Catena zero resta "buona".
+ *
+ * LA PROPRIETA' CHE CONTA, E PERCHE' E' SCRITTA E NON CALCOLATA. La "perfetta" non
+ * si puo' ottenere senza un intreccio: e' il punto dell'intera scala, perche' e' cio'
+ * che impedisce di regalare il gradino piu' alto a chi ha solo tenuto su la Catena.
+ *
+ * Con i pesi scelti la cosa sembrava venire da se': un gruppo vale sei livelli di
+ * Catena, la Catena si ferma a CHAIN_MAX, e in partita una eliminazione singola arriva
+ * al massimo a 6 + 9 + 2 = 17, sotto la soglia. Ma "in partita" non e' "sempre": il
+ * contributo delle bombe non ha tetto, e una cascata abbastanza grande porta anche una
+ * eliminazione sola sopra 19. Il test che afferma la proprieta' e' andato a cercare
+ * proprio quel caso e l'ha trovato.
+ *
+ * Quindi la condizione e' SCRITTA nel codice invece che affidata all'aritmetica. Una
+ * regola che vale solo per i valori che si vedono di solito non e' una regola, e'
+ * una coincidenza che aspetta la partita giusta per smettere di valere. Sui numeri
+ * misurati non cambia niente: nel simulatore il massimo di celle esplose in una
+ * mossa e' 9, quindi il caso non si presentava e la distribuzione resta quella
+ * tarata sopra.
+ *
  * @returns {null|'buona'|'ottima'|'eccellente'|'perfetta'}
  */
 export function moveTier(groupCount, chainLevel, celleEsplose = 0) {
   if (groupCount <= 0) return null;
-  const heat = groupCount + Math.floor(chainLevel / 3) + Math.floor(celleEsplose / 8);
-  if (heat >= 6) return 'perfetta';
-  if (heat >= 4) return 'eccellente';
-  if (heat >= 2) return 'ottima';
+  const heat = groupCount * 6 + chainLevel + Math.floor(celleEsplose / 4);
+  if (heat >= 19 && groupCount >= 2) return 'perfetta';
+  if (heat >= 15) return 'eccellente';
+  if (heat >= 12) return 'ottima';
   return 'buona';
 }

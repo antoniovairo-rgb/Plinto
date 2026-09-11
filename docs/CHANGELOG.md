@@ -7,6 +7,108 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.9.0] — 11 settembre 2026
+
+### Aggiunto
+
+**Il gioco dice qualcosa quando fai una bella mossa.**
+Fino a ieri PLINTO giudicava ogni mossa e non te lo diceva quasi mai: sopra i punti
+compariva una parola sola, in maiuscoletto, e quella parola non passava nemmeno dalla
+traduzione — chi gioca in inglese leggeva «ottima», «eccellente». Adesso al centro della
+plancia compare una frase, per un secondo e un quarto, e poi svanisce.
+
+**Centosei frasi per lingua, duecentododici in tutto**, distribuite secondo quanto
+spesso ogni tipo di mossa capita davvero: trenta per la piu' comune, ventisei per la
+seconda, e poche per quelle che in una partita si vedono meno di due volte. La misura del
+testo cresce con la rarita' della mossa: la frase piu' comune e' piccola e stretta,
+quella piu' rara riempie il tabellone.
+
+**Ma il numero da solo non toglie la ripetizione, e il modo di pescarle conta di piu'.**
+In una partita da 240 mosse la frase piu' comune esce 39 volte: sorteggiando ogni volta
+fra trenta, il doppione arriva in media dopo sette messaggi e spesso a due di distanza.
+Le frasi stanno quindi in un sacchetto e si estraggono SENZA rimetterle dentro: escono
+tutte prima che una qualsiasi torni, e la cucitura fra un giro e il successivo e'
+sorvegliata perche' l'ultima frase di un giro non sia la prima del giro dopo.
+
+Misurato su una partita simulata di 263 mosse, a parita' di mosse giocate:
+
+| | frasi dette | diverse fra loro | distanza minima fra due ripetizioni |
+|---|---|---|---|
+| prima (30 frasi, sorteggio) | 95 | 21 | 2 messaggi |
+| adesso (212 frasi, sacchetto) | 95 | 76 | 15 messaggi |
+
+Il caso usato per pescare NON e' quello del gioco: `rngState` genera la sequenza dei
+pezzi ed e' cio' che rende la sfida del giorno identica per tutti, quindi una frase
+decorativa non deve attingerci, altrimenti sposterebbe i pezzi di chi gioca.
+
+Il velo scuro dietro il testo ce l'hanno tutti e quattro i livelli, e non e' una scelta
+di gusto. La prima stesura lo toglieva al livello piu' frequente, per farlo pesare meno
+sulla griglia; fotografato sopra dei blocchi accesi, non si leggeva. I contrasti misurati
+spiegano perche': sopra le sei famiglie cromatiche il testo attenuato sta fra 1,09 e 1,64
+e persino il testo pieno arriva al massimo a 3,63, tutti sotto il 4,5 richiesto e quasi
+tutti sotto il 3. Nessun colore di testo e' leggibile sopra i blocchi. Sul velo si sale a
+7,44 nel tema scuro e 7,12 in quello chiaro. Togliere il velo non alleggeriva il
+messaggio, lo cancellava proprio quando capitava sulla parte piena della griglia.
+
+**Tre momenti che prima erano muti adesso parlano.**
+La griglia ripulita del tutto (capita una volta ogni 5.017 mosse), la Catena che arriva
+in cima, e il recupero: la griglia era quasi chiusa e una mossa l'ha fatta respirare.
+Quest'ultimo e' l'unico messaggio che parla piu' a chi fatica che a chi gioca bene, ed e'
+voluto: misurato sul simulatore esce una volta ogni 186 mosse per un giocatore capace e
+una ogni 49 per chi sta perdendo.
+
+La stessa frase entra anche nell'annuncio per i lettori di schermo. Una funzione che
+incoraggia solo chi guarda lo schermo e' una funzione che decide chi merita di essere
+incoraggiato.
+
+### Cambiato
+
+**La scala dei giudizi era rotta, non solo severa.**
+La formula era `gruppi + catena/3 + esplose/8` con la soglia della «perfetta» a 6. Ma la
+Catena si ferma a 9, quindi il suo contributo massimo e' 3, e quattro gruppi in una mossa
+capitano una volta su diecimila: il calore massimo raggiungibile in partita era 5. La
+«perfetta» non era rara, era **irraggiungibile per costruzione**. Misurata sul
+simulatore: 1 volta in 47.263 mosse, e quella volta e' un caso limite.
+
+La scala nuova viene da 75.623 mosse simulate su tre profili di abilita' e da 35.035
+combinazioni di pesi e soglie provate. Ma la ricerca a sole percentuali produceva formule
+sbagliate nel merito: un intreccio di due gruppi finiva in «buona» mentre una singola
+eliminazione con Catena alta diventava «ottima». E' al contrario — l'intreccio capita
+nell'1,45% delle mosse ed e' abilita', la Catena si accumula anche da sola. La ricerca e'
+stata rifatta imponendo prima il merito, e il risultato ha una proprieta' che vale piu'
+della statistica: **la «perfetta» non si ottiene senza un intreccio**, per quanto lunga
+sia la Catena e per quante bombe esplodano. Adesso esce una volta ogni 300 mosse circa.
+
+**Il traguardo di Catena si dice una volta per partita, non a ogni risalita.**
+La Catena tocca il tetto, cala di un livello alla prima mossa a vuoto e risale subito
+dopo. Festeggiare ogni rientro voleva dire, misurato, festeggiare una volta ogni 21
+mosse: il traguardo piu' alto del gioco ridotto a sottofondo.
+
+**Il pulsante «Rimetti a posto il pezzo» non sembra piu' un segnaposto.**
+Era un contorno sottile senza riempimento. L'intenzione era giusta — e' una correzione,
+non un'azione da invitare a fare — ma a schermo sembrava un elemento non finito. Adesso
+ha il riempimento delle superfici rialzate, lo stesso dei riquadri dei pezzi, e una
+freccia che torna indietro. Nessun colore d'accento: quello lo trasformerebbe in un
+invito.
+
+**L'istruzione «trascina un pezzo sulla griglia» sparisce dopo tre mosse.**
+Serve finche' non si e' trascinato il primo pezzo. Dopo era peggio che inutile: il
+pulsante «rimetti a posto» e' disponibile sul 63% delle mosse, quindi quella riga passava
+la partita a rimbalzare fra il pulsante e l'istruzione, una mossa si' e una no. Uno
+sfarfallio in mezzo allo schermo per dire una cosa gia' saputa.
+
+### Verifiche
+
+Il gate di rilascio passa da diciannove controlli a venti: `npm run incitamenti` apre il
+browser, gioca finche' non capita una eliminazione e verifica che la frase compaia dentro
+la plancia, che abbia il velo dietro, che non intercetti il tocco delle caselle, che non
+faccia cambiare misura al tabellone e che non si sovrapponga al pulsante. Lo scenario
+gioca anche una mossa che di proposito non chiude niente, perche' altrimenti il pulsante
+«rimetti a posto» non comparirebbe mai e quella meta' del controllo passerebbe senza aver
+provato nulla. E' la stessa famiglia di difetto della
+1.8.0 — qualcosa di decorativo davanti a qualcosa che si tocca — e quella volta se ne
+accorse un giocatore, non un controllo.
+
 ## [1.8.2] — 11 settembre 2026
 
 ### Cambiato

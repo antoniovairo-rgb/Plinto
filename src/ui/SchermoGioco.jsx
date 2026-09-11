@@ -55,6 +55,39 @@ function IntestazioneSfida({ giorno, t }) {
   );
 }
 
+/**
+ * Per quante mosse resta scritto "trascina un pezzo sulla griglia".
+ * Tre bastano: chi ha appoggiato tre pezzi ha capito come si appoggia un pezzo.
+ */
+const MOSSE_CON_ISTRUZIONI = 3;
+
+/**
+ * La freccia che torna indietro, disegnata sul posto.
+ *
+ * Un pulsante di sola scritta, con un contorno sottile e nessun segno, sembrava un
+ * elemento non finito. Il simbolo lo rende riconoscibile prima di leggerlo, che e'
+ * quello che serve a un comando premuto di fretta subito dopo un errore.
+ *
+ * `currentColor` e non un colore fisso: il pulsante schiarisce al passaggio del mouse
+ * e cambia con il tema, e un segno che resta indietro e' peggio che non averlo.
+ */
+function SegnoAnnulla() {
+  return (
+    <svg className="pl-annulla__segno" width="16" height="16" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" strokeWidth="2.2"
+         strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      {/* Una freccia che torna a sinistra e rientra.
+          IL PRIMO DISEGNO ERA UN ARCO CHIUSO con la coda a squadra, la forma classica
+          del "torna indietro" circolare. A 15 pixel l'arco diventava un cerchio pieno e
+          la coda un puntino: sembrava un simbolo di caricamento, non un ritorno.
+          Ingrandito 5 volte si vedeva subito, a dimensione vera no. Questa forma ha
+          tratti dritti e una punta netta, e regge anche piccola. */}
+      <polyline points="9.5,15 5,10.5 9.5,6" />
+      <path d="M5 10.5h9a4.5 4.5 0 0 1 0 9h-1.5" />
+    </svg>
+  );
+}
+
 export function SchermoGioco({
   partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
   quadro = null, statoQuadro = null, modalita = 'libera',
@@ -281,9 +314,6 @@ export function SchermoGioco({
                 style={posizionePunti}
               >
                 +{puntiVolanti.punti}
-                {puntiVolanti.tier && puntiVolanti.tier !== 'buona' ? (
-                  <span className="pl-etichetta-mossa">{puntiVolanti.tier}</span>
-                ) : null}
                 {puntiVolanti.tinta >= TINTA_SOGLIA ? (
                   <span className="pl-etichetta-tinta">
                     {t('gioca.tinta', { quante: puntiVolanti.tinta })}
@@ -291,27 +321,80 @@ export function SchermoGioco({
                 ) : null}
               </span>
             ) : null}
+
+            {/* La frase di incitamento, sopra la griglia.
+                E' qui e non sotto la plancia perche' li' sta l'occhio nel momento in cui
+                la mossa va a segno: un complimento che arriva dove lo sguardo non e'
+                ancora tornato e' un complimento che non si legge.
+
+                `aria-hidden` non la nasconde a chi non vede: la stessa frase e' gia'
+                dentro l'annuncio di `Annunci`, insieme a quanto si e' eliminato e a
+                quanti punti sono arrivati. Leggerla due volte da due regioni diverse
+                renderebbe l'annuncio piu' lungo senza aggiungere niente.
+
+                Non intercetta il tocco (`pointer-events: none` nel foglio di stile): sta
+                in mezzo alla griglia, e una casella che smette di rispondere al dito per
+                un secondo perche' sopra c'e' un elogio sarebbe il modo piu' sciocco di
+                rovinare una mossa.
+
+                LA CHIAVE HA UN PREFISSO perche' i punti volanti, il fratello qui
+                sopra, usano lo stesso numero di mossa. Due fratelli con la stessa chiave
+                non sono un avviso da ignorare: React puo' scambiarli o ometterne uno, e
+                qui vorrebbe dire una frase che non riparte o dei punti che restano
+                appesi. L'ha trovato il gate, che tratta come errore ogni avviso della
+                console -- 591 avvisi e tre controlli caduti -- dopo che il controllo
+                nuovo, che la console non la guardava, l'aveva lasciato passare.
+
+                Con le animazioni spente la frase resta, per lo stesso tempo, ma senza lo
+                scatto: chi le ha spente ha chiesto uno schermo piu' calmo, non un gioco
+                che smette di parlargli. Il foglio di stile fa la stessa cosa da solo per
+                chi ha chiesto meno movimento al sistema operativo; questa classe serve
+                per chi l'ha chiesto qui dentro, dove il CSS non puo' saperlo. */}
+            {effetti.incita ? (
+              <p
+                key={`frase-${effetti.incita.chiave}`}
+                className={
+                  `pl-incitamento pl-incitamento--l${effetti.incita.livello}`
+                  + (animazioni ? '' : ' pl-incitamento--fermo')
+                }
+                aria-hidden="true"
+              >
+                {t(
+                  `incita.${effetti.incita.categoria}.${effetti.incita.variante}`,
+                  { quanti: effetti.incita.catena },
+                )}
+              </p>
+            ) : null}
           </div>
 
           {/* Una riga sola per tre cose che non capitano mai insieme: come si muove, dove
               appoggiare, e il "rimetti a posto". L'altezza e' riservata sempre, anche
-              quando c'e' solo del testo: se crescesse all'apparire del pulsante, la
-              plancia si restringerebbe di colpo a meta' partita, e un tabellone che
-              cambia misura sotto il dito e' peggio del difetto che si voleva curare.
+              quando e' vuota: se crescesse all'apparire del pulsante, la plancia si
+              restringerebbe di colpo a meta' partita, e un tabellone che cambia misura
+              sotto il dito e' peggio del difetto che si voleva curare.
 
               L'ordine di precedenza non e' casuale. Se un pezzo e' gia' in mano, quello
               che serve sapere e' dove appoggiarlo: l'annulla puo' aspettare, e comunque
-              resta disponibile appena si lascia la presa. */}
+              resta disponibile appena si lascia la presa.
+
+              PERCHE' L'ISTRUZIONE SPARISCE DOPO LE PRIME MOSSE. "Trascina un pezzo sulla
+              griglia" e' utile finche' non si e' trascinato il primo pezzo; dopo e' una
+              frase che si rilegge per tutta la partita senza mai servire. E c'era di
+              peggio: il pulsante e' disponibile sul 63% delle mosse (misurato sul
+              simulatore), quindi la riga passava la partita a rimbalzare fra il pulsante
+              e quell'istruzione, una mossa si' e una no. Uno sfarfallio continuo in mezzo
+              allo schermo, per dire una cosa che il giocatore sapeva gia'. */}
           <p className="pl-suggerimento">
             {drag.selezionato !== null ? (
               t('gioca.tocca')
             ) : siPuoAnnullare ? (
               <button type="button" className="pl-annulla" onClick={onAnnulla}>
+                <SegnoAnnulla />
                 {t('gioca.annulla')}
               </button>
-            ) : (
+            ) : partita.stats.moves < MOSSE_CON_ISTRUZIONI ? (
               t('gioca.trascina')
-            )}
+            ) : null}
           </p>
           <p className="pl-sr">{t('a11y.istruzioni')}</p>
         </div>

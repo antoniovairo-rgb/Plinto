@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI } from '../src/feel/durate.js';
+import {
+  DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
+} from '../src/feel/durate.js';
 
 /**
  * Le durate degli effetti vivono per forza in due posti: in JavaScript, per sapere
@@ -27,6 +29,20 @@ describe('allineamento fra durate JavaScript e CSS', () => {
 
   it('il token dei punti volanti corrisponde alla costante JavaScript', () => {
     expect(millisecondi('pl-t-punti')).toBe(DURATA_PUNTI);
+  });
+
+  it('il token della frase di incitamento corrisponde alla costante JavaScript', () => {
+    expect(millisecondi('pl-t-incitamento')).toBe(DURATA_INCITAMENTO);
+  });
+
+  it('la frase di incitamento resta leggibile anche con meno movimento', () => {
+    // Le altre durate vengono azzerate sotto prefers-reduced-motion perche' misurano
+    // un movimento. Questa misura per quanto tempo si puo' leggere una frase: se
+    // finisse anche lei nell'elenco, chi ha chiesto meno animazioni smetterebbe di
+    // ricevere i messaggi invece di riceverli fermi.
+    const blocco = /@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n  \}/.exec(tokens);
+    expect(blocco, 'il blocco prefers-reduced-motion deve esistere').toBeTruthy();
+    expect(blocco[1]).not.toMatch(/--pl-t-incitamento/);
   });
 
   it('le animazioni del foglio di stile non scrivono durate a mano', () => {

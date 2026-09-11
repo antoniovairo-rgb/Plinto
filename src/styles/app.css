@@ -374,7 +374,12 @@ button {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 12.5px;
+  /* Piu' piccola e piu' spaziata di prima: e' una didascalia, non un testo da leggere.
+     A 12,5px piena, centrata e senza nessun altro segno attorno, sembrava una scritta
+     rimasta li' per sbaglio. Il peso di questa riga deve stare sul pulsante, quando
+     c'e'; quando non c'e', la riga deve sapere sparire. */
+  font-size: 11.5px;
+  letter-spacing: 0.07em;
   color: var(--pl-text-faint);
   padding: 0 20px;
   min-height: 44px;
@@ -382,21 +387,36 @@ button {
 
 /* Bersaglio pieno da 44px, come ogni altra cosa che si tocca in questo gioco: lo tocca
    chi ha appena sbagliato la mira, quindi e' l'ultimo posto dove si puo' fare piccolo.
-   Resta pero' SPENTO -- niente riempimento, niente colore acceso: e' una correzione, non
-   un'azione da invitare a fare. */
+
+   RESTA SPENTO, MA NON SEMBRA PIU' UN SEGNAPOSTO. La prima versione era un contorno
+   sottile e basta, senza riempimento: l'intenzione era giusta (e' una correzione, non
+   un'azione da invitare a fare) ma il risultato a schermo sembrava un elemento non
+   finito. Il riempimento adesso c'e', ed e' quello delle superfici rialzate, lo stesso
+   dei riquadri dei pezzi: da' forma al pulsante senza dargli un colore d'accento, che
+   e' cio' che lo trasformerebbe in un invito. */
 .pl-annulla {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   min-height: 44px;
-  padding: 0 18px;
+  padding: 0 17px 0 14px;
   border: 1px solid var(--pl-line-strong);
   border-radius: 999px;
-  background: none;
+  background: var(--pl-surface-2);
   color: var(--pl-text-dim);
   font: inherit;
   font-size: 12.5px;
   letter-spacing: 0.02em;
   cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+  transition: color var(--pl-t-fast), border-color var(--pl-t-fast),
+              background var(--pl-t-fast), transform var(--pl-t-fast);
 }
 .pl-annulla:hover { color: var(--pl-text); border-color: var(--pl-text-faint); }
+/* Il pulsante si abbassa sotto il dito. Su un comando che si usa dopo un errore, sapere
+   di averlo premuto davvero conta piu' che su qualunque altro. */
+.pl-annulla:active { transform: translateY(1px); background: var(--pl-surface); }
+.pl-annulla__segno { flex: none; opacity: 0.75; }
 
 /* Il bersaglio da toccare e' TUTTO lo slot, non il disegno del pezzo.
    Misurato prima della correzione: un pezzo da una cella offriva 34x34 px su uno
@@ -790,14 +810,95 @@ button {
   100% { transform: translate(-50%, -74px) scale(1); opacity: 0; }
 }
 
-.pl-etichetta-mossa {
-  display: block;
-  font-size: 0.42em;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+/* --- La frase di incitamento, sopra la griglia ----------------------------
+   Sta al centro della plancia perche' li' guarda chi ha appena giocato. Non
+   intercetta il tocco: sotto ci sono le caselle, e una casella che non risponde
+   al dito perche' sopra c'e' un complimento e' un complimento che costa una mossa.
+
+   La MISURA e' il messaggio. Quattro livelli, dal piu' comune al piu' raro, e la
+   dimensione cresce con la rarita': la frase che esce una mossa su sei e' piccola e
+   sobria, quella che esce una volta ogni trecento riempie il tabellone. Se fossero
+   tutte grandi uguali, l'unica cosa che il giocatore imparerebbe e' a non guardarle. */
+.pl-incitamento {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* La centratura sta QUI e non solo nei fotogrammi dell'animazione. Ce l'avevano solo
+     quelli, e finche' l'animazione parte il risultato e' identico -- ma un elemento il
+     cui posto dipende dall'animazione e' un elemento fuori posto ogni volta che
+     l'animazione non parte. Visto per davvero mettendo `animation: none` per
+     fotografare i quattro livelli: la frase piu' lunga usciva dal bordo destro della
+     plancia. I fotogrammi ripetono la stessa traslazione perche' devono aggiungerci
+     l'ingrandimento, e in CSS una transform sostituisce l'altra invece di sommarsi. */
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  margin: 0;
+  max-width: 92%;
+  padding: 9px 16px;
+  border-radius: 14px;
+  background: var(--pl-velo);
+  border: 1px solid var(--pl-velo-bordo);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+  pointer-events: none;
   text-align: center;
-  opacity: 0.9;
+  text-wrap: balance;
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: 0.005em;
+  color: var(--pl-text);
+  animation: pl-incita var(--pl-t-incitamento) var(--pl-ease-out) both;
 }
+
+/* Il livello 1 esce una mossa su sei: e' una pacca sulla spalla, non un annuncio.
+   Resta piu' piccolo, piu' stretto e di un colore piu' quieto degli altri.
+
+   IL VELO PERO' CE L'HA, E NON E' UN RIPENSAMENTO DI GUSTO. La prima stesura glielo
+   toglieva, con l'idea che una frase cosi' frequente dovesse pesare il meno possibile
+   sulla griglia. Fotografata sopra dei blocchi accesi non si leggeva, e i numeri dicono
+   perche': il testo attenuato sui sei colori dei blocchi sta fra 1,09 e 1,64 di
+   contrasto, e persino il testo pieno arriva al massimo a 3,63 -- tutti sotto il 4,5
+   richiesto, quasi tutti sotto il 3. NESSUN colore di testo e' leggibile sopra i
+   blocchi: l'unica cosa che rende leggibile la frase e' il velo, che porta il contrasto
+   a 7,44 nel tema scuro e 7,12 in quello chiaro. Toglierlo non alleggeriva il messaggio,
+   lo cancellava proprio quando capitava sopra la parte piena della griglia. */
+.pl-incitamento--l1 {
+  font-size: clamp(14px, 4.2vw, 17px);
+  font-weight: 700;
+  color: var(--pl-text-dim);
+  padding: 6px 12px;
+  border-radius: 11px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+}
+.pl-incitamento--l2 { font-size: clamp(17px, 5.2vw, 21px); }
+.pl-incitamento--l3 { font-size: clamp(19px, 6.0vw, 25px); color: var(--pl-ok); }
+.pl-incitamento--l4 { font-size: clamp(21px, 6.8vw, 29px); color: var(--pl-brand); }
+
+@keyframes pl-incita {
+  0%   { transform: translate(-50%, -50%) scale(0.82); opacity: 0; }
+  12%  { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  22%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  76%  { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -62%) scale(1.01); opacity: 0; }
+}
+
+/* Chi ha chiesto meno movimento riceve la stessa frase, per lo stesso tempo, senza
+   lo scatto: cambia l'animazione, non la permanenza. Per questo --pl-t-incitamento
+   e' l'unica durata che il blocco prefers-reduced-motion di tokens.css non azzera. */
+@keyframes pl-incita-fermo {
+  0%   { transform: translate(-50%, -50%); opacity: 0; }
+  10%  { transform: translate(-50%, -50%); opacity: 1; }
+  82%  { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, -50%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-incitamento { animation-name: pl-incita-fermo; }
+}
+
+/* Lo stesso, per chi ha spento le animazioni dalle impostazioni del gioco invece che
+   da quelle del sistema. Il foglio di stile non puo' leggere un interruttore che vive
+   in React, quindi e' React a dirglielo con questa classe. */
+.pl-incitamento--fermo { animation-name: pl-incita-fermo; }
 
 /* La Tinta si annuncia sotto il punteggio, piu' piccola dell'etichetta della mossa:
    e' un contorno anche nel punteggio, e deve esserlo anche nell'occhio. */

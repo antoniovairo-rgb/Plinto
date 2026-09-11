@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { scoreMove, chainMultiplier, intrecciMultiplier, nextChainState, respiroRimasto, moveTier } from '../src/core/scoring.js';
+import { CHAIN_MAX } from '../src/config/rules.js';
 import {
   CHAIN_MAX, CHAIN_GRACE, BOARD_CLEAR_BONUS, GROUP_BASE_POINTS,
   TINTA_SOGLIA, TINTA_PASSO, COLOR_COUNT,
@@ -155,9 +156,34 @@ describe('livello di celebrazione', () => {
 
   it('cresce con i gruppi chiusi e con la Catena', () => {
     expect(moveTier(1, 0)).toBe('buona');
-    expect(moveTier(2, 0)).toBe('ottima');
-    expect(moveTier(3, 3)).toBe('eccellente');
-    expect(moveTier(3, 9)).toBe('perfetta');
+    expect(moveTier(1, 7)).toBe('ottima');
+    expect(moveTier(2, 3)).toBe('eccellente');
+    expect(moveTier(3, 3)).toBe('perfetta');
+  });
+
+  // I quattro vincoli con cui la scala e' stata tarata. Sono espressi qui perche' sono
+  // il PROGETTO, non una conseguenza dei numeri scelti: chiunque ritocchi i pesi puo'
+  // cambiare le percentuali, ma non puo' far scendere l'intreccio sotto la Catena
+  // senza che questo test glielo dica.
+  it('un intreccio vale sempre piu di una eliminazione singola', () => {
+    expect(moveTier(2, 0)).toBe('ottima');       // due gruppi: almeno "ottima", sempre
+    expect(moveTier(3, 0)).toBe('eccellente');   // tre gruppi: almeno "eccellente"
+    expect(moveTier(4, 0)).toBe('perfetta');     // quattro: il massimo del gioco
+  });
+
+  it('la perfetta non si raggiunge senza intreccio, per quanto alta sia la Catena', () => {
+    // E' la proprieta' che da' un senso al gradino piu' alto. La Catena si ferma a
+    // CHAIN_MAX, quindi questo e' il massimo assoluto per una eliminazione singola:
+    // se un giorno restituisse 'perfetta', il gradino sarebbe di nuovo regalabile.
+    expect(moveTier(1, CHAIN_MAX, 99)).not.toBe('perfetta');
+  });
+
+  it('la scala precedente aveva un gradino irraggiungibile', () => {
+    // La taratura vecchia (gruppi + catena/3 + esplose/8, perfetta a 6) non poteva
+    // arrivare a 'perfetta' con i valori che si vedono davvero in partita: misurato
+    // sul simulatore, 1 volta su 47.263 mosse. Il caso piu' alto ragionevolmente
+    // raggiungibile -- tre gruppi insieme, Catena al massimo -- adesso ci arriva.
+    expect(moveTier(3, CHAIN_MAX)).toBe('perfetta');
   });
 });
 

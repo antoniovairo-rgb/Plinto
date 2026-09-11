@@ -11,6 +11,19 @@ import en from './en.js';
 export const LINGUE = { it: { nome: 'Italiano', strings: it }, en: { nome: 'English', strings: en } };
 export const LINGUA_PREDEFINITA = 'it';
 
+/**
+ * Quante varianti ha ogni frase di incitamento, per categoria.
+ *
+ * Serve all'interfaccia per sorteggiare quale dire. Il conteggio si legge dall'italiano
+ * e vale per tutte le lingue: tests/i18n.test.js pretende che le due lingue abbiano
+ * esattamente le stesse chiavi, e gli indici di un elenco SONO chiavi, quindi una lingua
+ * con una variante in meno fa fallire il test invece di far pescare una frase
+ * inesistente in partita.
+ */
+export const VARIANTI_INCITA = Object.fromEntries(
+  Object.entries(it.incita).map(([nome, frasi]) => [nome, Array.isArray(frasi) ? frasi.length : 1]),
+);
+
 /** Lingua suggerita dal browser, se la conosciamo. */
 export function linguaDelBrowser() {
   try {
