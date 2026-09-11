@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#0E1118" />
+    <meta name="description" content="PLINTO — puzzle game a blocchi. Gratuito, senza pubblicita." />
+    <title>PLINTO</title>
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icone/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./icone/icona-apple-180.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PLINTO" />
+
+    <!--
+      L'ANTEPRIMA DEI COLLEGAMENTI. Sono i tag che WhatsApp, Telegram, Facebook e
+      LinkedIn leggono quando qualcuno incolla il link del gioco: senza, esce un
+      indirizzo nudo, e un indirizzo nudo lo apre molta meno gente di un riquadro con
+      una figura e una frase.
+
+      GLI INDIRIZZI QUI DEVONO ESSERE ASSOLUTI, e non e' un vezzo. Tutto il resto della
+      pagina usa percorsi relativi perche' il gioco gira anche da una sottocartella; qui
+      no, perche' chi li legge non e' il browser del giocatore ma un server dall'altra
+      parte del mondo, che non ha nessuna pagina da cui contare i "../".
+
+      L'immagine e' la stessa 1024x500 della scheda del Play Store, copiata in `public/`
+      da `npm run immagine-store`: il riquadro che si vede in chat e quello che si vede
+      sullo store raccontano lo stesso gioco.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PLINTO" />
+    <meta property="og:title" content="PLINTO — puzzle a blocchi" />
+    <meta property="og:description" content="Cento livelli, ognuno con il suo obiettivo. Niente pubblicità, niente acquisti, niente vite da aspettare. Funziona anche senza rete." />
+    <meta property="og:url" content="https://antoniovairo-rgb.github.io/Plinto/" />
+    <meta property="og:image" content="https://antoniovairo-rgb.github.io/Plinto/anteprima-social.png" />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="500" />
+    <meta property="og:image:alt" content="Il tabellone di PLINTO con i blocchi colorati e il nome del gioco." />
+    <meta property="og:locale" content="it_IT" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PLINTO — puzzle a blocchi" />
+    <meta name="twitter:description" content="Cento livelli, ognuno con il suo obiettivo. Niente pubblicità, niente acquisti, niente vite da aspettare." />
+    <meta name="twitter:image" content="https://antoniovairo-rgb.github.io/Plinto/anteprima-social.png" />
+    <style>
+      html, body { margin: 0; height: 100%; background: #0e1118; }
+    </style>
+    <script type="module" crossorigin src="./assets/index-yOwuTNoF.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Cinjtd7W.css">
+  </head>
+  <body>
+    <!-- Fondo dipinto subito nel foglio di stile della pagina: senza, fra il primo
+         disegno e il montaggio di React comparirebbe un lampo bianco, che su un gioco
+         a fondo scuro si nota parecchio. -->
+    <div id="root"></div>
+  </body>
+</html>
