@@ -5,7 +5,7 @@ import { traduttore } from '../i18n/index.js';
 import { impostaLingua } from '../i18n/formato.js';
 import { impostaAudio, suonoBottone, sbloccaAudio } from '../audio/suoni.js';
 import { impostaVibrazione } from '../feel/vibrazione.js';
-import { clearAll, ripulisciChiaviAbbandonate } from '../persistence/storage.js';
+import { clearAll } from '../persistence/storage.js';
 import { deadPieces } from '../core/engine.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
 import { sfidaDelGiorno, storicoSfide } from '../persistence/sfide.js';
@@ -72,10 +72,6 @@ export function App() {
 
   // Le preferenze audio e vibrazione vivono in moduli senza React: qui le si tiene
   // allineate, cosi' i componenti non devono passarsele di mano in mano.
-  // Una volta sola, all'avvio: via le voci di storage della modalita' con l'anteprima
-  // in partita libera, che non esiste piu' (l'anteprima ora e' parte dei Quadri).
-  useEffect(() => { ripulisciChiaviAbbandonate(); }, []);
-
   useEffect(() => { impostaLingua(impostazioni.lingua); }, [impostazioni.lingua]);
   useEffect(() => { impostaAudio(impostazioni.audio); }, [impostazioni.audio]);
   useEffect(() => { impostaVibrazione(impostazioni.vibrazione); }, [impostazioni.vibrazione]);

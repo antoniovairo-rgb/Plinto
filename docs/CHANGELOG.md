@@ -7,6 +7,51 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.10.3] — 14 settembre 2026
+
+### Rimosso
+
+**Codice e voci che non servivano più, ognuna con la prova.**
+
+- `ripulisciChiaviAbbandonate` e `CHIAVI_ABBANDONATE` in `storage.js`, con la chiamata
+  all'avvio in `App.jsx`. Cancellavano le due chiavi della «partita libera con anteprima»,
+  una modalità sparita nella 1.1.0 del 7 settembre. Il test chiuso su Google Play è iniziato
+  il 10 settembre con una versione successiva: nessuna installazione dallo store ha mai
+  avuto quelle chiavi, e chi le aveva dal sito le ha viste cancellate alla prima apertura
+  dopo la 1.1.0. Le migrazioni dei documenti (`documenti.js`, `progressi.js`) restano: quelle
+  proteggono progressi veri, questa proteggeva da due voci morte.
+- La regola `.pl-home__record` in `app.css`: nessun componente la usa dal commit `096f93f`,
+  trovato con `git log -S`.
+- Tre voci di `.gitignore` che niente nel repository produce: `dist-ssr/` (non c'è
+  rendering lato server), `coverage/` (nessuna copertura configurata), `/tmp-sim/` (nessuno
+  script vi scrive). `.prova-sw/` resta: la usa `installazione.mjs`.
+
+### Corretto
+
+**Un colore copiato a mano è tornato a passare dal token.** L'anello della Catena (1.9.3)
+usava `rgba(242, 193, 78, 0.22)`, cioè `--pl-brand` ricopiato in decimale: esattamente la
+cosa che `DESIGN_SYSTEM.md` dichiarava sparita, e che ignorava il tema chiaro, dove
+`--pl-brand` è un altro colore. Ora è `color-mix(in srgb, var(--pl-brand) 22%, transparent)`,
+come le altre sei velature del file. La frase del documento torna vera e porta la data del
+ricontrollo.
+
+**La documentazione dice i numeri di oggi, non quelli del 6 settembre.** `README.md`
+dichiarava il gioco «non ancora pubblicato»: è su GitHub Pages e in test chiuso su Google
+Play. `AVVIO-RAPIDO.md` prometteva «100 test in meno di due secondi»: sono 483 in 28 file,
+circa venti secondi. `ARCHITECTURE.md` elencava 16 file di test e 7 scenari: sono 28 e 18;
+i pesi della build erano quelli di 68 moduli, oggi sono 106. `TESTING.md` contava
+«diciannove controlli»: sono ventiquattro. `RELEASE_CHECKLIST.md` diceva che il manifest
+non vincola l'orientamento: lo vincola a `portrait`, come l'app Android, e un test impone
+che i due coincidano. Le misure di simulazione e di contrasto datate 6 settembre restano
+con la loro data, perché non sono state rieseguite e cambiare la data senza rimisurare
+sarebbe una bugia.
+
+**Cosa non è stato toccato, e perché.** I due PNG identici (`store/immagine-in-evidenza.png`
+e `public/anteprima-social.png`) sono una copia voluta da `immagine-store.mjs`: uno va sullo
+store, l'altro è l'anteprima dei collegamenti servita dal sito. `sito-radice/` è il patto
+TWA con la radice del dominio. Gli strumenti di misura in `tools/` sono tutti richiamati da
+`package.json` e servono alla taratura dei livelli.
+
 ## [1.10.2] — 14 settembre 2026
 
 ### Cambiato

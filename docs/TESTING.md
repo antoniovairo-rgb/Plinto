@@ -1,6 +1,6 @@
 # Test e simulazioni
 
-> Fotografia del 6 settembre 2026. I conteggi di test sono stati ottenuti eseguendo
+> Conteggi aggiornati il 14 settembre 2026 (1.10.3); le misure di simulazione più sotto sono del 6 settembre. I conteggi di test sono stati ottenuti eseguendo
 > `npm test` e `npx vitest run --reporter=json`, non stimati. I risultati di simulazione
 > riportati più sotto sono misure reali prodotte da `node src/sim/run.mjs` o da script
 > equivalenti. Gli script che pilotano un browser (`e2e`, `precisione`, `soak`, `schermate`,
@@ -14,7 +14,7 @@ npm run verifica       # esegue TUTTI i controlli, in ordine, e riassume l'esito
 npm run verifica -- --veloce   # come sopra, ma salta i cento livelli SE il diff lo permette
 ```
 
-Diciannove controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
+Ventiquattro controlli, un comando — **lo stesso che gira in integrazione continua**: `.github/workflows/verifica.yml` esegue `npm run verifica` e nient'altro, così l'elenco è uno solo e non può divergere. Aggiungere un controllo qui lo fa girare anche in CI. Esiste perché i comandi separati vanno ricordati, e ricordarli
 tutti non ha funzionato: una pubblicazione è stata bloccata dall'integrazione continua
 proprio sul controllo che non era stato eseguito in locale. Non si ferma al primo
 fallimento — arriva in fondo e stampa il quadro completo, perché sapere che tre cose sono
@@ -145,9 +145,10 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **333 test in 21 file, tutti verdi**, durata ~12.5 s (misurato il 6 settembre
-2026). Undici e mezzo di quei secondi sono tutti in `invarianti.test.js`, che gioca 240
-partite complete: è il costo di quel file, non un rallentamento della suite.
+`npm test`: **483 test in 28 file, tutti verdi**, durata ~20 s (misurato il 14 settembre
+2026). La metà abbondante di quei secondi sta in due file: `incitamenti.test.js`, che simula
+decine di migliaia di mosse per decidere quando dire qualcosa, e `invarianti.test.js`, che
+gioca 240 partite complete. È il costo di quei file, non un rallentamento della suite.
 
 `npm run e2e`: **11 passaggi in Chromium reale** (0, 1, 2, 3, 3b, 4, 4b, 5, 6, 6b, 7). Il
 numero e la sequenza sono stati riletti nel file; l'esito riportato più sotto viene

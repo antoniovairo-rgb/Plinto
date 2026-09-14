@@ -2,9 +2,10 @@
 
 Puzzle game a blocchi. Gratuito, **senza pubblicita**, senza account, senza attese.
 
-> Stato: **giocabile e completo nelle funzioni**, non ancora pubblicato.
-> Restano da chiudere le voci del [gate di rilascio](docs/RELEASE_CHECKLIST.md),
-> fra cui il collegamento PayPal e la verifica legale del nome.
+> Stato: **pubblicato** su [GitHub Pages](https://antoniovairo-rgb.github.io/Plinto/) e
+> **in test chiuso su Google Play** come Trusted Web Activity. Le voci ancora aperte del
+> [gate di rilascio](docs/RELEASE_CHECKLIST.md) sono quelle che nessun controllo automatico
+> puo' chiudere: la prova su iPhone e la verifica legale del nome.
 
 ## Il gioco in una riga
 
@@ -78,7 +79,9 @@ Istruzioni passo passo, telefono compreso: **[AVVIO-RAPIDO.md](AVVIO-RAPIDO.md)*
 npm install
 npm run dev        # server di sviluppo
 npm run build      # build di produzione in dist/
-npm test           # suite di test unitari
+npm run verifica   # IL GATE: 24 controlli, lo stesso comando della CI (~65 min)
+npm run verifica -- --veloce   # salta i cento livelli SOLO se il diff lo permette (~10 min)
+npm test           # 28 file Vitest, 483 test, ~20 s
 npm run e2e        # partita completa guidata in un browser reale
 npm run precisione # precisione del trascinamento su tutte le forme
 npm run soak       # sessione lunga: fluidita', memoria, residui
@@ -91,6 +94,11 @@ npm run quadri         # misura la difficolta' reale di ogni livello
 npm run contrasti      # rimisura i contrasti WCAG leggendo il foglio dei token
 npm run catena         # distribuzione della Catena, confrontata con le regole scartate
 ```
+
+Gli altri script (uno per scenario nel browser: `guida`, `annulla`, `incitamenti`,
+`archivio`, `condivisione`, `anteprima`, `indietro`, `impaginazione`, `geometria`,
+`installazione`, `e2e-quadri`, `e2e-trionfo`, `e2e-ripresa`, `livelli`) sono elencati in
+`package.json` e li esegue tutti `npm run verifica`.
 
 Gli script che usano il browser avviano da soli il server di sviluppo.
 

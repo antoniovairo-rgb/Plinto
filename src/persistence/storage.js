@@ -105,21 +105,3 @@ export function chiaveRecord() {
   return KEYS.RECORDS;
 }
 
-/**
- * Le chiavi di una modalita' che non esiste piu': la partita libera con l'anteprima.
- *
- * L'anteprima e' diventata parte dei Quadri e la modalita' a se' e' sparita dalla home.
- * Chi aveva giocato in quella modalita' si ritroverebbe due voci di storage che nessuno
- * legge piu': una partita a meta' che non si puo' riprendere e un record che non si puo'
- * piu' battere. Non e' un dato prezioso da conservare -- e' una traccia di una cosa che
- * non c'e' -- e lasciarla li' vorrebbe dire non sapere piu', fra un anno, se serve.
- */
-const CHIAVI_ABBANDONATE = [
-  `${KEYS.CURRENT_GAME}-anteprima`,
-  `${KEYS.RECORDS}-anteprima`,
-];
-
-/** Cancella le voci delle modalita' che non esistono piu'. Si chiama una volta all'avvio. */
-export function ripulisciChiaviAbbandonate() {
-  CHIAVI_ABBANDONATE.forEach(remove);
-}

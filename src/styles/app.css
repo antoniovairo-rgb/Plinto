@@ -488,12 +488,6 @@ button {
   text-transform: uppercase;
 }
 .pl-home__azioni { display: grid; gap: 12px; max-width: 380px; width: 100%; margin: 0 auto; }
-.pl-home__record {
-  margin: 4px 0 0;
-  color: var(--pl-text-dim);
-  font-size: 14px;
-  font-variant-numeric: tabular-nums;
-}
 /* Le tre voci secondarie devono stare su una riga sola anche su schermi stretti:
    una voce che va a capo da sola sembra un errore di impaginazione.
    Non sono ancorate in fondo: con un menu appiccicato al bordo inferiore, su un
@@ -1465,7 +1459,7 @@ button {
    dove sta gia' l'informazione, invece di aggiungere una riga di testo rosso sotto.
    Il respiro serve perche' senza parole un contorno fermo non lo nota nessuno. */
 .pl-catena__barra--ultima {
-  box-shadow: 0 0 0 1px var(--pl-brand-deep), 0 0 10px rgba(242, 193, 78, 0.22);
+  box-shadow: 0 0 0 1px var(--pl-brand-deep), 0 0 10px color-mix(in srgb, var(--pl-brand) 22%, transparent);
 }
 .pl-catena__barra--ultima .pl-catena__riempimento {
   animation: pl-catena-avviso 1.5s ease-in-out infinite;

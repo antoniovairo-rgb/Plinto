@@ -74,7 +74,8 @@ risposta. Se ti va di annotare qualcosa mentre giochi:
 ## Le altre modalità di verifica
 
 ```bash
-npm test           # 100 test, meno di due secondi
+npm run verifica   # tutti i controlli, come in CI (circa un'ora)
+npm test           # 483 test in 28 file, circa 20 secondi
 npm run e2e        # una partita completa guidata in un browser
 npm run sim        # migliaia di partite simulate, per il bilanciamento
 npm run schermate  # rigenera le immagini in store/

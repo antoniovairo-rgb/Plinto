@@ -1,8 +1,8 @@
 # Architettura di PLINTO
 
-> Fotografia del codice al **6 settembre 2026**, aggiornata a `f31b2d5`, cioè dopo i commit
-> `9253cc7` (interfaccia), `ee7b452` (game feel e audio), `fe290f7` (tastiera, accessibilità,
-> primo avvio, orizzontale) e `f31b2d5` (Sfida del Giorno, invarianti). Descrive solo file e
+> Fotografia del codice al **14 settembre 2026** (versione 1.10.3). La tabella dei layer e lo
+> stato dei comandi sono stati riletti e rieseguiti in quella data; le sezioni successive,
+> scritte il 6 settembre, descrivono meccanismi che non sono cambiati. Descrive solo file e
 > comportamenti verificati leggendo il sorgente ed eseguendo i comandi. Dove una cosa non
 > esiste, è scritto che non esiste.
 
@@ -20,19 +20,20 @@
 | `src/audio/` | `scala.js` (le dieci note della Catena, **calcolate** dal temperamento equabile: puro, senza `AudioContext`) e `suoni.js` — sintesi Web Audio, **nessun file audio** | niente | browser (`AudioContext`) |
 | `src/feel/` | `useEffettiMossa.js` (traduce `lastMove` in effetti), `particelle.js` (classe `CampoParticelle`, un canvas), `vibrazione.js` (pattern per `navigator.vibrate`) | `config/`, `audio/`, React (solo l'hook) | browser |
 | `src/ui/` | `App.jsx`, `SchermoGioco.jsx`, i componenti `Plancia`, `Tray`, `Pezzo`, `Hud`+`BarraCatena`, `Logo`, `Annunci`, gli hook `useTrascinamento` e `useTastiera`, e in `schermate/` le schermate (fra cui `Quadri`, `AperturaQuadro`, `FineQuadro`, `AvanzamentoMappa`, `ComeSiGioca`, `Bomba`, `MiniGriglia`, `Salvagente`) più l'impalcatura comune `Pagina.jsx`, `Installa.jsx` (installazione sul telefono), `Archivio.jsx` (il calendario delle sfide), `Profilo.jsx` (il profilo di gioco), `Condividi.jsx`, `AnteprimaTerna.jsx` e `rotta.js` (l'unica àncora riconosciuta) | `core/`, `config/`, `state/`, `feel/`, `audio/`, `i18n/`, React | browser |
-| `src/state/` | `usePartita.js`, `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
-| `tests/` | 16 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `distribuzioni`, `quadri`, `i18n`, `sfide`, `documenti`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`) più gli scenari in `e2e/` (`partita`, `precisione`, `resistenza`, `quadri`, `comunicazioni`, `installazione`, `archivio`) | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
+| `src/state/` | `usePartita.js` (partita libera e Sfida), `useQuadro.js` (un livello: apertura, salvataggio, esito), `useAnnulla.js` (rimetti a posto), `useImpostazioni.js` — hook che avvolgono motore e storage | `core/`, `persistence/`, `i18n/`, React | browser |
+| `tests/` | 28 file Vitest (`grid`, `scoring`, `bombe`, `generator`, `engine`, `distribuzioni`, `quadri`, `i18n`, `sfide`, `documenti`, `invarianti`, `privacy`, `script`, `durate`, `contrasti`, `icona`, `android`, `anteprima`, `anteprima-collegamento`, `accoglienza`, `archivio`, `profilo`, `scala`, `scheda`, `incitamenti`, `sacchetto`, `trionfo`, `ripresa`) più 18 scenari in `e2e/`, uno per file, tutti registrati in `tools/verifica-tutto.mjs` | `core/`, `config/`, `i18n/`, `persistence/`, `styles/`, Playwright | Node |
 | `public/` | `icon.svg`, `icone/`, `manifest.webmanifest` e `sw.js` (service worker: installabilità e funzionamento senza rete) | niente | browser |
-| `tools/` | strumenti di misura e di produzione fuori dalla suite: `schermate`, `icone`, `prova-sottocartella`, `prova-desktop`, `quadri`, `taratura`, `genera-quadri`, `contrasti`, `misura-catena` | `core/`, `config/`, Playwright | Node |
+| `tools/` | `verifica-tutto` (il gate: 24 controlli, corsia veloce decisa dal diff), `versione-servita` (guardia contro un server di sviluppo vecchio), strumenti di misura (`quadri`, `taratura`, `confronto-anteprima`, `contrasti`, `misura-catena`, `misure-icone`, `prova-desktop`, `prova-sottocartella`) e di produzione (`genera-quadri`, `icone`, `schermate`, `immagine-store`, `video-store`, `privacy-html`) | `core/`, `config/`, Playwright | Node |
 
-Stato dei comandi, verificato eseguendoli il 6 settembre 2026 su `f31b2d5`:
+Stato dei comandi, verificato eseguendoli il 14 settembre 2026 (1.10.3):
 
-- `npm test` passa: **333 test in 21 file**, ~12.5 s (undici e mezzo dei quali spesi nel solo
-  `invarianti.test.js`, che gioca 240 partite complete);
-- `npm run e2e` passa: scenario in Chromium reale, "Nessun problema rilevato";
-- `npm run sim` funziona;
-- `npm run build` riesce: 68 moduli, `dist/assets` da **196.10 kB di JS** (63.19 kB gzip) e
-  **16.17 kB di CSS** (4.11 kB gzip).
+- `npm test` passa: **483 test in 28 file**, ~20 s (i più lunghi sono `incitamenti.test.js`,
+  che simula decine di migliaia di mosse, e `invarianti.test.js`, che gioca 240 partite
+  complete);
+- `npm run verifica` passa: **24 controlli**, ~65 minuti di cui 56 per rigiocare i cento
+  livelli nell'app; è lo stesso comando della CI;
+- `npm run build` riesce: 106 moduli, `dist/assets` da **311.55 kB di JS** (97.99 kB gzip) e
+  **40.97 kB di CSS** (8.66 kB gzip).
 
 Il gioco **è stato aperto in un browser reale**: lo scenario e2e lo guida attraverso primo
 avvio, trascinamento con mouse, eliminazione con particelle, modalità a due tocchi, partita

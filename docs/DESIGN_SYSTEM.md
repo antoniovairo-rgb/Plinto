@@ -39,7 +39,7 @@ Ne discendono tre conseguenze concrete, verificabili nel CSS:
 ## 2. Token colore
 
 Tutti i valori sono presi da `tokens.css`. Ogni colore usato nell'interfaccia deve venire da
-qui. In `app.css` restano però tredici colori letterali (conteggio del 6 settembre 2026), ed è
+qui. In `app.css` restano però tredici colori letterali (conteggio del 6 settembre 2026, ricontrollato il 14 settembre: nella 1.9.3 era ricomparso un `rgba(242, 193, 78, …)` scritto a mano nell'anello della Catena, tolto nella 1.10.3 a favore di `color-mix` sul token), ed è
 onesto elencarli invece di dichiarare una regola che il file non rispetta del tutto:
 
 - `#1a1405` (2 volte), il bruno quasi nero del testo sul giallo del marchio — pulsante

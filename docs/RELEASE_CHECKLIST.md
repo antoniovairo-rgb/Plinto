@@ -23,7 +23,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATT
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Nucleo di gioco stabile | **FATTO** | 240 test in 16 file; invarianti verificate a ogni mossa su 240 partite complete |
+| Nucleo di gioco stabile | **FATTO** | 483 test in 28 file; invarianti verificate a ogni mossa su 240 partite complete; i cento livelli rigiocati nell'app a ogni giro completo del gate |
 | Nessun difetto critico noto | **FATTO** | Nessuno aperto al momento di questa revisione |
 | Bilanciamento misurato | **FATTO** | Simulazioni su migliaia di partite, quattro profili di abilità, `npm run sim` |
 | Equità verificata con numeri | **FATTO** | Il 91% delle partite finisce con la griglia fra il 40% e il 70%; sotto il 30% è lo 0,7% |
@@ -70,7 +70,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATT
 | Voce | Stato | Nota |
 | --- | --- | --- |
 | Icona | **FATTO** | SVG originale, coerente con il marchio |
-| Manifest PWA | **FATTO** | Nome, colori, icona; vincolo di orientamento rimosso perché esiste il layout orizzontale |
+| Manifest PWA | **FATTO** | Nome, colori, icone (192, 512, maskable, SVG), `display: standalone`, `orientation: portrait` come nell'app Android: `tests/android.test.js` impone che i due manifest blocchino lo stesso orientamento, `tests/e2e/installazione.mjs` verifica che con questo manifest il gioco si installi e si apra senza rete |
 | Schermate per gli store | **FATTO, in parte** | Generate da `npm run schermate`, dal gioco vero, e rigenerate a ogni versione. **Quelle in linea sulla scheda del Play Store sono però più vecchie**: mostrano una home senza «Sostieni il progetto» e «Idee e segnalazioni» (arrivate con la 1.7.x) e nessuna frase di incitamento (1.9.0). Vanno ricaricate, vedi «Da fare dopo i 14 giorni» |
 | Icona in PNG alle dimensioni richieste dagli store | **FATTO** | `npm run icone` le genera tutte dall'SVG, compresi il primo piano adattivo, l'icona classica e quella di avvio per Android, copiate nel progetto Android dallo stesso comando |
 | Schermata di avvio | **FATTO** | Generata da `npm run icone` e dichiarata nel manifest Android; sta in una cartella qualificata per densità, altrimenti Android la moltiplica per la densità dello schermo e la mostra gigante |
