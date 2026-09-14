@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono ventidue, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono ventiquattro, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -35,6 +35,11 @@ import { createHash } from 'node:crypto';
 const NOME_GEOMETRIA = 'geometria della plancia e dei tocchi';
 
 const VERIFICHE = [
+  // PRIMO DI TUTTI, e non per ordine alfabetico: se sulla porta di prova risponde un
+  // server acceso da prima di un cambio di versione, tutto quello che viene dopo
+  // misura un gioco vecchio. E' gia' successo, ed e' costato la pubblicazione di un
+  // difetto d'impaginazione nella 1.10.0. Il perche' per esteso sta in tools/versione-servita.mjs.
+  { nome: 'il server di prova serve questa versione', comando: 'npm', argomenti: ['run', 'versione-servita'] },
   { nome: 'test unitari', comando: 'npm', argomenti: ['test'] },
   { nome: 'contrasti WCAG', comando: 'npm', argomenti: ['run', 'contrasti'] },
   { nome: 'build di produzione', comando: 'npm', argomenti: ['run', 'build'] },
@@ -42,6 +47,7 @@ const VERIFICHE = [
   { nome: 'partita completa nel browser', comando: 'npm', argomenti: ['run', 'e2e'] },
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
   { nome: 'fine del percorso: festa finale e atti chiusi', comando: 'npm', argomenti: ['run', 'e2e-trionfo'] },
+  { nome: 'ripresa dopo l interruzione (partita e livello)', comando: 'npm', argomenti: ['run', 'e2e-ripresa'] },
   // La guida al primo avvio: e' l'unica schermata che ogni giocatore vede una volta
   // sola, quindi un suo difetto non lo segnala mai nessuno. Chi lo incontra e' nuovo,
   // non sa che sia un difetto, e non torna indietro a raccontarlo.

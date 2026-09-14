@@ -4,6 +4,7 @@ import {
 } from '../core/engine.js';
 import { useAnnulla } from './useAnnulla.js';
 import { read, write, remove, chiavePartita } from '../persistence/storage.js';
+import { segnaPosto, dimenticaPosto } from '../persistence/ripresa.js';
 import { loadRecords, recordGame } from '../persistence/records.js';
 import { registraPartita } from '../persistence/profilo.js';
 import { registraSfida } from '../persistence/sfide.js';
@@ -79,6 +80,9 @@ export function usePartita() {
   }, [partitaSalvata]);
 
   const abbandona = useCallback(() => {
+    // La partita resta salvata -- "Riprendi" in home continua a funzionare -- ma il
+    // posto no: chi esce di sua volonta' al prossimo avvio vuole il menu.
+    dimenticaPosto();
     setPartita(null);
     setNuoviRecord([]);
   }, []);
@@ -100,11 +104,16 @@ export function usePartita() {
     if (!partita) return;
     if (partita.status === 'playing') {
       write(chiavePartita(modalita), serializeGame(partita));
+      // E anche DOVE si sta giocando: serve a ritrovare il posto se il sistema butta
+      // via la pagina mentre l'app e' in secondo piano. Vedi persistence/ripresa.js.
+      segnaPosto(modalita === 'sfida' ? 'sfida' : 'gioco');
       return;
     }
     if (registrata.current) return;
     registrata.current = true;
     remove(chiavePartita(modalita));
+    // Partita finita: non c'e' piu' un posto in cui tornare.
+    dimenticaPosto();
     const riepilogo = summarize(partita);
     const esito = recordGame(riepilogo);
     // Il profilo di gioco: entrano partita libera e sfida, non i livelli. I livelli

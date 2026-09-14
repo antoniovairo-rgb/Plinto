@@ -76,6 +76,9 @@ export const KEYS = {
   CURRENT_CHALLENGE: 'partita-sfida',
   CHALLENGES: 'sfide',
   PROGRESS: 'quadri',
+  // La partita di un livello lasciata a meta', e il posto in cui il giocatore era.
+  CURRENT_LEVEL: 'partita-quadro',
+  RIPRESA: 'ripresa',
   STATS: 'statistiche',
   PROFILO: 'profilo',
 };

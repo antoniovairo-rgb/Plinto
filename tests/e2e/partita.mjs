@@ -5,6 +5,17 @@ import { getShape } from '../../src/core/shapes.js';
 import { REGOLE_INTRO } from '../../src/config/intro.js';
 import { existsSync } from 'node:fs';
 
+/*
+ * NOTA SULLA RIPRESA (dalla 1.10.1).
+ *
+ * Riaprendosi, il gioco torna DENTRO la partita se l'ultima mossa e' di meno di due ore
+ * fa: e' la correzione del difetto "mettendo l'app in secondo piano si perde la partita"
+ * (vedi src/persistence/ripresa.js). Qui va disattivata, e non per comodita': questi
+ * controlli preparano uno scenario scrivendo una partita in memoria e si aspettano di
+ * trovare la HOME con il suo pulsante. Cancellare `plinto:ripresa` dice "nessuno e'
+ * stato interrotto", che e' esattamente la situazione che stanno simulando.
+ */
+
 /**
  * Percorso del browser.
  *
@@ -113,7 +124,7 @@ if (await page.locator('.pl-intro__regole').count() !== 0) {
 }
 
 // ---------- 1. Home ----------
-await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
+await page.evaluate(() => { window.localStorage.removeItem('plinto:partita'); window.localStorage.removeItem('plinto:ripresa'); });
 await page.reload({ waitUntil: 'networkidle' });
 await page.screenshot({ path: `${OUT}/01-home.png` });
 console.log('1. home caricata, titolo:', await page.title());
@@ -172,7 +183,10 @@ const quasiRiga = (() => {
   });
 })();
 
-await page.evaluate((s) => window.localStorage.setItem('plinto:partita', JSON.stringify(s)), quasiRiga);
+await page.evaluate((s) => {
+  window.localStorage.setItem('plinto:partita', JSON.stringify(s));
+  window.localStorage.removeItem('plinto:ripresa');
+}, quasiRiga);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /Riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
@@ -208,7 +222,7 @@ const esplosiDopo = await page.locator('.pl-blocco--esploso').count();
 if (esplosiDopo !== 0) errori.push('ANIMAZIONE: i blocchi in esplosione non vengono ripuliti');
 
 // ---------- 4. Modalita a due tocchi ----------
-await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
+await page.evaluate(() => { window.localStorage.removeItem('plinto:partita'); window.localStorage.removeItem('plinto:ripresa'); });
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
@@ -242,7 +256,7 @@ if (selezionato !== 1) errori.push('TAP: il pezzo toccato non risulta selezionat
 if (dopoTap <= primaTap) errori.push('TAP: nessun blocco posizionato con la modalita a due tocchi');
 
 // ---------- 4b. Partita da tastiera, senza mai toccare il puntatore ----------
-await page.evaluate(() => window.localStorage.removeItem('plinto:partita'));
+await page.evaluate(() => { window.localStorage.removeItem('plinto:partita'); window.localStorage.removeItem('plinto:ripresa'); });
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
 await page.waitForSelector('.pl-plancia');
@@ -284,7 +298,14 @@ if (!annuncio.trim()) errori.push('ACCESSIBILITA: la regione di annuncio resta v
 const punteggioPrima = await punteggio();
 const blocchiPrima = await contaBlocchi();
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Riprendi/ }).click();
+// QUI la ripresa NON si disattiva, ed e' il punto. Questo controllo chiede una cosa
+// sola: dopo un ricaricamento la partita e' la stessa? Da dove ci si rientra e'
+// secondario, e dalla 1.10.1 ci si rientra da soli, perche' l'interruzione e' appena
+// avvenuta. Si accettano tutte e due le strade e si misura quello che conta.
+await page.waitForTimeout(400);
+if (await page.locator('.pl-plancia').count() === 0) {
+  await page.getByRole('button', { name: /Riprendi/ }).click();
+}
 await page.waitForSelector('.pl-plancia');
 const punteggioDopo = await punteggio();
 const blocchiDopo = await contaBlocchi();
@@ -296,6 +317,7 @@ if (punteggioPrima !== punteggioDopo || blocchiPrima !== blocchiDopo) {
 // ---------- 6. Fine partita ----------
 await page.evaluate((salvataggio) => {
   window.localStorage.setItem('plinto:partita', JSON.stringify(salvataggio));
+  window.localStorage.removeItem('plinto:ripresa');
 }, quasiFinita);
 await page.reload({ waitUntil: 'networkidle' });
 await page.getByRole('button', { name: /Riprendi/ }).click();

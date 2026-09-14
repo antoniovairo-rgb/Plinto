@@ -7,6 +7,86 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.10.1] — 14 settembre 2026
+
+### Corretto
+
+**Mettendo l'app in secondo piano si perdeva il posto, e nei livelli si perdeva la
+partita.** Segnalato da chi ci gioca: «è come se scadesse molto velocemente la sessione».
+Su Android PLINTO gira dentro una Trusted Web Activity, cioè una pagina di Chrome a tutto
+schermo: quando l'app va in secondo piano il sistema può buttare via quella pagina, e alla
+riapertura la TWA la ricarica da zero.
+
+Misurato prima di intervenire, perché erano **due difetti diversi**. La partita libera e
+la Sfida non si perdevano: si salvano a ogni mossa, e infatti dopo il ricaricamento
+`plinto:partita` era ancora lì. Quello che si perdeva era il **posto**: l'app ripartiva
+dal menu. Un livello invece spariva davvero, perché `useQuadro` non salvava niente — dopo
+il ricaricamento in memoria restava solo `plinto:settings`.
+
+Adesso il livello si salva a ogni mossa come tutto il resto, e all'avvio il gioco torna
+dov'era. Il salvataggio copre anche il «rimetti a posto»: sta in un effetto e non dentro
+la mossa, altrimenti annullare avrebbe lasciato in memoria una copia che raccontava il
+falso.
+
+**Torna dentro solo se l'assenza è stata breve: due ore.** Non è una misura, è una scelta,
+e sta scritta in un posto solo (`FINESTRA_RIPRESA` in `src/persistence/ripresa.js`).
+Tornare dentro ha senso dopo una telefonata o una notifica; riaprire il gioco il giorno
+dopo e ritrovarsi in una partita di ieri, con la griglia a metà e un punteggio che non si
+ricorda, è una sorpresa e non una comodità. Passata la finestra il salvataggio **non**
+viene buttato via: resta, e «Riprendi la partita» in home continua a funzionare. La
+finestra decide soltanto se tornarci da soli.
+
+**Uscire di propria volontà cancella il posto.** Chi torna all'elenco dei livelli ha
+deciso di lasciare quel livello: ritrovarcisi dentro al prossimo avvio sarebbe il
+contrario di quello che ha chiesto. Stessa cosa per la guida iniziale e per un
+collegamento a una sfida, che vengono prima della ripresa: lì il giocatore ha chiesto
+qualcosa di preciso.
+
+**La presentazione del livello non si salva.** Chi viene interrotto mentre legge
+l'obiettivo riparte dalla home e riapre il livello rileggendolo, invece di trovarsi dentro
+una partita di cui non sa lo scopo.
+
+**La home scorreva di 7 pixel su uno schermo da 360×640, e la 1.10.0 è stata pubblicata
+così.** Il numero di versione sta nel piè di pagina, in fondo a una riga già piena
+(«Sostieni il progetto · Idee e segnalazioni · v1.9.3»). Misurato: con `v1.9.3` la home
+stava dentro **per un soffio**, alta esattamente 640 pixel su 640 disponibili, zero di
+margine. Con `v1.10.0` — un carattere in più — la riga è andata a capo e la home ha
+ripreso a scorrere.
+
+Non è stato corretto stringendo quella riga, che rimanderebbe il problema al prossimo
+numero lungo: sotto i 680 pixel di altezza la home recupera una ventina di pixel dai
+respiri, così il piè di pagina può andare a capo quanto vuole. I telefoni più alti non
+cambiano di una virgola.
+
+**Il gate non se n'era accorto, e il motivo è più importante del difetto.** Il numero di
+versione entra nel bundle quando il server di sviluppo **parte**, non a ogni richiesta.
+Un server rimasto acceso da prima del cambio di versione continua a servire il numero
+vecchio mentre tutto il resto del codice si aggiorna da solo. Il controllo
+dell'impaginazione girava contro un server così, vedeva `v1.9.3`, e diceva «entra».
+
+Due contromisure, perché una sola non basta:
+
+1. **`npm run versione-servita`, nuovo e primo controllo del gate.** Se sulla porta di
+   prova risponde qualcuno, deve servire la versione di `package.json`, altrimenti il
+   gate si ferma subito dicendo cosa fare. Se non risponde nessuno va bene: ogni
+   controllo si avvia il server da solo, e uno appena avviato la versione giusta ce l'ha
+   per costruzione. Una guardia così esisteva già, ma solo dentro `tools/schermate.mjs`,
+   nata dopo che delle schermate per il Play Store avevano dichiarato `v1.6.0` mentre il
+   gioco era alla 1.7.0. Era la lezione giusta imparata in un posto solo.
+2. **`npm run impaginazione` misura la home due volte:** con la versione vera e con una
+   lunga apposta (`v10.20.30`). Un numero di versione che cresce è l'unica cosa certa di
+   un progetto: un controllo che dice «entra» finché la versione è corta è un controllo
+   che dice il falso a data ignota.
+
+### Verificato
+
+Dieci test unitari sulla decisione (che è pura) e un ventiquattresimo controllo del gate
+(`npm run e2e-ripresa`) che simula l'interruzione con un ricaricamento vero — cioè
+letteralmente quello che fa la TWA — su quattro casi: la partita libera torna allo stesso
+punteggio, il livello torna allo stesso obiettivo e alle stesse mosse rimaste, un'assenza
+oltre la finestra **non** riapre niente, e un'uscita volontaria nemmeno. Ognuno dei
+quattro è stato fatto fallire di proposito prima di fidarsene.
+
 ## [1.10.0] — 13 settembre 2026
 
 ### Aggiunto

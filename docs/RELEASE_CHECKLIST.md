@@ -88,13 +88,41 @@ di estetica, se ne perdono settimane di attesa.
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è già a 10307 e `versionName` a 1.9.1. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
+| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è già a 10307 e `versionName` segue la versione del gioco. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
 | Attualizzare le schermate sulla scheda | **APERTO** | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, già aggiornate alla versione corrente. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
 
 Nota su cosa richiede cosa: il caricamento delle schermate è una modifica alla **scheda**,
 non un rilascio, quindi non ha bisogno di un AAB nuovo. Si fanno comunque in
 quest'ordine, perché delle schermate che mostrano una versione non ancora distribuita
 raccontano un'app che nessuno può ancora installare.
+
+## L'avviso «API deprecate per l'edge-to-edge»: deciso di non intervenire
+
+Il Play Console segnala che l'app usa API deprecate in Android 15
+(`Window.setStatusBarColor`, `Window.setNavigationBarColor`, e dentro la libreria
+`EdgeToEdgeController.setStatusBarColor` / `setNavigationBarColor`, richiamate da
+`PwaWrapperSplashScreenStrategy.customizeStatusAndNavBarDuringSplashScreen`). È
+etichettato **«Esperienza utente»**: non blocca né la pubblicazione né gli aggiornamenti.
+
+**Da dove nasce.** PLINTO su Android non ha una riga di codice nativo: è una Trusted Web
+Activity e l'unica Activity la fornisce `androidbrowserhelper`. Quelle chiamate sono
+della libreria, ma a farle eseguire sono tre nostre dichiarazioni nel manifest:
+`STATUS_BAR_COLOR`, `NAVIGATION_BAR_COLOR` e `SPLASH_IMAGE_DRAWABLE`.
+
+**Perché non si tocca, per ora.** Su Android 15 e oltre quei due setter non hanno già
+alcun effetto — è il motivo per cui sono deprecati — quindi lì dichiararli è inutile. Ma
+su Android 7-14 servono ancora: colorano la barra di stato e quella di navigazione
+durante la schermata d'avvio, e `minSdk` è 24. Toglierli zittirebbe un avviso sui telefoni
+nuovi peggiorando l'avvio su quelli vecchi, e senza garanzia: quell'analisi Play la fa sul
+bundle caricato, quindi l'esito si saprebbe solo dopo averlo caricato.
+
+**Cosa lo risolverebbe davvero:** una versione di `androidbrowserhelper` che non chiami
+più quelle API. Per noi sarebbe cambiare un numero in `android/app/build.gradle`, dove la
+dipendenza è fissata a `2.7.3`. Le versioni disponibili si leggono su
+<https://github.com/GoogleChrome/android-browser-helper/releases>.
+
+**Nota di fatto:** la release che l'avviso nomina è la **10305 (1.3.4)**, quella oggi in
+test chiuso. Caricare la 10307 non lo farebbe sparire, perché monta la stessa `2.7.3`.
 
 ---
 

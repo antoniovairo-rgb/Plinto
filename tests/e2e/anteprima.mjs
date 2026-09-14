@@ -21,6 +21,17 @@ import { iniziaQuadro, MODALITA_QUADRI } from '../../src/core/quadro.js';
 import { quadroNumero } from '../../src/config/quadri.js';
 import { MODALITA } from '../../src/config/rules.js';
 
+/*
+ * NOTA SULLA RIPRESA (dalla 1.10.1).
+ *
+ * Riaprendosi, il gioco torna DENTRO la partita se l'ultima mossa e' di meno di due ore
+ * fa: e' la correzione del difetto "mettendo l'app in secondo piano si perde la partita"
+ * (vedi src/persistence/ripresa.js). Dove questo file si aspetta la HOME va disattivata,
+ * e non per comodita': questi controlli preparano uno scenario e vogliono partire dal
+ * menu. Cancellare `plinto:ripresa` dice "nessuno e' stato interrotto", che e'
+ * esattamente la situazione che stanno simulando.
+ */
+
 /**
  * La terna che il MOTORE dice che sara' mostrata nel livello 1.
  *
@@ -247,6 +258,8 @@ if (fuoco !== 'pl-anteprima') errori.push(`TASTIERA: il tasto P non porta all an
 // parte di cosa la rende una partita libera. E il pulsante della vecchia modalita' a se'
 // non deve piu' esistere: due modi di vedere avanti vorrebbero dire due tarature.
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.evaluate(() => window.localStorage.removeItem('plinto:ripresa'));
+await page.reload({ waitUntil: 'networkidle' });
 const vecchioPulsante = await page.getByRole('button', { name: /Partita con anteprima/ }).count();
 if (vecchioPulsante !== 0) {
   errori.push('ANTEPRIMA: in home c e ancora il pulsante della modalita a se stante');

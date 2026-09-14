@@ -1132,6 +1132,29 @@ button {
   .pl-tray__posto { height: clamp(84px, 14vh, 110px); }
 }
 
+/*
+ * SCHERMI BASSI: la home deve entrare anche quando il pie' di pagina va a capo.
+ *
+ * LA STORIA, perche' e' il motivo per cui questa regola non e' un ritocco estetico.
+ * Il pie' di pagina e' una riga sola: "Sostieni il progetto · Idee e segnalazioni ·
+ * v1.9.3". Su 360x640 quella riga stava dentro per un soffio -- misurato: la home
+ * arrivava esattamente a 640 pixel su 640 disponibili, zero di margine. Poi la versione
+ * e' passata da `v1.9.3` a `v1.10.0`, un carattere in piu', la riga e' andata a capo e
+ * la home ha ricominciato a scorrere di 7 pixel. Un numero di versione che cresce e'
+ * l'unica cosa certa di un progetto, quindi una home che entra solo finche' la versione
+ * e' corta e' una home che si rompe da sola, a data ignota.
+ *
+ * QUI SI COMPRA IL MARGINE. Una ventina di pixel recuperati dai respiri, solo sotto i
+ * 680 di altezza: i telefoni piu' alti non cambiano di una virgola. Il pie' di pagina
+ * puo' andare a capo quanto vuole, e `npm run impaginazione` lo verifica adesso anche
+ * con una versione lunga apposta, invece di fidarsi di quella del momento.
+ */
+@media (max-height: 680px) and (orientation: portrait) {
+  .pl-home { gap: clamp(8px, 2.4vh, 30px); }
+  .pl-home__testata { gap: 8px; }
+  .pl-home__azioni { gap: 10px; }
+}
+
 /* ------------------------------------------------------- sfida del giorno --- */
 /* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
    secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */

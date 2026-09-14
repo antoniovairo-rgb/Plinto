@@ -29,6 +29,7 @@ import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/qu
 import {
   quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto,
 } from '../persistence/progressi.js';
+import { leggiRipresa } from '../persistence/ripresa.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
 import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
@@ -163,6 +164,41 @@ export function App() {
     apriSfida(rotta.giorno);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rotta, impostazioni.introVista, guidaSaltata]);
+
+  /**
+   * TORNARE DOV'ERAVAMO, se l'assenza e' stata breve.
+   *
+   * Su Android il gioco vive dentro una Trusted Web Activity: quando l'app va in secondo
+   * piano il sistema puo' buttare via la pagina, e alla riapertura la TWA la ricarica da
+   * zero. Chi ci gioca lo ha descritto cosi': "mettendo temporaneamente l'app in secondo
+   * piano si perde la partita in corso, e' come se scadesse la sessione". La partita in
+   * realta' non si perdeva (si salva a ogni mossa), si perdeva il POSTO -- e il livello
+   * invece si perdeva sul serio, perche' non veniva salvato affatto.
+   *
+   * UNA VOLTA SOLA, AL PRIMO MONTAGGIO. Non e' una navigazione che si puo' rifare: se
+   * questo effetto girasse di nuovo, riporterebbe dentro la partita chi e' appena uscito
+   * per andare al menu. Per questo l'elenco delle dipendenze e' vuoto.
+   *
+   * LA GUIDA E IL COLLEGAMENTO A UNA SFIDA VENGONO PRIMA. Al primo avvio si spiegano le
+   * regole, e un collegamento a una sfida e' un punto d'ingresso esplicito: in tutti e
+   * due i casi il giocatore ha chiesto qualcosa, e la ripresa e' solo una comodita'.
+   *
+   * La finestra di due ore e il perche' stanno in persistence/ripresa.js.
+   */
+  useEffect(() => {
+    if (!impostazioni.introVista) return;
+    if (rotta && rotta.nome === 'sfida') return;
+    const dove = leggiRipresa();
+    if (!dove) return;
+
+    if (dove.dove === 'quadro') {
+      if (quadri.riprendiSalvato()) setSchermata('quadro');
+      return;
+    }
+    const quale = dove.dove === 'sfida' ? 'sfida' : 'libera';
+    if (riprendi(quale)) setSchermata('gioco');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tornaAllaHome = useCallback(() => {
     // L'ancora della sfida non deve sopravvivere all'uscita: chi ricarica la pagina

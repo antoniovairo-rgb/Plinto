@@ -1,16 +1,26 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAnnulla } from './useAnnulla.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../core/quadro.js';
-import { summarize } from '../core/engine.js';
+import { summarize, serializeGame, deserializeGame } from '../core/engine.js';
 import { registraTentativo } from '../persistence/progressi.js';
+import { read, write, remove, KEYS } from '../persistence/storage.js';
+import { segnaPosto, dimenticaPosto } from '../persistence/ripresa.js';
+import { quadroNumero } from '../config/quadri.js';
 
 /**
  * Gestisce la partita di un Quadro.
  *
- * Sta separato da usePartita di proposito. La partita libera e la Sfida del Giorno
- * durano a lungo e vanno salvate; un Quadro dura poche mosse, ha un seme fisso e si
- * riparte da capo in un secondo. Metterli nello stesso posto avrebbe significato
- * infilare condizioni dappertutto per una modalita' che si comporta in un altro modo.
+ * Sta separato da usePartita di proposito: la registrazione del risultato, lo sblocco
+ * del livello successivo e la schermata di apertura sono cose che la partita libera non
+ * ha, e infilarle li' avrebbe voluto dire condizioni dappertutto.
+ *
+ * ANCHE IL LIVELLO SI SALVA, e prima non era cosi'. Il motivo scritto qui era "un Quadro
+ * dura poche mosse e si riparte da capo in un secondo": vale se sei tu a decidere di
+ * uscire, non se il sistema butta via la pagina mentre rispondi al telefono. Misurato:
+ * ricaricando a meta' del livello, in memoria restava solo `plinto:settings` e il
+ * tentativo spariva. Adesso il livello si salva a ogni mossa come tutto il resto, e la
+ * voce sparisce appena il livello finisce -- vinto o perso -- perche' una partita finita
+ * non si riprende.
  *
  * Il risultato viene registrato UNA volta sola per tentativo: senza il controllo, il
  * ridisegno che segue la mossa finale lo registrerebbe di nuovo.
@@ -32,11 +42,38 @@ export function useQuadro() {
   }, []);
 
   const chiudi = useCallback(() => {
+    // Uscire di propria volonta' cancella sia il salvataggio sia il posto: chi torna
+    // all'elenco ha deciso di lasciare quel livello, e ritrovarcisi dentro al prossimo
+    // avvio sarebbe il contrario di quello che ha chiesto.
+    remove(KEYS.CURRENT_LEVEL);
+    dimenticaPosto();
     setQuadro(null);
     setPartita(null);
     setEsito(null);
     setRegistrato(false);
     setDaPresentare(false);
+  }, []);
+
+  /**
+   * Riprende il livello lasciato a meta', se ce n'e' uno leggibile.
+   *
+   * Controlla che il numero corrisponda a un livello che esiste davvero: la voce in
+   * memoria puo' essere stata scritta da una versione con meno livelli, o modificata a
+   * mano. Un livello inventato porterebbe su una schermata senza obiettivi.
+   */
+  const riprendiSalvato = useCallback(() => {
+    const voce = read(KEYS.CURRENT_LEVEL, null);
+    if (!voce || !Number.isFinite(voce.numero)) return null;
+    const definizione = quadroNumero(voce.numero);
+    if (!definizione) return null;
+    const stato = deserializeGame(voce.partita);
+    if (!stato || stato.status !== 'playing') return null;
+    setQuadro(definizione);
+    setPartita(stato);
+    setEsito(null);
+    setRegistrato(false);
+    setDaPresentare(false);
+    return definizione;
   }, []);
 
   /** Chiude l'apertura e comincia a giocare. */
@@ -55,6 +92,42 @@ export function useQuadro() {
     apri(quadro);
     setDaPresentare(false);
   }, [quadro, apri]);
+
+  /**
+   * Salva il livello in corso, a ogni cambiamento della partita.
+   *
+   * Sta in un effetto e non dentro `gioca` perche' cosi' copre anche il "rimetti a
+   * posto": annullare una mossa cambia la partita senza passare da `gioca`, e senza
+   * questo la copia salvata resterebbe quella di prima dell'annullamento. Sarebbe il
+   * difetto peggiore di tutti, un salvataggio che esiste e racconta il falso.
+   */
+  useEffect(() => {
+    if (!quadro || !partita || esito) return;
+    // Finche' e' sullo schermo la presentazione di Plinto non si e' ancora giocato
+    // niente, e non si salva niente. Non e' un risparmio: riprendendo da li' il
+    // giocatore si ritroverebbe DENTRO il livello senza aver letto l'obiettivo, che e'
+    // proprio la cosa che quella schermata esiste per dirgli. Senza salvataggio riparte
+    // dalla home e riapre il livello leggendola, come la prima volta.
+    if (daPresentare) return;
+    write(KEYS.CURRENT_LEVEL, { numero: quadro.numero, partita: serializeGame(partita) });
+    segnaPosto('quadro', quadro.numero);
+  }, [quadro, partita, esito, daPresentare]);
+
+  /**
+   * Livello finito: si cancella il salvataggio.
+   *
+   * Sta in un effetto SUO e non nel ramo "altrimenti" di quello sopra, e la differenza
+   * non e' di stile. Un unico effetto con la cancellazione nel caso `!quadro` avrebbe
+   * cancellato il livello salvato AL MONTAGGIO, quando non c'e' ancora niente di aperto:
+   * cioe' esattamente nell'istante in cui l'avvio sta per andarlo a riprendere. Il
+   * salvataggio sarebbe sparito un attimo prima di essere letto, e il difetto si sarebbe
+   * visto solo sul telefono vero.
+   */
+  useEffect(() => {
+    if (!esito) return;
+    remove(KEYS.CURRENT_LEVEL);
+    dimenticaPosto();
+  }, [esito]);
 
   const gioca = useCallback((handIndex, row, col) => {
     if (!quadro) return;
@@ -99,6 +172,7 @@ export function useQuadro() {
     avvia,
     chiudi,
     riprova,
+    riprendiSalvato,
     gioca,
   };
 }

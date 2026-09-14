@@ -92,13 +92,43 @@ for (const [larghezza, altezza, nome] of FORMATI) {
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.pl-home__azioni');
 
-  const eccesso = await page.evaluate(() => {
+  /**
+   * Si misura DUE VOLTE: con la versione vera e con una lunga apposta.
+   *
+   * Perche' la seconda. Il numero di versione sta nel pie' di pagina, in fondo a una
+   * riga gia' piena ("Sostieni il progetto · Idee e segnalazioni · v1.9.3"). Su 360x640
+   * quella riga stava dentro per un soffio: la home misurava esattamente 640 pixel su
+   * 640, zero di margine. Passando da `v1.9.3` a `v1.10.0` -- un carattere in piu' -- la
+   * riga e' andata a capo e la home ha ripreso a scorrere. Questo controllo era passato
+   * lo stesso, perche' guardava la versione del momento invece della prossima.
+   *
+   * Un numero di versione che cresce e' l'unica cosa certa di un progetto. Misurare
+   * anche con `v10.20.30` vuol dire che questo controllo dice "entra" solo se entra
+   * davvero, e non finche' siamo fortunati.
+   */
+  const { eccesso, eccessoLungo, versione } = await page.evaluate(() => {
     const el = document.querySelector('.pl-home');
-    return el.scrollHeight - el.clientHeight;
+    const ver = el.querySelector('.pl-home__versione');
+    const prima = el.scrollHeight - el.clientHeight;
+    if (!ver) return { eccesso: prima, eccessoLungo: prima, versione: null };
+    const vero = ver.textContent;
+    ver.textContent = 'v10.20.30';
+    const dopo = el.scrollHeight - el.clientHeight;
+    ver.textContent = vero;
+    return { eccesso: prima, eccessoLungo: dopo, versione: vero };
   });
-  const esito = eccesso > 0 ? `SCORRE di ${eccesso}px` : 'entra';
-  console.log(`  ${eccesso > 0 ? 'NO  ' : 'ok  '}${nome.padEnd(18)} ${larghezza}x${altezza}  ${esito}`);
+  if (versione === null) {
+    errori.push(`${nome}: il numero di versione non si trova nel pie di pagina (.pl-home__versione), quindi non si puo misurare con una versione lunga`);
+  }
+  const peggio = Math.max(eccesso, eccessoLungo);
+  const esito = peggio > 0
+    ? `SCORRE di ${peggio}px${eccessoLungo > eccesso ? ' (solo con una versione lunga)' : ''}`
+    : 'entra';
+  console.log(`  ${peggio > 0 ? 'NO  ' : 'ok  '}${nome.padEnd(18)} ${larghezza}x${altezza}  ${esito}`);
   if (eccesso > 0) errori.push(`${nome} (${larghezza}x${altezza}): la home scorre di ${eccesso}px`);
+  if (eccessoLungo > 0 && eccessoLungo > eccesso) {
+    errori.push(`${nome} (${larghezza}x${altezza}): la home entra con ${versione} ma scorre di ${eccessoLungo}px con una versione piu lunga. Entra per fortuna, non per costruzione.`);
+  }
   await page.close();
 }
 

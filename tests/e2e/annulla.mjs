@@ -13,6 +13,17 @@
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 
+/*
+ * NOTA SULLA RIPRESA (dalla 1.10.1).
+ *
+ * Riaprendosi, il gioco torna DENTRO la partita se l'ultima mossa e' di meno di due ore
+ * fa: e' la correzione del difetto "mettendo l'app in secondo piano si perde la partita"
+ * (vedi src/persistence/ripresa.js). Dove questo file si aspetta la HOME va disattivata,
+ * e non per comodita': questi controlli preparano uno scenario e vogliono partire dal
+ * menu. Cancellare `plinto:ripresa` dice "nessuno e' stato interrotto", che e'
+ * esattamente la situazione che stanno simulando.
+ */
+
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
@@ -116,6 +127,8 @@ if (compare === 1) {
 
 // ---------- 5. Nei livelli vale lo stesso, e le mosse tornano indietro ----------
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.evaluate(() => window.localStorage.removeItem('plinto:ripresa'));
+await page.reload({ waitUntil: 'networkidle' });
 await page.locator('.pl-home__azioni .pl-btn--primario').click();
 await page.waitForSelector('.pl-apertura');
 await page.locator('.pl-apertura__azioni .pl-btn--primario').click();
