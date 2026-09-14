@@ -52,7 +52,18 @@ const PERCORSO_DA_FARE = '□';
  * dentro il componente e sarebbe rimasto indietro. La riga avrebbe continuato a
  * comparire uguale, e l'unico a notarlo sarebbe stato qualcuno che il gioco lo ascolta.
  */
-export const RIGA_DISEGNATA = /^[▁▂▃▄▅▆▇█■□]+$/u;
+/**
+ * La riga di blocchi colorati che chiude la scheda di chi ha finito il percorso.
+ *
+ * Sono i sei colori dei pezzi, nell'ordine in cui compaiono nel gioco: e' la firma che
+ * si riconosce in una chat senza leggere niente. E' una riga DISEGNATA, quindi
+ * RIGA_DISEGNATA deve escluderla da chi ascolta -- per questo i suoi caratteri stanno
+ * dentro quell'espressione, e non e' un dettaglio da ricordarsi a mano: un test
+ * controlla che ogni carattere di questa costante sia riconosciuto come disegno.
+ */
+export const FIRMA_TRIONFO = '\u{1F7E5}\u{1F7E7}\u{1F7E8}\u{1F7E9}\u{1F7E6}\u{1F7EA}';
+
+export const RIGA_DISEGNATA = /^[▁▂▃▄▅▆▇█■□\u{1F7E5}\u{1F7E6}\u{1F7E7}\u{1F7E8}\u{1F7E9}\u{1F7EA}]+$/u;
 
 /** Quante colonne ha la riga di blocchi. Sedici sta su una riga di chat ovunque. */
 export const COLONNE_FORMA = 16;
@@ -243,6 +254,48 @@ export function formattaSchedaPercorso(dati = {}, contesto = {}) {
   ].filter((riga) => riga !== '');
 
   return righe.join('\n').slice(0, LIMITE);
+}
+
+/**
+ * La scheda di CHI HA FINITO TUTTI I LIVELLI.
+ *
+ * E' distinta da `formattaSchedaPercorso` per una ragione che non e' estetica: quella
+ * dice "a che punto sono", e a percorso finito direbbe "100 livelli su 100" con una
+ * barra piena, cioe' il traguardo raccontato come se fosse una tappa qualsiasi. Questa
+ * dice che il percorso e' CHIUSO, e porta i due numeri che nessun altro puo' avere: le
+ * mosse spese in tutto e quanti livelli sono caduti al primo tentativo.
+ *
+ * NIENTE BARRA PIENA. Sedici quadrati tutti uguali non dicono niente: se sono tutti
+ * pieni, l'informazione e' zero. Al suo posto c'e' una riga di blocchi colorati, che e'
+ * la firma visiva del gioco ed e' decorativa come le altre (RIGA_DISEGNATA la esclude
+ * da chi ascolta, e tutto quello che conta e' scritto a parole sopra).
+ *
+ * I NUMERI RESTANO QUELLI VERI. `alPrimoColpo` puo' essere basso, e va bene: la riga
+ * esiste solo se c'e' qualcosa da dire, ma non viene abbellita. Una scheda che gonfia
+ * il risultato e' una scheda che chi la riceve impara a non credere.
+ */
+export function formattaSchedaTrionfo(dati = {}, contesto = {}) {
+  const { testi = {}, indirizzo } = contesto;
+  const totale = Math.max(1, dati.totale ?? 1);
+  const mosse = Math.max(0, dati.mosseTotali ?? 0);
+  const alPrimoColpo = Math.max(0, dati.alPrimoColpo ?? 0);
+
+  const righe = [
+    `${testi.gioco ?? 'PLINTO'} — ${testi.trionfoTitolo ?? 'Percorso completato'}`,
+    (testi.tuttiILivelli ?? 'Tutti i {totale} livelli superati').replace('{totale}', totale),
+    mosse > 0
+      ? (testi.mosseInTutto ?? '{mosse} mosse in tutto').replace('{mosse}', mosse)
+      : '',
+    alPrimoColpo > 0
+      ? (testi.alPrimoColpo ?? '{quanti} al primo colpo').replace('{quanti}', alPrimoColpo)
+      : '',
+    FIRMA_TRIONFO,
+    indirizzo ?? '',
+  ].filter((riga) => riga !== '');
+
+  const testo = righe.join('\n');
+  if (testo.length <= LIMITE) return testo;
+  return righe.filter((riga) => riga !== FIRMA_TRIONFO).join('\n').slice(0, LIMITE);
 }
 
 /**

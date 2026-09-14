@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
-  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda, RIGA_DISEGNATA,
+  formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, formattaSchedaTrionfo,
+  collegamentoScheda, RIGA_DISEGNATA,
 } from '../core/scheda.js';
 import { rottaSfida } from './rotta.js';
 import { PLAY_URL } from '../config/progetto.js';
@@ -173,6 +174,31 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
     },
   );
   return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} t={t} />;
+}
+
+/**
+ * La scheda di chi ha CHIUSO il percorso.
+ *
+ * Distinta da `CondividiPercorso` perche' il testo e' diverso (vedi
+ * `formattaSchedaTrionfo`) e perche' qui l'anteprima si mostra: chi ha appena finito
+ * cento livelli non sta cercando di sbrigarsi, e vedere cosa manderebbe e' la cosa che
+ * lo fa decidere di mandarlo.
+ */
+export function CondividiTrionfo({ totale, mosseTotali, alPrimoColpo, t }) {
+  const testo = formattaSchedaTrionfo(
+    { totale, mosseTotali, alPrimoColpo },
+    {
+      indirizzo: indirizzoDelGioco(null),
+      testi: {
+        gioco: 'PLINTO',
+        trionfoTitolo: t('scheda.trionfoTitolo'),
+        tuttiILivelli: t('scheda.tuttiILivelli'),
+        mosseInTutto: t('scheda.mosseInTutto'),
+        alPrimoColpo: t('scheda.alPrimoColpo'),
+      },
+    },
+  );
+  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiTrionfo')} t={t} />;
 }
 
 /** La scheda dell'avanzamento sul percorso, presa dalla mappa. */

@@ -7,6 +7,63 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.10.0] — 13 settembre 2026
+
+### Aggiunto
+
+**La fine del percorso adesso è un momento, non una riga di testo.** Chi supera tutti e
+cento i livelli trova una schermata tutta sua: i blocchi del gioco che cadono nei sei
+colori, Plinto che salta, i numeri del percorso (livelli superati, mosse spese, quanti
+sono caduti al primo colpo, e il livello che ha resistito di più) e la possibilità di
+raccontarlo. Prima al centesimo livello compariva una frase: «Hai superato tutti i
+livelli.»
+
+**«Completo» vuol dire superati davvero, non «sono arrivato al centesimo».** Al livello
+cento si arriva anche per insistenza: dopo otto tentativi falliti il successivo si apre
+lo stesso, senza spunta. Chi ci arriva così può vincere il centesimo avendone lasciati
+indietro cinque, e festeggiare «li hai superati tutti» sarebbe una bugia detta proprio
+nel momento in cui il gioco dovrebbe essere più sincero. La festa guarda quanti ne sono
+stati superati, non quale numero porta l'ultimo; a chi è in fondo con dei buchi il gioco
+lo dice, e gli indica dove sono.
+
+**L'annuncio dei prossimi livelli è senza date.** «Altri livelli sono in lavorazione. Non
+c'è ancora una data: quando ci saranno, li trovi qui.» Una data scritta lì è una promessa
+che chi ha appena finito cento livelli tornerebbe a riscuotere. Un test controlla che quel
+testo non contenga mesi, anni, «presto» o «settimane», in entrambe le lingue.
+
+**Una festa più piccola a ogni atto chiuso.** I cento livelli sono già raggruppati in
+sette atti (Le basi, Il ritmo, Gli ostacoli, La pressione, Il mestiere, La maestria, La
+vetta): chiuderne uno adesso mostra una fascia dedicata, dentro la schermata di vittoria.
+Non somiglia alla festa finale, ed è voluto: se le somigliasse, quella finale arriverebbe
+come la settima volta che succede la stessa cosa. Compare solo quando l'atto si chiude
+davvero, mai rigiocando un livello dentro un atto già finito.
+
+### Corretto
+
+**Tenendo premuto su un pezzo si illuminava una casella al centro della griglia.**
+Segnalato da chi ci gioca. Era il cursore della tastiera, che si posizionava al centro
+appena si sceglieva un pezzo — in qualsiasi modo lo si fosse scelto, anche con un dito.
+Mostrava una destinazione che non era nemmeno quella dove il pezzo sarebbe atterrato.
+Adesso il cursore compare solo se il pezzo è stato scelto da tastiera, e si riconosce da
+`detail === 0` sull'evento del clic, che distingue l'attivazione da tastiera da un tocco
+vero.
+
+### Verificato
+
+**Il testo della festa resta leggibile sopra qualunque blocco.** I blocchi cadono dietro
+al testo, ed è provato, ma «dietro» non basta: un quadrato pieno dietro una parola la
+rende illeggibile lo stesso se i due colori non contrastano. È lo stesso difetto già
+trovato con le frasi di incitamento, dove il contrasto scendeva a 1,09:1. Senza il velo
+il titolo qui misurava 1,37:1 e il sottotitolo 1,09:1; con il velo stanno a 13,3:1 e
+6,01:1 sul tema scuro, 15,21:1 e 6,3:1 sul chiaro. Il controllo calcola il fondo peggiore
+componendo il velo sopra ognuno dei sei colori, quindi non dipende da dove si trovava un
+blocco nell'istante dello scatto.
+
+**La pioggia non copre né il testo né i tocchi**, e il ventiduesimo controllo del gate
+(`npm run e2e-trionfo`) prova tutti e quattro i casi che contano: la festa compare
+chiudendo il centesimo, **non** compare con un livello ancora da superare, la fascia
+dell'atto compare chiudendolo e **non** torna rigiocando.
+
 ## [1.9.3] — 11 settembre 2026
 
 ### Cambiato

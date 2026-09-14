@@ -216,6 +216,24 @@ const primaTap = await contaBlocchi();
 await page.locator('.pl-tray .pl-pezzo-presa').first().click();
 await page.waitForTimeout(60);
 const selezionato = await page.locator('.pl-tray__posto--selezionato').count();
+
+// SCEGLIERE UN PEZZO COL DITO NON DEVE ACCENDERE NIENTE SULLA GRIGLIA.
+// Il cursore e' uno strumento della tastiera, e per tre versioni e' comparso anche
+// per chi gioca toccando: due caselle accese in mezzo alla griglia, al centro esatto,
+// che non erano nemmeno la destinazione -- toccando una casella il pezzo va li'.
+// L'ha trovato un giocatore, non un controllo. Adesso c'e' il controllo.
+const accesoSubito = await page.evaluate(() => {
+  const celle = [...document.querySelectorAll('.pl-plancia .pl-cella')];
+  const con = (c) => celle.filter((x) => x.classList.contains(c)).length;
+  return { anteprima: con('pl-cella--anteprima'), cursore: con('pl-cella--cursore') };
+});
+console.log(`4a. scelto col dito, griglia spenta: anteprima ${accesoSubito.anteprima}, cursore ${accesoSubito.cursore}`);
+if (accesoSubito.anteprima > 0 || accesoSubito.cursore > 0) {
+  errori.push(`TAP: scegliendo un pezzo col dito si accendono gia' delle caselle `
+    + `(${accesoSubito.anteprima} in anteprima, ${accesoSubito.cursore} sotto il cursore): `
+    + 'e\' il cursore della tastiera che compare a chi non la sta usando');
+}
+
 await page.locator('.pl-plancia .pl-cella').nth(8 * 9 + 4).click();
 await page.waitForTimeout(120);
 const dopoTap = await contaBlocchi();

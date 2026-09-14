@@ -171,6 +171,7 @@ export function SchermoGioco({
   const tastiera = useTastiera({
     attivo: partita.status === 'playing',
     selezionato: drag.selezionato,
+    conTastiera: drag.selezionatoDaTastiera,
     mano: partita.hand,
     onAnnulla: drag.annulla,
     onPosiziona: (indice, row, col) => {

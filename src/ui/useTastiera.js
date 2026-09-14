@@ -20,14 +20,29 @@ import { GRID_SIZE } from '../config/rules.js';
 
 const CENTRO = { row: 4, col: 4 };
 
-export function useTastiera({ attivo, selezionato, onPosiziona, onAnnulla, mano }) {
+export function useTastiera({
+  attivo, selezionato, onPosiziona, onAnnulla, mano, conTastiera = false,
+}) {
   const [cursore, setCursore] = useState(null);
 
-  // Il cursore compare quando si sceglie un pezzo e sparisce quando si annulla.
+  /**
+   * Il cursore compare quando si sceglie un pezzo DALLA TASTIERA, e sparisce quando si
+   * annulla.
+   *
+   * PRIMA COMPARIVA SEMPRE, ed era un difetto che si vedeva giocando col dito:
+   * toccando un pezzo si accendevano due caselle in mezzo alla griglia. Segnalato da
+   * chi ci gioca ("secondo me e' un bug") e riprodotto con eventi di tocco veri: le
+   * caselle 40 e 49, cioe' il centro esatto. Non era solo brutto, era una bugia --
+   * quella non e' la destinazione, perche' toccando una casella il pezzo va li'.
+   *
+   * Chi usa la tastiera il cursore ce l'ha subito, come prima. Chi lo muove con le
+   * frecce senza averlo lo fa comparire al primo tasto, perche' `muovi` parte dal
+   * centro quando non c'e'.
+   */
   useEffect(() => {
     if (selezionato === null) setCursore(null);
-    else setCursore((prec) => prec ?? { ...CENTRO });
-  }, [selezionato]);
+    else if (conTastiera) setCursore((prec) => prec ?? { ...CENTRO });
+  }, [selezionato, conTastiera]);
 
   const muovi = useCallback((dRiga, dColonna) => {
     setCursore((prec) => {

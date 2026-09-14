@@ -22,10 +22,13 @@ import { SchermoArchivio } from './schermate/Archivio.jsx';
 import { SchermoProfilo } from './schermate/Profilo.jsx';
 import { SchermoComeSiGioca } from './schermate/ComeSiGioca.jsx';
 import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
+import { SchermoTrionfo } from './schermate/Trionfo.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
-import { QUADRI, TOTALE_QUADRI, quadroNumero } from '../config/quadri.js';
-import { quantiSuperati, prossimoQuadro } from '../persistence/progressi.js';
+import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/quadri.js';
+import {
+  quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto,
+} from '../persistence/progressi.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
 import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
 import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
@@ -333,6 +336,36 @@ export function App() {
   // --- Quadro in corso, oppure il suo esito --------------------------------
   if (schermata === 'quadro' && quadri.quadro && quadri.partita) {
     if (quadri.esito) {
+      // I progressi si leggono DAI PROGRESSI SALVATI, non da `quadriFatti`: quel numero
+      // e' uno stato di React aggiornato dopo, e alla prima resa dell'esito racconta
+      // ancora il percorso di un istante fa. La festa finale che arriva un livello in
+      // ritardo sarebbe il difetto piu' beffardo possibile.
+      const appenaVinto = quadri.esito.completato
+        ? { numero: quadri.quadro.numero, primaVolta: Boolean(quadri.esito.primaVolta) }
+        : null;
+      const percorso = riepilogoPercorso(undefined, TOTALE_QUADRI);
+      const atto = appenaVinto
+        ? riepilogoAtto(attoDelQuadro(quadri.quadro.numero), appenaVinto)
+        : null;
+
+      // La festa finale si mostra quando questa vittoria ha CHIUSO il percorso: non
+      // basta che il percorso sia completo (lo resta per sempre, e la rivedresti a ogni
+      // livello rigiocato), serve che sia questa vittoria ad averlo completato -- cioe'
+      // che il livello appena vinto fosse ancora da superare.
+      if (percorso.completo && appenaVinto?.primaVolta) {
+        return (
+          <div className="pl-app">
+            <SchermoTrionfo
+              riepilogo={percorso}
+              animazioni={impostazioni.animazioni}
+              onLibera={iniziaNuova}
+              onElenco={tornaAiQuadri}
+              t={t}
+            />
+          </div>
+        );
+      }
+
       return (
         <div className="pl-app">
           <SchermoFineQuadro
@@ -340,6 +373,8 @@ export function App() {
             esito={quadri.esito}
             ultimo={quadri.quadro.numero >= TOTALE_QUADRI}
             superatiTotali={quadriFatti}
+            atto={atto}
+            percorsoCompleto={percorso.completo}
             animazioni={impostazioni.animazioni}
             onRiprova={quadri.riprova}
             onProssimo={quadroSuccessivo}

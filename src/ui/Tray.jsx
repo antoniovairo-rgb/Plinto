@@ -51,7 +51,7 @@ export function Tray({ mano, pezziMorti, selezionato, presoIndex, onPointerDownP
                 type="button"
                 className="pl-pezzo-presa"
                 onPointerDown={(e) => onPointerDownPezzo(e, i, cella)}
-                onClick={() => onTapPezzo(i)}
+                onClick={(e) => onTapPezzo(i, e)}
                 aria-label={
                   `${t('varie.pezzo').replace('{n}', i + 1).replace('{celle}', pezzo.shape.size)}`
                   + (morto ? `, ${t('varie.pezzoMorto')}` : '')

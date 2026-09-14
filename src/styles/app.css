@@ -2047,3 +2047,173 @@ button {
 }
 .pl-anteprima__cella .pl-bomba { position: absolute; inset: -1px; }
 .pl-anteprima__vuoto { width: 11px; height: 11px; }
+
+/* ==========================================================================
+   La fine del percorso: la festa dei cento livelli e la fascia dell'atto
+   ========================================================================== */
+
+/* La pioggia di blocchi.
+
+   E' DIETRO tutto e non intercetta niente: `pointer-events: none` non e' una
+   precauzione, e' l'unica cosa che impedisce a ventiquattro quadrati sovrapposti di
+   mangiarsi i tocchi sui pulsanti e sulla condivisione, che stanno proprio sotto.
+
+   `overflow: hidden` sul contenitore tiene i blocchi dentro lo schermo anche mentre
+   cadono oltre il bordo: senza, il corpo della pagina guadagna una barra di scorrimento
+   orizzontale per un secondo e mezzo. */
+.pl-pioggia {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.pl-pioggia__blocco {
+  position: absolute;
+  top: -10%;
+  border-radius: 4px;
+  opacity: 0.85;
+  animation-name: pl-cade;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+@keyframes pl-cade {
+  0%   { transform: translateY(-20vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.85; }
+  90%  { opacity: 0.85; }
+  100% { transform: translateY(115vh) rotate(420deg); opacity: 0; }
+}
+
+.pl-trionfo { position: relative; }
+/* Il contenuto sta SOPRA la pioggia. Senza lo z-index i blocchi passerebbero davanti al
+   titolo: disegnati dopo nell'ordine del documento, vincerebbero a parita' di livello. */
+.pl-trionfo__dentro { position: relative; z-index: 1; text-align: center; }
+
+.pl-trionfo__plinto { display: flex; justify-content: center; margin-top: 8px; }
+
+/* Il velo dietro il titolo: vedi il commento in Trionfo.jsx. Stessi token della frase
+   di incitamento, perche' e' lo stesso problema risolto nello stesso modo. */
+.pl-trionfo__intestazione {
+  margin: 10px auto 18px;
+  max-width: 32ch;
+  padding: 10px 16px 14px;
+  border-radius: 18px;
+  background: var(--pl-velo);
+  border: 1px solid var(--pl-velo-bordo);
+}
+
+.pl-trionfo__titolo {
+  margin: 0 0 2px;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--pl-text);
+}
+.pl-trionfo__sotto {
+  margin: 0 auto;
+  max-width: 30ch;
+  color: var(--pl-text-dim);
+  line-height: 1.45;
+}
+
+/* I tre numeri. `flex-wrap` e non una griglia a tre colonne: su uno schermo stretto tre
+   numeri a quattro cifre non ci stanno, e schiacciarli li rende illeggibili. */
+.pl-trionfo__numeri {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pl-trionfo__numero {
+  flex: 1 1 88px;
+  max-width: 132px;
+  padding: 12px 8px;
+  border-radius: 14px;
+  background: var(--pl-surface-2);
+  border: 1px solid var(--pl-line);
+}
+.pl-trionfo__numero strong {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--pl-text);
+  font-variant-numeric: tabular-nums;
+}
+.pl-trionfo__numero span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--pl-text-dim);
+  line-height: 1.25;
+}
+
+.pl-trionfo__nota {
+  margin: 0 auto 18px;
+  max-width: 34ch;
+  font-size: 0.9rem;
+  color: var(--pl-text-dim);
+  line-height: 1.45;
+}
+
+/* L'annuncio dei prossimi livelli. Riquadro e non paragrafo: e' l'unica cosa nella
+   schermata che parla del futuro, e deve distinguersi dai numeri del passato. */
+.pl-trionfo__annuncio {
+  margin: 0 auto 16px;
+  padding: 14px 16px;
+  max-width: 34ch;
+  border-radius: 16px;
+  background: var(--pl-surface-2);
+  border: 1px solid var(--pl-line);
+  text-align: left;
+}
+.pl-trionfo__annuncioTitolo {
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: var(--pl-text);
+}
+.pl-trionfo__annuncioTesto {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--pl-text-dim);
+  line-height: 1.45;
+}
+
+/* La fascia dell'atto chiuso: piccola per scelta, vedi il commento in FineQuadro.jsx. */
+.pl-atto-chiuso {
+  margin: 14px auto 4px;
+  padding: 10px 14px;
+  max-width: 32ch;
+  border-radius: 14px;
+  background: var(--pl-surface-2);
+  /* Il bordo e' d'ottone, come il nastro del record: e' cosi' che si distingue da un
+     pulsante, che sta subito sotto e ha la stessa forma. Senza, la fascia si legge come
+     una cosa da premere -- e una cosa da premere che non fa niente e' un difetto. */
+  border: 1px solid var(--pl-brand-deep);
+  text-align: center;
+}
+.pl-atto-chiuso__titolo {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--pl-brand);
+}
+.pl-atto-chiuso__riga {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--pl-text-dim);
+}
+.pl-atto-chiuso--entra { animation: pl-atto-entra var(--pl-t-festa) var(--pl-ease-pop) both; }
+@keyframes pl-atto-entra {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Moto ridotto: la pioggia sparisce del tutto invece di rallentare. Ventiquattro oggetti
+   che scendono sono esattamente il tipo di movimento per cui quella preferenza esiste, e
+   non c'e' un modo "lento" di farli cadere che la rispetti. Il testo resta tutto: la
+   schermata continua a dire le stesse cose. */
+@media (prefers-reduced-motion: reduce) {
+  .pl-pioggia { display: none; }
+  .pl-atto-chiuso--entra { animation: none; }
+}

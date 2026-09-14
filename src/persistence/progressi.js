@@ -191,7 +191,100 @@ export function azzeraProgressi() {
   salva({});
 }
 
+/**
+ * Il riepilogo di tutto il percorso: i numeri con cui si festeggia la fine dei cento.
+ *
+ * E' una funzione PURA sui progressi gia' letti, cosi' un test puo' interrogarla senza
+ * montare niente e senza toccare la memoria del browser.
+ *
+ * PERCHE' "COMPLETO" NON E' "HO VINTO IL CENTESIMO". Al livello cento si arriva anche
+ * per insistenza: dopo otto tentativi falliti il successivo si apre lo stesso, senza
+ * spunta. Chi ci arriva cosi' puo' vincere il centesimo avendone lasciati indietro
+ * cinque, e festeggiare "hai superato tutti i livelli" sarebbe una bugia detta proprio
+ * nel momento in cui il gioco dovrebbe essere piu' sincero. `completo` guarda quanti ne
+ * sono stati superati davvero, non quale numero porta l'ultimo.
+ *
+ * I NUMERI SONO QUELLI VERI, COMPRESI QUELLI SCOMODI. Le mosse sono le migliori di ogni
+ * livello, quindi la somma e' il percorso giocato al meglio; i tentativi sono TUTTI,
+ * anche quelli andati male. Un riepilogo che contasse solo le riuscite racconterebbe un
+ * percorso che non e' stato fatto da nessuno.
+ */
+export function riepilogoPercorso(progressi = caricaProgressi(), totale = 0) {
+  const superati = [];
+  let tentativiTotali = 0;
+  let piuOstinato = null;
+
+  for (const [chiave, voce] of Object.entries(progressi)) {
+    const numero = Number(chiave);
+    if (!Number.isFinite(numero)) continue;
+    const tentativi = voce?.tentativi ?? 0;
+    tentativiTotali += tentativi;
+    if (!quadroSuperato(numero, progressi)) continue;
+    superati.push({ numero, ...voce, tentativi });
+    if (!piuOstinato || tentativi > piuOstinato.tentativi) {
+      piuOstinato = { numero, tentativi };
+    }
+  }
+
+  const somma = (campo) => superati.reduce((t, q) => t + (q[campo] ?? 0), 0);
+
+  return {
+    superati: superati.length,
+    totale,
+    completo: totale > 0 && superati.length >= totale,
+    mosseTotali: somma('mosse'),
+    punteggioTotale: somma('punteggio'),
+    // Al primo colpo: superato con un solo tentativo. E' il numero di cui si va fieri.
+    alPrimoColpo: superati.filter((q) => q.tentativi === 1).length,
+    tentativiTotali,
+    // Il livello che ha resistito di piu'. Vale la pena dirlo: e' quello che il
+    // giocatore ricorda, e nominarlo dice che il gioco se n'e' accorto.
+    piuOstinato: piuOstinato && piuOstinato.tentativi > 1 ? piuOstinato : null,
+  };
+}
+
 /** Quanti Quadri sono stati superati davvero. Le voci dei soli tentativi non contano. */
 export function quantiSuperati(progressi = caricaProgressi()) {
   return Object.keys(progressi).filter((n) => quadroSuperato(n, progressi)).length;
+}
+
+/**
+ * Il riepilogo di un ATTO: il gruppo di livelli che il percorso attraversa prima di
+ * cambiare tono (Le basi, Il ritmo, Gli ostacoli...).
+ *
+ * Serve alla piccola festa di meta' strada: finire "Il ritmo" non e' finire il gioco, ma
+ * e' comunque un traguardo, e passare dal livello 24 al 25 senza che succeda niente fa
+ * sembrare i cento livelli una fila unica invece che un percorso con delle tappe.
+ *
+ * Prende l'atto come oggetto {da, a, nome} invece di importarlo: cosi' questo file non
+ * dipende dai cento livelli -- che sono quasi tremila righe generate -- e la funzione
+ * resta interrogabile da un test con un atto finto di tre livelli.
+ *
+ * CHIUSO ORA, NON CHIUSO E BASTA. `appenaChiuso` distingue "questo tentativo ha completato
+ * l'atto" da "l'atto era gia' completo": senza quella distinzione la festa tornerebbe ogni
+ * volta che si rigioca un livello dentro un atto finito, cioe' esattamente quando non e'
+ * successo niente.
+ */
+export function riepilogoAtto(atto, appenaVinto = null, progressi = caricaProgressi()) {
+  if (!atto) return null;
+  let superati = 0;
+  for (let n = atto.da; n <= atto.a; n += 1) if (quadroSuperato(n, progressi)) superati += 1;
+  const totale = atto.a - atto.da + 1;
+  const completo = superati >= totale;
+  return {
+    nome: atto.nome,
+    da: atto.da,
+    a: atto.a,
+    superati,
+    totale,
+    completo,
+    // Vero solo se il livello appena vinto e' il PRIMO successo su quel livello, sta in
+    // questo atto, ed era l'ultimo che mancava. Senza `primaVolta` la festa tornerebbe a
+    // ogni rigiocata dentro un atto gia' chiuso: un traguardo annunciato quando non e'
+    // successo niente e' un traguardo a cui si smette di credere.
+    appenaChiuso: completo
+      && Boolean(appenaVinto?.primaVolta)
+      && appenaVinto.numero >= atto.da
+      && appenaVinto.numero <= atto.a,
+  };
 }

@@ -203,6 +203,11 @@ export default {
     percorso: 'Percorso {fatti} di {totale}',
     percorsoTitolo: 'Il percorso',
     livelliSu: '{fatti} livelli su {totale}',
+    condividiTrionfo: 'Racconta che li hai finiti',
+    trionfoTitolo: 'Percorso completato',
+    tuttiILivelli: 'Tutti i {totale} livelli superati',
+    mosseInTutto: '{mosse} mosse in tutto',
+    alPrimoColpo: '{quanti} al primo colpo',
   },
   profilo: {
     titolo: 'Il tuo profilo di gioco',
@@ -268,6 +273,20 @@ export default {
       + 'rovinarsi la sorpresa da soli.',
     daQuando: 'La prima sfida è quella del {giorno}: prima non esisteva.',
   },
+  // La fine del percorso: l'unico momento in cui il gioco alza la voce.
+  trionfo: {
+    titolo: 'Li hai finiti tutti.',
+    sotto: '{totale} livelli, dal primo all\'ultimo. Il percorso è chiuso.',
+    livelli: 'livelli superati',
+    mosse: 'mosse spese',
+    primoColpo: 'al primo colpo',
+    ostinato: 'Il livello {n} ha resistito {tentativi} volte. Alla fine è caduto anche quello.',
+    prossimiTitolo: 'E adesso?',
+    // Senza date, per scelta. Vedi il commento in testa a ui/schermate/Trionfo.jsx.
+    prossimiTesto: 'Altri livelli sono in lavorazione. Non c\'è ancora una data: quando ci saranno, li trovi qui.',
+    libera: 'Gioca in partita libera',
+  },
+
   quadri: {
     titolo: 'Livelli',
     avanzamento: '{fatti} di {totale}',
@@ -285,7 +304,12 @@ export default {
     persoMosse: 'Hai finito le mosse.',
     persoBloccato: 'Nessun pezzo entra più sulla griglia.',
     nuovoRecord: 'Nuovo record: {mosse} mosse',
-    finito: 'Hai superato tutti i livelli.',
+    // Ultimo livello raggiunto, ma con dei buchi indietro: al centesimo si arriva anche
+    // per insistenza, e dire "li hai superati tutti" a chi ne ha lasciati cinque e' la
+    // bugia piu' facile da dire e la piu' facile da scoprire.
+    finitoConBuchi: 'Sei in fondo al percorso, ma qualche livello è ancora da superare: li trovi in elenco senza la spunta.',
+    attoChiuso: '{nome}: completo',
+    attoFatti: 'Tutti i livelli dal {da} al {a}, superati.',
     ricomincia: 'Ricomincia dal livello 1',
     ricominciaAvviso: 'Perderai i {n} livelli che hai superato e ripartirai dal primo. Vuoi continuare?',
     ricominciaSicuro: 'Sei sicuro? Questa cosa non si può annullare.',

@@ -64,6 +64,9 @@ function misuraGriglia(cellRefs) {
 export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true }) {
   const [preso, setPreso] = useState(null);        // trascinamento in corso
   const [selezionato, setSelezionato] = useState(null); // modalita' a tocchi
+  // Se la scelta del pezzo e' arrivata dalla tastiera: decide se il cursore sulla
+  // griglia deve comparire subito o solo quando lo si muove davvero.
+  const [daTastiera, setDaTastiera] = useState(false);
   const geometria = useRef(null);
   const presoRef = useRef(null);
 
@@ -164,22 +167,38 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
   })();
 
   /**
-   * Modalita' alternativa a due tocchi: serve a chi non riesce a trascinare
-   * (difficolta' motorie, schermi molto piccoli, mouse senza drag comodo).
+   * Sceglie un pezzo con un tocco (o con Invio sul pulsante del vassoio).
    *
-   * Il pezzo viene centrato sulla cella toccata e poi RIPORTATO DENTRO la griglia.
-   * Senza questo rientro, toccare una cella sul bordo con un pezzo alto tre non
-   * faceva assolutamente nulla, e un gesto che non produce effetto e' peggio di
-   * un gesto che produce un effetto leggermente spostato.
+   * E' il primo passo della modalita' alternativa a due tocchi, che serve a chi non
+   * riesce a trascinare: difficolta' motorie, schermi molto piccoli, mouse senza un
+   * drag comodo. Il secondo passo e' `posizionaSuCella`.
+   *
+   * SI RICORDA DA DOVE ARRIVA LA SCELTA, e non e' un dettaglio implementativo: il
+   * cursore sulla griglia e' uno strumento della tastiera -- esiste perche' le frecce
+   * lo muovano -- e comparire anche per chi gioca col dito significa accendere al
+   * centro della griglia una destinazione che quel giocatore non ha scelto, e che non
+   * e' nemmeno quella dove il pezzo andra': toccando una casella il pezzo va li'.
+   *
+   * `detail === 0` distingue le due strade in modo standard: un click prodotto da
+   * Invio o Spazio su un pulsante non ha un numero di clic, un tocco si'.
    */
   const selezionaPezzo = useCallback(
-    (handIndex) => {
+    (handIndex, evento) => {
       if (!attivo || !mano[handIndex]) return;
+      setDaTastiera(evento ? evento.detail === 0 : false);
       setSelezionato((prec) => (prec === handIndex ? null : handIndex));
     },
     [attivo, mano],
   );
 
+  /**
+   * Appoggia il pezzo scelto sulla cella toccata: il secondo passo dei due tocchi.
+   *
+   * Il pezzo viene centrato sulla cella e poi RIPORTATO DENTRO la griglia. Senza questo
+   * rientro, toccare una cella sul bordo con un pezzo alto tre non faceva assolutamente
+   * nulla, e un gesto che non produce effetto e' peggio di un gesto che produce un
+   * effetto leggermente spostato.
+   */
   const posizionaSuCella = useCallback(
     (row, col) => {
       if (selezionato === null) return;
@@ -198,6 +217,7 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
     selezionato,
     iniziaTrascinamento,
     selezionaPezzo,
+    selezionatoDaTastiera: daTastiera,
     posizionaSuCella,
     annulla,
   };

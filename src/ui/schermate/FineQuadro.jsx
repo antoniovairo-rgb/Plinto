@@ -19,7 +19,8 @@ import { TOTALE_QUADRI } from '../../config/quadri.js';
  * esserci un vuoto: deve esserci un motivo per premere ancora.
  */
 export function SchermoFineQuadro({
-  quadro, esito, ultimo, superatiTotali, animazioni = true, onRiprova, onProssimo, onElenco, t,
+  quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
+  animazioni = true, onRiprova, onProssimo, onElenco, t,
 }) {
   const vinto = esito.completato;
   const motivo = esito.motivo === 'mosse' ? t('quadri.persoMosse') : t('quadri.persoBloccato');
@@ -82,7 +83,32 @@ export function SchermoFineQuadro({
           />
         ) : null}
 
-        {vinto && ultimo ? <p className="pl-fine__extra">{t('quadri.finito')}</p> : null}
+        {/* La piccola festa di meta' strada: un atto chiuso.
+
+            NON E' LA FESTA FINALE IN MINIATURA, ed e' voluto: chiudere "Il ritmo" e'
+            un traguardo, ma se somigliasse alla schermata dei cento livelli, quella
+            finale arriverebbe come la settima volta che succede la stessa cosa. Qui
+            c'e' una fascia, dentro la pagina; li' c'e' una schermata tutta sua.
+
+            Compare solo quando l'atto si e' chiuso ADESSO (vedi `appenaChiuso` in
+            persistence/progressi.js): rigiocare un livello dentro un atto gia' finito
+            non e' un traguardo, e annunciarlo lo sarebbe soltanto la prima volta. */}
+        {vinto && atto?.appenaChiuso ? (
+          <div className={`pl-atto-chiuso ${animazioni ? 'pl-atto-chiuso--entra' : ''}`}>
+            <p className="pl-atto-chiuso__titolo">
+              {t('quadri.attoChiuso').replace('{nome}', atto.nome)}
+            </p>
+            <p className="pl-atto-chiuso__riga">
+              {t('quadri.attoFatti').replace('{da}', atto.da).replace('{a}', atto.a)}
+            </p>
+          </div>
+        ) : null}
+
+        {/* In fondo al percorso, ma solo se ci sono buchi indietro: chi li ha superati
+            tutti non vede questa schermata, vede la festa finale. */}
+        {vinto && ultimo && !percorsoCompleto ? (
+          <p className="pl-fine__extra">{t('quadri.finitoConBuchi')}</p>
+        ) : null}
 
         {/* La condivisione sta in FONDO all'area che scorre, sotto l'avanzamento, e solo
             dopo una vittoria. Due ragioni, in quest'ordine.
