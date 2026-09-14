@@ -34,21 +34,13 @@ export function SchermoFineQuadro({
 
         {/* Plinto dice l'esito prima delle parole: si legge in mezzo secondo. */}
         <div className={`pl-fine__plinto ${vinto && animazioni ? 'pl-festa' : ''}`}>
-          <Plinto espressione={vinto ? 'contento' : 'deluso'} dimensione={92} className="pl-plinto--vivo" />
+          <Plinto espressione={vinto ? 'contento' : 'incoraggia'} dimensione={92} className="pl-plinto--vivo" />
         </div>
 
         <p className={`pl-quadro-esito ${vinto ? 'pl-quadro-esito--vinto' : ''}`}>
           {vinto ? t('quadri.vinto') : t('quadri.perso')}
         </p>
         <p className="pl-fine__motivo">{vinto ? descriviObiettivi(quadro, t) : motivo}</p>
-
-        {/* La via d'uscita si annuncia QUI, nel momento in cui serve, e non in un menu:
-            chi ha appena perso l'ottava volta deve sapere che la strada non e' chiusa.
-            E si dice per intero, senza spacciarla per una vittoria: il livello resta da
-            superare, e in elenco resta senza spunta. */}
-        {!vinto && sbloccaIlProssimo ? (
-          <p className="pl-fine__extra">{t('quadri.apertoPerInsistenza')}</p>
-        ) : null}
 
         {vinto ? (
           <div className="pl-fine__punteggio">
@@ -61,17 +53,51 @@ export function SchermoFineQuadro({
             ) : null}
           </div>
         ) : (
-          <div className="pl-fine__dettagli">
-            {esito.progressi.map((p) => (
-              <div className="pl-fine__riga" key={p.tipo}>
-                <span>{descriviObiettivo(p.tipo, p.quanti, t)}</span>
-                <strong className={p.completo ? 'pl-quadro-esito--vinto' : ''}>
-                  {p.fatto} / {p.quanti}
-                </strong>
-              </div>
-            ))}
+          /* Quanto manca, riga per riga, con una barra: "3 su 8" letto di fretta e' un
+             numero, una barra piena a un terzo e' una distanza. E' il dato che
+             incoraggia davvero, piu' di qualunque frase: dice che una parte e' fatta.
+
+             La cifra completata ha una classe SUA. Prima usava `pl-quadro-esito--vinto`,
+             la stessa con cui `tests/e2e/tutti-i-livelli.mjs` riconosce la vittoria:
+             una sconfitta con un obiettivo parziale chiuso sarebbe stata contata come
+             livello vinto. Un selettore condiviso fra un titolo e un numero e' esattamente
+             il tipo di bugia che nessuno vede rileggendo. */
+          <div className="pl-fine__dettagli pl-fine__dettagli--obiettivi">
+            {esito.progressi.map((p) => {
+              const quota = p.quanti > 0 ? Math.min(1, p.fatto / p.quanti) : 0;
+              return (
+                <div className="pl-fine__riga" key={p.tipo}>
+                  <div className="pl-fine__riga-testo">
+                    <span>{descriviObiettivo(p.tipo, p.quanti, t)}</span>
+                    <strong className={p.completo ? 'pl-fine__riga--fatto' : ''}>
+                      {p.fatto} / {p.quanti}
+                    </strong>
+                  </div>
+                  <div className="pl-fine__barra" aria-hidden="true">
+                    <div
+                      className={`pl-fine__barra-pieno${p.completo ? ' pl-fine__barra-pieno--fatto' : ''}`}
+                      style={{ width: `${Math.round(quota * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+
+        {/* La via d'uscita si annuncia QUI, nel momento in cui serve, e non in un menu:
+            chi ha appena perso l'ottava volta deve sapere che la strada non e' chiusa.
+            E si dice per intero, senza spacciarla per una vittoria: il livello resta da
+            superare, e in elenco resta senza spunta.
+
+            Sta DOPO l'obiettivo e dentro un riquadro: prima era una riga verde nuda fra
+            il motivo della sconfitta e i numeri, e si leggeva come un avviso di sistema.
+            E' invece la notizia buona della schermata, e merita un posto suo. */}
+        {!vinto && sbloccaIlProssimo ? (
+          <div className="pl-fine__uscita">
+            <p>{t('quadri.apertoPerInsistenza')}</p>
+          </div>
+        ) : null}
 
         {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti". */}
         {vinto && !ultimo ? (

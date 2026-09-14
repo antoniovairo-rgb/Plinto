@@ -7,6 +7,39 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.10.4] — 14 settembre 2026
+
+### Cambiato
+
+**La schermata «Livello non superato» incoraggia invece di rimproverare.** Segnalazione
+dal test sul telefono, al livello 65 («Arriva a Catena 8», fermi a 3 su 8): il titolo era
+rosso, Plinto aveva le sopracciglia a V e la bocca all'ingiù, e l'avviso «il livello
+successivo si è aperto lo stesso» stava schiacciato fra il motivo della sconfitta e i
+numeri, come un messaggio di sistema. Tre cose cambiate, ognuna con il suo perché:
+
+- **Plinto ha una nuova espressione, `incoraggia`**: sopracciglia distese ad arco e un
+  sorriso aperto ma non riempito, perché il sorriso pieno resta quello della vittoria.
+  `deluso` non viene più usato da nessuna schermata: un personaggio arrabbiato *con* chi ha
+  appena perso rispondeva «sì» alla domanda che il progetto si fa da sempre, «quando perdi,
+  ti sembra colpa tua?».
+- **Il titolo non è più rosso.** Usa il colore del testo; il verde della vittoria resta.
+  Non superare un livello è un'informazione, non un errore.
+- **Ogni obiettivo ha una barra di avanzamento** sotto il «3 / 8»: letto di fretta un numero
+  è un numero, una barra piena a un terzo è una distanza, e dice che una parte è fatta. La
+  cifra di un obiettivo completato è verde con una classe sua, `pl-fine__riga--fatto`.
+- **La via d'uscita sta dopo l'obiettivo, in un riquadro col bordo verde**, allineata a
+  sinistra: è la notizia buona della schermata e merita un posto suo.
+
+### Corretto
+
+**Un controllo che avrebbe potuto contare una sconfitta come vittoria.** La cifra di un
+obiettivo completato portava la classe `pl-quadro-esito--vinto`, la stessa con cui
+`tests/e2e/tutti-i-livelli.mjs` riconosce il titolo del livello superato. Oggi ogni
+livello ha un solo obiettivo, e completarlo vuol dire vincere: il caso «sconfitta con un
+obiettivo chiuso» non esiste ancora. Sarebbe esistito con il primo livello a due
+obiettivi, e il controllo lo avrebbe contato vinto senza che nessuno se ne accorgesse.
+Adesso la cifra ha una classe sua.
+
 ## [1.10.3] — 14 settembre 2026
 
 ### Rimosso
