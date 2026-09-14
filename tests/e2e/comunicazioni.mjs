@@ -160,6 +160,13 @@ for (const lingua of ['it', 'en']) {
   controlla('partita libera', await page.locator('.pl-screen--gioco').innerText(), lingua);
 
   await page.locator('.pl-hud__menu').first().click();
+  // IL MENU DI PAUSA SI LEGGE PRIMA DI USARLO. Veniva aperto e subito chiuso, quindi il
+  // suo testo non passava da nessun controllo: una chiave di traduzione sbagliata ci
+  // sarebbe comparsa dentro per intero, e nessuno se ne sarebbe accorto. E' successo di
+  // recente che proprio una di quelle voci andasse cambiata (un tester: "il «Chiudi» e'
+  // poco parlante"), ed e' stato il momento giusto per accorgersi del buco.
+  await page.waitForSelector('.pl-menu');
+  controlla('menu di pausa', await page.locator('.pl-menu').innerText(), lingua);
   await page.locator('.pl-menu .pl-btn').last().click();   // torna alla home
   await page.waitForSelector('.pl-home');
   controlla('home', await page.locator('.pl-home').innerText(), lingua);

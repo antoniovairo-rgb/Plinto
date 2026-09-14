@@ -418,7 +418,7 @@ export default {
     apple: 'Tap the Share button at the bottom, then "Add to Home Screen". The game opens like an app, full screen and even offline.',
   },
   comune: {
-    chiudi: 'Close',
+    tornaAllaPartita: 'Back to the game',
     indietro: 'Back',
     si: 'Yes',
     no: 'No',

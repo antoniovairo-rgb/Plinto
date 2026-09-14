@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.10.2] — 14 settembre 2026
+
+### Cambiato
+
+**Il primo pulsante del menu di pausa adesso dice dove porta: «Torna alla partita».**
+Segnalato da un tester: «il *Chiudi* è poco parlante». Aveva ragione, e il motivo è
+preciso: in un menu sospeso sopra la partita «Chiudi» non dice **che cosa** chiude, il
+menu o il gioco. Sotto c'è «Torna ai livelli», che invece una destinazione la dichiara, e
+il contrasto rendeva la prima voce ancora più muta. Cambiato in tutti e due i menu di
+pausa — quello dei livelli e quello della partita libera — perché l'ambiguità era la
+stessa.
+
+Scartato «Continua», che in un livello si può leggere come «vai al livello successivo», e
+«Torna al livello», troppo simile al «Torna ai livelli» che gli sta due voci sotto.
+
+### Verificato
+
+**Il menu di pausa adesso viene letto prima di essere usato.** `npm run comunicazioni`
+lo apriva e lo chiudeva subito per tornare alla home, quindi il suo testo non passava da
+nessun controllo: una chiave di traduzione sbagliata ci sarebbe comparsa dentro per
+intero, in tutte e due le lingue, senza che niente fallisse. Adesso il contenuto del menu
+passa dalle stesse trappole di ogni altra schermata. Verificato che il controllo sappia
+fallire: storpiando di proposito la chiave, segnala «chiave di traduzione non risolta» sia
+in italiano sia in inglese.
+
 ## [1.10.1] — 14 settembre 2026
 
 ### Corretto

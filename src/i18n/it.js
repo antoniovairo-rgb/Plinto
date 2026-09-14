@@ -454,7 +454,11 @@ export default {
     apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
   },
   comune: {
-    chiudi: 'Chiudi',
+    /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.
+       In un menu sospeso sopra la partita l'ambiguita' pesa, perche' la voce sotto
+       («Torna ai livelli») una destinazione la dichiara, e il contrasto rende la prima
+       ancora piu' muta. Adesso dice dove porta. */
+    tornaAllaPartita: 'Torna alla partita',
     indietro: 'Indietro',
     si: 'Sì',
     no: 'No',

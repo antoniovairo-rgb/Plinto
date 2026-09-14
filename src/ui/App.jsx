@@ -454,7 +454,7 @@ export function App() {
           <div className="pl-velo" onClick={() => setMenuAperto(false)}>
             <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
               <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
-                {t('comune.chiudi')}
+                {t('comune.tornaAllaPartita')}
               </button>
               <button type="button" className="pl-btn pl-btn--largo" onClick={() => { setMenuAperto(false); quadri.riprova(); }}>
                 {t('quadri.riprova')}
@@ -574,7 +574,7 @@ export function App() {
         <div className="pl-velo" onClick={() => setMenuAperto(false)}>
           <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
             <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
-              {t('comune.chiudi')}
+              {t('comune.tornaAllaPartita')}
             </button>
             <button type="button" className="pl-btn pl-btn--largo" onClick={iniziaNuova}>
               {t('home.nuovaPartita')}
