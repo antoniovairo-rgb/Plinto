@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 5,
+            "command": "c=$(jq -r '.tool_input.command // \"\"'); if printf '%s\\n' \"$c\" | grep -Eq '(^|[^[:alnum:]_])p(kill|grep)[[:space:]][^|;&]*-[[:alnum:]]*f([[:space:]]|$)'; then jq -n '{hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"BLOCCATO da .claude/settings.json: pkill -f e pgrep -f cercano la stringa nella riga di comando di TUTTI i processi, compreso quello che li lancia. In questo progetto hanno ucciso la shell due volte e lasciato cicli di attesa appesi per ore. Trova i processi da /proc/<pid>/exe (es. readlink /proc/PID/exe che punta a node) e termina per PID.\"}}'; fi"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 300,
+            "statusMessage": "PLINTO: controllo dipendenze e Chromium per le prove",
+            "command": "d=$(jq -r '.cwd // empty' 2>/dev/null); cd \"${CLAUDE_PROJECT_DIR:-${d:-.}}\" || exit 0; [ -f package.json ] && grep -q '\"name\": \"plinto\"' package.json || exit 0; [ -d node_modules ] || npm ci --no-audit --no-fund; c=0; for b in /opt/pw-browsers/chromium-*/chrome-linux/chrome \"$HOME\"/.cache/ms-playwright/chromium-*/chrome-linux/chrome; do [ -x \"$b\" ] && c=1; done; [ \"$c\" = 1 ] || npx playwright install chromium; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
