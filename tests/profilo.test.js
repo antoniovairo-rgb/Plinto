@@ -17,7 +17,7 @@ vi.stubGlobal('window', {
 });
 
 const {
-  profiloVuoto, aggrega, quoteCatena, caricaProfilo, registraPartita, azzeraProfilo,
+  profiloVuoto, aggrega, quoteCatena, caricaProfilo, registraPartita,
   esportaProfilo, ANDAMENTO_MAX,
 } = await import('../src/persistence/profilo.js');
 
@@ -152,23 +152,6 @@ describe('il profilo salvato', () => {
     expect(JSON.parse(memoria.get('plinto:profilo')).versione).toBe(1);
   });
 
-  it('azzerare riporta a zero, e il profilo riparte senza errori', () => {
-    registraPartita(partitaVera(31));
-    azzeraProfilo();
-    expect(caricaProfilo().partite).toBe(0);
-    expect(caricaProfilo().mappaAppoggi.every((n) => n === 0)).toBe(true);
-    expect(registraPartita(partitaVera(32)).partite, 'riparte da uno').toBe(1);
-  });
-
-  it('azzerare il profilo NON tocca record, statistiche, livelli e sfide', () => {
-    memoria.set('plinto:records', JSON.stringify({ best: 4321, versione: 1 }));
-    memoria.set('plinto:sfide', JSON.stringify({ versione: 2, giorni: { '2026-09-06': { best: 10 } } }));
-    registraPartita(partitaVera(41));
-    azzeraProfilo();
-    expect(JSON.parse(memoria.get('plinto:records')).best).toBe(4321);
-    expect(JSON.parse(memoria.get('plinto:sfide')).giorni['2026-09-06'].best).toBe(10);
-  });
-
   it('esportare produce JSON valido e completo', () => {
     registraPartita(partitaVera(51));
     const testo = esportaProfilo();
@@ -182,7 +165,6 @@ describe('il profilo salvato', () => {
     expect(() => caricaProfilo()).not.toThrow();
     expect(caricaProfilo().partite).toBe(0);
     expect(() => registraPartita(partitaVera(61))).not.toThrow();
-    expect(() => azzeraProfilo()).not.toThrow();
     expect(() => esportaProfilo()).not.toThrow();
   });
 });

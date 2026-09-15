@@ -1951,6 +1951,79 @@ button {
 /* ------------------------------------------------ ricominciare da capo --- */
 /* In fondo alla mappa, staccato dai livelli e in tono minore: e' un'azione che si
    cerca, non una che deve farsi notare. */
+/* LA DECISIONE CHE CANCELLA ORE DI GIOCO STA IN UN RIQUADRO SUO.
+   Prima erano due righe di testo rosso appoggiate in fondo alla mappa, sotto cento
+   livelli: senza un contorno si leggevano come un errore comparso da solo, non come una
+   domanda a cui rispondere. Il fondo e' `--pl-surface` e non `--pl-surface-2` perche' i
+   pulsanti dentro usano gia' quest'ultimo: con lo stesso colore sparirebbero nel riquadro.
+   Il bordo cresce fra la prima e la seconda conferma: la seconda non e' la ripetizione
+   della prima, e' l'ultimo passo. */
+.pl-azzera {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface);
+  border: 1px solid color-mix(in srgb, var(--pl-danger) 35%, transparent);
+  text-align: left;
+}
+.pl-azzera--ultimo {
+  border-color: var(--pl-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-danger) 12%, transparent);
+}
+.pl-azzera__passo {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pl-text-faint);
+}
+.pl-azzera__titolo {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--pl-text);
+}
+.pl-azzera__etichetta {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pl-text-faint);
+}
+/* L'elenco di quello che sparisce: la voce a sinistra, quanto ce n'e' a destra. Un
+   numero accanto al nome dice in un colpo quanto costa, dove "cancella i tuoi dati"
+   non dice niente. */
+.pl-azzera__elenco { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.pl-azzera__voce {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: var(--pl-surface-2);
+  font-size: 14px;
+  color: var(--pl-text-dim);
+}
+.pl-azzera__voce strong { color: var(--pl-danger); font-variant-numeric: tabular-nums; }
+.pl-azzera__testo { margin: 0; font-size: 14px; line-height: 1.45; color: var(--pl-text); }
+.pl-azzera__testo--forte { font-weight: 700; color: var(--pl-danger); }
+.pl-azzera__resta { margin: 0; font-size: 13px; line-height: 1.4; color: var(--pl-text-faint); }
+/* I due pulsanti si dividono la riga. Il respiro laterale si stringe rispetto a un
+   pulsante normale: con quello di partenza "Si, ricomincia" andava a capo su due righe,
+   e un'etichetta spezzata su un pulsante rosso si legge peggio proprio dove serve
+   leggerla bene. */
+.pl-azzera .pl-segmenti .pl-btn { flex: 1; padding: 0 12px; }
+.pl-velo .pl-azzera { width: 100%; max-width: 360px; box-shadow: var(--pl-shadow-lift); }
+
+/* Il salvataggio: due pulsanti per riga, con il respiro laterale stretto. Con quello di
+   un pulsante normale "Scarica il file" andava a capo, e un'etichetta spezzata in due su
+   un bersaglio da toccare si legge come un errore di impaginazione. */
+.pl-salva .pl-segmenti .pl-btn { flex: 1; padding: 0 12px; }
+
 .pl-ricomincia {
   margin-top: 12px;
   padding-top: 20px;

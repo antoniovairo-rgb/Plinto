@@ -76,7 +76,7 @@ await preparaEApri([[1, 9], [2, 10], [3, 11], [4, 12], [5, 13], [6, 14], [7, 15]
 // finisce in un file che il browser di prova gestisce a parte. Il pulsante che scarica ha
 // il suo controllo piu' sotto.
 await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-await page.getByRole('button', { name: /^Copia negli appunti$/ }).click();
+await page.getByRole('button', { name: /^Copia il testo$/ }).click();
 await page.waitForTimeout(200);
 const esportato = await page.evaluate(() => navigator.clipboard.readText());
 controlla('la copia negli appunti non ha prodotto niente', esportato.length > 100);
@@ -108,7 +108,7 @@ await page.screenshot({ path: `${OUT}/3-tornati.png` });
 // ---------- 2. Un file vecchio NON cancella progressi piu recenti ----------
 console.log('2. importo un file con tre livelli su un telefono che ne ha dieci...');
 await preparaEApri([[1, 20], [2, 21], [3, 22]]);
-await page.getByRole('button', { name: /^Copia negli appunti$/ }).click();
+await page.getByRole('button', { name: /^Copia il testo$/ }).click();
 await page.waitForTimeout(200);
 const fileCorto = await page.evaluate(() => navigator.clipboard.readText());
 
@@ -135,8 +135,48 @@ controlla('un salvataggio manomesso non viene segnalato', allarme > 0);
 controlla('un salvataggio manomesso e stato importato lo stesso', (await quantiSuperati()) === 1);
 await page.screenshot({ path: `${OUT}/4-rifiutato.png` });
 
-// ---------- 4. Il pulsante che scarica produce davvero un file ----------
-console.log('4. il pulsante che scarica...');
+// ---------- 4. Azzerare tutto chiede DUE conferme, e dice che cosa cancella ----------
+// E' l'azione piu' distruttiva del gioco: toglie livelli, record, statistiche, profilo,
+// archivio delle sfide e partita in corso. Stava dietro un tocco solo, e l'avviso
+// ometteva proprio i livelli.
+console.log('4. azzera i miei dati: due conferme e l elenco di cosa sparisce...');
+await preparaEApri([[1, 9], [2, 10], [3, 11]]);
+await page.getByRole('button', { name: /^Azzera i miei dati$/ }).click();
+await page.waitForTimeout(200);
+
+controlla('la conferma non compare come finestra sospesa', await page.locator('.pl-velo .pl-azzera').count() === 1);
+const elenco = await page.locator('.pl-azzera__voce').allInnerTexts();
+controlla(`l elenco non dice quanti livelli si perdono: ${elenco.join(' / ')}`,
+  elenco.some((r) => /Livelli superati/.test(r) && /\b3\b/.test(r)));
+await page.screenshot({ path: `${OUT}/5-azzera-1.png` });
+
+// Ci si tira indietro al primo passo: non deve succedere niente.
+await page.getByRole('button', { name: /^No$/ }).click();
+await page.waitForTimeout(150);
+controlla('annullando al primo passo i livelli sono spariti lo stesso', (await quantiSuperati()) === 3);
+
+// Secondo passo, e ci si tira indietro anche li'.
+await page.getByRole('button', { name: /^Azzera i miei dati$/ }).click();
+await page.getByRole('button', { name: /^Sì$/ }).click();
+await page.waitForTimeout(150);
+const secondo = await page.getByRole('button', { name: /^Sì, azzera tutto$/ }).count();
+controlla('manca la SECONDA conferma: basta un tocco per cancellare tutto', secondo === 1);
+await page.screenshot({ path: `${OUT}/6-azzera-2.png` });
+if (secondo === 1) {
+  await page.getByRole('button', { name: /^No$/ }).click();
+  await page.waitForTimeout(150);
+  controlla('annullando alla seconda conferma i livelli sono spariti lo stesso', (await quantiSuperati()) === 3);
+
+  // E adesso fino in fondo.
+  await page.getByRole('button', { name: /^Azzera i miei dati$/ }).click();
+  await page.getByRole('button', { name: /^Sì$/ }).click();
+  await page.getByRole('button', { name: /^Sì, azzera tutto$/ }).click();
+  await page.waitForTimeout(300);
+  controlla(`dopo l azzeramento restano ${await quantiSuperati()} livelli`, (await quantiSuperati()) === 0);
+}
+
+// ---------- 5. Il pulsante che scarica produce davvero un file ----------
+console.log('5. il pulsante che scarica...');
 await preparaEApri([[1, 9]]);
 const scaricato = await Promise.race([
   page.waitForEvent('download', { timeout: 8000 }).catch(() => null),

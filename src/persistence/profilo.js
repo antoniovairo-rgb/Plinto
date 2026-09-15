@@ -147,11 +147,6 @@ export function registraPartita(riepilogo) {
   return nuovo;
 }
 
-/** Cancella il profilo e basta: record, statistiche, livelli e sfide restano. */
-export function azzeraProfilo() {
-  return scriviDocumento(KEYS.PROFILO, VERSIONE, profiloVuoto());
-}
-
 /**
  * Il profilo come testo JSON, per il pulsante "esporta".
  *

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { QUADRI, ATTI, OPERE, TOTALE_QUADRI } from '../../config/quadri.js';
+import { ConfermaDoppia, VoceCancellata } from '../ConfermaDoppia.jsx';
 import { caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 import { CondividiPercorso } from '../Condividi.jsx';
@@ -134,45 +135,58 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
       {/* Ricominciare da capo. In fondo alla mappa, dopo tutti i livelli: chi la cerca
           la trova, chi non la cerca non ci inciampa. */}
       <div className="pl-ricomincia">
-        {superati === 0 ? null : passoConferma === 0 ? (
+        {superati === 0 ? null : (
           <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo"
                   onClick={() => setPassoConferma(1)}>
             {t('quadri.ricomincia')}
           </button>
-        ) : passoConferma === 1 ? (
-          <>
-            <p className="pl-nota pl-nota--allarme">
-              {t('quadri.ricominciaAvviso').replace('{n}', numero(superati))}
-            </p>
-            <div className="pl-segmenti">
-              <button type="button" className="pl-btn pl-btn--fantasma"
-                      onClick={() => setPassoConferma(0)}>
-                {t('comune.no')}
-              </button>
-              <button type="button" className="pl-btn" onClick={() => setPassoConferma(2)}>
-                {t('comune.si')}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Seconda conferma: dice cosa NON si perde, perche' il timore ragionevole
-                a questo punto e' di star cancellando anche record e statistiche. */}
-            <p className="pl-nota pl-nota--allarme">{t('quadri.ricominciaSicuro')}</p>
-            <p className="pl-nota">{t('quadri.ricominciaResta')}</p>
-            <div className="pl-segmenti">
-              <button type="button" className="pl-btn pl-btn--fantasma"
-                      onClick={() => setPassoConferma(0)}>
-                {t('comune.no')}
-              </button>
-              <button type="button" className="pl-btn pl-btn--pericolo"
-                      onClick={() => { azzeraProgressi(); setPassoConferma(0); onAzzerato?.(); }}>
-                {t('quadri.ricominciaConferma')}
-              </button>
-            </div>
-          </>
         )}
       </div>
+
+      {/* LA DOMANDA STA IN UNA FINESTRA SOSPESA, non in fondo alla mappa.
+          Sotto cento livelli, due righe di testo rosso in coda alla pagina si leggevano
+          come un avviso comparso da solo, non come una domanda a cui rispondere -- e la
+          domanda cancella ore di gioco. Una finestra prende lo schermo: non si puo'
+          scorrere oltre e non si confonde con il resto.
+
+          E' lo stesso componente che usa "Azzera i miei dati", perche' e' la stessa
+          domanda: tenerne due copie vorrebbe dire che un giorno una avra' due conferme e
+          l'altra una sola, e nessuno se ne accorgerebbe finche' qualcuno non perde
+          qualcosa. Le etichette dei pulsanti restano identiche, perche' il controllo che
+          verifica le due conferme cerca esattamente quelle parole. */}
+      {passoConferma > 0 ? (
+        <ConfermaDoppia
+          passo={passoConferma}
+          titolo={t('quadri.ricomincia')}
+          etichettaFinale={t('quadri.ricominciaConferma')}
+          onAnnulla={() => setPassoConferma(0)}
+          onAvanti={() => setPassoConferma(2)}
+          onConferma={() => { azzeraProgressi(); setPassoConferma(0); onAzzerato?.(); }}
+          t={t}
+        >
+          {passoConferma === 1 ? (
+            <>
+              <p className="pl-azzera__etichetta">{t('impostazioni.azzeraElenco')}</p>
+              <ul className="pl-azzera__elenco">
+                <VoceCancellata
+                  etichetta={t('impostazioni.voceLivelli')}
+                  valore={numero(superati)}
+                />
+              </ul>
+              <p className="pl-azzera__testo">{t('quadri.ricominciaAvviso')}</p>
+            </>
+          ) : (
+            <>
+              <p className="pl-azzera__testo pl-azzera__testo--forte">
+                {t('quadri.ricominciaSicuro')}
+              </p>
+              {/* Dice cosa NON si perde: il timore ragionevole a questo punto e' di star
+                  cancellando anche record e statistiche. */}
+              <p className="pl-azzera__resta">{t('quadri.ricominciaResta')}</p>
+            </>
+          )}
+        </ConfermaDoppia>
+      ) : null}
     </Pagina>
   );
 }

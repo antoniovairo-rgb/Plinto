@@ -7,6 +7,71 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.13.2] — 15 settembre 2026
+
+### Sicurezza dei dati
+
+**«Azzera i miei dati» diceva meno del vero.** L'avviso recitava «Cancella record,
+statistiche e partita in corso»: ometteva i livelli superati, il profilo di gioco,
+l'archivio delle sfide e le impostazioni. La funzione dietro quel pulsante cancella ogni
+cosa che il gioco abbia mai scritto. Chi aveva sessantanove livelli leggeva quella frase e
+poteva concludere che fossero al sicuro, e toccare. Non c'è modo di tornare indietro.
+
+Ed era un tocco solo, in fondo a una schermata che si scorre col pollice.
+
+Adesso la conferma è una **finestra sospesa con due passi**, e il primo elenca che cosa
+sparisce, voce per voce, con quanto ce n'è: livelli superati, partite giocate, punteggio
+record, giorni di Sfida. Le voci a zero non compaiono, perché elencare cose che non
+esistono fa sembrare grave una cancellazione che non toglie niente. Sotto, la riga che
+copre il resto: profilo di gioco, impostazioni e partita in corso. Il secondo passo dice
+l'unica via di ritorno che esiste davvero, cioè il salvataggio esportato, che sta due
+pulsanti più su.
+
+### Cambiato
+
+**Le conferme che cancellano sono finestre, e sono una sola cosa.** Ricominciare dal
+livello 1 e azzerare i dati usano lo stesso componente: stessa forma, stessi due passi,
+stesse regole. Tenerli in due pezzi di codice separati vorrebbe dire che un giorno uno
+avrà due conferme e l'altro una sola, e nessuno se ne accorgerà finché qualcuno non perde
+qualcosa. Il componente garantisce che i passi siano sempre due e sempre dichiarati
+(«Conferma 1 di 2»), che si esca con Escape o toccando fuori, e che **il «No» sia il
+pulsante pieno e il «Sì» quello trasparente**: prima era il contrario, cioè la strada che
+cancella era anche la più facile da toccare.
+
+Prima erano righe di testo rosso in fondo a schermate lunghe, e si leggevano come un
+avviso comparso da solo invece che come una domanda. Una finestra prende lo schermo: non
+si può scorrere oltre.
+
+**La sezione del salvataggio si legge.** I due modi di portare via i progressi erano testo
+trasparente senza contorno, quindi sembravano collegamenti, e «Scarica il file» andava a
+capo in mezzo alla riga. Adesso sono pulsanti pieni e la coppia dice la differenza in una
+parola: «Scarica il file» contro «Copia il testo».
+
+### Rimosso
+
+**«Cancella il profilo» non c'è più.** Nata da una domanda di chi ci gioca: «che vuol dire
+cancella il profilo?». La domanda era la risposta: in un gioco senza account, «profilo» fa
+pensare a un account, mentre lì dentro ci sono solo statistiche su come giochi.
+
+Quella voce non reggeva. L'informativa elenca due modi di cancellare i propri dati, e il
+profilo non è mai stato uno di quelli: il primo di quei due lo porta via comunque. Restava
+un terzo comando che cancella, in un gioco che ne aveva già due, per un caso d'uso stretto
+e su dati che nel gioco non servono a niente. Ogni comando distruttivo in più è un modo in
+più di perdere qualcosa per sbaglio. Resta la metà che serve, cioè portarsi via i propri
+numeri. Tolta anche la funzione `azzeraProfilo`, rimasta senza chiamanti, e le due prove
+che la coprivano.
+
+### Verificato
+
+`tests/e2e/salvataggio.mjs` adesso prova anche l'azzeramento totale, che prima non era
+coperto da nessun controllo: le conferme devono essere due, ci si deve poter tirare
+indietro a ciascuna senza che niente cambi, e l'elenco deve dire quanti livelli si
+perdono. Verificato capace di fallire: collegando il primo «Sì» direttamente alla
+cancellazione, segnala che manca la seconda conferma.
+
+Il controllo che verifica le due conferme del «ricomincia dal livello 1» non è stato
+ritoccato: le etichette dei pulsanti sono rimaste identiche apposta, e continua a passare.
+
 ## [1.13.1] — 15 settembre 2026
 
 ### Sicurezza

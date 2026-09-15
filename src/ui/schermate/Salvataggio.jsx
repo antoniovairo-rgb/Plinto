@@ -88,21 +88,21 @@ export function Salvataggio({ t }) {
   }
 
   return (
-    <div className="pl-gruppo">
+    <div className="pl-gruppo pl-salva">
       <span className="pl-hud__etichetta">{t('salvataggio.titolo')}</span>
       <p className="pl-nota">{t('salvataggio.nota')}</p>
 
       <div className="pl-segmenti">
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={scarica}>
+        <button type="button" className="pl-btn" onClick={scarica}>
           {t('salvataggio.scarica')}
         </button>
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={copia}>
+        <button type="button" className="pl-btn" onClick={copia}>
           {t('salvataggio.copia')}
         </button>
       </div>
       {copiato ? <p className="pl-nota">{t('salvataggio.copiato')}</p> : null}
 
-      <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo"
+      <button type="button" className="pl-btn pl-btn--largo"
               onClick={() => fileInput.current?.click()}>
         {t('salvataggio.importa')}
       </button>

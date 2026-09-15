@@ -149,7 +149,21 @@ export default {
     lingua: 'Lingua',
     aiutoVisivo: 'Evidenzia i gruppi che stai per chiudere',
     azzera: 'Azzera i miei dati',
-    azzeraConferma: 'Cancella record, statistiche e partita in corso. Non si può annullare.',
+    // DICEVA MENO DEL VERO. "Cancella record, statistiche e partita in corso" ometteva
+    // proprio la cosa che costa di piu': i livelli superati. Chi ne aveva sessantanove
+    // leggeva quella frase e poteva concludere che fossero al sicuro.
+    // L'elenco dice COSA sparisce e QUANTO ce n'e': "livelli superati 69" si capisce
+    // in un colpo, "cancella i tuoi dati" no. Le voci a zero non compaiono: elencare
+    // cose che non esistono fa sembrare grave una cancellazione che non toglie niente.
+    azzeraElenco: 'Che cosa sparisce',
+    voceLivelli: 'Livelli superati',
+    vocePartite: 'Partite giocate',
+    voceRecord: 'Punteggio record',
+    voceSfide: 'Giorni di Sfida',
+    azzeraConferma: 'Spariscono anche il profilo di gioco, le impostazioni e la partita in corso.',
+    azzeraSicuro: 'Sei sicuro? Non si può annullare.',
+    azzeraResta: 'Se hai esportato un salvataggio, quel file resta dov\'è: è l\'unico modo di tornare indietro.',
+    azzeraDavvero: 'Sì, azzera tutto',
     azzeraFatto: 'Dati cancellati.',
   },
   info: {
@@ -241,13 +255,9 @@ export default {
     mappaDidascalia: 'Mappa degli appoggi, nove righe per nove colonne',
     riga: 'Riga',
     tuoiDati: 'I tuoi dati',
-    tuoiDatiSpiega: 'Questi numeri stanno solo qui, sul tuo dispositivo. Puoi portarteli via o cancellarli, e nessuna delle due cose richiede di chiedere il permesso a nessuno.',
+    tuoiDatiSpiega: 'Questi numeri stanno solo qui, sul tuo dispositivo. Puoi portarteli via quando vuoi, senza chiedere il permesso a nessuno. Per cancellarli c\'è «Azzera i miei dati» nelle impostazioni.',
     esporta: 'Copia i miei dati',
     esportato: 'Copiati negli appunti, in formato JSON.',
-    cancella: 'Cancella il profilo',
-    cancellaConferma: 'Cancella SOLO il profilo di gioco. Record, statistiche, livelli e sfide restano dove sono. Non si torna indietro.',
-    cancellaDavvero: 'Sì, cancella il profilo',
-    annulla: 'Lascia stare',
   },
   archivio: {
     titolo: 'Archivio delle sfide',
@@ -322,7 +332,7 @@ export default {
     // esiste e' che i progressi stanno in un posto solo, e chi gioca non ha modo di saperlo.
     nota: 'I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser.',
     scarica: 'Scarica il file',
-    copia: 'Copia negli appunti',
+    copia: 'Copia il testo',
     copiato: 'Copiato. Incollalo dove vuoi tenerlo al sicuro.',
     importa: 'Scegli un file da importare',
     incolla: 'Oppure incolla qui un salvataggio',
@@ -384,7 +394,9 @@ export default {
     restanoIndietro: 'Restano {n} livelli indietro, in elenco senza la spunta.',
     restanoIndietroUno: 'Resta 1 livello indietro, in elenco senza la spunta.',
     ricomincia: 'Ricomincia dal livello 1',
-    ricominciaAvviso: 'Perderai i {n} livelli che hai superato e ripartirai dal primo. Vuoi continuare?',
+    // La posta in gioco si dice con il NUMERO in evidenza, non annegato in una frase:
+    // "69" letto di colpo pesa quanto merita, "i 69 livelli che hai superato" scorre via.
+    ricominciaAvviso: 'Ripartirai dal livello 1. Vuoi continuare?',
     ricominciaSicuro: 'Sei sicuro? Questa cosa non si può annullare.',
     ricominciaResta: 'Restano il record della partita libera, le statistiche e la Sfida del giorno: si azzerano solo i livelli.',
     ricominciaConferma: 'Sì, ricomincia',
@@ -535,5 +547,8 @@ export default {
     indietro: 'Indietro',
     si: 'Sì',
     no: 'No',
+    // Usata da TUTTE le conferme in due passi: una sola stringa, cosi' non possono
+    // divergere fra una schermata e l'altra.
+    passoConferma: 'Conferma {n} di 2',
   },
 };

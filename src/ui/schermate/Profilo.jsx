@@ -3,7 +3,7 @@ import { Pagina } from './Pagina.jsx';
 import { numero } from '../../i18n/formato.js';
 import { CHAIN_MAX } from '../../config/rules.js';
 import { IMPRONTA_REGOLE } from '../../core/impronta.js';
-import { caricaProfilo, quoteCatena, azzeraProfilo, esportaProfilo } from '../../persistence/profilo.js';
+import { caricaProfilo, quoteCatena, esportaProfilo } from '../../persistence/profilo.js';
 import riferimento from '../../data/riferimento-catena.json';
 
 /**
@@ -45,8 +45,7 @@ function Dato({ etichetta, valore }) {
 }
 
 export function SchermoProfilo({ onIndietro, t }) {
-  const [profilo, setProfilo] = useState(() => caricaProfilo());
-  const [conferma, setConferma] = useState(false);
+  const [profilo] = useState(() => caricaProfilo());
   const [copiato, setCopiato] = useState(false);
 
   const quote = useMemo(() => quoteCatena(profilo), [profilo]);
@@ -220,33 +219,20 @@ export function SchermoProfilo({ onIndietro, t }) {
         </button>
         {copiato ? <p className="pl-nota">{t('profilo.esportato')}</p> : null}
 
-        {conferma ? (
-          <>
-            <p className="pl-nota pl-nota--allarme">{t('profilo.cancellaConferma')}</p>
-            <button
-              type="button"
-              className="pl-btn pl-btn--largo pl-btn--pericolo"
-              onClick={() => { azzeraProfilo(); setProfilo(caricaProfilo()); setConferma(false); }}
-            >
-              {t('profilo.cancellaDavvero')}
-            </button>
-            <button
-              type="button"
-              className="pl-btn pl-btn--fantasma pl-btn--largo"
-              onClick={() => setConferma(false)}
-            >
-              {t('profilo.annulla')}
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            className="pl-btn pl-btn--fantasma pl-btn--largo"
-            onClick={() => setConferma(true)}
-          >
-            {t('profilo.cancella')}
-          </button>
-        )}
+        {/* QUI C'ERA "Cancella il profilo", ED E' STATO TOLTO.
+            L'informativa elenca due modi di cancellare i propri dati -- "Azzera i miei
+            dati" nelle impostazioni e i dati del sito dal browser -- e il profilo non e'
+            mai stato uno di quelli: il dovere di dare una via d'uscita era gia' assolto,
+            e il primo di quei due porta via anche il profilo.
+
+            Restava un terzo comando che cancella, in un gioco che ne aveva gia' due, per
+            un caso d'uso stretto (rimettere a zero le misure dopo aver prestato il
+            telefono) e su dati che non servono a niente nel gioco: il profilo descrive
+            come giochi, non sblocca e non influenza nulla. Ogni comando distruttivo in
+            piu' e' un modo in piu' di perdere qualcosa per sbaglio, e chi ci ha giocato
+            ne ha incontrati due in dieci minuti senza capire che cosa facessero.
+
+            Resta la meta' che serve davvero: portarsi via i propri numeri. */}
       </section>
     </Pagina>
   );

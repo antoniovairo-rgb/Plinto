@@ -27,7 +27,7 @@
 
 Stato dei comandi, verificato eseguendoli il 14 settembre 2026 (1.10.3):
 
-- `npm test` passa: **502 test in 29 file**, ~20 s (i più lunghi sono `incitamenti.test.js`,
+- `npm test` passa: **500 test in 29 file**, ~20 s (i più lunghi sono `incitamenti.test.js`,
   che simula decine di migliaia di mosse, e `invarianti.test.js`, che gioca 240 partite
   complete);
 - `npm run verifica` passa: **24 controlli**, ~65 minuti di cui 56 per rigiocare i cento
