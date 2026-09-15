@@ -7,6 +7,9 @@ import { useTrascinamento, origineDaCella } from './useTrascinamento.js';
 import { useTastiera } from './useTastiera.js';
 import { Annunci, frasePerMossa } from './Annunci.jsx';
 import { BarraObiettivo } from './BarraObiettivo.jsx';
+import { MagazzinoAttrezzi, PannelloAttrezzi } from './Attrezzi.jsx';
+import { MASSIMO as ATTREZZI_MASSIMO, OGNI_LIVELLI } from '../persistence/attrezzi.js';
+import { idx } from '../core/grid.js';
 import { useEffettiMossa } from '../feel/useEffettiMossa.js';
 import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
@@ -91,8 +94,27 @@ function SegnoAnnulla() {
 export function SchermoGioco({
   partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
   quadro = null, statoQuadro = null, modalita = 'libera',
-  siPuoAnnullare = false, onAnnulla = null, t,
+  siPuoAnnullare = false, onAnnulla = null,
+  // Gli attrezzi arrivano solo dai livelli: negli altri modi questi restano a zero e
+  // la pastiglia non compare.
+  attrezzi = null, suggerimento = null, onGru = null, onGessetto = null, t,
 }) {
+  // 'chiuso' | 'scelta' (pannello aperto) | 'gru' (si aspetta quale pezzo cambiare)
+  const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
+  const conAttrezzi = attrezzi !== null && onGru && onGessetto;
+
+  /* Le caselle che il gesso ha segnato. Si ricavano dal suggerimento e dalla forma del
+     pezzo consigliato: il motore dice "questo pezzo, li'", e qui si traduce in caselle. */
+  const segnate = useMemo(() => {
+    if (!suggerimento) return null;
+    const pezzo = partita.hand[suggerimento.handIndex];
+    if (!pezzo) return null;
+    const celle = new Set();
+    for (const [dr, dc] of pezzo.shape.cells) {
+      celle.add(idx(suggerimento.row + dr, suggerimento.col + dc));
+    }
+    return celle;
+  }, [suggerimento, partita.hand]);
   const cellRefs = useRef([]);
   const plancia = useRef(null);
   const canvas = useRef(null);
@@ -298,6 +320,7 @@ export function SchermoGioco({
               esplosioni={effetti.esplosioni}
               celleEsplose={effetti.celleEsplose}
               cursore={tastiera.cursore}
+              segnate={segnate}
               pezzoInMano={drag.selezionato !== null}
               t={t}
               cellRefs={cellRefs}
@@ -385,8 +408,18 @@ export function SchermoGioco({
               simulatore), quindi la riga passava la partita a rimbalzare fra il pulsante
               e quell'istruzione, una mossa si' e una no. Uno sfarfallio continuo in mezzo
               allo schermo, per dire una cosa che il giocatore sapeva gia'. */}
-          <p className="pl-suggerimento">
-            {drag.selezionato !== null ? (
+          <p className={`pl-suggerimento ${conAttrezzi ? 'pl-suggerimento--conattrezzi' : ''}`}>
+            {modoAttrezzo === 'gru' ? (
+              /* In modo gru la riga smette di dire qualunque altra cosa: c'e' una domanda
+                 aperta, "quale pezzo cambio?", e due messaggi insieme sarebbero due. */
+              <span className="pl-attrezzi__invito">
+                {t('attrezzi.gruScegli')}
+                <button type="button" className="pl-attrezzi__annulla"
+                        onClick={() => setModoAttrezzo('chiuso')}>
+                  {t('attrezzi.lasciaStare')}
+                </button>
+              </span>
+            ) : drag.selezionato !== null ? (
               t('gioca.tocca')
             ) : siPuoAnnullare ? (
               <button type="button" className="pl-annulla" onClick={onAnnulla}>
@@ -396,20 +429,32 @@ export function SchermoGioco({
             ) : partita.stats.moves < MOSSE_CON_ISTRUZIONI ? (
               t('gioca.trascina')
             ) : null}
+            {conAttrezzi && modoAttrezzo !== 'gru' ? (
+              <MagazzinoAttrezzi
+                quanti={attrezzi}
+                massimo={ATTREZZI_MASSIMO}
+                onApri={() => setModoAttrezzo('scelta')}
+                t={t}
+              />
+            ) : null}
           </p>
           <p className="pl-sr">{t('a11y.istruzioni')}</p>
         </div>
       </div>
 
-      <Tray
-        mano={partita.hand}
-        pezziMorti={pezziMorti}
-        selezionato={drag.selezionato}
-        presoIndex={drag.preso?.handIndex ?? null}
-        onPointerDownPezzo={prendi}
-        onTapPezzo={drag.selezionaPezzo}
-        t={t}
-      />
+      <div className={modoAttrezzo === 'gru' ? 'pl-tray-scelta' : ''}>
+        <Tray
+          mano={partita.hand}
+          pezziMorti={pezziMorti}
+          selezionato={modoAttrezzo === 'gru' ? null : drag.selezionato}
+          presoIndex={drag.preso?.handIndex ?? null}
+          onPointerDownPezzo={modoAttrezzo === 'gru' ? () => {} : prendi}
+          onTapPezzo={modoAttrezzo === 'gru'
+            ? (i) => { if (onGru(i)) setModoAttrezzo('chiuso'); }
+            : drag.selezionaPezzo}
+          t={t}
+        />
+      </div>
 
       {/* L'anteprima sta SOTTO i pezzi in mano, e non sopra la plancia dov'era prima.
           La terna successiva viene DOPO quella che hai in mano, e si legge nell'ordine
@@ -431,6 +476,20 @@ export function SchermoGioco({
             cella={drag.preso.cella}
           />
         </div>
+      ) : null}
+
+      {modoAttrezzo === 'scelta' ? (
+        <PannelloAttrezzi
+          quanti={attrezzi}
+          ogniLivelli={OGNI_LIVELLI}
+          onChiudi={() => setModoAttrezzo('chiuso')}
+          onScegli={(quale) => {
+            if (quale === 'gru') { setModoAttrezzo('gru'); return; }
+            onGessetto();
+            setModoAttrezzo('chiuso');
+          }}
+          t={t}
+        />
       ) : null}
 
       <Annunci testo={frasePerMossa(partita.lastMove, t)} />

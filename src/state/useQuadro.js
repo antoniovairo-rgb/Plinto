@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAnnulla } from './useAnnulla.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../core/quadro.js';
 import { summarize, serializeGame, deserializeGame } from '../core/engine.js';
-import { registraTentativo } from '../persistence/progressi.js';
+import { registraTentativo, quantiSuperati } from '../persistence/progressi.js';
+import { riscuoti, usaAttrezzo, quantiAttrezzi } from '../persistence/attrezzi.js';
+import { cambiaPezzo } from '../core/engine.js';
+import { suggerisciMossa } from '../core/suggerimento.js';
 import { read, write, remove, KEYS } from '../persistence/storage.js';
 import { segnaPosto, dimenticaPosto } from '../persistence/ripresa.js';
 import { quadroNumero } from '../config/quadri.js';
@@ -32,6 +35,15 @@ export function useQuadro() {
   const [registrato, setRegistrato] = useState(false);
   // Vero finche' l'apertura con la spiegazione di Plinto e' ancora sullo schermo.
   const [daPresentare, setDaPresentare] = useState(false);
+
+  // GLI ATTREZZI VIVONO QUI, e non in usePartita, ed e' la ragione per cui non esistono
+  // nella Sfida del giorno: quella passa dall'altro gestore. La Sfida e' la stessa partita
+  // per tutti, e due punteggi ottenuti con un numero diverso di attrezzi non sarebbero
+  // piu' confrontabili.
+  const [attrezzi, setAttrezzi] = useState(() => quantiAttrezzi());
+  // Il consiglio del gessetto, finche' resta a schermo. Non e' stato della partita: la
+  // partita non sa che esiste, ed e' esattamente la garanzia che si voleva.
+  const [suggerimento, setSuggerimento] = useState(null);
 
   const apri = useCallback((definizione) => {
     setQuadro(definizione);
@@ -135,6 +147,7 @@ export function useQuadro() {
       if (!prec) return prec;
       const dopo = giocaNelQuadro(quadro, prec, handIndex, row, col);
       if (dopo === prec) return prec;
+      setSuggerimento(null);
 
       const stato = statoQuadro(quadro, dopo);
       if (stato.finito && !registrato) {
@@ -150,7 +163,15 @@ export function useQuadro() {
         // ...registrazione }`, e un campo omonimo dell'una sovrascriveva quello
         // dell'altra: la schermata di sconfitta chiamava .map() su un oggetto e il
         // gioco si spegneva. Elencare i campi costa una riga e chiude la categoria.
-        setEsito({ ...stato, miglioramento, primaVolta, riepilogo });
+        // Il livello vinto la PRIMA volta puo' maturare un attrezzo. Si riscuote qui,
+        // dove si sa che e' la prima volta: rigiocare un livello gia' vinto non paga.
+        const paga = stato.completato && primaVolta ? riscuoti(quantiSuperati()) : null;
+        if (paga) setAttrezzi(paga.attrezzi.disponibili);
+        setEsito({
+          ...stato, miglioramento, primaVolta, riepilogo,
+          attrezzoGuadagnato: paga?.guadagnati ?? 0,
+          attrezzoPerso: paga?.persi ?? 0,
+        });
       }
       return dopo;
     });
@@ -159,6 +180,36 @@ export function useQuadro() {
   // Anche nei livelli: e' anzi il posto dove serve di piu', perche' li' ogni mossa e'
   // contata e uno scivolone costa il record.
   const { siPuoAnnullare, annulla } = useAnnulla(partita, setPartita);
+
+  /**
+   * LA GRU. L'attrezzo si scala SOLO se il cambio e' davvero avvenuto: `cambiaPezzo`
+   * restituisce null su uno slot vuoto o a partita finita, e in quel caso il giocatore
+   * non deve pagare niente.
+   */
+  const usaGru = useCallback((handIndex) => {
+    if (!partita || quantiAttrezzi() <= 0) return false;
+    const dopo = cambiaPezzo(partita, handIndex);
+    if (!dopo) return false;
+    if (!usaAttrezzo()) return false;
+    setPartita(dopo);
+    setAttrezzi(quantiAttrezzi());
+    setSuggerimento(null);   // il consiglio di prima parlava di una mano che non c'e' piu'
+    return true;
+  }, [partita]);
+
+  /** IL GESSETTO. Stessa regola: se non c'e' niente da consigliare, non si paga. */
+  const usaGessetto = useCallback(() => {
+    if (!quadro || !partita || quantiAttrezzi() <= 0) return false;
+    const mossa = suggerisciMossa(quadro, partita);
+    if (!mossa) return false;
+    if (!usaAttrezzo()) return false;
+    setSuggerimento(mossa);
+    setAttrezzi(quantiAttrezzi());
+    return true;
+  }, [quadro, partita]);
+
+  /** Il segno del gesso si cancella appena si muove: parlava della mano di prima. */
+  const scordaSuggerimento = useCallback(() => setSuggerimento(null), []);
 
   return {
     quadro,
@@ -174,5 +225,10 @@ export function useQuadro() {
     riprova,
     riprendiSalvato,
     gioca,
+    attrezzi,
+    suggerimento,
+    usaGru,
+    usaGessetto,
+    scordaSuggerimento,
   };
 }

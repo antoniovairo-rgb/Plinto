@@ -26,7 +26,7 @@ import {
   fillRatio,
   filledCount,
 } from './grid.js';
-import { generateHand, resetUid } from './generator.js';
+import { generateHand, generaPezzoSingolo, resetUid } from './generator.js';
 import { conMossa, distribuzioniVuote, normalizzaDistribuzioni } from './distribuzioni.js';
 import { getShape } from './shapes.js';
 import { scoreMove, moveTier } from './scoring.js';
@@ -319,6 +319,38 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
  * @param {object} state
  * @param {number} [now] istante di riferimento per una partita ancora in corso.
  */
+/**
+ * LA GRU: cambia un pezzo della mano, e nient'altro.
+ *
+ * Non consuma una mossa, non tocca la griglia, non tocca il punteggio ne' la Catena. E'
+ * voluto: la gru serve a sbloccare chi ha ricevuto un pezzo che non entra, non a dare un
+ * turno in piu'. Se contasse come mossa sarebbe un attrezzo che ti fa perdere prima nei
+ * livelli a mosse contate, cioe' l'opposto di un aiuto.
+ *
+ * Lo stato del generatore avanza, ed e' giusto: il pezzo nuovo e' un'estrazione vera, non
+ * una copia di qualcosa che esisteva gia'.
+ *
+ * @returns {object|null} lo stato nuovo, oppure null se lo slot e' vuoto o la partita e'
+ *   finita -- e in quel caso chi chiama NON deve scalare l'attrezzo.
+ */
+export function cambiaPezzo(state, handIndex) {
+  if (state.status !== 'playing') return null;
+  const vecchio = state.hand[handIndex];
+  if (!vecchio) return null;
+
+  const restanti = state.hand
+    .filter((p, i) => p && i !== handIndex)
+    .map((p) => p.shapeId);
+
+  const { pezzo, rngState, history } = generaPezzoSingolo(
+    state.grid, state.rngState, state.shapeHistory, restanti,
+  );
+
+  const hand = state.hand.slice();
+  hand[handIndex] = pezzo;
+  return { ...state, hand, rngState, shapeHistory: history };
+}
+
 export function gameDuration(state, now = Date.now()) {
   return (state.endedAt ?? now) - state.startedAt;
 }

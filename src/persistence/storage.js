@@ -81,6 +81,8 @@ export const KEYS = {
   RIPRESA: 'ripresa',
   STATS: 'statistiche',
   PROFILO: 'profilo',
+  // Gli attrezzi del cantiere: quanti se ne hanno e fin dove si e' gia' convertito.
+  ATTREZZI: 'attrezzi',
 };
 
 /**

@@ -6,7 +6,7 @@ description: Procedura di rilascio di PLINTO. Usala prima di pubblicare una vers
 # Rilascio di PLINTO
 
 Questa skill NON reimplementa nessun controllo: li esegue quelli che il repo ha gia'
-(`tools/verifica-tutto.mjs`, 26 controlli) e aggiunge la procedura intorno, che e' dove
+(`tools/verifica-tutto.mjs`, 27 controlli) e aggiunge la procedura intorno, che e' dove
 finora si e' sbagliato. Se un controllo manca, si aggiunge al gate, non qui.
 
 ## 0. Quando fermarsi prima di cominciare

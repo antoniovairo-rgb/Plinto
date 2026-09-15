@@ -39,6 +39,11 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
                       onCambia={() => inverti('animazioni')} />
         <Interruttore etichetta={t('impostazioni.aiutoVisivo')} attivo={impostazioni.aiutoVisivo}
                       onCambia={() => inverti('aiutoVisivo')} />
+        {/* Spegnendoli la pastiglia sparisce dalla partita. Si continua a guadagnarli lo
+            stesso: chi li riaccende dopo trenta livelli ritrova quello che gli spetta,
+            invece di scoprire che spegnere un aiuto gli e' costato dei progressi. */}
+        <Interruttore etichetta={t('impostazioni.attrezzi')} attivo={impostazioni.attrezzi !== false}
+                      onCambia={() => inverti('attrezzi')} />
       </div>
 
       <div className="pl-gruppo">

@@ -122,6 +122,7 @@ export default {
     temaChiaro: 'Light',
     lingua: 'Language',
     aiutoVisivo: 'Highlight the groups you are about to clear',
+    attrezzi: 'Site tools',
     azzera: 'Erase my data',
     azzeraElenco: 'What disappears',
     voceLivelli: 'Levels cleared',
@@ -258,6 +259,20 @@ export default {
     prossimiTitolo: 'What now?',
     prossimiTesto: 'In the works. There is no date yet: when it is ready, you will find it here.',
     libera: 'Play a free game',
+  },
+
+  attrezzi: {
+    titolo: 'Site tools',
+    su: 'of',
+    gru: 'The crane',
+    gruSpiega: 'Swaps one piece in your hand. It costs no move.',
+    gruScegli: 'Which piece do I swap?',
+    gessetto: 'The chalk',
+    gessettoSpiega: 'Marks where the piece should go.',
+    lasciaStare: 'Never mind',
+    comeSiGuadagnano: 'No tools yet. You earn one every {n} levels cleared, and you can hold up to three.',
+    guadagnato: 'You earned a tool.',
+    perso: 'Store full: the tool you just earned was lost. Use one to make room.',
   },
 
   atti: {

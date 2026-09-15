@@ -444,6 +444,10 @@ export function App() {
           animazioni={impostazioni.animazioni}
           quadro={quadri.quadro}
           statoQuadro={quadri.stato}
+          attrezzi={impostazioni.attrezzi === false ? null : quadri.attrezzi}
+          suggerimento={quadri.suggerimento}
+          onGru={quadri.usaGru}
+          onGessetto={quadri.usaGessetto}
           t={t}
         />
         {menuAperto ? (

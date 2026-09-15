@@ -42,6 +42,8 @@ export function useImpostazioni() {
       vibrazione: true,
       animazioni: !menoMovimento(),
       aiutoVisivo: true,
+      // Accesi di serie: un aiuto che bisogna scoprire di avere non aiuta nessuno.
+      attrezzi: true,
       tema: 'scuro',
       lingua: linguaDelBrowser(),
       introVista: false,

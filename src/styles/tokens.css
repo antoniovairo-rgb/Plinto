@@ -100,6 +100,11 @@
   /* Festeggiamento fra un livello e l'altro: coriandoli, salto di Plinto e barra
      dell'avanzamento. Lunga perche' e' un momento da guardare, non un riscontro. */
   --pl-t-festa: 900ms;
+
+  /* Il respiro con cui un attrezzo chiama l'attenzione: il vassoio quando aspetta di
+     sapere quale pezzo cambiare, e il segno del gesso sulla plancia. Lento di proposito:
+     e' un invito, non un allarme. */
+  --pl-t-attrezzo: 1500ms;
   --pl-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --pl-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 

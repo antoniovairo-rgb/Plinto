@@ -7,6 +7,64 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.14.0] — 15 settembre 2026
+
+### Aggiunto
+
+**Gli attrezzi del cantiere: si guadagnano giocando, si spendono quando ci si blocca.**
+Primo di due tempi, con la gru e il gessetto; piccone e consegna arriveranno dopo, quando
+si sarà visto come vengono usati questi.
+
+- **La gru** cambia un pezzo della mano. Il pezzo che arriva rispetta tre regole, e ognuna
+  si vede giocando: deve **entrare** sulla griglia di adesso, perché la gru si usa quando
+  si è bloccati e riceverne un altro che non entra sarebbe una presa in giro a pagamento;
+  deve essere **diverso** da quelli rimasti in mano, altrimenti «cambia un pezzo» è un
+  attrezzo speso per niente; e non porta **mai bombe**, altrimenti cambiare pezzi
+  diventerebbe il modo per coltivarle. Non costa una mossa: in un livello a mosse contate,
+  un attrezzo che ne consuma una ti fa perdere prima, cioè l'opposto di un aiuto.
+- **Il gessetto** segna sulla griglia dove conviene appoggiare, con un contorno
+  tratteggiato che non si confonde né con un blocco già posato né con l'anteprima del
+  pezzo che si sta trascinando.
+
+**Una risorsa sola per tutti e due, un attrezzo ogni 5 livelli superati, massimo 3 da
+parte.** Una sola risorsa e non due contatori separati: così la scelta di quale attrezzo
+usare è una decisione, invece di spendere quello che avanza. Il tetto fa perdere davvero
+quello che matura a magazzino pieno, ed è voluto: tenere il credito in sospeso sembra più
+gentile ma svuota il tetto di significato, perché si arriverebbe all'ultimo atto con tre
+attrezzi in mano e diciassette in attesa. Chi gioca lo sa prima: la pastiglia mostra i
+posti liberi, non solo quelli pieni.
+
+**Niente attrezzi nella Sfida del giorno**, per costruzione: vivono nel gestore dei
+livelli, e la Sfida passa da un altro. È la stessa partita per tutti, e due punteggi
+ottenuti con un numero diverso di attrezzi non sarebbero più confrontabili.
+
+**Un interruttore nelle impostazioni** li spegne del tutto. Spenti, la pastiglia non
+compare, ma si continua a guadagnarli: chi li riaccende dopo trenta livelli ritrova quello
+che gli spetta, invece di scoprire che spegnere un aiuto gli è costato dei progressi.
+
+### La trappola del suggeritore
+
+Il cervello che consiglia è lo stesso che nel gate gioca e vince tutti e cento i livelli.
+Portarlo dentro l'applicazione aveva un rischio preciso: quella funzione vuole un
+generatore di numeri casuali, e passandogli quello della partita **chiedere un consiglio
+avrebbe consumato casualità**, cambiando i pezzi in arrivo. Il suggerimento avrebbe
+modificato la partita su cui era stato chiesto, e due giocatori nella stessa posizione
+avrebbero ricevuto mani diverse a seconda di quanti consigli avevano chiesto. Si usa un
+generatore separato, seminato dalla situazione: stessa posizione, stesso consiglio, e la
+partita non si muove. Una prova confronta i pezzi che arrivano dopo, con e senza consiglio.
+
+Il consiglio non è indebolito di proposito: un suggerimento volutamente mediocre sarebbe
+una bugia verso chi ha speso un attrezzo. Il limite è la scarsità, non la qualità.
+
+### Verificato
+
+Ventuno prove nuove fra `attrezzi`, `gru` e `gessetto`, più un controllo nuovo nel gate che
+sale a ventisette: `tests/e2e/attrezzi.mjs` prova il cablaggio nel gioco vero, cioè che
+guardare il pannello non costi niente, che la gru cambi il pezzo toccato senza consumare
+mosse, che il gessetto segni delle caselle e che l'interruttore spento faccia sparire la
+pastiglia. Verificato capace di fallire: staccando la spesa dell'attrezzo dalla gru,
+segnala due problemi.
+
 ## [1.13.4] — 15 settembre 2026
 
 ### Cambiato

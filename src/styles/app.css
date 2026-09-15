@@ -385,6 +385,132 @@ button {
   min-height: 44px;
 }
 
+/* ------------------------------------------------- attrezzi del cantiere --- */
+
+/* La riga sotto la plancia ospita anche la pastiglia, all'estremo destro. Sta in
+   posizione assoluta e non nel flusso perche' il contenuto della riga e' centrato: con
+   un terzo elemento in mezzo, "Rimetti a posto il pezzo" smetterebbe di stare al centro
+   dello schermo, e quella e' la riga che si guarda mentre si gioca. */
+.pl-suggerimento--conattrezzi { position: relative; }
+.pl-attrezzi__pastiglia {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--pl-surface-2);
+  color: var(--pl-brand);
+  transition: transform var(--pl-t-instant) var(--pl-ease-out);
+}
+.pl-attrezzi__pastiglia:active { transform: translateY(-50%) scale(0.95); }
+/* Vuota resta visibile, solo spenta: chi non ha mai avuto un attrezzo deve comunque
+   sapere che esistono, e toccandola scopre come si guadagnano. */
+.pl-attrezzi__pastiglia--vuota { color: var(--pl-text-faint); }
+
+.pl-attrezzi__posti { display: flex; gap: 3px; }
+.pl-attrezzi__posto {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pl-line-strong);
+}
+.pl-attrezzi__posto--pieno { background: var(--pl-brand); }
+
+.pl-attrezzi__pannello {
+  width: 100%;
+  max-width: 340px;
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: var(--pl-radius-lg);
+  background: var(--pl-surface);
+  box-shadow: var(--pl-shadow-lift);
+}
+.pl-attrezzi__intestazione {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pl-text-faint);
+}
+.pl-attrezzi__scelte { display: grid; gap: 8px; }
+.pl-attrezzi__scelta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-surface-2);
+  text-align: left;
+  color: var(--pl-text);
+  transition: transform var(--pl-t-instant) var(--pl-ease-out);
+}
+.pl-attrezzi__scelta:active { transform: scale(0.98); }
+.pl-attrezzi__icona {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--pl-surface);
+  color: var(--pl-brand);
+}
+.pl-attrezzi__testi { display: grid; gap: 2px; }
+.pl-attrezzi__testi strong { font-size: 15px; }
+.pl-attrezzi__testi span { font-size: 12.5px; line-height: 1.35; color: var(--pl-text-dim); }
+.pl-attrezzi__vuoto { margin: 0; font-size: 13px; line-height: 1.45; color: var(--pl-text-dim); }
+
+/* Modo "quale pezzo cambio": l'invito prende la riga e il vassoio si illumina. */
+.pl-attrezzi__invito { display: inline-flex; align-items: center; gap: 10px; color: var(--pl-brand); }
+.pl-attrezzi__annulla {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--pl-surface-2);
+  color: var(--pl-text-dim);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+}
+.pl-tray-scelta .pl-tray__posto {
+  outline: 2px solid var(--pl-brand);
+  outline-offset: -2px;
+  border-radius: var(--pl-radius-md);
+  animation: pl-attrezzo-chiama var(--pl-t-attrezzo) var(--pl-ease-out) infinite;
+}
+@keyframes pl-attrezzo-chiama {
+  0%, 100% { outline-color: color-mix(in srgb, var(--pl-brand) 45%, transparent); }
+  50%      { outline-color: var(--pl-brand); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-tray-scelta .pl-tray__posto { animation: none; }
+}
+
+/* Il segno del gesso sulla plancia: un contorno tratteggiato, non un riempimento. Deve
+   dire "qui", senza sembrare un blocco gia' appoggiato ne' l'anteprima del pezzo che si
+   sta trascinando, che sono due cose che il giocatore vede in continuazione. */
+.pl-cella--segnata::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 6px;
+  border: 2px dashed var(--pl-brand);
+  animation: pl-gesso var(--pl-t-attrezzo) var(--pl-ease-out) infinite;
+}
+@keyframes pl-gesso {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-cella--segnata::after { animation: none; opacity: 1; }
+}
+
 /* Bersaglio pieno da 44px, come ogni altra cosa che si tocca in questo gioco: lo tocca
    chi ha appena sbagliato la mira, quindi e' l'ultimo posto dove si puo' fare piccolo.
 

@@ -148,6 +148,7 @@ export default {
     temaChiaro: 'Chiaro',
     lingua: 'Lingua',
     aiutoVisivo: 'Evidenzia i gruppi che stai per chiudere',
+    attrezzi: 'Attrezzi del cantiere',
     azzera: 'Azzera i miei dati',
     // DICEVA MENO DEL VERO. "Cancella record, statistiche e partita in corso" ometteva
     // proprio la cosa che costa di piu': i livelli superati. Chi ne aveva sessantanove
@@ -311,6 +312,20 @@ export default {
    * partono con la griglia gia' occupata; il vuoto e' il tratto senza appoggi, cioe' meno
    * spazio e meno mosse; l'arco e' dove non si puo' sbagliare di un dito.
    */
+  attrezzi: {
+    titolo: 'Attrezzi del cantiere',
+    su: 'su',
+    gru: 'La gru',
+    gruSpiega: 'Cambia un pezzo della mano. Non costa una mossa.',
+    gruScegli: 'Quale pezzo cambio?',
+    gessetto: 'Il gessetto',
+    gessettoSpiega: 'Segna dove conviene appoggiare.',
+    lasciaStare: 'Lascia stare',
+    comeSiGuadagnano: 'Non hai attrezzi. Ne guadagni uno ogni {n} livelli superati, e puoi tenerne al massimo tre.',
+    guadagnato: 'Hai guadagnato un attrezzo.',
+    perso: 'Magazzino pieno: l\'attrezzo appena guadagnato è andato perso. Usane uno per fare posto.',
+  },
+
   atti: {
     fondamenta: 'Le fondamenta',
     pilastri: 'I pilastri',

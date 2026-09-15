@@ -17,6 +17,8 @@ export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
     appoggiate, esplosioni, celleEsplose, cursore, pezzoInMano,
+    // Le caselle segnate col gesso: dove il gessetto dice di appoggiare.
+    segnate,
     cellRefs, canvasRef, onCellPointerUp, t,
   },
   ref,
@@ -41,6 +43,7 @@ export const Plancia = forwardRef(function Plancia(
         if (inAnteprima) classi.push('pl-cella--anteprima');
         if (inAnteprima && !anteprimaValida) classi.push('pl-cella--vietata');
         if (daEliminare) classi.push('pl-cella--incandidata');
+        if (segnate?.has(i)) classi.push('pl-cella--segnata');
 
         out.push(
           <div
@@ -78,7 +81,7 @@ export const Plancia = forwardRef(function Plancia(
       }
     }
     return out;
-  }, [grid, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
+  }, [grid, segnate, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
       celleEsplose, cursore, cellRefs, onCellPointerUp, t]);
 
   return (

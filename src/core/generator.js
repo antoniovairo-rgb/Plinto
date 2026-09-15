@@ -157,6 +157,45 @@ function drawHand(rng, fill, history) {
   return shapes.map((shape, i) => makePiece(shape, colors[i]));
 }
 
+/**
+ * Pesca UN pezzo solo: e' quello che serve alla gru, che ne cambia uno e lascia gli altri.
+ *
+ * PERCHE' NON SI RIUSA `generateHand` PRENDENDONE UNO. Quella funzione tiene una memoria
+ * delle forme appena uscite per non ripeterle, e restituirebbe una memoria che contiene
+ * anche i due pezzi scartati: da li' in poi il gioco eviterebbe forme che il giocatore
+ * non ha mai visto.
+ *
+ * TRE REGOLE, E OGNUNA HA UN MOTIVO CHE SI VEDE GIOCANDO.
+ *   1. Il pezzo deve ENTRARE sulla griglia di adesso, se esiste una forma che ci entra.
+ *      La gru si usa quando si e' bloccati: riceverne un altro che non entra sarebbe una
+ *      presa in giro, e per giunta a pagamento.
+ *   2. Il pezzo deve essere DIVERSO da quelli rimasti in mano. "Cambia un pezzo" che
+ *      restituisce lo stesso pezzo e' un attrezzo speso per niente.
+ *   3. Niente bombe. La regola delle bombe e' "al massimo una per mano": se la gru
+ *      potesse pescarne una, cambiare pezzi diventerebbe il modo per coltivarle.
+ *
+ * @param {Uint8Array} grid griglia corrente
+ * @param {number} rngState stato del generatore
+ * @param {string[]} history forme uscite di recente
+ * @param {string[]} restanti id delle forme che restano in mano
+ * @returns {{pezzo: object, rngState: number, history: string[]}}
+ */
+export function generaPezzoSingolo(grid, rngState, history = [], restanti = []) {
+  const rng = createRng(rngState);
+  const fill = fillRatio(grid);
+
+  const entrano = SHAPES.filter((s) => hasAnyPlacement(grid, s));
+  const base = entrano.length > 0 ? entrano : SHAPES;
+  const diverse = base.filter((s) => !restanti.includes(s.id));
+  const scelta = weightedPick(rng, diverse.length > 0 ? diverse : base, fill, history);
+
+  return {
+    pezzo: makePiece(scelta, pickColor(rng, [])),
+    rngState: rng.state,
+    history: [...history, scelta.id].slice(-HISTORY_SIZE),
+  };
+}
+
 /** Almeno un pezzo della mano e' piazzabile sulla griglia data? */
 function handIsAlive(grid, pieces) {
   return pieces.some((piece) => hasAnyPlacement(grid, piece.shape));

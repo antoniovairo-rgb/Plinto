@@ -38,6 +38,7 @@ export const FORMATO = 1;
 /** Quello che vale la pena portarsi dietro. L'ordine e' quello del file, per leggibilita'. */
 export const DOCUMENTI = [
   KEYS.PROGRESS,
+  KEYS.ATTREZZI,
   chiaveRecord(),
   KEYS.STATS,
   KEYS.PROFILO,
