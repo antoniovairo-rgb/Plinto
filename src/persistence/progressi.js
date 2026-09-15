@@ -24,6 +24,7 @@
  * strada che non si chiude.
  */
 
+import { ATTI, TOTALE_QUADRI } from '../config/quadri.js';
 import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 
@@ -271,6 +272,31 @@ export function riepilogoAtto(atto, appenaVinto = null, progressi = caricaProgre
   for (let n = atto.da; n <= atto.a; n += 1) if (quadroSuperato(n, progressi)) superati += 1;
   const totale = atto.a - atto.da + 1;
   const completo = superati >= totale;
+
+  // QUANTO PESA QUESTA CHIUSURA. Non e' un giudizio inventato: e' la posizione nell'arco.
+  // Chiudere "Le basi" e chiudere "La vetta" sono due cose diverse, e una fascia identica
+  // per tutti e sette lo nega. La scala sta qui e non nel componente perche' e' una
+  // regola sui progressi, e una regola si puo' interrogare in un test; una classe CSS no.
+  const posizione = ATTI.findIndex((a) => a.da === atto.da);
+  const indice = posizione >= 0 ? posizione + 1 : 1;
+  const totaleAtti = ATTI.length;
+  // Tre gradini, ricavati dalla posizione e non scritti a mano: l'ultimo atto sta a se',
+  // la seconda meta' del percorso pesa piu' della prima. Se un giorno gli atti fossero
+  // sei o otto, la scala si adatta da sola invece di puntare a un atto che non c'e' piu'.
+  const intensita = indice === totaleAtti ? 3 : (indice > totaleAtti / 2 ? 2 : 1);
+
+  let attiChiusi = 0;
+  for (const a of ATTI) {
+    let fatti = 0;
+    for (let n = a.da; n <= a.a; n += 1) if (quadroSuperato(n, progressi)) fatti += 1;
+    if (fatti >= a.a - a.da + 1) attiChiusi += 1;
+  }
+  // I livelli lasciati indietro nell'INTERO percorso. Serve solo all'ultimo atto: chi
+  // chiude "La vetta" senza aver finito il percorso ha dei buchi dietro, e dirglielo qui
+  // e' l'unico modo onesto di festeggiare senza far credere che sia finita.
+  let mancanti = 0;
+  for (let n = 1; n <= TOTALE_QUADRI; n += 1) if (!quadroSuperato(n, progressi)) mancanti += 1;
+
   return {
     nome: atto.nome,
     da: atto.da,
@@ -278,6 +304,11 @@ export function riepilogoAtto(atto, appenaVinto = null, progressi = caricaProgre
     superati,
     totale,
     completo,
+    indice,
+    totaleAtti,
+    intensita,
+    attiChiusi,
+    mancanti,
     // Vero solo se il livello appena vinto e' il PRIMO successo su quel livello, sta in
     // questo atto, ed era l'ultimo che mancava. Senza `primaVolta` la festa tornerebbe a
     // ogni rigiocata dentro un atto gia' chiuso: un traguardo annunciato quando non e'

@@ -2257,6 +2257,43 @@ button {
   font-size: 0.85rem;
   color: var(--pl-text-dim);
 }
+.pl-atto-chiuso__intestazione {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pl-atto-chiuso__frase {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--pl-text);
+}
+/* I sette atti. Sei pallini accesi su sette si leggono in un colpo d'occhio, e sono un
+   dato vero che cresce: non serve aggiungere un effetto per dire che conta di piu'. */
+.pl-atto-chiuso__pallini { display: flex; justify-content: center; gap: 5px; margin-top: 9px; }
+.pl-atto-chiuso__pallino {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pl-line-strong);
+}
+.pl-atto-chiuso__pallino--acceso { background: var(--pl-brand); }
+
+/* I tre gradini. L'alone e' sempre lo stesso ottone del bordo, solo piu' o meno fitto:
+   un colore nuovo direbbe "altra cosa", non "stessa cosa che pesa di piu'". Nessuno dei
+   tre arriva vicino alla festa dei cento livelli, che resta una schermata tutta sua. */
+.pl-atto-chiuso--i2 {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-brand) 12%, transparent);
+}
+.pl-atto-chiuso--i3 {
+  padding: 13px 16px;
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--pl-brand) 20%, transparent),
+    0 6px 20px color-mix(in srgb, var(--pl-brand) 15%, transparent);
+}
+.pl-atto-chiuso--i3 .pl-atto-chiuso__titolo { font-size: 1.05rem; }
+
 .pl-atto-chiuso--entra { animation: pl-atto-entra var(--pl-t-festa) var(--pl-ease-pop) both; }
 @keyframes pl-atto-entra {
   from { opacity: 0; transform: translateY(10px) scale(0.96); }

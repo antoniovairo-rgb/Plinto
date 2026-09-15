@@ -363,6 +363,25 @@ if (await vinciIlPrimo()) {
       errori.push(`ATTO: la fascia non nomina l atto. Dice: "${testo.replace(/\n/g, ' | ')}"`);
     }
     console.log(`   fascia dell atto: "${testo.replace(/\n/g, ' | ')}"`);
+
+    // I pallini degli atti. Chiudendo il PRIMO ne deve essere acceso esattamente uno:
+    // se ne accendesse sette, la fascia direbbe a chi ha appena finito i primi dieci
+    // livelli che ha finito tutto il percorso.
+    const pallini = await page.locator('.pl-atto-chiuso__pallino').count();
+    const accesi = await page.locator('.pl-atto-chiuso__pallino--acceso').count();
+    if (pallini !== ATTI.length) {
+      errori.push(`ATTO: i pallini degli atti sono ${pallini}, gli atti sono ${ATTI.length}`);
+    }
+    if (accesi !== 1) {
+      errori.push(`ATTO: chiudendo il primo atto i pallini accesi sono ${accesi} invece di 1`);
+    }
+    // La frase dell'atto c'e' e non e' la chiave grezza.
+    if (/quadri\.attoFrasi/.test(testo)) {
+      errori.push(`ATTO: la fascia mostra la chiave di traduzione invece della frase: "${testo}"`);
+    }
+    if (await page.locator('.pl-atto-chiuso__frase').count() !== 1) {
+      errori.push('ATTO: manca la frase che dice che cosa ha chiesto l atto');
+    }
   }
   if (await page.locator('.pl-trionfo').count() > 0) {
     errori.push('ATTO: chiudere un atto mostra la festa finale. Sono due traguardi diversi.');

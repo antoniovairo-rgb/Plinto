@@ -23,7 +23,7 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATT
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Nucleo di gioco stabile | **FATTO** | 483 test in 28 file; invarianti verificate a ogni mossa su 240 partite complete; i cento livelli rigiocati nell'app a ogni giro completo del gate |
+| Nucleo di gioco stabile | **FATTO** | 486 test in 28 file; invarianti verificate a ogni mossa su 240 partite complete; i cento livelli rigiocati nell'app a ogni giro completo del gate |
 | Nessun difetto critico noto | **FATTO** | Nessuno aperto al momento di questa revisione |
 | Bilanciamento misurato | **FATTO** | Simulazioni su migliaia di partite, quattro profili di abilità, `npm run sim` |
 | Equità verificata con numeri | **FATTO** | Il 91% delle partite finisce con la griglia fra il 40% e il 70%; sotto il 30% è lo 0,7% |

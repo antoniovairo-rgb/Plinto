@@ -26,6 +26,13 @@ export function SchermoFineQuadro({
   const motivo = esito.motivo === 'mosse' ? t('quadri.persoMosse') : t('quadri.persoBloccato');
   // Il livello successivo si e' aperto lo stesso, per quante volte ci si e' provati.
   const sbloccaIlProssimo = !vinto && !ultimo && quadroSbloccato(quadro.numero + 1);
+  // La frase dell'atto. La chiave si compone qui in forma letterale perche' il controllo
+  // delle traduzioni riconosce i prefissi dinamici solo scritti cosi': spezzarla in una
+  // variabile farebbe risultare orfane tutte e sette le frasi. Se un giorno gli atti
+  // fossero piu' delle frasi, t() restituisce la chiave stessa: in quel caso non si
+  // scrive niente invece di mostrare "quadri.attoFrasi.7" a chi ha appena finito un atto.
+  const dettaAtto = t(`quadri.attoFrasi.${(atto?.indice ?? 1) - 1}`);
+  const fraseAtto = dettaAtto.startsWith('quadri.') ? null : dettaAtto;
 
   return (
     <div className="pl-screen pl-fine">
@@ -120,12 +127,43 @@ export function SchermoFineQuadro({
             persistence/progressi.js): rigiocare un livello dentro un atto gia' finito
             non e' un traguardo, e annunciarlo lo sarebbe soltanto la prima volta. */}
         {vinto && atto?.appenaChiuso ? (
-          <div className={`pl-atto-chiuso ${animazioni ? 'pl-atto-chiuso--entra' : ''}`}>
-            <p className="pl-atto-chiuso__titolo">
-              {t('quadri.attoChiuso').replace('{nome}', atto.nome)}
-            </p>
+          <div className={`pl-atto-chiuso pl-atto-chiuso--i${atto.intensita ?? 1} ${animazioni ? 'pl-atto-chiuso--entra' : ''}`}>
+            <div className="pl-atto-chiuso__intestazione">
+              {/* Plinto compare solo all'ultimo atto. E' l'unico modo di dire "questa
+                  volta e' diverso" che non ruba niente alla festa dei cento livelli. */}
+              {atto.intensita === 3 ? <Plinto espressione="contento" dimensione={34} /> : null}
+              <p className="pl-atto-chiuso__titolo">
+                {t('quadri.attoChiuso').replace('{nome}', atto.nome)}
+              </p>
+            </div>
+            {fraseAtto ? <p className="pl-atto-chiuso__frase">{fraseAtto}</p> : null}
             <p className="pl-atto-chiuso__riga">
               {t('quadri.attoFatti').replace('{da}', atto.da).replace('{a}', atto.a)}
+            </p>
+            {/* Solo all'ultimo atto, e solo se dei buchi ci sono davvero: chi arriva qui
+                con il percorso intero vede la festa finale, non questa fascia. */}
+            {atto.intensita === 3 && atto.mancanti > 0 ? (
+              <p className="pl-atto-chiuso__riga">
+                {atto.mancanti === 1
+                  ? t('quadri.restanoIndietroUno')
+                  : t('quadri.restanoIndietro', { n: atto.mancanti })}
+              </p>
+            ) : null}
+            {/* I sette atti come pallini: e' la parte che cresce da sola. Chiudere il
+                sesto ne accende sei, e l'importanza si vede senza che nessuno la dichiari.
+                Per chi non vede, la stessa cosa detta a parole nella riga qui sotto. */}
+            <div className="pl-atto-chiuso__pallini" aria-hidden="true">
+              {Array.from({ length: atto.totaleAtti ?? 0 }, (_, i) => (
+                <span
+                  key={i}
+                  className={`pl-atto-chiuso__pallino${i < (atto.attiChiusi ?? 0) ? ' pl-atto-chiuso__pallino--acceso' : ''}`}
+                />
+              ))}
+            </div>
+            <p className="pl-sr">
+              {atto.attiChiusi === 1
+                ? t('quadri.attiChiusiUno', { totale: atto.totaleAtti })
+                : t('quadri.attiChiusi', { n: atto.attiChiusi, totale: atto.totaleAtti })}
             </p>
           </div>
         ) : null}

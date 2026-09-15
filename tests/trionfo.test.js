@@ -100,6 +100,39 @@ describe('chiusura di un atto', () => {
     expect(r.appenaChiuso).toBe(false);
   });
 
+  it('l importanza della chiusura segue la posizione, non un elenco scritto a mano', () => {
+    const gradini = ATTI.map((a) => riepilogoAtto(a, null, superati([])).intensita);
+    // I sette atti di oggi. Se un giorno fossero otto questa riga fallisce, ed e' voluto:
+    // cambiare il percorso vuol dire ricontrollare anche le frasi, non solo i numeri.
+    expect(gradini).toEqual([1, 1, 1, 2, 2, 2, 3]);
+    // Una scala che scende non e' una scala: l'atto dopo non puo' pesare meno di quello
+    // prima, altrimenti chiudere "La maestria" varrebbe meno che chiudere "Le basi".
+    for (let i = 1; i < gradini.length; i += 1) {
+      expect(gradini[i], `atto ${i + 1}`).toBeGreaterThanOrEqual(gradini[i - 1]);
+    }
+    expect(riepilogoAtto(ATTI[0], null, superati([])).indice).toBe(1);
+    expect(riepilogoAtto(ATTI[ATTI.length - 1], null, superati([])).indice).toBe(ATTI.length);
+  });
+
+  it('conta gli atti gia chiusi e i livelli lasciati indietro', () => {
+    const r = riepilogoAtto(ATTI[1], { numero: ATTI[1].a, primaVolta: true }, superati(daA(1, ATTI[1].a)));
+    expect(r.attiChiusi).toBe(2);
+    expect(r.mancanti).toBe(TOTALE_QUADRI - ATTI[1].a);
+    // Un buco dentro il primo atto lo riapre. I pallini accesi devono dire il vero: se
+    // contassero gli atti "raggiunti" invece che chiusi, mostrerebbero un traguardo mai
+    // fatto proprio a chi un livello lo ha saltato.
+    const conBuco = superati(daA(1, ATTI[1].a).filter((n) => n !== 5));
+    expect(riepilogoAtto(ATTI[1], null, conBuco).attiChiusi).toBe(1);
+  });
+
+  it('ogni atto ha la sua frase in tutte e due le lingue', () => {
+    for (const lingua of Object.keys(LINGUE)) {
+      const frasi = LINGUE[lingua].strings.quadri.attoFrasi;
+      expect(frasi.length, lingua).toBe(ATTI.length);
+      for (const f of frasi) expect(f.trim().length, `${lingua}: "${f}"`).toBeGreaterThan(10);
+    }
+  });
+
   it('gli atti coprono tutti i livelli senza buchi ne sovrapposizioni', () => {
     // Se un livello non appartenesse a nessun atto, la sua vittoria non potrebbe mai
     // chiuderne uno: la festa di meta' strada sparirebbe in silenzio.

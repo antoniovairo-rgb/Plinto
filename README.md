@@ -81,7 +81,7 @@ npm run dev        # server di sviluppo
 npm run build      # build di produzione in dist/
 npm run verifica   # IL GATE: 24 controlli, lo stesso comando della CI (~65 min)
 npm run verifica -- --veloce   # salta i cento livelli SOLO se il diff lo permette (~10 min)
-npm test           # 28 file Vitest, 483 test, ~20 s
+npm test           # 28 file Vitest, 486 test, ~20 s
 npm run e2e        # partita completa guidata in un browser reale
 npm run precisione # precisione del trascinamento su tutte le forme
 npm run soak       # sessione lunga: fluidita', memoria, residui

@@ -7,6 +7,51 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.11.0] — 15 settembre 2026
+
+### Aggiunto
+
+**Chiudere un atto non è più sempre la stessa cosa.** Fino alla 1.10.4 le sette fasce di
+fine atto erano identiche: cambiavano solo il nome e l'intervallo dei livelli. Chiudere
+«Le basi», cioè i primi dieci livelli, e chiudere «La vetta», cioè gli otto più difficili
+del percorso, ricevevano lo stesso riquadro. Adesso la fascia cresce con l'atto, in tre
+modi che non si sovrappongono.
+
+- **Una frase per atto, e non è un complimento generico.** Ognuna dice che cosa ha chiesto
+  davvero quell'atto, e viene da come l'atto è costruito in `tools/genera-quadri.mjs`:
+  quali tipi di obiettivo usa, con che griglia di partenza, quante mosse concede, con che
+  margine sono tarati i bersagli. «Sedici livelli cominciati con la griglia già occupata»
+  per «Gli ostacoli» è il conto dei livelli dal 25 al 40 e l'elenco dei motivi di griglia
+  di quell'atto, non un modo di dire.
+- **Sette pallini, accesi quanti sono gli atti chiusi.** È la parte che cresce da sola:
+  chiudere il sesto atto ne accende sei, e l'importanza si vede senza dichiararla. Contano
+  gli atti davvero completi, non quelli raggiunti: chi ha saltato un livello nel primo
+  atto vede il primo pallino spento anche mentre chiude il secondo.
+- **Tre gradini di intensità, ricavati dalla posizione dell'atto.** I primi tre come
+  prima; dal quarto al sesto il riquadro prende un alone d'ottone tenue; l'ultimo ha
+  l'alone marcato, Plinto accanto al titolo e la riga che dice quanti livelli restano
+  indietro. La scala non è un elenco scritto a mano: se un giorno gli atti fossero sei o
+  otto si adatta da sola, e un test controlla che non scenda mai.
+
+Quello che la fascia continua a NON fare è somigliare alla festa dei cento livelli. Resta
+un riquadro dentro la pagina: se anche solo l'ultimo atto diventasse una schermata a sé,
+la festa finale arriverebbe come la seconda volta che succede la stessa cosa.
+
+### Corretto
+
+**«1 atti su 7 completati» non si legge più.** Le due righe nuove hanno la loro forma
+singolare, con la stessa convenzione che gli obiettivi dei Quadri usano già («1 atto su 7
+completato», «Resta 1 livello indietro»). È il genere di dettaglio che fa sembrare
+tradotto male un gioco che in italiano ci nasce.
+
+### Verificato
+
+Tre prove nuove in `tests/trionfo.test.js`: la scala di importanza segue la posizione e
+non scende mai, i pallini contano gli atti chiusi e non quelli raggiunti, ogni atto ha la
+sua frase in italiano e in inglese. Verificato che sappiano fallire: forzando l'intensità
+a un valore fisso, la prima segnala. In `tests/e2e/trionfo.mjs` la fascia del primo atto
+adesso viene contata, non solo letta: sette pallini in tutto, esattamente uno acceso.
+
 ## [1.10.4] — 14 settembre 2026
 
 ### Cambiato

@@ -145,7 +145,7 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **483 test in 28 file, tutti verdi**, durata ~20 s (misurato il 14 settembre
+`npm test`: **486 test in 28 file, tutti verdi**, durata ~20 s (misurato il 14 settembre
 2026). La metà abbondante di quei secondi sta in due file: `incitamenti.test.js`, che simula
 decine di migliaia di mosse per decidere quando dire qualcosa, e `invarianti.test.js`, che
 gioca 240 partite complete. È il costo di quei file, non un rallentamento della suite.

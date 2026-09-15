@@ -310,6 +310,27 @@ export default {
     finitoConBuchi: 'Sei in fondo al percorso, ma qualche livello è ancora da superare: li trovi in elenco senza la spunta.',
     attoChiuso: '{nome}: completo',
     attoFatti: 'Tutti i livelli dal {da} al {a}, superati.',
+    // Una frase per atto, nell'ordine del percorso. Dice che cosa ha chiesto DAVVERO
+    // quell'atto, e ogni riga viene da come l'atto e' costruito in tools/genera-quadri.mjs
+    // (tipi di obiettivo, motivi della griglia di partenza, mosse concesse, margine di
+    // taratura). Non sono complimenti: sono il motivo per cui quei livelli erano diversi
+    // dai precedenti, e per cui chiuderli vuol dire qualcosa.
+    attoFrasi: [
+      'Righe, colonne e quadranti: le mosse che reggono tutto il resto.',
+      'I primi livelli che chiedono la Catena, non solo righe e quadranti.',
+      'Sedici livelli cominciati con la griglia già occupata.',
+      'Meno spazio e meno mosse, e li hai superati lo stesso.',
+      'Obiettivi che non si vincono con un colpo solo, ma costruendo.',
+      'Qui i bersagli hanno smesso di lasciare margine.',
+      'Gli otto livelli più difficili del percorso.',
+    ],
+    attiChiusi: '{n} atti su {totale} completati.',
+    // Le forme al singolare. "1 atti su 7 completati" e' il genere di dettaglio che fa
+    // sembrare tradotto male un gioco scritto in italiano, ed e' la stessa regola che
+    // gli obiettivi dei Quadri seguono gia' con le loro chiavi "...Uno".
+    attiChiusiUno: '1 atto su {totale} completato.',
+    restanoIndietro: 'Restano {n} livelli indietro, in elenco senza la spunta.',
+    restanoIndietroUno: 'Resta 1 livello indietro, in elenco senza la spunta.',
     ricomincia: 'Ricomincia dal livello 1',
     ricominciaAvviso: 'Perderai i {n} livelli che hai superato e ripartirai dal primo. Vuoi continuare?',
     ricominciaSicuro: 'Sei sicuro? Questa cosa non si può annullare.',
