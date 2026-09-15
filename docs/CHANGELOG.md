@@ -7,6 +7,46 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.13.1] — 15 settembre 2026
+
+### Sicurezza
+
+**Adesso una politica di sicurezza dei contenuti c'è davvero.** Fino a ieri il progetto ne
+dichiarava una severa dentro `netlify.toml`: un file che GitHub Pages non legge nemmeno.
+Sembrava protetto e non lo era, e nessun controllo poteva accorgersene perché nessun
+controllo guardava. Rimosso quel file, restava un gioco senza nessuna politica attiva, né
+sul sito né dentro l'applicazione Android.
+
+La politica ora sta in un `<meta>` scritto nella pagina al momento della build, che il
+browser applica su qualunque hosting statico. Vieta tutto per impostazione predefinita e
+riapre solo quello che il gioco usa davvero: il proprio codice, i propri fogli di stile,
+le proprie immagini, il proprio service worker. Nessun dominio esterno è permesso, per
+niente. L'audio non compare fra i permessi perché è generato con gli oscillatori: non si
+carica nessun file.
+
+**Ogni voce è misurata, non copiata da un esempio.** Si parte da «tutto vietato» e si
+aggiunge solo ciò che l'applicazione ha chiesto mentre un controllo la attraversava intera
+raccogliendo le violazioni. Risultato: zero violazioni su home, sette schermate, una
+partita completa, la registrazione del service worker e il salvataggio esportabile, che
+era il punto più a rischio perché crea il file con un indirizzo `blob:` ed è esattamente
+il genere di cosa che una politica scritta a occhio blocca in silenzio.
+
+**Due cose dette invece che nascoste.** La politica non è applicata in sviluppo: Vite
+inietta codice suo nella pagina per l'aggiornamento a caldo, e una politica severa
+impedirebbe al gioco di aprirsi con `npm run dev`. E da un `<meta>` il browser ignora
+`frame-ancestors`, `report-uri` e `sandbox`: contro l'essere incorniciati in una pagina
+altrui, su questo hosting, non c'è difesa possibile. Un controllo impedisce di dichiarare
+quelle tre voci fingendo che funzionino.
+
+### Verificato
+
+Un controllo nuovo nel gate, che sale a ventisei: `tests/e2e/sicurezza.mjs`. Ha due metà, e
+la seconda è quella che rende credibile la prima. Il gioco intero non deve produrre nessuna
+violazione; poi uno script, un'immagine e una chiamata di rete verso un altro dominio
+devono essere bloccati. Senza quella seconda parte, il giorno in cui il `<meta>` sparisse
+per sbaglio il controllo direbbe «zero violazioni» e sembrerebbe una buona notizia.
+Verificato capace di fallire: togliendo il plugin dalla build, segnala quattro problemi.
+
 ## [1.13.0] — 15 settembre 2026
 
 ### Cambiato

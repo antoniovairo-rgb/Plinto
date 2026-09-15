@@ -79,11 +79,16 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
 - Il deploy e' **solo** GitHub Pages. `netlify.toml` e' stato tolto nel settembre 2026:
   il proprietario del progetto non usa Netlify per PLINTO, e il file dichiarava una
   configurazione che non veniva applicata da nessuna parte.
-- **In produzione non c'e' nessuna CSP.** Le intestazioni di sicurezza stavano solo in
-  `netlify.toml`, e GitHub Pages non le legge ne' permette di impostarle. Per averle
-  davvero servirebbe un `<meta http-equiv="Content-Security-Policy">` in `index.html`,
-  da tarare con attenzione: il salvataggio esportabile usa un URL `blob:`, e una CSP
-  scritta a occhio lo blocca.
+- **La CSP sta in un `<meta>` iniettato nella build** (plugin `politicaDiSicurezza` in
+  `vite.config.js`, `apply: 'build'`). Non nelle intestazioni, perche' GitHub Pages non
+  permette di metterne di proprie; non in sviluppo, perche' Vite inietta codice suo e la
+  politica lo bloccherebbe. Da un `<meta>` il browser IGNORA `frame-ancestors`,
+  `report-uri` e `sandbox`: contro l'essere incorniciati in una pagina altrui qui non
+  c'e' difesa, e un controllo impedisce di dichiararli fingendo che funzionino.
+  `npm run e2e-sicurezza` attraversa il gioco costruito e fallisce a ogni violazione, poi
+  prova a caricare roba da un altro dominio per dimostrare che la politica e' davvero
+  attiva: senza quella seconda meta', il giorno in cui il `<meta>` sparisse il controllo
+  direbbe "zero violazioni" e sembrerebbe tutto a posto.
 - Android: l'`.aab` si ricarica sullo store solo se cambiano icona, nome o permessi.
   Il sito si aggiorna da solo dentro l'app. `versionCode` va alzato a OGNI caricamento.
 
