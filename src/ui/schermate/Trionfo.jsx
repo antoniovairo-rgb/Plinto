@@ -1,4 +1,5 @@
 import { Plinto } from '../Plinto.jsx';
+import { OPERE } from '../../config/quadri.js';
 import { CondividiTrionfo } from '../Condividi.jsx';
 
 /**
@@ -87,7 +88,9 @@ export function SchermoTrionfo({
             I riquadri dei numeri e dell'annuncio il problema non ce l'hanno: hanno gia'
             un fondo pieno. Il velo serve solo al testo nudo. */}
         <div className="pl-trionfo__intestazione">
-          <h1 className="pl-trionfo__titolo">{t('trionfo.titolo')}</h1>
+          <h1 className="pl-trionfo__titolo">
+            {t('trionfo.titolo').replace('{opera}', t(`opere.${OPERE[0].id}`))}
+          </h1>
           <p className="pl-trionfo__sotto">
             {t('trionfo.sotto').replace('{totale}', riepilogo.totale)}
           </p>
@@ -113,9 +116,16 @@ export function SchermoTrionfo({
           </p>
         ) : null}
 
-        {/* L'annuncio. Senza date: vedi il commento in testa al file. */}
+        {/* L'annuncio dell'opera successiva. Sta QUI e in nessun altro posto: alla fine
+            della prima si vede la seconda, e non prima. Metterla anche nella mappa dei
+            livelli vorrebbe dire mostrarla a chi e' al livello 3, cioe' promettere una
+            cosa che non esiste a chi non ha ancora finito quella che esiste.
+
+            Senza date: vedi il commento in testa al file. La Torre non ha livelli dietro,
+            e finche' non li ha si dice che e' in lavorazione, non che sta per arrivare. */}
         <div className="pl-trionfo__annuncio">
           <p className="pl-trionfo__annuncioTitolo">{t('trionfo.prossimiTitolo')}</p>
+          <p className="pl-trionfo__annuncioOpera">{t('opere.torre')}</p>
           <p className="pl-trionfo__annuncioTesto">{t('trionfo.prossimiTesto')}</p>
         </div>
 

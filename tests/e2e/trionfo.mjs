@@ -19,6 +19,7 @@ import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { quadroNumero, TOTALE_QUADRI, ATTI } from '../../src/config/quadri.js';
+import { traduttore } from '../../src/i18n/index.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
 import { createRng } from '../../src/core/rng.js';
@@ -349,17 +350,20 @@ if (await vinciIlPrimo()) {
 
 // ---------- 3. La fascia dell'atto chiuso ----------
 const primoAtto = ATTI[0];
-console.log(`3. tutto il primo atto ("${primoAtto.nome}") tranne il primo livello: mi aspetto la fascia...`);
+// Il nome dell'atto non sta piu' nei dati: si chiede alle traduzioni, nella lingua in cui
+// la pagina di prova sta girando.
+const nomeAtto = traduttore('it')(`atti.${primoAtto.id}`);
+console.log(`3. tutto il primo atto ("${nomeAtto}") tranne il primo livello: mi aspetto la fascia...`);
 await preparaEGioca(tutti.filter((n) => n > 1 && n <= primoAtto.a));
 if (await vinciIlPrimo()) {
   await page.waitForTimeout(1000);
   await page.screenshot({ path: `${OUT}/3-atto-chiuso.png` });
   const fasce = await page.locator('.pl-atto-chiuso').count();
   if (fasce !== 1) {
-    errori.push(`ATTO: chiudendo "${primoAtto.nome}" la fascia non compare (trovate ${fasce})`);
+    errori.push(`ATTO: chiudendo "${nomeAtto}" la fascia non compare (trovate ${fasce})`);
   } else {
     const testo = await page.locator('.pl-atto-chiuso').innerText();
-    if (!testo.includes(primoAtto.nome)) {
+    if (!testo.includes(nomeAtto)) {
       errori.push(`ATTO: la fascia non nomina l atto. Dice: "${testo.replace(/\n/g, ' | ')}"`);
     }
     console.log(`   fascia dell atto: "${testo.replace(/\n/g, ' | ')}"`);

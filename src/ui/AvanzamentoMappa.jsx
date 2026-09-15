@@ -50,7 +50,7 @@ export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, 
 
   return (
     <div className="pl-avanza">
-      <p className="pl-avanza__atto">{atto ? atto.nome : ''}</p>
+      <p className="pl-avanza__atto">{atto ? t(`atti.${atto.id}`) : ''}</p>
 
       <ol className="pl-avanza__strada" aria-hidden="true">
         {tappe.map((q) => {

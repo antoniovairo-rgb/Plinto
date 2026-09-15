@@ -131,13 +131,13 @@ const MOTIVI = {
  * fortuna per diventare una richiesta di costanza.
  */
 const ATTI = [
-  { da:  1, a: 10, nome: 'Le basi',      tipi: ['righe','colonne','quadranti','gruppi'],                          motivi: ['nessuno'],                                  mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22] },
-  { da: 11, a: 24, nome: 'Il ritmo',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['nessuno','angoli','croce'],                 mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20] },
-  { da: 25, a: 40, nome: 'Gli ostacoli', tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['scala','isole','cornice','colonne','blocchi'], mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18] },
-  { da: 41, a: 58, nome: 'La pressione', tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16] },
-  { da: 59, a: 76, nome: 'Il mestiere',  tipi: ['punteggio','catena','gruppi','celle','righe'],                    motivi: ['clessidra','labirinto','fitto','assedio','isole'], mosse: [20, 30], percentile: [34, 50], margine: [1.16, 1.12] },
-  { da: 77, a: 92, nome: 'La maestria',  tipi: ['punteggio','catena','celle','quadranti','gruppi'],               motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08] },
-  { da: 93, a:100, nome: 'La vetta',     tipi: ['punteggio','celle','catena','gruppi','intrecci'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05] },
+  { da:  1, a: 10, id: 'fondamenta',      tipi: ['righe','colonne','quadranti','gruppi'],                          motivi: ['nessuno'],                                  mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22] },
+  { da: 11, a: 24, id: 'pilastri',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['nessuno','angoli','croce'],                 mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20] },
+  { da: 25, a: 40, id: 'roccia', tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['scala','isole','cornice','colonne','blocchi'], mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18] },
+  { da: 41, a: 58, id: 'vuoto', tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16] },
+  { da: 59, a: 76, id: 'strada',  tipi: ['punteggio','catena','gruppi','celle','righe'],                    motivi: ['clessidra','labirinto','fitto','assedio','isole'], mosse: [20, 30], percentile: [34, 50], margine: [1.16, 1.12] },
+  { da: 77, a: 92, id: 'arco',  tipi: ['punteggio','catena','celle','quadranti','gruppi'],               motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08] },
+  { da: 93, a:100, id: 'ultimaPietra',     tipi: ['punteggio','celle','catena','gruppi','intrecci'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05] },
 ];
 
 const NOMI = {
@@ -874,7 +874,7 @@ const righe = quadri.map((q) => {
   const griglia = q.griglia
     ? `\n    griglia: MOTIVI.${q.motivo},`
     : '';
-  return `  { numero: ${q.numero}, nome: '${q.nome}', atto: ${JSON.stringify(attoDi(q.numero).nome)}, `
+  return `  { numero: ${q.numero}, nome: '${q.nome}', atto: ${JSON.stringify(attoDi(q.numero).id)}, `
     + `obiettivi: [{ tipo: '${q.tipo}', quanti: ${q.bersaglio} }], maxMosse: ${q.maxMosse},${griglia} },`;
 });
 
@@ -920,8 +920,30 @@ export const QUADRI = [
 ${righe.join('\n')}
 ];
 
-/** Gli atti del percorso, per l'interfaccia: servono a far vedere dove si e' arrivati. */
-export const ATTI = ${JSON.stringify(ATTI.map((a) => ({ da: a.da, a: a.a, nome: a.nome })), null, 2).replace(/"([a-z]+)":/g, '$1:')};
+/**
+ * Gli atti del percorso: servono a far vedere dove si e' arrivati.
+ *
+ * Qui c'e' l'IDENTIFICATIVO, non il nome. Il nome visibile sta nelle traduzioni, sotto
+ * "atti.<id>": finche' e' stato scritto qui, in italiano, chi giocava in inglese leggeva
+ * "Le basi" e "La vetta" dentro un'interfaccia inglese, e nessuno se n'era accorto perche'
+ * i dati generati non passano da nessun controllo sulle traduzioni.
+ */
+export const ATTI = ${JSON.stringify(ATTI.map((a) => ({ id: a.id, da: a.da, a: a.a })), null, 2).replace(/"([a-z]+)":/g, '$1:')};
+
+/**
+ * Le opere: i gruppi di livelli, ognuno con i suoi atti.
+ *
+ * Oggi ce n'e' UNA, il Ponte, e sono i cento livelli che esistono. La struttura e' al
+ * plurale lo stesso, perche' e' il punto: aggiungere un gruppo nuovo deve voler dire
+ * aggiungere una voce qui e i suoi livelli, non rimettere mano a come il gioco e' fatto.
+ * I progressi sono gia' salvati per numero di livello, quindi un secondo gruppo che parte
+ * dal 101 non chiede nessuna migrazione di quello che le persone hanno gia' fatto.
+ *
+ * Il nome sta nelle traduzioni, sotto "opere.<id>", per la stessa ragione degli atti.
+ */
+export const OPERE = [
+  { id: 'ponte', da: 1, a: ${quadri.length} },
+];
 
 /** @param {number} numero */
 export function quadroNumero(numero) {

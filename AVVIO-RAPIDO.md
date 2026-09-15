@@ -75,7 +75,7 @@ risposta. Se ti va di annotare qualcosa mentre giochi:
 
 ```bash
 npm run verifica   # tutti i controlli, come in CI (circa un'ora)
-npm test           # 499 test in 29 file, circa 20 secondi
+npm test           # 501 test in 29 file, circa 20 secondi
 npm run e2e        # una partita completa guidata in un browser
 npm run sim        # migliaia di partite simulate, per il bilanciamento
 npm run schermate  # rigenera le immagini in store/

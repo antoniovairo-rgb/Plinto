@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
-import { QUADRI, ATTI, TOTALE_QUADRI } from '../../config/quadri.js';
+import { QUADRI, ATTI, OPERE, TOTALE_QUADRI } from '../../config/quadri.js';
 import { caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 import { CondividiPercorso } from '../Condividi.jsx';
@@ -36,8 +36,11 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
     tappaCorrente.current?.scrollIntoView({ block: 'center' });
   }, []);
 
+  // Il titolo e' il nome dell'opera, non la parola "Livelli": i cento livelli sono UNA
+  // cosa, il Ponte, e quando ce ne sara' un'altra questa schermata sapra' gia' dire quale
+  // si sta guardando.
   return (
-    <Pagina titolo={t('quadri.titolo')} onIndietro={onIndietro} t={t}>
+    <Pagina titolo={t(`opere.${OPERE[0].id}`)} onIndietro={onIndietro} t={t}>
       <div className="pl-mappa__testata">
         <Plinto espressione={superati >= TOTALE_QUADRI ? 'contento' : 'normale'} dimensione={56} className="pl-plinto--vivo" />
         <div>
@@ -70,9 +73,9 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
         const fattiQui = dellAtto.filter((q) => progressi[q.numero]).length;
         const apertoQui = dellAtto.some((q) => quadroSbloccato(q.numero, progressi));
         return (
-          <section key={atto.nome} className={`pl-atto ${apertoQui ? '' : 'pl-atto--chiuso'}`}>
+          <section key={atto.id} className={`pl-atto ${apertoQui ? '' : 'pl-atto--chiuso'}`}>
             <header className="pl-atto__testata">
-              <h2 className="pl-atto__nome">{atto.nome}</h2>
+              <h2 className="pl-atto__nome">{t(`atti.${atto.id}`)}</h2>
               <span className="pl-atto__conteggio">{fattiQui}/{dellAtto.length}</span>
             </header>
 

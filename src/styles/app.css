@@ -2240,6 +2240,14 @@ button {
   font-weight: 700;
   color: var(--pl-text);
 }
+/* Il nome dell'opera che verra': d'ottone come i traguardi, ma senza alone -- non e'
+   una cosa fatta, e' una cosa annunciata. */
+.pl-trionfo__annuncioOpera {
+  margin: 4px 0 2px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--pl-brand);
+}
 .pl-trionfo__annuncioTesto {
   margin: 0;
   font-size: 0.9rem;

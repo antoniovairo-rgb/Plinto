@@ -133,7 +133,7 @@ export function SchermoFineQuadro({
                   volta e' diverso" che non ruba niente alla festa dei cento livelli. */}
               {atto.intensita === 3 ? <Plinto espressione="contento" dimensione={34} /> : null}
               <p className="pl-atto-chiuso__titolo">
-                {t('quadri.attoChiuso').replace('{nome}', atto.nome)}
+                {t('quadri.attoChiuso').replace('{nome}', t(`atti.${atto.id}`))}
               </p>
             </div>
             {fraseAtto ? <p className="pl-atto-chiuso__frase">{fraseAtto}</p> : null}

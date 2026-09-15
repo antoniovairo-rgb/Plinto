@@ -9,7 +9,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { formattaSchedaTrionfo, FIRMA_TRIONFO, RIGA_DISEGNATA, LIMITE } from '../src/core/scheda.js';
-import { ATTI, TOTALE_QUADRI, attoDelQuadro } from '../src/config/quadri.js';
+import { ATTI, OPERE, TOTALE_QUADRI, attoDelQuadro } from '../src/config/quadri.js';
 import { traduttore, LINGUE } from '../src/i18n/index.js';
 
 const memoria = new Map();
@@ -73,7 +73,7 @@ describe('riepilogo del percorso', () => {
 });
 
 describe('chiusura di un atto', () => {
-  const atto = { da: 1, a: 10, nome: 'Le basi' };
+  const atto = { id: 'fondamenta', da: 1, a: 10 };
 
   it('si chiude quando cade l ultimo livello che mancava', () => {
     const r = riepilogoAtto(atto, { numero: 10, primaVolta: true }, superati(daA(1, 10)));
@@ -123,6 +123,33 @@ describe('chiusura di un atto', () => {
     // fatto proprio a chi un livello lo ha saltato.
     const conBuco = superati(daA(1, ATTI[1].a).filter((n) => n !== 5));
     expect(riepilogoAtto(ATTI[1], null, conBuco).attiChiusi).toBe(1);
+  });
+
+  it('ogni atto e ogni opera hanno un nome in tutte e due le lingue', () => {
+    // I nomi sono usciti dai dati generati e sono finiti nelle traduzioni. Se un giorno
+    // il generatore aggiungesse un atto senza che nessuno scriva il nome, a schermo
+    // comparirebbe "atti.qualcosa": questa prova lo ferma prima.
+    for (const lingua of Object.keys(LINGUE)) {
+      const dizionario = LINGUE[lingua].strings;
+      for (const atto of ATTI) {
+        expect(typeof dizionario.atti?.[atto.id], `${lingua}: atti.${atto.id}`).toBe('string');
+        expect(dizionario.atti[atto.id].trim().length).toBeGreaterThan(2);
+      }
+      for (const opera of OPERE) {
+        expect(typeof dizionario.opere?.[opera.id], `${lingua}: opere.${opera.id}`).toBe('string');
+      }
+      // La Torre non ha livelli, ma il suo nome si vede nella festa finale.
+      expect(typeof dizionario.opere?.torre).toBe('string');
+    }
+  });
+
+  it('le opere coprono tutti i livelli, e gli atti stanno dentro un opera', () => {
+    const coperti = OPERE.reduce((n, o) => n + (o.a - o.da + 1), 0);
+    expect(coperti).toBe(TOTALE_QUADRI);
+    for (const atto of ATTI) {
+      const dentro = OPERE.filter((o) => atto.da >= o.da && atto.a <= o.a);
+      expect(dentro.length, `atto ${atto.id}`).toBe(1);
+    }
   });
 
   it('ogni atto ha la sua frase in tutte e due le lingue', () => {

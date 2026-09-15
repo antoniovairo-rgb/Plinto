@@ -7,6 +7,66 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.13.0] — 15 settembre 2026
+
+### Cambiato
+
+**I cento livelli sono Il Ponte, e i sette atti hanno nomi da cantiere.** Il nome del gioco
+lo diceva già e nessuno lo aveva mai detto: un plinto è il blocco su cui poggia una colonna,
+e Plinto è un blocco di pietra squadrato che ha preso vita. Il campo semantico era dentro il
+gioco dal primo giorno, semplicemente non era mai stato usato.
+
+| Livelli | Prima | Adesso | In inglese |
+|---|---|---|---|
+| 1-10 | Le basi | Le fondamenta | Foundations |
+| 11-24 | Il ritmo | I pilastri | Pillars |
+| 25-40 | Gli ostacoli | La roccia | The Rock |
+| 41-58 | La pressione | Il vuoto | The Gap |
+| 59-76 | Il mestiere | La strada | The Road |
+| 77-92 | La maestria | L'arco | The Arch |
+| 93-100 | La vetta | L'ultima pietra | The Last Stone |
+
+Ogni nome dice ancora che cosa chiede quel tratto, solo senza spiegarlo: la roccia è il
+terreno duro, cioè i livelli che partono con la griglia già occupata; il vuoto è il tratto
+senza appoggi, cioè meno spazio e meno mosse; l'arco è dove non si può sbagliare di un dito.
+I nomi possono essere evocativi perché dalla 1.11.0 la descrizione la fa la frase dell'atto:
+prima il nome era l'unica cosa che descriveva quel tratto, e doveva essere didascalico.
+
+La schermata dei livelli si intitola **Il Ponte** invece che «Livelli», e la festa finale
+dice «Il Ponte è finito» invece di «Li hai finiti tutti».
+
+### Aggiunto
+
+**Le opere: i gruppi di livelli.** Oggi ce n'è una, il Ponte, e sono i cento livelli che
+esistono. La struttura è al plurale lo stesso, perché è il punto: aggiungere un gruppo nuovo
+deve voler dire aggiungere una voce e i suoi livelli, non rimettere mano a come il gioco è
+fatto. I progressi sono già salvati per numero di livello, quindi un secondo gruppo che parte
+dal 101 non chiede nessuna migrazione di quello che le persone hanno già fatto.
+
+**La Torre, annunciata alla fine del Ponte.** Chi finisce i cento livelli vede il nome
+dell'opera successiva, in lavorazione e senza date. Sta lì e in nessun altro posto: metterla
+anche nella mappa vorrebbe dire mostrarla a chi è al livello 3, cioè promettere una cosa che
+non esiste a chi non ha ancora finito quella che esiste. Non ha livelli dietro, e finché non
+li ha si dice che è in lavorazione, non che sta per arrivare.
+
+### Corretto
+
+**Chi gioca in inglese non legge più l'italiano.** I nomi degli atti stavano scritti nel file
+dei livelli, che è generato, e non passavano da nessuna traduzione: un'interfaccia inglese
+mostrava «Le basi» e «La vetta». Adesso nel file dei livelli ci sono identificativi stabili
+(`fondamenta`, `ultimaPietra`) e le parole visibili stanno nelle traduzioni, in tutte e due
+le lingue. Un test controlla che ogni atto e ogni opera abbiano un nome in ogni lingua: se un
+giorno il generatore aggiungesse un atto senza il nome, la prova fallisce prima che qualcuno
+veda a schermo la chiave grezza.
+
+### Verificato
+
+**Il file dei livelli è stato rigenerato, e i cento livelli non sono cambiati.** Era il rischio
+vero di questa modifica: il nome dell'atto stava dentro i dati generati, quindi toglierlo
+voleva dire far ricalcolare tutto al generatore. Confronto riga per riga fra il file di prima e
+quello di adesso, normalizzando il solo campo che doveva cambiare: cento livelli su cento
+identici, bersagli, tetti di mosse e motivi delle griglie compresi.
+
 ## [1.12.0] — 15 settembre 2026
 
 ### Aggiunto

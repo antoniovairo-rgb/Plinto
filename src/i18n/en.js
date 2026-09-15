@@ -245,15 +245,30 @@ export default {
     daQuando: 'The first challenge is the one from {giorno}: there was none before that.',
   },
   trionfo: {
-    titolo: 'You finished them all.',
+    titolo: '{opera} is finished.',
     sotto: '{totale} levels, from the first to the last. The path is closed.',
     livelli: 'levels cleared',
     mosse: 'moves spent',
     primoColpo: 'on the first try',
     ostinato: 'Level {n} held out {tentativi} times. In the end it fell too.',
     prossimiTitolo: 'What now?',
-    prossimiTesto: 'More levels are in the works. There is no date yet: when they are ready, you will find them here.',
+    prossimiTesto: 'In the works. There is no date yet: when it is ready, you will find it here.',
     libera: 'Play a free game',
+  },
+
+  atti: {
+    fondamenta: 'Foundations',
+    pilastri: 'Pillars',
+    roccia: 'The Rock',
+    vuoto: 'The Gap',
+    strada: 'The Road',
+    arco: 'The Arch',
+    ultimaPietra: 'The Last Stone',
+  },
+
+  opere: {
+    ponte: 'The Bridge',
+    torre: 'The Tower',
   },
 
   salvataggio: {
@@ -279,7 +294,6 @@ export default {
   },
 
   quadri: {
-    titolo: 'Levels',
     avanzamento: '{fatti} of {totale}',
     superato: 'Cleared',
     bloccato: 'Clear the previous level',

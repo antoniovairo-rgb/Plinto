@@ -275,7 +275,8 @@ export default {
   },
   // La fine del percorso: l'unico momento in cui il gioco alza la voce.
   trionfo: {
-    titolo: 'Li hai finiti tutti.',
+    // Il traguardo ha un nome: non "li hai finiti tutti", ma l'opera che hai costruito.
+    titolo: '{opera} è finito.',
     sotto: '{totale} livelli, dal primo all\'ultimo. Il percorso è chiuso.',
     livelli: 'livelli superati',
     mosse: 'mosse spese',
@@ -283,8 +284,36 @@ export default {
     ostinato: 'Il livello {n} ha resistito {tentativi} volte. Alla fine è caduto anche quello.',
     prossimiTitolo: 'E adesso?',
     // Senza date, per scelta. Vedi il commento in testa a ui/schermate/Trionfo.jsx.
-    prossimiTesto: 'Altri livelli sono in lavorazione. Non c\'è ancora una data: quando ci saranno, li trovi qui.',
+    // L'opera successiva si annuncia per nome e come lavoro in corso. Niente date, niente
+    // "presto": sono le parole che fanno sembrare imminente una cosa che non ha una data,
+    prossimiTesto: 'In lavorazione. Non c\'è ancora una data: quando ci sarà, la trovi qui.',
     libera: 'Gioca in partita libera',
+  },
+
+  /**
+   * I nomi degli atti e delle opere. Stanno QUI e non nel file dei livelli, che e'
+   * generato: li' erano scritti in italiano e non passavano da nessuna traduzione, quindi
+   * chi giocava in inglese leggeva "Le basi" dentro un'interfaccia inglese.
+   *
+   * Il campo semantico e' il cantiere, e viene dal nome del gioco: un plinto e' il blocco
+   * su cui poggia una colonna, e Plinto e' un blocco di pietra squadrato. Ogni nome dice
+   * anche che cosa chiede quel tratto: la roccia e' il terreno duro, cioe' i livelli che
+   * partono con la griglia gia' occupata; il vuoto e' il tratto senza appoggi, cioe' meno
+   * spazio e meno mosse; l'arco e' dove non si puo' sbagliare di un dito.
+   */
+  atti: {
+    fondamenta: 'Le fondamenta',
+    pilastri: 'I pilastri',
+    roccia: 'La roccia',
+    vuoto: 'Il vuoto',
+    strada: 'La strada',
+    arco: 'L\'arco',
+    ultimaPietra: 'L\'ultima pietra',
+  },
+
+  opere: {
+    ponte: 'Il Ponte',
+    torre: 'La Torre',
   },
 
   salvataggio: {
@@ -312,7 +341,6 @@ export default {
   },
 
   quadri: {
-    titolo: 'Livelli',
     avanzamento: '{fatti} di {totale}',
     superato: 'Superato',
     bloccato: 'Supera il livello precedente',

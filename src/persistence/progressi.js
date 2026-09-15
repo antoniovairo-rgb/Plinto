@@ -298,7 +298,7 @@ export function riepilogoAtto(atto, appenaVinto = null, progressi = caricaProgre
   for (let n = 1; n <= TOTALE_QUADRI; n += 1) if (!quadroSuperato(n, progressi)) mancanti += 1;
 
   return {
-    nome: atto.nome,
+    id: atto.id,
     da: atto.da,
     a: atto.a,
     superati,

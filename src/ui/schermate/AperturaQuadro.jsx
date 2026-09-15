@@ -22,7 +22,7 @@ export function AperturaQuadro({ quadro, onGioca, onElenco, t }) {
   return (
     <div className="pl-screen pl-apertura">
       <div className="pl-scroll">
-        <p className="pl-apertura__atto">{quadro.atto}</p>
+        <p className="pl-apertura__atto">{t(`atti.${quadro.atto}`)}</p>
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 
         <div className="pl-apertura__scena">
