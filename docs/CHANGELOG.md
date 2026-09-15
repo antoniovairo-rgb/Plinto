@@ -7,6 +7,42 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.13.4] — 15 settembre 2026
+
+### Cambiato
+
+**La faccia del livello fallito adesso è dispiaciuta.** È la terza versione in due giorni,
+e le prime due sbagliavano in due modi opposti.
+
+`deluso`, con le sopracciglia a V e la bocca all'ingiù, era un personaggio arrabbiato *con*
+chi aveva appena perso: la domanda che il progetto si fa da sempre è «quando perdi, ti
+sembra colpa tua?», e quella faccia rispondeva di sì. La 1.10.4 l'ha sostituita con
+`incoraggia`, che però correggeva troppo: sorriso aperto e sopracciglia distese, cioè un
+personaggio contento mentre tu hai perso. Visto sul telefono al livello 73, con l'obiettivo
+a 8 su 9, sembrava che la cosa non lo riguardasse.
+
+`dispiaciuto` è l'unica delle tre che guarda il giocatore invece del risultato:
+sopracciglia con l'estremo **interno** alzato, che è il segno della dispiacenza ed è il
+rovescio esatto della V della rabbia, bocca appena arcuata all'ingiù e pupille un po'
+abbassate. Dispiaciuto *per* te, non *di* te.
+
+Le altre due espressioni sono state tolte invece di lasciate nel vocabolario: una faccia
+che nessuno usa è codice morto, e una faccia sbagliata rimasta a disposizione è un invito a
+rimetterla.
+
+### Corretto
+
+**La barra dell'obiettivo era tagliata a metà riga.** Segnalato guardando la schermata: la
+barretta sotto «Chiudi una colonna 0 / 1» finiva a due terzi del riquadro, e il numero
+stava appiccicato all'etichetta invece che in fondo alla riga.
+
+La causa, misurata e non ipotizzata: riga larga 350 pixel, colonna interna larga 159. La
+regola di base di quella riga è scritta per `flex` e porta con sé `justify-content:
+space-between`; quando la riga degli obiettivi è diventata una griglia, nella 1.10.4, quella
+proprietà è rimasta addosso. Su una griglia non allarga le tracce, le impacchetta alla
+larghezza del contenuto: la barra finiva larga quanto il testo sopra. Adesso la colonna è
+dichiarata esplicitamente e prende tutta la riga, 318 pixel su 318 disponibili.
+
 ## [1.13.3] — 15 settembre 2026
 
 ### Cambiato

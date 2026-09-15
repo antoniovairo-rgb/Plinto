@@ -11,16 +11,27 @@
  * cambia insieme al resto quando si passa al tema chiaro.
  *
  * Le espressioni servono a dire qualcosa, non a fare simpatia: `contento` a un Quadro
- * superato, `incoraggia` a uno fallito, `stupito` quando succede qualcosa di grosso.
+ * superato, `dispiaciuto` a uno fallito, `stupito` quando succede qualcosa di grosso.
  *
- * PERCHE' A UN LIVELLO FALLITO NON C'E' PIU' `deluso`. C'era, e visto sul telefono al
- * livello 65 era quello che era: sopracciglia a V e bocca all'ingiu', cioe' un personaggio
- * arrabbiato CON il giocatore nel momento in cui ha appena perso. La domanda che il
- * progetto si fa da sempre e' "quando perdi, ti sembra colpa tua?": una faccia cosi'
- * rispondeva di si'.
- * `incoraggia` guarda il giocatore, non il fallimento: sopracciglia distese e un
- * sorriso aperto, non il ghigno pieno della vittoria. `deluso` resta nel vocabolario
- * perche' un giorno potrebbe servire a dire un'altra cosa, non questa.
+ * LA FACCIA DEL LIVELLO FALLITO, IN TRE VERSIONI, PERCHE' LE PRIME DUE ERANO SBAGLIATE
+ * IN DUE MODI OPPOSTI.
+ *
+ * `deluso` -- sopracciglia a V e bocca all'ingiu' -- era un personaggio arrabbiato CON il
+ * giocatore nel momento in cui ha appena perso. La domanda che il progetto si fa da
+ * sempre e' "quando perdi, ti sembra colpa tua?", e quella faccia rispondeva di si'.
+ *
+ * `incoraggia` correggeva troppo: sorriso aperto e sopracciglia distese, cioe' un
+ * personaggio contento mentre tu hai perso. Visto sul telefono al livello 73, con
+ * l'obiettivo a 8 su 9, sembrava che la cosa non lo riguardasse.
+ *
+ * `dispiaciuto` sta in mezzo, ed e' l'unica delle tre che guarda il giocatore invece del
+ * risultato: sopracciglia con l'estremo INTERNO alzato -- il segno della dispiacenza, che
+ * e' esattamente l'opposto della V della rabbia -- bocca appena arcuata all'ingiu' e
+ * pupille un po' abbassate. Dispiaciuto PER te, non DI te.
+ *
+ * Le altre due sono state tolte invece di lasciate nel vocabolario: una faccia che nessuno
+ * usa e' codice morto, e una faccia sbagliata rimasta a disposizione e' un invito a
+ * rimetterla.
  */
 /**
  * Il sopracciglio: e' quasi tutto quello che decide l'umore di una faccia disegnata.
@@ -33,6 +44,13 @@ function sopracciglio(tipo, cx, i) {
   const x = cx - 7;
   if (tipo === 'giu') return `M ${x} 38 l 14 ${i === 0 ? 4 : -4}`;
   if (tipo === 'su') return `M ${x} ${36 + (i === 0 ? 3 : 0)} l 14 ${i === 0 ? -3 : 3}`;
+  // `triste`: l'estremo INTERNO alzato e l'esterno che scende. E' il segno che una faccia
+  // usa per dire dispiacere, ed e' il rovescio esatto della V della rabbia.
+  if (tipo === 'triste') {
+    return i === 0
+      ? `M ${x} 39 q 7 -1 14 -3`
+      : `M ${x} 36 q 7 0.5 14 3`;
+  }
   return `M ${x} 37.5 q 7 -3.5 14 0`;
 }
 
@@ -40,8 +58,7 @@ export function Plinto({ espressione = 'normale', dimensione = 72, className = '
   const occhi = {
     normale:  { rx: 5.4, ry: 6.2, pupillaY: 0, sopracciglia: null },
     contento: { rx: 5.4, ry: 3.2, pupillaY: -1, sopracciglia: null },
-    deluso:   { rx: 5.0, ry: 5.6, pupillaY: 2, sopracciglia: 'giu' },
-    incoraggia: { rx: 5.4, ry: 6.0, pupillaY: -0.6, sopracciglia: 'dolce' },
+    dispiaciuto: { rx: 5.2, ry: 5.9, pupillaY: 1.4, sopracciglia: 'triste' },
     stupito:  { rx: 6.6, ry: 7.4, pupillaY: 0, sopracciglia: 'su' },
     dorme:    { rx: 5.4, ry: 0.8, pupillaY: 0, sopracciglia: null },
   }[espressione] ?? {};
@@ -49,9 +66,9 @@ export function Plinto({ espressione = 'normale', dimensione = 72, className = '
   const bocca = {
     normale:  'M 40 66 Q 50 72 60 66',
     contento: 'M 36 62 Q 50 78 64 62 Z',
-    deluso:   'M 40 71 Q 50 63 60 71',
-    // Aperto e sincero, ma non riempito: il sorriso pieno e' della vittoria.
-    incoraggia: 'M 39 65 Q 50 76 61 65',
+    // Appena arcuata all'ingiu': un broncio profondo tornerebbe a dare la colpa a chi
+    // guarda, una bocca dritta non direbbe niente.
+    dispiaciuto: 'M 40 69 Q 50 64.5 60 69',
     stupito:  null,
     dorme:    'M 43 68 h 14',
   }[espressione];

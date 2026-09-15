@@ -41,7 +41,7 @@ export function SchermoFineQuadro({
 
         {/* Plinto dice l'esito prima delle parole: si legge in mezzo secondo. */}
         <div className={`pl-fine__plinto ${vinto && animazioni ? 'pl-festa' : ''}`}>
-          <Plinto espressione={vinto ? 'contento' : 'incoraggia'} dimensione={92} className="pl-plinto--vivo" />
+          <Plinto espressione={vinto ? 'contento' : 'dispiaciuto'} dimensione={92} className="pl-plinto--vivo" />
         </div>
 
         <p className={`pl-quadro-esito ${vinto ? 'pl-quadro-esito--vinto' : ''}`}>

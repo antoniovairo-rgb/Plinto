@@ -595,7 +595,18 @@ button {
 /* La sconfitta di un livello: ogni obiettivo con la sua barra. Il layout a griglia vale
    SOLO qui (`--obiettivi`): la stessa `.pl-fine__riga` in Fine.jsx ha due figli
    affiancati e deve restare com'e'. */
-.pl-fine__dettagli--obiettivi .pl-fine__riga { display: grid; gap: 9px; }
+.pl-fine__dettagli--obiettivi .pl-fine__riga {
+  display: grid;
+  /* UNA COLONNA CHE PRENDE TUTTA LA RIGA, e va detto esplicitamente. La regola di base di
+     `.pl-fine__riga` e' scritta per flex e porta con se' `justify-content: space-between`:
+     su una griglia quella proprieta' non allarga le tracce, le impacchetta alla larghezza
+     del contenuto. Risultato, misurato: riga larga 350px e colonna larga 159, cioe' la
+     barra dell'obiettivo tagliata a meta' e il numero appiccicato all'etichetta invece che
+     in fondo. Una proprieta' di flex rimasta addosso a un contenitore diventato griglia. */
+  grid-template-columns: 1fr;
+  justify-content: normal;
+  gap: 9px;
+}
 .pl-fine__riga-testo { display: flex; justify-content: space-between; gap: 12px; }
 .pl-fine__riga strong.pl-fine__riga--fatto { color: var(--pl-ok); }
 .pl-fine__barra {
