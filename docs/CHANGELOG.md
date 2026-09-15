@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.13.3] — 15 settembre 2026
+
+### Cambiato
+
+**I due modi di portare via i progressi non sono più presentati come pari.** Chiesto da chi
+ci gioca: «Scarica il file e Copia il testo producono la stessa cosa, non sono ridondanti?».
+Non lo sono, ma la schermata non lo diceva: due pulsanti identici affiancati costringevano a
+indovinare quale scegliere.
+
+Il file e il testo finiscono in posti diversi. Il file va nella cartella dei download, dove
+quasi nessuno entra e dove il prossimo svuotamento lo porta via. Il testo lo incolli dove
+tieni le cose che non vuoi perdere: una nota, un messaggio a te stesso. Su un telefono
+quella è spesso l'unica cassaforte che si usa davvero. Adesso «Scarica il file» è il
+pulsante pieno, «Copia il testo» sta sotto più discreto, e una riga dice a che cosa serve
+invece di lasciarlo capire.
+
+La sezione ha anche due metà dichiarate, «Porta via i progressi» e «Rimetti un salvataggio»:
+senza, i quattro pulsanti erano un elenco piatto in cui non si capiva quali due andassero
+insieme.
+
+Una nota sulla giustificazione precedente, perché era debole. Il secondo pulsante era stato
+scritto come ripiego, nel caso il download fallisse in silenzio dentro l'applicazione
+installata. Quel fallimento non è mai stato osservato su un dispositivo vero: era una
+supposizione, non un motivo. Il motivo vero è dove finiscono le due cose.
+
 ## [1.13.2] — 15 settembre 2026
 
 ### Sicurezza dei dati

@@ -331,8 +331,15 @@ export default {
     // Si dice come stanno le cose, non "fai il backup": la ragione per cui questa schermata
     // esiste e' che i progressi stanno in un posto solo, e chi gioca non ha modo di saperlo.
     nota: 'I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser.',
+    portaVia: 'Porta via i progressi',
+    rimetti: 'Rimetti un salvataggio',
     scarica: 'Scarica il file',
     copia: 'Copia il testo',
+    // Il testo non e' un ripiego del file: finisce in un posto diverso. Il file va nella
+    // cartella dei download, dove quasi nessuno entra e dove il prossimo svuotamento lo
+    // porta via; il testo lo incolli dove tieni le cose che non vuoi perdere. Detto qui,
+    // perche' due pulsanti che sembrano fare la stessa cosa costringono a indovinare.
+    copiaSpiega: 'Comodo per incollarlo in una nota o in un messaggio a te stesso.',
     copiato: 'Copiato. Incollalo dove vuoi tenerlo al sicuro.',
     importa: 'Scegli un file da importare',
     incolla: 'Oppure incolla qui un salvataggio',

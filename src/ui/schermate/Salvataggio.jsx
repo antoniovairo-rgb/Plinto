@@ -92,16 +92,23 @@ export function Salvataggio({ t }) {
       <span className="pl-hud__etichetta">{t('salvataggio.titolo')}</span>
       <p className="pl-nota">{t('salvataggio.nota')}</p>
 
-      <div className="pl-segmenti">
-        <button type="button" className="pl-btn" onClick={scarica}>
-          {t('salvataggio.scarica')}
-        </button>
-        <button type="button" className="pl-btn" onClick={copia}>
-          {t('salvataggio.copia')}
-        </button>
-      </div>
-      {copiato ? <p className="pl-nota">{t('salvataggio.copiato')}</p> : null}
+      {/* UNA PRINCIPALE E UNA DISCRETA, non due pari. Affiancate e con lo stesso peso
+          sembravano due modi della stessa cosa, e chi legge doveva indovinare quale
+          scegliere: e' stato chiesto da chi ci gioca. Il file e' la via normale; il testo
+          serve a chi vuole metterlo in una nota, e la riga sotto lo dice invece di
+          lasciarlo capire. */}
+      <p className="pl-salva__etichetta">{t('salvataggio.portaVia')}</p>
+      <button type="button" className="pl-btn pl-btn--largo" onClick={scarica}>
+        {t('salvataggio.scarica')}
+      </button>
+      <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={copia}>
+        {t('salvataggio.copia')}
+      </button>
+      <p className="pl-nota pl-salva__spiega">
+        {copiato ? t('salvataggio.copiato') : t('salvataggio.copiaSpiega')}
+      </p>
 
+      <p className="pl-salva__etichetta">{t('salvataggio.rimetti')}</p>
       <button type="button" className="pl-btn pl-btn--largo"
               onClick={() => fileInput.current?.click()}>
         {t('salvataggio.importa')}

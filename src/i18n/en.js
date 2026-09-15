@@ -278,8 +278,11 @@ export default {
   salvataggio: {
     titolo: 'Save file',
     nota: 'Your progress lives only on this device. Export it if you do not want to lose it when you change phone or clear your browser data.',
+    portaVia: 'Take your progress with you',
+    rimetti: 'Restore a save file',
     scarica: 'Download the file',
     copia: 'Copy the text',
+    copiaSpiega: 'Handy to paste into a note or a message to yourself.',
     copiato: 'Copied. Paste it somewhere safe.',
     importa: 'Choose a file to import',
     incolla: 'Or paste a save file here',

@@ -2023,6 +2023,17 @@ button {
    un pulsante normale "Scarica il file" andava a capo, e un'etichetta spezzata in due su
    un bersaglio da toccare si legge come un errore di impaginazione. */
 .pl-salva .pl-segmenti .pl-btn { flex: 1; padding: 0 12px; }
+/* Le due meta' della sezione: portare via e rimettere. Senza queste etichette i quattro
+   pulsanti sono un elenco piatto in cui non si capisce quali due vanno insieme. */
+.pl-salva__etichetta {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pl-text-faint);
+}
+.pl-salva__spiega { margin: 0; }
 
 .pl-ricomincia {
   margin-top: 12px;
