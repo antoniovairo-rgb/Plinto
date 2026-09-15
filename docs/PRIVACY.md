@@ -101,7 +101,10 @@ Due modi, entrambi immediati e definitivi:
 1. **Impostazioni → Azzera i miei dati**, dentro il gioco.
 2. Cancellando i dati del sito dal tuo browser.
 
-Non esiste una copia altrove: cancellati lì, sono cancellati e basta.
+Non esiste nessuna copia dalla nostra parte: cancellati lì, sono cancellati e basta.
+L'unica copia possibile è quella che fai tu con **Impostazioni → Salvataggio**, che
+scrive un file sul tuo dispositivo e non lo manda da nessuna parte. Se cancelli i dati
+del gioco, quel file resta dov'è: è tuo, e sta solo dove l'hai messo.
 
 ## Minori
 

@@ -145,7 +145,7 @@ quelli disponibili.
 
 ## Stato attuale della suite
 
-`npm test`: **486 test in 28 file, tutti verdi**, durata ~20 s (misurato il 14 settembre
+`npm test`: **499 test in 29 file, tutti verdi**, durata ~20 s (misurato il 14 settembre
 2026). La metà abbondante di quei secondi sta in due file: `incitamenti.test.js`, che simula
 decine di migliaia di mosse per decidere quando dire qualcosa, e `invarianti.test.js`, che
 gioca 240 partite complete. È il costo di quei file, non un rallentamento della suite.
@@ -294,6 +294,7 @@ con codice 1):
 | `tests/e2e/condivisione.mjs` | `npm run condivisione` | **toglie `navigator.share`** dal browser e verifica che la condivisione ripieghi sugli appunti, con lo stesso testo e una conferma a schermo. È la situazione di chiunque giochi da un computer, ed è quella in cui un pulsante rotto non sembra rotto: chi lo tocca crede di aver condiviso |
 | `tests/e2e/anteprima.mjs` | `npm run anteprima` | la stessa promessa, ma **a schermo**: esaurisce la mano e confronta le forme comparse nel tray con quelle che erano in anteprima. Verifica anche il tasto **P** e che nella partita base la striscia non compaia affatto |
 | `tests/e2e/installazione.mjs` | `npm run installazione` | il gioco si installa, si apre **senza rete** e — soprattutto — un giocatore che ha già installato la versione vecchia riceve quella nuova? Serve la build da `/plinto/` come su GitHub Pages, con la cache HTTP disattivata perché ciò che si misura sia l'effetto del service worker e non quello del browser; poi **sostituisce i file serviti a caldo** e ricarica. Un service worker che serve per sempre la versione vecchia è il difetto peggiore che possa avere, e provando una volta sola sembra funzionare benissimo. Ha già trovato un difetto vero: alla prima visita il service worker non controlla ancora la pagina, quindi JavaScript e CSS non finivano in cache e senza rete il gioco si apriva bianco |
+| `tests/e2e/salvataggio.mjs` | `npm run e2e-salvataggio` | il giro che questa funzionalità esiste per fare: dieci livelli superati, esportati, **cancellati come farebbe chi svuota i dati del browser**, reimportati, e devono tornare tutti e dieci. Poi la regola che non si rompe: un salvataggio con tre livelli, importato su un dispositivo che ne ha dieci, ne lascia dieci e di ciascuno tiene il risultato migliore. Infine un file manomesso, che deve essere rifiutato con un messaggio invece di entrare. Verificato capace di fallire: trasformando l'unione in una sostituzione, due controlli su quattro segnalano |
 | `tests/e2e/resistenza.mjs` | `npm run soak` (o `node tests/e2e/resistenza.mjs [mosse]`) | dopo centinaia di mosse il gioco è ancora fluido? Ha accumulato memoria, nodi DOM, timer o cicli di animazione lasciati per strada? Sono i difetti che non si vedono in una partita di prova da dieci mosse. **Era rimasto fuori da `npm run verifica`, e si è rotto in silenzio**: cercava un pulsante «Gioca» che la home non aveva più da due versioni. Ora fa parte dell'elenco, perché un controllo che si lancia solo quando qualcuno se lo ricorda è un controllo che prima o poi non si lancia più |
 
 Nessuno di questi è un test unitario e nessuno gira in `npm test`: vanno lanciati a

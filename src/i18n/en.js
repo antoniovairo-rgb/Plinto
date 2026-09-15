@@ -256,6 +256,28 @@ export default {
     libera: 'Play a free game',
   },
 
+  salvataggio: {
+    titolo: 'Save file',
+    nota: 'Your progress lives only on this device. Export it if you do not want to lose it when you change phone or clear your browser data.',
+    scarica: 'Download the file',
+    copia: 'Copy to clipboard',
+    copiato: 'Copied. Paste it somewhere safe.',
+    importa: 'Choose a file to import',
+    incolla: 'Or paste a save file here',
+    leggi: 'Read it',
+    trovato: 'That save file has {file} levels cleared. You have {ora} right now.',
+    unisci: 'Merge with mine',
+    sostituisci: 'Replace everything',
+    sostituisciConferma: 'Replacing drops what you have now and keeps only what is in the save file. Continue?',
+    fatto: 'Done. You now have {livelli} levels cleared.',
+    errore: {
+      illeggibile: 'This file cannot be read.',
+      altroGioco: 'This save file is not from PLINTO.',
+      formatoIgnoto: 'This save file was written by a newer version of the game.',
+      rovinato: 'The save file is incomplete or was edited: it will not be imported, so what you already have stays safe.',
+    },
+  },
+
   quadri: {
     titolo: 'Levels',
     avanzamento: '{fatti} of {totale}',

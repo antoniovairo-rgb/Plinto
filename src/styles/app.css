@@ -730,6 +730,20 @@ button {
   color: var(--pl-text-faint);
 }
 .pl-testo { margin: 0 0 18px; font-size: 14px; line-height: 1.6; color: var(--pl-text-dim); }
+.pl-campo {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border-radius: var(--pl-radius-md);
+  border: 1px solid var(--pl-line-strong);
+  background: var(--pl-surface-2);
+  color: var(--pl-text);
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.pl-campo:focus-visible { outline: 2px solid var(--pl-brand); outline-offset: 2px; }
+
 .pl-nota { margin: 0 0 14px; font-size: 13px; color: var(--pl-text-faint); }
 .pl-nota--allarme { color: var(--pl-danger); }
 .pl-nota--piede { text-align: center; margin-top: 26px; }

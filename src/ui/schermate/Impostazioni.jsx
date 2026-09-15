@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pagina, Interruttore } from './Pagina.jsx';
 import { LINGUE } from '../../i18n/index.js';
+import { Salvataggio } from './Salvataggio.jsx';
 
 /**
  * Impostazioni. Ogni voce e' una scelta reale del giocatore, non una preferenza
@@ -51,6 +52,8 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
           ))}
         </div>
       </div>
+
+      <Salvataggio t={t} />
 
       <div className="pl-gruppo">
         {fatto ? (

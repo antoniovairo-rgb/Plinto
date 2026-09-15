@@ -287,6 +287,30 @@ export default {
     libera: 'Gioca in partita libera',
   },
 
+  salvataggio: {
+    titolo: 'Salvataggio',
+    // Si dice come stanno le cose, non "fai il backup": la ragione per cui questa schermata
+    // esiste e' che i progressi stanno in un posto solo, e chi gioca non ha modo di saperlo.
+    nota: 'I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser.',
+    scarica: 'Scarica il file',
+    copia: 'Copia negli appunti',
+    copiato: 'Copiato. Incollalo dove vuoi tenerlo al sicuro.',
+    importa: 'Scegli un file da importare',
+    incolla: 'Oppure incolla qui un salvataggio',
+    leggi: 'Leggi',
+    trovato: 'Nel salvataggio ci sono {file} livelli superati. Adesso ne hai {ora}.',
+    unisci: 'Unisci ai miei',
+    sostituisci: 'Sostituisci tutto',
+    sostituisciConferma: 'Sostituendo perdi quello che hai adesso e resta solo quello che c\'è nel salvataggio. Vuoi continuare?',
+    fatto: 'Fatto. Adesso hai {livelli} livelli superati.',
+    errore: {
+      illeggibile: 'Questo file non si riesce a leggere.',
+      altroGioco: 'Questo salvataggio non è di PLINTO.',
+      formatoIgnoto: 'Questo salvataggio è stato scritto da una versione più recente del gioco.',
+      rovinato: 'Il salvataggio è incompleto o è stato modificato: non lo importo, per non rovinare quello che hai già.',
+    },
+  },
+
   quadri: {
     titolo: 'Livelli',
     avanzamento: '{fatti} di {totale}',

@@ -7,6 +7,66 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.12.0] — 15 settembre 2026
+
+### Aggiunto
+
+**Il salvataggio si può portare via, e rimettere.** Fino a ieri tutto quello che il gioco
+ricorda stava soltanto nel browser di chi gioca, e l'unica cosa esportabile era il profilo
+di gioco, che finiva negli appunti e non si poteva nemmeno reimportare. I cento livelli
+superati non avevano nessuna via d'uscita: cancellare i dati del sito, cambiare telefono o
+disinstallare l'applicazione li buttava via. Il prezzo cresce con il gioco, e i livelli
+sono destinati a diventare di più.
+
+In **Impostazioni → Salvataggio** adesso ci sono due vie in uscita e due in entrata:
+scarica un file oppure copia il testo, scegli un file oppure incolla. Due e non una
+perché il download non si comporta allo stesso modo ovunque, e dentro un'applicazione
+installata può finire in un posto che chi gioca non trova. Il browser non dice se sia
+riuscito: meglio due strade visibili che una sola che magari fallisce in silenzio. È la
+stessa ragione per cui la scheda condivisibile ha un ripiego sugli appunti.
+
+Nel file finisce quello che costa fatica: livelli superati, record, statistiche, profilo,
+archivio delle sfide e impostazioni. Non ci finiscono le partite lasciate a metà né il
+segnaposto della ripresa, che sono roba del momento: su un altro dispositivo diventerebbero
+un livello a metà che non ricordi di aver cominciato.
+
+**L'importazione unisce, non sostituisce.** È la regola che tutto il resto serve a
+proteggere: reimportare un salvataggio vecchio non deve mai cancellare progressi più
+recenti. Di ogni livello resta il risultato migliore, con lo stesso criterio che il gioco
+usa già per i record (meno mosse; a parità di mosse, più punti), e i tentativi prendono il
+valore più alto. Sostituire tutto resta possibile, ma è una scelta esplicita con conferma,
+perché è l'unica che può far perdere qualcosa.
+
+Tre decisioni che vale la pena sapere:
+
+- **Niente si somma, si tiene il valore più alto.** Sommare vorrebbe dire che importare due
+  volte lo stesso file raddoppia le partite giocate, e un numero che cresce da solo è peggio
+  di un numero fermo. Il rovescio, detto chiaro: unendo due dispositivi su cui si è giocato
+  davvero, i totali non si addizionano.
+- **Le impostazioni viaggiano ma non si applicano unendo.** Tema, lingua e animazioni sono
+  di quel dispositivo, non del giocatore: importare i progressi non deve cambiare il tema a
+  chi lo sta usando. Si applicano solo scegliendo di sostituire tutto.
+- **Il controllo di integrità è contro i file rotti, non contro i furbi.** Un'impronta del
+  contenuto fa rifiutare un file troncato o modificato a mano, con un messaggio invece che
+  con un salvataggio rovinato. Chi vuole ritoccarsi i record può ricalcolarla, e va bene
+  così: il nemico qui è il file corrotto.
+
+Questo non è una sincronizzazione e non va raccontato come tale. Protegge chi si ricorda di
+esportare. Una sincronizzazione vera richiederebbe account e server, cioè le due cose che il
+gioco dichiara di non avere dalla prima riga del readme.
+
+### Verificato
+
+Dodici prove nuove in `tests/salvataggio.test.js` e un controllo nuovo nel gate,
+`tests/e2e/salvataggio.mjs`, che porta i controlli a venticinque. Il controllo nel browser
+fa il giro vero: dieci livelli, esporta, cancella, reimporta, e devono tornare. Tutti e due
+verificati capaci di fallire: trasformando l'unione in una sostituzione, quattro prove
+unitarie su dodici e due controlli nel browser segnalano.
+
+`PRIVACY.md` diceva «non esiste una copia altrove». Adesso una copia può farsela il
+giocatore, quindi la frase distingue le due cose: dalla nostra parte non esiste nessuna
+copia, e quella che fai tu resta sul tuo dispositivo e non viene mandata da nessuna parte.
+
 ## [1.11.0] — 15 settembre 2026
 
 ### Aggiunto
