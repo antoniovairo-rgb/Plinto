@@ -5,7 +5,12 @@ import { Plinto } from '../Plinto.jsx';
 import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
 import { TOTALE_QUADRI } from '../../config/quadri.js';
-import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE , TINTA_SOGLIA, TINTA_PASSO } from '../../config/rules.js';
+import {
+  CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA,
+  ESPLOSIONE_SOGLIA, PUNTI_CELLA_ESPLOSA, GRID_SIZE,
+} from '../../config/rules.js';
+import { fattoreTinta, fattoreEsplosione } from '../../core/scoring.js';
+import { ATTREZZI, OGNI_LIVELLI, MASSIMO as ATTREZZI_MASSIMO } from '../../persistence/attrezzi.js';
 
 /**
  * "Come si gioca": le regole, rileggibili quando si vuole.
@@ -35,6 +40,24 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
   // Il giocatore conta le mosse a vuoto, non la "tolleranza": con tolleranza 1 la
   // Catena cala alla SECONDA mossa di fila senza eliminazioni.
   const mosseAVuoto = CHAIN_GRACE + 1;
+  /*
+   * I DUE NUMERI DELLA TINTA E DELLE ESPLOSIONI LI CHIEDE AL MOTORE, non li ricalcola.
+   *
+   * Qui c'era una formula scritta a mano -- `TINTA_PASSO * 5 * 100` -- che valeva finche'
+   * la soglia era 5. Cambiata la taratura nella 1.15.0, questa pagina ha continuato a
+   * dire "+100%" mentre il gioco ne pagava 60: un aiuto che descrive regole diverse da
+   * quelle del gioco e' peggio di nessun aiuto, ed e' esattamente la cosa che questo
+   * file dichiarava in cima di voler evitare. La formula stava in DUE posti (anche nella
+   * guida al primo avvio) e ne e' invecchiato uno solo, che e' il modo in cui questi
+   * errori capitano sempre.
+   *
+   * Adesso la fonte e' una sola: la funzione che assegna i punti. Una prova confronta
+   * questi numeri con quelli del motore e fallisce se qualcuno ritocca la taratura
+   * senza riaprire l'aiuto.
+   */
+  const tintaMassima = Math.round(fattoreTinta(GRID_SIZE) * 100);
+  const esplosioneSoglia = ESPLOSIONE_SOGLIA + 1;
+  const esplosionePremio = Math.round((fattoreEsplosione(esplosioneSoglia) - 1) * 100);
 
   return (
     <Pagina titolo={t('aiuto.titolo')} onIndietro={onIndietro} t={t}>
@@ -57,7 +80,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
           riaprire da qui: sarebbe una seconda strada, piu' povera, verso quello che
           questa pagina dice gia' meglio. */}
       <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-      <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI)}</p>
+      <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
       <p className="pl-testo">{t('guida.altreModalita')}</p>
 
       <h2 className="pl-sezione">{t('aiuto.baseTitolo')}</h2>
@@ -100,7 +123,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
       </p>
       <p className="pl-testo">
         <strong>{t('guida.tintaTitolo')}</strong>{' — '}
-        {t('aiuto.tinta', { soglia: TINTA_SOGLIA, massimo: Math.round(TINTA_PASSO * 5 * 100) })}
+        {t('aiuto.tinta', { soglia: TINTA_SOGLIA, massimo: tintaMassima })}
       </p>
 
       <h2 className="pl-sezione">{t('aiuto.bombeTitolo')}</h2>
@@ -111,6 +134,29 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
         <p className="pl-testo">{t('aiuto.bombe')}</p>
       </div>
       <p className="pl-testo">{t('aiuto.bombeCatena')}</p>
+      <p className="pl-testo">
+        {t('aiuto.bombeGrandi', {
+          soglia: esplosioneSoglia,
+          premio: esplosionePremio,
+          punti: PUNTI_CELLA_ESPLOSA,
+        })}
+      </p>
+
+      {/* GLI ATTREZZI. Stanno qui e non solo nel pannello che si apre in partita: quel
+          pannello lo trova chi ha gia' capito che esistono, e chi non lo ha ancora
+          aperto non ha nessun posto dove leggere che cosa fa ognuno dei quattro. */}
+      <h2 className="pl-sezione">{t('attrezzi.titolo')}</h2>
+      <p className="pl-testo">
+        {t('aiuto.attrezzi', { ogni: OGNI_LIVELLI, massimo: ATTREZZI_MASSIMO })}
+      </p>
+      <ul className="pl-aiuto__elenco">
+        {ATTREZZI.map((nome) => (
+          <li key={nome} className="pl-testo">
+            <strong>{t(`attrezzi.${nome}`)}</strong>{' — '}{t(`attrezzi.${nome}Spiega`)}
+          </li>
+        ))}
+      </ul>
+      <p className="pl-testo">{t('aiuto.attrezziSfida')}</p>
 
       <h2 className="pl-sezione">{t('aiuto.equitaTitolo')}</h2>
       <p className="pl-testo">{t('aiuto.equita')}</p>

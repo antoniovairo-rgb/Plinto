@@ -514,7 +514,7 @@ export default {
     intreccioTitolo: 'L\'Intreccio',
     tintaTitolo: 'La Tinta',
     percorsoTitolo: 'Il percorso',
-    percorso: 'Il gioco vero sono {n} livelli, ognuno con un obiettivo suo e un numero di mosse per riuscirci. Si apre uno alla volta, e ognuno ti spiega che cosa devi fare prima di cominciare.',
+    percorso: 'Il gioco vero sono {n} livelli, ognuno con un obiettivo suo e un numero di mosse per riuscirci. Si apre uno alla volta, e ognuno ti spiega che cosa devi fare prima di cominciare. Ogni {attrezziOgni} livelli superati guadagni un attrezzo del cantiere: quando ti blocchi, scegli tu quale usare fra la gru, il gessetto, il piccone e la mensola.',
     altreModalita: 'Ci sono anche la partita libera, che non finisce mai e serve a fare punti, e la sfida del giorno: la stessa identica partita per tutti, una al giorno.',
   },
   aiuto: {
@@ -533,6 +533,9 @@ export default {
     bombeTitolo: 'Le bombe',
     bombe: 'Ogni tanto una delle caselle di un pezzo è una bomba. Sulla griglia non fa niente: esplode solo quando viene eliminata insieme al gruppo che la contiene, e allora porta via anche le otto caselle intorno.',
     bombeCatena: 'Le bombe vicine si innescano a vicenda: tre in fila portano via quindici caselle. Quelle a due caselle di distanza no. Le caselle fatte saltare valgono punti e seguono la Catena.',
+    bombeGrandi: 'Un\'esplosione grossa vale più di una piccola: ogni cella vale {punti} punti, e da {soglia} celle in su l\'intera esplosione prende un {premio}% in più per ogni cella oltre la soglia. Far saltare due caselle o sette non è la stessa cosa moltiplicata, ed è il motivo per cui a volte conviene aspettare il momento giusto invece di usare la bomba subito.',
+    attrezzi: 'Sono gli aiuti che si guadagnano giocando: uno ogni {ogni} livelli superati, e se ne tengono al massimo {massimo}. La risorsa è una sola per tutti, quindi quale usare è una scelta. Guardare il pannello non costa niente: si paga solo quando l\'attrezzo fa davvero qualcosa.',
+    attrezziSfida: 'Nella sfida del giorno non ci sono, ed è voluto: è la stessa partita per tutti, e due punteggi ottenuti con un numero diverso di attrezzi non sarebbero più confrontabili.',
     equitaTitolo: 'Nessuna difficoltà nascosta',
     equita: 'I pezzi che ricevi non dipendono da come stai andando. Il gioco non ti manda pezzi scomodi perché stai vincendo, né pezzi comodi perché stai perdendo. Le uniche regole che non vedi servono ad aiutarti, mai il contrario: a inizio partita il gioco evita di darti tre pezzi che non entrano da nessuna parte, e con la griglia molto piena garantisce almeno un pezzo piccolo. Non ci sono vite, non c\'è tempo, non c\'è niente da comprare.',
   },

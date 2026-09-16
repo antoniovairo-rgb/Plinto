@@ -442,7 +442,7 @@ export default {
     intreccioTitolo: 'The Interlock',
     tintaTitolo: 'The Tint',
     percorsoTitolo: 'The path',
-    percorso: 'The real game is {n} levels, each with its own goal and a number of moves to reach it. They open one at a time, and each one explains what you have to do before you start.',
+    percorso: 'The real game is {n} levels, each with its own goal and a number of moves to reach it. They open one at a time, and each one explains what you have to do before you start. Every {attrezziOgni} levels you clear you earn a site tool: when you get stuck, you choose which one to use among the crane, the chalk, the pickaxe and the shelf.',
     altreModalita: 'There is also free play, which never ends and is about scoring, and the daily challenge: the exact same game for everyone, once a day.',
   },
   aiuto: {
@@ -460,6 +460,9 @@ export default {
     tinta: 'A cleared group is worth more when many of its cells share one colour. It starts paying from {soglia} matching cells and reaches +{massimo}% at nine. It is not luck: you do not choose the colours of the pieces, but you choose where to put them, and that is how a majority is built.',
     bombeTitolo: 'Bombs',
     bombe: 'Now and then one of a piece\'s squares is a bomb. On the grid it does nothing: it only goes off when it is cleared along with the group holding it, and then it takes the eight squares around it too.',
+    bombeGrandi: 'A big blast is worth more than a small one: each cell pays {punti} points, and from {soglia} cells up the whole blast gains an extra {premio}% for every cell above the threshold. Clearing two cells or seven is not the same thing multiplied, which is why it is sometimes worth waiting for the right moment instead of using the bomb straight away.',
+    attrezzi: 'These are the helpers you earn by playing: one every {ogni} levels cleared, and you can hold up to {massimo}. There is a single pool for all of them, so which one to use is a real choice. Opening the panel costs nothing: you only pay when the tool actually does something.',
+    attrezziSfida: 'They are not available in the daily challenge, on purpose: it is the same game for everyone, and two scores obtained with a different number of tools would no longer be comparable.',
     bombeCatena: 'Nearby bombs set each other off: three in a row take out fifteen squares. Two squares apart, they do not. Blown squares score points and follow the Chain.',
     equitaTitolo: 'No hidden difficulty',
     equita: 'The pieces you get do not depend on how you are doing. The game will not send you awkward pieces because you are winning, or easy ones because you are losing. The only rules you cannot see are there to help you, never the opposite: early on the game avoids handing you three pieces that fit nowhere, and with a very full board it guarantees at least one small piece. There are no lives, no timer, nothing to buy.',

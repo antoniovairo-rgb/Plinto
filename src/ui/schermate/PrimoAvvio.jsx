@@ -5,7 +5,9 @@ import { getShape } from '../../core/shapes.js';
 import { Plinto } from '../Plinto.jsx';
 import { Bomba } from '../Bomba.jsx';
 import { REGOLE_INTRO, PASSI_GUIDA } from '../../config/intro.js';
-import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA, TINTA_PASSO } from '../../config/rules.js';
+import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA, GRID_SIZE } from '../../config/rules.js';
+import { fattoreTinta } from '../../core/scoring.js';
+import { OGNI_LIVELLI } from '../../persistence/attrezzi.js';
 import { TOTALE_QUADRI } from '../../config/quadri.js';
 
 /**
@@ -44,7 +46,10 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
   const catenaMassima = (1 + CHAIN_STEP * CHAIN_MAX).toFixed(2);
   const intreccioTre = (1 + INTRECCIO_STEP * 2).toFixed(2);
   const mosseAVuoto = CHAIN_GRACE + 1;
-  const tintaMassima = Math.round(TINTA_PASSO * (9 - TINTA_SOGLIA + 1) * 100);
+  // Lo stesso numero dell'aiuto, e dalla stessa fonte: la funzione che assegna i punti.
+  // Erano due formule scritte a mano in due file, ed e' bastato un cambio di taratura
+  // perche' una delle due mentisse.
+  const tintaMassima = Math.round(fattoreTinta(GRID_SIZE) * 100);
 
   return (
     <div className="pl-screen pl-intro pl-guida">
@@ -153,7 +158,7 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
         {nome === 'percorso' ? (
           <>
             <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-            <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI)}</p>
+            <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
             <p className="pl-testo">{t('guida.altreModalita')}</p>
           </>
         ) : null}

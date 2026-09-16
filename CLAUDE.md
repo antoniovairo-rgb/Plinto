@@ -125,6 +125,14 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
 - Priorita' finche' e' in test: crash > difetti > regressioni > stabilita' > resto.
 - Prima di modifiche non banali, spiega il piano e attendi conferma.
 - Un commit per funzionalita' o correzione, con il messaggio che racconta il perche'.
+- **Ogni novita' che il giocatore sente va scritta anche nell'aiuto**: `src/ui/schermate/
+  ComeSiGioca.jsx` e, se cambia che gioco e', la guida al primo avvio
+  (`src/ui/schermate/PrimoAvvio.jsx` + `src/config/intro.js`). Vale per una meccanica
+  nuova e anche per una costante ritarata, perche' l'aiuto cita dei numeri. I numeri non
+  si ricalcolano a mano: si chiedono alla funzione del motore che li usa. Pagato una
+  volta: la 1.15.0 ha spostato la soglia della Tinta e l'aiuto ha continuato a dire
+  "+100%" mentre il gioco ne pagava 60. Il promemoria e' `tests/aiuto-aggiornato.test.js`,
+  che fallisce se cambi la taratura o aggiungi un attrezzo senza riaprire l'aiuto.
 - Non modificare `docs/` di altri progetti, ne' il progetto in `../` : si lavora qui.
 - Non committare `.env` ne' chiavi. Il `.gitignore` le esclude gia'.
 - Fino alla fine dei 14 giorni di test chiuso su Play (~24 settembre 2026) **non si tocca

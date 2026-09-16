@@ -2038,6 +2038,20 @@ button {
   gap: 14px;
 }
 
+/* L'elenco degli attrezzi nell'aiuto. Senza pallini: ogni voce comincia gia' con il
+   nome in grassetto, e un pallino davanti a un nome in grassetto e' rumore. */
+.pl-aiuto__elenco {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.pl-aiuto__elenco > li { margin: 0; }
+/* Il paragrafo che segue l'elenco e' un'altra cosa, non l'ultima voce: senza questo
+   stacco "Nella sfida del giorno non ci sono" si legge come parte della mensola. */
+.pl-aiuto__elenco + .pl-testo { margin-top: 14px; }
+
 /* Nella pagina di aiuto le regole numerate hanno piu' aria che nella presentazione:
    li' si scorrono, qui si leggono. */
 .pl-screen .pl-aiuto__saluto + .pl-sezione { margin-top: 18px; }

@@ -45,6 +45,38 @@ partita. L'attrezzo che serve a sbloccarsi sarebbe stato il modo più rapido di 
 non è un caso di scuola — è proprio il momento in cui uno la mensola la usa, cioè quando la
 mano non gli piace.
 
+### Corretto
+
+**«Come si gioca» diceva che la Tinta arriva a +100%. Ne paga 60.** Il numero veniva da
+una formula ricopiata nella schermata (`TINTA_PASSO * 5`), giusta finché la soglia era 5 e
+sbagliata dal momento in cui la 1.15.0 l'ha spostata a 7. La stessa formula esisteva anche
+nella guida al primo avvio, scritta in un altro modo, e lì era rimasta giusta: è invecchiato
+uno dei due posti, che è esattamente il modo in cui questi errori capitano. Adesso il numero
+lo chiedono tutte e due alla funzione che assegna i punti, e la formula a mano non c'è più.
+
+È un difetto che nessuno segnala, e vale la pena dire perché: chi apre quella pagina la apre
+per imparare, quindi non ha modo di sospettare che sia sbagliata, e chi già sa la risposta
+non la apre. Era in produzione dalla 1.15.0.
+
+### Aggiornato l'aiuto, e d'ora in poi è un obbligo verificato
+
+**«Come si gioca» ha due sezioni nuove.** Le esplosioni grosse (quanto valgono e da quante
+celle comincia il premio, con i numeri veri presi dal motore) e **gli attrezzi del cantiere**:
+come si guadagnano, il tetto, e l'elenco di tutti e quattro con la loro spiegazione. L'elenco
+si disegna da `ATTREZZI`, quindi un quinto attrezzo compare da solo invece di essere
+dimenticato. C'è anche il perché non ci sono nella sfida del giorno.
+
+**La guida al primo avvio dice che gli attrezzi esistono**, in una riga del passo che parla
+dei cento livelli — che è dove si guadagnano. Non un passo in più: la guida deve far
+cominciare a giocare in fretta, e al primo avvio di attrezzi se ne hanno zero.
+
+**`tests/aiuto-aggiornato.test.js` è il promemoria che non si dimentica.** Fallisce se
+qualcuno ritara una costante senza riaprire l'aiuto, se aggiunge un attrezzo senza
+documentarlo, o se rimette una formula scritta a mano al posto della funzione del motore.
+Verificato capace di fallire in tutti e tre i modi. La stessa regola è ora scritta in
+`CLAUDE.md`, perché una promessa che sta solo nella testa di chi ha scritto il codice non è
+una regola.
+
 ### Verificato
 
 **Prova che il motore non è cambiato per chi gli attrezzi non li usa.** Duecento partite
