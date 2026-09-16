@@ -393,6 +393,17 @@ button {
   color: var(--pl-text-faint);
   padding: 0 20px;
   min-height: 44px;
+  /* LARGA QUANTO LA PLANCIA, SEMPRE.
+     Questa riga sta in una colonna con `align-items: center`, quindi senza una larghezza
+     sua si stringe attorno al proprio contenuto -- e il contenuto cambia a ogni mossa:
+     "Rimetti a posto il pezzo", "Trascina un pezzo sulla griglia", oppure niente. La
+     pastiglia degli attrezzi e' agganciata al bordo destro della riga, quindi si
+     spostava avanti e indietro a ogni mossa. Misurato: riga larga 374 col messaggio
+     lungo e 386 senza, e la pastiglia che scivolava verso il centro.
+     Agganciata alla stessa larghezza della plancia, la pastiglia sta ferma dove il
+     giocatore l'ha vista l'ultima volta. */
+  width: 100%;
+  max-width: var(--pl-plancia-max);
   /* Lo stacco sopra e sotto si stringe sugli schermi bassi. Li' la plancia NON e'
      limitata dalla larghezza ma dall'altezza -- misurato: 270 pixel di plancia su 412
      di schermo disponibile -- e ogni pixel che questa riga non prende lo prende la

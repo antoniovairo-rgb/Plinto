@@ -298,6 +298,19 @@ async function mossaCheNonEliminaNiente() {
 for (const larghezza of [320, 360, 390, 412]) {
   await page.setViewportSize({ width: larghezza, height: 844 });
   await apriPartita(3);
+  /*
+   * LA PASTIGLIA NON SI DEVE SPOSTARE.
+   * Segnalata da uno schermo vero: "il loghetto degli attrezzi tende a spostarsi a
+   * sinistra". La riga sotto la plancia sta in una colonna centrata, quindi senza una
+   * larghezza sua si stringe attorno al proprio contenuto -- e il contenuto cambia a
+   * ogni mossa: "Rimetti a posto il pezzo", "Trascina un pezzo sulla griglia", o
+   * niente. La pastiglia e' agganciata al bordo destro di quella riga e le andava
+   * dietro. Un bersaglio che si sposta da solo e' un bersaglio che si sbaglia.
+   */
+  const dovEra = await page.evaluate(() => {
+    const p = document.querySelector('.pl-attrezzi__pastiglia').getBoundingClientRect();
+    return Math.round(p.left);
+  });
   if (!(await mossaCheNonEliminaNiente())) {
     errori.push(`SOVRAPPOSIZIONE a ${larghezza}px: non si e riusciti a far comparire il pulsante`);
     continue;
@@ -317,8 +330,15 @@ for (const larghezza of [320, 360, 390, 412]) {
     errori.push(`SOVRAPPOSIZIONE a ${larghezza}px: non sono comparsi insieme il pulsante e la pastiglia`);
     continue;
   }
+  const dovE = await page.evaluate(() => {
+    const p = document.querySelector('.pl-attrezzi__pastiglia')?.getBoundingClientRect();
+    return p ? Math.round(p.left) : null;
+  });
   await page.screenshot({ path: `${OUT}/9-riga-${larghezza}.png` });
-  console.log(`   ${larghezza}px: sovrapposizione ${misura.sovrapposizione}px, testo tagliato ${misura.tagliato}px`);
+  console.log(`   ${larghezza}px: sovrapposizione ${misura.sovrapposizione}px, testo tagliato ${misura.tagliato}px,`
+    + ` pastiglia ${dovEra} -> ${dovE}`);
+  controlla(`a ${larghezza}px la pastiglia si sposta quando cambia il messaggio`
+    + ` (${dovEra} -> ${dovE})`, dovE === dovEra);
   controlla(`a ${larghezza}px il pulsante e la pastiglia si sovrappongono di ${misura.sovrapposizione}px`,
     misura.sovrapposizione <= 0);
   controlla(`a ${larghezza}px il testo del pulsante e tagliato di ${misura.tagliato}px`,

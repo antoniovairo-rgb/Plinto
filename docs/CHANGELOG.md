@@ -18,7 +18,24 @@ sono elencati lo stesso, con nome e spiegazione, ma come **voci e non come pulsa
 vede quello che ti aspetta e non c'è niente da premere per sbaglio. La paura di partenza
 era giusta — un pulsante spento che non dice perché è un vicolo cieco — e resta rispettata.
 
+### Corretto
+
+**La pastiglia degli attrezzi si spostava a ogni mossa.** Segnalata con una fotografia:
+«il loghetto tende a spostarsi a sinistra». La riga sotto la plancia sta in una colonna
+centrata, quindi senza una larghezza sua **si stringe attorno al proprio contenuto** — e
+il contenuto cambia in continuazione: «Rimetti a posto il pezzo», «Trascina un pezzo sulla
+griglia», oppure niente. La pastiglia è agganciata al bordo destro di quella riga e le
+andava dietro. Misurato: riga larga 374 col messaggio lungo e 386 senza, con la pastiglia
+che scivolava verso il centro; senza messaggio la riga si riduceva quasi alla sola
+pastiglia, ed è il caso della fotografia. Adesso la riga è larga quanto la plancia, come
+già la barra della Catena, e la pastiglia sta ferma dove il giocatore l'ha vista l'ultima
+volta. Un bersaglio che si sposta da solo è un bersaglio che si sbaglia.
+
 ### Verificato
+
+`tests/e2e/attrezzi.mjs` misura dove sta la pastiglia **prima e dopo una mossa**, a quattro
+larghezze: deve essere lo stesso pixel. Verificato capace di fallire togliendo la larghezza
+alla riga: segnala lo spostamento a 390 e a 412.
 
 `tests/e2e/attrezzi.mjs` controlla che a magazzino vuoto la legenda nomini e spieghi tutti
 e quattro gli attrezzi e che **nessuna voce sia premibile**: non si deve poter spendere un
