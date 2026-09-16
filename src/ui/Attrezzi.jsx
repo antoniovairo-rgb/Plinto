@@ -115,30 +115,44 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
            aria-label={t('attrezzi.titolo')} onClick={(e) => e.stopPropagation()}>
         <p className="pl-attrezzi__intestazione">{t('attrezzi.titolo')}</p>
 
+        {/* CON IL MAGAZZINO VUOTO L'ELENCO C'E' LO STESSO, come legenda.
+            Prima a zero attrezzi si leggeva solo "ne guadagni uno ogni 5 livelli": chi
+            non ne aveva ancora avuto uno sapeva COME ottenerli e non sapeva CHE COSA
+            fossero, cioe' l'unica cosa che poteva fargli venire voglia di ottenerli. La
+            paura era di mostrare pulsanti spenti che non dicono perche', e resta giusta:
+            infatti a zero non sono pulsanti, sono voci. Si vede quello che ti aspetta, e
+            non c'e' niente da premere per sbaglio. */}
         {quanti === 0 ? (
-          /* Con il magazzino vuoto si spiega come si riempie, invece di mostrare due voci
-             spente: un pulsante che non si puo' premere e non dice perche' e' un vicolo. */
           <p className="pl-attrezzi__vuoto">
             {t('attrezzi.comeSiGuadagnano').replace('{n}', ogniLivelli)}
           </p>
-        ) : (
-          <div className="pl-attrezzi__scelte">
-            {ATTREZZI.map((nome) => {
-              const Icona = ICONE[nome];
-              return (
-                <button key={nome} type="button" className="pl-attrezzi__scelta"
-                        disabled={disabilitati?.includes(nome)}
-                        onClick={() => onScegli(nome)}>
-                  <span className="pl-attrezzi__icona"><Icona /></span>
-                  <span className="pl-attrezzi__testi">
-                    <strong>{t(`attrezzi.${nome}`)}</strong>
-                    <span>{t(`attrezzi.${nome}Spiega`)}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+        ) : null}
+
+        <div className={`pl-attrezzi__scelte ${quanti === 0 ? 'pl-attrezzi__scelte--legenda' : ''}`}>
+          {ATTREZZI.map((nome) => {
+            const Icona = ICONE[nome];
+            const contenuto = (
+              <>
+                <span className="pl-attrezzi__icona"><Icona /></span>
+                <span className="pl-attrezzi__testi">
+                  <strong>{t(`attrezzi.${nome}`)}</strong>
+                  <span>{t(`attrezzi.${nome}Spiega`)}</span>
+                </span>
+              </>
+            );
+            return quanti === 0 ? (
+              <div key={nome} className="pl-attrezzi__scelta pl-attrezzi__scelta--voce">
+                {contenuto}
+              </div>
+            ) : (
+              <button key={nome} type="button" className="pl-attrezzi__scelta"
+                      disabled={disabilitati?.includes(nome)}
+                      onClick={() => onScegli(nome)}>
+                {contenuto}
+              </button>
+            );
+          })}
+        </div>
 
         <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onChiudi}>
           {t('comune.tornaAllaPartita')}

@@ -506,6 +506,18 @@ button {
 .pl-attrezzi__testi span { font-size: 12.5px; line-height: 1.35; color: var(--pl-text-dim); }
 .pl-attrezzi__vuoto { margin: 0; font-size: 13px; line-height: 1.45; color: var(--pl-text-dim); }
 
+/* La legenda: le stesse voci dell'elenco, ma spente e non premibili. Si vede che cosa
+   ti aspetta senza che sembri qualcosa da toccare -- il fondo sparisce e il testo si
+   attenua, cosi' "non e' un pulsante" si legge prima di provarci. */
+.pl-attrezzi__scelte--legenda .pl-attrezzi__scelta {
+  background: transparent;
+  cursor: default;
+  padding-left: 0;
+  padding-right: 0;
+}
+.pl-attrezzi__scelte--legenda .pl-attrezzi__icona { opacity: 0.6; }
+.pl-attrezzi__scelte--legenda .pl-attrezzi__testi strong { color: var(--pl-text-dim); }
+
 /* Modo "quale pezzo cambio": l'invito prende la riga e il vassoio si illumina. */
 .pl-attrezzi__invito { display: inline-flex; align-items: center; gap: 10px; color: var(--pl-brand); }
 .pl-attrezzi__annulla {

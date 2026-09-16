@@ -14,6 +14,8 @@ import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
+import { ATTREZZI } from '../../src/persistence/attrezzi.js';
+import TESTI from '../../src/i18n/it.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
@@ -106,11 +108,26 @@ controlla(`la gru ha consumato una mossa (${mossePrima} -> ${await mosseDi()})`,
 controlla(`dopo la gru restano ${await pieni()} attrezzi invece di 0`, (await pieni()) === 0);
 controlla('il segno del gesso non si e cancellato dopo la gru', await page.locator('.pl-cella--segnata').count() === 0);
 
-console.log('5. a magazzino vuoto il pannello spiega come si guadagnano...');
+console.log('5. a magazzino vuoto il pannello spiega come si guadagnano E che cosa sono...');
 await page.locator('.pl-attrezzi__pastiglia').click();
 await page.waitForSelector('.pl-attrezzi__pannello');
 const vuoto = await page.locator('.pl-attrezzi__pannello').innerText();
 controlla(`il pannello vuoto non spiega niente: "${vuoto.replace(/\n/g, ' | ')}"`, /5 livelli/.test(vuoto));
+// LA LEGENDA. A zero attrezzi si leggeva solo COME ottenerli e non CHE COSA fossero,
+// cioe' l'unica cosa che poteva far venire voglia di ottenerli. Adesso l'elenco c'e'
+// lo stesso, ma come voci e non come pulsanti: si vede quello che ti aspetta e non
+// c'e' niente da premere per sbaglio.
+const voci = await page.locator('.pl-attrezzi__scelta').count();
+const premibili = await page.locator('button.pl-attrezzi__scelta').count();
+console.log(`   legenda: ${voci} voci, ${premibili} premibili`);
+controlla(`a magazzino vuoto la legenda mostra ${voci} attrezzi invece di ${ATTREZZI.length}`,
+  voci === ATTREZZI.length);
+controlla(`a magazzino vuoto ci sono ${premibili} voci premibili: non si deve poter spendere
+ un attrezzo che non c'e`, premibili === 0);
+for (const nome of ATTREZZI) {
+  controlla(`la legenda non nomina ${nome}`, vuoto.includes(TESTI.attrezzi[nome]));
+  controlla(`la legenda non spiega ${nome}`, vuoto.includes(TESTI.attrezzi[`${nome}Spiega`]));
+}
 await page.screenshot({ path: `${OUT}/5-vuoto.png` });
 await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
 

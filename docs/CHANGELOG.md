@@ -7,6 +7,24 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.2] — 16 settembre 2026
+
+### Aggiunto
+
+**Il pannello degli attrezzi vuoto adesso è anche una legenda.** A zero attrezzi si
+leggeva solo *come* si guadagnano — «uno ogni 5 livelli superati» — e non *che cosa* sono,
+cioè l'unica cosa che poteva far venire voglia di ottenerli. Adesso i quattro attrezzi
+sono elencati lo stesso, con nome e spiegazione, ma come **voci e non come pulsanti**: si
+vede quello che ti aspetta e non c'è niente da premere per sbaglio. La paura di partenza
+era giusta — un pulsante spento che non dice perché è un vicolo cieco — e resta rispettata.
+
+### Verificato
+
+`tests/e2e/attrezzi.mjs` controlla che a magazzino vuoto la legenda nomini e spieghi tutti
+e quattro gli attrezzi e che **nessuna voce sia premibile**: non si deve poter spendere un
+attrezzo che non c'è. L'elenco si disegna da `ATTREZZI`, quindi un quinto attrezzo comparirà
+da solo. Verificato capace di fallire rimettendo l'elenco vuoto: segnala nove problemi.
+
 ## [1.16.1] — 16 settembre 2026
 
 ### Corretto
@@ -88,7 +106,7 @@ lo spazio in altezza**. Una plancia stretta *e* con l'aria attorno vuol dire che
 ha rubato spazio senza accorgersene — che è esattamente com'era arrivata la mensola.
 Verificato capace di fallire: riportando il tetto a 80% segnala otto formati.
 
-`tests/e2e/attrezzi.mjs` controlla anche che usare la mensola non rimpicciolisca la plancia,
+`tests/e2e/attrezzi.mjs` controlla che usare la mensola non rimpicciolisca la plancia,
 su tre formati, e `tests/attrezzi.test.js` fissa i numeri del caso «aggiorno dopo settanta
 livelli»: 3 entrati, 11 persi, il conto che non riparte da capo, e il primo che matura dopo
 va perso finché non se ne spende uno. Con una prova che la schermata di fine livello legga
