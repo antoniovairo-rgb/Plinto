@@ -50,7 +50,7 @@ const VERIFICHE = [
   { nome: 'ripresa dopo l interruzione (partita e livello)', comando: 'npm', argomenti: ['run', 'e2e-ripresa'] },
   { nome: 'salvataggio: esce, rientra e non cancella niente', comando: 'npm', argomenti: ['run', 'e2e-salvataggio'] },
   { nome: 'politica di sicurezza attiva, e non rompe niente', comando: 'npm', argomenti: ['run', 'e2e-sicurezza'] },
-  { nome: 'attrezzi del cantiere: gru e gessetto nel gioco', comando: 'npm', argomenti: ['run', 'e2e-attrezzi'] },
+  { nome: 'attrezzi del cantiere: tutti e quattro nel gioco', comando: 'npm', argomenti: ['run', 'e2e-attrezzi'] },
   // Le scenografie della mossa. Sono l'esempio perfetto di difetto silenzioso: se si
   // spengono, il gioco funziona, da' gli stessi punti e non segnala niente -- smette
   // solo di festeggiare. Nessuna prova pura puo' vederle, perche' nascono da un campo
