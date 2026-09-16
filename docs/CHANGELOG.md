@@ -7,6 +7,22 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.4] — 17 settembre 2026
+
+### Corretto
+
+**«Hai 1 attrezzo: scegli quale farne» non era italiano.** Segnalata da chi giocava, ed
+era una frase che avevo scritto io il giorno prima. Adesso dice «Hai 1 attrezzo: scegli tu
+come usarlo. Lo spendi solo se fa davvero qualcosa», col plurale che cambia di
+conseguenza. Rilette tutte le frasi aggiunte in questi giorni: ne è emersa una seconda da
+sistemare, nella spiegazione delle bombe («prende un 25% in più» → «vale il 25% in più»).
+
+**Un limite dichiarato.** Il controllo «comunicazioni» passa ogni schermata in tutte e due
+le lingue e verifica che i testi ci siano, che non siano tagliati e che non restino chiavi
+grezze a schermo: **non** verifica che siano scritti in buon italiano, e non può farlo.
+Quella parte resta agli occhi di chi legge, ed è il motivo per cui una segnalazione come
+questa vale più di un controllo automatico.
+
 ## [1.16.3] — 17 settembre 2026
 
 ### Corretto
