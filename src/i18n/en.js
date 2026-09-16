@@ -274,6 +274,8 @@ export default {
     mensolaRiprendi: 'Take the piece back from the shelf',
     mensolaScambia: 'Your hand is full: which piece do I swap it with?',
     lasciaStare: 'Never mind',
+    quantiHaiUno: 'You have 1 tool: choose what to make of it. You only pay when it does something.',
+    quantiHai: 'You have {n} tools: choose which one to use. You only pay when it does something.',
     comeSiGuadagnano: 'No tools yet. You earn one every {n} levels cleared, and you can hold up to three.',
     guadagnato: 'You earned a tool.',
     guadagnatiTanti: 'You earned {n} tools.',

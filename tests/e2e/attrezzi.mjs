@@ -78,6 +78,17 @@ await page.screenshot({ path: `${OUT}/1-pastiglia.png` });
 console.log('2. guardare il pannello e chiuderlo NON costa niente...');
 await page.locator('.pl-attrezzi__pastiglia').click();
 await page.waitForSelector('.pl-attrezzi__pannello');
+/*
+ * IL PANNELLO DEVE DIRE QUANTI NE HAI.
+ * Segnalato da chi giocava: "non riesco a capire quale attrezzo ho a disposizione".
+ * Il numero c'era solo nell'etichetta per i lettori di schermo e nei pallini della
+ * pastiglia -- e i pallini da soli non dicono che cosa contano. Con quattro voci tutte
+ * accese si legge "ho tutti e quattro gli attrezzi", mentre se ne ha UNO e si sceglie
+ * che cosa farne.
+ */
+const conto = await page.locator('.pl-attrezzi__conto').innerText().catch(() => '');
+console.log(`   il pannello dice: "${conto}"`);
+controlla(`il pannello non dice quanti attrezzi hai: "${conto}"`, /\b2\b/.test(conto));
 await page.screenshot({ path: `${OUT}/2-pannello.png` });
 await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
 await page.waitForTimeout(200);

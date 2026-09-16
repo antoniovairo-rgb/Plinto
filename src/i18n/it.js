@@ -325,6 +325,8 @@ export default {
     mensolaRiprendi: 'Riprendi il pezzo dalla mensola',
     mensolaScambia: 'La mano è piena: con quale pezzo lo scambio?',
     lasciaStare: 'Lascia stare',
+    quantiHaiUno: 'Hai 1 attrezzo: scegli quale farne. Si paga solo quando fa qualcosa.',
+    quantiHai: 'Hai {n} attrezzi: scegli quale usare. Si paga solo quando fa qualcosa.',
     comeSiGuadagnano: 'Non hai attrezzi. Ne guadagni uno ogni {n} livelli superati, e puoi tenerne al massimo tre.',
     guadagnato: 'Hai guadagnato un attrezzo.',
     guadagnatiTanti: 'Hai guadagnato {n} attrezzi.',

@@ -76,6 +76,26 @@ function IconaMensola() {
   );
 }
 
+/**
+ * La cassetta: e' il MAGAZZINO, non uno degli attrezzi.
+ *
+ * Prima la pastiglia disegnava la gru, e guardandola si capiva "ho una gru" invece di
+ * "ho un attrezzo, e scelgo io quale". Segnalato da chi giocava: "non riesco a capire
+ * quale attrezzo ho a disposizione". La risposta e' che non ne hai uno in particolare
+ * -- ne hai TANTI QUANTI dicono i pallini, e quale diventa lo decidi quando lo usi --
+ * e un'icona che nomina un attrezzo solo diceva il contrario.
+ */
+function IconaCassetta() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+         stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="8.5" width="18" height="11" rx="1.6" />
+      <path d="M9 8.5V6.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+      <path d="M3 13h18" />
+    </svg>
+  );
+}
+
 const ICONE = {
   gru: IconaGru, gessetto: IconaGessetto, piccone: IconaPiccone, mensola: IconaMensola,
 };
@@ -91,7 +111,7 @@ export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {
       onClick={onApri}
       aria-label={`${t('attrezzi.titolo')}: ${quanti} ${t('attrezzi.su')} ${massimo}`}
     >
-      <IconaGru />
+      <IconaCassetta />
       <span className="pl-attrezzi__posti" aria-hidden="true">
         {Array.from({ length: massimo }, (_, i) => (
           <span key={i} className={`pl-attrezzi__posto ${i < quanti ? 'pl-attrezzi__posto--pieno' : ''}`} />
@@ -114,6 +134,17 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
       <div className="pl-attrezzi__pannello" role="dialog" aria-modal="true"
            aria-label={t('attrezzi.titolo')} onClick={(e) => e.stopPropagation()}>
         <p className="pl-attrezzi__intestazione">{t('attrezzi.titolo')}</p>
+
+        {/* QUANTI NE HAI, SCRITTO. Il numero c'era solo nell'etichetta per i lettori di
+            schermo e nei pallini della pastiglia, e i pallini da soli non dicono che
+            cosa contano. Chi apriva il pannello vedeva quattro voci tutte accese e
+            capiva "ho tutti e quattro gli attrezzi", mentre ne ha UNO e sceglie quale
+            farne. Segnalato da chi giocava. */}
+        {quanti > 0 ? (
+          <p className="pl-attrezzi__conto">
+            {t(quanti === 1 ? 'attrezzi.quantiHaiUno' : 'attrezzi.quantiHai').replace('{n}', quanti)}
+          </p>
+        ) : null}
 
         {/* CON IL MAGAZZINO VUOTO L'ELENCO C'E' LO STESSO, come legenda.
             Prima a zero attrezzi si leggeva solo "ne guadagni uno ogni 5 livelli": chi

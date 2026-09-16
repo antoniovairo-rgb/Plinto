@@ -7,6 +7,29 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.3] — 17 settembre 2026
+
+### Corretto
+
+**Non si capiva quale attrezzo si avesse a disposizione**, e le cause erano due.
+
+La prima: **la pastiglia in partita disegnava la gru**. Guardandola si capiva «ho una gru»,
+mentre la verità è che non ne hai uno in particolare — ne hai *tanti quanti* dicono i
+pallini, e quale diventa lo decidi al momento di usarlo. Adesso l'icona è una **cassetta
+degli attrezzi**: è il magazzino, non uno dei quattro.
+
+La seconda, più seria: **il numero non era scritto da nessuna parte**. Stava
+nell'etichetta per i lettori di schermo e nei tre pallini della pastiglia, e i pallini da
+soli non dicono *che cosa* contano. Chi apriva il pannello vedeva quattro voci tutte accese
+e leggeva «ho tutti e quattro gli attrezzi», mentre ne ha uno e sceglie che cosa farne.
+Adesso il pannello lo dice a parole, al singolare e al plurale: «Hai 1 attrezzo: scegli
+quale farne. Si paga solo quando fa qualcosa.»
+
+### Verificato
+
+`tests/e2e/attrezzi.mjs` controlla che il pannello riporti il numero di attrezzi davvero
+posseduti. Verificato capace di fallire togliendo quella riga.
+
 ## [1.16.2] — 16 settembre 2026
 
 ### Aggiunto

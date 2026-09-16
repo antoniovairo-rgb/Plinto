@@ -515,6 +515,12 @@ button {
 .pl-attrezzi__testi { display: grid; gap: 2px; }
 .pl-attrezzi__testi strong { font-size: 15px; }
 .pl-attrezzi__testi span { font-size: 12.5px; line-height: 1.35; color: var(--pl-text-dim); }
+.pl-attrezzi__conto {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--pl-brand);
+}
 .pl-attrezzi__vuoto { margin: 0; font-size: 13px; line-height: 1.45; color: var(--pl-text-dim); }
 
 /* La legenda: le stesse voci dell'elenco, ma spente e non premibili. Si vede che cosa
