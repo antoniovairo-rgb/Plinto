@@ -212,7 +212,7 @@ export default {
     livello: 'Livello {n}',
     superatoIn: 'Superato in {mosse} mosse',
     record: 'record personale',
-    percorso: 'Percorso {fatti} di {totale}',
+    percorso: '{opera}: {fatti} livelli su {totale}',
     livelliSu: '{fatti} livelli su {totale}',
     condividiTrionfo: 'Racconta che li hai finiti',
     trionfoTitolo: 'Percorso completato',

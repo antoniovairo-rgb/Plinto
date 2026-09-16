@@ -1,4 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+// Attenzione: NON importarle come `it`/`en`: `it` collide con la funzione di test.
+import italiano from '../src/i18n/it.js';
+import inglese from '../src/i18n/en.js';
 import {
   formattaScheda, formattaSchedaQuadro, formattaSchedaPercorso, collegamentoScheda,
   formaPartita, serieDaIstogramma, LIMITE, COLONNE_FORMA, RIGA_DISEGNATA,
@@ -316,5 +320,41 @@ describe('le righe disegnate della scheda', () => {
     expect(RIGA_DISEGNATA.test('23 livelli su 100')).toBe(false);
     expect(RIGA_DISEGNATA.test('PLINTO — Il percorso')).toBe(false);
     expect(RIGA_DISEGNATA.test('')).toBe(false);
+  });
+});
+
+/**
+ * LE DUE SCHEDE DEVONO NOMINARE L'OPERA, E DEVONO FARLO TUTTE E DUE.
+ *
+ * I cento livelli hanno un nome -- il Ponte -- ed e' meta' del motivo per cui esiste un
+ * gruppo: si sta costruendo qualcosa. "Percorso 76 di 100" non dice a chi riceve il
+ * messaggio DI CHE COSA sono quei livelli.
+ *
+ * Questa prova esiste perche' il difetto e' gia' capitato nella forma peggiore: le schede
+ * sono due -- quella presa dalla mappa e quella di fine livello -- ne ho sistemata una
+ * sola, e l'altra ha continuato a dire "Percorso" per un giorno intero. Due posti che
+ * devono dire la stessa cosa sono due posti di cui uno invecchia.
+ */
+describe('le schede nominano l opera', () => {
+  /* Il codice senza i commenti: la prova qui sotto vieta il nome scritto a mano, e il
+     commento che SPIEGA perche' non va scritto a mano lo contiene alla lettera. Una
+     prova che costringe a cancellare la spiegazione per passare peggiora il codice. */
+  const sorgente = readFileSync(new URL('../src/ui/Condividi.jsx', import.meta.url), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  it('la riga del percorso ha un posto per il nome dell opera, in tutte e due le lingue', () => {
+    for (const [lingua, testi] of [['it', italiano], ['en', inglese]]) {
+      expect(testi.scheda.percorso, `${lingua}: la riga del percorso non nomina l opera`)
+        .toContain('{opera}');
+    }
+  });
+
+  it('tutte e due le schede chiedono il nome a OPERE invece di scriverlo', () => {
+    // Due chiamate: una per la scheda di fine livello, una per quella dalla mappa.
+    const chiamate = sorgente.match(/operaDelQuadro\(/g) ?? [];
+    expect(chiamate).toHaveLength(2);
+    // E nessuna delle due deve avere il nome scritto a mano: quando arrivera' la Torre,
+    // le schede lo devono dire da sole.
+    expect(sorgente).not.toMatch(/'Il Ponte'|"Il Ponte"/);
   });
 });

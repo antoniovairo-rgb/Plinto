@@ -160,6 +160,10 @@ export function Condividi({ riepilogo, giorno, t }) {
  * due frasi per la stessa cosa, destinate a divergere alla prima modifica.
  */
 export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, totale, serie, t }) {
+  // Anche qui l'opera si chiama per nome, come nella scheda presa dalla mappa: "Il Ponte"
+  // dice di che cosa sono quei livelli, "Percorso" non lo dice. Il nome arriva da OPERE,
+  // cosi' le due schede non possono raccontare cose diverse.
+  const opera = operaDelQuadro(Math.min(Math.max(1, numero), totale || numero));
   const testo = formattaSchedaQuadro(
     { numero, obiettivo, mosse, record, superati, totale },
     {
@@ -170,7 +174,7 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
         livello: t('scheda.livello'),
         superatoIn: t('scheda.superatoIn'),
         record: t('scheda.record'),
-        percorso: t('scheda.percorso'),
+        percorso: t('scheda.percorso').replace('{opera}', t(`opere.${opera.id}`)),
       },
     },
   );

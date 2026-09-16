@@ -7,6 +7,26 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.5] — 17 settembre 2026
+
+### Corretto
+
+**Anche la scheda di fine livello nomina il Ponte.** Diceva «Percorso 76 di 100», adesso
+dice «Il Ponte: 76 livelli su 100».
+
+È lo stesso difetto della 1.16.1, non sistemato fino in fondo: le schede condivisibili
+sono **due** — quella presa dalla mappa e quella che compare vincendo un livello — ne avevo
+corretta una sola, e l'altra ha continuato a dire «Percorso» per un giorno intero. Due
+posti che devono raccontare la stessa cosa sono due posti di cui uno invecchia.
+
+### Verificato
+
+Due prove nuove in `tests/scheda.test.js`, scritte proprio contro questo modo di sbagliare:
+la riga del percorso deve avere un posto per il nome dell'opera in tutte e due le lingue, e
+**tutte e due** le schede devono chiedere quel nome a `OPERE` invece di scriverlo a mano —
+contate le chiamate, devono essere due. Verificato capace di fallire rimettendo la
+situazione di ieri, con una sola scheda sistemata: la prova dice «expected 1 to be 2».
+
 ## [1.16.4] — 17 settembre 2026
 
 ### Corretto

@@ -178,7 +178,7 @@ export default {
     livello: 'Level {n}',
     superatoIn: 'Cleared in {mosse} moves',
     record: 'personal best',
-    percorso: 'Path {fatti} of {totale}',
+    percorso: '{opera}: {fatti} levels out of {totale}',
     livelliSu: '{fatti} levels out of {totale}',
     condividiTrionfo: 'Tell them you finished',
     trionfoTitolo: 'Path completed',
