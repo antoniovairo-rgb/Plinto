@@ -227,12 +227,79 @@ controlla(`con la mensola piena la pagina diventa scorrevole (${entra.scorriment
   entra.scorrimento <= 1);
 await page.setViewportSize({ width: 390, height: 844 });
 
-console.log('9. un vecchio "attrezzi: false" salvato non li spegne piu...');
+// SOVRAPPOSIZIONE FRA IL PULSANTE E LA PASTIGLIA.
+// Segnalato da uno schermo vero al livello 73: "Rimetti a posto il pezzo" finiva SOTTO
+// la pastiglia degli attrezzi, con il testo tagliato a meta'. La pastiglia stava in
+// posizione assoluta per tenere il messaggio centrato, e un elemento fuori dal flusso
+// non fa spazio a nessuno. Si misura sugli schermi piu' stretti, che sono quelli dove
+// i due elementi si contendono davvero i pixel.
+console.log('9. il pulsante "Rimetti a posto" e la pastiglia non si sovrappongono...');
+/**
+ * Appoggia il primo pezzo della mano in una casella libera, provandone diverse finche'
+ * una non entra. Su una griglia gia' occupata -- come quella di un livello -- la prima
+ * casella vuota spesso non basta: il pezzo ci appoggia l'origine, e il resto deve
+ * starci. Serve una mossa che non elimini niente, cosi' compare il "Rimetti a posto".
+ */
+async function mossaCheNonEliminaNiente() {
+  const candidate = await page.evaluate(() => [...document.querySelectorAll('.pl-plancia .pl-cella')]
+    .map((c, i) => (c.querySelector('.pl-blocco') ? -1 : i))
+    .filter((i) => i >= 0));
+  for (const indice of candidate) {
+    const g = await page.evaluate((n) => {
+      const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+      const c = document.querySelectorAll('.pl-plancia .pl-cella')[n].getBoundingClientRect();
+      return {
+        px: p.left + p.width / 2, py: p.top + p.height / 2,
+        cx: c.left + c.width / 2, cy: c.top + c.height / 2,
+      };
+    }, indice);
+    await page.mouse.move(g.px, g.py);
+    await page.mouse.down();
+    await page.mouse.move(g.cx, g.cy, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(220);
+    if (await page.locator('.pl-annulla').count() > 0) return true;
+  }
+  return false;
+}
+
+for (const larghezza of [320, 360, 390, 412]) {
+  await page.setViewportSize({ width: larghezza, height: 844 });
+  await apriPartita(3);
+  if (!(await mossaCheNonEliminaNiente())) {
+    errori.push(`SOVRAPPOSIZIONE a ${larghezza}px: non si e riusciti a far comparire il pulsante`);
+    continue;
+  }
+  const misura = await page.evaluate(() => {
+    const annulla = document.querySelector('.pl-annulla');
+    const pastiglia = document.querySelector('.pl-attrezzi__pastiglia');
+    if (!annulla || !pastiglia) return null;
+    const a = annulla.getBoundingClientRect();
+    const b = pastiglia.getBoundingClientRect();
+    return {
+      sovrapposizione: Math.round(Math.min(a.right, b.right) - Math.max(a.left, b.left)),
+      tagliato: annulla.scrollWidth - Math.ceil(a.width),
+    };
+  });
+  if (!misura) {
+    errori.push(`SOVRAPPOSIZIONE a ${larghezza}px: non sono comparsi insieme il pulsante e la pastiglia`);
+    continue;
+  }
+  await page.screenshot({ path: `${OUT}/9-riga-${larghezza}.png` });
+  console.log(`   ${larghezza}px: sovrapposizione ${misura.sovrapposizione}px, testo tagliato ${misura.tagliato}px`);
+  controlla(`a ${larghezza}px il pulsante e la pastiglia si sovrappongono di ${misura.sovrapposizione}px`,
+    misura.sovrapposizione <= 0);
+  controlla(`a ${larghezza}px il testo del pulsante e tagliato di ${misura.tagliato}px`,
+    misura.tagliato <= 0);
+}
+await page.setViewportSize({ width: 390, height: 844 });
+
+console.log('10. un vecchio "attrezzi: false" salvato non li spegne piu...');
 await apriPartita(3, { attrezzi: false });
 controlla('una vecchia impostazione "attrezzi: false" fa ancora sparire la pastiglia',
   await page.locator('.pl-attrezzi__pastiglia').count() === 1);
 
-console.log('10. nelle impostazioni non ci sono piu interruttori per spegnere il gioco...');
+console.log('11. nelle impostazioni non ci sono piu interruttori per spegnere il gioco...');
 await page.evaluate(() => {
   window.localStorage.removeItem('plinto:ripresa');
   window.localStorage.removeItem('plinto:partita');

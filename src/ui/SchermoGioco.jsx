@@ -433,6 +433,13 @@ export function SchermoGioco({
               e quell'istruzione, una mossa si' e una no. Uno sfarfallio continuo in mezzo
               allo schermo, per dire una cosa che il giocatore sapeva gia'. */}
           <p className={`pl-suggerimento ${conAttrezzi ? 'pl-suggerimento--conattrezzi' : ''}`}>
+            {/* IL MESSAGGIO STA DENTRO UN ELEMENTO SUO, e non e' un dettaglio di stile.
+                Alcuni di questi rami sono testo nudo: in una griglia un nodo di testo
+                diventa un elemento anonimo, che il foglio di stile non puo' collocare e
+                che finisce nella prima cella libera. Incartandolo, la riga puo' mettere
+                il messaggio al centro e la pastiglia a destra con una regola sola,
+                invece di sovrapporli. */}
+            <span className="pl-suggerimento__testo">
             {modoAttrezzo === 'gru' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
               /* Con un attrezzo in corso la riga smette di dire qualunque altra cosa:
                  c'e' una domanda aperta, e due messaggi insieme sarebbero due. */
@@ -453,6 +460,7 @@ export function SchermoGioco({
             ) : partita.stats.moves < MOSSE_CON_ISTRUZIONI ? (
               t('gioca.trascina')
             ) : null}
+            </span>
             {conAttrezzi && modoAttrezzo === 'chiuso' ? (
               <MagazzinoAttrezzi
                 quanti={attrezzi}

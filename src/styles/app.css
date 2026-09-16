@@ -387,16 +387,39 @@ button {
 
 /* ------------------------------------------------- attrezzi del cantiere --- */
 
-/* La riga sotto la plancia ospita anche la pastiglia, all'estremo destro. Sta in
-   posizione assoluta e non nel flusso perche' il contenuto della riga e' centrato: con
-   un terzo elemento in mezzo, "Rimetti a posto il pezzo" smetterebbe di stare al centro
-   dello schermo, e quella e' la riga che si guarda mentre si gioca. */
-.pl-suggerimento--conattrezzi { position: relative; }
+/* LA RIGA SOTTO LA PLANCIA OSPITA DUE COSE: il messaggio (o il pulsante "Rimetti a
+   posto il pezzo") e la pastiglia degli attrezzi, all'estremo destro.
+
+   PRIMA LA PASTIGLIA STAVA IN POSIZIONE ASSOLUTA, per tenere il messaggio al centro
+   esatto dello schermo. Funzionava finche' il messaggio era corto: "Rimetti a posto il
+   pezzo" e' un pulsante largo, e centrato sullo schermo arrivava a finirci SOTTO. Visto
+   su un telefono vero al livello 73, con il testo tagliato a meta' dalla pastiglia.
+   Un elemento fuori dal flusso non fa spazio a nessuno: e' proprio cio' che significa
+   toglierlo dal flusso, e qui lo si era chiesto senza accettarne la conseguenza.
+
+   Adesso e' una griglia di tre colonne: `1fr auto 1fr`. Le due laterali sono uguali,
+   quindi il messaggio al centro resta centrato sullo schermo esattamente come prima; la
+   pastiglia sta nella terza e occupa spazio suo, quindi il messaggio si stringe invece
+   di finirle sotto. Quando non c'e' abbastanza posto per entrambi, a cedere e' il
+   messaggio -- che si accorcia -- e non la leggibilita'. */
+.pl-suggerimento--conattrezzi {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+}
+.pl-suggerimento__testo {
+  grid-column: 2;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  /* Senza questo, un pulsante largo si rifiuta di stringersi e sfonda la colonna. */
+  min-width: 0;
+}
 .pl-attrezzi__pastiglia {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  grid-column: 3;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -407,7 +430,7 @@ button {
   color: var(--pl-brand);
   transition: transform var(--pl-t-instant) var(--pl-ease-out);
 }
-.pl-attrezzi__pastiglia:active { transform: translateY(-50%) scale(0.95); }
+.pl-attrezzi__pastiglia:active { transform: scale(0.95); }
 /* Vuota resta visibile, solo spenta: chi non ha mai avuto un attrezzo deve comunque
    sapere che esistono, e toccandola scopre come si guadagnano. */
 .pl-attrezzi__pastiglia--vuota { color: var(--pl-text-faint); }

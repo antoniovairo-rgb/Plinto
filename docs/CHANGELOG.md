@@ -7,6 +7,36 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.1] — 16 settembre 2026
+
+### Corretto
+
+**Il pulsante «Rimetti a posto il pezzo» finiva sotto la pastiglia degli attrezzi.**
+Segnalato da uno schermo vero al livello 73, con il testo tagliato a metà. Misurata dopo:
+la sovrapposizione era di **69 pixel**, identica su tutte le larghezze provate da 320 a
+412, quindi la vedeva chiunque avesse degli attrezzi e un pezzo da rimettere a posto.
+
+La causa era una scelta fatta apposta e non portata fino in fondo. La pastiglia stava in
+posizione assoluta per tenere il messaggio al centro esatto dello schermo: funzionava
+finché il messaggio era una frase corta, ma «Rimetti a posto il pezzo» è un pulsante largo
+e, centrato sullo schermo, ci arrivava sotto. **Un elemento fuori dal flusso non fa spazio
+a nessuno** — è esattamente ciò che significa toglierlo dal flusso, e qui lo si era chiesto
+senza accettarne la conseguenza.
+
+Adesso la riga è una griglia di tre colonne (`1fr auto 1fr`): le due laterali sono uguali,
+quindi il messaggio resta centrato sullo schermo come prima, e la pastiglia occupa una
+colonna sua. Quando lo spazio non basta per entrambi, a cedere è il messaggio, che si
+stringe, non la leggibilità. Il messaggio è stato incartato in un elemento suo: alcuni dei
+rami di quella riga sono testo nudo, e in una griglia un nodo di testo diventa un elemento
+anonimo che il foglio di stile non può collocare.
+
+### Verificato
+
+`tests/e2e/attrezzi.mjs` misura la sovrapposizione fra i due elementi a **320, 360, 390 e
+412 pixel** di larghezza, e controlla anche che il testo del pulsante non venga tagliato.
+Adesso i due distano 8 pixel su tutte e quattro. Verificato capace di fallire rimettendo il
+posizionamento assoluto: segnala quattro problemi e riporta i 69 pixel di prima.
+
 ## [1.16.0] — 16 settembre 2026
 
 ### Aggiunto
