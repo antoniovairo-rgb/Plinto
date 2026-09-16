@@ -24,6 +24,9 @@ export class CampoParticelle {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.particelle = [];
+    // Le misure in pixel CSS, ricordate per poter ricostruire il canvas da zero.
+    this.larghezza = 0;
+    this.altezza = 0;
     // Le onde d'urto stanno in una lista a parte perche' si disegnano PRIMA delle
     // particelle (sono lo sfondo del botto, non i suoi coriandoli) e perche' sono
     // pochissime: una per gruppo chiuso, non una per cella.
@@ -31,10 +34,73 @@ export class CampoParticelle {
     this.frame = null;
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     this.attivo = true;
+
+    /*
+     * IL CANVAS BIANCO CON LA FACCINA ROTTA.
+     *
+     * Segnalato su un telefono vero: messa l'app in secondo piano e riaperta, al posto
+     * della plancia c'era un rettangolo bianco con l'icona dell'immagine rotta, e dopo
+     * qualche secondo la griglia tornava. Non e' un'immagine che non si carica -- in
+     * questa schermata non c'e' nemmeno un'immagine -- ed e' l'unico elemento che puo'
+     * disegnare quell'icona: un canvas la cui memoria di disegno e' stata buttata via.
+     *
+     * Android lo fa apposta. Quando l'app va in secondo piano il sistema recupera
+     * memoria, e la memoria di un canvas e' fra le prime a saltare; al ritorno il
+     * browser non ha piu' niente da disegnare e mette il segnaposto. Il nostro canvas sta
+     * SOPRA la plancia e la copre tutta, quindi il segnaposto si mangia il tabellone.
+     *
+     * Due difese, e servono tutte e due.
+     *
+     * 1. Quando la pagina si nasconde, il canvas viene AZZERATO (larghezza e altezza a
+     *    zero): cosi' non resta nessuna memoria da buttare via, e non c'e' niente che
+     *    possa tornare rotto. Al ritorno si ricostruisce, vuoto. Non si perde nulla:
+     *    le particelle di una mossa durano meno di mezzo secondo e non hanno senso
+     *    dopo un ritorno da secondo piano.
+     * 2. Se la memoria salta lo stesso -- succede anche a pagina visibile, sotto
+     *    pressione -- il browser manda `contextlost`. Fermandolo con preventDefault si
+     *    chiede di ripristinarlo, e a quel punto si riprende il contesto e si ridisegna
+     *    da capo.
+     */
+    this.allaVisibilita = () => {
+      if (document.visibilityState === 'hidden') this.liberaMemoria();
+      else this.ricostruisci();
+    };
+    this.alContestoPerso = (e) => {
+      // Senza questo il browser NON ripristina il contesto, e il canvas resta rotto
+      // per sempre: e' il difetto vero, non un dettaglio.
+      e.preventDefault();
+      this.particelle.length = 0;
+      this.onde.length = 0;
+      if (this.frame) { cancelAnimationFrame(this.frame); this.frame = null; }
+    };
+    this.alContestoTornato = () => {
+      this.ctx = this.canvas.getContext('2d');
+      this.ricostruisci();
+    };
+
+    document.addEventListener('visibilitychange', this.allaVisibilita);
+    canvas.addEventListener('contextlost', this.alContestoPerso);
+    canvas.addEventListener('contextrestored', this.alContestoTornato);
+  }
+
+  /** Butta via la memoria di disegno: niente da perdere, quindi niente da rompere. */
+  liberaMemoria() {
+    this.particelle.length = 0;
+    this.onde.length = 0;
+    if (this.frame) { cancelAnimationFrame(this.frame); this.frame = null; }
+    this.canvas.width = 0;
+    this.canvas.height = 0;
+  }
+
+  /** Rifa' il canvas alle misure di prima, vuoto. */
+  ricostruisci() {
+    if (this.larghezza > 0 && this.altezza > 0) this.ridimensiona(this.larghezza, this.altezza);
   }
 
   /** Adegua il canvas alla dimensione reale del suo contenitore. */
   ridimensiona(larghezza, altezza) {
+    this.larghezza = larghezza;
+    this.altezza = altezza;
     this.canvas.width = Math.round(larghezza * this.dpr);
     this.canvas.height = Math.round(altezza * this.dpr);
     this.canvas.style.width = `${larghezza}px`;
@@ -51,7 +117,9 @@ export class CampoParticelle {
     this.particelle.length = 0;
     this.onde.length = 0;
     if (this.frame) { cancelAnimationFrame(this.frame); this.frame = null; }
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Il contesto puo' non esserci: fra `contextlost` e `contextrestored` non c'e'
+    // niente su cui disegnare, e chiamarci sopra farebbe saltare la partita.
+    this.ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**
@@ -63,7 +131,7 @@ export class CampoParticelle {
    *   le bombe si distinguono a occhio da un'eliminazione qualunque.
    */
   esplodi(celle, intensita = 1, brillantezza = 1) {
-    if (!this.attivo) return;
+    if (!this.attivo || !this.ctx) return;
     const perCella = Math.min(14, 3 + Math.round(intensita * 1.6 * brillantezza));
     for (const cella of celle) {
       for (let i = 0; i < perCella; i += 1) {
@@ -112,7 +180,7 @@ export class CampoParticelle {
    *          spessore?:number,opacita?:number}[]} centri
    */
   onda(centri) {
-    if (!this.attivo) return;
+    if (!this.attivo || !this.ctx) return;
     for (const c of centri) {
       this.onde.push({
         x: c.x,
@@ -135,7 +203,7 @@ export class CampoParticelle {
   }
 
   avvia() {
-    if (this.frame !== null) return;
+    if (this.frame !== null || !this.ctx) return;
     const passo = () => {
       this.frame = null;
       const { ctx, canvas, dpr } = this;
@@ -194,6 +262,9 @@ export class CampoParticelle {
   }
 
   distruggi() {
+    document.removeEventListener('visibilitychange', this.allaVisibilita);
+    this.canvas.removeEventListener('contextlost', this.alContestoPerso);
+    this.canvas.removeEventListener('contextrestored', this.alContestoTornato);
     this.svuota();
   }
 }

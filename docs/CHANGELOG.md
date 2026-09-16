@@ -30,7 +30,33 @@ stringe, non la leggibilità. Il messaggio è stato incartato in un elemento suo
 rami di quella riga sono testo nudo, e in una griglia un nodo di testo diventa un elemento
 anonimo che il foglio di stile non può collocare.
 
+**La plancia diventava un rettangolo bianco dopo un giro in secondo piano.** Segnalato con
+una fotografia: al posto del tabellone un rettangolo bianco con l'icona dell'immagine
+rotta, e dopo qualche secondo la griglia tornava. Non era un'immagine che non si carica —
+in quella schermata non ce n'è nemmeno una, e l'unico elemento che può disegnare quella
+icona è il **canvas delle particelle**, che sta sopra la plancia e la copre tutta.
+
+Android lo fa apposta: quando l'app va in secondo piano il sistema recupera memoria, e la
+memoria di disegno di un canvas è fra le prime a saltare. Al ritorno il browser non ha più
+niente da disegnare e ci mette il segnaposto, che essendo grande quanto la plancia se la
+mangia tutta.
+
+Due difese, e servono entrambe. Quando la pagina si nasconde il canvas viene **azzerato**:
+niente memoria da buttare via, quindi niente che possa tornare rotto, e al ritorno si
+ricostruisce vuoto. Non si perde nulla, perché le particelle di una mossa durano meno di
+mezzo secondo. E se la memoria salta lo stesso — succede anche a pagina visibile, sotto
+pressione — il browser manda `contextlost`: fermandolo con `preventDefault` si chiede il
+ripristino, e su `contextrestored` il contesto viene ripreso. Senza quel `preventDefault`
+il canvas resta rotto per sempre.
+
 ### Verificato
+
+`tests/e2e/scenografie.mjs` sale a sette passi: finge il giro in secondo piano e controlla
+che il canvas resti senza memoria mentre la pagina è nascosta, che al ritorno sia
+ricostruito alle misure giuste e vuoto, e — la parte che conta davvero — che **dopo quel
+giro gli effetti funzionino ancora**. Una difesa che spegne le particelle per sempre
+sarebbe un difetto peggiore di quello che cura. Prova anche che `contextlost` venga
+fermato. Verificato capace di fallire: togliendo le due difese segnala due problemi.
 
 `tests/e2e/attrezzi.mjs` misura la sovrapposizione fra i due elementi a **320, 360, 390 e
 412 pixel** di larghezza, e controlla anche che il testo del pulsante non venga tagliato.

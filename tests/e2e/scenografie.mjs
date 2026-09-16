@@ -187,6 +187,88 @@ const residuo = await page.evaluate(() => {
 console.log(`5. pixel rimasti sul canvas a riposo: ${residuo}`);
 controlla('RIPOSO: il canvas non si ripulisce dopo la fine degli effetti', residuo === 0);
 
+// ---------- 6. Il canvas sopravvive al secondo piano ----------
+/*
+ * IL DIFETTO CHE QUESTO CONTROLLO IMPEDISCE. Su un telefono vero, mettendo l'app in
+ * secondo piano e riaprendola, al posto della plancia compariva un rettangolo BIANCO con
+ * l'icona dell'immagine rotta. Non e' un'immagine che non si carica: in quella schermata
+ * non ce n'e' nemmeno una. E' il canvas delle particelle, che sta sopra la plancia e la
+ * copre tutta: Android ne aveva buttato via la memoria di disegno per far posto, e il
+ * browser al ritorno ci aveva messo il segnaposto.
+ *
+ * Qui non si puo' far recuperare memoria ad Android, ma si puo' provare la difesa: che
+ * nascondendo la pagina il canvas venga azzerato (niente memoria da buttare via, niente
+ * che possa tornare rotto), che al ritorno venga ricostruito alle misure giuste, e --
+ * la parte che conta davvero -- che DOPO quel giro gli effetti funzionino ancora. Una
+ * difesa che spegne le particelle per sempre sarebbe un difetto peggiore di quello che
+ * cura.
+ */
+console.log('6. il canvas sopravvive al secondo piano...');
+const misure = () => page.evaluate(() => {
+  const c = document.querySelector('.pl-plancia__particelle');
+  const r = c.getBoundingClientRect();
+  return { w: c.width, h: c.height, largo: Math.round(r.width), alto: Math.round(r.height) };
+});
+const prima = await misure();
+controlla('il canvas non ha una memoria di disegno prima di nascondere la pagina',
+  prima.w > 0 && prima.h > 0);
+
+/** Finge che la pagina vada in secondo piano e poi torni. */
+async function visibilita(stato) {
+  await page.evaluate((s) => {
+    Object.defineProperty(document, 'visibilityState', { value: s, configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+  }, stato);
+  await page.waitForTimeout(120);
+}
+
+await visibilita('hidden');
+const nascosto = await misure();
+console.log(`   in secondo piano: memoria del canvas ${nascosto.w}x${nascosto.h}`);
+controlla(`in secondo piano il canvas tiene ancora ${nascosto.w}x${nascosto.h} di memoria da perdere`,
+  nascosto.w === 0 && nascosto.h === 0);
+
+await visibilita('visible');
+const tornato = await misure();
+console.log(`   al ritorno: memoria del canvas ${tornato.w}x${tornato.h} su ${tornato.largo}x${tornato.alto} CSS`);
+controlla(`al ritorno il canvas non e stato ricostruito (${tornato.w}x${tornato.h})`,
+  tornato.w === prima.w && tornato.h === prima.h);
+controlla('al ritorno il canvas non e vuoto: resterebbe a schermo il disegno di prima',
+  (await page.evaluate(() => {
+    const c = document.querySelector('.pl-plancia__particelle');
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 0) return false;
+    return true;
+  })));
+
+// E adesso la parte che conta: gli effetti devono funzionare ancora.
+{
+  const r = vuote();
+  for (let c = 0; c < 8; c += 1) r[0][c] = '#';
+  r[5][5] = '#';
+  const v = await scena('6-dopo-secondo-piano', { ...base, grid: tinteggia(r, 1), hand: mano() }, 8);
+  controlla('dopo un giro in secondo piano le particelle non si disegnano piu', v.pixel > 0);
+  controlla('dopo un giro in secondo piano l eliminazione non si vede piu', v.esplosi === 9);
+}
+
+// ---------- 7. Un contesto perso si riprende ----------
+// La seconda difesa, per quando la memoria salta a pagina visibile: il browser manda
+// `contextlost`, e senza un preventDefault il canvas resta rotto per sempre.
+console.log('7. un contesto perso viene ripreso...');
+const ripreso = await page.evaluate(() => {
+  const c = document.querySelector('.pl-plancia__particelle');
+  const perso = new Event('contextlost', { cancelable: true });
+  c.dispatchEvent(perso);
+  const fermato = perso.defaultPrevented;
+  c.dispatchEvent(new Event('contextrestored'));
+  return { fermato, w: c.width, h: c.height };
+});
+console.log(`   contextlost fermato: ${ripreso.fermato} | canvas ${ripreso.w}x${ripreso.h}`);
+controlla('contextlost non viene fermato: il browser non ripristinera il canvas',
+  ripreso.fermato === true);
+controlla('dopo contextrestored il canvas resta senza memoria di disegno',
+  ripreso.w > 0 && ripreso.h > 0);
+
 await browser.close();
 server?.kill();
 
