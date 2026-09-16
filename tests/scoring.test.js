@@ -220,17 +220,29 @@ describe('la Tinta', () => {
     expect(fattoreTinta(TINTA_SOGLIA + 1)).toBeCloseTo(TINTA_PASSO * 2);
   });
 
-  it('al massimo aggiunge il 20 per cento: resta un contorno', () => {
-    // Se questo numero salisse, il colore diventerebbe piu' importante della Catena e
-    // dell'Intreccio, che sono le meccaniche su cui il gioco si regge.
-    expect(fattoreTinta(9)).toBeCloseTo(0.2);
+  it('al massimo aggiunge il 60 per cento, ma quasi mai: resta un contorno', () => {
+    // IL NUMERO E' TRIPLICATO E IL CONTORNO E' RIMASTO CONTORNO, ed e' il punto della
+    // modifica. Con la soglia a 5 la Tinta si accendeva nel 45% delle eliminazioni e
+    // valeva l'1,14% dei punti di una partita: continua e trascurabile. Con la soglia a 7
+    // si accende nel 9,9% e vale l'1,21%: rara e grossa. Il peso sulla partita e' lo
+    // stesso, cambia quanto conta la singola volta in cui compare.
+    //
+    // E' questo secondo numero -- la quota sui punti di una partita intera -- che non deve
+    // salire, non il premio di una singola mossa: se salisse, il colore diventerebbe piu'
+    // importante della Catena e dell'Intreccio, che sono le meccaniche su cui il gioco si
+    // regge. Misurato con `node tools/...` su 60 partite del giocatore artificiale.
+    expect(fattoreTinta(9)).toBeCloseTo(0.6);
   });
 
   it('una maggioranza casuale non la fa scattare', () => {
-    // Nove celle su sei colori danno una maggioranza attorno a 3: la soglia esiste
-    // perche' la Tinta non arrivi mai per caso.
+    // Nove celle su sei colori danno una maggioranza attorno a 3. La soglia era a 5 e la
+    // regola diceva che li' "non scatta mai per caso": misurando si e' scoperto che
+    // scattava nel 45% delle eliminazioni di un giocatore che il colore non lo cerca
+    // nemmeno. A 7 scende al 9,9%, e sette celle uguali su nove non capitano da sole.
     expect(fattoreTinta(3)).toBe(0);
     expect(fattoreTinta(4)).toBe(0);
+    expect(fattoreTinta(5)).toBe(0);
+    expect(fattoreTinta(6)).toBe(0);
   });
 
   it('passa sotto Intreccio e Catena, non li scavalca', () => {

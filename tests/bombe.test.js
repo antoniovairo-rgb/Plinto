@@ -4,7 +4,7 @@ import {
   gridFromString, idx, conBomba, eBomba, coloreDi, detonaBombe, filledCount, gridToString,
 } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
-import { scoreMove } from '../src/core/scoring.js';
+import { scoreMove, fattoreEsplosione } from '../src/core/scoring.js';
 import { generateHand } from '../src/core/generator.js';
 import { createRng } from '../src/core/rng.js';
 import {
@@ -142,15 +142,19 @@ describe('le bombe in partita', () => {
       placedCellCount: 1, groups: [{ type: 'row' }], chainLevel: 0, boardCleared: false,
       explodedCellCount: 5,
     });
-    expect(con.points - senza.points).toBe(5 * PUNTI_CELLA_ESPLOSA);
-    expect(con.breakdown.esplosioni).toBe(5 * PUNTI_CELLA_ESPLOSA);
+    // Il premio per le esplosioni grosse lo calcola il motore: qui lo chiediamo alla
+    // sua funzione invece di riscrivere la formula, cosi' la prova non va rifatta
+    // ogni volta che si ritocca la taratura.
+    const atteso = Math.round(5 * PUNTI_CELLA_ESPLOSA * fattoreEsplosione(5));
+    expect(con.points - senza.points).toBe(atteso);
+    expect(con.breakdown.esplosioni).toBe(atteso);
 
     // Con la Catena a 4 (moltiplicatore x2) anche le esplosioni raddoppiano.
     const conCatena = scoreMove({
       placedCellCount: 1, groups: [{ type: 'row' }], chainLevel: 4, boardCleared: false,
       explodedCellCount: 5,
     });
-    expect(conCatena.breakdown.esplosioni).toBe(5 * PUNTI_CELLA_ESPLOSA * 2);
+    expect(conCatena.breakdown.esplosioni).toBe(Math.round(5 * PUNTI_CELLA_ESPLOSA * fattoreEsplosione(5) * 2));
   });
 
   it('una mossa con molte celle saltate viene celebrata di piu', () => {

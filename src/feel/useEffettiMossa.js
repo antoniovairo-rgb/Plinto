@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { COLOR_COUNT } from '../config/rules.js';
+import { COLOR_COUNT, TINTA_SOGLIA } from '../config/rules.js';
 import {
   suonoAppoggio, suonoEliminazione, suonoGrandeCombo, suonoGrigliaVuota, suonoFinePartita,
   suonoCatenaGiu, suonoUltimaChiamata,
@@ -24,7 +24,7 @@ import {
 
 import {
   DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
-  ATTESA_INCITAMENTO,
+  ATTESA_INCITAMENTO, DURATA_SVUOTAMENTO,
 } from './durate.js';
 import { respiroRimasto } from '../core/scoring.js';
 import { incitamento } from '../core/incitamenti.js';
@@ -39,12 +39,25 @@ function coloreBlocco(indice) {
   return valore.trim() || '#ffffff';
 }
 
+/**
+ * Il colore con cui brucia una bomba: lo stesso giallo della miccia che il giocatore
+ * vede acceso sul blocco prima di farlo saltare. Letto dal foglio di stile, cosi' se
+ * i temi cambiano la bomba cambia con loro invece di restare indietro.
+ */
+function coloreBomba() {
+  if (typeof window === 'undefined') return '#ffd23d';
+  const valore = getComputedStyle(document.documentElement)
+    .getPropertyValue('--pl-bomba-scintilla');
+  return valore.trim() || '#ffd23d';
+}
+
 export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni }) {
   const [appoggiate, setAppoggiate] = useState(null);
   const [esplosioni, setEsplosioni] = useState(null);
   const [celleEsplose, setCelleEsplose] = useState(null);
   const [puntiVolanti, setPuntiVolanti] = useState(null);
   const [incita, setIncita] = useState(null);
+  const [svuotata, setSvuotata] = useState(null);
   const ultimaMossa = useRef(null);
   // I sacchetti delle frasi, uno per categoria: si pesca senza rimettere dentro, cosi'
   // escono tutte prima che una si ripeta. Vivono in un ref e non in uno stato perche'
@@ -129,21 +142,122 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     // --- celle che stanno sparendo ------------------------------------------
     if (gruppi > 0) {
       const colore = coloreBlocco(lastMove.color);
-      setEsplosioni({ celle: new Set(lastMove.clearedCells), colore });
+      const tintaPiena = (lastMove.breakdown?.tintaMassima ?? 0) >= TINTA_SOGLIA;
+      setEsplosioni({ celle: new Set(lastMove.clearedCells), colore, tinta: tintaPiena });
       setCelleEsplose(new Set(lastMove.celleEsplose ?? []));
       timers.push(setTimeout(() => { setEsplosioni(null); setCelleEsplose(null); }, DURATA_ESPLOSIONE));
 
       // --- particelle ------------------------------------------------------
       if (campo.current && plancia.current) {
         const base = plancia.current.getBoundingClientRect();
-        const punti = [];
+        // Dove sta ogni cella sulla plancia, in coordinate del canvas. Si misura una
+        // volta sola e serve a tutti gli effetti qui sotto: chiedere due volte al
+        // browser la stessa posizione costa un ricalcolo del layout per cella.
+        const posizioni = new Map();
         for (const indice of lastMove.clearedCells) {
           const nodo = cellRefs.current[indice];
           if (!nodo) continue;
           const r = nodo.getBoundingClientRect();
-          punti.push({ x: r.left - base.left, y: r.top - base.top, lato: r.width, colore });
+          posizioni.set(indice, { x: r.left - base.left, y: r.top - base.top, lato: r.width });
         }
-        campo.current.esplodi(punti, gruppi);
+
+        const esplose = new Set(lastMove.celleEsplose ?? []);
+        // La Tinta e' scattata: e' un premio raro (una eliminazione su dieci), quindi
+        // ha diritto a schegge piu' grosse e piu' lente. Senza questo pagherebbe in
+        // silenzio, che e' il difetto da cui la Tinta era nata.
+        const tinta = (lastMove.breakdown?.tintaMassima ?? 0) >= TINTA_SOGLIA;
+        const brillantezza = tinta ? 1.45 : 1;
+
+        const normali = [];
+        const bomba = [];
+        for (const [indice, p] of posizioni) {
+          (esplose.has(indice) ? bomba : normali).push({ ...p, colore });
+        }
+        if (normali.length > 0) campo.current.esplodi(normali, gruppi, brillantezza);
+        // Le celle fatte saltare dalle bombe bruciano invece di sbriciolarsi: colore
+        // proprio della bomba e schegge piu' violente. Ora che un'esplosione grossa
+        // vale piu' punti di una piccola, deve anche VEDERSI piu' grossa.
+        if (bomba.length > 0) {
+          const fuoco = coloreBomba();
+          campo.current.esplodi(
+            bomba.map((p) => ({ ...p, colore: fuoco })),
+            gruppi + 2,
+            1.6 + Math.min(1, bomba.length / 12),
+          );
+        }
+
+        // --- onde d'urto: una per gruppo chiuso, piu' una per le bombe ---------
+        const centri = [];
+        for (const gruppo of lastMove.groups) {
+          const celle = gruppo.cells.map((i) => posizioni.get(i)).filter(Boolean);
+          if (celle.length === 0) continue;
+          const lato = celle[0].lato;
+          const cx = celle.reduce((a, p) => a + p.x + lato / 2, 0) / celle.length;
+          const cy = celle.reduce((a, p) => a + p.y + lato / 2, 0) / celle.length;
+          // La forma dell'onda segue la forma di cio' che e' sparito: e' cosi' che si
+          // capisce a colpo d'occhio SE e' caduta una riga, una colonna o un quadrante.
+          // I tre casi hanno misure proprie e NON derivate dal numero di celle: riga,
+          // colonna e quadrante ne hanno nove ciascuno, e calcolando dal conteggio il
+          // quadrante riceveva l'onda larga della riga -- un cerchio che copriva mezzo
+          // tabellone senza dire da dove veniva. Visto a schermo prima di correggerlo.
+          const lunga = lato * 5;
+          const corta = lato * 1.4;
+          const tonda = lato * 2.2;
+          const dimensioni = gruppo.type === 'quadrant'
+            ? { raggioX: tonda, raggioY: tonda }
+            : {
+              raggioX: gruppo.type === 'col' ? corta : lunga,
+              raggioY: gruppo.type === 'col' ? lunga : corta,
+            };
+          centri.push({
+            x: cx,
+            y: cy,
+            ...dimensioni,
+            colore,
+            spessore: tinta ? 4.5 : 3,
+          });
+        }
+        if (bomba.length > 0) {
+          const celle = bomba;
+          const lato = celle[0].lato;
+          const cx = celle.reduce((a, p) => a + p.x + lato / 2, 0) / celle.length;
+          const cy = celle.reduce((a, p) => a + p.y + lato / 2, 0) / celle.length;
+          // Raggio contenuto e anello piu' acceso degli altri: la deflagrazione deve
+          // vedersi PIU' delle onde del gruppo, non piu' larga. Un cerchio grande e
+          // pallido, provato a schermo, non sembrava un'esplosione: sembrava un errore
+          // di disegno.
+          const raggio = lato * (0.8 + celle.length * 0.1);
+          centri.push({
+            x: cx,
+            y: cy,
+            raggioX: raggio,
+            raggioY: raggio,
+            colore: coloreBomba(),
+            spessore: 5,
+            opacita: 0.85,
+          });
+        }
+        if (centri.length > 0) campo.current.onda(centri);
+      }
+    }
+
+    // --- griglia svuotata: il lampo su tutta la plancia -----------------------
+    // Va DOPO le esplosioni di proposito: prima i blocchi se ne vanno, poi si vede
+    // che non ne e' rimasto nessuno. E' l'ordine in cui il giocatore capisce cosa e'
+    // successo, non il contrario.
+    if (lastMove.boardCleared) {
+      setSvuotata(lastMove.moveNumber);
+      timers.push(setTimeout(() => setSvuotata(null), DURATA_SVUOTAMENTO));
+      if (campo.current && plancia.current) {
+        const r = plancia.current.getBoundingClientRect();
+        campo.current.onda([{
+          x: r.width / 2,
+          y: r.height / 2,
+          raggioX: r.width * 0.62,
+          raggioY: r.height * 0.62,
+          colore: coloreBlocco(lastMove.color),
+          spessore: 6,
+        }]);
       }
     }
 
@@ -165,5 +279,5 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     return () => timers.forEach(clearTimeout);
   }, [lastMove, campo, cellRefs, plancia, animazioni]);
 
-  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita };
+  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita, svuotata };
 }

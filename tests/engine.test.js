@@ -7,7 +7,8 @@ import { getShape } from '../src/core/shapes.js';
 import {
   gridFromString, idx, gridToString, isEmpty, allPlacements, placeShape, findCompletedGroups,
 } from '../src/core/grid.js';
-import { HAND_SIZE, GROUP_BASE_POINTS, TINTA_PASSO, BOARD_CLEAR_BONUS } from '../src/config/rules.js';
+import { HAND_SIZE, GROUP_BASE_POINTS, BOARD_CLEAR_BONUS } from '../src/config/rules.js';
+import { fattoreTinta } from '../src/core/scoring.js';
 
 /** Costruisce uno stato di prova con griglia e mano scelte a mano. */
 function scenario(gridText, shapeIds) {
@@ -123,10 +124,10 @@ describe('eliminazioni e punteggio in partita', () => {
     expect(after.lastMove.groups[0].type).toBe('row');
     expect(after.lastMove.clearedCells).toHaveLength(9);
     // La griglia di prova e' tutta di un colore, quindi la riga chiusa prende la Tinta
-    // piena: 9 celle uguali, +20% sul valore del gruppo. Non e' un dettaglio del caso,
-    // e' il motivo per cui questo numero e' cambiato quando la Tinta e' nata.
+    // piena: 9 celle uguali. Quanto valga il bonus lo decide il motore, non questa prova:
+    // chiediamo il fattore alla funzione vera, cosi' la prova segue il gioco se cambia.
     expect(after.lastMove.breakdown.tintaMassima).toBe(9);
-    expect(after.score).toBe(1 + Math.round(GROUP_BASE_POINTS.row * (1 + TINTA_PASSO * 5)));
+    expect(after.score).toBe(1 + Math.round(GROUP_BASE_POINTS.row * (1 + fattoreTinta(9))));
     expect(after.chain).toBe(1);
     expect(after.lastMove.boardCleared).toBe(false);
   });
@@ -139,7 +140,7 @@ describe('eliminazioni e punteggio in partita', () => {
     const after = placePiece(s, 0, 0, 2);
     expect(after.lastMove.groups[0].type).toBe('quadrant');
     expect(after.lastMove.breakdown.tintaMassima).toBe(9);
-    expect(after.score).toBe(3 + Math.round(GROUP_BASE_POINTS.quadrant * (1 + TINTA_PASSO * 5)));
+    expect(after.score).toBe(3 + Math.round(GROUP_BASE_POINTS.quadrant * (1 + fattoreTinta(9))));
   });
 
   it('la Catena regge una mossa a vuoto prima di calare', () => {

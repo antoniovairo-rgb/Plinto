@@ -163,6 +163,37 @@ export const BOMBA_RAGGIO = 1;
 export const PUNTI_CELLA_ESPLOSA = 6;
 
 /**
+ * LE ESPLOSIONI GROSSE VALGONO DI PIU', E NON IN PROPORZIONE.
+ *
+ * Misurato su 80 partite: una bomba compare nel 14,7% delle mani, ne detona una ogni
+ * ventuno mosse, e quando detona porta via in media 2,4 celle su un raggio che ne
+ * toccherebbe otto. Cioe' la bomba quasi sempre scoppia sul vuoto. Con un punteggio
+ * lineare, far scoppiare due celle o sette e' la stessa cosa moltiplicata: niente
+ * invita ad aspettare il momento giusto.
+ *
+ * Da SOGLIA celle in su ogni cella aggiuntiva vale un PASSO in piu' sull'intera
+ * esplosione. Sette celle non fanno tre volte due celle: ne fanno quasi cinque. E' l'unico
+ * modo perche' tenere una bomba in mano diventi una decisione invece di un pezzo come
+ * gli altri.
+ *
+ * PERCHE' LA SOGLIA E' 3 E NON 4. Contate 5.870 detonazioni su 400 partite, le esplosioni
+ * si distribuiscono cosi': 1 cella 30,7%, 2 celle 30,1%, 3 celle 19,8%, 4 celle 11,7%,
+ * 5 o piu' 7,7%. Con la soglia a 4 il premio sarebbe scattato in quel 7,7%, cioe' una
+ * detonazione ogni tredici: un premio che si incontra cosi' di rado non si impara, si
+ * subisce. Con la soglia a 3 scatta nel 19,4%, una su cinque, e la detonazione MEDIA
+ * (2,4 celle) continua a non prendere niente -- che e' il punto: il premio resta per chi
+ * ha aspettato il momento giusto, ma capita abbastanza spesso da capire che esiste.
+ * Sul totale dei punti le esplosioni passano dal 6,03% al 6,89%, e il punteggio medio di
+ * una partita sale dell'1,5%: abbastanza da sentirsi, troppo poco da rifare i livelli
+ * a obiettivo di punteggio.
+ *
+ * NON si e' alzata la frequenza delle bombe: erano gia' rare al punto giusto, e una
+ * sorpresa che arriva spesso smette di essere una sorpresa.
+ */
+export const ESPLOSIONE_SOGLIA = 3;
+export const ESPLOSIONE_PASSO = 0.25;
+
+/**
  * LA TINTA: quanto vale chiudere un gruppo di un colore solo.
  *
  * PERCHE' ESISTE. Per tre versioni il colore e' stato dichiarato "puramente estetico",
@@ -177,18 +208,30 @@ export const PUNTI_CELLA_ESPLOSA = 6;
  * decidendo DOVE posare un pezzo -- che e' l'unica leva che il giocatore ha davvero, ed
  * e' gia' l'asse su cui si gioca tutto il resto.
  *
- * LA SOGLIA NON E' ARBITRARIA. Con sei colori, le nove celle di un gruppo riempite a
- * caso danno una maggioranza attorno a 3. Far partire il bonus da 5 significa che non
- * scatta mai per caso: se scatta, e' perche' qualcuno ci ha pensato.
+ * LA SOGLIA E' STATA ALZATA DA 5 A 7, E LA MISURA DICE PERCHE'. La versione precedente
+ * sosteneva che a 5 "non scatta mai per caso". Falso, e si vedeva soltanto misurando: su
+ * 120 partite del giocatore artificiale -- che il colore non lo insegue affatto -- la
+ * Tinta si accendeva nel 45% delle eliminazioni, una volta ogni sei mosse, e valeva
+ * l'1,14% dei punti. Un'etichetta che compare di continuo e non significa niente: proprio
+ * la cosa che il commento qui sopra dice di voler evitare.
+ *
+ * A 7 scende al 10% delle eliminazioni, e quella e' una maggioranza che non capita da
+ * sola: un gruppo di nove celle con sette dello stesso colore lo costruisce chi lo vuole.
+ * Quando compare adesso e' un evento, e per questo puo' valere molto di piu'.
  */
-export const TINTA_SOGLIA = 5;
+export const TINTA_SOGLIA = 7;
 
 /**
  * Quanto aggiunge ogni cella oltre la soglia, in frazione del valore del gruppo.
- * Al massimo (9 celle uguali) sono +20%: si sente, ma la partita continua a decidersi
- * su Catena e Intreccio, che sono le meccaniche che distinguono questo gioco.
+ * Con la soglia a 7: sette celle +20%, otto +40%, nove +60%. Il massimo triplica rispetto
+ * a prima, ma si paga quattro volte e mezzo meno spesso, e il conto complessivo resta
+ * quasi identico: misurata, la Tinta pesa l'1,21% dei punti contro l'1,14% di prima. E'
+ * voluto. La partita deve continuare a decidersi su Catena e Intreccio, che sono le
+ * meccaniche che distinguono questo gioco: quello che cambia non e' quanto la Tinta conta
+ * in una partita, ma quanto conta la singola volta in cui compare. Rara e grossa invece
+ * che continua e trascurabile.
  */
-export const TINTA_PASSO = 0.04;
+export const TINTA_PASSO = 0.20;
 
 /**
  * Modalita' di gioco che cambiano il MOTORE, non solo l'interfaccia.

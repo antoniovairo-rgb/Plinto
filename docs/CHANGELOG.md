@@ -7,6 +7,83 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.15.0] — 16 settembre 2026
+
+### Cambiato
+
+**La Tinta smette di essere una mancia continua e diventa un premio vero.** Prima
+scattava nel 44,9% delle eliminazioni — una ogni 6,1 mosse — e valeva l'1,12% dei punti di
+una partita: cioè arrivava di continuo e non si sentiva mai. Ora la soglia è a 7 celle
+dello stesso colore (era 5) e ogni cella oltre la soglia vale il 20% in più sul valore del
+gruppo (era il 4%). Misurato sulle stesse 400 partite e sulle stesse 121.636 mosse, prima
+e dopo: la Tinta scatta nel 10,0% delle eliminazioni, una ogni 27,5 mosse, e vale l'1,28%
+dei punti. Nel totale è quasi la stessa cifra, ed è voluto — quello che cambia è che
+adesso arriva tutta insieme in un momento riconoscibile invece di sciogliersi in
+duecento elemosine da tre punti.
+
+**Le esplosioni grosse valgono più di quelle piccole.** Fino a ieri far saltare due celle
+o sette era la stessa cosa moltiplicata. Da 3 celle in su, ogni cella aggiuntiva vale un
+25% in più sull'intera esplosione: sette celle non fanno tre volte due celle, ne fanno
+quasi cinque. La soglia è 3 e non 4 per una ragione contata: su 5.870 detonazioni, le
+esplosioni da 5 celle o più sono il 7,7% — un premio che si incontra una volta ogni
+tredici non si impara, si subisce. A 3 scatta nel 19,4% dei casi, una su cinque, mentre la
+detonazione MEDIA (2,4 celle) continua a non prendere niente: il premio resta per chi ha
+aspettato il momento giusto. Le esplosioni passano dal 6,03% al 6,89% dei punti.
+
+**Conseguenza da dichiarare, perché tocca i record.** Il punteggio medio di una partita
+sale dell'1,5%. È poco, e i cento livelli restano vinti tutti e cento nel controllo che li
+rigioca nell'app, ma è comunque un metro diverso: i punteggi fatti prima e quelli fatti
+dopo non sono confrontabili al centesimo. E siccome cambiare una costante di `rules.js`
+cambia l'impronta delle regole, **le Sfide del giorno registrate prima di questa versione
+risultano ottenute con regole diverse**, e il confronto con lo stratega nel profilo resta
+nascosto per quelle. Non è un difetto: è il meccanismo che impedisce di mettere in fila
+punteggi ottenuti con due giochi diversi.
+
+### Aggiunto
+
+**Le scenografie della mossa.** Fin qui l'eliminazione aveva le schegge e basta, e le
+schegge raccontano QUANTE celle sono saltate ma non DOVE: con quattro gruppi chiusi
+insieme il tabellone diventava una nuvola uniforme, e l'intreccio — la cosa più difficile
+del gioco — si vedeva meno di una riga singola.
+
+- **L'onda d'urto** parte dal centro di ogni gruppo chiuso, e ha la forma di quello che è
+  sparito: larga e schiacciata per una riga, alta e stretta per una colonna, tonda per un
+  quadrante. Quattro onde che si allargano insieme si contano a colpo d'occhio.
+- **La Tinta ha un alone tutto suo**: i blocchi se ne vanno accesi del proprio colore
+  invece di sbiancare come gli altri. Ora che scatta una volta ogni ventisette mosse
+  serviva qualcosa che dicesse perché il numero è più grosso, e dirlo nell'istante del
+  premio invece che in una schermata di regole che non apre nessuno.
+- **Le bombe bruciano** invece di sbriciolarsi: schegge del giallo della miccia, più
+  veloci e più grandi, e un anello acceso stretto attorno alla deflagrazione.
+- **La griglia svuotata accende un lampo dorato su tutta la plancia.** Era l'evento più
+  raro del gioco e l'unico che si sentiva soltanto: c'erano un suono e una vibrazione, e
+  niente da vedere. Chi gioca in silenzio, cioè quasi tutti in mobilità, non sapeva
+  nemmeno che fosse successo qualcosa di speciale.
+
+Tutto su un canvas solo, come le schegge: nessun nodo animato in più, e il ciclo di
+animazione resta acceso solo finché c'è qualcosa da disegnare.
+
+### Verificato
+
+Un controllo nuovo nel gate, che sale a **ventotto**: `tests/e2e/scenografie.mjs` fa una
+mossa sola su quattro partite costruite a mano e guarda cosa compare. Ha una metà «al
+contrario» — la stessa riga con i colori mescolati NON deve accendere l'alone della Tinta,
+e una mossa che non svuota la griglia non deve accendere il lampo — senza la quale
+passerebbe anche con gli effetti sempre accesi, cioè senza provare niente. Verifica anche
+che a riposo il canvas torni a zero pixel: le onde vivono nello stesso ciclo delle
+schegge, e una che non scadesse terrebbe acceso un `requestAnimationFrame` per sempre.
+Verificato capace di fallire: spegnendo l'alone della Tinta segnala il problema, spegnendo
+il lampo dello svuotamento ne segnala un altro.
+
+Le prove del punteggio non ricalcolano più a mano le formule del motore: chiedono il
+fattore alla funzione vera (`fattoreTinta`, `fattoreEsplosione`). Duplicare l'aritmetica
+significava che ogni ritocco alla taratura faceva fallire prove che non erano rotte, e la
+prova diceva «il motore calcola così» mentre in realtà diceva «io calcolo così».
+
+Il riferimento dello stratega è stato rigenerato con `npm run catena` (impronta e5273fab):
+è la misura su cui il profilo confronta la Catena del giocatore, e con regole nuove la
+vecchia non valeva più.
+
 ## [1.14.0] — 15 settembre 2026
 
 ### Aggiunto

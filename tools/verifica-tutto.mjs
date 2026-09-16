@@ -1,7 +1,7 @@
 /**
  * Esegue TUTTE le verifiche, in ordine, e riassume l'esito.
  *
- * Perche' esiste. I controlli di questo progetto sono ventisette, e sono comandi separati:
+ * Perche' esiste. I controlli di questo progetto sono ventotto, e sono comandi separati:
  * chi pubblica deve ricordarseli tutti. Non me li sono ricordati tutti — ho pubblicato
  * saltando `prova-pages`, l'integrazione continua ha bloccato il rilascio, e il difetto
  * era proprio nel controllo che non avevo eseguito. Un elenco da ricordare a memoria e'
@@ -51,6 +51,11 @@ const VERIFICHE = [
   { nome: 'salvataggio: esce, rientra e non cancella niente', comando: 'npm', argomenti: ['run', 'e2e-salvataggio'] },
   { nome: 'politica di sicurezza attiva, e non rompe niente', comando: 'npm', argomenti: ['run', 'e2e-sicurezza'] },
   { nome: 'attrezzi del cantiere: gru e gessetto nel gioco', comando: 'npm', argomenti: ['run', 'e2e-attrezzi'] },
+  // Le scenografie della mossa. Sono l'esempio perfetto di difetto silenzioso: se si
+  // spengono, il gioco funziona, da' gli stessi punti e non segnala niente -- smette
+  // solo di festeggiare. Nessuna prova pura puo' vederle, perche' nascono da un campo
+  // di `lastMove` e finiscono su un canvas.
+  { nome: 'scenografie della mossa (onde, Tinta, bombe, svuotamento)', comando: 'npm', argomenti: ['run', 'e2e-scenografie'] },
   // La guida al primo avvio: e' l'unica schermata che ogni giocatore vede una volta
   // sola, quindi un suo difetto non lo segnala mai nessuno. Chi lo incontra e' nuovo,
   // non sa che sia un difetto, e non torna indietro a raccontarlo.

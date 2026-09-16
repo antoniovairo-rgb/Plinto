@@ -962,6 +962,66 @@ button {
   100% { transform: scale(0.2); opacity: 0; filter: brightness(2.6) saturate(0.35); }
 }
 
+/* LA TINTA. Il gruppo chiuso era quasi tutto dello stesso colore: invece di sbiancare
+   come gli altri, i blocchi se ne vanno con un alone del PROPRIO colore, che si allarga
+   mentre il blocco si stringe.
+
+   Perche' merita un'animazione sua. La Tinta paga una eliminazione su dieci circa: se
+   se ne andasse come tutte le altre, il giocatore vedrebbe solo un numero piu' grosso
+   e non saprebbe mai PERCHE'. L'alore colorato e' la spiegazione, e arriva nello stesso
+   istante del premio invece che in una schermata di regole che nessuno apre. */
+.pl-blocco--esploso.pl-blocco--tinta {
+  animation: pl-svanisci-tinta var(--pl-t-esplosione) var(--pl-ease-out) both;
+}
+
+@keyframes pl-svanisci-tinta {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: 0 0 0 0 var(--esploso, var(--pl-text));
+  }
+  22% {
+    transform: scale(1.24);
+    opacity: 1;
+    filter: brightness(2.2) saturate(1.4);
+    box-shadow: 0 0 14px 4px var(--esploso, var(--pl-text));
+  }
+  100% {
+    transform: scale(0.18);
+    opacity: 0;
+    filter: brightness(2.2) saturate(1.4);
+    box-shadow: 0 0 34px 2px transparent;
+  }
+}
+
+/* IL LAMPO DELLO SVUOTAMENTO. La griglia e' rimasta completamente vuota: l'evento piu'
+   raro del gioco, e fino a ieri l'unico che si sentiva soltanto (un suono e una
+   vibrazione, niente da vedere). Chi gioca in silenzio non sapeva nemmeno che fosse
+   successo qualcosa di speciale.
+
+   Non copre il tabellone: e' un velo chiaro che si accende e si spegne, e sotto ci
+   sono le caselle vuote -- che sono il punto. Non intercetta il tocco, perche' arriva
+   proprio mentre il giocatore sta gia' cercando dove appoggiare il prossimo pezzo. */
+.pl-plancia__lampo {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 50%;
+  /* Lo sfondo sta QUI e non nei fotogrammi: fra due gradienti il browser non
+     interpola, salta. Si anima quello che si anima davvero -- opacita' e scala --
+     e il risultato e' un alone che si accende e si allarga invece di un lampeggio. */
+  background: radial-gradient(circle at 50% 50%, var(--pl-brand) 0%, rgba(0, 0, 0, 0) 66%);
+  animation: pl-lampo var(--pl-t-svuotamento) var(--pl-ease-out) both;
+}
+
+@keyframes pl-lampo {
+  0%   { opacity: 0; transform: scale(0.3); }
+  22%  { opacity: 0.45; transform: scale(0.85); }
+  100% { opacity: 0; transform: scale(1.3); }
+}
+
 /* --------------------------------------------------- game feel: punteggio --- */
 .pl-punti-volanti {
   position: absolute;

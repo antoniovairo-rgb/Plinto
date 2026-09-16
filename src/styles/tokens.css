@@ -91,6 +91,7 @@
   --pl-t-atterraggio: 260ms;
   --pl-t-esplosione: 420ms;
   --pl-t-punti: 950ms;
+  --pl-t-svuotamento: 700ms;
   /* La frase di incitamento. NON compare nel blocco prefers-reduced-motion qui sotto,
      ed e' l'unica durata che non ci compare: le altre misurano un movimento, questa
      misura per quanto tempo si puo' LEGGERE un testo. Azzerarla non toglierebbe del
@@ -184,6 +185,7 @@
     --pl-t-atterraggio: 1ms;
     --pl-t-esplosione: 1ms;
     --pl-t-punti: 1ms;
+    --pl-t-svuotamento: 1ms;
     --pl-t-festa: 1ms;
   }
 }

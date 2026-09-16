@@ -31,6 +31,8 @@ import {
   CHAIN_STEP_UP,
   BOARD_CLEAR_BONUS,
   PUNTI_CELLA_ESPLOSA,
+  ESPLOSIONE_SOGLIA,
+  ESPLOSIONE_PASSO,
   TINTA_SOGLIA,
   TINTA_PASSO,
   COLOR_COUNT,
@@ -56,6 +58,16 @@ export function maggioranzaColore(grid, cells) {
   let massimo = 0;
   for (let c = 1; c <= COLOR_COUNT; c += 1) if (conteggi[c] > massimo) massimo = conteggi[c];
   return massimo;
+}
+
+/**
+ * Quanto vale un'esplosione GROSSA rispetto a una piccola: 1 fino alla soglia, poi
+ * cresce. Vedi ESPLOSIONE_SOGLIA in rules.js per il perche'.
+ * @returns {number} moltiplicatore (1 = niente in piu')
+ */
+export function fattoreEsplosione(celle) {
+  if (celle <= ESPLOSIONE_SOGLIA) return 1;
+  return 1 + (celle - ESPLOSIONE_SOGLIA) * ESPLOSIONE_PASSO;
 }
 
 /**
@@ -142,7 +154,9 @@ export function scoreMove({
   const clearPoints = groups.length > 0 ? Math.round((groupsBase + tinta) * intreccio * chain) : 0;
   // Le celle portate via dalle bombe oltre al gruppo: seguono la Catena come tutto
   // il resto, altrimenti sarebbero un punteggio scollegato dal ritmo della partita.
-  const esplosioni = Math.round(explodedCellCount * PUNTI_CELLA_ESPLOSA * chain);
+  const esplosioni = Math.round(
+    explodedCellCount * PUNTI_CELLA_ESPLOSA * fattoreEsplosione(explodedCellCount) * chain,
+  );
   const boardClear = boardCleared && groups.length > 0 ? BOARD_CLEAR_BONUS : 0;
 
   const dopo = nextChainState(chainLevel, groups.length, chainFast);
@@ -212,6 +226,15 @@ export function scoreMove({
 export function moveTier(groupCount, chainLevel, celleEsplose = 0) {
   if (groupCount <= 0) return null;
   const heat = groupCount * 6 + chainLevel + Math.floor(celleEsplose / 4);
+  // LA SOGLIA RESTA 19, dopo averla abbassata e rimessa. La misura diceva che la
+  // "perfetta" si vede una volta ogni 339 mosse su una partita media di 214, e sembrava
+  // un tetto irraggiungibile da abbassare. Guardando la scala con cui e' tarata, no: con
+  // tre gruppi e la Catena almeno a uno la perfetta arriva gia' oggi, quindi la rarita'
+  // viene dalla MOSSA -- chiudere tre gruppi insieme e' raro di suo -- non dalla soglia.
+  // Abbassarla a 18 avrebbe solo aggiunto "tre gruppi con la Catena a zero", rompendo la
+  // scala che questo file dichiara: due gruppi almeno ottima, tre almeno eccellente,
+  // quattro il massimo. Lo spettacolo si aumenta con gli effetti, non svendendo il
+  // gradino piu' alto.
   if (heat >= 19 && groupCount >= 2) return 'perfetta';
   if (heat >= 15) return 'eccellente';
   if (heat >= 12) return 'ottima';

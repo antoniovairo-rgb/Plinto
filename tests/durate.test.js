@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import {
   DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
+  DURATA_SVUOTAMENTO,
 } from '../src/feel/durate.js';
 
 /**
@@ -29,6 +30,10 @@ describe('allineamento fra durate JavaScript e CSS', () => {
 
   it('il token dei punti volanti corrisponde alla costante JavaScript', () => {
     expect(millisecondi('pl-t-punti')).toBe(DURATA_PUNTI);
+  });
+
+  it('il token del lampo di svuotamento corrisponde alla costante JavaScript', () => {
+    expect(millisecondi('pl-t-svuotamento')).toBe(DURATA_SVUOTAMENTO);
   });
 
   it('il token della frase di incitamento corrisponde alla costante JavaScript', () => {

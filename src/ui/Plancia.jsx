@@ -16,7 +16,7 @@ import { Bomba } from './Bomba.jsx';
 export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
-    appoggiate, esplosioni, celleEsplose, cursore, pezzoInMano,
+    appoggiate, esplosioni, celleEsplose, svuotata, cursore, pezzoInMano,
     // Le caselle segnate col gesso: dove il gessetto dice di appoggiare.
     segnate,
     cellRefs, canvasRef, onCellPointerUp, t,
@@ -72,7 +72,14 @@ export const Plancia = forwardRef(function Plancia(
                 scatto e la mossa piu' soddisfacente del gioco passerebbe inosservata. */}
             {inEsplosione ? (
               <div
-                className={`pl-blocco pl-blocco--esploso ${saltata ? 'pl-blocco--saltato' : ''}`}
+                className={[
+                  'pl-blocco', 'pl-blocco--esploso',
+                  saltata ? 'pl-blocco--saltato' : '',
+                  // La Tinta e' scattata: il blocco se ne va con un alone del proprio
+                  // colore invece di sbiancare e basta. Succede una eliminazione su
+                  // dieci, quindi si nota senza diventare rumore.
+                  esplosioni.tinta ? 'pl-blocco--tinta' : '',
+                ].filter(Boolean).join(' ')}
                 style={{ '--esploso': esplosioni.colore }}
               />
             ) : null}
@@ -85,9 +92,20 @@ export const Plancia = forwardRef(function Plancia(
       celleEsplose, cursore, cellRefs, onCellPointerUp, t]);
 
   return (
-    <div className="pl-plancia" ref={ref} role="grid" aria-label="PLINTO" data-in-mano={pezzoInMano ? 'si' : 'no'}>
+    <div
+      className="pl-plancia"
+      ref={ref}
+      role="grid"
+      aria-label="PLINTO"
+      data-in-mano={pezzoInMano ? 'si' : 'no'}
+    >
       {celle}
       <div className="pl-plancia__quadranti" />
+      {/* Il lampo dello svuotamento. E' un elemento a se' e non uno sfondo della
+          plancia perche' deve stare SOPRA le caselle e sotto le particelle, e perche'
+          rimontandolo a ogni svuotamento l'animazione riparte davvero: una classe
+          rimessa sullo stesso nodo, in CSS, non fa ripartire niente. */}
+      {svuotata ? <div key={svuotata} className="pl-plancia__lampo" aria-hidden="true" /> : null}
       <canvas className="pl-plancia__particelle" ref={canvasRef} aria-hidden="true" />
     </div>
   );

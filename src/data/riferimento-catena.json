@@ -17,7 +17,7 @@
   "partite": 120,
   "tettoMosse": 250,
   "mosse": 29950,
-  "regole": "dee85df4",
-  "misuratoIl": "2026-09-09",
+  "regole": "e5273fab",
+  "misuratoIl": "2026-09-16",
   "comando": "npm run catena 120 250"
 }

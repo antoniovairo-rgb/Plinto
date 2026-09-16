@@ -12,6 +12,20 @@ export const DURATA_ESPLOSIONE = 420;
 export const DURATA_PUNTI = 950;
 
 /**
+ * Quanto dura il lampo che attraversa la plancia quando la griglia si svuota.
+ *
+ * Svuotare il tabellone e' l'evento piu' raro e piu' bello del gioco, e fino a ieri
+ * era l'unico che si SENTIVA soltanto: c'erano un suono e una vibrazione, e niente
+ * da vedere. Chi gioca senza audio -- cioe' quasi tutti, in mobilita' -- non sapeva
+ * nemmeno che fosse successo qualcosa di speciale.
+ *
+ * Piu' lungo dell'esplosione (420ms) perche' deve restare visibile DOPO che l'ultimo
+ * blocco e' sparito: il senso del lampo e' il tabellone vuoto, non i blocchi che se
+ * ne vanno.
+ */
+export const DURATA_SVUOTAMENTO = 700;
+
+/**
  * Quanto resta a schermo la frase di incitamento.
  *
  * Piu' lunga dei punti volanti (950ms) perche' un numero si coglie con la coda
