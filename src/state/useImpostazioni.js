@@ -8,10 +8,13 @@ import { linguaDelBrowser } from '../i18n/index.js';
  *
  * Il CSS lo sa gia' da solo, ma le particelle sono disegnate su un canvas con
  * requestAnimationFrame: `prefers-reduced-motion` non le tocca. L'unico modo per
- * rispettare davvero quella preferenza e' leggerla anche da JavaScript e usarla come
- * VALORE INIZIALE dell'impostazione Animazioni. Resta un valore iniziale, non un
- * vincolo: chi vuole le animazioni le riaccende dalle impostazioni e la sua scelta,
- * essendo salvata, vince sulla preferenza di sistema.
+ * rispettare davvero quella preferenza e' leggerla anche da JavaScript.
+ *
+ * Da quando l'interruttore delle Animazioni non esiste piu' nelle impostazioni, questa
+ * e' l'UNICA cosa che le spegne. Non e' una perdita: chi ha bisogno di meno movimento
+ * lo ha gia' chiesto al sistema operativo una volta per tutte, e non deve ripeterlo
+ * dentro ogni applicazione. Il campo resta nelle impostazioni salvate perche' le prove
+ * automatiche lo forzano per rendere deterministici i controlli nel browser.
  */
 function menoMovimento() {
   try {
@@ -41,9 +44,6 @@ export function useImpostazioni() {
       audio: true,
       vibrazione: true,
       animazioni: !menoMovimento(),
-      aiutoVisivo: true,
-      // Accesi di serie: un aiuto che bisogna scoprire di avere non aiuta nessuno.
-      attrezzi: true,
       tema: 'scuro',
       lingua: linguaDelBrowser(),
       introVista: false,

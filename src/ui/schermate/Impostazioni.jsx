@@ -10,8 +10,18 @@ import { numero } from '../../i18n/formato.js';
 
 /**
  * Impostazioni. Ogni voce e' una scelta reale del giocatore, non una preferenza
- * finta: audio, vibrazione e animazioni si spengono davvero, e l'aiuto visivo
- * si puo' togliere per chi vuole leggere la griglia da solo.
+ * finta: audio e vibrazione si spengono davvero.
+ *
+ * QUI NON SI SPEGNE IL GIOCO. Animazioni, evidenziazione dei gruppi e attrezzi del
+ * cantiere non hanno piu' un interruttore, ed e' una scelta di disegno: erano tre modi
+ * di giocare a un gioco diverso da quello che tutti gli altri stanno giocando, nascosti
+ * in una schermata che quasi nessuno apre. Un'impostazione che cambia le regole non e'
+ * una preferenza, e' una seconda versione del gioco da mantenere.
+ *
+ * Il movimento ridotto resta rispettato, ma lo chiede il TELEFONO e non questa
+ * schermata: `prefers-reduced-motion` spegne le animazioni da solo (vedi
+ * src/state/useImpostazioni.js). Chi ha bisogno di meno movimento lo ha gia' detto al
+ * sistema operativo, e non deve ridirlo a ogni applicazione.
  */
 export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, onIndietro, t }) {
   // Zero e' il primo passo, uno e due sono le due conferme. Lo stesso meccanismo del
@@ -35,15 +45,6 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
                       onCambia={() => inverti('audio')} />
         <Interruttore etichetta={t('impostazioni.vibrazione')} attivo={impostazioni.vibrazione}
                       onCambia={() => inverti('vibrazione')} />
-        <Interruttore etichetta={t('impostazioni.animazioni')} attivo={impostazioni.animazioni}
-                      onCambia={() => inverti('animazioni')} />
-        <Interruttore etichetta={t('impostazioni.aiutoVisivo')} attivo={impostazioni.aiutoVisivo}
-                      onCambia={() => inverti('aiutoVisivo')} />
-        {/* Spegnendoli la pastiglia sparisce dalla partita. Si continua a guadagnarli lo
-            stesso: chi li riaccende dopo trenta livelli ritrova quello che gli spetta,
-            invece di scoprire che spegnere un aiuto gli e' costato dei progressi. */}
-        <Interruttore etichetta={t('impostazioni.attrezzi')} attivo={impostazioni.attrezzi !== false}
-                      onCambia={() => inverti('attrezzi')} />
       </div>
 
       <div className="pl-gruppo">

@@ -39,6 +39,24 @@ risultano ottenute con regole diverse**, e il confronto con lo stratega nel prof
 nascosto per quelle. Non è un difetto: è il meccanismo che impedisce di mettere in fila
 punteggi ottenuti con due giochi diversi.
 
+**Tre interruttori in meno nelle impostazioni: Animazioni, «Evidenzia i gruppi che stai
+per chiudere» e Attrezzi del cantiere.** Erano tre modi di giocare a un gioco diverso da
+quello che giocano tutti gli altri, nascosti in una schermata che quasi nessuno apre:
+l'evidenziazione non spiega qualcosa che si potrebbe indovinare, spiega la regola centrale
+del gioco, e lasciarla dietro un interruttore voleva dire lasciare al caso se un giocatore
+la capisse. Restano accesi Suoni e Vibrazione, che spengono un fastidio e non una regola.
+
+**Il movimento ridotto resta rispettato, ma lo chiede il telefono.** Chi ha attivato
+«riduci animazioni» nelle impostazioni di sistema continua a vedere un gioco fermo: la
+preferenza viene letta anche da JavaScript, perché le particelle sono disegnate su un
+canvas e `prefers-reduced-motion` da solo non le tocca. Chi ha bisogno di meno movimento
+lo ha già detto una volta al sistema operativo e non deve ripeterlo qui.
+
+**Chi aveva spento gli attrezzi nella 1.14 se li ritrova accesi.** Quell'impostazione
+salvata non ha più effetto, ed è voluto: senza questo, chi aveva abbassato l'interruttore
+non avrebbe più avuto nessun modo di rialzarlo. Un controllo nel gate lo verifica proprio
+partendo da un vecchio `attrezzi: false` salvato.
+
 ### Aggiunto
 
 **Le scenografie della mossa.** Fin qui l'eliminazione aveva le schegge e basta, e le
@@ -74,6 +92,10 @@ che a riposo il canvas torni a zero pixel: le onde vivono nello stesso ciclo del
 schegge, e una che non scadesse terrebbe acceso un `requestAnimationFrame` per sempre.
 Verificato capace di fallire: spegnendo l'alone della Tinta segnala il problema, spegnendo
 il lampo dello svuotamento ne segnala un altro.
+
+`tests/e2e/attrezzi.mjs` guadagna due passi al posto di quello che spegneva l'interruttore:
+che un vecchio `attrezzi: false` salvato non faccia più sparire la pastiglia, e che nelle
+impostazioni non ricompaia nessuno dei tre interruttori tolti.
 
 Le prove del punteggio non ricalcolano più a mano le formule del motore: chiedono il
 fattore alla funzione vera (`fattoreTinta`, `fattoreEsplosione`). Duplicare l'aritmetica

@@ -42,18 +42,18 @@ page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text().slice(0, 160)}`); });
 
 /** Apre il livello 13 con `quanti` attrezzi in magazzino. */
-async function apriPartita(quanti, conAttrezzi = true) {
+async function apriPartita(quanti, impostazioniInPiu = {}) {
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate(({ n, acceso }) => {
+  await page.evaluate(({ n, extra }) => {
     window.localStorage.clear();
     window.localStorage.setItem('plinto:settings', JSON.stringify({
-      introVista: true, lingua: 'it', tema: 'scuro', animazioni: false, aiutoVisivo: true, attrezzi: acceso,
+      introVista: true, lingua: 'it', tema: 'scuro', animazioni: false, ...extra,
     }));
     const v = {};
     for (let k = 1; k <= 12; k += 1) v[k] = { mosse: 12, punteggio: 300, tentativi: 1 };
     window.localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: v }));
     window.localStorage.setItem('plinto:attrezzi', JSON.stringify({ versione: 1, disponibili: n, riscossi: 2 }));
-  }, { n: quanti, acceso: conAttrezzi });
+  }, { n: quanti, extra: impostazioniInPiu });
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
   await page.waitForSelector('.pl-tappe');
@@ -114,9 +114,29 @@ controlla(`il pannello vuoto non spiega niente: "${vuoto.replace(/\n/g, ' | ')}"
 await page.screenshot({ path: `${OUT}/5-vuoto.png` });
 await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
 
-console.log('6. con l interruttore spento la pastiglia sparisce...');
-await apriPartita(3, false);
-controlla('spegnendo gli attrezzi la pastiglia resta a schermo', await page.locator('.pl-attrezzi__pastiglia').count() === 0);
+// Gli attrezzi non hanno piu' un interruttore nelle impostazioni (1.15.0): il controllo
+// che li spegneva e' diventato il controllo che nessuno possa restare spento. Un vecchio
+// `attrezzi: false` salvato esiste davvero sui telefoni di chi ha giocato la 1.14 con
+// l'interruttore abbassato: senza questa prova, quelle persone non rivedrebbero mai piu'
+// la pastiglia e non avrebbero piu' nessun modo di riaccenderla.
+console.log('6. un vecchio "attrezzi: false" salvato non li spegne piu...');
+await apriPartita(3, { attrezzi: false });
+controlla('una vecchia impostazione "attrezzi: false" fa ancora sparire la pastiglia',
+  await page.locator('.pl-attrezzi__pastiglia').count() === 1);
+
+console.log('7. nelle impostazioni non ci sono piu interruttori per spegnere il gioco...');
+await page.evaluate(() => {
+  window.localStorage.removeItem('plinto:ripresa');
+  window.localStorage.removeItem('plinto:partita');
+  window.localStorage.removeItem('plinto:quadro-in-corso');
+});
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Impostazioni$/ }).click();
+await page.waitForSelector('.pl-lista');
+const etichette = await page.locator('.pl-lista').innerText();
+await page.screenshot({ path: `${OUT}/7-impostazioni.png` });
+controlla(`le impostazioni mostrano ancora un interruttore di troppo: "${etichette.replace(/\n/g, ' | ')}"`,
+  !/Animazioni|Evidenzia|Attrezzi/i.test(etichette));
 
 await browser.close();
 server?.kill();

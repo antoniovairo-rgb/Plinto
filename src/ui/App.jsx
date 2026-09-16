@@ -440,11 +440,10 @@ export function App() {
           pezziMorti={deadPiecesDi(quadri.partita)}
           onGioca={quadri.gioca}
           onMenu={() => setMenuAperto(true)}
-          aiutoVisivo={impostazioni.aiutoVisivo}
           animazioni={impostazioni.animazioni}
           quadro={quadri.quadro}
           statoQuadro={quadri.stato}
-          attrezzi={impostazioni.attrezzi === false ? null : quadri.attrezzi}
+          attrezzi={quadri.attrezzi}
           suggerimento={quadri.suggerimento}
           onGru={quadri.usaGru}
           onGessetto={quadri.usaGessetto}
@@ -480,7 +479,6 @@ export function App() {
           pezziMorti={pezziMorti}
           onGioca={gioca}
           onMenu={() => setMenuAperto(true)}
-          aiutoVisivo={impostazioni.aiutoVisivo}
           animazioni={impostazioni.animazioni}
           modalita={modalita}
           t={t}

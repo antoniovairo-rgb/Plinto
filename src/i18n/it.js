@@ -142,13 +142,10 @@ export default {
     titolo: 'Impostazioni',
     audio: 'Suoni',
     vibrazione: 'Vibrazione',
-    animazioni: 'Animazioni',
     tema: 'Tema',
     temaScuro: 'Scuro',
     temaChiaro: 'Chiaro',
     lingua: 'Lingua',
-    aiutoVisivo: 'Evidenzia i gruppi che stai per chiudere',
-    attrezzi: 'Attrezzi del cantiere',
     azzera: 'Azzera i miei dati',
     // DICEVA MENO DEL VERO. "Cancella record, statistiche e partita in corso" ometteva
     // proprio la cosa che costa di piu': i livelli superati. Chi ne aveva sessantanove

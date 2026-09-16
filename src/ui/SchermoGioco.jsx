@@ -92,7 +92,7 @@ function SegnoAnnulla() {
 }
 
 export function SchermoGioco({
-  partita, record, pezziMorti, onGioca, onMenu, aiutoVisivo, animazioni,
+  partita, record, pezziMorti, onGioca, onMenu, animazioni,
   quadro = null, statoQuadro = null, modalita = 'libera',
   siPuoAnnullare = false, onAnnulla = null,
   // Gli attrezzi arrivano solo dai livelli: negli altri modi questi restano a zero e
@@ -239,8 +239,11 @@ export function SchermoGioco({
     if (celle === null) return null;              // fuori griglia: niente da mostrare
 
     const valida = canPlace(partita.grid, pezzo.shape, destinazione.row, destinazione.col);
+    // L'evidenziazione dei gruppi che stanno per chiudersi c'e' sempre: non spiega
+    // qualcosa che si potrebbe indovinare, spiega la regola centrale del gioco. Averla
+    // dietro un interruttore voleva dire lasciare a caso se un giocatore la capisse.
     let incandidate = null;
-    if (valida && aiutoVisivo) {
+    if (valida) {
       const { grid: dopo } = placeShape(
         partita.grid, pezzo.shape, destinazione.row, destinazione.col, pezzo.color,
       );
@@ -252,7 +255,7 @@ export function SchermoGioco({
     }
     return { celle: new Set(celle), colore: pezzo.color, valida, incandidate };
   }, [drag.preso, drag.destinazione, drag.selezionato, tastiera.cursore,
-      partita.hand, partita.grid, aiutoVisivo]);
+      partita.hand, partita.grid]);
 
   const pezzoTrascinato = drag.preso ? partita.hand[drag.preso.handIndex] : null;
 
