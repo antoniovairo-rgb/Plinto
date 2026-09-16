@@ -117,6 +117,10 @@ export function createGame(options = {}) {
     grid,
     hand: dealt.pieces,
     manoSuccessiva: successiva ? successiva.pieces : null,
+    // La mensola del cantiere: il posto dove si appoggia un pezzo per dopo. Nasce vuota
+    // e lo resta finche' non la si usa, quindi una partita che non tocca l'attrezzo si
+    // comporta esattamente come prima che la mensola esistesse.
+    mensola: null,
     score: 0,
     chain: 0,
     // Mosse consecutive senza eliminazioni. La Catena cala solo quando questo
@@ -140,6 +144,23 @@ export function canPlaceHandPiece(state, handIndex, row, col) {
 /** Esiste almeno un pezzo in mano ancora piazzabile? */
 export function handHasMove(grid, hand) {
   return hand.some((piece) => piece && hasAnyPlacement(grid, piece.shape));
+}
+
+/**
+ * C'e' ancora qualcosa da giocare: in mano OPPURE sulla mensola.
+ *
+ * E' la funzione che decide la fine della partita, ed e' separata da `handHasMove`
+ * perche' quella risponde a una domanda piu' piccola ("questa mano ha una mossa?") ed
+ * e' usata anche dal generatore, dove la mensola non c'entra nulla.
+ *
+ * CHE COSA IMPEDISCE. Senza contare la mensola, appoggiarci l'ultimo pezzo giocabile
+ * chiuderebbe la partita: l'attrezzo che serve a sbloccarsi diventerebbe il modo piu'
+ * rapido di perdere. Non e' un caso di scuola -- e' proprio il momento in cui uno usa
+ * la mensola, cioe' quando la mano non gli piace.
+ */
+export function restaUnaMossa(grid, hand, mensola = null) {
+  if (handHasMove(grid, hand)) return true;
+  return Boolean(mensola) && hasAnyPlacement(grid, mensola.shape);
 }
 
 /** Elenco dei pezzi in mano che non entrano piu' da nessuna parte. */
@@ -232,8 +253,9 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     handsDealt += 1;
   }
 
-  // 6. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte.
-  const alive = handHasMove(grid, nextHand);
+  // 6. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte -- contando
+  //    anche quello appoggiato sulla mensola, che e' giocabile quanto gli altri.
+  const alive = restaUnaMossa(grid, nextHand, state.mensola ?? null);
 
   const distribuzioni = conMossa(state.stats, {
     catenaApplicata: scored.chainUsed,
@@ -351,6 +373,75 @@ export function cambiaPezzo(state, handIndex) {
   return { ...state, hand, rngState, shapeHistory: history };
 }
 
+/**
+ * IL PICCONE: toglie UNA casella gia' posata, quella scelta dal giocatore.
+ *
+ * Non da' punti, non tocca la Catena, non conta come mossa e non muove le statistiche.
+ * E' voluto ed e' la regola piu' importante di questo attrezzo: se scavare desse punti
+ * diventerebbe una macchina da punteggio invece di un aiuto, e se costasse una mossa
+ * sarebbe inutile proprio nei livelli a mosse contate, cioe' dove serve.
+ *
+ * Non tocca nemmeno `lastMove`: quel campo descrive l'ultima MOSSA, e uno scavo non lo
+ * e'. Lasciandolo fermo, gli effetti a schermo non rifanno la festa dell'eliminazione
+ * precedente, e il "rimetti a posto" resta spento -- perche' la regola che lo accende
+ * chiede che le mosse siano aumentate di uno, e qui non aumentano.
+ *
+ * Togliere una casella non puo' MAI completare una riga, una colonna o un quadrante:
+ * i gruppi si chiudono riempiendo, non svuotando. Quindi qui non si cercano gruppi.
+ *
+ * @returns {object|null} nuovo stato, oppure null se non c'era niente da togliere
+ *   (casella gia' vuota, indice fuori dalla griglia, partita finita). In quel caso chi
+ *   chiama non deve far pagare l'attrezzo.
+ */
+export function scavaCella(state, index) {
+  if (state.status !== 'playing') return null;
+  if (!Number.isInteger(index) || index < 0 || index >= state.grid.length) return null;
+  if (state.grid[index] === 0) return null;
+  const grid = Uint8Array.from(state.grid);
+  grid[index] = 0;
+  return { ...state, grid };
+}
+
+/**
+ * LA MENSOLA, primo tempo: appoggiare un pezzo della mano.
+ *
+ * @returns {object|null} null se la mensola e' gia' occupata, se lo slot e' vuoto o se
+ *   la partita e' finita: anche qui, chi chiama non deve far pagare l'attrezzo.
+ */
+export function appoggiaSullaMensola(state, handIndex) {
+  if (state.status !== 'playing') return null;
+  if (state.mensola) return null;
+  const pezzo = state.hand[handIndex];
+  if (!pezzo) return null;
+  const hand = state.hand.slice();
+  hand[handIndex] = null;
+  return { ...state, hand, mensola: pezzo };
+}
+
+/**
+ * LA MENSOLA, secondo tempo: riprendere il pezzo. Non costa niente, perche' l'attrezzo
+ * si e' gia' pagato appoggiandolo: un pezzo messo da parte che si deve ricomprare per
+ * riaverlo non e' messo da parte, e' sequestrato.
+ *
+ * SE LO SLOT E' OCCUPATO I DUE SI SCAMBIANO, e non e' un vezzo: senza lo scambio esiste
+ * un vicolo cieco reale. Appoggi un pezzo, giochi gli altri due, la mano si rifa' con
+ * tre pezzi nuovi, e quello sulla mensola non ha piu' dove tornare -- resterebbe li'
+ * per sempre mentre la partita lo conta come giocabile. Costo dichiarato dello scambio:
+ * chi vuole puo' continuare a scambiare e tenersi di fatto un quarto posto. E' il
+ * prezzo di non avere trappole, ed e' un prezzo che si paga volentieri.
+ *
+ * @returns {object|null} null se la mensola e' vuota o l'indice non e' della mano.
+ */
+export function riprendiDallaMensola(state, handIndex) {
+  if (state.status !== 'playing') return null;
+  if (!state.mensola) return null;
+  if (!Number.isInteger(handIndex) || handIndex < 0 || handIndex >= state.hand.length) return null;
+  const hand = state.hand.slice();
+  const scambiato = hand[handIndex] ?? null;
+  hand[handIndex] = state.mensola;
+  return { ...state, hand, mensola: scambiato };
+}
+
 export function gameDuration(state, now = Date.now()) {
   return (state.endedAt ?? now) - state.startedAt;
 }
@@ -401,6 +492,7 @@ export function serializeGame(state) {
     shapeHistory: state.shapeHistory,
     grid: Array.from(state.grid),
     hand: state.hand.map(pezzoSerializzato),
+    mensola: pezzoSerializzato(state.mensola ?? null),
     score: state.score,
     chain: state.chain,
     chainDigiuno: state.chainDigiuno ?? 0,
@@ -459,6 +551,10 @@ export function deserializeGame(raw) {
       shapeHistory: raw.shapeHistory ?? [],
       grid,
       hand,
+      // Un salvataggio fatto prima che la mensola esistesse non ha questo campo, e la
+      // lettura giusta e' "mensola vuota": non e' un ripiego, e' esattamente com'era
+      // quella partita. Per questo non invalida il salvataggio ne' alza STATE_VERSION.
+      mensola: ricostruisci(raw.mensola ?? null),
       score: raw.score,
       chain: raw.chain,
       chainDigiuno: Number.isInteger(raw.chainDigiuno) && raw.chainDigiuno >= 0 ? raw.chainDigiuno : 0,

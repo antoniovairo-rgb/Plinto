@@ -4,7 +4,9 @@ import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../core/quadro.js';
 import { summarize, serializeGame, deserializeGame } from '../core/engine.js';
 import { registraTentativo, quantiSuperati } from '../persistence/progressi.js';
 import { riscuoti, usaAttrezzo, quantiAttrezzi } from '../persistence/attrezzi.js';
-import { cambiaPezzo } from '../core/engine.js';
+import {
+  cambiaPezzo, scavaCella, appoggiaSullaMensola, riprendiDallaMensola,
+} from '../core/engine.js';
 import { suggerisciMossa } from '../core/suggerimento.js';
 import { read, write, remove, KEYS } from '../persistence/storage.js';
 import { segnaPosto, dimenticaPosto } from '../persistence/ripresa.js';
@@ -208,6 +210,45 @@ export function useQuadro() {
     return true;
   }, [quadro, partita]);
 
+  /**
+   * IL PICCONE. Si paga solo se una casella viene tolta davvero: toccare una casella
+   * gia' vuota non e' uno scavo, e' un dito storto, e un attrezzo perso per un dito
+   * storto e' il modo piu' rapido di far odiare un aiuto.
+   */
+  const usaPiccone = useCallback((indice) => {
+    if (!partita || quantiAttrezzi() <= 0) return false;
+    const dopo = scavaCella(partita, indice);
+    if (!dopo) return false;
+    if (!usaAttrezzo()) return false;
+    setPartita(dopo);
+    setAttrezzi(quantiAttrezzi());
+    // La griglia non e' piu' quella di cui parlava il gesso.
+    setSuggerimento(null);
+    return true;
+  }, [partita]);
+
+  /** LA MENSOLA: appoggiare costa un attrezzo. Stessa regola di sempre sul pagamento. */
+  const usaMensola = useCallback((handIndex) => {
+    if (!partita || quantiAttrezzi() <= 0) return false;
+    const dopo = appoggiaSullaMensola(partita, handIndex);
+    if (!dopo) return false;
+    if (!usaAttrezzo()) return false;
+    setPartita(dopo);
+    setAttrezzi(quantiAttrezzi());
+    setSuggerimento(null);   // il consiglio parlava di una mano che non c'e' piu'
+    return true;
+  }, [partita]);
+
+  /** Riprendere NON costa: l'attrezzo si e' gia' pagato appoggiando il pezzo. */
+  const riprendiMensola = useCallback((handIndex) => {
+    if (!partita) return false;
+    const dopo = riprendiDallaMensola(partita, handIndex);
+    if (!dopo) return false;
+    setPartita(dopo);
+    setSuggerimento(null);
+    return true;
+  }, [partita]);
+
   /** Il segno del gesso si cancella appena si muove: parlava della mano di prima. */
   const scordaSuggerimento = useCallback(() => setSuggerimento(null), []);
 
@@ -229,6 +270,9 @@ export function useQuadro() {
     suggerimento,
     usaGru,
     usaGessetto,
+    usaPiccone,
+    usaMensola,
+    riprendiMensola,
     scordaSuggerimento,
   };
 }

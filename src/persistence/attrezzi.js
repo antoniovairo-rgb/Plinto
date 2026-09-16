@@ -5,7 +5,8 @@
  * superati, se ne tengono al massimo tre, e al momento di usarlo si sceglie quale:
  *   gru       cambia un pezzo della mano, senza toccare la griglia
  *   gessetto  segna dove conviene appoggiare, come si fa in cantiere col gesso
- * (Piccone e consegna arriveranno dopo, quando si sara' visto come vengono usati questi.)
+ *   piccone   toglie una casella gia' posata, quella che tocchi
+ *   mensola   ci appoggi un pezzo e te lo riprendi quando vuoi
  *
  * UNA RISORSA SOLA, E NON E' PIGRIZIA: cosi' la scelta di quale attrezzo usare e' una
  * decisione del giocatore invece di una dotazione automatica. Con quattro contatori
@@ -34,7 +35,7 @@ export const OGNI_LIVELLI = 5;
 export const MASSIMO = 3;
 
 /** Gli attrezzi esistenti, nell'ordine in cui si mostrano. */
-export const ATTREZZI = ['gru', 'gessetto'];
+export const ATTREZZI = ['gru', 'gessetto', 'piccone', 'mensola'];
 
 const PREDEFINITI = { disponibili: 0, riscossi: 0 };
 

@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { ATTREZZI } from '../persistence/attrezzi.js';
+import { Pezzo } from './Pezzo.jsx';
 
 /**
  * Gli attrezzi del cantiere, a schermo.
@@ -49,7 +51,36 @@ function IconaGessetto() {
   );
 }
 
-const ICONE = { gru: IconaGru, gessetto: IconaGessetto };
+/** Il piccone: manico e punta. Toglie una casella. */
+function IconaPiccone() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+         stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9q9-6 18 0" />
+      <path d="M12 6.2V11" />
+      <path d="M11.4 11 4.5 20.5" />
+    </svg>
+  );
+}
+
+/** La mensola: la tavola a muro e il pezzo che ci sta sopra. */
+function IconaMensola() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+         stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 14h18" />
+      <path d="M6 14l-2 4" />
+      <path d="M18 14l2 4" />
+      <rect x="8.5" y="5" width="7" height="7" rx="1.2" />
+    </svg>
+  );
+}
+
+const ICONE = {
+  gru: IconaGru, gessetto: IconaGessetto, piccone: IconaPiccone, mensola: IconaMensola,
+};
+
+export { IconaMensola };
 
 /** La pastiglia: quanti attrezzi hai, e quanti posti restano. */
 export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {
@@ -71,7 +102,7 @@ export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {
 }
 
 /** Il pannello di scelta. */
-export function PannelloAttrezzi({ quanti, ogniLivelli, onScegli, onChiudi, t }) {
+export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, onChiudi, t }) {
   useEffect(() => {
     const esci = (e) => { if (e.key === 'Escape') onChiudi(); };
     window.addEventListener('keydown', esci);
@@ -92,10 +123,11 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, onScegli, onChiudi, t })
           </p>
         ) : (
           <div className="pl-attrezzi__scelte">
-            {['gru', 'gessetto'].map((nome) => {
+            {ATTREZZI.map((nome) => {
               const Icona = ICONE[nome];
               return (
                 <button key={nome} type="button" className="pl-attrezzi__scelta"
+                        disabled={disabilitati?.includes(nome)}
                         onClick={() => onScegli(nome)}>
                   <span className="pl-attrezzi__icona"><Icona /></span>
                   <span className="pl-attrezzi__testi">
@@ -112,6 +144,43 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, onScegli, onChiudi, t })
           {t('comune.tornaAllaPartita')}
         </button>
       </div>
+    </div>
+  );
+}
+
+
+/**
+ * LA MENSOLA A SCHERMO: il pezzo messo da parte, sopra la mano.
+ *
+ * COMPARE SOLO QUANDO C'E' QUALCOSA SOPRA. Una mensola vuota fissa ruberebbe altezza
+ * alla plancia per non dire niente, e l'altezza della plancia su un telefono e' la cosa
+ * piu' contesa che ci sia: il caso normale -- nessun pezzo messo da parte -- non deve
+ * pagare niente per una funzione che in quel momento non si sta usando.
+ *
+ * STA SOPRA LA MANO E NON DENTRO IL PANNELLO DEGLI ATTREZZI. Un pezzo messo da parte
+ * che non si vede e' un pezzo dimenticato, e un aiuto dimenticato e' un aiuto sprecato.
+ */
+export function Mensola({ pezzo, inScambio, onRiprendi, onAnnullaScambio, t }) {
+  if (!pezzo) return null;
+  return (
+    <div className="pl-mensola">
+      <span className="pl-mensola__etichetta">{t('attrezzi.mensola')}</span>
+      <button
+        type="button"
+        className="pl-mensola__posto"
+        onClick={onRiprendi}
+        aria-label={t('attrezzi.mensolaRiprendi')}
+      >
+        <Pezzo shape={pezzo.shape} color={pezzo.color} bombe={pezzo.bombe} cella={14} />
+      </button>
+      {inScambio ? (
+        <span className="pl-attrezzi__invito pl-mensola__invito">
+          {t('attrezzi.mensolaScambia')}
+          <button type="button" className="pl-attrezzi__annulla" onClick={onAnnullaScambio}>
+            {t('attrezzi.lasciaStare')}
+          </button>
+        </span>
+      ) : null}
     </div>
   );
 }

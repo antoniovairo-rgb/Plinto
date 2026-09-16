@@ -119,12 +119,120 @@ await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
 // `attrezzi: false` salvato esiste davvero sui telefoni di chi ha giocato la 1.14 con
 // l'interruttore abbassato: senza questa prova, quelle persone non rivedrebbero mai piu'
 // la pastiglia e non avrebbero piu' nessun modo di riaccenderla.
-console.log('6. un vecchio "attrezzi: false" salvato non li spegne piu...');
+console.log('6. il piccone toglie una casella sola e costa uno...');
+await apriPartita(3);
+const mosseScavo = await mosseDi();
+await page.locator('.pl-attrezzi__pastiglia').click();
+await page.getByRole('button', { name: /Il piccone/ }).click();
+await page.waitForTimeout(150);
+controlla('in modo piccone la plancia non viene messa in evidenza',
+  await page.locator('.pl-plancia-scavo').count() === 1);
+await page.screenshot({ path: `${OUT}/6-piccone.png` });
+const blocchiPrima = await page.locator('.pl-plancia .pl-blocco').count();
+
+// Toccare una casella VUOTA non e uno scavo: non deve costare niente e non deve
+// chiudere il modo. E il caso del dito storto, e un attrezzo perso per un dito storto
+// e il modo piu rapido di far odiare un aiuto.
+const vuota = page.locator('.pl-plancia .pl-cella').filter({ hasNot: page.locator('.pl-blocco') }).first();
+await vuota.click();
+await page.waitForTimeout(200);
+controlla('toccare una casella vuota ha chiuso il modo piccone',
+  await page.locator('.pl-plancia-scavo').count() === 1);
+controlla('toccare una casella vuota ha tolto qualcosa dalla griglia',
+  await page.locator('.pl-plancia .pl-blocco').count() === blocchiPrima);
+// La pastiglia si rivede solo fuori dal modo attrezzo: per contare gli attrezzi si esce.
+await page.getByRole('button', { name: /^Lascia stare$/ }).click();
+await page.waitForTimeout(150);
+controlla(`toccare una casella vuota ha scalato un attrezzo (ne restano ${await pieni()})`,
+  (await pieni()) === 3);
+
+await page.locator('.pl-attrezzi__pastiglia').click();
+await page.getByRole('button', { name: /Il piccone/ }).click();
+await page.waitForTimeout(150);
+const piena = page.locator('.pl-plancia .pl-cella').filter({ has: page.locator('.pl-blocco') }).first();
+await piena.click();
+await page.waitForTimeout(250);
+const blocchiDopo = await page.locator('.pl-plancia .pl-blocco').count();
+controlla(`il piccone ha tolto ${blocchiPrima - blocchiDopo} caselle invece di una`,
+  blocchiDopo === blocchiPrima - 1);
+controlla('dopo lo scavo la plancia resta in evidenza',
+  await page.locator('.pl-plancia-scavo').count() === 0);
+controlla(`lo scavo non ha scalato l attrezzo (ne restano ${await pieni()})`, (await pieni()) === 2);
+// Uno scavo NON e una mossa: nei livelli a mosse contate e la differenza fra un aiuto
+// e una tassa.
+controlla(`lo scavo ha consumato una mossa (${mosseScavo} -> ${await mosseDi()})`,
+  (await mosseDi()) === mosseScavo);
+await page.screenshot({ path: `${OUT}/6b-dopo-scavo.png` });
+console.log(`   blocchi ${blocchiPrima} -> ${blocchiDopo}, mosse rimaste ${mosseScavo} -> ${await mosseDi()}`);
+
+console.log('7. la mensola tiene un pezzo e te lo ridà...');
+await apriPartita(3);
+controlla('la mensola compare anche quando non c e niente sopra',
+  await page.locator('.pl-mensola').count() === 0);
+const manoPrima = await page.locator('.pl-tray .pl-pezzo-presa').count();
+await page.locator('.pl-attrezzi__pastiglia').click();
+await page.getByRole('button', { name: /La mensola/ }).click();
+await page.waitForTimeout(150);
+await page.locator('.pl-tray .pl-pezzo-presa').first().click();
+await page.waitForTimeout(250);
+controlla('il pezzo appoggiato non compare sulla mensola',
+  await page.locator('.pl-mensola').count() === 1);
+controlla(`appoggiare non ha scalato l attrezzo (ne restano ${await pieni()})`, (await pieni()) === 2);
+controlla('il pezzo e rimasto anche in mano',
+  await page.locator('.pl-tray .pl-pezzo-presa').count() === manoPrima - 1);
+await page.screenshot({ path: `${OUT}/7-mensola.png` });
+
+// Con la mensola occupata la voce del pannello deve essere spenta: due pezzi su una
+// mensola sola non ci stanno, e un pulsante che non fa niente e peggio di uno spento.
+await page.locator('.pl-attrezzi__pastiglia').click();
+await page.waitForSelector('.pl-attrezzi__pannello');
+controlla('con la mensola occupata la voce resta premibile',
+  await page.getByRole('button', { name: /La mensola/ }).isDisabled());
+await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
+
+await page.locator('.pl-mensola__posto').click();
+await page.waitForTimeout(250);
+controlla('riprendere il pezzo non svuota la mensola',
+  await page.locator('.pl-mensola').count() === 0);
+controlla('riprendere il pezzo ha scalato un attrezzo: non deve costare niente',
+  (await pieni()) === 2);
+controlla('il pezzo ripreso non e tornato in mano',
+  await page.locator('.pl-tray .pl-pezzo-presa').count() === manoPrima);
+await page.screenshot({ path: `${OUT}/7b-ripreso.png` });
+
+console.log('8. con la mensola piena il tavolo entra lo stesso su uno schermo basso...');
+// La mensola e una riga in piu' fra la plancia e la mano, cioe' nel punto piu' conteso
+// dello schermo di un telefono. Su uno schermo basso va verificato che non spinga fuori
+// niente, altrimenti l'aiuto si paga con il tabellone.
+await page.setViewportSize({ width: 412, height: 622 });
+await apriPartita(3);
+await page.locator('.pl-attrezzi__pastiglia').click();
+await page.getByRole('button', { name: /La mensola/ }).click();
+await page.locator('.pl-tray .pl-pezzo-presa').first().click();
+await page.waitForTimeout(300);
+const entra = await page.evaluate(() => {
+  const p = document.querySelector('.pl-plancia').getBoundingClientRect();
+  const tray = document.querySelector('.pl-tray').getBoundingClientRect();
+  return {
+    plancia: Math.round(p.bottom), tray: Math.round(tray.bottom),
+    finestra: window.innerHeight,
+    scorrimento: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+  };
+});
+await page.screenshot({ path: `${OUT}/8-schermo-basso.png` });
+console.log(`   plancia fino a ${entra.plancia}, mano fino a ${entra.tray}, finestra ${entra.finestra}, scorrimento ${entra.scorrimento}`);
+controlla(`con la mensola piena la mano esce dallo schermo (${entra.tray} > ${entra.finestra})`,
+  entra.tray <= entra.finestra);
+controlla(`con la mensola piena la pagina diventa scorrevole (${entra.scorrimento}px)`,
+  entra.scorrimento <= 1);
+await page.setViewportSize({ width: 390, height: 844 });
+
+console.log('9. un vecchio "attrezzi: false" salvato non li spegne piu...');
 await apriPartita(3, { attrezzi: false });
 controlla('una vecchia impostazione "attrezzi: false" fa ancora sparire la pastiglia',
   await page.locator('.pl-attrezzi__pastiglia').count() === 1);
 
-console.log('7. nelle impostazioni non ci sono piu interruttori per spegnere il gioco...');
+console.log('10. nelle impostazioni non ci sono piu interruttori per spegnere il gioco...');
 await page.evaluate(() => {
   window.localStorage.removeItem('plinto:ripresa');
   window.localStorage.removeItem('plinto:partita');

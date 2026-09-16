@@ -7,7 +7,7 @@ import { useTrascinamento, origineDaCella } from './useTrascinamento.js';
 import { useTastiera } from './useTastiera.js';
 import { Annunci, frasePerMossa } from './Annunci.jsx';
 import { BarraObiettivo } from './BarraObiettivo.jsx';
-import { MagazzinoAttrezzi, PannelloAttrezzi } from './Attrezzi.jsx';
+import { MagazzinoAttrezzi, PannelloAttrezzi, Mensola } from './Attrezzi.jsx';
 import { MASSIMO as ATTREZZI_MASSIMO, OGNI_LIVELLI } from '../persistence/attrezzi.js';
 import { idx } from '../core/grid.js';
 import { useEffettiMossa } from '../feel/useEffettiMossa.js';
@@ -97,11 +97,25 @@ export function SchermoGioco({
   siPuoAnnullare = false, onAnnulla = null,
   // Gli attrezzi arrivano solo dai livelli: negli altri modi questi restano a zero e
   // la pastiglia non compare.
-  attrezzi = null, suggerimento = null, onGru = null, onGessetto = null, t,
+  attrezzi = null, suggerimento = null, onGru = null, onGessetto = null,
+  onPiccone = null, onMensola = null, onRiprendiMensola = null, t,
 }) {
-  // 'chiuso' | 'scelta' (pannello aperto) | 'gru' (si aspetta quale pezzo cambiare)
+  /*
+   * I modi dell'attrezzo in corso:
+   *   'chiuso'   si gioca normalmente
+   *   'scelta'   il pannello e' aperto
+   *   'gru'      si aspetta QUALE pezzo cambiare
+   *   'mensola'  si aspetta QUALE pezzo mettere da parte
+   *   'piccone'  si aspetta QUALE casella togliere
+   *   'scambio'  la mano e' piena e si aspetta con quale pezzo scambiare la mensola
+   * I primi tre esistevano gia': gli altri riusano lo stesso meccanismo invece di
+   * inventarne uno nuovo, che e' una cosa in meno che puo' rompersi.
+   */
   const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
-  const conAttrezzi = attrezzi !== null && onGru && onGessetto;
+  const conAttrezzi = attrezzi !== null && onGru && onGessetto && onPiccone && onMensola;
+  /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
+  const sceltaPezzo = modoAttrezzo === 'gru' || modoAttrezzo === 'mensola'
+    || modoAttrezzo === 'scambio';
 
   /* Le caselle che il gesso ha segnato. Si ricavano dal suggerimento e dalla forma del
      pezzo consigliato: il motore dice "questo pezzo, li'", e qui si traduce in caselle. */
@@ -311,7 +325,7 @@ export function SchermoGioco({
         <div className="pl-tavolo">
           <BarraCatena livello={partita.chain} digiuno={partita.chainDigiuno ?? 0} t={t} />
 
-          <div className="pl-plancia-involucro">
+          <div className={`pl-plancia-involucro ${modoAttrezzo === 'piccone' ? 'pl-plancia-scavo' : ''}`}>
             <Plancia
               ref={plancia}
               grid={partita.grid}
@@ -330,9 +344,15 @@ export function SchermoGioco({
               cellRefs={cellRefs}
               canvasRef={canvas}
               onCellPointerUp={
-                drag.selezionato !== null
-                  ? (e, r, c) => { e.preventDefault(); drag.posizionaSuCella(r, c); }
-                  : undefined
+                /* Con il piccone in mano il tocco sulla griglia non appoggia: scava.
+                   Il modo si chiude SOLO se una casella e' stata tolta davvero, cosi'
+                   chi tocca il vuoto per sbaglio resta in scavo invece di aver perso
+                   il giro -- e, nel gestore del livello, non paga niente. */
+                modoAttrezzo === 'piccone'
+                  ? (e, r, c) => { e.preventDefault(); if (onPiccone(idx(r, c))) setModoAttrezzo('chiuso'); }
+                  : drag.selezionato !== null
+                    ? (e, r, c) => { e.preventDefault(); drag.posizionaSuCella(r, c); }
+                    : undefined
               }
             />
             {puntiVolanti ? (
@@ -413,11 +433,11 @@ export function SchermoGioco({
               e quell'istruzione, una mossa si' e una no. Uno sfarfallio continuo in mezzo
               allo schermo, per dire una cosa che il giocatore sapeva gia'. */}
           <p className={`pl-suggerimento ${conAttrezzi ? 'pl-suggerimento--conattrezzi' : ''}`}>
-            {modoAttrezzo === 'gru' ? (
-              /* In modo gru la riga smette di dire qualunque altra cosa: c'e' una domanda
-                 aperta, "quale pezzo cambio?", e due messaggi insieme sarebbero due. */
+            {modoAttrezzo === 'gru' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
+              /* Con un attrezzo in corso la riga smette di dire qualunque altra cosa:
+                 c'e' una domanda aperta, e due messaggi insieme sarebbero due. */
               <span className="pl-attrezzi__invito">
-                {t('attrezzi.gruScegli')}
+                {t(`attrezzi.${modoAttrezzo}Scegli`)}
                 <button type="button" className="pl-attrezzi__annulla"
                         onClick={() => setModoAttrezzo('chiuso')}>
                   {t('attrezzi.lasciaStare')}
@@ -433,7 +453,7 @@ export function SchermoGioco({
             ) : partita.stats.moves < MOSSE_CON_ISTRUZIONI ? (
               t('gioca.trascina')
             ) : null}
-            {conAttrezzi && modoAttrezzo !== 'gru' ? (
+            {conAttrezzi && modoAttrezzo === 'chiuso' ? (
               <MagazzinoAttrezzi
                 quanti={attrezzi}
                 massimo={ATTREZZI_MASSIMO}
@@ -446,16 +466,37 @@ export function SchermoGioco({
         </div>
       </div>
 
-      <div className={modoAttrezzo === 'gru' ? 'pl-tray-scelta' : ''}>
+      {conAttrezzi ? (
+        <Mensola
+          pezzo={partita.mensola ?? null}
+          inScambio={modoAttrezzo === 'scambio'}
+          onRiprendi={() => {
+            // Un posto libero c'e': si riprende e basta, con un tocco solo. Se la mano
+            // e' piena si passa allo scambio, che e' l'unica cosa che impedisce al pezzo
+            // di restare bloccato sulla mensola per sempre.
+            const libero = partita.hand.findIndex((p) => p === null);
+            if (libero >= 0) onRiprendiMensola(libero);
+            else setModoAttrezzo('scambio');
+          }}
+          onAnnullaScambio={() => setModoAttrezzo('chiuso')}
+          t={t}
+        />
+      ) : null}
+
+      <div className={sceltaPezzo ? 'pl-tray-scelta' : ''}>
         <Tray
           mano={partita.hand}
           pezziMorti={pezziMorti}
-          selezionato={modoAttrezzo === 'gru' ? null : drag.selezionato}
+          selezionato={sceltaPezzo ? null : drag.selezionato}
           presoIndex={drag.preso?.handIndex ?? null}
-          onPointerDownPezzo={modoAttrezzo === 'gru' ? () => {} : prendi}
-          onTapPezzo={modoAttrezzo === 'gru'
-            ? (i) => { if (onGru(i)) setModoAttrezzo('chiuso'); }
-            : drag.selezionaPezzo}
+          onPointerDownPezzo={sceltaPezzo ? () => {} : prendi}
+          onTapPezzo={
+            modoAttrezzo === 'gru' ? (i) => { if (onGru(i)) setModoAttrezzo('chiuso'); }
+              : modoAttrezzo === 'mensola' ? (i) => { if (onMensola(i)) setModoAttrezzo('chiuso'); }
+                : modoAttrezzo === 'scambio'
+                  ? (i) => { if (onRiprendiMensola(i)) setModoAttrezzo('chiuso'); }
+                  : drag.selezionaPezzo
+          }
           t={t}
         />
       </div>
@@ -487,10 +528,13 @@ export function SchermoGioco({
           quanti={attrezzi}
           ogniLivelli={OGNI_LIVELLI}
           onChiudi={() => setModoAttrezzo('chiuso')}
+          /* La mensola si puo' scegliere solo se e' libera: due pezzi su una mensola
+             sola non ci stanno, e un pulsante che si preme e non fa niente e' peggio
+             di un pulsante spento che dice perche'. */
+          disabilitati={partita.mensola ? ['mensola'] : []}
           onScegli={(quale) => {
-            if (quale === 'gru') { setModoAttrezzo('gru'); return; }
-            onGessetto();
-            setModoAttrezzo('chiuso');
+            if (quale === 'gessetto') { onGessetto(); setModoAttrezzo('chiuso'); return; }
+            setModoAttrezzo(quale);
           }}
           t={t}
         />

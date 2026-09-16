@@ -7,6 +7,71 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.0] — 16 settembre 2026
+
+### Aggiunto
+
+**Il secondo tempo degli attrezzi: il piccone e la mensola.** La cassetta è completa, e la
+scarsità non è cambiata: sempre **un attrezzo ogni 5 livelli superati, massimo 3 da parte**.
+Raddoppiare le scelte senza raddoppiare la risorsa è proprio ciò che rende la scelta una
+decisione invece di un elenco.
+
+**⛏️ Il piccone toglie una casella già posata, quella che tocchi.** Non dà punti, non tocca
+la Catena, non conta come mossa e non muove le statistiche. Non è pigrizia, è la regola
+centrale di questo attrezzo: se scavare pagasse sarebbe una macchina da punteggio invece
+di un aiuto, e se costasse una mossa sarebbe inutile proprio nei livelli a mosse contate,
+cioè dove serve. Toccando una casella già vuota non succede niente e **non si paga**: il
+dito storto capita, e un attrezzo perso per un dito storto è il modo più rapido di far
+odiare un aiuto. Mentre il piccone è in mano la plancia è messa in evidenza, con lo stesso
+richiamo che usano la gru e la mensola quando chiedono «quale?».
+
+**🏗️ La mensola: ci appoggi un pezzo e te lo riprendi quando vuoi.** Appoggiare costa un
+attrezzo, riprendere è gratis — un pezzo messo da parte che si deve ricomprare per riaverlo
+non è messo da parte, è sequestrato. Il pezzo appoggiato **si vede sopra la mano**, non
+dentro un pannello: un pezzo messo da parte che non si vede è un pezzo dimenticato, e un
+aiuto dimenticato è un aiuto sprecato. La striscia compare solo quando c'è davvero qualcosa
+sopra, perché ogni pixel fra la plancia e i pezzi lo paga il tabellone.
+
+**Se quando lo riprendi la mano è piena, i due si scambiano.** Non è un vezzo: senza lo
+scambio esiste un vicolo cieco vero. Appoggi un pezzo, giochi gli altri due, la mano si rifà
+con tre pezzi nuovi, e quello sulla mensola non ha più dove tornare — resterebbe lì per
+sempre mentre la partita lo conta come giocabile. Costo dichiarato: chi vuole può continuare
+a scambiare e tenersi di fatto un quarto posto. È il prezzo di non avere trappole.
+
+**La fine della partita adesso guarda anche la mensola**, e questa è la correzione più
+importante di tutta la versione. Prima la partita finiva quando nessuno dei tre pezzi in
+mano entrava più: con la mensola, appoggiarci l'ultimo pezzo giocabile avrebbe chiuso la
+partita. L'attrezzo che serve a sbloccarsi sarebbe stato il modo più rapido di perdere, e
+non è un caso di scuola — è proprio il momento in cui uno la mensola la usa, cioè quando la
+mano non gli piace.
+
+### Verificato
+
+**Prova che il motore non è cambiato per chi gli attrezzi non li usa.** Duecento partite
+giocate dal giocatore artificiale con gli stessi semi, prima e dopo: 59.898 mosse,
+1.586.772 punti, 209.619 celle eliminate, 200 partite chiuse. Numeri identici in ogni cifra.
+Il campo nuovo nasce vuoto e il giocatore artificiale non lo tocca mai, quindi i cento
+livelli si rigiocano uguali — e lo si è verificato invece di darlo per scontato.
+
+**Quindici prove nuove** in `tests/piccone-mensola.test.js`, concentrate su quello che questi
+due attrezzi potevano rompere: che lo scavo non sposti punteggio, Catena, mosse, mano o
+generatore; che non accenda il «rimetti a posto» né rifaccia la festa dell'eliminazione
+precedente; che appoggiare l'ultimo pezzo giocabile non chiuda la partita; e che la partita
+finisca comunque quando non entra più niente, mensola compresa. Verificate capaci di
+fallire: togliendo la mensola dal controllo di fine partita, la prova che conta fallisce.
+
+**Un salvataggio della 1.15 resta valido.** Il campo nuovo è opzionale e «assente» si legge
+«mensola vuota», che è esattamente com'era quella partita: nessuna migrazione, nessun salto
+di versione dello stato, e una prova che parte proprio da un salvataggio senza il campo.
+
+`tests/e2e/attrezzi.mjs` sale a dieci passi: il piccone che toglie una casella sola e non ne
+tocca altre, il tocco a vuoto che non costa niente e non chiude il modo, lo scavo che non
+consuma una mossa (18 → 18 a schermo), la mensola che prende e restituisce il pezzo, la voce
+spenta quando la mensola è già occupata, e — su uno schermo basso 412×622 — che con la
+mensola piena la mano resti dentro lo schermo e la pagina non diventi scorrevole. Verificato
+capace di fallire: facendo pagare lo scavo a vuoto e il ritiro dalla mensola, segnala due
+problemi.
+
 ## [1.15.0] — 16 settembre 2026
 
 ### Cambiato

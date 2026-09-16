@@ -447,6 +447,9 @@ export function App() {
           suggerimento={quadri.suggerimento}
           onGru={quadri.usaGru}
           onGessetto={quadri.usaGessetto}
+          onPiccone={quadri.usaPiccone}
+          onMensola={quadri.usaMensola}
+          onRiprendiMensola={quadri.riprendiMensola}
           t={t}
         />
         {menuAperto ? (

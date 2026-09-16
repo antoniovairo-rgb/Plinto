@@ -492,6 +492,55 @@ button {
   .pl-tray-scelta .pl-tray__posto { animation: none; }
 }
 
+/* IL PICCONE: la plancia diventa il bersaglio, e si deve vedere. Lo stesso richiamo
+   pulsante che usa il tray quando si sceglie un pezzo, cosi' i due attrezzi che
+   chiedono "quale?" parlano la stessa lingua invece di inventarsene una a testa. */
+.pl-plancia-scavo {
+  outline: 2px solid var(--pl-brand);
+  outline-offset: 4px;
+  border-radius: var(--pl-radius-md);
+  animation: pl-attrezzo-chiama var(--pl-t-attrezzo) var(--pl-ease-out) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-plancia-scavo { animation: none; }
+}
+
+/* LA MENSOLA: il pezzo messo da parte, sopra la mano.
+   Bassa di proposito: sta fra la plancia e i pezzi, cioe' nel punto piu' conteso dello
+   schermo di un telefono, e ogni pixel che prende lo toglie al tabellone. Compare solo
+   quando c'e' davvero qualcosa sopra (vedi il componente Mensola). */
+.pl-mensola {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px 4px;
+  min-height: 0;
+}
+.pl-mensola__etichetta {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pl-text-dim);
+}
+.pl-mensola__posto {
+  display: grid;
+  place-items: center;
+  /* Il bersaglio resta grande anche se il pezzo disegnato dentro e' piccolo: sotto i
+     44px un pulsante su un telefono si sbaglia, e sbagliarlo qui vuol dire non
+     riprendersi il pezzo proprio nel momento in cui serve. */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: var(--pl-radius-md);
+  background: var(--pl-cella-vuota);
+  cursor: pointer;
+}
+.pl-mensola__invito {
+  font-size: 12.5px;
+  color: var(--pl-brand);
+}
+
 /* Il segno del gesso sulla plancia: un contorno tratteggiato, non un riempimento. Deve
    dire "qui", senza sembrare un blocco gia' appoggiato ne' l'anteprima del pezzo che si
    sta trascinando, che sono due cose che il giocatore vede in continuazione. */
