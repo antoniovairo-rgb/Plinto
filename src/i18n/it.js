@@ -213,7 +213,6 @@ export default {
     superatoIn: 'Superato in {mosse} mosse',
     record: 'record personale',
     percorso: 'Percorso {fatti} di {totale}',
-    percorsoTitolo: 'Il percorso',
     livelliSu: '{fatti} livelli su {totale}',
     condividiTrionfo: 'Racconta che li hai finiti',
     trionfoTitolo: 'Percorso completato',
@@ -328,7 +327,9 @@ export default {
     lasciaStare: 'Lascia stare',
     comeSiGuadagnano: 'Non hai attrezzi. Ne guadagni uno ogni {n} livelli superati, e puoi tenerne al massimo tre.',
     guadagnato: 'Hai guadagnato un attrezzo.',
-    perso: 'Magazzino pieno: l\'attrezzo appena guadagnato è andato perso. Usane uno per fare posto.',
+    guadagnatiTanti: 'Hai guadagnato {n} attrezzi.',
+    perso: 'Magazzino pieno: un attrezzo appena maturato è andato perso. Usane uno per fare posto.',
+    persiTanti: 'Magazzino pieno: {n} attrezzi maturati sono andati persi. Se ne tengono al massimo tre: usane uno per fare posto.',
   },
 
   atti: {

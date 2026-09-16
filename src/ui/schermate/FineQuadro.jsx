@@ -49,6 +49,27 @@ export function SchermoFineQuadro({
         </p>
         <p className="pl-fine__motivo">{vinto ? descriviObiettivi(quadro, t) : motivo}</p>
 
+        {/* GLI ATTREZZI GUADAGNATI E QUELLI PERSI.
+            Il gioco questi due numeri li calcolava gia' -- stanno nel risultato del
+            livello da quando gli attrezzi esistono -- e non li mostrava a nessuno.
+            Risultato: tre attrezzi comparivano dal nulla e undici sparivano in silenzio,
+            e chi giocava doveva indovinare perche'. Perdere qualcosa senza che nessuno
+            te lo dica e' il modo piu' rapido di far perdere fiducia in un gioco.
+            Il caso in cui ne maturano molti insieme non e' teorico: chi aggiorna dopo
+            settanta livelli li riscuote tutti in una volta. */}
+        {esito.attrezzoGuadagnato > 0 ? (
+          <p className="pl-fine__attrezzo">
+            {t(esito.attrezzoGuadagnato === 1 ? 'attrezzi.guadagnato' : 'attrezzi.guadagnatiTanti')
+              .replace('{n}', esito.attrezzoGuadagnato)}
+          </p>
+        ) : null}
+        {esito.attrezzoPerso > 0 ? (
+          <p className="pl-fine__attrezzo pl-fine__attrezzo--perso">
+            {t(esito.attrezzoPerso === 1 ? 'attrezzi.perso' : 'attrezzi.persiTanti')
+              .replace('{n}', esito.attrezzoPerso)}
+          </p>
+        ) : null}
+
         {vinto ? (
           <div className="pl-fine__punteggio">
             <span className="pl-hud__etichetta">{t('quadri.mosse')}</span>

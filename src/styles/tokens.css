@@ -82,6 +82,14 @@
   --pl-font-num: ui-rounded, 'SF Pro Rounded', -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* --- Tempi (vedi docs: il game feel vive qui) --------------------------- */
+  /* QUANTO PUO' ESSERE GRANDE LA PLANCIA.
+     Sta in un token e non ripetuto in quattro regole perche' la barra della Catena, la
+     striscia dell'obiettivo e l'anteprima devono restare larghe ESATTAMENTE quanto la
+     plancia: scritto a mano in piu' posti, basta cambiarne uno e si disallineano.
+     I due tetti dicono due cose diverse: `vw` e' quanto schermo puo' prendere in
+     larghezza, `vh` impedisce che su uno schermo altissimo diventi enorme. */
+  --pl-plancia-max: min(99vw, 58vh);
+
   --pl-t-instant: 90ms;
   --pl-t-fast: 160ms;
   --pl-t-base: 240ms;

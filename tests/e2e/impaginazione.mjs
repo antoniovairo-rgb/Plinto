@@ -200,6 +200,23 @@ for (const [larghezza, altezza, nome] of [...FORMATI, ...FORMATI_CON_BARRE]) {
       planciaSulSuggerimento: suggerimento
         ? Math.round(Math.max(0, plancia.bottom - suggerimento.top)) : 0,
       pulsante: !!document.querySelector('.pl-annulla'),
+      /*
+       * QUANTO LA PLANCIA E' PICCOLA RISPETTO A QUANTO POTREBBE ESSERE.
+       *
+       * La griglia e' il fulcro del gioco: ogni pixel che non prende lei lo prende il
+       * vuoto. E' anche la cosa che si rimpicciolisce per prima quando si aggiunge un
+       * elemento sotto la plancia, in silenzio e senza rompere niente -- e' successo
+       * con la mensola, che si era presa una striscia sua.
+       *
+       * La plancia e' quadrata, quindi una delle due misure la vincola:
+       *  - se e' la LARGHEZZA, deve prendere quasi tutto lo schermo;
+       *  - se e' l'ALTEZZA, deve prendere quasi tutto lo spazio verticale che le resta,
+       *    cioe' l'aria sopra e sotto dev'essere poca.
+       * Una plancia stretta E con l'aria attorno vuol dire che qualcuno le ha rubato
+       * spazio senza accorgersene.
+       */
+      quotaLarghezza: plancia.width / window.innerWidth,
+      ariaVerticale: Math.round(involucro.height - plancia.height),
     };
   });
   const rotto = m.sborda > 0 || m.sovrapposizione > 0 || m.planciaSfora > 0
@@ -208,8 +225,19 @@ for (const [larghezza, altezza, nome] of [...FORMATI, ...FORMATI_CON_BARRE]) {
     + `tavolo ${m.sborda > 0 ? `sborda di ${m.sborda}px` : 'entra'}`
     + `${m.planciaSfora > 0 ? `, plancia fuori dal riquadro di ${m.planciaSfora}px` : ''}`
     + `${m.planciaSulSuggerimento > 0 ? `, copre il pulsante di ${m.planciaSulSuggerimento}px` : ''}`
-    + `${m.sovrapposizione > 0 ? `, copre i pezzi di ${m.sovrapposizione}px` : ''}`);
+    + `${m.sovrapposizione > 0 ? `, copre i pezzi di ${m.sovrapposizione}px` : ''}`
+    + ` | plancia ${Math.round(m.quotaLarghezza * 100)}% della larghezza, ${m.ariaVerticale}px d aria`);
   if (!m.pulsante) errori.push(`${nome} (${larghezza}x${altezza}): dopo la mossa il pulsante non c'e, lo scenario non prova quello che dice`);
+  // O e' larga quanto lo schermo, o ha finito l'altezza: una via di mezzo vuol dire
+  // spazio sprecato. Le soglie sono larghe di proposito -- servono a cogliere una
+  // plancia RIMPICCIOLITA, non a fissare al pixel il disegno di oggi.
+  const stretta = m.quotaLarghezza < 0.93;
+  const conAria = m.ariaVerticale > 24;
+  if (stretta && conAria) {
+    errori.push(`${nome} (${larghezza}x${altezza}): la plancia prende solo il `
+      + `${Math.round(m.quotaLarghezza * 100)}% della larghezza e le avanzano `
+      + `${m.ariaVerticale}px in altezza: qualcosa le ha rubato spazio`);
+  }
   if (m.sborda > 0) errori.push(`${nome} (${larghezza}x${altezza}): il tavolo sborda di ${m.sborda}px`);
   if (m.planciaSfora > 0) errori.push(`${nome} (${larghezza}x${altezza}): la plancia esce dal suo riquadro di ${m.planciaSfora}px`);
   if (m.planciaSulSuggerimento > 0) {

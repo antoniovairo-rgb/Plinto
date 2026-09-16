@@ -190,7 +190,7 @@ controlla('con la mensola occupata la voce resta premibile',
   await page.getByRole('button', { name: /La mensola/ }).isDisabled());
 await page.getByRole('button', { name: /^Torna alla partita$/ }).click();
 
-await page.locator('.pl-mensola__posto').click();
+await page.locator('.pl-mensola').click();
 await page.waitForTimeout(250);
 controlla('riprendere il pezzo non svuota la mensola',
   await page.locator('.pl-mensola').count() === 0);
@@ -200,31 +200,46 @@ controlla('il pezzo ripreso non e tornato in mano',
   await page.locator('.pl-tray .pl-pezzo-presa').count() === manoPrima);
 await page.screenshot({ path: `${OUT}/7b-ripreso.png` });
 
-console.log('8. con la mensola piena il tavolo entra lo stesso su uno schermo basso...');
-// La mensola e una riga in piu' fra la plancia e la mano, cioe' nel punto piu' conteso
-// dello schermo di un telefono. Su uno schermo basso va verificato che non spinga fuori
-// niente, altrimenti l'aiuto si paga con il tabellone.
-await page.setViewportSize({ width: 412, height: 622 });
-await apriPartita(3);
-await page.locator('.pl-attrezzi__pastiglia').click();
-await page.getByRole('button', { name: /La mensola/ }).click();
-await page.locator('.pl-tray .pl-pezzo-presa').first().click();
-await page.waitForTimeout(300);
-const entra = await page.evaluate(() => {
-  const p = document.querySelector('.pl-plancia').getBoundingClientRect();
-  const tray = document.querySelector('.pl-tray').getBoundingClientRect();
-  return {
-    plancia: Math.round(p.bottom), tray: Math.round(tray.bottom),
-    finestra: window.innerHeight,
-    scorrimento: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-  };
-});
-await page.screenshot({ path: `${OUT}/8-schermo-basso.png` });
-console.log(`   plancia fino a ${entra.plancia}, mano fino a ${entra.tray}, finestra ${entra.finestra}, scorrimento ${entra.scorrimento}`);
-controlla(`con la mensola piena la mano esce dallo schermo (${entra.tray} > ${entra.finestra})`,
-  entra.tray <= entra.finestra);
-controlla(`con la mensola piena la pagina diventa scorrevole (${entra.scorrimento}px)`,
-  entra.scorrimento <= 1);
+// LA MENSOLA NON DEVE RUBARE NIENTE ALLA PLANCIA.
+// Segnalato da uno schermo vero: la prima versione della mensola si prendeva una
+// striscia fra la plancia e i pezzi, e su un telefono quella striscia la paga il
+// tabellone -- la griglia si rimpiccioliva appena si usava l'attrezzo. Un aiuto che
+// come prima cosa ti restringe il tavolo da gioco e' un aiuto che costa.
+console.log('8. usare la mensola non rimpicciolisce la plancia...');
+for (const [larghezza, altezza] of [[360, 780], [390, 844], [412, 622]]) {
+  await page.setViewportSize({ width: larghezza, height: altezza });
+  await apriPartita(3);
+  const plancia = () => page.evaluate(() => {
+    const r = document.querySelector('.pl-plancia').getBoundingClientRect();
+    return { largo: Math.round(r.width), alto: Math.round(r.height) };
+  });
+  const prima = await plancia();
+  await page.locator('.pl-attrezzi__pastiglia').click();
+  await page.getByRole('button', { name: /La mensola/ }).click();
+  await page.locator('.pl-tray .pl-pezzo-presa').first().click();
+  await page.waitForTimeout(300);
+  const dopo = await plancia();
+  const misure = await page.evaluate(() => {
+    const tray = document.querySelector('.pl-tray').getBoundingClientRect();
+    return {
+      trayFino: Math.round(tray.bottom),
+      finestra: window.innerHeight,
+      scorrimento: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+      mensola: document.querySelectorAll('.pl-mensola').length,
+    };
+  });
+  await page.screenshot({ path: `${OUT}/8-mensola-${larghezza}x${altezza}.png` });
+  console.log(`   ${larghezza}x${altezza}: plancia ${prima.largo}x${prima.alto} -> ${dopo.largo}x${dopo.alto}`
+    + ` | mano fino a ${misure.trayFino} su ${misure.finestra} | scorrimento ${misure.scorrimento}`);
+  controlla(`a ${larghezza}x${altezza} la mensola non e comparsa`, misure.mensola === 1);
+  controlla(`a ${larghezza}x${altezza} usare la mensola rimpicciolisce la plancia`
+    + ` (${prima.largo}x${prima.alto} -> ${dopo.largo}x${dopo.alto})`,
+  dopo.largo === prima.largo && dopo.alto === prima.alto);
+  controlla(`a ${larghezza}x${altezza} con la mensola piena la mano esce dallo schermo`,
+    misure.trayFino <= misure.finestra);
+  controlla(`a ${larghezza}x${altezza} con la mensola piena la pagina diventa scorrevole`,
+    misure.scorrimento <= 1);
+}
 await page.setViewportSize({ width: 390, height: 844 });
 
 // SOVRAPPOSIZIONE FRA IL PULSANTE E LA PASTIGLIA.

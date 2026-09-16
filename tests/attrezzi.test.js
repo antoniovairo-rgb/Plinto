@@ -6,6 +6,10 @@
  * attrezzo che non c'e'.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+// Attenzione: NON importarle come `it`/`en`: `it` collide con la funzione di test.
+import testiIt from '../src/i18n/it.js';
+import testiEn from '../src/i18n/en.js';
 
 const memoria = new Map();
 vi.stubGlobal('window', {
@@ -99,5 +103,60 @@ describe('spendere attrezzi', () => {
     // risorsa e' proprio cio' che rende la scelta una decisione invece di un elenco.
     expect(OGNI_LIVELLI).toBe(5);
     expect(MASSIMO).toBe(3);
+  });
+});
+
+/**
+ * QUANDO GLI ATTREZZI ARRIVANO TUTTI INSIEME, E PERCHE' VA DETTO.
+ *
+ * Chi aggiorna dopo aver gia' giocato non ha mai riscosso niente: al primo livello vinto
+ * dopo l'aggiornamento il gioco converte in un colpo solo TUTTI i livelli gia' superati.
+ * Con settanta livelli fatti sono quattordici attrezzi maturati, tre che entrano e undici
+ * persi per il tetto.
+ *
+ * Non e' un difetto -- lasciare a zero chi ha fatto settanta livelli sarebbe peggio -- ma
+ * successo in silenzio lo e': tre attrezzi comparsi dal nulla e undici spariti senza una
+ * parola. Segnalato da chi giocava, con la domanda "perche' ho tutti questi attrezzi?".
+ *
+ * Queste prove fissano i due numeri e il fatto che la schermata di fine livello li dica.
+ */
+describe('gli attrezzi arretrati di chi aggiorna a meta strada', () => {
+  it('settantadue livelli gia fatti danno tre attrezzi e undici persi', () => {
+    const esito = riscuoti(72);
+    expect(esito.guadagnati).toBe(3);
+    expect(esito.persi).toBe(11);
+    expect(esito.attrezzi.disponibili).toBe(MASSIMO);
+    // Il conto NON riparte da capo: i livelli gia' convertiti restano convertiti, e
+    // vincere il 73esimo o il 74esimo non regala niente. Senza questo, ogni livello
+    // vinto ne darebbe un altro.
+    expect(riscuoti(73).guadagnati).toBe(0);
+    expect(riscuoti(74).guadagnati).toBe(0);
+    // Al 75esimo ne matura uno, ma il magazzino e' pieno: va perso, e il gioco lo dice.
+    // E' la conseguenza diretta della conversione in blocco -- si arriva al tetto subito
+    // -- ed e' il motivo per cui il messaggio "magazzino pieno" doveva esistere.
+    expect(riscuoti(75)).toMatchObject({ guadagnati: 0, persi: 1 });
+    // Speso uno, il posto si libera e il prossimo entra davvero.
+    usaAttrezzo();
+    expect(riscuoti(80)).toMatchObject({ guadagnati: 1, persi: 0 });
+  });
+
+  it('la schermata di fine livello mostra sia i guadagnati sia i persi', () => {
+    // Il gioco questi due numeri li calcolava gia' e non li mostrava a nessuno: erano
+    // nel risultato del livello da quando gli attrezzi esistono, e nessuna schermata li
+    // leggeva. Questa prova e' il promemoria che non si perda di nuovo per strada.
+    const schermata = readFileSync(
+      new URL('../src/ui/schermate/FineQuadro.jsx', import.meta.url), 'utf8',
+    );
+    expect(schermata).toMatch(/esito\.attrezzoGuadagnato/);
+    expect(schermata).toMatch(/esito\.attrezzoPerso/);
+    for (const [lingua, testi] of [['it', testiIt], ['en', testiEn]]) {
+      for (const chiave of ['guadagnato', 'guadagnatiTanti', 'perso', 'persiTanti']) {
+        expect(testi.attrezzi[chiave], `${lingua}: manca attrezzi.${chiave}`).toBeTruthy();
+      }
+      // Il plurale deve poter dire QUANTI: un messaggio che dice "alcuni attrezzi sono
+      // andati persi" non e' un'informazione, e' un dispiacere generico.
+      expect(testi.attrezzi.guadagnatiTanti).toContain('{n}');
+      expect(testi.attrezzi.persiTanti).toContain('{n}');
+    }
   });
 });

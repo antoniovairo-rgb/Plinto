@@ -203,7 +203,10 @@ button {
   justify-items: center;
   align-items: stretch;
   min-height: 0;
-  padding: 4px 10px;
+  /* Ai lati quasi niente: quei dieci pixel per parte erano venti pixel di plancia in
+     meno, e sul tabellone si vedono. Sopra e sotto restano, perche' li' la plancia non
+     e' limitata da quel bordo ma dalla propria forma quadrata. */
+  padding: 4px 2px;
 }
 
 /* Il tavolo da gioco: barra della Catena, plancia e suggerimento restano attaccati. */
@@ -216,7 +219,7 @@ button {
   justify-content: center;
   gap: 4px;
 }
-.pl-tavolo .pl-catena { width: 100%; max-width: min(96vw, 58vh); padding: 0 4px 2px; }
+.pl-tavolo .pl-catena { width: 100%; max-width: var(--pl-plancia-max); padding: 0 4px 2px; }
 
 /* LA PLANCIA SI MISURA IN ALTEZZA, non in larghezza, e la differenza non e' teorica.
    
@@ -228,12 +231,19 @@ button {
    
    Partendo dall'altezza il vincolo viaggia nel verso giusto -- l'altezza e' definita,
    la larghezza la segue, e `max-width` la riporta indietro se il riquadro e' stretto.
-   I due vecchi tetti (96vw e 58vh) restano dentro il `min`: servivano a non far
-   diventare enorme la plancia sugli schermi molto alti, e quel compito ce l'hanno
-   ancora. */
+   I due vecchi tetti restano dentro il `min` (adesso nel token --pl-plancia-max):
+   servivano a non far diventare enorme la plancia sugli schermi molto alti, e quel
+   compito ce l'hanno ancora.
+
+   IL TETTO IN LARGHEZZA E' SALITO DA 96vw A 99vw, dopo averlo misurato. Su un telefono
+   alto la plancia e' limitata dalla LARGHEZZA e non dall'altezza: a 390x844 occupava
+   374 pixel su 390, mentre in altezza ne aveva 466 a disposizione -- novantadue buttati,
+   che essendo la plancia quadrata non si possono recuperare in nessun altro modo che
+   allargandola. La griglia e' il fulcro del gioco: ogni pixel che non prende lei lo
+   prende il vuoto. */
 .pl-plancia {
   position: relative;
-  height: min(100%, 96vw, 58vh);
+  height: min(100%, var(--pl-plancia-max));
   width: auto;
   max-width: 100%;
   aspect-ratio: 1;
@@ -383,6 +393,12 @@ button {
   color: var(--pl-text-faint);
   padding: 0 20px;
   min-height: 44px;
+  /* Lo stacco sopra e sotto si stringe sugli schermi bassi. Li' la plancia NON e'
+     limitata dalla larghezza ma dall'altezza -- misurato: 270 pixel di plancia su 412
+     di schermo disponibile -- e ogni pixel che questa riga non prende lo prende la
+     griglia. Sugli schermi alti resta l'aria di prima, perche' li' non servirebbe a
+     niente: la plancia e' gia' larga quanto lo schermo. */
+  margin: clamp(3px, 1.4vh, 11.5px) 0;
 }
 
 /* ------------------------------------------------- attrezzi del cantiere --- */
@@ -528,41 +544,40 @@ button {
   .pl-plancia-scavo { animation: none; }
 }
 
-/* LA MENSOLA: il pezzo messo da parte, sopra la mano.
-   Bassa di proposito: sta fra la plancia e i pezzi, cioe' nel punto piu' conteso dello
-   schermo di un telefono, e ogni pixel che prende lo toglie al tabellone. Compare solo
-   quando c'e' davvero qualcosa sopra (vedi il componente Mensola). */
+/* LA MENSOLA: il pezzo messo da parte, nella colonna di sinistra della riga sotto la
+   plancia. Prima aveva una striscia sua fra la plancia e i pezzi, e su un telefono
+   quella striscia la pagava il tabellone: la griglia si rimpiccioliva appena si usava
+   l'attrezzo. Qui non costa niente in altezza, perche' quella colonna c'era gia' ed era
+   vuota -- serviva solo a bilanciare la pastiglia a destra. */
 .pl-mensola {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 16px 4px;
-  min-height: 0;
-}
-.pl-mensola__etichetta {
-  font-size: 11.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--pl-text-dim);
-}
-.pl-mensola__posto {
-  display: grid;
+  grid-column: 1;
+  justify-self: start;
+  display: inline-grid;
   place-items: center;
   /* Il bersaglio resta grande anche se il pezzo disegnato dentro e' piccolo: sotto i
      44px un pulsante su un telefono si sbaglia, e sbagliarlo qui vuol dire non
      riprendersi il pezzo proprio nel momento in cui serve. */
   min-width: 44px;
-  min-height: 44px;
-  padding: 4px 8px;
+  min-height: 38px;
+  padding: 2px 8px;
   border: none;
-  border-radius: var(--pl-radius-md);
-  background: var(--pl-cella-vuota);
+  border-radius: 999px;
+  background: var(--pl-surface-2);
   cursor: pointer;
+  transition: transform var(--pl-t-instant) var(--pl-ease-out);
 }
-.pl-mensola__invito {
-  font-size: 12.5px;
+.pl-mensola:active { transform: scale(0.95); }
+
+/* Gli attrezzi guadagnati e quelli persi, a fine livello. Due righe sobrie: una notizia
+   buona e una brutta, e la brutta non va nascosta ne' urlata. */
+.pl-fine__attrezzo {
+  margin: 8px 0 0;
+  font-size: 13.5px;
   color: var(--pl-brand);
+  text-align: center;
 }
+.pl-fine__attrezzo--perso { color: var(--pl-text-dim); }
+
 
 /* Il segno del gesso sulla plancia: un contorno tratteggiato, non un riempimento. Deve
    dire "qui", senza sembrare un blocco gia' appoggiato ne' l'anteprima del pezzo che si
@@ -1704,7 +1719,7 @@ button {
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: min(96vw, 58vh);
+  max-width: var(--pl-plancia-max);
   margin: 0 auto;
   padding: 8px 12px;
   border-radius: var(--pl-radius-md);
@@ -2178,7 +2193,7 @@ button {
    presente: serve a rispondere alla domanda "dove sono", non a decorare. */
 .pl-modalita {
   width: 100%;
-  max-width: min(96vw, 58vh);
+  max-width: var(--pl-plancia-max);
   margin: 0 auto;
   padding: 6px 12px;
   text-align: center;

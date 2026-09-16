@@ -5,6 +5,7 @@ import {
 } from '../core/scheda.js';
 import { rottaSfida } from './rotta.js';
 import { PLAY_URL } from '../config/progetto.js';
+import { operaDelQuadro } from '../config/quadri.js';
 
 /**
  * Condividere il risultato.
@@ -203,13 +204,26 @@ export function CondividiTrionfo({ totale, mosseTotali, alPrimoColpo, t }) {
 
 /** La scheda dell'avanzamento sul percorso, presa dalla mappa. */
 export function CondividiPercorso({ superati, totale, t }) {
+  /*
+   * IL TITOLO NOMINA L'OPERA, non dice "il percorso" e basta.
+   *
+   * "PLINTO - Il percorso, 73 livelli su 100" non dice a chi lo riceve DI CHE COSA sono
+   * quei livelli. I cento livelli hanno un nome -- il Ponte -- e quel nome e' meta' del
+   * motivo per cui esiste un gruppo: si sta costruendo qualcosa, e chi legge il messaggio
+   * deve poterlo capire senza aver gia' giocato.
+   *
+   * Il nome si chiede a OPERE e non e' scritto qui: quando arrivera' la Torre, questa
+   * scheda dira' "La Torre" da sola. Si guarda il livello a cui si e' arrivati, cioe' il
+   * prossimo da giocare, perche' e' quello che dice a che cantiere si sta lavorando.
+   */
+  const opera = operaDelQuadro(Math.min(superati + 1, totale));
   const testo = formattaSchedaPercorso(
     { superati, totale },
     {
       indirizzo: indirizzoDelGioco(null),
       testi: {
         gioco: 'PLINTO',
-        percorsoTitolo: t('scheda.percorsoTitolo'),
+        percorsoTitolo: t(`opere.${opera.id}`),
         livelliSu: t('scheda.livelliSu'),
       },
     },

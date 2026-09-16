@@ -150,37 +150,39 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
 
 
 /**
- * LA MENSOLA A SCHERMO: il pezzo messo da parte, sopra la mano.
+ * LA MENSOLA A SCHERMO: il pezzo messo da parte.
  *
- * COMPARE SOLO QUANDO C'E' QUALCOSA SOPRA. Una mensola vuota fissa ruberebbe altezza
- * alla plancia per non dire niente, e l'altezza della plancia su un telefono e' la cosa
- * piu' contesa che ci sia: il caso normale -- nessun pezzo messo da parte -- non deve
- * pagare niente per una funzione che in quel momento non si sta usando.
+ * STA DENTRO LA RIGA CHE C'ERA GIA', non in una riga sua. La prima versione si prendeva
+ * una striscia fra la plancia e i pezzi, e su un telefono quella striscia la paga il
+ * tabellone: la griglia si rimpiccioliva appena si usava l'attrezzo. Un aiuto che come
+ * prima cosa ti restringe il tavolo da gioco e' un aiuto che costa.
  *
- * STA SOPRA LA MANO E NON DENTRO IL PANNELLO DEGLI ATTREZZI. Un pezzo messo da parte
- * che non si vede e' un pezzo dimenticato, e un aiuto dimenticato e' un aiuto sprecato.
+ * La riga sotto la plancia e' una griglia di tre colonne, con la pastiglia degli attrezzi
+ * a destra e il messaggio al centro: la colonna di SINISTRA era vuota e larga uguale a
+ * quella della pastiglia. La mensola ci sta dentro senza rubare un pixel in altezza.
+ *
+ * E' un <button> e basta, senza involucri: quella riga e' un <p>, e un <div> dentro un
+ * <p> lo chiude a meta' -- il browser lo fa da solo, in silenzio, e il risultato e' un
+ * pezzo di interfaccia che finisce fuori posto senza che nessuno abbia sbagliato a
+ * scrivere il CSS.
+ *
+ * Senza etichetta scritta: il nome lo dice il pannello nell'istante in cui lo scegli, e
+ * chi usa un lettore di schermo lo sente dall'etichetta accessibile. Una parola in piu'
+ * qui vorrebbe dire togliere spazio al messaggio, che e' quello che si legge giocando.
  */
-export function Mensola({ pezzo, inScambio, onRiprendi, onAnnullaScambio, t }) {
+export function Mensola({ pezzo, onRiprendi, t }) {
   if (!pezzo) return null;
   return (
-    <div className="pl-mensola">
-      <span className="pl-mensola__etichetta">{t('attrezzi.mensola')}</span>
-      <button
-        type="button"
-        className="pl-mensola__posto"
-        onClick={onRiprendi}
-        aria-label={t('attrezzi.mensolaRiprendi')}
-      >
-        <Pezzo shape={pezzo.shape} color={pezzo.color} bombe={pezzo.bombe} cella={14} />
-      </button>
-      {inScambio ? (
-        <span className="pl-attrezzi__invito pl-mensola__invito">
-          {t('attrezzi.mensolaScambia')}
-          <button type="button" className="pl-attrezzi__annulla" onClick={onAnnullaScambio}>
-            {t('attrezzi.lasciaStare')}
-          </button>
-        </span>
-      ) : null}
-    </div>
+    <button
+      type="button"
+      className="pl-mensola"
+      onClick={onRiprendi}
+      /* L'etichetta dice COSA FA, non come si chiama: "Riprendi il pezzo dalla mensola"
+         e' quello che serve sapere a chi la sente, e non si confonde con la voce del
+         pannello che si chiama "La mensola". */
+      aria-label={t('attrezzi.mensolaRiprendi')}
+    >
+      <Pezzo shape={pezzo.shape} color={pezzo.color} bombe={pezzo.bombe} cella={11} />
+    </button>
   );
 }

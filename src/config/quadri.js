@@ -449,6 +449,16 @@ export function quadroNumero(numero) {
   return QUADRI.find((q) => q.numero === numero) ?? null;
 }
 
+/**
+ * L'opera a cui appartiene un Quadro: oggi c'e' solo il Ponte, e sono tutti e cento.
+ * Esiste per la stessa ragione di `attoDelQuadro`: chi deve NOMINARE il gruppo non deve
+ * sapere dove comincia e dove finisce, altrimenti quel confine finisce scritto in due
+ * posti e uno dei due invecchia.
+ */
+export function operaDelQuadro(numero) {
+  return OPERE.find((o) => numero >= o.da && numero <= o.a) ?? OPERE[OPERE.length - 1];
+}
+
 /** L'atto a cui appartiene un Quadro. */
 export function attoDelQuadro(numero) {
   return ATTI.find((a) => numero >= a.da && numero <= a.a) ?? ATTI[ATTI.length - 1];

@@ -179,7 +179,6 @@ export default {
     superatoIn: 'Cleared in {mosse} moves',
     record: 'personal best',
     percorso: 'Path {fatti} of {totale}',
-    percorsoTitolo: 'The path',
     livelliSu: '{fatti} levels out of {totale}',
     condividiTrionfo: 'Tell them you finished',
     trionfoTitolo: 'Path completed',
@@ -277,7 +276,9 @@ export default {
     lasciaStare: 'Never mind',
     comeSiGuadagnano: 'No tools yet. You earn one every {n} levels cleared, and you can hold up to three.',
     guadagnato: 'You earned a tool.',
-    perso: 'Store full: the tool you just earned was lost. Use one to make room.',
+    guadagnatiTanti: 'You earned {n} tools.',
+    perso: 'Store full: a tool you had just earned was lost. Use one to make room.',
+    persiTanti: 'Store full: {n} earned tools were lost. You can hold three at most: use one to make room.',
   },
 
   atti: {

@@ -30,6 +30,37 @@ stringe, non la leggibilità. Il messaggio è stato incartato in un elemento suo
 rami di quella riga sono testo nudo, e in una griglia un nodo di testo diventa un elemento
 anonimo che il foglio di stile non può collocare.
 
+**La plancia era più piccola di quanto poteva essere.** Misurata: a 390×844 occupava
+374 pixel su 390 di schermo, mentre in altezza ne aveva 466 a disposizione — **92 buttati**,
+che essendo la plancia quadrata non si recuperano in nessun altro modo che allargandola.
+Il tetto in larghezza sale da 96% a 99% dello schermo e i margini laterali scendono da 10
+a 2 pixel; sugli schermi bassi, dove a vincolare è l'altezza e non la larghezza, lo stacco
+sopra e sotto la riga del messaggio si stringe. Risultato misurato su cinque formati:
+346→356, 374→386, 396→408, 270→276, 285→291. La griglia è il fulcro del gioco: ogni pixel
+che non prende lei lo prende il vuoto.
+
+**La mensola rimpiccioliva la griglia.** Si prendeva una striscia sua fra la plancia e i
+pezzi, e su un telefono quella striscia la paga il tabellone: bastava usare l'attrezzo per
+vedersi restringere il tavolo da gioco. Adesso sta nella colonna di sinistra della riga
+sotto la plancia — era vuota, serviva solo a bilanciare la pastiglia degli attrezzi a
+destra — e non costa un pixel in altezza. Misurato su tre formati: la plancia resta
+identica prima e dopo aver messo via un pezzo.
+
+**Gli attrezzi guadagnati e quelli persi non si vedevano.** Il gioco calcolava i due numeri
+— li mette nel risultato di fine livello da quando gli attrezzi esistono — e **nessuna
+schermata li leggeva**. Chi aggiornava dopo settanta livelli si ritrovava tre attrezzi
+comparsi dal nulla e undici spariti in silenzio, senza una parola. Il caso non è teorico:
+con 72 livelli già fatti maturano 14 attrezzi in una volta sola, ne entrano 3 e se ne
+perdono 11. Perdere qualcosa senza che nessuno te lo dica è il modo più rapido di far
+perdere fiducia in un gioco. Adesso la schermata di fine livello lo dice, al singolare e al
+plurale, col numero esatto.
+
+**La scheda condivisa nomina l'opera.** Diceva «PLINTO — Il percorso, 73 livelli su 100»,
+che non dice a chi la riceve **di che cosa** sono quei livelli. I cento livelli hanno un
+nome, il Ponte, ed è metà del motivo per cui esiste un gruppo: si sta costruendo qualcosa.
+Il nome si chiede a `OPERE` e non è scritto nella scheda, così quando arriverà la Torre la
+scheda lo dirà da sola.
+
 **La plancia diventava un rettangolo bianco dopo un giro in secondo piano.** Segnalato con
 una fotografia: al posto del tabellone un rettangolo bianco con l'icona dell'immagine
 rotta, e dopo qualche secondo la griglia tornava. Non era un'immagine che non si carica —
@@ -50,6 +81,18 @@ ripristino, e su `contextrestored` il contesto viene ripreso. Senza quel `preven
 il canvas resta rotto per sempre.
 
 ### Verificato
+
+`tests/e2e/impaginazione.mjs` fissa quanto è grande la plancia, e lo fa con un'invariante
+invece che con un numero: essendo quadrata, **o è larga quasi quanto lo schermo, o ha finito
+lo spazio in altezza**. Una plancia stretta *e* con l'aria attorno vuol dire che qualcuno le
+ha rubato spazio senza accorgersene — che è esattamente com'era arrivata la mensola.
+Verificato capace di fallire: riportando il tetto a 80% segnala otto formati.
+
+`tests/e2e/attrezzi.mjs` controlla anche che usare la mensola non rimpicciolisca la plancia,
+su tre formati, e `tests/attrezzi.test.js` fissa i numeri del caso «aggiorno dopo settanta
+livelli»: 3 entrati, 11 persi, il conto che non riparte da capo, e il primo che matura dopo
+va perso finché non se ne spende uno. Con una prova che la schermata di fine livello legga
+davvero quei due numeri.
 
 `tests/e2e/scenografie.mjs` sale a sette passi: finge il giro in secondo piano e controlla
 che il canvas resti senza memoria mentre la pagina è nascosta, che al ritorno sia

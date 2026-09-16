@@ -439,8 +439,30 @@ export function SchermoGioco({
                 che finisce nella prima cella libera. Incartandolo, la riga puo' mettere
                 il messaggio al centro e la pastiglia a destra con una regola sola,
                 invece di sovrapporli. */}
+            {/* La mensola sta nella colonna di sinistra della riga, che era vuota: cosi'
+                il pezzo messo da parte si vede sempre senza togliere un pixel alla
+                plancia. */}
+            {conAttrezzi ? (
+              <Mensola
+                pezzo={partita.mensola ?? null}
+                onRiprendi={() => {
+                  const libero = partita.hand.findIndex((p) => p === null);
+                  if (libero >= 0) onRiprendiMensola(libero);
+                  else setModoAttrezzo('scambio');
+                }}
+                t={t}
+              />
+            ) : null}
             <span className="pl-suggerimento__testo">
-            {modoAttrezzo === 'gru' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
+            {modoAttrezzo === 'scambio' ? (
+              <span className="pl-attrezzi__invito">
+                {t('attrezzi.mensolaScambia')}
+                <button type="button" className="pl-attrezzi__annulla"
+                        onClick={() => setModoAttrezzo('chiuso')}>
+                  {t('attrezzi.lasciaStare')}
+                </button>
+              </span>
+            ) : modoAttrezzo === 'gru' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
               /* Con un attrezzo in corso la riga smette di dire qualunque altra cosa:
                  c'e' una domanda aperta, e due messaggi insieme sarebbero due. */
               <span className="pl-attrezzi__invito">
@@ -473,23 +495,6 @@ export function SchermoGioco({
           <p className="pl-sr">{t('a11y.istruzioni')}</p>
         </div>
       </div>
-
-      {conAttrezzi ? (
-        <Mensola
-          pezzo={partita.mensola ?? null}
-          inScambio={modoAttrezzo === 'scambio'}
-          onRiprendi={() => {
-            // Un posto libero c'e': si riprende e basta, con un tocco solo. Se la mano
-            // e' piena si passa allo scambio, che e' l'unica cosa che impedisce al pezzo
-            // di restare bloccato sulla mensola per sempre.
-            const libero = partita.hand.findIndex((p) => p === null);
-            if (libero >= 0) onRiprendiMensola(libero);
-            else setModoAttrezzo('scambio');
-          }}
-          onAnnullaScambio={() => setModoAttrezzo('chiuso')}
-          t={t}
-        />
-      ) : null}
 
       <div className={sceltaPezzo ? 'pl-tray-scelta' : ''}>
         <Tray
