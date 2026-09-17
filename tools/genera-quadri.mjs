@@ -43,6 +43,20 @@ import {
 } from '../src/sim/giocatore-quadri.mjs';
 
 const TENTATIVI = Number(process.argv[2] ?? 7);
+/**
+ * PROVA A VUOTO: `QUADRI_PROVA=8` genera solo i primi otto livelli, `QUADRI_PROVA=41-58`
+ * solo quel tratto, e in nessuno dei due casi si scrive niente.
+ *
+ * Una generazione intera dura decine di minuti, e quasi tutto quel tempo se ne va nelle
+ * partite. Quando si cambia la ricetta o un controllo si vuole sapere in due minuti se il
+ * codice regge, non aspettare mezz'ora per scoprire un errore di battitura al passaggio
+ * finale. Il file generato NON viene scritto, cosi' una prova non puo' lasciare in giro
+ * cento livelli tarati male.
+ */
+const PROVA = process.env.QUADRI_PROVA ?? '';
+const [PROVA_DA, PROVA_A] = PROVA.includes('-')
+  ? PROVA.split('-').map(Number)
+  : [1, Number(PROVA || 0)];
 const TOTALE = 100;
 
 // ---------------------------------------------------------------- le griglie ---
@@ -130,14 +144,84 @@ const MOTIVI = {
  * lo tara come tutti gli altri, e la stessa meccanica smette di essere un colpo di
  * fortuna per diventare una richiesta di costanza.
  */
+/**
+ * TRE CAMPI NUOVI, E LE MISURE CHE LI HANNO CHIESTI.
+ *
+ * `doppi` -- OGNI QUANTI LIVELLI DELL'ATTO UNO NE CHIEDE DUE COSE INSIEME.
+ *
+ * Tutti e cento i livelli chiedevano una cosa sola. Motore, giocatore artificiale e
+ * schermo dell'obiettivo sapevano gia' maneggiare una LISTA di obiettivi -- `quadro.js`
+ * mappa su `quadro.obiettivi` da sempre -- ma nessun livello ne aveva mai piu' di uno,
+ * quindi la capacita' c'era e non si vedeva. "Chiudi 3 righe E fai 400 punti" non e' la
+ * somma dei suoi pezzi: da solo, "chiudi 3 righe" si gioca in automatico chiudendo righe,
+ * e il punteggio arriva da se'; insieme, obbligano a scegliere quale mossa serve a quale
+ * meta'. E' l'unico modo di aumentare la richiesta senza toccare il motore.
+ *
+ * Solo dagli atti avanzati: nei primi il livello insegna una regola alla volta.
+ *
+ * `intrecci` PIU' SPESSO. Era in due atti soli: cinque livelli su cento, di cui quattro
+ * consecutivi nello stesso tratto (42, 47, 52, 57) e uno in fondo (97). Una meccanica che
+ * il gioco ha, che il generatore sa tarare come ogni altro cumulo, e che praticamente non
+ * chiede mai. Ora e' in cinque atti su sette: circa tredici livelli su cento.
+ *
+ * NOTA DI METODO, perche' e' costata una diagnosi sbagliata. Lo strumento di taratura
+ * (`tools/taratura.mjs`) non conosceva il tipo `intrecci`: aveva il ramo per `intreccio`,
+ * il picco ormai in disuso, e non quello per il conteggio. Il giocatore non veniva mai
+ * spinto a chiudere piu' gruppi insieme, e i cinque livelli a intrecci risultavano i piu'
+ * duri del gioco (mediana 1 contro un bersaglio di 3) per un difetto del METRO. Il
+ * generatore il ramo giusto ce l'aveva, quindi i livelli erano tarati bene. Corretto lo
+ * strumento, le stesse mediane stanno fra 1 e 3, cioe' in mezzo al gruppo.
+ *
+ * `riuscite` -- LA BANDA DI DIFFICOLTA' DELL'ATTO: quante partite su venti il metro
+ * puo' vincere, al minimo e al massimo.
+ *
+ * E' il campo che cambia il mestiere di questo file, e vale la pena dire da dove viene.
+ *
+ * Fino a ieri la difficolta' non era un obiettivo: era una CONSEGUENZA SPERATA di tre
+ * leve mosse a mano atto per atto -- il percentile del bersaglio, il tetto di mosse, il
+ * margine -- piu' un unico vincolo valido per tutti e cento i livelli: "almeno 4 riuscite
+ * su 12". Un solo pavimento, nessun soffitto, il livello 3 e il livello 99 con lo stesso
+ * requisito. Misurata a 24 partite per livello, la curva che ne usciva era questa, in
+ * riuscite medie per gruppo di dieci:
+ *
+ *     84  85  74  61  57  60  56  54  44  63
+ *
+ * Quattro inversioni e un rimbalzo in fondo. Il punto piu' duro del gioco cadeva al
+ * livello 90, e gli ultimi dieci si vincevano il 63% delle volte contro il 44% dei dieci
+ * precedenti: il finale si allentava.
+ *
+ * E non era il bersaglio. Misurato come rapporto fra cio' che si chiede e cio' che il
+ * metro raggiunge davvero, gli ultimi dieci stavano a 1,09 e i dieci prima a 1,09:
+ * identici. Era il TETTO DI MOSSE -- 26-40 nell'ultimo atto contro 22-32 nel penultimo.
+ * Con piu' tempo lo stesso bersaglio si raggiunge piu' spesso.
+ *
+ * Il controllo "nessun livello banale" non poteva prenderlo, perche' chiede DUE condizioni
+ * insieme: vinto quasi sempre E con molto tempo che avanza. Serviva a non bocciare i
+ * livelli tesi, quelli in cui o si vince presto o si perde. Ma lascia passare il caso
+ * opposto, il livello vinto quasi sempre SENZA tempo che avanza: il quadro 96 chiedeva 14
+ * gruppi in 33 mosse, si vinceva 96 volte su 100 e il giocatore ne usava 30 su 33.
+ *
+ * Adesso ogni atto ha pavimento E soffitto, e il generatore li fa rispettare: si tolgono
+ * mosse per far scendere la riuscita, se ne aggiungono per farla salire, e solo quando il
+ * tetto e' al minimo si tocca il bersaglio. L'ordine e' quello di tutto il resto del file:
+ * togliere tempo lascia il livello quello che era, cambiare il bersaglio ne fa un altro.
+ *
+ * LE BANDE SI SOVRAPPONGONO DI PROPOSITO. Dentro un atto i livelli devono variare,
+ * altrimenti il percorso diventa un metronomo: sedici livelli tutti al 55% sono noiosi
+ * quanto sedici livelli banali. Ma i due estremi scendono entrambi a ogni atto, quindi la
+ * curva complessiva non puo' piu' risalire.
+ *
+ * IL PRIMO ATTO HA UN SOFFITTO DI VENTI SU VENTI, cioe' nessun soffitto: i primi dieci
+ * livelli insegnano, e un livello che insegna si deve poter vincere sempre.
+ */
 const ATTI = [
-  { da:  1, a: 10, id: 'fondamenta',      tipi: ['righe','colonne','quadranti','gruppi'],                          motivi: ['nessuno'],                                  mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22] },
-  { da: 11, a: 24, id: 'pilastri',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['nessuno','angoli','croce'],                 mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20] },
-  { da: 25, a: 40, id: 'roccia', tipi: ['gruppi','quadranti','righe','colonne','catena'],                 motivi: ['scala','isole','cornice','colonne','blocchi'], mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18] },
-  { da: 41, a: 58, id: 'vuoto', tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],            motivi: ['muro','strettoia','diagonale','angoli','croce'], mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16] },
-  { da: 59, a: 76, id: 'strada',  tipi: ['punteggio','catena','gruppi','celle','righe'],                    motivi: ['clessidra','labirinto','fitto','assedio','isole'], mosse: [20, 30], percentile: [34, 50], margine: [1.16, 1.12] },
-  { da: 77, a: 92, id: 'arco',  tipi: ['punteggio','catena','celle','quadranti','gruppi'],               motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08] },
-  { da: 93, a:100, id: 'ultimaPietra',     tipi: ['punteggio','celle','catena','gruppi','intrecci'],                motivi: ['briciole','clessidra','labirinto','assedio'], mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05] },
+  { da:  1, a: 10, id: 'fondamenta',   tipi: ['righe','colonne','quadranti','gruppi'],                            motivi: ['nessuno'],                                             mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22], riuscite: [15, 20] },
+  { da: 11, a: 24, id: 'pilastri',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                   motivi: ['nessuno','angoli','croce'],                            mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20], riuscite: [13, 18] },
+  { da: 25, a: 40, id: 'roccia',       tipi: ['gruppi','quadranti','righe','colonne','catena','intrecci'],        motivi: ['scala','isole','cornice','colonne','blocchi'],         mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18], riuscite: [11, 17] },
+  { da: 41, a: 58, id: 'vuoto',        tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],              motivi: ['muro','strettoia','diagonale','angoli','croce'],       mosse: [16, 24], percentile: [28, 42], margine: [1.22, 1.16], doppi: 4, riuscite: [9, 15] },
+  { da: 59, a: 76, id: 'strada',       tipi: ['punteggio','catena','intrecci','gruppi','celle','righe'],          motivi: ['clessidra','labirinto','fitto','assedio','isole'],     mosse: [20, 30], percentile: [34, 50], margine: [1.16, 1.12], doppi: 4, riuscite: [8, 13] },
+  { da: 77, a: 92, id: 'arco',         tipi: ['punteggio','catena','celle','intrecci','quadranti','gruppi'],      motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08], doppi: 4, riuscite: [7, 12] },
+  { da: 93, a:100, id: 'ultimaPietra', tipi: ['punteggio','celle','catena','gruppi','intrecci'],                  motivi: ['briciole','clessidra','labirinto','assedio'],          mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05], doppi: 4, riuscite: [6, 10] },
 ];
 
 const NOMI = {
@@ -152,23 +236,84 @@ function interpola(intervallo, quota) {
 }
 
 /** Progetto di un Quadro: tutto tranne il bersaglio, che si misura. */
+/**
+ * QUANTO SI SCONTA IL BERSAGLIO DI UN LIVELLO A DUE OBIETTIVI.
+ *
+ * Chiedere due cose insieme e' strettamente piu' difficile che chiederne una: le mosse
+ * sono le stesse e vanno divise. Lasciare a ciascuna meta' il percentile che avrebbe da
+ * sola vorrebbe dire fare un livello quasi doppio e poi lasciare che il controllo di
+ * superabilita' lo smonti a forza di gradini -- cioe' inventare la difficolta' e
+ * correggerla dopo, invece di progettarla.
+ *
+ * Quindici punti di percentile a testa, con un pavimento a dieci. Non e' un numero
+ * misurato: e' una partenza ragionevole che il controllo di superabilita' (almeno 4
+ * riuscite su 12) e quello di banalita' correggono in entrambe le direzioni. Se dopo la
+ * generazione i livelli doppi risultassero sistematicamente abbassati o sistematicamente
+ * banali, e' QUESTO il numero da cambiare.
+ */
+const SCONTO_DOPPIO = 15;
+const PERCENTILE_MINIMO = 10;
+
+/**
+ * I tipi di obiettivo di un livello: uno, o due sui livelli "doppi" dell'atto.
+ *
+ * Il secondo tipo non e' quello successivo nel giro ma quello DUE passi avanti: con il
+ * successivo, due livelli vicini finirebbero per chiedere la stessa coppia scambiata
+ * ("righe + colonne" al 44 e "colonne + quadranti" al 45), e la coppia si riconoscerebbe
+ * come un motivo ripetuto invece che come un livello a se'.
+ */
+const coppieUsate = new Set();
+function tipiDi(atto, n) {
+  const giro = atto.tipi;
+  const i = n - atto.da;
+  const primo = giro[i % giro.length];
+  if (!atto.doppi || giro.length < 3) return [primo];
+  if (i % atto.doppi !== atto.doppi - 1) return [primo];
+
+  // MAI DUE VOLTE LA STESSA COPPIA, in tutto il percorso.
+  //
+  // Con un passo fisso la coppia si ripete: i livelli doppi distano quattro, i tipi del
+  // giro sono cinque o sei, e i due cicli vanno a tempo. Misurato sulla ricetta: "gruppi +
+  // righe" usciva al 62 e di nuovo al 74, e "catena + gruppi" al 66 in ordine scambiato --
+  // che per chi legge l'obiettivo e' la stessa richiesta. Qui la seconda meta' avanza nel
+  // giro finche' la coppia non e' nuova. La coppia si confronta SENZA ORDINE, perche'
+  // "3 righe e 400 punti" e "400 punti e 3 righe" sono lo stesso livello.
+  //
+  // Lo stato vive fra una chiamata e l'altra: `progetta` scorre i livelli una volta sola e
+  // in ordine, quindi l'insieme e' esattamente la storia del percorso fin qui.
+  for (let passo = 2; passo < giro.length; passo += 1) {
+    const secondo = giro[(i + passo) % giro.length];
+    if (secondo === primo) continue;
+    const coppia = [primo, secondo].sort().join('+');
+    if (coppiaUsate(coppia)) continue;
+    coppieUsate.add(coppia);
+    return [primo, secondo];
+  }
+  return [primo];
+}
+function coppiaUsate(coppia) { return coppieUsate.has(coppia); }
+
 function progetta(n) {
   const atto = attoDi(n);
   const quota = (n - atto.da) / Math.max(1, atto.a - atto.da);
-  const tipo = atto.tipi[(n - atto.da) % atto.tipi.length];
+  const tipi = tipiDi(atto, n);
   const motivo = atto.motivi[(n - atto.da) % atto.motivi.length];
   // Le mosse oscillano dentro l'intervallo dell'atto invece di crescere dritte:
   // un percorso che sale sempre uguale diventa prevedibile a occhio.
   const oscilla = ((n * 7) % 5) / 4;
+  const percentilePieno = interpola(atto.percentile, quota);
   return {
     numero: n,
-    nome: `${NOMI[tipo]}${n}`,
-    tipo,
+    nome: `${tipi.map((t) => NOMI[t]).join('')}${n}`,
+    tipi,
     motivo,
     // Tetto PROVVISORIO: serve solo a far giocare la taratura del bersaglio. Quello vero
     // si calcola dopo, misurando quante mosse servono davvero (vedi `margine`).
     maxMosse: interpola(atto.mosse, oscilla),
-    percentile: interpola(atto.percentile, quota),
+    percentile: tipi.length > 1
+      ? Math.max(PERCENTILE_MINIMO, percentilePieno - SCONTO_DOPPIO)
+      : percentilePieno,
+    riuscite: atto.riuscite,
     // Di quanto il tetto di mosse deve superare le mosse davvero necessarie. 1,45 vuol
     // dire "quasi meta' del tempo di margine", 1,05 "appena il fiato". E' la leva che
     // fa salire la difficolta' lungo il percorso, e l'unica che funzioni sugli obiettivi
@@ -205,14 +350,26 @@ function vicinanza(grid) {
     if (p < 9) v.quadrant += (p/9) ** 3; }
   return v;
 }
-function preferenze(tipo) {
+/**
+ * Pesi del giocatore di prova, orientati ai tipi di obiettivo del livello.
+ *
+ * Prende una LISTA, non un tipo: su un livello a due obiettivi il giocatore deve badare a
+ * entrambi, e tarare "chiudi 3 righe e fai 400 punti" con un giocatore che pensa solo
+ * alle righe misurerebbe un livello che nessuno gioca. Dove i due tipi tirano in
+ * direzioni opposte -- `catena` non vuole saltare mosse, `intrecci` vuole aspettare per
+ * chiudere insieme -- vince l'ultimo assegnato: e' un compromesso dichiarato, non un
+ * caso, e il controllo di superabilita' ha comunque l'ultima parola.
+ */
+function preferenze(tipi) {
   const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, nonSpezzare: 240 };
-  if (tipo === 'righe') p.row = 6;
-  else if (tipo === 'colonne') p.col = 6;
-  else if (tipo === 'quadranti') p.quadrant = 6;
-  else if (tipo === 'pulizia') { p.svuotare = 320; p.nonSpezzare = 40; }
-  else if (tipo === 'catena') p.nonSpezzare = 900;
-  else if (tipo === 'intreccio' || tipo === 'intrecci') p.nonSpezzare = 40;
+  for (const tipo of [].concat(tipi)) {
+    if (tipo === 'righe') p.row = 6;
+    else if (tipo === 'colonne') p.col = 6;
+    else if (tipo === 'quadranti') p.quadrant = 6;
+    else if (tipo === 'pulizia') { p.svuotare = 320; p.nonSpezzare = 40; }
+    else if (tipo === 'catena') p.nonSpezzare = 900;
+    else if (tipo === 'intreccio' || tipo === 'intrecci') p.nonSpezzare = 40;
+  }
   return p;
 }
 function valuta(dopo, gruppi, pref, rumore) {
@@ -286,7 +443,7 @@ function gioca(progetto, rng) {
     now: 0,
     modalita: MODALITA_QUADRI,
   });
-  const pref = preferenze(progetto.tipo);
+  const pref = preferenze(progetto.tipi);
   for (let m = 0; m < progetto.maxMosse; m += 1) {
     if (partita.status !== 'playing') break;
     const mossa = scegliMossa(partita, pref, rng);
@@ -296,55 +453,48 @@ function gioca(progetto, rng) {
   return partita;
 }
 
-/**
- * Gioca un Quadro PUNTANDO al suo bersaglio, e dice se ce l'ha fatta.
- *
- * Differenza dal `gioca` qui sopra, che serve a tarare: quello gioca senza obiettivo e
- * arriva in fondo alle mosse, perche' misura FIN DOVE si arriva. Questo si ferma appena
- * il bersaglio e' raggiunto, perche' misura una cosa sola: il livello si supera, si' o no.
- */
-function superato(progetto, bersaglio, rng) {
-  const leggi = OBIETTIVI[progetto.tipo].progresso;
-  let partita = createGame({
-    seed: seedFromString(`plinto-quadro-${progetto.numero}`),
-    grigliaIniziale: progetto.griglia ? gridFromString(progetto.griglia, 3) : undefined,
-    now: 0,
-    modalita: MODALITA_QUADRI,
-  });
-  // `preferenze` del modulo condiviso vuole il QUADRO, non il tipo: prende l'obiettivo
-  // dalla stessa forma che ha il livello in src/config/quadri.js.
-  const pref = preferenzeObiettivo({ obiettivi: [{ tipo: progetto.tipo, quanti: bersaglio }] });
-  for (let m = 0; m < progetto.maxMosse; m += 1) {
-    if (leggi(partita) >= bersaglio) return true;
-    if (partita.status !== 'playing') break;
-    const mossa = scegliMossaObiettivo(partita, pref, rng);
-    if (!mossa) break;
-    partita = placePiece(partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
-  }
-  return leggi(partita) >= bersaglio;
+/** Gli obiettivi del livello nella forma che hanno in src/config/quadri.js. */
+function obiettiviDi(progetto, bersagli) {
+  return progetto.tipi.map((tipo, i) => ({ tipo, quanti: bersagli[i] }));
 }
+
+/** Tutti gli obiettivi raggiunti? Su un livello a due, uno solo non basta. */
+function tuttiRaggiunti(partita, progetto, bersagli) {
+  return progetto.tipi.every((tipo, i) => OBIETTIVI[tipo].progresso(partita) >= bersagli[i]);
+}
+
+/**
+ * "IL LIVELLO SI SUPERA?" NON HA PIU' UNA FUNZIONE PROPRIA, ed e' un miglioramento.
+ *
+ * C'era un `superato()` che rigiocava la partita fermandosi appena il bersaglio era
+ * raggiunto. Faceva esattamente lo stesso lavoro di `mosseNecessarie` qui sotto, che pero'
+ * restituisce anche QUANTE mosse sono servite -- e quel numero risponde a "si supera?" per
+ * ogni tetto in un colpo solo, invece che per uno. Tenere le due funzioni significava
+ * giocare due volte le stesse partite e, peggio, rischiare che un giorno divergessero:
+ * chi decide e chi verifica devono usare lo stesso metro, ed e' la lezione che questo file
+ * ha gia' imparato tre volte. Adesso la domanda e' una conta su `mosseSeme`.
+ */
 
 /**
  * Quante mosse servono davvero per raggiungere il bersaglio, se ci si riesce.
  * @returns {number|null} il numero di mosse usate, o null se non ci si arriva
  */
-function mosseNecessarie(progetto, bersaglio, tetto, rng) {
-  const leggi = OBIETTIVI[progetto.tipo].progresso;
+function mosseNecessarie(progetto, bersagli, tetto, rng) {
   let partita = createGame({
     seed: seedFromString(`plinto-quadro-${progetto.numero}`),
     grigliaIniziale: progetto.griglia ? gridFromString(progetto.griglia, 3) : undefined,
     now: 0,
     modalita: MODALITA_QUADRI,
   });
-  const pref = preferenzeObiettivo({ obiettivi: [{ tipo: progetto.tipo, quanti: bersaglio }] });
+  const pref = preferenzeObiettivo({ obiettivi: obiettiviDi(progetto, bersagli) });
   for (let m = 0; m < tetto; m += 1) {
-    if (leggi(partita) >= bersaglio) return m;
+    if (tuttiRaggiunti(partita, progetto, bersagli)) return m;
     if (partita.status !== 'playing') return null;
     const mossa = scegliMossaObiettivo(partita, pref, rng);
     if (!mossa) return null;
     partita = placePiece(partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
   }
-  return leggi(partita) >= bersaglio ? tetto : null;
+  return tuttiRaggiunti(partita, progetto, bersagli) ? tetto : null;
 }
 
 /** Il gradino SOPRA un bersaglio, nella scala del suo tipo. */
@@ -408,7 +558,7 @@ for (const [nome, righe] of Object.entries(MOTIVI)) {
   const chiusi = [];
   for (let p = 0; p < PROVE_MOTIVO; p += 1) {
     const finto = {
-      numero: 9000 + p, nome, tipo: 'gruppi', motivo: nome,
+      numero: 9000 + p, nome, tipi: ['gruppi'], motivo: nome,
       maxMosse: MOSSE_PROVA, percentile: 50, griglia: righe.join('\n'),
     };
     const fine = gioca(finto, createRng(seedFromString(`motivo-${nome}-${p}`)));
@@ -434,20 +584,34 @@ console.log('');
 
 // ------------------------------------------------------------------ taratura ---
 const quadri = [];
-for (let n = 1; n <= TOTALE; n += 1) {
+const PRIMO = PROVA_A > 0 ? PROVA_DA : 1;
+const ULTIMO = PROVA_A > 0 ? PROVA_A : TOTALE;
+for (let n = PRIMO; n <= ULTIMO; n += 1) {
   const progetto = progetta(n);
   const rng = createRng(seedFromString(`taratura-${n}`));
   const finali = [];
   for (let i = 0; i < TENTATIVI; i += 1) finali.push(gioca(progetto, rng));
 
-  const valori = finali.map((s) => OBIETTIVI[progetto.tipo].progresso(s));
-  let bersaglio = percentile(valori, progetto.percentile);
-  if (progetto.tipo === 'punteggio') bersaglio = Math.max(100, Math.round(bersaglio / 25) * 25);
-  else if (progetto.tipo === 'celle') bersaglio = Math.max(9, Math.round(bersaglio / 3) * 3);
-  else bersaglio = Math.max(1, Math.round(bersaglio));
+  // Un bersaglio per obiettivo, tarato sulla STESSA serie di partite: le mosse sono le
+  // stesse per tutti e due, quindi misurarli in partite separate direbbe quanto si arriva
+  // lontano dedicandosi a una cosa sola -- che e' esattamente cio' che un livello doppio
+  // non concede.
+  const bersagli = [];
+  const massimi = [];
+  const mediane = [];
+  for (const tipo of progetto.tipi) {
+    const valori = finali.map((s) => OBIETTIVI[tipo].progresso(s));
+    let bersaglio = percentile(valori, progetto.percentile);
+    if (tipo === 'punteggio') bersaglio = Math.max(100, Math.round(bersaglio / 25) * 25);
+    else if (tipo === 'celle') bersaglio = Math.max(9, Math.round(bersaglio / 3) * 3);
+    else bersaglio = Math.max(1, Math.round(bersaglio));
+    bersagli.push(bersaglio);
+    mediane.push(percentile(valori, 50));
+    massimi.push(Math.max(...valori));
+  }
 
-  quadri.push({ ...progetto, bersaglio, mediana: percentile(valori, 50), max: Math.max(...valori) });
-  if (n % 10 === 0) process.stdout.write(`  tarati ${n}/${TOTALE}\n`);
+  quadri.push({ ...progetto, bersagli, mediane, massimi });
+  if (n % 10 === 0) process.stdout.write(`  tarati ${n}/${ULTIMO}\n`);
 }
 
 /**
@@ -522,43 +686,61 @@ for (let n = 1; n <= TOTALE; n += 1) {
  * La regola qui e' minima e non inventa numeri: il bersaglio di un tipo non puo' essere
  * piu' basso di quello gia' chiesto prima per lo stesso tipo, e dopo due richieste identiche
  * la terza sale di un gradino -- ma solo fino a dove la MISURA dice che si puo' arrivare
- * (`q.max`, il massimo che il metro ha davvero raggiunto su quel livello). Dove la misura
+ * (il massimo che il metro ha davvero raggiunto su quel livello). Dove la misura
  * non lo permette, il bersaglio resta dov'e': meglio una ripetizione onesta di un bersaglio
  * inventato. Il controllo di superabilita' piu' in basso ha comunque l'ultima parola.
+ */
+/**
+ * I LIVELLI DOPPI RESTANO FUORI DA QUESTA REGOLA, e vale la pena dire perche'.
+ *
+ * La regola esiste contro una sensazione precisa: "questo me l'hai gia' chiesto". Su un
+ * livello che chiede due cose insieme quella sensazione non c'e', perche' la richiesta e'
+ * visibilmente un'altra: "chiudi 3 righe E fai 400 punti" non e' "chiudi 3 righe", nemmeno
+ * se il numero delle righe e' piu' basso di quello chiesto dieci livelli prima. Anzi: i
+ * livelli doppi partono apposta da un percentile scontato, e costringerli a non scendere
+ * mai sotto l'ultimo bersaglio singolo cancellerebbe lo sconto -- cioe' farebbe con la
+ * mano destra il contrario di quello che la sinistra ha appena progettato.
+ *
+ * Per lo stesso motivo non aggiornano `ultimo`: un bersaglio scontato non deve diventare
+ * il pavimento dei livelli singoli che vengono dopo.
  */
 console.log('  Rendo i bersagli crescenti dentro ogni tipo');
 const ultimo = {};
 const ripetuti = {};
 const alzati = [];
 for (const q of quadri) {
-  const partenza = q.bersaglio;
-  const precedente = ultimo[q.tipo];
+  if (q.tipi.length > 1) continue;
+  const tipo = q.tipi[0];
+  const partenza = q.bersagli[0];
+  const massimo = q.massimi[0];
+  const precedente = ultimo[tipo];
 
   // Non scendere sotto quello gia' chiesto -- ma mai oltre cio' che la misura dice
-  // raggiungibile su questo livello: alzare oltre `q.max` sarebbe inventare un numero.
+  // raggiungibile su questo livello: alzare oltre il massimo misurato sarebbe inventare
+  // un numero.
   if (precedente !== undefined) {
-    q.bersaglio = Math.max(q.bersaglio, Math.min(precedente, q.max));
+    q.bersagli[0] = Math.max(q.bersagli[0], Math.min(precedente, massimo));
   }
 
-  if (precedente !== undefined && q.bersaglio === precedente) {
-    ripetuti[q.tipo] = (ripetuti[q.tipo] ?? 0) + 1;
+  if (precedente !== undefined && q.bersagli[0] === precedente) {
+    ripetuti[tipo] = (ripetuti[tipo] ?? 0) + 1;
     // MAI due richieste identiche di fila dentro lo stesso tipo. La prima versione ne
     // tollerava due, ragionando che due griglie diverse fanno due problemi diversi. E'
     // vero, ma non basta a chi legge "chiudi 1 colonna" per la seconda volta: il livello
     // 6 chiedeva la stessa cosa del 2, ed e' quello che un giocatore ha chiamato "molto
     // banale". La ripetizione resta possibile solo dove la MISURA la impone -- cioe' dove
     // su quella griglia il metro non arriva a un gradino piu' su.
-    if (ripetuti[q.tipo] >= 1) {
-      const su = gradinoSopra(q.tipo, q.bersaglio);
-      if (su <= q.max) { q.bersaglio = su; ripetuti[q.tipo] = 0; }
+    if (ripetuti[tipo] >= 1) {
+      const su = gradinoSopra(tipo, q.bersagli[0]);
+      if (su <= massimo) { q.bersagli[0] = su; ripetuti[tipo] = 0; }
     }
   } else {
-    ripetuti[q.tipo] = 0;
+    ripetuti[tipo] = 0;
   }
 
-  ultimo[q.tipo] = q.bersaglio;
-  if (q.bersaglio !== partenza) {
-    alzati.push(`quadro ${q.numero}: ${q.tipo} da ${partenza} a ${q.bersaglio}`);
+  ultimo[tipo] = q.bersagli[0];
+  if (q.bersagli[0] !== partenza) {
+    alzati.push(`quadro ${q.numero}: ${tipo} da ${partenza} a ${q.bersagli[0]}`);
   }
 }
 if (alzati.length) {
@@ -604,7 +786,7 @@ const tettiCambiati = [];
 for (const q of quadri) {
   const necessarie = [];
   for (let i = 0; i < PROVE_MOSSE; i += 1) {
-    const m = mosseNecessarie(q, q.bersaglio, q.maxMosse, createRng(seedFromString(`mosse-${q.numero}-${i}`)));
+    const m = mosseNecessarie(q, q.bersagli, q.maxMosse, createRng(seedFromString(`mosse-${q.numero}-${i}`)));
     if (m !== null) necessarie.push(m);
   }
   // Nessuna vittoria con il tetto generoso: il tetto non e' il problema di questo livello,
@@ -614,7 +796,7 @@ for (const q of quadri) {
   const tipico = percentile(necessarie, 70);
   const nuovo = Math.max(MOSSE_MINIME, Math.min(q.maxMosse, Math.ceil(tipico * q.margine)));
   if (nuovo !== q.maxMosse) {
-    tettiCambiati.push({ numero: q.numero, tipo: q.tipo, da: q.maxMosse, a: nuovo, tipico });
+    tettiCambiati.push({ numero: q.numero, tipo: q.tipi.join('+'), da: q.maxMosse, a: nuovo, tipico });
     q.maxMosse = nuovo;
   }
 }
@@ -628,46 +810,106 @@ if (tettiCambiati.length) {
   );
 }
 
-const PROVE_SUPERAMENTO = 12;
-const MINIME_RIUSCITE = 4;
+/**
+ * VENTI PROVE, NON DODICI, e il motivo e' aritmetico.
+ *
+ * Dodici prove misurano a scalini di un dodicesimo, cioe' circa otto punti percentuali:
+ * con dodici partite non si distingue un livello al 40% da uno al 50%. Finche' l'unico
+ * requisito era un pavimento unico ("almeno 4 su 12") quella grana bastava, perche' si
+ * chiedeva una cosa sola e grossolana: che il livello si potesse vincere. Le bande per
+ * atto chiedono invece proprio la distinzione che dodici prove non sanno fare.
+ *
+ * Venti prove costano un terzo di tempo in piu' sui tre controlli che decidono, e portano
+ * lo scalino al 5%. Non e' precisione da laboratorio -- per quella servirebbero centinaia
+ * di partite per livello e ore di generazione -- ma e' abbastanza fine per le bande qui
+ * sopra, ed e' ripetibile: i semi sono fissi, quindi due generazioni sullo stesso progetto
+ * danno lo stesso risultato.
+ *
+ * Le soglie restano scritte come CONTEGGI SU VENTI e non come percentuali, per non far
+ * finta di una precisione che non c'e'.
+ */
+const PROVE_SUPERAMENTO = 20;
+
+/**
+ * Il pavimento ASSOLUTO, sotto il quale nessun atto puo' scendere per quanto la sua banda
+ * sia bassa: sei riuscite su venti, cioe' il 30%. Serve come rete: se un domani una banda
+ * venisse scritta troppo severa, il livello resterebbe comunque superabile.
+ */
+const MINIME_RIUSCITE = 6;
+
+/** Il pavimento di questo livello: quello del suo atto, mai sotto la rete assoluta. */
+function pavimentoDi(q) { return Math.max(MINIME_RIUSCITE, q.riuscite[0]); }
+/** Il soffitto di questo livello: quello del suo atto. */
+function soffittoDi(q) { return q.riuscite[1]; }
+
+/**
+ * LE MOSSE CHE SERVONO, SEME PER SEME: la misura che i tre controlli si passano.
+ *
+ * Il giocatore artificiale NON GUARDA il tetto di mosse -- sceglie la mossa dalla griglia,
+ * dalla mano e dai suoi pesi -- quindi con lo stesso seme gioca la stessa identica partita
+ * qualunque tetto gli si dia. Quante mosse gli servono per arrivare al bersaglio e' percio'
+ * una proprieta' del SEME e del BERSAGLIO, non del tetto.
+ *
+ * Da qui due conseguenze, e sono la ragione per cui questa funzione esiste.
+ *
+ * PRIMA: misurata una volta col tetto piu' largo dell'atto, la riuscita a QUALUNQUE tetto
+ * piu' stretto e' una conta -- quanti di quei numeri stanno sotto il tetto -- non altre
+ * partite. Prima ogni controllo rigiocava venti partite per ogni tetto tentato.
+ *
+ * SECONDA: i tre controlli che seguono -- superabilita', banalita', banda dell'atto --
+ * misurano tutti la stessa cosa sugli stessi semi. Tenendo il risultato in memoria, il
+ * secondo e il terzo non giocano niente finche' il bersaglio non cambia. Il risparmio non
+ * e' un lusso: senza, una generazione dura ore e ritoccare la ricetta diventa impossibile.
+ *
+ * Non e' un'approssimazione: e' lo stesso identico numero che si otterrebbe rigiocando.
+ */
+const misurato = new Map();
+/** Il tetto piu' largo che l'atto possa mai concedere: si misura sempre a quello. */
+function tettoDiMisura(q) { return interpola(attoDi(q.numero).mosse, 1); }
+function mosseSeme(q, bersagli) {
+  const tetto = Math.max(tettoDiMisura(q), q.maxMosse);
+  const chiave = `${q.numero}|${bersagli.join(',')}|${tetto}`;
+  if (misurato.has(chiave)) return misurato.get(chiave);
+  const n = [];
+  for (let i = 0; i < PROVE_SUPERAMENTO; i += 1) {
+    n.push(mosseNecessarie(q, bersagli, tetto, createRng(seedFromString(`prova-${q.numero}-${i}`))));
+  }
+  misurato.set(chiave, n);
+  return n;
+}
+/** Quante di quelle partite si vincono entro un dato tetto. */
+function vinteEntro(n, tetto) { return n.filter((m) => m !== null && m <= tetto).length; }
+
 console.log(
-  `  Controllo che ogni livello sia superabile: almeno ${MINIME_RIUSCITE} riuscite `
-  + `su ${PROVE_SUPERAMENTO} tentativi`,
+  `  Controllo che ogni livello stia nella banda del suo atto, su ${PROVE_SUPERAMENTO} tentativi`,
 );
 const abbassati = [];
 const allargati = [];
 const muri = [];
 for (const q of quadri) {
-  // I sei semi sono gli STESSI a ogni gradino della discesa. Non e' un dettaglio: con lo
+  // I semi sono gli STESSI a ogni gradino della discesa. Non e' un dettaglio: con lo
   // stesso seme il giocatore fa le stesse mosse e si ferma solo prima, quindi un bersaglio
   // piu' basso non puo' mai riuscire meno di uno piu' alto. Con semi nuovi a ogni gradino
   // la discesa diventerebbe un sorteggio, e si fermerebbe al primo colpo fortunato.
-  const prova = (bersaglio) => {
-    let vinte = 0;
-    for (let i = 0; i < PROVE_SUPERAMENTO; i += 1) {
-      if (superato(q, bersaglio, createRng(seedFromString(`prova-${q.numero}-${i}`)))) {
-        vinte += 1;
-        if (vinte >= MINIME_RIUSCITE) return true;
-      }
-      // Se le prove rimaste non bastano piu' a raggiungere la soglia, e' gia' deciso.
-      if (vinte + (PROVE_SUPERAMENTO - i - 1) < MINIME_RIUSCITE) return false;
-    }
-    return false;
-  };
+  const pavimento = pavimentoDi(q);
+  const prova = (bersagli) => vinteEntro(mosseSeme(q, bersagli), q.maxMosse) >= pavimento;
 
-  if (prova(q.bersaglio)) continue;
+  if (prova(q.bersagli)) continue;
 
   // PRIMA si allarga il tetto, POI si abbassa il bersaglio. L'ordine non e' arbitrario: il
   // tetto lo abbiamo appena stretto noi, quindi e' il sospettato numero uno, e restituire
   // mosse costa meno che rinunciare a cio' che il livello chiede. Abbassare il bersaglio e'
   // l'ultima risorsa perche' cambia l'IDENTITA' del livello: "chiudi 6 righe" che diventa
   // "chiudine 4" e' un altro livello, mentre "in 12 mosse invece che in 10" e' lo stesso.
+  //
+  // Le mosse necessarie sono gia' in mano, quindi il tetto giusto non si cerca a tentoni:
+  // si prende il piu' STRETTO che basti, invece del primo multiplo di due che capita.
   const tettoStretto = q.maxMosse;
-  const tettoLargo = interpola(attoDi(q.numero).mosse, 1);
+  const tettoLargo = tettoDiMisura(q);
+  const mosse = mosseSeme(q, q.bersagli);
   let allargato = false;
-  while (q.maxMosse < tettoLargo) {
-    q.maxMosse = Math.min(tettoLargo, q.maxMosse + 2);
-    if (prova(q.bersaglio)) { allargato = true; break; }
+  for (let t = tettoStretto + 1; t <= tettoLargo; t += 1) {
+    if (vinteEntro(mosse, t) >= pavimento) { q.maxMosse = t; allargato = true; break; }
   }
   if (allargato) {
     allargati.push(`quadro ${q.numero}: da ${tettoStretto} a ${q.maxMosse} mosse`);
@@ -675,20 +917,30 @@ for (const q of quadri) {
   }
   q.maxMosse = tettoStretto;
 
-  const partenza = q.bersaglio;
-  let bersaglio = q.bersaglio;
-  const fondo = fondoScala(q.tipo);
+  // SU UN LIVELLO DOPPIO SI SCENDE A TURNO, un gradino per obiettivo.
+  //
+  // L'alternativa -- svuotare prima un obiettivo e poi l'altro -- arriverebbe allo stesso
+  // punto per una strada che passa da livelli sbilanciati ("chiudi 1 riga e fai 700
+  // punti"), e siccome la discesa si ferma al primo bersaglio che funziona, e' proprio uno
+  // di quelli sbilanciati che finirebbe nel gioco. A turno, invece, le due meta' restano
+  // nella stessa proporzione in cui sono state progettate.
+  const partenza = [...q.bersagli];
+  const bersagli = [...q.bersagli];
   let riuscito = false;
-  while (bersaglio > fondo) {
-    bersaglio = scendiDiUno(q.tipo, bersaglio);
-    if (prova(bersaglio)) { riuscito = true; break; }
+  let giro = 0;
+  while (bersagli.some((b, i) => b > fondoScala(q.tipi[i]))) {
+    const i = giro % q.tipi.length;
+    giro += 1;
+    if (bersagli[i] <= fondoScala(q.tipi[i])) continue;
+    bersagli[i] = scendiDiUno(q.tipi[i], bersagli[i]);
+    if (prova(bersagli)) { riuscito = true; break; }
   }
   if (!riuscito) {
-    muri.push(`quadro ${q.numero} (${q.tipo}, ${q.maxMosse} mosse, motivo "${q.motivo}")`);
+    muri.push(`quadro ${q.numero} (${q.tipi.join('+')}, ${q.maxMosse} mosse, motivo "${q.motivo}", pavimento ${pavimento}/${PROVE_SUPERAMENTO})`);
     continue;
   }
-  q.bersaglio = bersaglio;
-  abbassati.push(`quadro ${q.numero}: ${q.tipo} da ${partenza} a ${bersaglio}`);
+  q.bersagli = bersagli;
+  abbassati.push(`quadro ${q.numero}: ${q.tipi.join('+')} da ${partenza.join('+')} a ${bersagli.join('+')}`);
 }
 
 if (allargati.length) {
@@ -734,31 +986,38 @@ const sgonfiati = [];
 const alzatiPerBanalita = [];
 const restanoBanali = [];
 for (const q of quadri) {
-  const misura = (tetto) => {
-    let vinte = 0;
-    let usateTotali = 0;
-    for (let i = 0; i < PROVE_SUPERAMENTO; i += 1) {
-      // GLI STESSI SEMI del controllo di superabilita', non semi propri.
-      //
-      // La prima versione ne usava di suoi, per non "riusare" lo stesso campione. Il
-      // risultato: il quadro 55 risultava vinto 12 volte su 12 al controllo di banalita' e
-      // meno di 4 su 12 a quello di superabilita', sullo STESSO bersaglio. Non era rumore
-      // statistico -- era che i due controlli guardavano partite diverse e si
-      // contraddicevano, cosi' il ciclo che alza il bersaglio si fermava subito
-      // lasciando il livello banale.
-      //
-      // Su un livello al limite -- "325 punti in 4 mosse" si vince solo con una catena di
-      // bombe fortunata -- l'esito dipende quasi solo da come il giocatore rompe i pareggi,
-      // e due flussi casuali diversi danno due risposte opposte. E' la stessa lezione gia'
-      // imparata due volte oggi: chi decide e chi verifica devono usare lo stesso metro,
-      // e il metro comprende i semi.
-      const m = mosseNecessarie(q, q.bersaglio, tetto, createRng(seedFromString(`prova-${q.numero}-${i}`)));
-      if (m !== null) { vinte += 1; usateTotali += m; }
-    }
-    const quota = vinte / PROVE_SUPERAMENTO;
-    const margine = vinte === 0 ? 0 : (tetto - usateTotali / vinte) / tetto;
-    return { quota, margine };
+  // GLI STESSI SEMI del controllo di superabilita', non semi propri.
+  //
+  // La prima versione ne usava di suoi, per non "riusare" lo stesso campione. Il
+  // risultato: il quadro 55 risultava vinto 12 volte su 12 al controllo di banalita' e
+  // meno di 4 su 12 a quello di superabilita', sullo STESSO bersaglio. Non era rumore
+  // statistico -- era che i due controlli guardavano partite diverse e si
+  // contraddicevano, cosi' il ciclo che alza il bersaglio si fermava subito
+  // lasciando il livello banale.
+  //
+  // Su un livello al limite -- "325 punti in 4 mosse" si vince solo con una catena di
+  // bombe fortunata -- l'esito dipende quasi solo da come il giocatore rompe i pareggi,
+  // e due flussi casuali diversi danno due risposte opposte. E' la stessa lezione gia'
+  // imparata due volte oggi: chi decide e chi verifica devono usare lo stesso metro,
+  // e il metro comprende i semi.
+  //
+  // E SI GIOCA UNA VOLTA SOLA PER BERSAGLIO. Il giocatore non guarda il tetto -- sceglie
+  // la mossa dalla griglia, dalla mano e dai suoi pesi -- quindi con lo stesso seme gioca
+  // la stessa partita qualunque tetto gli si dia, e le mosse che gli servono per arrivare
+  // al bersaglio sono una proprieta' del SEME. Misurate una volta col tetto piu' largo,
+  // la riuscita e il margine a qualunque tetto piu' stretto sono una conta, non altre
+  // partite. Prima questo ciclo rigiocava venti partite per ogni singola mossa tolta.
+  const necessarieCon = (bersagli) => mosseSeme(q, bersagli);
+  let mosseNec = necessarieCon(q.bersagli);
+  const misuraDa = (n, tetto) => {
+    const vinte = n.filter((m) => m !== null && m <= tetto);
+    const usateTotali = vinte.reduce((t, m) => t + m, 0);
+    return {
+      quota: vinte.length / PROVE_SUPERAMENTO,
+      margine: vinte.length === 0 ? 0 : (tetto - usateTotali / vinte.length) / tetto,
+    };
   };
+  const misura = (tetto) => misuraDa(mosseNec, tetto);
 
   let { quota, margine } = misura(q.maxMosse);
   if (quota <= QUOTA_BANALE || margine <= MARGINE_BANALE) continue;
@@ -770,14 +1029,14 @@ for (const q of quadri) {
   while (tetto > MOSSE_MINIME && quota > QUOTA_BANALE && margine > MARGINE_BANALE) {
     const provato = tetto - 1;
     const dopo = misura(provato);
-    if (dopo.quota * PROVE_SUPERAMENTO < MINIME_RIUSCITE) break;
+    if (dopo.quota * PROVE_SUPERAMENTO < pavimentoDi(q)) break;
     tetto = provato;
     quota = dopo.quota;
     margine = dopo.margine;
   }
   if (tetto !== partenza) {
     q.maxMosse = tetto;
-    sgonfiati.push(`quadro ${q.numero}: ${q.tipo} da ${partenza} a ${tetto} mosse`);
+    sgonfiati.push(`quadro ${q.numero}: ${q.tipi.join('+')} da ${partenza} a ${tetto} mosse`);
   }
 
   /**
@@ -798,26 +1057,32 @@ for (const q of quadri) {
    * si corregge dove il divario si vede, cioe' quando il livello risulta banale.
    */
   if (quota > QUOTA_BANALE && margine > MARGINE_BANALE) {
-    const bersaglioPartenza = q.bersaglio;
+    const partenzaBersagli = q.bersagli.join('+');
+    let giro = 0;
     while (quota > QUOTA_BANALE && margine > MARGINE_BANALE) {
-      const su = gradinoSopra(q.tipo, q.bersaglio);
-      const tenta = { ...q, bersaglio: su };
-      let vinte = 0;
-      for (let i = 0; i < PROVE_SUPERAMENTO; i += 1) {
-        if (superato(tenta, su, createRng(seedFromString(`prova-${q.numero}-${i}`)))) vinte += 1;
-      }
-      if (vinte < MINIME_RIUSCITE) break;   // oltre si scavallerebbe nel troppo difficile
-      q.bersaglio = su;
+      // A turno come nella discesa, e per la stessa ragione: le due meta' devono
+      // crescere insieme, non una sola fino a sbilanciare il livello.
+      const i = giro % q.tipi.length;
+      giro += 1;
+      const tenta = [...q.bersagli];
+      tenta[i] = gradinoSopra(q.tipi[i], tenta[i]);
+      // Il bersaglio e' cambiato, quindi le mosse necessarie vanno rimisurate: sono
+      // l'unica cosa che dipende dal bersaglio e non dal tetto.
+      const nuove = necessarieCon(tenta);
+      const vinte = nuove.filter((m) => m !== null && m <= q.maxMosse).length;
+      if (vinte < pavimentoDi(q)) break;   // oltre si scavallerebbe nel troppo difficile
+      q.bersagli = tenta;
+      mosseNec = nuove;
       ({ quota, margine } = misura(q.maxMosse));
     }
-    if (q.bersaglio !== bersaglioPartenza) {
-      alzatiPerBanalita.push(`quadro ${q.numero}: ${q.tipo} da ${bersaglioPartenza} a ${q.bersaglio}`);
+    if (q.bersagli.join('+') !== partenzaBersagli) {
+      alzatiPerBanalita.push(`quadro ${q.numero}: ${q.tipi.join('+')} da ${partenzaBersagli} a ${q.bersagli.join('+')}`);
     }
   }
 
   if (quota > QUOTA_BANALE && margine > MARGINE_BANALE) {
     restanoBanali.push(
-      `quadro ${q.numero} (${q.tipo} ${q.bersaglio}, ${q.maxMosse} mosse): `
+      `quadro ${q.numero} (${q.tipi.join('+')} ${q.bersagli.join('+')}, ${q.maxMosse} mosse): `
       + `vinto nel ${Math.round(quota * 100)}% dei tentativi con il ${Math.round(margine * 100)}% di mosse avanzate`,
     );
   }
@@ -842,6 +1107,219 @@ if (restanoBanali.length) {
 }
 
 /**
+ * LA BANDA DELL'ATTO: il livello deve starci dentro, da sopra e da sotto.
+ *
+ * Il controllo di superabilita' piu' in alto guarda solo il pavimento, e quello di
+ * banalita' guarda un soffitto fatto di DUE condizioni insieme -- vinto quasi sempre E con
+ * molto tempo che avanza -- che serviva a non bocciare i livelli tesi. Fra i due resta
+ * scoperto il caso che ha allentato il finale del gioco: il livello vinto quasi sempre
+ * SENZA tempo che avanza. Il quadro 96 chiedeva 14 gruppi in 33 mosse, si vinceva 96 volte
+ * su 100 e il giocatore ne usava 30 su 33: nessuna delle due condizioni bastava a
+ * prenderlo, e il risultato era un ultimo atto piu' facile del penultimo.
+ *
+ * Qui il livello viene portato dentro la banda del suo atto. LA LEVA E' IL TETTO DI MOSSE
+ * in entrambe le direzioni: toglierne fa scendere la riuscita, aggiungerne la fa salire, e
+ * in nessuno dei due casi il livello diventa un altro livello. Il bersaglio si tocca solo
+ * quando il tetto ha finito la corsa.
+ *
+ * VENTI PARTITE BASTANO A PROVARE TUTTI I TETTI, e questo merita di essere scritto perche'
+ * e' cio' che rende il controllo eseguibile. La prima stesura rigiocava venti partite per
+ * ogni tetto tentato: fino a ventiquattro tetti per livello, cioe' quasi cinquecento
+ * partite a livello e ore di generazione. Ma il giocatore NON GUARDA il tetto -- sceglie
+ * la mossa dalla griglia, dalla mano e dai suoi pesi -- quindi con lo stesso seme gioca la
+ * stessa identica partita qualunque tetto gli si dia. Il numero di mosse che gli servono
+ * per arrivare al bersaglio e' quindi una proprieta' del SEME, non del tetto.
+ *
+ * Si misura una volta sola, col tetto piu' largo dell'atto, e si ottengono venti numeri:
+ * le mosse necessarie seme per seme (o "mai", se quella partita non ci arriva). Da li' la
+ * riuscita a QUALSIASI tetto e' una conta, non altre partite: quanti di quei numeri stanno
+ * sotto il tetto. Venti partite per livello invece di cinquecento, e lo stesso risultato
+ * esatto -- non un'approssimazione.
+ *
+ * IL PAVIMENTO VINCE SEMPRE SUL SOFFITTO. Stringere un livello fino a portarlo sotto la
+ * sua banda sarebbe sostituire un difetto con il suo opposto, e fra i due il muro e'
+ * peggio: un livello troppo facile annoia, uno imbattibile chiude i novantanove che
+ * vengono dopo.
+ *
+ * QUANDO NON CI SI RIESCE non si ferma la generazione, si SCRIVE. Un livello che resta
+ * fuori banda anche con le leve a fondo corsa non ha un difetto di taratura: ha un difetto
+ * di progetto -- il tipo di obiettivo, il motivo della griglia, l'intervallo di mosse
+ * dell'atto -- e si corregge nella ricetta qui sopra, non forzando la misura.
+ */
+/**
+ * Quanti gradini di bersaglio provare prima di arrendersi.
+ *
+ * Erano dodici e si fermavano al primo gradino che non migliorava. Misurato: il quadro 55
+ * chiedeva 350 punti in 8 mosse, si vinceva 20 volte su 20 contro un soffitto di 15, e il
+ * generatore lo lasciava li'. Alzare di 25 punti su 350 non sposta niente -- e' il 7% --
+ * quindi il primo gradino pareggiava e il ciclo si arrendeva. Ma alzare un bersaglio non
+ * puo' MAI allontanare dalla banda quando si sta sopra il soffitto: al peggio non serve.
+ * Quindi non ci si ferma su un pareggio, ci si ferma solo se peggiora, e i gradini
+ * disponibili raddoppiano: ventiquattro gradini sono +600 punti, abbastanza da mordere.
+ */
+const PASSI_BERSAGLIO = 24;
+console.log('  Porto ogni livello dentro la banda del suo atto');
+const tettiPerTensione = [];
+const bersagliPerTensione = [];
+const fuoriBanda = [];
+for (const q of quadri) {
+  const pavimento = pavimentoDi(q);
+  const soffitto = soffittoDi(q);
+  const tettoLargo = Math.max(q.maxMosse, tettoDiMisura(q));
+
+  // Le mosse necessarie seme per seme, misurate una volta sola col tetto piu' largo.
+  // Gli STESSI semi degli altri due controlli: chi decide e chi verifica devono guardare
+  // le stesse partite.
+  const necessarie = (bersagli) => mosseSeme(q, bersagli);
+  const vinteA = (n, tetto) => vinteEntro(n, tetto);
+  /** Il tetto piu' STRETTO che tiene la riuscita dentro la banda, se esiste. */
+  const tettoMigliore = (n) => {
+    let scelto = null;
+    for (let t = MOSSE_MINIME; t <= tettoLargo; t += 1) {
+      const v = vinteA(n, t);
+      if (v >= pavimento && v <= soffitto) { scelto = t; break; }
+    }
+    return scelto;
+  };
+
+  let mosse = necessarie(q.bersagli);
+  let vinte = vinteA(mosse, q.maxMosse);
+  q.riusciteMisurate = vinte;
+  if (vinte >= pavimento && vinte <= soffitto) continue;
+
+  const tettoPartenza = q.maxMosse;
+  const scelto = tettoMigliore(mosse);
+  if (scelto !== null) {
+    q.maxMosse = scelto;
+    vinte = vinteA(mosse, scelto);
+  } else {
+    // Nessun tetto fa rientrare il livello: si tiene quello che ci va piu' vicino, e poi
+    // si passa al bersaglio.
+    let migliore = q.maxMosse;
+    let distanza = Infinity;
+    for (let t = MOSSE_MINIME; t <= tettoLargo; t += 1) {
+      const v = vinteA(mosse, t);
+      const d = v < pavimento ? pavimento - v : v - soffitto;
+      if (d < distanza) { distanza = d; migliore = t; }
+    }
+    q.maxMosse = migliore;
+    vinte = vinteA(mosse, migliore);
+  }
+  if (q.maxMosse !== tettoPartenza) {
+    tettiPerTensione.push(
+      `quadro ${q.numero}: da ${tettoPartenza} a ${q.maxMosse} mosse `
+      + `(riuscite ${vinte}/${PROVE_SUPERAMENTO}, banda ${pavimento}-${soffitto})`,
+    );
+  }
+
+  // Il tetto ha finito la corsa e il livello e' ancora fuori: si tocca il bersaglio, a
+  // turno fra gli obiettivi, nella direzione che serve. Dopo ogni gradino il tetto viene
+  // riscelto, perche' un bersaglio diverso cambia le mosse necessarie.
+  if (vinte > soffitto || vinte < pavimento) {
+    const partenzaBersagli = q.bersagli.join('+');
+    const tettoPrimaDelBersaglio = q.maxMosse;
+    let giro = 0;
+    for (let passo = 0; passo < PASSI_BERSAGLIO; passo += 1) {
+      if (vinte >= pavimento && vinte <= soffitto) break;
+      const i = giro % q.tipi.length;
+      giro += 1;
+      const tenta = [...q.bersagli];
+      if (vinte > soffitto) {
+        tenta[i] = gradinoSopra(q.tipi[i], tenta[i]);
+      } else {
+        if (tenta[i] <= fondoScala(q.tipi[i])) continue;
+        tenta[i] = scendiDiUno(q.tipi[i], tenta[i]);
+      }
+      const m = necessarie(tenta);
+      const t = tettoMigliore(m);
+      if (t !== null) {
+        q.bersagli = tenta; q.maxMosse = t; mosse = m; vinte = vinteA(m, t);
+        break;
+      }
+      // Non rientra nemmeno cosi': si tiene il gradino solo se avvicina alla banda.
+      const tOra = q.maxMosse;
+      const vNuovo = vinteA(m, tOra);
+      const dOra = vinte < pavimento ? pavimento - vinte : vinte - soffitto;
+      const dNuovo = vNuovo < pavimento ? pavimento - vNuovo : vNuovo - soffitto;
+      if (dNuovo > dOra) break;
+      q.bersagli = tenta; mosse = m; vinte = vNuovo;
+    }
+    if (q.bersagli.join('+') !== partenzaBersagli) {
+      bersagliPerTensione.push(
+        `quadro ${q.numero}: ${q.tipi.join('+')} da ${partenzaBersagli} a ${q.bersagli.join('+')} `
+        + `(riuscite ${vinte}/${PROVE_SUPERAMENTO}, banda ${pavimento}-${soffitto})`,
+      );
+    }
+    if (q.maxMosse !== tettoPrimaDelBersaglio && !tettiPerTensione.some((r) => r.startsWith(`quadro ${q.numero}:`))) {
+      tettiPerTensione.push(
+        `quadro ${q.numero}: da ${tettoPartenza} a ${q.maxMosse} mosse `
+        + `(riuscite ${vinte}/${PROVE_SUPERAMENTO}, banda ${pavimento}-${soffitto})`,
+      );
+    }
+  }
+
+  q.riusciteMisurate = vinte;
+  if (vinte > soffitto || vinte < pavimento) {
+    fuoriBanda.push(
+      `quadro ${q.numero} (${q.tipi.join('+')} ${q.bersagli.join('+')}, ${q.maxMosse} mosse): `
+      + `${vinte}/${PROVE_SUPERAMENTO} riuscite, banda dell'atto ${pavimento}-${soffitto}`,
+    );
+  }
+}
+if (tettiPerTensione.length) {
+  console.log(`  Tetti cambiati per rientrare nella banda (${tettiPerTensione.length}):`);
+  tettiPerTensione.forEach((r) => console.log(`    ${r}`));
+}
+if (bersagliPerTensione.length) {
+  console.log(`  Bersagli cambiati perche' il tetto era a fondo corsa (${bersagliPerTensione.length}):`);
+  bersagliPerTensione.forEach((r) => console.log(`    ${r}`));
+}
+if (fuoriBanda.length) {
+  console.log(`\n  ATTENZIONE — livelli rimasti fuori dalla banda del loro atto (${fuoriBanda.length}):`);
+  fuoriBanda.forEach((r) => console.log(`    ${r}`));
+  console.log('    Non e la taratura: e il progetto dell atto (tipo, motivo, intervallo di mosse).\n');
+} else {
+  console.log('  Tutti i livelli stanno nella banda del loro atto.');
+}
+
+/**
+ * LA CURVA CHE E' USCITA DAVVERO, stampata atto per atto.
+ *
+ * E' il controllo che mancava a tutti gli altri: ognuno guardava UN livello, e la curva
+ * del percorso non era responsabilita' di nessuno. Qui il file dichiara il risultato del
+ * proprio lavoro con lo stesso metro con cui lo ha prodotto, cosi' la ricetta si giudica
+ * da cio' che ha fatto e non da cio' che voleva fare.
+ */
+console.log('\n  La curva misurata, atto per atto:');
+console.log('    atto          quadri   riuscite del metro          mosse  bersaglio al');
+const curva = [];
+for (const atto of ATTI) {
+  const dentro = quadri.filter((q) => q.numero >= atto.da && q.numero <= atto.a);
+  if (!dentro.length) continue;   // prova a vuoto su un tratto solo
+  const media = dentro.reduce((t, q) => t + q.riusciteMisurate, 0) / dentro.length;
+  curva.push({ id: atto.id, media });
+  const quota = media / PROVE_SUPERAMENTO;
+  const barra = '#'.repeat(Math.round(quota * 20)).padEnd(20, '.');
+  const mosse = (dentro.reduce((t, q) => t + q.maxMosse, 0) / dentro.length).toFixed(0);
+  const pc = (dentro.reduce((t, q) => t + q.percentile, 0) / dentro.length).toFixed(0);
+  console.log(
+    `    ${atto.id.padEnd(13)} ${String(atto.da).padStart(3)}-${String(atto.a).padEnd(3)} `
+    + `${barra} ${String(Math.round(quota * 100)).padStart(3)}%   `
+    + `(banda ${Math.round((atto.riuscite[0] / PROVE_SUPERAMENTO) * 100)}-${Math.round((atto.riuscite[1] / PROVE_SUPERAMENTO) * 100)}%)`
+    + `   ${String(mosse).padStart(3)}   ${String(pc).padStart(3)}° perc.`,
+  );
+}
+const risalite = curva
+  .map((v, i) => (i > 0 && v.media > curva[i - 1].media + 0.5 ? v.id : null))
+  .filter(Boolean);
+if (risalite.length) {
+  console.log(`\n  ATTENZIONE — la curva risale in questi atti: ${risalite.join(', ')}.`);
+  console.log('    Un percorso che si allenta andando avanti e il difetto che le bande devono togliere.\n');
+} else {
+  console.log('\n  La curva scende a ogni atto: nessun tratto si allenta andando avanti.\n');
+}
+
+/**
  * I bersagli che NON sono stati misurati, ma inventati da un arrotondamento.
  *
  * I tre `Math.max` qui sopra danno un pavimento al bersaglio -- 100 punti, 9 celle, 1
@@ -855,12 +1333,12 @@ if (restanoBanali.length) {
  * "nessuno ci arriva mai", e un obiettivo come svuotare la plancia una persona che ci
  * punta lo raggiunge dove un giocatore avido non ci prova. Ma va DETTO, ogni volta.
  */
-const inventati = quadri.filter((q) => q.max === 0);
+const inventati = quadri.filter((q) => q.massimi.some((m) => m === 0));
 if (inventati.length) {
   console.log('\n  ATTENZIONE — bersagli non misurati ma imposti dal pavimento:');
   inventati.forEach((q) => {
     console.log(
-      `    quadro ${String(q.numero).padStart(3)}  ${q.tipo.padEnd(10)} bersaglio ${q.bersaglio}  `
+      `    quadro ${String(q.numero).padStart(3)}  ${q.tipi.join('+').padEnd(10)} bersaglio ${q.bersagli.join('+')}  `
       + `(il metro non ci e' mai arrivato in ${q.maxMosse} mosse, su ${TENTATIVI} partite)`,
     );
   });
@@ -874,8 +1352,11 @@ const righe = quadri.map((q) => {
   const griglia = q.griglia
     ? `\n    griglia: MOTIVI.${q.motivo},`
     : '';
+  const obiettivi = q.tipi
+    .map((tipo, i) => `{ tipo: '${tipo}', quanti: ${q.bersagli[i]} }`)
+    .join(', ');
   return `  { numero: ${q.numero}, nome: '${q.nome}', atto: ${JSON.stringify(attoDi(q.numero).id)}, `
-    + `obiettivi: [{ tipo: '${q.tipo}', quanti: ${q.bersaglio} }], maxMosse: ${q.maxMosse},${griglia} },`;
+    + `obiettivi: [${obiettivi}], maxMosse: ${q.maxMosse},${griglia} },`;
 });
 
 const motiviTesto = Object.entries(MOTIVI)
@@ -950,6 +1431,16 @@ export function quadroNumero(numero) {
   return QUADRI.find((q) => q.numero === numero) ?? null;
 }
 
+/**
+ * L'opera a cui appartiene un Quadro: oggi c'e' solo il Ponte, e sono tutti e cento.
+ * Esiste per la stessa ragione di \`attoDelQuadro\`: chi deve NOMINARE il gruppo non deve
+ * sapere dove comincia e dove finisce, altrimenti quel confine finisce scritto in due
+ * posti e uno dei due invecchia.
+ */
+export function operaDelQuadro(numero) {
+  return OPERE.find((o) => numero >= o.da && numero <= o.a) ?? OPERE[OPERE.length - 1];
+}
+
 /** L'atto a cui appartiene un Quadro. */
 export function attoDelQuadro(numero) {
   return ATTI.find((a) => numero >= a.da && numero <= a.a) ?? ATTI[ATTI.length - 1];
@@ -958,15 +1449,12 @@ export function attoDelQuadro(numero) {
 export const TOTALE_QUADRI = QUADRI.length;
 `;
 
-writeFileSync(new URL('../src/config/quadri.js', import.meta.url), file);
-
-console.log(`\nScritti ${quadri.length} Quadri in src/config/quadri.js\n`);
-console.log('  atto            quadri   mosse    bersaglio medio   percentile');
-console.log('  ' + '-'.repeat(70));
-for (const atto of ATTI) {
-  const gruppo = quadri.filter((q) => q.numero >= atto.da && q.numero <= atto.a);
-  const mosse = (gruppo.reduce((a, q) => a + q.maxMosse, 0) / gruppo.length).toFixed(0);
-  const pc = (gruppo.reduce((a, q) => a + q.percentile, 0) / gruppo.length).toFixed(0);
-  console.log(`  ${atto.nome.padEnd(15)} ${String(gruppo.length).padStart(4)}   ${String(mosse).padStart(5)}   ${' '.repeat(10)}       ${pc}%`);
+if (PROVA_A > 0) {
+  console.log(`\n  PROVA A VUOTO (quadri ${PRIMO}-${ULTIMO}): non scrivo src/config/quadri.js.\n`);
+} else {
+  writeFileSync(new URL('../src/config/quadri.js', import.meta.url), file);
 }
-console.log('');
+
+console.log(PROVA_A > 0
+  ? `\nProvati ${quadri.length} Quadri, niente scritto su disco.\n`
+  : `\nScritti ${quadri.length} Quadri in src/config/quadri.js\n`);

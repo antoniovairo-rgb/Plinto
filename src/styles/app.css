@@ -1414,6 +1414,22 @@ button {
 
 /* La barra della Catena disegnata ferma: serve a farla RICONOSCERE durante la partita,
    non a spiegarla una seconda volta. */
+/* La riga della Catena nella guida: etichetta, barra e moltiplicatore, nello stesso
+   ordine e con lo stesso aspetto della riga vera sopra la plancia. */
+.pl-guida__catena {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 6px;
+}
+.pl-guida__catena .pl-guida__barra { flex: 1; margin: 0; }
+.pl-guida__catena-valore {
+  font-family: var(--pl-font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--pl-text-dim);
+}
+
 .pl-guida__barra {
   height: 10px;
   border-radius: 999px;
@@ -1433,6 +1449,14 @@ button {
    direttamente in una griglia, si ancora al primo antenato posizionato che trova --
    che qui sarebbe la pagina -- e finisce nell'angolo in alto a sinistra dello schermo.
    E' successo esattamente cosi'. */
+/* Il disegno dell'Intreccio nella guida: la stessa MiniGriglia dell'apertura dei
+   livelli, centrata e con un po' d'aria sopra e sotto. */
+.pl-guida__disegno {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 6px;
+}
+
 .pl-guida__tinta {
   display: grid;
   grid-template-columns: repeat(3, 34px);
@@ -1849,8 +1873,21 @@ button {
 .pl-apertura .pl-fine__titolo { text-align: center; }
 
 /* Il contenuto e' corto: centrarlo verticalmente evita la colonna di vuoto sotto,
-   che su uno schermo alto fa sembrare la schermata incompiuta. */
-.pl-apertura .pl-scroll { display: flex; flex-direction: column; justify-content: center; }
+   che su uno schermo alto fa sembrare la schermata incompiuta.
+
+   MA NON CON `justify-content: center`, ed e' costato un difetto vero. Quando il
+   contenuto diventa PIU' ALTO del contenitore -- succede sui livelli che chiedono due
+   obiettivi, che hanno due spiegazioni, due disegni e due consigli -- `center` spinge
+   l'eccedenza fuori da TUTTE E DUE le estremita', e quella in cima non si puo'
+   raggiungere nemmeno scorrendo: `scrollTop` e' gia' zero. Sul quadro 44 sparivano il
+   nome dell'atto, il numero del livello e mezza riga dell'obiettivo.
+
+   I due pseudo-elementi con margine automatico fanno la stessa cosa senza il difetto:
+   quando c'e' spazio libero se lo dividono e il contenuto risulta centrato, quando non
+   ce n'e' collassano a zero e la schermata scorre dall'inizio come qualunque altra. */
+.pl-apertura .pl-scroll { display: flex; flex-direction: column; }
+.pl-apertura .pl-scroll::before,
+.pl-apertura .pl-scroll::after { content: ''; margin-block: auto; }
 
 .pl-apertura__atto {
   text-align: center;
@@ -1922,6 +1959,10 @@ button {
   color: var(--pl-text-dim);
 }
 .pl-apertura__consiglio .pl-hud__etichetta { display: block; margin-bottom: 4px; }
+/* Con due obiettivi i consigli sono due, dentro lo stesso riquadro: separati da uno
+   spazio, non da un secondo titolo. */
+.pl-apertura__consiglio-riga { margin: 0; }
+.pl-apertura__consiglio-riga + .pl-apertura__consiglio-riga { margin-top: 8px; }
 
 .pl-apertura__mosse {
   margin: 4px 0 0;

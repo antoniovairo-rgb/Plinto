@@ -133,6 +133,17 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
   volta: la 1.15.0 ha spostato la soglia della Tinta e l'aiuto ha continuato a dire
   "+100%" mentre il gioco ne pagava 60. Il promemoria e' `tests/aiuto-aggiornato.test.js`,
   che fallisce se cambi la taratura o aggiungi un attrezzo senza riaprire l'aiuto.
+- **I cento livelli non si modificano a mano.** `src/config/quadri.js` e' generato: si
+  cambia la ricetta in `tools/genera-quadri.mjs` (atti, tipi, motivi, percentili, margini,
+  bande di riuscita) e si rigenera. Una generazione intera dura ore, quindi si prova prima
+  a vuoto su un tratto: `QUADRI_PROVA=41-58 node tools/genera-quadri.mjs 8` non scrive
+  niente. La difficolta' non e' una speranza: ogni atto ha una BANDA di riuscite del
+  giocatore artificiale (pavimento e soffitto), il generatore ce lo porta dentro togliendo
+  o restituendo mosse, e alla fine stampa la curva che e' uscita davvero. Se la curva
+  risale in un atto, il generatore lo dice: non pubblicare senza averlo guardato.
+  Rigenerare NON azzera l'avanzamento di chi gioca -- i progressi stanno in
+  `localStorage` per numero di livello, non per contenuto -- ma i record di mosse gia'
+  registrati si riferiscono a livelli diversi, e va scritto nel changelog.
 - Non modificare `docs/` di altri progetti, ne' il progetto in `../` : si lavora qui.
 - Non committare `.env` ne' chiavi. Il `.gitignore` le esclude gia'.
 - Fino alla fine dei 14 giorni di test chiuso su Play (~24 settembre 2026) **non si tocca

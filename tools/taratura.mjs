@@ -80,7 +80,11 @@ function preferenze(quadro) {
     else if (tipo === 'quadranti') p.quadrant = 6;
     else if (tipo === 'pulizia') { p.svuotare = 300; p.nonSpezzare = 60; }
     else if (tipo === 'catena') p.nonSpezzare = 900;
-    else if (tipo === 'intreccio') p.nonSpezzare = 60;
+    // `intrecci` mancava: senza questo ramo il giocatore non veniva mai spinto a
+    // chiudere piu' gruppi insieme, e i cinque livelli a intrecci risultavano
+    // impossibili (mediana 1 contro un bersaglio di 3) per un difetto del metro,
+    // non del livello. Gli stessi pesi del generatore, che il ramo ce l'ha.
+    else if (tipo === 'intreccio' || tipo === 'intrecci') p.nonSpezzare = 40;
   }
   return p;
 }

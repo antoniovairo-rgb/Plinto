@@ -19,6 +19,7 @@
 
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
+import { QUADRI } from '../../src/config/quadri.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -247,6 +248,58 @@ for (const [larghezza, altezza, nome] of [...FORMATI, ...FORMATI_CON_BARRE]) {
     errori.push(`${nome} (${larghezza}x${altezza}): il tavolo copre i pezzi in mano di ${m.sovrapposizione}px`);
   }
   await page.close();
+}
+
+/**
+ * L'APERTURA DI UN LIVELLO A DUE OBIETTIVI DEVE COMINCIARE DALL'INIZIO.
+ *
+ * Quella schermata centra il contenuto verticalmente, perche' di solito e' corto e una
+ * colonna di vuoto sotto la fa sembrare incompiuta. Con due obiettivi il contenuto e'
+ * PIU' ALTO dello schermo -- due spiegazioni, due disegni, due consigli -- e
+ * `justify-content: center` spingeva l'eccedenza fuori da tutte e due le estremita':
+ * quella in cima non si poteva raggiungere nemmeno scorrendo, perche' `scrollTop` era
+ * gia' zero. Sul quadro 44 sparivano il nome dell'atto, il numero del livello e mezza
+ * riga dell'obiettivo, e nessuna prova poteva vederlo: l'HTML c'era tutto.
+ *
+ * Qui si misura quello che conta davvero, cioe' se quelle righe si VEDONO.
+ */
+{
+  const doppio = QUADRI.find((q) => q.obiettivi.length > 1);
+  if (!doppio) {
+    errori.push('nessun livello a due obiettivi: questa prova non sta provando niente');
+  } else {
+    for (const [larghezza, altezza, nome] of FORMATI) {
+      const page = await browser.newPage({ viewport: { width: larghezza, height: altezza } });
+      await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+      await page.evaluate((fino) => {
+        window.localStorage.clear();
+        window.localStorage.setItem('plinto:settings', JSON.stringify({
+          versione: 1, introVista: true, tema: 'scuro', lingua: 'it',
+          audio: false, vibrazione: false, animazioni: false, aiutoVisivo: true,
+        }));
+        const livelli = {};
+        for (let n = 1; n < fino; n += 1) livelli[n] = { mosse: 12, punteggio: 500, tentativi: 1 };
+        window.localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli }));
+      }, doppio.numero);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.getByRole('button', { name: new RegExp(`LIVELLO ${doppio.numero}`, 'i') }).click();
+      await page.waitForSelector('.pl-apertura', { timeout: 15000 });
+      const fuori = await page.evaluate(() => {
+        const contenitore = document.querySelector('.pl-apertura .pl-scroll');
+        const nascosti = [];
+        for (const sel of ['.pl-apertura__atto', '.pl-apertura__obiettivo']) {
+          const el = document.querySelector(sel);
+          if (!el) { nascosti.push(`${sel} non c'e`); continue; }
+          const r = el.getBoundingClientRect();
+          const c = contenitore.getBoundingClientRect();
+          if (r.top < c.top - 1) nascosti.push(`${sel} tagliato in cima di ${Math.round(c.top - r.top)}px`);
+        }
+        return nascosti;
+      });
+      fuori.forEach((f) => errori.push(`${nome}: apertura del quadro ${doppio.numero}, ${f}`));
+      await page.close();
+    }
+  }
 }
 
 await browser.close();

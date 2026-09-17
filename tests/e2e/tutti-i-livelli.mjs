@@ -46,10 +46,17 @@ import { origineDaCella } from '../../src/ui/useTrascinamento.js';
 
 const DA = Number(process.argv[2] ?? 1);
 const A = Number(process.argv[3] ?? QUADRI.length);
-// Gli stessi dodici semi con cui il generatore garantisce che il livello sia superabile.
+// Gli stessi VENTI semi con cui il generatore garantisce che il livello sia superabile.
 // Non e' una comodita': se qui si usassero semi diversi, questa prova misurerebbe partite
 // che nessuno ha mai promesso vincibili, e i suoi fallimenti non direbbero niente.
-const SEMI = 12;
+//
+// Erano dodici, quanti ne usava il generatore. Da quando il generatore misura su venti --
+// gli servono per distinguere un livello al 40% da uno al 50%, cosa che con dodici prove
+// non si puo' fare -- fermarsi a dodici qui vorrebbe dire cercare la vittoria fra meno
+// partite di quelle su cui la promessa e' stata fatta: un livello garantito "vinto 6
+// volte su 20" puo' avere quelle sei vittorie tutte oltre il dodicesimo seme, e questa
+// prova lo dichiarerebbe rotto mentre e' esattamente come progettato.
+const SEMI = 20;
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';

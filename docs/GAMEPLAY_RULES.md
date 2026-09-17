@@ -540,15 +540,63 @@ Due garanzie diverse, e conviene tenerle distinte perché coprono due rischi div
 
 **La prima riguarda il progetto dei livelli**, e la impone il generatore: si rifiuta di
 produrre i cento livelli se una griglia di ostacoli non permette di chiudere almeno un gruppo
-in trenta mosse, o se un livello non viene superato almeno **4 volte su 12** dal giocatore
-artificiale. Se un bersaglio è troppo alto scende di un gradino alla volta finché non lo è
-più; se nemmeno al minimo si supera, la generazione fallisce nominando il livello — perché a
-quel punto il problema è la griglia, il tetto di mosse o il tipo di obiettivo, e nasconderlo
-con un numero più basso sarebbe la cosa sbagliata.
+in trenta mosse, o se un livello esce dalla **banda di difficoltà del suo atto**. Se un
+bersaglio è troppo alto scende di un gradino alla volta finché non lo è più; se nemmeno al
+minimo si supera, la generazione fallisce nominando il livello — perché a quel punto il
+problema è la griglia, il tetto di mosse o il tipo di obiettivo, e nasconderlo con un numero
+più basso sarebbe la cosa sbagliata.
 
-Perché 4 su 12 e non «almeno una volta»: con poche prove non si distingue un livello che si
-supera il 10% delle volte da uno al 40%, e una soglia bassa lascia passare le macine per puro
-caso. La tabella completa delle probabilità è nel commento di `tools/genera-quadri.mjs`.
+Perché una soglia bassa non basta: con poche prove non si distingue un livello che si supera
+il 10% delle volte da uno al 40%, e una soglia bassa lascia passare le macine per puro caso.
+La tabella completa delle probabilità è nel commento di `tools/genera-quadri.mjs`.
+
+### La banda di difficoltà di ogni atto
+
+Ogni atto dichiara **quante partite su venti** il giocatore artificiale può vincere: un
+pavimento e un soffitto. Il pavimento è la vecchia garanzia di superabilità; il soffitto è
+nuovo, e serve a una cosa che nessun controllo vedeva.
+
+| atto | livelli | banda |
+|---|---|---|
+| fondamenta | 1-10 | 75-100% |
+| pilastri | 11-24 | 65-90% |
+| roccia | 25-40 | 55-85% |
+| vuoto | 41-58 | 45-75% |
+| strada | 59-76 | 40-65% |
+| arco | 77-92 | 35-60% |
+| ultima pietra | 93-100 | 30-50% |
+
+Le bande **si sovrappongono di proposito**: dentro un atto i livelli devono variare,
+altrimenti il percorso diventa un metronomo. Ma i due estremi scendono a ogni atto, quindi la
+curva complessiva non può risalire — ed è esattamente quello che faceva. Misurata su 24
+partite per livello prima di questa regola, la riuscita media per gruppo di dieci era
+`84 · 85 · 74 · 61 · 57 · 60 · 56 · 54 · 44 · 63`: il punto più duro del gioco cadeva al
+livello 90, e gli ultimi dieci erano **più facili di venti punti** dei dieci che li
+precedevano.
+
+Il controllo «nessun livello banale» non poteva accorgersene perché chiede due condizioni
+*insieme* — vinto quasi sempre **e** con molto tempo che avanza — e lascia scoperto il livello
+vinto quasi sempre al fotofinish: il quadro 96 chiedeva 14 gruppi in 33 mosse, si vinceva 96
+volte su 100 e il giocatore artificiale ne usava 30 su 33.
+
+E non era il bersaglio: misurata come rapporto fra ciò che si chiede e ciò che il metro
+raggiunge, la richiesta degli ultimi dieci era **identica** a quella dei dieci precedenti
+(1,09 contro 1,09). Era il tetto di mosse — 26-40 nell'ultimo atto contro 22-32 nel penultimo.
+Perciò la leva della banda è **il tempo, non il bersaglio**: togliere mosse lascia il livello
+quello che era, cambiare il bersaglio ne fa un altro. Il bersaglio si tocca solo quando il
+tetto ha finito la corsa, e il pavimento vince sempre sul soffitto.
+
+### Livelli a due obiettivi
+
+Dal quarto atto in poi, un livello ogni quattro chiede **due cose insieme** — «chiudi 3 righe
+e fai 400 punti» — e vanno soddisfatte entrambe con le stesse mosse. Il motore, il giocatore
+artificiale e le tre schermate che mostrano l'obiettivo lavoravano su una lista da sempre:
+per cento livelli nessuno ne aveva mai avuti due.
+
+Ogni metà parte da un percentile **scontato di quindici punti**, perché chiedere due cose è
+strettamente più difficile che chiederne una e le mosse sono le stesse. Le coppie sono tutte
+diverse fra loro, confrontate senza ordine: «3 righe e 400 punti» e «400 punti e 3 righe»
+sono lo stesso livello.
 
 **La seconda riguarda l'incontro fra un livello e chi lo gioca**, e la prima non la copre: il
 giocatore artificiale è un metro coerente, non una persona. Un percorso a catena ha un difetto

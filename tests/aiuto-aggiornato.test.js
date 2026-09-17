@@ -7,6 +7,7 @@ import testiEn from '../src/i18n/en.js';
 import { ATTREZZI } from '../src/persistence/attrezzi.js';
 import { fattoreTinta, fattoreEsplosione } from '../src/core/scoring.js';
 import { GRID_SIZE, ESPLOSIONE_SOGLIA } from '../src/config/rules.js';
+import { QUADRI } from '../src/config/quadri.js';
 
 /**
  * L'AIUTO DEVE INVECCHIARE INSIEME AL GIOCO.
@@ -78,6 +79,71 @@ describe('l aiuto racconta il gioco di adesso', () => {
       }
     }
     expect(aiuto, 'l elenco degli attrezzi nell aiuto deve venire da ATTREZZI').toMatch(/ATTREZZI\.map/);
+  });
+
+  it('le quattro regole di base non anticipano i passi che vengono dopo', () => {
+    /**
+     * LA GUIDA DICEVA TRE VOLTE LE STESSE COSE.
+     *
+     * Il primo passo elencava quattro regole, e due erano la Catena e le bombe -- che
+     * hanno un passo tutto loro, il secondo e il quinto, con il disegno e i numeri veri.
+     * Chi legge si trova la stessa regola due volte in due minuti, in due versioni
+     * diverse, e non ha modo di capire quale sia quella completa: la ripetizione non
+     * rassicura, confonde.
+     *
+     * Il primo passo adesso dice solo quello che si fa con le mani -- come entrano i
+     * pezzi, che cosa sparisce, quanti pezzi si hanno, quando la partita finisce -- e i
+     * moltiplicatori restano ai loro passi. La prova tiene il confine.
+     */
+    for (const [lingua, testi] of [['it', testiIt], ['en', testiEn]]) {
+      const regole = ['uno', 'due', 'tre', 'quattro'].map((k) => testi.intro[k].toLowerCase()).join(' ');
+      for (const parola of ['catena', 'chain', 'bomba', 'bomb', 'intreccio', 'interlace', 'tinta', 'tint']) {
+        expect(regole, `${lingua}: le regole di base parlano gia di "${parola}", che ha il suo passo`)
+          .not.toMatch(new RegExp(`\\b${parola}`));
+      }
+    }
+  });
+
+  it('la guida dice come finisce una partita', () => {
+    // Era l'unica regola del tavolo che la guida non diceva da nessuna parte: si scopre
+    // perdendo, cioe' nel momento peggiore per impararla.
+    expect(testiIt.intro.quattro).toMatch(/finisce/);
+    expect(testiEn.intro.quattro).toMatch(/ends/);
+  });
+
+  it('il passo del percorso chiama gli attrezzi con il loro nome di adesso', () => {
+    /**
+     * IL DIFETTO CHE QUESTA PROVA HA TROVATO, il giorno in cui e' stata scritta.
+     *
+     * La 1.16.7 ha rinominato la gru in carriola. Il nome nel dizionario degli attrezzi e'
+     * stato cambiato in tutte e due le lingue, ma la frase del percorso li elenca a mano --
+     * "fra la carriola, il gessetto, il piccone e la mensola" -- e in inglese continuava a
+     * dire "the crane". Una prova che guarda `attrezzi.<nome>` non poteva vederlo: li' era
+     * tutto giusto. Il difetto stava nella prosa che quei nomi li ripete.
+     *
+     * Qui la frase viene confrontata con i nomi veri, senza articolo: se un attrezzo cambia
+     * nome e la frase resta indietro, si vede subito e in tutte le lingue.
+     */
+    for (const [lingua, testi] of [['it', testiIt], ['en', testiEn]]) {
+      const frase = testi.guida.percorso.toLowerCase();
+      for (const nome of ATTREZZI) {
+        const etichetta = testi.attrezzi[nome].toLowerCase()
+          .replace(/^(il|lo|la|l'|the)\s*/, '');
+        expect(frase, `${lingua}: il percorso non nomina "${etichetta}"`).toContain(etichetta);
+      }
+    }
+  });
+
+  it('se esistono livelli a due obiettivi, il percorso lo dice', () => {
+    // Un livello che chiede due cose insieme cambia come si gioca, e chi legge la guida
+    // deve saperlo prima di incontrarlo. La condizione viene dai livelli veri: se un
+    // giorno non ce ne fossero piu', la prova smette da sola di pretenderlo.
+    const doppi = QUADRI.filter((q) => q.obiettivi.length > 1).length;
+    if (doppi === 0) return;
+    for (const [lingua, testi] of [['it', testiIt], ['en', testiEn]]) {
+      expect(testi.guida.percorso, `${lingua}: ${doppi} livelli chiedono due obiettivi e la guida non ne parla`)
+        .toMatch(/due insieme|two at once/);
+    }
   });
 
   it('la guida al primo avvio dice che gli attrezzi esistono', () => {

@@ -48,12 +48,17 @@ export function AperturaQuadro({ quadro, onGioca, onElenco, t }) {
           </div>
         ) : null))}
 
-        {quadro.obiettivi.map(({ tipo }) => (
-          <p className="pl-apertura__consiglio" key={tipo}>
-            <span className="pl-hud__etichetta">{t('quadri.consiglio')}</span>
-            {t(`quadri.consigli.${tipo}`)}
-          </p>
-        ))}
+        {/* UN SOLO "COME FARE", anche quando i consigli sono due.
+            Con due obiettivi qui uscivano due riquadri identici, ognuno con la sua
+            etichetta: letto di seguito sembrava che il secondo consiglio riaprisse un
+            discorso chiuso, invece e' la seconda meta' dello stesso. L'etichetta dice
+            che cosa sono, e di cose sono una sola. */}
+        <div className="pl-apertura__consiglio">
+          <span className="pl-hud__etichetta">{t('quadri.consiglio')}</span>
+          {quadro.obiettivi.map(({ tipo }) => (
+            <p className="pl-apertura__consiglio-riga" key={tipo}>{t(`quadri.consigli.${tipo}`)}</p>
+          ))}
+        </div>
 
         <p className="pl-apertura__mosse">
           {quadro.maxMosse != null

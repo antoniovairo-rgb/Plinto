@@ -4,9 +4,10 @@ import { Pezzo } from '../Pezzo.jsx';
 import { getShape } from '../../core/shapes.js';
 import { Plinto } from '../Plinto.jsx';
 import { Bomba } from '../Bomba.jsx';
+import { MiniGriglia } from '../MiniGriglia.jsx';
 import { REGOLE_INTRO, PASSI_GUIDA } from '../../config/intro.js';
-import { CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA, GRID_SIZE } from '../../config/rules.js';
-import { fattoreTinta } from '../../core/scoring.js';
+import { CHAIN_MAX, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA, GRID_SIZE } from '../../config/rules.js';
+import { chainMultiplier, fattoreTinta } from '../../core/scoring.js';
 import { OGNI_LIVELLI } from '../../persistence/attrezzi.js';
 import { TOTALE_QUADRI } from '../../config/quadri.js';
 
@@ -36,6 +37,13 @@ import { TOTALE_QUADRI } from '../../config/quadri.js';
  * punti. Una guida che spiega regole diverse da quelle applicate e' peggio di nessuna
  * guida, e l'unico modo per impedirlo e' non avere due copie del testo.
  */
+/**
+ * Il gradino a cui la barra disegnata e' ferma: cinque su nove, cioe' poco piu' di
+ * meta'. Un disegno con la barra vuota non direbbe niente, uno con la barra piena
+ * direbbe che il massimo si raggiunge sempre.
+ */
+const GRADINO_MOSTRATO = 5;
+
 export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
   const [passo, setPasso] = useState(0);
   const nome = PASSI_GUIDA[passo];
@@ -43,7 +51,10 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
 
   // Gli stessi numeri di "Come si gioca", presi dalla stessa fonte e scritti nello
   // stesso formato con cui compaiono sulla barra durante la partita.
-  const catenaMassima = (1 + CHAIN_STEP * CHAIN_MAX).toFixed(2);
+  // I due estremi della Catena, chiesti alla funzione che li calcola davvero e scritti
+  // nello stesso formato della barra: il giocatore deve riconoscerli, non convertirli.
+  const catenaBase = chainMultiplier(0).toFixed(2);
+  const catenaMassima = chainMultiplier(CHAIN_MAX).toFixed(2);
   const intreccioTre = (1 + INTRECCIO_STEP * 2).toFixed(2);
   const mosseAVuoto = CHAIN_GRACE + 1;
   // Lo stesso numero dell'aiuto, e dalla stessa fonte: la funzione che assegna i punti.
@@ -97,12 +108,24 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
           <>
             <h2 className="pl-sezione">{t('guida.catenaTitolo')}</h2>
             <p className="pl-testo">
-              {t('aiuto.catena').replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
+              {t('aiuto.catena').replace('{base}', catenaBase).replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
             </p>
             {/* La barra disegnata e' la stessa che si vede in partita, ferma a meta':
-                serve a farla riconoscere dopo, non a spiegarla di nuovo. */}
-            <div className="pl-guida__barra" aria-hidden="true">
-              <div className="pl-guida__riempimento" style={{ width: '55%' }} />
+                serve a farla riconoscere dopo, non a spiegarla di nuovo.
+
+                CON L'ETICHETTA E IL MOLTIPLICATORE, che prima non c'erano: una barra
+                gialla e basta non somiglia a niente, e il testo parla della "barra" senza
+                che si capisca quale. In partita quella riga e' "CATENA ---- x1.00", e
+                riconoscerla e' tutto il lavoro che questo disegno deve fare. Il numero
+                mostrato e' quello del gradino a cui la barra e' ferma, chiesto alla
+                stessa funzione del gioco: un disegno che mostrasse un moltiplicatore
+                impossibile insegnerebbe una regola falsa. */}
+            <div className="pl-guida__catena" aria-hidden="true">
+              <span className="pl-hud__etichetta">{t('hud.catena')}</span>
+              <div className="pl-guida__barra">
+                <div className="pl-guida__riempimento" style={{ width: `${(GRADINO_MOSTRATO / CHAIN_MAX) * 100}%` }} />
+              </div>
+              <span className="pl-guida__catena-valore">&times;{chainMultiplier(GRADINO_MOSTRATO).toFixed(2)}</span>
             </div>
           </>
         ) : null}
@@ -111,6 +134,17 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
           <>
             <h2 className="pl-sezione">{t('guida.intreccioTitolo')}</h2>
             <p className="pl-testo">{t('aiuto.intreccio').replace('{n}', intreccioTre)}</p>
+            {/* ERA L'UNICO PASSO SENZA DISEGNO, ed era anche il piu' astratto.
+                Gli altri cinque mostrano la cosa di cui parlano -- i due pezzi che
+                chiudono un quadrante, la barra della Catena, le sette caselle uguali, la
+                bomba e il suo scoppio -- e questo chiedeva di immaginare "due gruppi
+                chiusi con una mossa sola" a chi non ha ancora mai chiuso un gruppo.
+                Il disegno e' lo STESSO che spiega l'Intreccio nell'apertura dei livelli:
+                una riga e una colonna che si incrociano, cioe' il posto dove la mossa si
+                trova davvero. */}
+            <div className="pl-guida__disegno" aria-hidden="true">
+              <MiniGriglia tipo="intreccio" />
+            </div>
           </>
         ) : null}
 

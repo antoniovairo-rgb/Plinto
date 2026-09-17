@@ -7,6 +7,169 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.17.0] — 17 settembre 2026
+
+### La curva di difficoltà è diventata una cosa che si misura
+
+Fino a ieri la difficoltà dei cento livelli non era un obiettivo: era la **conseguenza
+sperata** di tre leve mosse a mano atto per atto — il percentile del bersaglio, il tetto di
+mosse, il margine — più un unico vincolo valido per tutti e cento, «almeno 4 riuscite su
+12». Un solo pavimento, nessun soffitto, il livello 3 e il livello 99 con lo stesso
+requisito.
+
+Misurata a 24 partite per livello, la curva che ne usciva era questa, in riuscite medie del
+giocatore artificiale per gruppo di dieci:
+
+`84 · 85 · 74 · 61 · 57 · 60 · 56 · 54 · 44 · 63`
+
+Quattro inversioni e un rimbalzo in fondo: il punto più duro del gioco cadeva al **livello
+90**, e gli ultimi dieci si vincevano il **63%** delle volte contro il **44%** dei dieci
+precedenti. Il finale si allentava.
+
+**E non era il bersaglio.** Misurato come rapporto fra ciò che si chiede e ciò che il metro
+raggiunge davvero, gli ultimi dieci stavano a 1,09 e i dieci prima a 1,09: identici. Era il
+**tetto di mosse** — 26-40 nell'ultimo atto contro 22-32 nel penultimo. Con più tempo lo
+stesso bersaglio si raggiunge più spesso.
+
+Il controllo «nessun livello banale» non poteva prenderlo, perché chiede due condizioni
+*insieme*: vinto quasi sempre **e** con molto tempo che avanza. Restava scoperto il caso
+opposto, il livello vinto quasi sempre al fotofinish — il quadro 96 chiedeva 14 gruppi in 33
+mosse, si vinceva 96 volte su 100 e il giocatore artificiale ne usava 30 su 33.
+
+Adesso ogni atto dichiara una **banda di riuscite**, pavimento e soffitto, e il generatore ce
+lo porta dentro togliendo o restituendo mosse; il bersaglio si tocca solo quando il tetto ha
+finito la corsa. Le bande si sovrappongono di proposito — dentro un atto i livelli devono
+variare — ma i due estremi scendono sempre, quindi la curva non può più risalire. La curva
+uscita dalla rigenerazione:
+
+| atto | livelli | riuscite | banda |
+|---|---|---|---|
+| fondamenta | 1-10 | 91% | 75-100% |
+| pilastri | 11-24 | 72% | 65-90% |
+| roccia | 25-40 | 63% | 55-85% |
+| vuoto | 41-58 | 56% | 45-75% |
+| strada | 59-76 | 53% | 40-65% |
+| arco | 77-92 | 46% | 35-60% |
+| ultima pietra | 93-100 | **39%** | 30-50% |
+
+Un livello è rimasto fuori dalla sua banda e il generatore lo dichiara invece di forzarlo: il
+**quadro 21** (gruppi 7 in 20 mosse) si vince 12 volte su 20 contro un pavimento di 13, con
+il tetto già al massimo che il suo atto concede. Un'unità su venti, dentro il rumore di una
+misura a scalini del 5%.
+
+Il generatore ora **stampa la curva che è uscita davvero** e avvisa se risale in un atto: era
+il controllo che mancava a tutti gli altri, ognuno dei quali guardava un livello alla volta e
+non il percorso.
+
+### Livelli che chiedono due cose insieme
+
+Tredici livelli, dal quarto atto in poi, chiedono **due obiettivi insieme** — «chiudi 4
+quadranti e arriva a Catena 2» — e vanno soddisfatti entrambi con le stesse mosse. Motore,
+giocatore artificiale e le tre schermate che mostrano l'obiettivo lavoravano su una lista da
+sempre: per cento livelli nessuno ne aveva mai avuti due. Ogni metà parte da un percentile
+scontato di quindici punti, perché chiedere due cose è strettamente più difficile che
+chiederne una e le mosse sono le stesse. Le tredici coppie sono tutte diverse fra loro,
+confrontate senza ordine: «3 righe e 400 punti» e «400 punti e 3 righe» sono lo stesso
+livello.
+
+### Gli Intrecci da 5 livelli a 15
+
+Erano in due atti soli, quattro dei quali consecutivi nello stesso tratto: una meccanica che
+il gioco ha, che il generatore sa tarare come ogni altro cumulo, e che praticamente non
+chiedeva mai. Ora sono in cinque atti su sette. La distribuzione dei tipi è più piatta:
+gruppi 19, Catena 18, intrecci 15, quadranti 14, punteggio 14, righe 13, celle 11, colonne 9.
+
+### La guida al primo avvio
+
+**Diceva due volte le stesse cose.** Il primo passo elencava quattro regole, e due erano la
+Catena e le bombe — che hanno un passo tutto loro, con il disegno e i numeri veri. La stessa
+regola due volte in due minuti, in due versioni diverse, senza modo di capire quale fosse
+quella completa. Adesso il primo passo dice solo quello che si fa con le mani.
+
+**In quello spazio sono entrate due regole che la guida non diceva da nessuna parte**: che i
+pezzi arrivano tre alla volta e i tre dopo arrivano solo quando li hai usati tutti, e che la
+partita finisce quando nessuno dei pezzi in mano entra più da nessuna parte. La seconda si
+scopriva perdendo, cioè nel momento peggiore per impararla.
+
+**La Catena confondeva due numeri diversi.** Diceva «sale di uno… fino a ×3.25»: di uno sale
+il *gradino*, mentre il numero sulla barra è il *moltiplicatore*. Ora la frase li collega, e
+tutti e due i numeri vengono dalla funzione che li calcola davvero.
+
+**Il disegno della Catena non somigliava alla cosa che nomina**: una barra gialla e basta,
+mentre il testo parla della «barra». Adesso è la riga vera — etichetta, barra e
+moltiplicatore — con il numero chiesto alla stessa funzione del gioco.
+
+**L'Intreccio era l'unico passo senza disegno, ed era il più astratto**: chiedeva di
+immaginare «due gruppi chiusi con una mossa sola» a chi non ha ancora mai chiuso un gruppo.
+Ora mostra la stessa mini-griglia che lo spiega nell'apertura dei livelli.
+
+### Corretto
+
+**«Gruppo» non era spiegato dove viene usato.** È la parola più usata dalle regole —
+Intreccio, Tinta, bombe e una dozzina di obiettivi la danno per nota — e per chi leggeva la
+guida compariva al terzo passo senza definizione: la spiegazione esisteva solo nella
+schermata di apertura di un livello che chiede proprio «chiudi N gruppi». Adesso la dà la
+seconda regola di base.
+
+**Due nomi per la stessa cosa.** Il quadratino della griglia era «casella» sedici volte e
+«cella» due; in inglese «square» quasi ovunque e «cell» dentro la frase delle bombe, a due
+righe da una che diceva «squares».
+
+**In inglese la carriola si chiamava ancora «crane».** La 1.16.7 ha rinominato la gru in
+carriola e il dizionario è stato aggiornato in tutte e due le lingue, ma la frase che presenta
+il percorso elenca gli attrezzi a mano.
+
+**La frase del premio delle esplosioni era imprecisa**, non solo contorta: «da 4 caselle in su
+vale il 25% in più per ogni cella oltre la soglia» — letta alla lettera, a quattro caselle il
+premio è zero. Il numero era giusto, la soglia mostrata era spostata di uno.
+
+**«La partita libera non finisce mai»** era falso: finisce quando non entra più un pezzo.
+
+**Il regolamento diceva «Catena» dove intendeva «regola 3».** La terza regola di base
+nominava una cosa che nel gioco non c'è: «senza saltare un turno».
+
+**L'apertura di un livello a due obiettivi tagliava l'intestazione.** Quella schermata centra
+il contenuto verticalmente, e con due obiettivi il contenuto diventa più alto dello schermo:
+`justify-content: center` spinge l'eccedenza fuori da *tutte e due* le estremità, e quella in
+cima non si raggiunge nemmeno scorrendo perché `scrollTop` è già zero. Sul quadro 44
+sparivano il nome dell'atto, il numero del livello e mezza riga dell'obiettivo. Nello stesso
+punto, i due riquadri «COME FARE» uscivano identici uno sotto l'altro.
+
+**Il file generato dei livelli aveva perso una funzione, e l'app non si avviava.**
+`operaDelQuadro` — usata dalla scheda condivisibile e dalla schermata di fine livello — era
+stata aggiunta **a mano** al file generato e mai rimessa nel modello del generatore: la prima
+rigenerazione l'ha cancellata. 563 prove unitarie passavano, perché nessuna la importava e
+quella che ne conta le *chiamate* legge il sorgente delle schermate, dove le chiamate c'erano
+ancora. Mancava la definizione, non l'uso.
+
+**Lo strumento di taratura non conosceva il tipo di obiettivo `intrecci`.** Aveva il ramo per
+`intreccio` — il picco ormai in disuso — e non quello per il conteggio: il giocatore non
+veniva mai spinto a chiudere più gruppi insieme, e i cinque livelli a intrecci risultavano i
+più duri del gioco (mediana 1 contro un bersaglio di 3) per un difetto del **metro**. Il
+generatore il ramo giusto ce l'aveva, quindi i livelli erano tarati bene.
+
+### Verificato
+
+- `tests/progressione.test.js` fissa la forma del percorso — livelli doppi, intrecci in più
+  atti, nessun tipo confinato in un punto, nessun livello sotto le otto mosse — e controlla
+  che il file generato **esporti ogni nome che l'app gli chiede**.
+- `tests/lessico.test.js` scorre i valori dei dizionari e boccia i sinonimi vietati.
+- `tests/aiuto-aggiornato.test.js` verifica che le regole di base non anticipino i passi
+  successivi, che la guida dica come finisce una partita e che la frase del percorso chiami
+  gli attrezzi con il nome che hanno nel dizionario.
+- `npm run impaginazione` misura, su tutti i formati, che l'intestazione di un livello a due
+  obiettivi si **veda**: con il CSS di prima segnala 8 problemi su 4 formati.
+- `tests/e2e/tutti-i-livelli.mjs` cerca la vittoria fra **venti** semi e non più dodici, gli
+  stessi su cui il generatore fa la sua promessa.
+
+### Nota per chi sta già giocando
+
+I cento livelli sono stati rigenerati: obiettivi e tetti di mosse sono cambiati quasi
+ovunque. **L'avanzamento non si perde** — spunte, frontiera e livelli aperti per insistenza
+stanno in `localStorage` indicizzati per numero, non per contenuto — ma i **record di mosse**
+già registrati si riferiscono ormai a livelli diversi. I record della sfida del giorno non
+sono toccati: le costanti di regolamento non sono cambiate.
+
 ## [1.16.8] — 17 settembre 2026
 
 ### Corretto

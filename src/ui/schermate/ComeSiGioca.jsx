@@ -6,10 +6,10 @@ import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
 import { TOTALE_QUADRI } from '../../config/quadri.js';
 import {
-  CHAIN_MAX, CHAIN_STEP, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA,
+  CHAIN_MAX, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA,
   ESPLOSIONE_SOGLIA, PUNTI_CELLA_ESPLOSA, GRID_SIZE,
 } from '../../config/rules.js';
-import { fattoreTinta, fattoreEsplosione } from '../../core/scoring.js';
+import { chainMultiplier, fattoreEsplosione, fattoreTinta } from '../../core/scoring.js';
 import { ATTREZZI, OGNI_LIVELLI, MASSIMO as ATTREZZI_MASSIMO } from '../../persistence/attrezzi.js';
 
 /**
@@ -35,7 +35,10 @@ import { ATTREZZI, OGNI_LIVELLI, MASSIMO as ATTREZZI_MASSIMO } from '../../persi
 export function SchermoComeSiGioca({ onIndietro, t }) {
   // Due decimali come nella barra della Catena in partita: il numero scritto qui deve
   // essere scritto ESATTAMENTE come quello che il giocatore vede sullo schermo.
-  const catenaMassima = (1 + CHAIN_STEP * CHAIN_MAX).toFixed(2);
+  // I due estremi della Catena, chiesti alla funzione che li calcola davvero e scritti
+  // nello stesso formato della barra: il giocatore deve riconoscerli, non convertirli.
+  const catenaBase = chainMultiplier(0).toFixed(2);
+  const catenaMassima = chainMultiplier(CHAIN_MAX).toFixed(2);
   const intreccioTre = (1 + INTRECCIO_STEP * 2).toFixed(2);
   // Il giocatore conta le mosse a vuoto, non la "tolleranza": con tolleranza 1 la
   // Catena cala alla SECONDA mossa di fila senza eliminazioni.
@@ -56,8 +59,20 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
    * senza riaprire l'aiuto.
    */
   const tintaMassima = Math.round(fattoreTinta(GRID_SIZE) * 100);
-  const esplosioneSoglia = ESPLOSIONE_SOGLIA + 1;
-  const esplosionePremio = Math.round((fattoreEsplosione(esplosioneSoglia) - 1) * 100);
+  /**
+   * LA SOGLIA SI DICE COM'E', non spostata di uno.
+   *
+   * Qui si passava `ESPLOSIONE_SOGLIA + 1`, cioe' la prima esplosione premiata, e la
+   * frase diceva "da 4 caselle in su vale il 25% in piu' per ogni cella oltre la
+   * soglia": letta alla lettera, a quattro caselle il premio sarebbe zero, perche' di
+   * caselle oltre quattro non ce n'e' nessuna. Il numero era giusto e la frase no.
+   *
+   * Adesso la frase dice "oltre le {soglia} caselle, ogni casella in piu' vale il
+   * {premio}% in piu'", e la soglia e' quella vera: oltre tre, la quarta paga il 25%,
+   * la quinta il 50%. E' esattamente la formula di `fattoreEsplosione`.
+   */
+  const esplosioneSoglia = ESPLOSIONE_SOGLIA;
+  const esplosionePremio = Math.round((fattoreEsplosione(ESPLOSIONE_SOGLIA + 1) - 1) * 100);
 
   return (
     <Pagina titolo={t('aiuto.titolo')} onIndietro={onIndietro} t={t}>
@@ -119,7 +134,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
       </p>
       <p className="pl-testo">
         <strong>{t('guida.catenaTitolo')}</strong>{' — '}
-        {t('aiuto.catena').replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
+        {t('aiuto.catena').replace('{base}', catenaBase).replace('{max}', catenaMassima).replace('{n}', mosseAVuoto)}
       </p>
       <p className="pl-testo">
         <strong>{t('guida.tintaTitolo')}</strong>{' — '}
