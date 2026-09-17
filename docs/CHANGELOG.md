@@ -14,7 +14,14 @@ La versione è dichiarata in un solo posto — il campo `version` di `package.js
 **La gru diventa la carriola.** Una gru non è un attrezzo da cassetta: è una macchina, e
 stonava in fila con gessetto, piccone e mensola, che sono tutti oggetti che si tengono in
 mano. La carriola fa anche il gesto giusto: carichi il blocco che non ti va, lo porti via e
-torni con un altro. Icona nuova — vasca, ruota e manici — al posto di braccio e gancio.
+torni con un altro.
+
+**L'icona è stata rifatta due volte.** La prima sembrava un aquilone, ed era giusto: la
+vasca era un quadrilatero chiuso e il manico scendeva a destra, cioè dalla parte sbagliata.
+Quella buona ha la vasca a trapezio **aperta in alto**, la ruota davanti, il manico
+all'indietro e in alto e la gamba dietro. Scelta guardando cinque varianti renderizzate a
+26, 52 e 88 pixel, non a occhio sul codice: a quella dimensione una sagoma o si riconosce
+o non si riconosce, e dal sorgente non si capisce quale delle due.
 
 Cambiano nome e icona, **non il funzionamento**: cambia un pezzo della mano, il pezzo che
 arriva entra di sicuro sulla griglia, è diverso da quelli rimasti e non porta mai bombe, e
