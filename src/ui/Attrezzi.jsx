@@ -37,15 +37,16 @@ function IconaCarriola() {
     <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none"
          stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       {/* Vasca a trapezio APERTA in alto, non un quadrilatero chiuso: chiusa diventava un
-          rombo, e con il manico che scendeva a destra si leggeva come un aquilone. Ruota
-          davanti, manico all'indietro e in alto, gamba dietro: e' la sagoma che si
-          riconosce anche a 26 pixel. Scelta guardando cinque varianti a schermo, non a
-          occhio sul codice. */}
-      <path d="M3.5 8h11l-2.2 5.5h-6.6z" />
-      <path d="M14.5 8 20.5 6.2" />
-      <path d="M12.3 13.5 13.8 17" />
-      <circle cx="7" cy="17.3" r="2" />
-      <path d="M5.7 13.5 6.4 15.4" />
+          rombo, e con il manico che scendeva a destra si leggeva come un aquilone.
+          DUE manici e non uno: sono quelli che si impugnano davvero, e in coppia la
+          sagoma si riconosce prima. Ruota davanti, gamba dietro. Scelta guardando cinque
+          varianti renderizzate a 26, 52 e 88 pixel, non a occhio sul codice. */}
+      <path d="M3 8.5h10.5l-2 5h-6.5z" />
+      <path d="M13.5 8.5 20 6" />
+      <path d="M13.5 10.5 20 8" />
+      <circle cx="7" cy="17.5" r="2.1" />
+      <path d="M6 13.5 7 15.4" />
+      <path d="M11.5 13.5 13 17.5" />
     </svg>
   );
 }

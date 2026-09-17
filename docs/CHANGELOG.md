@@ -18,8 +18,8 @@ torni con un altro.
 
 **L'icona è stata rifatta due volte.** La prima sembrava un aquilone, ed era giusto: la
 vasca era un quadrilatero chiuso e il manico scendeva a destra, cioè dalla parte sbagliata.
-Quella buona ha la vasca a trapezio **aperta in alto**, la ruota davanti, il manico
-all'indietro e in alto e la gamba dietro. Scelta guardando cinque varianti renderizzate a
+Quella buona ha la vasca a trapezio **aperta in alto**, i **due manici** all'indietro e in
+alto, la ruota davanti e la gamba dietro. Scelta guardando cinque varianti renderizzate a
 26, 52 e 88 pixel, non a occhio sul codice: a quella dimensione una sagoma o si riconosce
 o non si riconosce, e dal sorgente non si capisce quale delle due.
 
