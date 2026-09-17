@@ -328,6 +328,7 @@ export default {
   quadri: {
     avanzamento: '{fatti} of {totale}',
     superato: 'Cleared',
+    attoDaAprire: 'Opens when you reach level {n}',
     bloccato: 'Clear the previous level',
     quadro: 'Level {n}',
     mosse: 'Moves',

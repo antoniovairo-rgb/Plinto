@@ -7,6 +7,33 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.8] — 17 settembre 2026
+
+### Corretto
+
+**«Supera il livello precedente» sotto un atto ancora chiuso diceva una cosa falsa.**
+Quella frase è scritta per un livello solo — è l'etichetta del suo pulsante, dove «il
+precedente» è davvero quello prima — ed era riusata come didascalia di un atto intero.
+Sotto L'ULTIMA PIETRA, con il giocatore al livello 79 e l'atto che comincia dal 93,
+faceva credere che mancasse **un** livello mentre ne mancavano quattordici. Adesso dice
+«Si apre quando arrivi al livello 93»: il numero vero, e vale comunque si arrivi lì.
+
+**Gli atti già finiti rendevano un paragrafo vuoto.** Non dice niente e l'altezza se la
+prende lo stesso: su una mappa con sette atti erano cinque buchi. Adesso la didascalia
+compare solo quando ha qualcosa da dire.
+
+**Una chiave di traduzione era definita due volte nello stesso blocco.** È il difetto che
+ha inghiottito in silenzio la prima stesura di questa correzione: in un oggetto JavaScript
+due chiavi con lo stesso nome non sono un errore, **vince l'ultima**. Nella mappa è
+comparso «{nome}: completo» — segnaposto grezzo compreso — al posto della frase nuova.
+
+### Verificato
+
+`tests/i18n.test.js` adesso **legge il sorgente dei dizionari** e rifiuta due chiavi con lo
+stesso nome nello stesso blocco. Nessuna prova poteva accorgersene guardando l'oggetto: il
+dizionario che ne esce è valido, il difetto sta nel file. Verificato capace di fallire
+rimettendo il nome duplicato: segnala `it: quadri.attoChiuso`.
+
 ## [1.16.7] — 17 settembre 2026
 
 ### Cambiato

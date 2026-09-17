@@ -116,18 +116,26 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
               })}
             </ol>
 
-            {apertoQui ? (
-              <p className="pl-atto__obiettivo">
-                {(() => {
-                  const prossima = dellAtto.find((q) => q.numero === corrente);
-                  return prossima
-                    ? `${t('quadri.quadro').replace('{n}', prossima.numero)} · ${descriviObiettivi(prossima, t)} · ${prossima.maxMosse} ${t('quadri.mosse').toLowerCase()}`
-                    : '';
-                })()}
-              </p>
-            ) : (
-              <p className="pl-atto__obiettivo">{t('quadri.bloccato')}</p>
-            )}
+            {/*
+              * LA DIDASCALIA DELL'ATTO, in tre casi e non due.
+              *  - aperto e in corso: il livello a cui si e' arrivati, con obiettivo e mosse;
+              *  - chiuso: da quale livello si apre. NON "supera il livello precedente":
+              *    quella frase e' scritta per un livello solo -- come etichetta del suo
+              *    pulsante, dove "il precedente" e' davvero quello prima -- e sotto otto
+              *    livelli diceva una cosa falsa, cioe' che ne mancasse uno;
+              *  - finito: NIENTE. Prima usciva un paragrafo vuoto, che non dice niente e
+              *    l'altezza se la prende lo stesso: su una mappa con sette atti erano
+              *    cinque buchi.
+              */}
+            {(() => {
+              const inCorso = dellAtto.find((q) => q.numero === corrente);
+              const testo = apertoQui
+                ? (inCorso
+                  ? `${t('quadri.quadro').replace('{n}', inCorso.numero)} · ${descriviObiettivi(inCorso, t)} · ${inCorso.maxMosse} ${t('quadri.mosse').toLowerCase()}`
+                  : '')
+                : t('quadri.attoDaAprire').replace('{n}', atto.da);
+              return testo ? <p className="pl-atto__obiettivo">{testo}</p> : null;
+            })()}
           </section>
         );
       })}

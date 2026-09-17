@@ -92,6 +92,39 @@ describe('chiavi effettivamente usate', () => {
     return [...prefissi].some((p) => chiave.startsWith(`${p}.`));
   }
 
+  /**
+   * CHIAVI DOPPIE DENTRO LO STESSO BLOCCO.
+   *
+   * In un oggetto JavaScript, due chiavi con lo stesso nome non sono un errore: vince
+   * l'ultima, in silenzio. Chi aggiunge una voce senza accorgersi che il nome e' gia'
+   * preso la vede sparire e non capisce perche' -- a schermo compare il testo dell'altra.
+   *
+   * E' successo davvero: una didascalia nuova nel blocco `quadri` si chiamava come una
+   * gia' presente venti righe piu' sotto, e nella mappa e' comparso "{nome}: completo"
+   * al posto della frase nuova, segnaposto grezzo compreso. Nessuna prova se n'era
+   * accorta, perche' la chiave ESISTE e il dizionario e' valido: il difetto sta nel
+   * sorgente, non nell'oggetto che ne esce. Per questo si legge il file.
+   */
+  it('nessun dizionario definisce due volte la stessa chiave nello stesso blocco', () => {
+    for (const [lingua, file] of [['it', 'it.js'], ['en', 'en.js']]) {
+      const testo = readFileSync(new URL(`../src/i18n/${file}`, import.meta.url), 'utf8');
+      const doppie = [];
+      let blocco = '(radice)';
+      const visti = new Map([[blocco, new Set()]]);
+      for (const riga of testo.split('\n')) {
+        const apre = /^ {2}([a-zA-Z0-9_]+): \{/.exec(riga);
+        if (apre) { blocco = apre[1]; visti.set(blocco, new Set()); continue; }
+        if (/^ {2}\},?$/.test(riga)) { blocco = '(radice)'; continue; }
+        const chiave = /^ {4}([a-zA-Z0-9_]+):/.exec(riga);
+        if (!chiave) continue;
+        const insieme = visti.get(blocco);
+        if (insieme.has(chiave[1])) doppie.push(`${lingua}: ${blocco}.${chiave[1]}`);
+        insieme.add(chiave[1]);
+      }
+      expect(doppie, `chiavi definite due volte: la seconda cancella la prima`).toEqual([]);
+    }
+  });
+
   it('non esistono chiavi definite che nessuno usa', () => {
     // Una chiave orfana e' un testo che qualcuno ha scritto e tradotto due volte
     // per niente, e che al primo sguardo sembra invece una funzionalita' esistente.

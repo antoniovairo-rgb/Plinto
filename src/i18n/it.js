@@ -385,6 +385,7 @@ export default {
   quadri: {
     avanzamento: '{fatti} di {totale}',
     superato: 'Superato',
+    attoDaAprire: 'Si apre quando arrivi al livello {n}',
     bloccato: 'Supera il livello precedente',
     quadro: 'Livello {n}',
     mosse: 'Mosse',
