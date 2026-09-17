@@ -174,7 +174,10 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
         livello: t('scheda.livello'),
         superatoIn: t('scheda.superatoIn'),
         record: t('scheda.record'),
-        percorso: t('scheda.percorso').replace('{opera}', t(`opere.${opera.id}`)),
+        // Il singolare esiste perche' "1 livelli su 100" non e' italiano, e a un livello
+        // superato ci passa ogni giocatore nuovo: e' la prima scheda che condivide.
+        percorso: (superati === 1 ? t('scheda.percorsoUno') : t('scheda.percorso'))
+          .replace('{opera}', t(`opere.${opera.id}`)),
       },
     },
   );
@@ -228,7 +231,7 @@ export function CondividiPercorso({ superati, totale, t }) {
       testi: {
         gioco: 'PLINTO',
         percorsoTitolo: t(`opere.${opera.id}`),
-        livelliSu: t('scheda.livelliSu'),
+        livelliSu: superati === 1 ? t('scheda.livelliSuUno') : t('scheda.livelliSu'),
       },
     },
   );

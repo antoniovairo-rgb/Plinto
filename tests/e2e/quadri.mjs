@@ -295,7 +295,18 @@ if (!sequenza) {
       // quadro hanno fatto la stessa cosa, e li distingue solo in quante mosse.
       if (!/mosse/i.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice le mosse — "${schedaQuadro}"`);
       if (!/Livello 1\b/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice quale livello — "${schedaQuadro}"`);
-      if (!/1 di 100/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: non dice l avanzamento — "${schedaQuadro}"`);
+      // I DUE NUMERI, non le parole che li circondano. Questo controllo cercava
+      // "1 di 100" alla lettera e ha bocciato la riga giusta -- "Il Ponte: 1 livello
+      // su 100" -- perche' la formulazione era cambiata. Un controllo che fissa la
+      // prosa invece del fatto blocca le correzioni di prosa: e' successo davvero.
+      if (!/\b1\b[^\n]*\b100\b/.test(schedaQuadro)) {
+        errori.push(`SCHEDA LIVELLO: non dice l avanzamento — "${schedaQuadro}"`);
+      }
+      // E il singolare dev'essere singolare: "1 livelli su 100" e' la prima riga che
+      // legge chi ha appena superato il primo livello.
+      if (/\b1 livelli\b/.test(schedaQuadro)) {
+        errori.push(`SCHEDA LIVELLO: singolare sbagliato — "${schedaQuadro}"`);
+      }
       if (!/https?:\/\//.test(schedaQuadro)) errori.push('SCHEDA LIVELLO: manca il collegamento al gioco');
       if (/undefined|NaN|null/.test(schedaQuadro)) errori.push(`SCHEDA LIVELLO: valore rotto — "${schedaQuadro}"`);
       // Niente spoiler: gli identificativi delle forme non devono comparire.

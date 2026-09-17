@@ -7,6 +7,30 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.6] — 17 settembre 2026
+
+### Corretto
+
+**«1 livelli su 100».** La scheda condivisibile non aveva il singolare, e ci passa ogni
+giocatore nuovo: è la prima scheda che si condivide in assoluto. Adesso dice «Il Ponte:
+1 livello su 100», in italiano e in inglese.
+
+**Un controllo che fissava la prosa invece del fatto.** «Livelli nel browser» cercava la
+scritta `1 di 100` alla lettera e ha bocciato la riga giusta — «Il Ponte: 1 livello su
+100» — solo perché la formulazione era cambiata. Adesso guarda i **due numeri** e non le
+parole che li circondano, e in più verifica che «1 livelli» non ricompaia.
+
+### Come è andata davvero, perché resti scritto
+
+La 1.16.5 è stata **pubblicata con il gate fallito**. Il gate aveva detto «1 controlli su
+27 sono falliti. NON pubblicare»; la lettura dell'esito e il push stavano nello stesso
+comando, e il push è partito lo stesso. Il gate ha funzionato: è stato ignorato.
+
+Il controllo che si lamentava era stantìo, ma **aveva ragione su un'altra cosa**: senza di
+lui il singolare sbagliato sarebbe passato inosservato. È l'argomento migliore che si possa
+avere a favore del non pubblicare mai su un rosso, anche quando si è convinti di sapere
+perché è rosso.
+
 ## [1.16.5] — 17 settembre 2026
 
 ### Corretto
