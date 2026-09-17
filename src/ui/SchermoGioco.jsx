@@ -97,14 +97,14 @@ export function SchermoGioco({
   siPuoAnnullare = false, onAnnulla = null,
   // Gli attrezzi arrivano solo dai livelli: negli altri modi questi restano a zero e
   // la pastiglia non compare.
-  attrezzi = null, suggerimento = null, onGru = null, onGessetto = null,
+  attrezzi = null, suggerimento = null, onCarriola = null, onGessetto = null,
   onPiccone = null, onMensola = null, onRiprendiMensola = null, t,
 }) {
   /*
    * I modi dell'attrezzo in corso:
    *   'chiuso'   si gioca normalmente
    *   'scelta'   il pannello e' aperto
-   *   'gru'      si aspetta QUALE pezzo cambiare
+   *   'carriola'      si aspetta QUALE pezzo cambiare
    *   'mensola'  si aspetta QUALE pezzo mettere da parte
    *   'piccone'  si aspetta QUALE casella togliere
    *   'scambio'  la mano e' piena e si aspetta con quale pezzo scambiare la mensola
@@ -112,9 +112,9 @@ export function SchermoGioco({
    * inventarne uno nuovo, che e' una cosa in meno che puo' rompersi.
    */
   const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
-  const conAttrezzi = attrezzi !== null && onGru && onGessetto && onPiccone && onMensola;
+  const conAttrezzi = attrezzi !== null && onCarriola && onGessetto && onPiccone && onMensola;
   /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
-  const sceltaPezzo = modoAttrezzo === 'gru' || modoAttrezzo === 'mensola'
+  const sceltaPezzo = modoAttrezzo === 'carriola' || modoAttrezzo === 'mensola'
     || modoAttrezzo === 'scambio';
 
   /* Le caselle che il gesso ha segnato. Si ricavano dal suggerimento e dalla forma del
@@ -462,7 +462,7 @@ export function SchermoGioco({
                   {t('attrezzi.lasciaStare')}
                 </button>
               </span>
-            ) : modoAttrezzo === 'gru' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
+            ) : modoAttrezzo === 'carriola' || modoAttrezzo === 'mensola' || modoAttrezzo === 'piccone' ? (
               /* Con un attrezzo in corso la riga smette di dire qualunque altra cosa:
                  c'e' una domanda aperta, e due messaggi insieme sarebbero due. */
               <span className="pl-attrezzi__invito">
@@ -504,7 +504,7 @@ export function SchermoGioco({
           presoIndex={drag.preso?.handIndex ?? null}
           onPointerDownPezzo={sceltaPezzo ? () => {} : prendi}
           onTapPezzo={
-            modoAttrezzo === 'gru' ? (i) => { if (onGru(i)) setModoAttrezzo('chiuso'); }
+            modoAttrezzo === 'carriola' ? (i) => { if (onCarriola(i)) setModoAttrezzo('chiuso'); }
               : modoAttrezzo === 'mensola' ? (i) => { if (onMensola(i)) setModoAttrezzo('chiuso'); }
                 : modoAttrezzo === 'scambio'
                   ? (i) => { if (onRiprendiMensola(i)) setModoAttrezzo('chiuso'); }

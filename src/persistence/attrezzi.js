@@ -3,7 +3,7 @@
  *
  * COSA SONO. Una risorsa sola per piu' usi. Si guadagna un attrezzo ogni cinque livelli
  * superati, se ne tengono al massimo tre, e al momento di usarlo si sceglie quale:
- *   gru       cambia un pezzo della mano, senza toccare la griglia
+ *   carriola       cambia un pezzo della mano, senza toccare la griglia
  *   gessetto  segna dove conviene appoggiare, come si fa in cantiere col gesso
  *   piccone   toglie una casella gia' posata, quella che tocchi
  *   mensola   ci appoggi un pezzo e te lo riprendi quando vuoi
@@ -35,7 +35,7 @@ export const OGNI_LIVELLI = 5;
 export const MASSIMO = 3;
 
 /** Gli attrezzi esistenti, nell'ordine in cui si mostrano. */
-export const ATTREZZI = ['gru', 'gessetto', 'piccone', 'mensola'];
+export const ATTREZZI = ['carriola', 'gessetto', 'piccone', 'mensola'];
 
 const PREDEFINITI = { disponibili: 0, riscossi: 0 };
 

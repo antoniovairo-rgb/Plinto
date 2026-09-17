@@ -188,7 +188,7 @@ export function useQuadro() {
    * restituisce null su uno slot vuoto o a partita finita, e in quel caso il giocatore
    * non deve pagare niente.
    */
-  const usaGru = useCallback((handIndex) => {
+  const usaCarriola = useCallback((handIndex) => {
     if (!partita || quantiAttrezzi() <= 0) return false;
     const dopo = cambiaPezzo(partita, handIndex);
     if (!dopo) return false;
@@ -268,7 +268,7 @@ export function useQuadro() {
     gioca,
     attrezzi,
     suggerimento,
-    usaGru,
+    usaCarriola,
     usaGessetto,
     usaPiccone,
     usaMensola,

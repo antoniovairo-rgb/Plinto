@@ -313,9 +313,9 @@ export default {
   attrezzi: {
     titolo: 'Attrezzi del cantiere',
     su: 'su',
-    gru: 'La gru',
-    gruSpiega: 'Cambia un pezzo della mano. Non costa una mossa.',
-    gruScegli: 'Quale pezzo cambio?',
+    carriola: 'La carriola',
+    carriolaSpiega: 'Cambia un pezzo della mano. Non costa una mossa.',
+    carriolaScegli: 'Quale pezzo cambio?',
     gessetto: 'Il gessetto',
     gessettoSpiega: 'Segna dove conviene appoggiare.',
     piccone: 'Il piccone',
@@ -519,7 +519,7 @@ export default {
     intreccioTitolo: 'L\'Intreccio',
     tintaTitolo: 'La Tinta',
     percorsoTitolo: 'Il percorso',
-    percorso: 'Il gioco vero sono {n} livelli, ognuno con un obiettivo suo e un numero di mosse per riuscirci. Si apre uno alla volta, e ognuno ti spiega che cosa devi fare prima di cominciare. Ogni {attrezziOgni} livelli superati guadagni un attrezzo del cantiere: quando ti blocchi, scegli tu quale usare fra la gru, il gessetto, il piccone e la mensola.',
+    percorso: 'Il gioco vero sono {n} livelli, ognuno con un obiettivo suo e un numero di mosse per riuscirci. Si apre uno alla volta, e ognuno ti spiega che cosa devi fare prima di cominciare. Ogni {attrezziOgni} livelli superati guadagni un attrezzo del cantiere: quando ti blocchi, scegli tu quale usare fra la carriola, il gessetto, il piccone e la mensola.',
     altreModalita: 'Ci sono anche la partita libera, che non finisce mai e serve a fare punti, e la sfida del giorno: la stessa identica partita per tutti, una al giorno.',
   },
   aiuto: {

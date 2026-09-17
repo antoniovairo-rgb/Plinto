@@ -345,7 +345,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
  * LA GRU: cambia un pezzo della mano, e nient'altro.
  *
  * Non consuma una mossa, non tocca la griglia, non tocca il punteggio ne' la Catena. E'
- * voluto: la gru serve a sbloccare chi ha ricevuto un pezzo che non entra, non a dare un
+ * voluto: la carriola serve a sbloccare chi ha ricevuto un pezzo che non entra, non a dare un
  * turno in piu'. Se contasse come mossa sarebbe un attrezzo che ti fa perdere prima nei
  * livelli a mosse contate, cioe' l'opposto di un aiuto.
  *

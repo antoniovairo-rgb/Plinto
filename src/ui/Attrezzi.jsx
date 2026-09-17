@@ -24,17 +24,22 @@ import { Pezzo } from './Pezzo.jsx';
  *    perdere una mossa a qualcuno.
  */
 
-/** La gru: braccio, cavo e gancio. Cambia un pezzo. */
-function IconaGru() {
+/**
+ * La carriola: vasca, ruota e manici.
+ *
+ * Prima era una gru, e una gru non e' un attrezzo da cassetta: e' una macchina, e stonava
+ * in fila con gessetto, piccone e mensola, che sono tutti oggetti che si tengono in mano.
+ * La carriola fa anche il gesto giusto: carichi il blocco che non ti va, lo porti via e
+ * torni con un altro.
+ */
+function IconaCarriola() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none"
          stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 21h6" />
-      <path d="M8 21V4" />
-      <path d="M8 4h11" />
-      <path d="M8 4 4 9" />
-      <path d="M16 4v5" />
-      <rect x="13.5" y="9" width="5" height="4" rx="1" />
+      <path d="M4 7h9l3.4 7H7.5z" />
+      <path d="M16.4 14 21 18" />
+      <path d="M7.5 14 5.4 18" />
+      <circle cx="9.2" cy="19.2" r="1.9" />
     </svg>
   );
 }
@@ -79,7 +84,7 @@ function IconaMensola() {
 /**
  * La cassetta: e' il MAGAZZINO, non uno degli attrezzi.
  *
- * Prima la pastiglia disegnava la gru, e guardandola si capiva "ho una gru" invece di
+ * Prima la pastiglia disegnava la carriola, e guardandola si capiva "ho una carriola" invece di
  * "ho un attrezzo, e scelgo io quale". Segnalato da chi giocava: "non riesco a capire
  * quale attrezzo ho a disposizione". La risposta e' che non ne hai uno in particolare
  * -- ne hai TANTI QUANTI dicono i pallini, e quale diventa lo decidi quando lo usi --
@@ -97,7 +102,7 @@ function IconaCassetta() {
 }
 
 const ICONE = {
-  gru: IconaGru, gessetto: IconaGessetto, piccone: IconaPiccone, mensola: IconaMensola,
+  carriola: IconaCarriola, gessetto: IconaGessetto, piccone: IconaPiccone, mensola: IconaMensola,
 };
 
 export { IconaMensola };

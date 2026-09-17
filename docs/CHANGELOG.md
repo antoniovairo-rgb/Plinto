@@ -7,6 +7,34 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.16.7] — 17 settembre 2026
+
+### Cambiato
+
+**La gru diventa la carriola.** Una gru non è un attrezzo da cassetta: è una macchina, e
+stonava in fila con gessetto, piccone e mensola, che sono tutti oggetti che si tengono in
+mano. La carriola fa anche il gesto giusto: carichi il blocco che non ti va, lo porti via e
+torni con un altro. Icona nuova — vasca, ruota e manici — al posto di braccio e gancio.
+
+Cambiano nome e icona, **non il funzionamento**: cambia un pezzo della mano, il pezzo che
+arriva entra di sicuro sulla griglia, è diverso da quelli rimasti e non porta mai bombe, e
+non costa una mossa.
+
+**Nessun salvataggio si rompe.** Verificato prima di toccare qualsiasi cosa: l'identificativo
+dell'attrezzo non compare in nessun dato salvato — il magazzino registra soltanto quanti
+attrezzi hai e fino a dove hai riscosso. Quindi il rinomino non chiede nessuna migrazione.
+
+**Le voci di changelog precedenti non sono state riscritte**: dicono ancora «la gru» perché
+è quello che il gioco diceva allora, e una storia corretta a posteriori è una storia di cui
+non ci si può fidare.
+
+### Verificato
+
+Il rinomino ha una trappola che valeva la pena evitare: `gru` è dentro **gru**ppo e
+**gru**ppi, che sono le parole più usate del motore. È stato fatto solo su parola intera, e
+le 548 prove — fra cui tutte quelle su Intreccio, Tinta e chiusura dei gruppi — passano
+invariate.
+
 ## [1.16.6] — 17 settembre 2026
 
 ### Corretto

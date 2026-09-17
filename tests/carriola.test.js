@@ -1,5 +1,5 @@
 /**
- * La gru: cambia un pezzo e nient'altro.
+ * La carriola: cambia un pezzo e nient'altro.
  *
  * Le regole che questi test difendono sono quelle che rendono l'attrezzo un aiuto invece
  * di una fregatura: il pezzo nuovo deve entrare sulla griglia, deve essere diverso da
@@ -11,7 +11,7 @@ import { hasAnyPlacement, idx } from '../src/core/grid.js';
 
 const partita = (seed = 12345) => createGame({ seed });
 
-describe('la gru', () => {
+describe('la carriola', () => {
   it('cambia solo il pezzo scelto e lascia gli altri', () => {
     const prima = partita();
     const dopo = cambiaPezzo(prima, 1);
@@ -22,7 +22,7 @@ describe('la gru', () => {
   });
 
   it('NON consuma una mossa e non tocca griglia, punteggio e Catena', () => {
-    // E' la regola che rende la gru un aiuto: in un livello a mosse contate, un attrezzo
+    // E' la regola che rende la carriola un aiuto: in un livello a mosse contate, un attrezzo
     // che costa una mossa ti fa perdere prima.
     const prima = partita();
     const dopo = cambiaPezzo(prima, 0);
@@ -42,7 +42,7 @@ describe('la gru', () => {
   });
 
   it('il pezzo nuovo ENTRA sulla griglia, anche quando e quasi piena', () => {
-    // Si riempie la griglia lasciando pochi buchi: e' la situazione in cui si usa la gru.
+    // Si riempie la griglia lasciando pochi buchi: e' la situazione in cui si usa la carriola.
     let stato = partita(4242);
     const grid = new Uint8Array(stato.grid);
     for (let r = 0; r < 9; r += 1) for (let c = 0; c < 9; c += 1) {
@@ -69,7 +69,7 @@ describe('la gru', () => {
     expect(cambiaPezzo(finita, 0)).toBeNull();
   });
 
-  it('la partita resta giocabile dopo la gru', () => {
+  it('la partita resta giocabile dopo la carriola', () => {
     let stato = cambiaPezzo(partita(777), 2);
     const pezzo = stato.hand[2];
     expect(hasAnyPlacement(stato.grid, pezzo.shape)).toBe(true);

@@ -445,7 +445,7 @@ export function App() {
           statoQuadro={quadri.stato}
           attrezzi={quadri.attrezzi}
           suggerimento={quadri.suggerimento}
-          onGru={quadri.usaGru}
+          onCarriola={quadri.usaCarriola}
           onGessetto={quadri.usaGessetto}
           onPiccone={quadri.usaPiccone}
           onMensola={quadri.usaMensola}

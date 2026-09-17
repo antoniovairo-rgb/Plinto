@@ -158,7 +158,7 @@ function drawHand(rng, fill, history) {
 }
 
 /**
- * Pesca UN pezzo solo: e' quello che serve alla gru, che ne cambia uno e lascia gli altri.
+ * Pesca UN pezzo solo: e' quello che serve alla carriola, che ne cambia uno e lascia gli altri.
  *
  * PERCHE' NON SI RIUSA `generateHand` PRENDENDONE UNO. Quella funzione tiene una memoria
  * delle forme appena uscite per non ripeterle, e restituirebbe una memoria che contiene
@@ -167,11 +167,11 @@ function drawHand(rng, fill, history) {
  *
  * TRE REGOLE, E OGNUNA HA UN MOTIVO CHE SI VEDE GIOCANDO.
  *   1. Il pezzo deve ENTRARE sulla griglia di adesso, se esiste una forma che ci entra.
- *      La gru si usa quando si e' bloccati: riceverne un altro che non entra sarebbe una
+ *      La carriola si usa quando si e' bloccati: riceverne un altro che non entra sarebbe una
  *      presa in giro, e per giunta a pagamento.
  *   2. Il pezzo deve essere DIVERSO da quelli rimasti in mano. "Cambia un pezzo" che
  *      restituisce lo stesso pezzo e' un attrezzo speso per niente.
- *   3. Niente bombe. La regola delle bombe e' "al massimo una per mano": se la gru
+ *   3. Niente bombe. La regola delle bombe e' "al massimo una per mano": se la carriola
  *      potesse pescarne una, cambiare pezzi diventerebbe il modo per coltivarle.
  *
  * @param {Uint8Array} grid griglia corrente

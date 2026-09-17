@@ -262,9 +262,9 @@ export default {
   attrezzi: {
     titolo: 'Site tools',
     su: 'of',
-    gru: 'The crane',
-    gruSpiega: 'Swaps one piece in your hand. It costs no move.',
-    gruScegli: 'Which piece do I swap?',
+    carriola: 'The wheelbarrow',
+    carriolaSpiega: 'Swaps one piece in your hand. It costs no move.',
+    carriolaScegli: 'Which piece do I swap?',
     gessetto: 'The chalk',
     gessettoSpiega: 'Marks where the piece should go.',
     piccone: 'The pickaxe',

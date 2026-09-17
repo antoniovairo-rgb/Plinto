@@ -94,10 +94,10 @@ describe('spendere attrezzi', () => {
     expect(caricaAttrezzi().disponibili).toBe(0);
   });
 
-  it('la cassetta e completa: gru, gessetto, piccone e mensola', () => {
+  it('la cassetta e completa: carriola, gessetto, piccone e mensola', () => {
     // L'ordine non e' un dettaglio: e' l'ordine in cui il pannello li mostra, e va dal
     // piu' semplice da capire al piu' strategico.
-    expect(ATTREZZI).toEqual(['gru', 'gessetto', 'piccone', 'mensola']);
+    expect(ATTREZZI).toEqual(['carriola', 'gessetto', 'piccone', 'mensola']);
     // La scarsita' NON e' cambiata aggiungendo due attrezzi: sempre uno ogni cinque
     // livelli, sempre tre al massimo. Raddoppiare le scelte senza raddoppiare la
     // risorsa e' proprio cio' che rende la scelta una decisione invece di un elenco.

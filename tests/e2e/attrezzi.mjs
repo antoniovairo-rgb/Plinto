@@ -1,9 +1,9 @@
 /**
  * Gli attrezzi del cantiere, nel gioco vero.
  *
- * Le regole stanno gia' nelle prove pure (attrezzi, gru, gessetto). Qui si prova il
+ * Le regole stanno gia' nelle prove pure (attrezzi, carriola, gessetto). Qui si prova il
  * cablaggio, cioe' quello che quelle non possono vedere: che la pastiglia compaia, che il
- * pannello si apra senza costare niente, che la gru cambi davvero il pezzo toccato e che
+ * pannello si apra senza costare niente, che la carriola cambi davvero il pezzo toccato e che
  * il gessetto segni delle caselle. E due cose che sarebbero difetti silenziosi: guardare
  * il pannello e chiuderlo non deve scalare niente, e spegnendo l'interruttore la pastiglia
  * deve sparire.
@@ -103,21 +103,21 @@ controlla('il gessetto non ha segnato nessuna casella', segnate > 0);
 controlla(`dopo il gessetto restano ${await pieni()} attrezzi invece di 1`, (await pieni()) === 1);
 await page.screenshot({ path: `${OUT}/3-gessetto.png` });
 
-console.log('4. la gru cambia il pezzo che tocchi, e non costa una mossa...');
+console.log('4. la carriola cambia il pezzo che tocchi, e non costa una mossa...');
 const mosseDi = async () => Number((await page.locator('.pl-obiettivo__mosse strong').first().innerText()).trim());
 const mossePrima = await mosseDi();
 await page.locator('.pl-attrezzi__pastiglia').click();
-await page.getByRole('button', { name: /La gru/ }).click();
+await page.getByRole('button', { name: /La carriola/ }).click();
 await page.waitForTimeout(200);
-controlla('in modo gru il vassoio non si illumina', await page.locator('.pl-tray-scelta').count() === 1);
-await page.screenshot({ path: `${OUT}/4-gru.png` });
+controlla('in modo carriola il vassoio non si illumina', await page.locator('.pl-tray-scelta').count() === 1);
+await page.screenshot({ path: `${OUT}/4-carriola.png` });
 const prima = await page.locator('.pl-tray__posto').nth(1).innerHTML();
 await page.locator('.pl-tray__posto').nth(1).click();
 await page.waitForTimeout(400);
-controlla('la gru non ha cambiato il pezzo toccato', prima !== await page.locator('.pl-tray__posto').nth(1).innerHTML());
-controlla(`la gru ha consumato una mossa (${mossePrima} -> ${await mosseDi()})`, (await mosseDi()) === mossePrima);
-controlla(`dopo la gru restano ${await pieni()} attrezzi invece di 0`, (await pieni()) === 0);
-controlla('il segno del gesso non si e cancellato dopo la gru', await page.locator('.pl-cella--segnata').count() === 0);
+controlla('la carriola non ha cambiato il pezzo toccato', prima !== await page.locator('.pl-tray__posto').nth(1).innerHTML());
+controlla(`la carriola ha consumato una mossa (${mossePrima} -> ${await mosseDi()})`, (await mosseDi()) === mossePrima);
+controlla(`dopo la carriola restano ${await pieni()} attrezzi invece di 0`, (await pieni()) === 0);
+controlla('il segno del gesso non si e cancellato dopo la carriola', await page.locator('.pl-cella--segnata').count() === 0);
 
 console.log('5. a magazzino vuoto il pannello spiega come si guadagnano E che cosa sono...');
 await page.locator('.pl-attrezzi__pastiglia').click();
