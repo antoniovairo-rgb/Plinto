@@ -102,11 +102,17 @@ console.log(`0. guida al primo avvio: regole mostrate al primo passo ${introVisi
 if (introVisibile !== REGOLE_INTRO.length) {
   errori.push(`PRIMO AVVIO: il primo passo mostra ${introVisibile} regole invece di ${REGOLE_INTRO.length}`);
 }
-const testoIntro = await page.locator('.pl-intro__regole').innerText();
-if (!/bomba/i.test(testoIntro)) errori.push('PRIMO AVVIO: le regole non nominano la bomba');
-// La bomba ha un passo tutto suo e viene verificata li' (`npm run guida`): da quando la
-// presentazione e' diventata una guida a piu' passi, cercarla sulla prima schermata
-// vorrebbe dire pretendere che tutto stia di nuovo insieme.
+// LA BOMBA NON SI CERCA PIU' QUI, e il commento che lo diceva c'era gia': sotto questa
+// riga stava scritto "la bomba ha un passo tutto suo e viene verificata li'", mentre la
+// riga sopra pretendeva di trovarla lo stesso fra le quattro regole del primo passo.
+// Un controllo e la sua spiegazione che dicevano il contrario, e ha retto finche' le
+// regole di base hanno continuato a nominarla per abitudine.
+//
+// Adesso non la nominano piu', di proposito: le anticipava e poi il quinto passo le
+// rispiegava con il disegno e i numeri veri, cioe' la stessa regola due volte in due
+// minuti. La garanzia non si e' persa, ha solo il posto giusto: `tests/e2e/guida.mjs`
+// controlla che il passo della bomba la NOMINI e la ILLUSTRI, ed e' li' che il
+// giocatore la incontra.
 // Dalla guida si esce nella HOME, non dentro una partita: e' l'unica schermata che
 // mostra la forma del gioco, ed e' quella che al primo avvio non vedeva nessuno. Chi
 // la salta -- verso la partita libera come faceva prima, o verso il livello 1 --
