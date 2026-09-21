@@ -99,6 +99,12 @@ export const Plancia = forwardRef(function Plancia(
       aria-label="PLINTO"
       data-in-mano={pezzoInMano ? 'si' : 'no'}
     >
+      {/* La scacchiera dei quadranti sta PRIMA delle celle, e non e' un dettaglio:
+          le celle sono `position: relative`, quindi fra elementi posizionati decide
+          l'ordine nel DOM. Messa qui resta SOTTO le caselle -- che hanno un fondo
+          semitrasparente e la lasciano trasparire -- e sotto i blocchi, che sono opachi:
+          cambia il colore del vuoto e non tocca il contrasto dei pezzi. */}
+      <div className="pl-plancia__scacchi" aria-hidden="true" />
       {celle}
       <div className="pl-plancia__quadranti" />
       {/* Il lampo dello svuotamento. E' un elemento a se' e non uno sfondo della

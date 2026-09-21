@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pagina } from './Pagina.jsx';
+import { Pagina, Vuoto } from './Pagina.jsx';
 import { numero } from '../../i18n/formato.js';
 import { CHAIN_MAX } from '../../config/rules.js';
 import { IMPRONTA_REGOLE } from '../../core/impronta.js';
@@ -44,7 +44,7 @@ function Dato({ etichetta, valore }) {
   );
 }
 
-export function SchermoProfilo({ onIndietro, t }) {
+export function SchermoProfilo({ onIndietro, t, onGioca }) {
   const [profilo] = useState(() => caricaProfilo());
   const [copiato, setCopiato] = useState(false);
 
@@ -59,7 +59,7 @@ export function SchermoProfilo({ onIndietro, t }) {
   if (profilo.partite === 0) {
     return (
       <Pagina titolo={t('profilo.titolo')} onIndietro={onIndietro} t={t}>
-        <p className="pl-testo">{t('profilo.vuoto')}</p>
+        <Vuoto testo={t('profilo.vuoto')} invito={onGioca ? t('stats.vuotoInvito') : null} onInvito={onGioca} />
       </Pagina>
     );
   }

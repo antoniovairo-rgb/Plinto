@@ -153,6 +153,16 @@ button {
   flex-wrap: wrap;
 }
 
+/* La riga della Catena a riposo: la barra si fa piu' discreta e accanto compare la
+   frase che dice come accenderla. */
+.pl-catena--riposo .pl-catena__barra { opacity: 0.55; }
+.pl-catena__spunto {
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--pl-text-faint);
+  white-space: nowrap;
+}
+
 .pl-catena__barra {
   flex: 1;
   height: 6px;
@@ -275,7 +285,39 @@ button {
     linear-gradient(to right, transparent calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px)),
     linear-gradient(to bottom, transparent calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% - 1px), var(--pl-line-strong) calc(33.333% + 1px), transparent calc(33.333% + 1px)),
     linear-gradient(to bottom, transparent calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% - 1px), var(--pl-line-strong) calc(66.666% + 1px), transparent calc(66.666% + 1px));
-  opacity: 0.85;
+  /* Piena: a 0,85 la linea si spegneva proprio dove serviva, cioe' sul fondo scuro. */
+  opacity: 1;
+}
+
+/* LA SCACCHIERA DEI QUADRANTI.
+   Cinque dei nove riquadri -- i quattro angoli e il centro -- portano una velatura
+   appena percettibile. Non e' decorazione:
+   una LINEA la si perde -- basta il sole, uno schermo economico, un dito sopra -- mentre
+   un'AREA resta leggibile, ed e' cosi' che i tabelloni a nove riquadri si leggono da
+   sempre. La velatura sta sotto le celle e sotto i pezzi, quindi non tocca il contrasto
+   dei blocchi: cambia solo il colore del vuoto.
+   E' lo schema a scacchi su tre caselle per lato: ogni riquadro confina solo con
+   riquadri di tinta diversa. */
+.pl-plancia__scacchi {
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  border-radius: 10px;
+  --q: 33.3333%;
+  background-image:
+    linear-gradient(var(--pl-quadrante-velo), var(--pl-quadrante-velo)),
+    linear-gradient(var(--pl-quadrante-velo), var(--pl-quadrante-velo)),
+    linear-gradient(var(--pl-quadrante-velo), var(--pl-quadrante-velo)),
+    linear-gradient(var(--pl-quadrante-velo), var(--pl-quadrante-velo)),
+    linear-gradient(var(--pl-quadrante-velo), var(--pl-quadrante-velo));
+  background-size: var(--q) var(--q);
+  background-repeat: no-repeat;
+  background-position:
+    0 0,
+    100% 0,
+    50% 50%,
+    0 100%,
+    100% 100%;
 }
 
 /* ---------------------------------------------------------------- blocchi --- */
@@ -773,11 +815,30 @@ button {
    telefono alto si apriva un vuoto di quasi meta' schermo nel mezzo della home.
    Meglio una composizione centrata con lo stesso respiro sopra e sotto. */
 .pl-home__menu {
-  display: flex;
-  justify-content: center;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
 }
-.pl-home__menu .pl-btn { padding: 0 12px; font-size: 14px; }
+/* L'ultima voce prende tutta la riga: con cinque voci una resta spaiata comunque, e
+   una larga in fondo si legge come una scelta, una stretta a sinistra come un avanzo. */
+.pl-home__menu .pl-home__voce:last-child { grid-column: 1 / -1; }
+.pl-home__voce {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  min-height: 46px;
+}
+.pl-home__voce-icona {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--pl-brand);
+}
 
 /* Piu' piccolo e piu' spento delle voci di menu: e' l'ultima cosa della pagina, e
    deve leggersi come tale. */
@@ -1037,7 +1098,23 @@ button {
 .pl-nota { margin: 0 0 14px; font-size: 13px; color: var(--pl-text-faint); }
 .pl-nota--allarme { color: var(--pl-danger); }
 .pl-nota--piede { text-align: center; margin-top: 26px; }
-.pl-vuoto { text-align: center; color: var(--pl-text-faint); padding: 40px 0; font-size: 14px; }
+/* La schermata vuota: Plinto, che cosa comparira' qui, e la strada per farcelo
+   comparire. Centrata nello spazio che ha, non appoggiata in cima. */
+.pl-vuoto {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 52px 8px 40px;
+  text-align: center;
+}
+.pl-vuoto__testo {
+  margin: 0;
+  max-width: 300px;
+  color: var(--pl-text-dim);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.pl-vuoto .pl-btn { margin-top: 4px; }
 
 /* ------------------------------------------------------------------ menu --- */
 .pl-velo {

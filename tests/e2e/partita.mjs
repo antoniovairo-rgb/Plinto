@@ -402,12 +402,24 @@ if (riprendiVisibile === 0) {
   // L'attesa non nasconde niente. Se la partita fosse davvero andata persa, i blocchi
   // non arriverebbero mai e l'attesa scadrebbe: il difetto verrebbe fuori lo stesso,
   // solo con un messaggio diverso.
-  await page.waitForFunction(
+  //
+  // E SE SCADE, LO DICE. Prima l'attesa veniva inghiottita da un `catch` vuoto e la
+  // prova proseguiva contando zero blocchi, cioe' accusava "la partita e' andata persa"
+  // quando la verita' era "non e' arrivata entro cinque secondi". Sono due difetti
+  // diversi e portano a cercare in due posti diversi: il primo nel salvataggio, il
+  // secondo nei tempi. Un messaggio che indica il posto sbagliato costa piu' di nessun
+  // messaggio -- misurato di persona, cercando una regressione che non c'era.
+  const arrivati = await page.waitForFunction(
     () => document.querySelectorAll('.pl-plancia .pl-blocco').length > 0,
-    null, { timeout: 5000 },
-  ).catch(() => {});
+    null, { timeout: 15000 },
+  ).then(() => true).catch(() => false);
   const blocchiRipresi = await contaBlocchi();
-  if (blocchiRipresi !== blocchiLibera) {
+  if (!arrivati) {
+    errori.push(
+      'SFIDA: dopo "Riprendi la partita" i blocchi non sono comparsi entro 15 secondi. '
+      + 'Non e detto che la partita sia persa: potrebbe essere solo lenta a rimontare.',
+    );
+  } else if (blocchiRipresi !== blocchiLibera) {
     errori.push(`SFIDA: la partita libera ripresa ha ${blocchiRipresi} blocchi invece di ${blocchiLibera}`);
   }
   await page.locator('.pl-hud__menu').first().click();

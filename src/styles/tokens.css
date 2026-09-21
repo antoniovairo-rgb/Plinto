@@ -16,7 +16,16 @@
   --pl-surface: #181d2a;      /* pannelli, tray */
   --pl-surface-2: #1f2534;    /* elementi rialzati */
   --pl-line: #262d3f;         /* linee sottili della griglia */
-  --pl-line-strong: #3a4460;  /* separatori dei quadranti 3x3: la firma del tabellone */
+  /* Separatori dei quadranti 3x3: la firma del tabellone.
+     ALZATO da #3a4460. Riga e colonna si vedono da sole -- sono i bordi del tabellone --
+     mentre il quadrante va DISEGNATO, e con gli obiettivi che dicono "chiudi 4 quadranti"
+     il giocatore deve trovarli a occhio, anche al sole. */
+  --pl-line-strong: #55618a;
+  /* La velatura dei quadranti a scacchiera. Serve a far leggere i nove riquadri come
+     REGIONI e non come quattro righe sottili: una linea si perde, un'area no. Tenuta
+     bassissima perche' sotto ci passano le celle vuote, e una plancia a scacchi
+     griderebbe piu' dei pezzi. */
+  --pl-quadrante-velo: rgba(255, 255, 255, 0.034);
   /* Tinta delle celle libere. E' un token e non un bianco trasparente scritto a mano
      perche' su fondo chiaro un velo bianco e' semplicemente invisibile. */
   --pl-cella-vuota: rgba(255, 255, 255, 0.03);
@@ -137,7 +146,8 @@
   --pl-surface: #ffffff;
   --pl-surface-2: #f0f2f7;
   --pl-line: #d8dce7;
-  --pl-line-strong: #a9b1c6;
+  --pl-line-strong: #8892ad;
+  --pl-quadrante-velo: rgba(23, 27, 38, 0.035);
   --pl-velo: rgba(255, 255, 255, 0.93);
   --pl-velo-bordo: rgba(0, 0, 0, 0.10);
 

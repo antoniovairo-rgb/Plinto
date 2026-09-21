@@ -7,6 +7,66 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.18.0] — 21 settembre 2026
+
+### I quadranti si vedono
+
+Riga e colonna si vedono da sole — sono i bordi del tabellone — mentre il **quadrante va
+disegnato**, e con obiettivi che dicono «chiudi 4 quadranti» il giocatore deve trovarli a
+occhio, anche al sole e anche su uno schermo economico. Le linee che separavano i nove
+riquadri erano sottili e di un blu appena distinguibile dal fondo.
+
+Adesso la linea è più chiara e piena, e sotto le caselle passa una **velatura a scacchi**:
+i quattro angoli e il centro sono appena più chiari degli altri quattro. Una linea si
+perde, un'area no — è così che i tabelloni a nove riquadri si leggono da sempre. La
+velatura sta **sotto** le celle e sotto i pezzi, quindi cambia il colore del vuoto e non
+tocca il contrasto dei blocchi.
+
+### Le schermate vuote non sono più una frase sospesa nel nero
+
+Statistiche e profilo, prima della prima partita, erano una riga grigia in mezzo a
+ottocento pixel di vuoto: sembrava un gioco incompiuto, non un dato che manca. Sono i
+primi posti dove va un giocatore curioso, spesso **prima** di giocare. Adesso mostrano
+Plinto, che cosa comparirà lì, e il pulsante per farcelo comparire.
+
+### La home
+
+**Le cinque voci di menu erano un elenco interrotto a metà**: stavano in una riga che
+andava a capo e uscivano due, due e «Info» spaiata in mezzo. Ora sono una griglia a due
+colonne con l'ultima voce a tutta larghezza — lo spaiamento diventa una scelta invece che
+un effetto del ritorno a capo — e ognuna ha la sua icona, perché un simbolo si riconosce
+prima di leggere la parola.
+
+**Il trattino al posto del punteggio sembrava un valore mancante.** Un «—» accanto a
+«Partita libera» si legge come un dato che non è arrivato, non come «non c'è ancora
+niente» — e a vederlo è solo chi non ha ancora giocato, cioè chi si fa la prima
+impressione. Adesso dicono «Mai giocata» e «Da giocare».
+
+### La Catena spenta adesso dice a cosa serve
+
+A Catena zero la riga era una barra grigia vuota e un «×1.00», cioè un moltiplicatore che
+non moltiplica: una riga intera che non diceva niente proprio nel momento in cui il
+giocatore ha più bisogno di capirla. Adesso dice «sale a ogni eliminazione», e la frase
+sparisce da sola appena la Catena si accende.
+
+### Verificato
+
+- L'icona dell'app ripeteva a mano il vecchio colore dei quadranti: la prova che confronta
+  la palette dell'icona con i token del gioco l'ha presa al primo tentativo.
+- `tests/e2e/partita.mjs`: l'attesa dei blocchi dopo «Riprendi la partita» veniva
+  inghiottita da un `catch` vuoto, e la prova proseguiva accusando «la partita è andata
+  persa» quando la verità era «non è arrivata entro cinque secondi». Sono due difetti
+  diversi e si cercano in due posti diversi. Adesso il messaggio dice quale dei due è, e
+  l'attesa è di quindici secondi.
+
+### Non fatto, e perché
+
+Avevo proposto di spostare l'anteprima della prossima terna nella fascia sotto la plancia,
+per usare lo spazio che sembrava vuoto. **Ritirata**: quella fascia contiene la riga del
+suggerimento, e la posizione dell'anteprima sotto i pezzi in mano è una scelta già presa e
+motivata nel codice — la terna successiva viene **dopo** quella che hai in mano e si legge
+nell'ordine in cui arriva. Spostarla sopra avrebbe scambiato un problema con uno peggiore.
+
 ## [1.17.1] — 21 settembre 2026
 
 ### Corretto

@@ -1,4 +1,4 @@
-import { Pagina, Voce } from './Pagina.jsx';
+import { Pagina, Voce, Vuoto } from './Pagina.jsx';
 import { numero, data } from '../../i18n/formato.js';
 
 function tempo(ms) {
@@ -11,12 +11,12 @@ function tempo(ms) {
  * Statistiche personali. Sono l'unica progressione del gioco: nessun livello,
  * nessuna valuta, nessuna ricompensa a tempo. Si torna per battere se stessi.
  */
-export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietro, t }) {
+export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietro, onGioca, t }) {
   const vuoto = stats.partite === 0;
   return (
     <Pagina titolo={t('stats.titolo')} onIndietro={onIndietro} t={t}>
       {vuoto ? (
-        <p className="pl-vuoto">{t('stats.vuoto')}</p>
+        <Vuoto testo={t('stats.vuoto')} invito={onGioca ? t('stats.vuotoInvito') : null} onInvito={onGioca} />
       ) : (
         <div className="pl-lista">
           <Voce etichetta={t('stats.migliore')} valore={numero(record.best)} />

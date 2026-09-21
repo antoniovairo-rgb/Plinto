@@ -8,5 +8,5 @@
   <rect x="3" y="3" width="19" height="19" rx="5" fill="#ffc212"/>
   <rect x="26" y="3" width="19" height="19" rx="5" fill="#12e1b0"/>
   <rect x="3" y="26" width="19" height="19" rx="5" fill="#9b4dff"/>
-  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#3a4460" stroke-width="2" stroke-dasharray="4 3"/>
+  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#55618a" stroke-width="2" stroke-dasharray="4 3"/>
 </svg>

@@ -1,3 +1,4 @@
+import { Plinto } from '../Plinto.jsx';
 /** Impalcatura comune delle pagine secondarie: testata con titolo e ritorno. */
 export function Pagina({ titolo, onIndietro, children, t }) {
   return (
@@ -18,6 +19,34 @@ export function Pagina({ titolo, onIndietro, children, t }) {
 }
 
 /** Riga di una lista di valori. */
+/**
+ * LA SCHERMATA VUOTA, quando non c'e' ancora niente da mostrare.
+ *
+ * Era una frase grigia sospesa in mezzo a ottocento pixel di nero. Statistiche, profilo e
+ * archivio sono i primi posti dove va un giocatore curioso -- spesso PRIMA di giocare,
+ * perche' vuole capire che cosa il gioco tiene da conto -- e trovarci una riga sola in un
+ * vuoto restituisce l'impressione che il gioco sia incompiuto, non che manchino i dati.
+ *
+ * Tre cose, nell'ordine in cui servono: la faccia del gioco, che cosa comparira' qui, e
+ * la strada per farlo comparire. L'invito e' opzionale perche' non ogni schermata vuota
+ * ne ha uno sensato: dove non c'e', restano le prime due e la composizione regge lo
+ * stesso.
+ */
+export function Vuoto({ testo, invito, onInvito, children }) {
+  return (
+    <div className="pl-vuoto">
+      <Plinto espressione="normale" dimensione={72} className="pl-plinto--vivo" />
+      <p className="pl-vuoto__testo">{testo}</p>
+      {children}
+      {invito && onInvito ? (
+        <button type="button" className="pl-btn pl-btn--primario" onClick={onInvito}>
+          {invito}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export function Voce({ etichetta, valore }) {
   return (
     <div className="pl-voce">

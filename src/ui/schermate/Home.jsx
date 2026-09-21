@@ -1,5 +1,8 @@
 import { Logo } from '../Logo.jsx';
 import { numero } from '../../i18n/formato.js';
+import {
+  IconaAiuto, IconaStatistiche, IconaProfilo, IconaImpostazioni, IconaInfo,
+} from '../IconeMenu.jsx';
 import { Installa } from '../Installa.jsx';
 import { CONTATTO } from '../../config/progetto.js';
 import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
@@ -74,7 +77,11 @@ export function SchermoHome({
         >
           <span>{etichettaLibera}</span>
           {/* Il numero da solo non direbbe di che cosa e' il record: la parola serve. */}
-          <span className="pl-sfida-avvio__esito">{recordTesto || '—'}</span>
+          {/* IL TRATTINO SEMBRAVA UN VALORE MANCANTE. Un "—" a destra di una voce di
+              menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
+              niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
+              impressione sbagliata. La parola lo dice e basta. */}
+          <span className="pl-sfida-avvio__esito">{recordTesto || t('home.maiGiocata')}</span>
         </button>
 
         {cePartitaSalvata ? (
@@ -90,7 +97,7 @@ export function SchermoHome({
           aria-label={sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida}
         >
           <span>{etichettaSfida}</span>
-          <span className="pl-sfida-avvio__esito">{sfidaTesto || '—'}</span>
+          <span className="pl-sfida-avvio__esito">{sfidaTesto || t('home.daGiocare')}</span>
         </button>
 
         {/* L'archivio sta SOTTO la sfida di oggi e non accanto: oggi e' la sfida che
@@ -106,25 +113,31 @@ export function SchermoHome({
           davvero — non e' un pulsante decorativo. */}
       <Installa t={t} />
 
+      {/* LE CINQUE VOCI SONO UNA GRIGLIA, non una riga che va a capo.
+          Erano cinque etichette dentro un `flex-wrap`: uscivano due, due e "Info" da
+          sola in mezzo, cioe' un blocco che sembrava un elenco interrotto a meta'. Due
+          colonne fisse mettono ordine, e l'ultima voce occupa tutta la riga: cosi' lo
+          spaiamento diventa una scelta invece che un effetto del ritorno a capo.
+          Il profilo sta qui accanto alle statistiche, non fra i pulsanti per giocare:
+          e' una cosa che si guarda fra una partita e l'altra, non un modo di iniziare. */}
       <nav className="pl-home__menu">
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('aiuto')}>
-          {t('aiuto.titolo')}
-        </button>
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('statistiche')}>
-          {t('home.statistiche')}
-        </button>
-        {/* Il profilo sta nel menu accanto alle statistiche, non fra i pulsanti per
-            giocare: e' una cosa che si guarda fra una partita e l'altra, non un modo
-            di iniziare. */}
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('profilo')}>
-          {t('profilo.titolo')}
-        </button>
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('impostazioni')}>
-          {t('home.impostazioni')}
-        </button>
-        <button type="button" className="pl-btn pl-btn--fantasma" onClick={() => onVai('info')}>
-          {t('home.info')}
-        </button>
+        {[
+          ['aiuto', t('aiuto.titolo'), <IconaAiuto key="i" />],
+          ['statistiche', t('home.statistiche'), <IconaStatistiche key="i" />],
+          ['profilo', t('profilo.titolo'), <IconaProfilo key="i" />],
+          ['impostazioni', t('home.impostazioni'), <IconaImpostazioni key="i" />],
+          ['info', t('home.info'), <IconaInfo key="i" />],
+        ].map(([dove, etichetta, icona]) => (
+          <button
+            key={dove}
+            type="button"
+            className="pl-btn pl-btn--fantasma pl-home__voce"
+            onClick={() => onVai(dove)}
+          >
+            <span className="pl-home__voce-icona">{icona}</span>
+            <span>{etichetta}</span>
+          </button>
+        ))}
       </nav>
 
       {/* Il sostegno sta in fondo e in piccolo, sotto tutto il resto e sopra la sola

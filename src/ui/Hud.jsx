@@ -54,7 +54,7 @@ export function BarraCatena({ livello, digiuno = 0, t }) {
   // non e' un avviso, e' arredamento.
   const ultimaChiamata = attiva && digiuno > 0 && respiroRimasto(digiuno) === 0;
   return (
-    <div className="pl-catena">
+    <div className={`pl-catena ${attiva ? '' : 'pl-catena--riposo'}`}>
       <span className="pl-hud__etichetta">{t('hud.catena')}</span>
       <div
         className={`pl-catena__barra ${ultimaChiamata ? 'pl-catena__barra--ultima' : ''}`}
@@ -73,6 +73,12 @@ export function BarraCatena({ livello, digiuno = 0, t }) {
       <span className={`pl-catena__valore ${attiva ? 'pl-catena__valore--attiva' : ''}`}>
         &times;{moltiplicatore.toFixed(2)}
       </span>
+      {/* A CATENA SPENTA LA RIGA NON DICEVA NIENTE: una barra grigia vuota e un x1.00,
+          cioe' un moltiplicatore che non moltiplica, occupavano una riga intera proprio
+          nel momento in cui il giocatore ha piu' bisogno di capire a che cosa serve.
+          Adesso quella riga dice come si accende, e sparisce da sola appena e' accesa --
+          quando la barra si riempie, la spiegazione non serve piu'. */}
+      {!attiva ? <span className="pl-catena__spunto">{t('hud.catenaRiposo')}</span> : null}
       {/* L'AVVISO E' SULLA BARRA, NON SCRITTO. Era una riga di testo rosso sotto la
           barra, e il rosso in questa interfaccia e' il colore di cio' che cancella i
           dati: diceva "stai per perdere qualcosa di grave" per un moltiplicatore che

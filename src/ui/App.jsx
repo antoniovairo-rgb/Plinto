@@ -511,7 +511,7 @@ export function App() {
       ) : null}
 
       {schermata === 'profilo' ? (
-        <SchermoProfilo onIndietro={() => setSchermata('home')} t={t} />
+        <SchermoProfilo onIndietro={() => setSchermata('home')} onGioca={iniziaNuova} t={t} />
       ) : null}
 
       {schermata === 'archivio' ? (
@@ -536,6 +536,7 @@ export function App() {
 
       {schermata === 'statistiche' ? (
         <SchermoStatistiche
+          onGioca={iniziaNuova}
           record={loadRecords()}
           stats={statistiche}
           storicoSfide={storicoSfide()}
