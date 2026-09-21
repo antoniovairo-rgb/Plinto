@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { QUADRI, ATTI, OPERE, TOTALE_QUADRI } from '../../config/quadri.js';
 import { ConfermaDoppia, VoceCancellata } from '../ConfermaDoppia.jsx';
-import { caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi } from '../../persistence/progressi.js';
+import {
+  caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi, quantiSuperati,
+} from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 import { CondividiPercorso } from '../Condividi.jsx';
+import { IconaCassetta } from '../Attrezzi.jsx';
+import { OGNI_LIVELLI, tappeDelProssimoAttrezzo } from '../../persistence/attrezzi.js';
 
 /**
  * La mappa del percorso.
@@ -27,7 +31,29 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
   // farebbe partire per sbaglio; due volte no.
   const [passoConferma, setPassoConferma] = useState(0);
   const progressi = caricaProgressi();
-  const superati = QUADRI.filter((q) => progressi[q.numero]).length;
+  /**
+   * QUANTI NE HAI SUPERATI DAVVERO, non quanti ne hai toccati.
+   *
+   * Qui si contavano le VOCI salvate: `progressi[n]`. Ma da quando dopo otto tentativi
+   * falliti il livello successivo si apre lo stesso, esiste una voce che dice soltanto
+   * "ci ha provato N volte" e non ha nessun `mosse`. La spunta sulla casella la
+   * riconosceva -- usa `quadroSuperato` -- e questo conteggio no: la stessa schermata
+   * mostrava una casella senza spunta e la contava lo stesso in "X di 100". Lo diceva
+   * anche la barra, il riquadro delle statistiche e la scheda che si condivide, che
+   * verso l'esterno dichiarava piu' di quanto era stato fatto.
+   */
+  const superati = quantiSuperati(progressi);
+  // Le caselle da segnare le decide `tappeDelProssimoAttrezzo`, che sta con la regola
+  // degli attrezzi e non con il suo disegno: qui si passa solo l'elenco dei livelli che
+  // possono ancora far salire il conto.
+  const tappeConAttrezzo = useMemo(
+    () => tappeDelProssimoAttrezzo(
+      QUADRI.filter((q) => !quadroSuperato(q.numero, progressi)).map((q) => q.numero),
+      superati,
+    ),
+    [progressi, superati],
+  );
+
   const corrente = prossimoQuadro(TOTALE_QUADRI, progressi);
   const tappaCorrente = useRef(null);
 
@@ -54,6 +80,17 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
         </div>
       </div>
 
+      {/* LA LEGENDA DELLA CASSETTA. Un'icona che nessuno ha mai visto non spiega niente
+          da sola: chi guarda la mappa vede un simbolo su una casella ogni cinque e deve
+          poter capire che cosa promette senza aprirla. Compare solo finche' c'e'
+          qualcosa da guadagnare, cioe' finche' restano livelli da superare. */}
+      {superati < TOTALE_QUADRI ? (
+        <p className="pl-mappa__legenda">
+          <span className="pl-mappa__legenda-icona" aria-hidden="true"><IconaCassetta /></span>
+          {t('quadri.legendaAttrezzo').replace('{n}', OGNI_LIVELLI)}
+        </p>
+      ) : null}
+
       {/* Condividere il percorso sta QUI, accanto al numero che racconta, e non in fondo
           alla mappa. In fondo ci sono cento livelli di distanza: una cosa che nessuno
           trova e' una cosa che non esiste.
@@ -71,7 +108,9 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
 
       {ATTI.map((atto) => {
         const dellAtto = QUADRI.filter((q) => q.numero >= atto.da && q.numero <= atto.a);
-        const fattiQui = dellAtto.filter((q) => progressi[q.numero]).length;
+        // Lo stesso criterio della spunta e del conteggio grande, e per la stessa
+        // ragione: qui diceva "8/10" con sette livelli superati e uno solo tentato.
+        const fattiQui = dellAtto.filter((q) => quadroSuperato(q.numero, progressi)).length;
         const apertoQui = dellAtto.some((q) => quadroSbloccato(q.numero, progressi));
         return (
           <section key={atto.id} className={`pl-atto ${apertoQui ? '' : 'pl-atto--chiuso'}`}>
@@ -88,10 +127,12 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                 const fatto = quadroSuperato(quadro.numero, progressi) ? progressi[quadro.numero] : null;
                 const aperto = quadroSbloccato(quadro.numero, progressi);
                 const qui = quadro.numero === corrente;
+                const daAttrezzo = tappeConAttrezzo.has(quadro.numero);
                 const classi = ['pl-tappa'];
                 if (fatto) classi.push('pl-tappa--fatta');
                 if (!aperto) classi.push('pl-tappa--chiusa');
                 if (qui) classi.push('pl-tappa--qui');
+                if (daAttrezzo) classi.push('pl-tappa--attrezzo');
                 return (
                   <li key={quadro.numero} ref={qui ? tappaCorrente : null}>
                     <button
@@ -102,12 +143,22 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                       aria-current={qui ? 'step' : undefined}
                       aria-label={`${t('quadri.quadro').replace('{n}', quadro.numero)}: ${
                         aperto ? descriviObiettivi(quadro, t) : t('quadri.bloccato')}${
-                        fatto ? `. ${t('quadri.superato')}, ${t('quadri.tuoRecord').replace('{mosse}', fatto.mosse)}` : ''}`}
+                        fatto ? `. ${t('quadri.superato')}, ${t('quadri.tuoRecord').replace('{mosse}', fatto.mosse)}` : ''}${
+                        daAttrezzo ? `. ${t('quadri.quiAttrezzo')}` : ''}`}
                     >
                       <span className="pl-tappa__numero">{fatto ? '✓' : quadro.numero}</span>
                       {qui ? (
                         <span className="pl-tappa__plinto" aria-hidden="true">
                           <Plinto dimensione={38} className="pl-plinto--vivo" />
+                        </span>
+                      ) : null}
+                      {/* La cassetta degli attrezzi, piccola, in un angolo: la casella
+                          deve restare leggibile come numero. Il significato lo dice
+                          l'etichetta letta dai lettori di schermo e la legenda sotto la
+                          testata, non l'icona da sola. */}
+                      {daAttrezzo ? (
+                        <span className="pl-tappa__attrezzo" aria-hidden="true">
+                          <IconaCassetta />
                         </span>
                       ) : null}
                     </button>

@@ -68,6 +68,36 @@ export function riscuoti(superati) {
 }
 
 /**
+ * QUALI LIVELLI PORTANO AL PROSSIMO ATTREZZO, per segnarli sulla mappa.
+ *
+ * L'attrezzo matura ogni OGNI_LIVELLI livelli SUPERATI, e non ai livelli 5, 10, 15: per
+ * chi ne ha aperto uno per insistenza -- otto tentativi e si va avanti lo stesso -- i due
+ * conti divergono, e un segno fisso sulla quinta casella direbbe una cosa falsa proprio a
+ * chi ha gia' faticato di piu'.
+ *
+ * Quindi si conta come conta la regola. I livelli NON ancora superati, in ordine, sono
+ * gli unici che possono far salire il totale: il k-esimo di quelli porta il conto a
+ * `superati + k`, e dove quel numero e' un multiplo esatto si guadagna un attrezzo.
+ *
+ * E' una previsione, e si comporta da previsione: se salti un livello il segno si sposta
+ * in avanti da solo, perche' quel livello non ha fatto salire il conto.
+ *
+ * Sta qui e non nella schermata perche' e' una regola sugli attrezzi, non un disegno: la
+ * schermata la mostra, questa la decide, e cosi' si puo' provare senza un browser.
+ *
+ * @param {number[]} daSuperare i numeri dei livelli non ancora superati, in ordine
+ * @param {number} superati quanti ne sono gia' stati superati
+ * @returns {Set<number>} i numeri dei livelli su cui mettere il segno
+ */
+export function tappeDelProssimoAttrezzo(daSuperare, superati) {
+  const segnate = new Set();
+  daSuperare.forEach((numero, i) => {
+    if ((superati + i + 1) % OGNI_LIVELLI === 0) segnate.add(numero);
+  });
+  return segnate;
+}
+
+/**
  * Spende un attrezzo. Restituisce false se il magazzino e' vuoto, e in quel caso non
  * scrive niente: chi chiama non deve poter applicare l'effetto di un attrezzo che non
  * c'era.

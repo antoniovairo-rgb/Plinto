@@ -173,6 +173,9 @@ export function useQuadro() {
           ...stato, miglioramento, primaVolta, riepilogo,
           attrezzoGuadagnato: paga?.guadagnati ?? 0,
           attrezzoPerso: paga?.persi ?? 0,
+          // Quanti ne ha IN MANO dopo l'incasso: e' il numero che serve a decidere se
+          // usarne uno, e non si puo' ricavare da "quanti ne hai appena guadagnati".
+          attrezziOra: paga?.attrezzi.disponibili ?? 0,
         });
       }
       return dopo;

@@ -281,6 +281,8 @@ export default {
     comeSiGuadagnano: 'No tools yet. You earn one every {n} levels cleared, and you can hold up to three.',
     guadagnato: 'You earned a tool.',
     guadagnatiTanti: 'You earned {n} tools.',
+    oraNeHai: 'You now have {n}.',
+    oraNeHaiUno: 'You now have one.',
     perso: 'Store full: a tool you had just earned was lost. Use one to make room.',
     persiTanti: 'Store full: {n} earned tools were lost. You can hold three at most: use one to make room.',
   },
@@ -327,6 +329,8 @@ export default {
 
   quadri: {
     avanzamento: '{fatti} of {totale}',
+    legendaAttrezzo: 'The toolbox marks the level that earns you a tool: one every {n} levels cleared.',
+    quiAttrezzo: 'Clear this one and you earn a tool',
     superato: 'Cleared',
     attoDaAprire: 'Opens when you reach level {n}',
     bloccato: 'Clear the previous level',

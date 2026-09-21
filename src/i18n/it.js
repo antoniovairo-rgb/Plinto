@@ -332,6 +332,8 @@ export default {
     comeSiGuadagnano: 'Non hai attrezzi. Ne guadagni uno ogni {n} livelli superati, e puoi tenerne al massimo tre.',
     guadagnato: 'Hai guadagnato un attrezzo.',
     guadagnatiTanti: 'Hai guadagnato {n} attrezzi.',
+    oraNeHai: 'Adesso ne hai {n}.',
+    oraNeHaiUno: 'Adesso ne hai uno.',
     perso: 'Magazzino pieno: un attrezzo appena maturato è andato perso. Usane uno per fare posto.',
     persiTanti: 'Magazzino pieno: {n} attrezzi maturati sono andati persi. Se ne tengono al massimo tre: usane uno per fare posto.',
   },
@@ -384,6 +386,8 @@ export default {
 
   quadri: {
     avanzamento: '{fatti} di {totale}',
+    legendaAttrezzo: 'La cassetta segna il livello che ti fa guadagnare un attrezzo: uno ogni {n} livelli superati.',
+    quiAttrezzo: 'Superandolo guadagni un attrezzo',
     superato: 'Superato',
     attoDaAprire: 'Si apre quando arrivi al livello {n}',
     bloccato: 'Supera il livello precedente',

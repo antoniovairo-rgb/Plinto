@@ -7,6 +7,60 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.17.1] — 21 settembre 2026
+
+### Corretto
+
+**Mettere l'ultimo pezzo della terna sulla mensola fermava il gioco.** Segnalato giocando:
+la mano restava vuota e la terna successiva non arrivava. Non era un blocco totale —
+riprendendo il pezzo e giocandolo la mano tornava — ma si restava con **un pezzo giocabile
+invece di tre**, e se quell'unico pezzo non fosse entrato da nessuna parte la partita si
+sarebbe dichiarata finita mentre non lo era.
+
+La causa è la solita: il rifornimento della mano viveva **dentro** `placePiece`, cioè
+dentro l'unico modo che c'era di consumare un pezzo prima che la mensola esistesse. La
+mensola lo consuma senza passare di lì. Adesso il rifornimento è una funzione sola che
+entrambe le strade chiamano, e se un domani arriverà un terzo modo di svuotare la mano ci
+sarà un punto solo da chiamare.
+
+**La mappa contava come superati livelli che non lo erano.** Contava le *voci* salvate,
+mentre la spunta sulla singola casella usa il criterio giusto — serve un numero di mosse
+registrato. Chi apre un livello per insistenza, dopo otto tentativi falliti, ha una voce
+senza mosse: la sua casella restava **senza spunta** e il livello veniva contato lo stesso
+in «X di 100», nella barra, nel conteggio dell'atto, nel riquadro delle statistiche e
+**nella scheda che si condivide**, che verso l'esterno dichiarava più di quanto era stato
+fatto. La schermata si contraddiceva da sola.
+
+### Aggiunto
+
+**Sulla mappa si vede dove si guadagna un attrezzo.** Una cassetta sulla casella che porta
+al prossimo, con la legenda sotto la testata.
+
+Il segno **non sta ogni cinque caselle**, e la differenza conta: l'attrezzo matura ogni
+cinque livelli *superati*, e per chi ne ha aperto uno per insistenza i due conti divergono.
+Un segno fisso sulla quinta casella direbbe una cosa falsa proprio a chi ha già faticato di
+più. Si conta quindi come conta la regola: i livelli non ancora superati, in ordine, sono
+gli unici che possono far salire il totale, e si segna quello che porta il conto a un
+multiplo esatto. È una previsione e si comporta da previsione — se salti un livello il
+segno si sposta in avanti da solo.
+
+**L'attrezzo guadagnato si festeggia.** Un messaggio c'era già, ma era una riga da 13,5px
+schiacciata fra il titolo e il punteggio: la cosa migliore che succede in quel livello,
+detta con il carattere più piccolo della schermata. Adesso è un riquadro con la cassetta,
+la frase che festeggia e **quanti attrezzi hai in mano adesso** — il numero che serve per
+decidere se usarne uno, e che prima non era scritto da nessuna parte.
+
+### Verificato
+
+- `tests/piccone-mensola.test.js`: la mano si rifà quando l'ultimo pezzo va sulla mensola,
+  non si rifà negli altri casi (altrimenti la mensola diventerebbe un modo per cambiare la
+  terna), e la partita non si dichiara finita se il pezzo messo da parte entra ancora.
+  Verificata capace di fallire rimettendo il difetto: dice «la terna successiva non è
+  arrivata».
+- `tests/attrezzi.test.js`: il calcolo delle caselle da segnare è una funzione pura e
+  provata, compreso il caso del livello saltato. Verificata capace di fallire sostituendola
+  con «ogni quinto livello».
+
 ## [1.17.0] — 17 settembre 2026
 
 ### La curva di difficoltà è diventata una cosa che si misura

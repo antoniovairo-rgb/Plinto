@@ -3,6 +3,7 @@ import { Plinto } from '../Plinto.jsx';
 import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
 import { CondividiQuadro } from '../Condividi.jsx';
 import { quadroSbloccato } from '../../persistence/progressi.js';
+import { IconaCassetta } from '../Attrezzi.jsx';
 import { TOTALE_QUADRI } from '../../config/quadri.js';
 
 
@@ -57,11 +58,24 @@ export function SchermoFineQuadro({
             te lo dica e' il modo piu' rapido di far perdere fiducia in un gioco.
             Il caso in cui ne maturano molti insieme non e' teorico: chi aggiorna dopo
             settanta livelli li riscuote tutti in una volta. */}
+        {/* ERA UNA RIGA DA TREDICI PUNTI E MEZZO fra il titolo e il punteggio, e si
+            leggeva come una nota a pie' di pagina invece che come una ricompensa: la
+            cosa migliore che ti succede in quel livello, detta con il carattere piu'
+            piccolo della schermata. Adesso e' un riquadro con la cassetta, la parola
+            che festeggia e quanti attrezzi hai in mano ADESSO -- che e' il numero
+            di cui il giocatore ha bisogno per decidere se usarne uno. */}
         {esito.attrezzoGuadagnato > 0 ? (
-          <p className="pl-fine__attrezzo">
-            {t(esito.attrezzoGuadagnato === 1 ? 'attrezzi.guadagnato' : 'attrezzi.guadagnatiTanti')
-              .replace('{n}', esito.attrezzoGuadagnato)}
-          </p>
+          <div className="pl-fine__premio">
+            <span className="pl-fine__premio-icona" aria-hidden="true"><IconaCassetta /></span>
+            <p className="pl-fine__premio-titolo">
+              {t(esito.attrezzoGuadagnato === 1 ? 'attrezzi.guadagnato' : 'attrezzi.guadagnatiTanti')
+                .replace('{n}', esito.attrezzoGuadagnato)}
+            </p>
+            <p className="pl-fine__premio-conto">
+              {t(esito.attrezziOra === 1 ? 'attrezzi.oraNeHaiUno' : 'attrezzi.oraNeHai')
+                .replace('{n}', esito.attrezziOra)}
+            </p>
+          </div>
         ) : null}
         {esito.attrezzoPerso > 0 ? (
           <p className="pl-fine__attrezzo pl-fine__attrezzo--perso">

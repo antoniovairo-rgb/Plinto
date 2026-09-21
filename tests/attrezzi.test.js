@@ -24,7 +24,7 @@ vi.stubGlobal('window', {
 
 const {
   caricaAttrezzi, riscuoti, usaAttrezzo, quantiAttrezzi, magazzinoPieno,
-  OGNI_LIVELLI, MASSIMO, ATTREZZI,
+  tappeDelProssimoAttrezzo, OGNI_LIVELLI, MASSIMO, ATTREZZI,
 } = await import('../src/persistence/attrezzi.js');
 
 beforeEach(() => memoria.clear());
@@ -158,5 +158,44 @@ describe('gli attrezzi arretrati di chi aggiorna a meta strada', () => {
       expect(testi.attrezzi.guadagnatiTanti).toContain('{n}');
       expect(testi.attrezzi.persiTanti).toContain('{n}');
     }
+  });
+});
+
+/**
+ * IL SEGNO SULLA MAPPA DEVE DIRE IL VERO ANCHE A CHI HA SALTATO UN LIVELLO.
+ *
+ * E' la ragione per cui questo calcolo non e' "ogni quinta casella". Dopo otto tentativi
+ * falliti il livello successivo si apre lo stesso, quindi si puo' arrivare al livello 12
+ * avendone superati 9: a quel punto "il livello 10" e "il decimo superato" sono due cose
+ * diverse, e segnare il 10 prometterebbe un attrezzo che li' non arriva.
+ */
+describe('le caselle che portano al prossimo attrezzo', () => {
+  const tutti = Array.from({ length: 30 }, (_, i) => i + 1);
+
+  it('a percorso appena cominciato segna il quinto, il decimo, il quindicesimo', () => {
+    const segnate = tappeDelProssimoAttrezzo(tutti, 0);
+    expect([...segnate].slice(0, 4)).toEqual([5, 10, 15, 20]);
+  });
+
+  it('conta da dove sei arrivato, non dal principio', () => {
+    // Sette superati: ne mancano tre al decimo, e i tre prossimi da superare sono 8, 9, 10.
+    const daSuperare = tutti.filter((n) => n > 7);
+    const segnate = tappeDelProssimoAttrezzo(daSuperare, 7);
+    expect([...segnate].slice(0, 3)).toEqual([10, 15, 20]);
+  });
+
+  it('un livello saltato sposta il segno in avanti', () => {
+    // Nove superati su undici aperti: il terzo e l undicesimo sono rimasti indietro.
+    // Il decimo superato sara' il PRIMO che gli manca, cioe' il livello 3.
+    const daSuperare = tutti.filter((n) => n === 3 || n >= 11);
+    const segnate = tappeDelProssimoAttrezzo(daSuperare, 9);
+    expect(segnate.has(3), 'il primo livello che gli manca porta al decimo superato').toBe(true);
+    expect(segnate.has(10), 'il livello 10 e gia superato: non puo far salire niente').toBe(false);
+    // Il quindicesimo superato: 3, poi 11..15 -> il sesto della lista.
+    expect(segnate.has(15)).toBe(true);
+  });
+
+  it('non segna niente se non resta piu niente da superare', () => {
+    expect(tappeDelProssimoAttrezzo([], 100).size).toBe(0);
   });
 });

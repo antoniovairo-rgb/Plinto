@@ -607,6 +607,43 @@ button {
 }
 .pl-fine__attrezzo--perso { color: var(--pl-text-dim); }
 
+/* IL PREMIO: l'attrezzo appena guadagnato. Un riquadro, non una riga fra le altre --
+   e' la cosa migliore che succede in quel livello e deve vedersi come tale. */
+.pl-fine__premio {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 14px auto 20px;
+  padding: 12px 18px;
+  max-width: 300px;
+  border-radius: var(--pl-radius-md);
+  background: color-mix(in srgb, var(--pl-brand) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-brand) 34%, transparent);
+}
+.pl-fine__premio-icona {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--pl-brand) 22%, transparent);
+  color: var(--pl-brand);
+  margin-bottom: 4px;
+}
+.pl-fine__premio-titolo {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--pl-brand);
+  text-align: center;
+}
+.pl-fine__premio-conto {
+  margin: 0;
+  font-size: 13px;
+  color: var(--pl-text-dim);
+  text-align: center;
+}
+
 
 /* Il segno del gesso sulla plancia: un contorno tratteggiato, non un riempimento. Deve
    dire "qui", senza sembrare un blocco gia' appoggiato ne' l'anteprima del pezzo che si
@@ -1749,6 +1786,47 @@ button {
   color: var(--pl-text-faint);
   cursor: default;
 }
+
+/* La legenda della cassetta, sotto la testata della mappa. */
+.pl-mappa__legenda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pl-text-faint);
+}
+.pl-mappa__legenda-icona {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--pl-surface-2);
+  color: var(--pl-brand);
+}
+.pl-mappa__legenda-icona svg { width: 14px; height: 14px; }
+
+/* LA CASSETTA SULLA CASELLA CHE PORTA AL PROSSIMO ATTREZZO.
+   Piccola e in un angolo: la casella deve restare leggibile come numero, e l'icona e'
+   un'aggiunta, non il contenuto. Il cerchio di fondo la stacca sia dalla casella chiusa
+   (trasparente) sia da quella corrente (ottone), che altrimenti se la mangerebbe. */
+.pl-tappa__attrezzo {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--pl-surface-2);
+  box-shadow: 0 0 0 2px var(--pl-bg);
+  color: var(--pl-brand);
+}
+.pl-tappa__attrezzo svg { width: 13px; height: 13px; }
 
 /* La tappa corrente: piu' grande, in ottone, con Plinto appoggiato sopra. */
 .pl-tappa--qui {

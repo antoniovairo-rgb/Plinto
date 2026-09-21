@@ -112,7 +112,7 @@ const ICONE = {
   carriola: IconaCarriola, gessetto: IconaGessetto, piccone: IconaPiccone, mensola: IconaMensola,
 };
 
-export { IconaMensola };
+export { IconaMensola, IconaCassetta };
 
 /** La pastiglia: quanti attrezzi hai, e quanti posti restano. */
 export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {

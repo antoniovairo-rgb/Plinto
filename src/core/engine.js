@@ -171,6 +171,56 @@ export function deadPieces(state) {
 }
 
 /**
+ * LA MANO SI RIFORNISCE QUANDO SI SVUOTA, da qualunque strada si sia svuotata.
+ *
+ * Stava dentro `placePiece`, e li' descriveva bene l'unico modo che c'era di consumare
+ * un pezzo: appoggiarlo sulla griglia. Poi e' arrivata la mensola, che il pezzo lo toglie
+ * dalla mano senza passare di qui, e il difetto e' uscito com'era prevedibile:
+ * mettendo sulla mensola l'ULTIMO pezzo della terna, la mano restava vuota e la terna
+ * successiva non arrivava mai. Non era un blocco totale -- riprendendo il pezzo dalla
+ * mensola e giocandolo la mano tornava -- ma il gioco restava fermo dove doveva andare
+ * avanti, e con un pezzo solo giocabile invece di tre.
+ *
+ * Adesso il rifornimento e' una funzione sola, e la chiamano tutte e due le strade. Se un
+ * domani arrivasse un terzo modo di svuotare la mano, e' questo il punto da chiamare.
+ *
+ * @param {object} state stato di partenza (per modalita', semi e anteprima)
+ * @param {Uint8Array} grid la griglia su cui estrarre, che dopo una mossa non e' piu'
+ *   quella di `state`
+ * @param {Array} hand la mano gia' svuotata del pezzo appena consumato
+ */
+function rifornisci(state, grid, hand) {
+  let rngState = state.rngState;
+  let shapeHistory = state.shapeHistory;
+  let manoSuccessiva = state.manoSuccessiva ?? null;
+  let handsDealt = state.stats.handsDealt;
+  let nuova = hand;
+
+  if (hand.every((p) => p === null)) {
+    if (state.modalita === MODALITA.ANTEPRIMA && manoSuccessiva) {
+      // Si consegna ESATTAMENTE la terna che il giocatore ha visto. Non viene ricalcolata
+      // ne' ritoccata: se lo fosse, l'anteprima sarebbe una promessa non mantenuta, ed e'
+      // il difetto peggiore che questa modalita' possa avere in un gioco che promette di
+      // non nascondere niente.
+      nuova = manoSuccessiva;
+      // E nello stesso istante si estrae quella dopo, sulla griglia di adesso.
+      const dopo = generateHand(grid, rngState, shapeHistory);
+      manoSuccessiva = dopo.pieces;
+      rngState = dopo.rngState;
+      shapeHistory = dopo.history;
+    } else {
+      const dealt = generateHand(grid, rngState, shapeHistory);
+      nuova = dealt.pieces;
+      rngState = dealt.rngState;
+      shapeHistory = dealt.history;
+    }
+    handsDealt += 1;
+  }
+
+  return { hand: nuova, rngState, shapeHistory, manoSuccessiva, handsDealt };
+}
+
+/**
  * Appoggia un pezzo della mano sulla griglia. Unico modo di far progredire la partita.
  * @param {object} state
  * @param {number} handIndex indice del pezzo nella mano
@@ -181,6 +231,7 @@ export function deadPieces(state) {
  *   della partita era l'unico valore non deterministico a parita' di seed.
  * @returns {object} nuovo stato (lo stato precedente non viene mai mutato)
  */
+
 export function placePiece(state, handIndex, row, col, now = Date.now()) {
   if (state.status !== 'playing') return state;
   const piece = state.hand[handIndex];
@@ -222,36 +273,14 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
   // 5. Mano: si rigenera solo quando tutti i pezzi sono stati usati.
   const hand = state.hand.slice();
   hand[handIndex] = null;
+
+  // Va letto PRIMA del rifornimento: dopo, la mano e' di nuovo piena e questa domanda
+  // non si puo' piu' fare. Serve all'animazione, che mostra la terna nuova entrare.
   const handEmpty = hand.every((p) => p === null);
 
-  let grid = cleared.grid;
-  let rngState = state.rngState;
-  let shapeHistory = state.shapeHistory;
-  let nextHand = hand;
-  let handsDealt = state.stats.handsDealt;
-
-  let manoSuccessiva = state.manoSuccessiva ?? null;
-
-  if (handEmpty) {
-    if (state.modalita === MODALITA.ANTEPRIMA && manoSuccessiva) {
-      // Si consegna ESATTAMENTE la terna che il giocatore ha visto. Non viene ricalcolata
-      // ne' ritoccata: se lo fosse, l'anteprima sarebbe una promessa non mantenuta, ed e'
-      // il difetto peggiore che questa modalita' possa avere in un gioco che promette di
-      // non nascondere niente.
-      nextHand = manoSuccessiva;
-      // E nello stesso istante si estrae quella dopo, sulla griglia di adesso.
-      const dopo = generateHand(grid, rngState, shapeHistory);
-      manoSuccessiva = dopo.pieces;
-      rngState = dopo.rngState;
-      shapeHistory = dopo.history;
-    } else {
-      const dealt = generateHand(grid, rngState, shapeHistory);
-      nextHand = dealt.pieces;
-      rngState = dealt.rngState;
-      shapeHistory = dealt.history;
-    }
-    handsDealt += 1;
-  }
+  const grid = cleared.grid;
+  const rifornita = rifornisci(state, grid, hand);
+  const { hand: nextHand, rngState, shapeHistory, manoSuccessiva, handsDealt } = rifornita;
 
   // 6. Game over: nessuno dei pezzi rimasti entra piu' da nessuna parte -- contando
   //    anche quello appoggiato sulla mensola, che e' giocabile quanto gli altri.
@@ -415,7 +444,27 @@ export function appoggiaSullaMensola(state, handIndex) {
   if (!pezzo) return null;
   const hand = state.hand.slice();
   hand[handIndex] = null;
-  return { ...state, hand, mensola: pezzo };
+
+  // METTERE DA PARTE L'ULTIMO PEZZO SVUOTA LA MANO, e una mano vuota va rifornita
+  // esattamente come dopo una mossa: e' lo stesso fatto, non un caso speciale.
+  //
+  // Senza, la terna successiva non arrivava e il giocatore restava con il solo pezzo
+  // sulla mensola -- uno invece di tre -- fino a rimetterlo giu'. Segnalato giocando.
+  const rifornita = rifornisci(state, state.grid, hand);
+
+  return {
+    ...state,
+    hand: rifornita.hand,
+    manoSuccessiva: rifornita.manoSuccessiva,
+    rngState: rifornita.rngState,
+    shapeHistory: rifornita.shapeHistory,
+    mensola: pezzo,
+    stats: { ...state.stats, handsDealt: rifornita.handsDealt },
+    // La mano nuova potrebbe non entrare da nessuna parte. Si controlla come dopo una
+    // mossa, contando anche il pezzo appena messo sulla mensola: e' giocabile quanto
+    // gli altri, e dimenticarlo dichiarerebbe finita una partita che non lo e'.
+    status: restaUnaMossa(state.grid, rifornita.hand, pezzo) ? 'playing' : 'over',
+  };
 }
 
 /**

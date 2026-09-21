@@ -3,6 +3,7 @@ import {
   createGame, placePiece, scavaCella, appoggiaSullaMensola, riprendiDallaMensola,
   restaUnaMossa, serializeGame, deserializeGame, annullabile,
 } from '../src/core/engine.js';
+import { canPlace } from '../src/core/grid.js';
 import { HAND_SIZE } from '../src/config/rules.js';
 import { gridFromString, idx, filledCount } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
@@ -175,5 +176,78 @@ describe('la mensola attraverso un salvataggio', () => {
     expect(riletto).not.toBeNull();
     expect(riletto.mensola).toBeNull();
     expect(riletto.hand).toHaveLength(HAND_SIZE);
+  });
+});
+
+/**
+ * METTERE DA PARTE L'ULTIMO PEZZO NON DEVE FERMARE LA PARTITA.
+ *
+ * Segnalato giocando: con la mensola si mette da parte il terzo pezzo della terna, la
+ * mano resta vuota e la terna successiva non arriva. Non era un blocco totale --
+ * riprendendo il pezzo e giocandolo la mano tornava -- ma il gioco restava fermo dove
+ * doveva andare avanti, e con un pezzo solo giocabile invece di tre.
+ *
+ * La causa: il rifornimento della mano viveva dentro `placePiece`, cioe' dentro l'unico
+ * modo che c'era di consumare un pezzo prima che la mensola esistesse. La mensola lo
+ * consuma senza passare di li'.
+ */
+describe('la mensola e la terna successiva', () => {
+  /** Gioca i primi due pezzi della mano, lasciandone uno solo. */
+  function conUnPezzoSolo() {
+    let s = createGame({ seed: 4242 });
+    for (const i of [0, 1]) {
+      const pezzo = s.hand[i];
+      const posto = allPosti(s.grid, pezzo.shape);
+      s = placePiece(s, i, posto.row, posto.col, 0);
+    }
+    return s;
+  }
+
+  function allPosti(grid, shape) {
+    for (let r = 0; r < 9; r += 1) {
+      for (let c = 0; c < 9; c += 1) {
+        if (canPlace(grid, shape, r, c)) return { row: r, col: c };
+      }
+    }
+    throw new Error('nessun posto per il pezzo: lo scenario non prova quello che dice');
+  }
+
+  it('la mano si rifa quando l ultimo pezzo va sulla mensola', () => {
+    const prima = conUnPezzoSolo();
+    const rimasti = prima.hand.filter(Boolean);
+    expect(rimasti.length, 'lo scenario deve lasciare un pezzo solo').toBe(1);
+
+    const indice = prima.hand.findIndex((p) => p !== null);
+    const dopo = appoggiaSullaMensola(prima, indice);
+
+    expect(dopo, 'la mensola era vuota: l attrezzo deve funzionare').not.toBeNull();
+    expect(dopo.mensola.uid).toBe(rimasti[0].uid);
+    expect(dopo.hand.filter(Boolean).length, 'la terna successiva non e arrivata').toBe(HAND_SIZE);
+    expect(dopo.stats.handsDealt).toBe(prima.stats.handsDealt + 1);
+    expect(dopo.status).toBe('playing');
+  });
+
+  it('mettere da parte un pezzo qualsiasi NON rifa la mano', () => {
+    // Il rovescio della prova sopra: il rifornimento scatta solo quando la mano si
+    // svuota, altrimenti la mensola diventerebbe un modo per cambiare la terna.
+    const s = createGame({ seed: 4242 });
+    const dopo = appoggiaSullaMensola(s, 0);
+    expect(dopo.hand.filter(Boolean).length).toBe(HAND_SIZE - 1);
+    expect(dopo.stats.handsDealt).toBe(s.stats.handsDealt);
+  });
+
+  it('la partita non si dichiara finita se il pezzo sulla mensola entra ancora', () => {
+    // La mano nuova potrebbe non entrare. Il pezzo appena messo da parte e' giocabile
+    // quanto gli altri, e va contato: dimenticarlo chiuderebbe una partita viva.
+    const quasiPiena = [
+      '111111111', '111111111', '111111111',
+      '111111111', '111111111', '111111111',
+      '111111111', '11111111.', '11111111.',
+    ].join('\n');
+    const s = { ...scenario(quasiPiena, ['p1', null, null]), mensola: null };
+    const dopo = appoggiaSullaMensola(s, 0);
+    expect(dopo.mensola).not.toBeNull();
+    expect(restaUnaMossa(dopo.grid, dopo.hand, dopo.mensola)).toBe(true);
+    expect(dopo.status).toBe('playing');
   });
 });
