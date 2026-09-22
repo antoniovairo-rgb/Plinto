@@ -26,10 +26,24 @@ function menoMovimento() {
 
 /**
  * Versione del documento delle impostazioni.
- * Alla 1 i campi sono gli stessi della forma senza versione: nessuna migrazione serve,
- * il documento dice soltanto da dove viene.
+ *
+ * Alla 1 i campi erano gli stessi della forma senza versione: il documento diceva
+ * soltanto da dove veniva.
+ *
+ * ALLA 2 IL TEMA CHIARO NON ESISTE PIU'. La migrazione toglie il campo, e non e' una
+ * pulizia cosmetica: chi aveva scelto "chiaro" ha quella parola scritta sul proprio
+ * dispositivo, e senza migrazione se la porterebbe dietro per sempre -- con l'interruttore
+ * per cambiarla sparito dalle impostazioni. Sarebbe un giocatore chiuso dentro un tema che
+ * il gioco non disegna piu' e che non puo' abbandonare. Togliendo il campo, alla prima
+ * apertura torna allo scuro come tutti.
  */
-const VERSIONE = 1;
+const VERSIONE = 2;
+
+/** Dalla forma con il tema a quella senza. */
+function migra(dati) {
+  const { tema, ...resto } = dati;
+  return resto;
+}
 
 /**
  * Impostazioni del giocatore, salvate in locale.
@@ -44,20 +58,22 @@ export function useImpostazioni() {
       audio: true,
       vibrazione: true,
       animazioni: !menoMovimento(),
-      tema: 'scuro',
       lingua: linguaDelBrowser(),
       introVista: false,
     },
+    migra,
   }));
 
   useEffect(() => { scriviDocumento(KEYS.SETTINGS, VERSIONE, impostazioni); }, [impostazioni]);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (impostazioni.tema === 'chiaro') root.setAttribute('data-theme', 'chiaro');
-    else root.removeAttribute('data-theme');
+    // L'attributo si toglie SEMPRE, anche se nessuno lo mette piu': un dispositivo che
+    // l'aveva addosso da prima deve perderlo alla prima apertura, non restare dipinto
+    // con una tavolozza che il gioco non ha piu'.
+    root.removeAttribute('data-theme');
     root.setAttribute('lang', impostazioni.lingua);
-  }, [impostazioni.tema, impostazioni.lingua]);
+  }, [impostazioni.lingua]);
 
   const cambia = useCallback((chiave, valore) => {
     setImpostazioni((prev) => ({ ...prev, [chiave]: valore }));

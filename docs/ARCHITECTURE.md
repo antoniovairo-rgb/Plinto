@@ -302,7 +302,6 @@ codice che può violare in silenzio la promessa di `PRIVACY.md`: per questo
 `tests/privacy.test.js` lo legge e rifiuta domini esterni, `sendBeacon`, WebSocket e la
 scomparsa del controllo sull'origine.
 
-
 ### ADR-9 — Documenti versionati su localStorage, e un contenitore per le mappe
 **Contesto.** Tutto cio' che PLINTO salva vive solo nel browser di chi gioca: non esiste
 nessuna copia altrove. Finora nessun documento diceva quale versione del gioco lo avesse
@@ -347,9 +346,7 @@ Restano aperte queste, e sono aperte per davvero.
   JSX invece che nei dizionari (etichette dei pezzi nel tray, note di `Info.jsx` e
   `Sostieni.jsx`) e che i numeri siano formattati con `toLocaleString('it-IT')` fisso anche
   in inglese.
-- **Accessibilità del tema chiaro.** I contrasti sono stati misurati e corretti solo per il
-  tema scuro; il tema chiaro non è conforme e nessuno ha ancora deciso se correggerlo o
-  ritirarlo (vedi `DESIGN_SYSTEM.md`, sezione 3).
+
 - **Rientro dall'app in background.** La partita viene salvata a ogni mossa, quindi la
   perdita è al massimo di zero mosse; ma non esiste nessuna gestione esplicita di
   `visibilitychange`, e il comportamento dell'`AudioContext` sospeso dal sistema operativo

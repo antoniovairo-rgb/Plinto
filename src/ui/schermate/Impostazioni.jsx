@@ -48,21 +48,6 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
       </div>
 
       <div className="pl-gruppo">
-        <span className="pl-hud__etichetta">{t('impostazioni.tema')}</span>
-        <div className="pl-segmenti">
-          {[['scuro', t('impostazioni.temaScuro')], ['chiaro', t('impostazioni.temaChiaro')]].map(
-            ([valore, testo]) => (
-              <button key={valore} type="button"
-                      className={`pl-segmento ${impostazioni.tema === valore ? 'pl-segmento--attivo' : ''}`}
-                      onClick={() => cambia('tema', valore)} aria-pressed={impostazioni.tema === valore}>
-                {testo}
-              </button>
-            ),
-          )}
-        </div>
-      </div>
-
-      <div className="pl-gruppo">
         <span className="pl-hud__etichetta">{t('impostazioni.lingua')}</span>
         <div className="pl-segmenti">
           {Object.entries(LINGUE).map(([codice, { nome }]) => (

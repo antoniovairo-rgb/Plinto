@@ -7,6 +7,35 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.0] — 22 settembre 2026
+
+### Tolto
+
+**Il tema chiaro non esiste più.** Era un'opzione nelle impostazioni; adesso il gioco ha un
+tema solo, quello scuro. Sono stati tolti la scelta, i suoi token e le sue misure di
+contrasto.
+
+**Chi aveva scelto il tema chiaro non resta bloccato**, ed era la parte che contava. Quella
+parola stava scritta sul suo dispositivo: senza migrazione se la sarebbe portata dietro per
+sempre, con l'interruttore per cambiarla sparito dalle impostazioni — un giocatore chiuso
+dentro un tema che il gioco non disegna più e che non può abbandonare. Il documento delle
+impostazioni passa alla versione 2 e toglie il campo, quindi alla prima apertura torna allo
+scuro come tutti. Verificato aprendo l'app con un documento di versione 1 che diceva
+`tema: "chiaro"`: l'attributo sulla radice risulta assente e le impostazioni salvate
+tornano senza quel campo.
+
+### Verificato
+
+`tools/contrasti.mjs` misura ora un tema solo, e `tests/e2e/trionfo.mjs` non ripete più le
+sue misure su due tavolozze. La ragione per cui quelle prove esistevano resta scritta nel
+codice e in `docs/DESIGN_SYSTEM.md`, perché vale per il prossimo tema che qualcuno volesse
+aggiungere: il tema chiaro era stato **pubblicato rotto** — punteggio in oro a 1,53:1,
+cinque blocchi su sei sotto 3:1 — proprio perché lo strumento guardava solo l'altro. Un
+tema si ridefinisce per intero, oppure non si offre.
+
+In `docs/ARCHITECTURE.md` sparisce il debito tecnico «accessibilità del tema chiaro»: non
+è stato risolto, è stato tolto l'oggetto.
+
 ## [1.18.0] — 21 settembre 2026
 
 ### I quadranti si vedono

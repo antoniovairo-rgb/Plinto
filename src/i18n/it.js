@@ -146,9 +146,6 @@ export default {
     titolo: 'Impostazioni',
     audio: 'Suoni',
     vibrazione: 'Vibrazione',
-    tema: 'Tema',
-    temaScuro: 'Scuro',
-    temaChiaro: 'Chiaro',
     lingua: 'Lingua',
     azzera: 'Azzera i miei dati',
     // DICEVA MENO DEL VERO. "Cancella record, statistiche e partita in corso" ometteva

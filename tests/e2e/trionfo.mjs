@@ -277,25 +277,18 @@ if (await vinciIlPrimo()) {
       return peggiori;
     });
 
-    // SI MISURA IN TUTTI E DUE I TEMI. Il velo e i colori dei blocchi cambiano entrambi
-    // fra scuro e chiaro: un velo che salva il testo sul fondo scuro non dice niente su
-    // quello chiaro, e il tema chiaro in questo progetto e' gia' stato rotto una volta
-    // (punteggio a 1,53:1) proprio perche' si misurava solo l'altro.
-    for (const tema of ['scuro', 'chiaro']) {
-      await page.evaluate((quale) => {
-        if (quale === 'chiaro') document.documentElement.setAttribute('data-theme', 'chiaro');
-        else document.documentElement.removeAttribute('data-theme');
-      }, tema);
-      for (const m of await misuraLeggibilita()) {
-        console.log(`   [${tema}] ${m.sel}: contrasto peggiore sopra un blocco ${m.rapporto}:1 (velo ${m.velo})`);
-        // 4.5 e' la soglia WCAG AA per il testo normale. Il titolo e' grande e potrebbe
-        // cavarsela con 3, ma il sottotitolo no: si chiede la stessa cosa a entrambi.
-        if (m.rapporto < 4.5) {
-          errori.push(`TRIONFO [tema ${tema}]: ${m.sel} sopra un blocco arriva a ${m.rapporto}:1, sotto la soglia AA di 4.5`);
-        }
+    // SI MISURAVA IN TUTTI E DUE I TEMI, e il chiaro non c'e' piu'. La ragione per cui
+    // c'erano entrambi resta scritta perche' vale per il prossimo tema che qualcuno
+    // volesse aggiungere: il chiaro era stato pubblicato rotto -- punteggio a 1,53:1 --
+    // proprio perche' si misurava solo l'altro.
+    for (const m of await misuraLeggibilita()) {
+      console.log(`   ${m.sel}: contrasto peggiore sopra un blocco ${m.rapporto}:1 (velo ${m.velo})`);
+      // 4.5 e' la soglia WCAG AA per il testo normale. Il titolo e' grande e potrebbe
+      // cavarsela con 3, ma il sottotitolo no: si chiede la stessa cosa a entrambi.
+      if (m.rapporto < 4.5) {
+        errori.push(`TRIONFO: ${m.sel} sopra un blocco arriva a ${m.rapporto}:1, sotto la soglia AA di 4.5`);
       }
     }
-    await page.evaluate(() => document.documentElement.removeAttribute('data-theme'));
 
     // E i tocchi devono attraversarla. Qui la regola vera e' `pointer-events: none` sulla
     // pioggia: si controlla quella, e poi si preme davvero il pulsante per vedere che la

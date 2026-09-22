@@ -2,7 +2,7 @@
  * Verifica dei contrasti dichiarati in src/styles/tokens.css.
  *
  * I numeri scritti nei commenti dei token non sono decorazione: sono la prova che il
- * tema chiaro e quello scuro rispettano WCAG AA. Un commento sbagliato e' peggio di
+ * tema del gioco rispetta WCAG AA. Un commento sbagliato e' peggio di
  * nessun commento, perche' fa passare per verificato cio' che non lo e' — ed e' gia'
  * successo due volte in questo file. Questo strumento rimisura tutto leggendo il CSS,
  * cosi' i numeri si possono rifare con un comando invece che a mente.
@@ -48,9 +48,16 @@ function tokenDi(selettore) {
   return token;
 }
 
+/**
+ * UN TEMA SOLO, da quando il chiaro non esiste piu'.
+ *
+ * Era una coppia, e la coppia aveva una ragione: il tema chiaro era stato pubblicato
+ * rotto -- punteggio in oro a 1,53:1 sul fondo, cinque blocchi su sei sotto 3:1 -- proprio
+ * perche' si misurava solo l'altro. La lezione resta valida e vale per il prossimo tema
+ * che qualcuno volesse aggiungere: si misura per intero, oppure non si offre.
+ */
 const TEMI = [
-  { nome: 'scuro',  token: tokenDi(':root {') },
-  { nome: 'chiaro', token: tokenDi(":root[data-theme='chiaro']") },
+  { nome: 'scuro', token: tokenDi(':root {') },
 ];
 
 let fallito = false;

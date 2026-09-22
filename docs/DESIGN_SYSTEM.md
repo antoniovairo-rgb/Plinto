@@ -92,50 +92,19 @@ migliori passano da `--pl-brand` a `--pl-block-2` (`eccellente`) e a `--pl-block
 (`perfetta`). Da quando i blocchi sono saturi, `--pl-block-2` **non** coincide più con
 `--pl-ok`: erano lo stesso `#4cb5a5`, adesso sono due tinte diverse.
 
-### Tema chiaro (`:root[data-theme='chiaro']`)
+### Un tema solo
 
-Si attiva **solo** su richiesta esplicita del giocatore (Impostazioni → Tema), mai in
-automatico: `useImpostazioni` scrive l'attributo `data-theme` sull'elemento radice. Non
-esiste nessuna regola `prefers-color-scheme` nel progetto, ed è deliberato — cambiare
+Il gioco ha **un tema, quello scuro**. Il tema chiaro è stato ritirato: era un'opzione
+nelle impostazioni, ed è stata tolta insieme ai suoi token.
+
+Non esiste nessuna regola `prefers-color-scheme` nel progetto, ed è deliberato — cambiare
 l'aspetto del gioco mentre qualcuno sta giocando è peggio di ignorare la preferenza di
 sistema.
 
-| Token | Valore chiaro | Note |
-| --- | --- | --- |
-| `--pl-ink` | `#f3f4f8` | |
-| `--pl-ink-2` | `#e9ebf2` | fondo della plancia |
-| `--pl-surface` | `#ffffff` | |
-| `--pl-surface-2` | `#f0f2f7` | |
-| `--pl-line` | `#d8dce7` | |
-| `--pl-line-strong` | `#a9b1c6` | |
-| `--pl-text` | `#171b26` | |
-| `--pl-text-dim` | `#4f586d` | |
-| `--pl-text-faint` | `#60687a` | scurito rispetto al tema scuro (`#838ca1`) |
-| `--pl-brand` | `#7f6628` | ottone scurito: sul chiaro il giallo del tema scuro era illeggibile |
-| `--pl-brand-deep` | `#6d5622` | |
-| `--pl-ok` | `#307469` | |
-| `--pl-danger` | `#a54c64` | |
-| `--pl-block-1` | `#d94500` | arancio |
-| `--pl-block-2` | `#00926d` | verde |
-| `--pl-block-3` | `#7a1fe0` | viola |
-| `--pl-block-4` | `#9c7400` | oro |
-| `--pl-block-5` | `#e00048` | rosa |
-| `--pl-block-6` | `#0072d6` | azzurro |
-| `--pl-cella-vuota` | `rgba(23,27,38,0.05)` | |
-| `--pl-shadow-soft` | `0 2px 10px rgba(20,25,40,0.1)` | |
-| `--pl-shadow-lift` | `0 12px 32px rgba(20,25,40,0.18)` | |
-
-**Il tema chiaro è stato riscritto per intero.** La versione precedente ridefiniva solo
-fondali e testi e lasciava accenti e blocchi del tema scuro: il risultato era un tema
-inutilizzabile e mai misurato (il punteggio in ottone stava a 1.53:1 sul fondo e cinque
-blocchi su sei sotto 3:1 sulla plancia). Adesso ridefinisce anche `--pl-brand`,
-`--pl-brand-deep`, `--pl-ok`, `--pl-danger`, tutte e sei le famiglie cromatiche e
-`--pl-cella-vuota`. La lezione, scritta anche nel commento di `tokens.css`: **un tema va
-ridefinito per intero, oppure non va offerto.**
-
-Restano del tema scuro, perché non sono ridefiniti nel blocco chiaro, i token dei tempi,
-della geometria, della tipografia e `--pl-danger-fondo` (che regge il testo bianco in
-entrambi i temi allo stesso rapporto).
+Chi aveva scelto il tema chiaro se lo ritrovava scritto sul proprio dispositivo. La
+versione 2 del documento delle impostazioni **toglie quel campo**: senza quella migrazione
+sarebbe rimasto dipinto con una tavolozza che il gioco non ha più e senza l'interruttore
+per cambiarla.
 
 ### Ombre
 
@@ -185,50 +154,26 @@ testuali:
 
 Il peggiore (viola, 4.18) supera comunque anche la soglia più severa per il testo normale.
 
-### Tema chiaro: misurato sul fondo peggiore, e conforme
+### Il tema chiaro, e perché la sua lezione resta
 
-Il tema chiaro è stato ridefinito per intero e **misurato**, cosa che prima non era mai
-successa. Le quattro superfici su cui può capitare del testo sono `--pl-surface` `#ffffff`,
-`--pl-ink` `#f3f4f8`, `--pl-surface-2` `#f0f2f7` e `--pl-ink-2` `#e9ebf2`.
+Il tema chiaro non c'è più, ma le tabelle dei suoi contrasti stavano qui e la ragione per
+cui erano state fatte vale per qualunque tema qualcuno volesse aggiungere.
 
-Il fondo di riferimento è **il più sfavorevole dei quattro**, cioè `--pl-ink-2`. Non è un
-dettaglio di metodo: la prima stesura di questa tabella dichiarava i contrasti su `--pl-ink`,
-il fondo più *favorevole*, e faceva così passare per conforme un token che sugli altri fondi
-non lo era. Misurare sul caso migliore non è misurare.
+La prima versione del tema chiaro ridefiniva solo fondali e testi, lasciando invariati
+accenti e colori dei blocchi: il risultato era **pubblicato e inutilizzabile**, con il
+punteggio in oro a 1,53:1 sul fondo e cinque blocchi su sei sotto 3:1 sulla plancia. Nessuno
+lo aveva misurato perché lo strumento guardava solo l'altro tema.
 
-| Elemento | su `--pl-surface` | su `--pl-ink` | su `--pl-surface-2` | su `--pl-ink-2` (riferimento) |
-| --- | --- | --- | --- | --- |
-| `--pl-text` `#171b26` | 17.20 | 15.65 | 15.35 | **14.44** |
-| `--pl-text-dim` `#4f586d` | 7.12 | 6.48 | 6.36 | **5.98** |
-| `--pl-text-faint` `#60687a` | 5.59 | 5.08 | 4.99 | **4.69** |
-| `--pl-brand` `#7f6628` | 5.48 | 4.98 | 4.89 | **4.60** |
-| `--pl-ok` `#307469` | 5.49 | 4.99 | 4.90 | **4.61** |
-| `--pl-danger` `#a54c64` | 5.50 | 5.00 | 4.91 | **4.62** |
-| `#fff` su `--pl-danger-fondo` `#b81f47` | — | — | — | **6.32** |
+Le due regole che ne sono uscite:
 
-Tutti conformi ad AA (4.5:1) **sul fondo peggiore**, quindi conformi ovunque.
+1. **Un tema si ridefinisce per intero, oppure non si offre.** Metà tema è peggio di
+   nessun tema, perché sembra funzionare.
+2. **Si misura sul fondo peggiore, non sul migliore.** La prima stesura di quelle tabelle
+   dichiarava i contrasti sul fondo più favorevole, e faceva passare per conformi token
+   che sugli altri fondi non lo erano. Misurare sul caso migliore non è misurare.
 
-Blocchi contro la plancia chiara `--pl-ink-2` (`#e9ebf2`), soglia 3:1 perché sono elementi
-grafici e non testo:
-
-| Blocco | Valore chiaro | Contrasto |
-| --- | --- | --- |
-| arancio `--pl-block-1` | `#d94500` | **3.67** |
-| verde `--pl-block-2` | `#00926d` | **3.31** |
-| viola `--pl-block-3` | `#7a1fe0` | **5.69** |
-| oro `--pl-block-4` | `#9c7400` | **3.59** |
-| rosa `--pl-block-5` | `#e00048` | **4.14** |
-| azzurro `--pl-block-6` | `#0072d6` | **4.03** |
-
-**Tutti e sei passano.** Prima erano cinque su sei sotto soglia: è la correzione più
-sostanziosa della palette.
-
-**Come si rifanno questi numeri.** `npm run contrasti` (`tools/contrasti.mjs`) legge
-`tokens.css`, ricalcola ogni riga di queste tabelle e termina con errore se anche un solo
-valore scende sotto soglia; `tests/contrasti.test.js` lo esegue dentro `npm test`. Nessuno di
-questi numeri va più copiato a mano, ed è deliberato: la stessa affermazione sbagliata — un
-commento che dichiarava contrasti mai misurati — era già stata corretta una volta ed era
-tornata. Un controllo automatico chiude la categoria; una correzione puntuale no.
+`tools/contrasti.mjs` misura oggi un tema solo. Chi ne aggiungesse un altro deve
+aggiungerlo anche lì, nello stesso momento.
 
 ### Le correzioni già fatte, e perché
 
