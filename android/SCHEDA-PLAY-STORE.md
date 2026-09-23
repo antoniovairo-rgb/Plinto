@@ -188,28 +188,36 @@ rigenerate dopo ogni versione che cambia una schermata.
 
 - **Icona**: `public/icone/icona-512.png`, generata da `npm run icone`
 - **Immagine in evidenza** 1024×500: `store/immagine-in-evidenza.png`
-- **Schermate del telefono**: in `store/`, 1170×2532, nove disponibili
+- **Schermate del telefono**: in `store/`, otto da 1236×2196 (9:16), più la home di riserva
 
 ### Le otto schermate da caricare, in quest'ordine
 
-Play ne accetta da due a otto e le mostra nell'ordine in cui si caricano. Le prime due sono
-le uniche che quasi tutti vedono davvero, quindi aprono i livelli: sono il percorso
-principale del gioco, e la scheda attuale li teneva in fondo.
+Play ne accetta da due a otto e le mostra nell'ordine in cui si caricano. Il numero nel nome
+del file **è** l'ordine di caricamento: si caricano dalla 1 alla 8, senza tabelle da
+tradurre. Le prime due sono le uniche che quasi tutti vedono davvero, quindi aprono i
+livelli: sono il percorso principale del gioco, e la scheda attuale li teneva in fondo.
+
+Requisiti della Play Console, dalla sua guida («Add preview assets»): PNG o JPEG a 24 bit
+senza trasparenza, lati fra 320 e 3840 px, lato lungo **non oltre il doppio** del corto, al
+massimo otto per tipo di dispositivo; per le sezioni di raccomandazione almeno quattro
+schermate con lato corto di almeno 1080 px, in 9:16. Fino alla 1.19.0 lo strumento produceva
+nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Adesso
+`npm run schermate` controlla i file prodotti e si ferma se uno non è caricabile.
 
 | # | File | Che cosa dice nei primi due secondi |
 | --- | --- | --- |
-| 1 | `7-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
-| 2 | `8-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
-| 3 | `9-livello.png` | Com'e' fatto un livello mentre lo giochi, con l'obiettivo sempre in cima |
-| 4 | `3-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |
-| 5 | `2-partita.png` | La partita libera, per chi vuole giocare senza obiettivi |
-| 6 | `4-fine-partita.png` | La fine dice il motivo e i numeri, e il pulsante per rigiocare e' sotto il pollice |
-| 7 | `5-statistiche.png` | Il gioco tiene traccia di come giochi, non solo di quanto hai fatto |
-| 8 | `6-impostazioni.png` | Suoni, vibrazione, animazioni, lingua, tema: si spegne tutto quello che da' fastidio |
+| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un attrezzo. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
+| 2 | `2-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
+| 3 | `3-livello.png` | Com'e' fatto un livello mentre lo giochi: l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
+| 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |
+| 5 | `5-partita.png` | La partita libera, per chi vuole giocare senza obiettivi |
+| 6 | `6-fine-partita.png` | La fine dice il motivo e i numeri di una partita vera, e il pulsante per rigiocare e' sotto il pollice |
+| 7 | `7-statistiche.png` | Il gioco tiene traccia di come giochi, non solo di quanto hai fatto |
+| 8 | `8-impostazioni.png` | Suoni, vibrazione e lingua, e i progressi si portano via con un file: niente account e niente da comprare |
 
-Fuori dalle otto resta `1-home.png`, che mostra bene l'insieme delle modalita' ma dice meno
-di una schermata di gioco a chi scorre in fretta. Se una delle otto qui sopra non convince,
-e' il primo ricambio.
+Fuori dalle otto resta `riserva-home.png`, che mostra bene l'insieme delle modalita' ma dice
+meno di una schermata di gioco a chi scorre in fretta. Se una delle otto qui sopra non
+convince, e' il primo ricambio.
 
 ---
 

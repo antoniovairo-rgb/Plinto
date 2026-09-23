@@ -88,8 +88,8 @@ di estetica, se ne perdono settimane di attesa.
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è già a 10307 e `versionName` segue la versione del gioco. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
-| Attualizzare le schermate sulla scheda | **APERTO** | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, già aggiornate alla versione corrente. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
+| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è a 11900 (`versionName` 1.19.0) e segue la versione del gioco. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
+| Attualizzare le schermate sulla scheda | **APERTO** | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, rigenerate alla 1.19.0: **otto** immagini da 1236×2196 (9:16). Le versioni precedenti dello strumento ne producevano nove da 1170×2532, e la Play Console non le avrebbe accettate: la sua guida ammette al massimo otto schermate per tipo di dispositivo e un lato lungo non oltre il doppio del corto (2532/1170 = 2,16). Adesso lo strumento controlla i file prodotti e si ferma se non sono caricabili. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
 
 Nota su cosa richiede cosa: il caricamento delle schermate è una modifica alla **scheda**,
 non un rilascio, quindi non ha bisogno di un AAB nuovo. Si fanno comunque in

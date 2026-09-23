@@ -11,9 +11,7 @@
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { createGame, serializeGame, placePiece } from '../src/core/engine.js';
-import { gridFromString, allPlacements, fillRatio } from '../src/core/grid.js';
-import { getShape } from '../src/core/shapes.js';
-import { COLOR_COUNT } from '../src/config/rules.js';
+import { allPlacements, fillRatio } from '../src/core/grid.js';
 import { createRng } from '../src/core/rng.js';
 import { chooseMove } from '../src/sim/player.mjs';
 import { findCompletedGroups, placeShape } from '../src/core/grid.js';
@@ -35,12 +33,34 @@ const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
 const USCITA = new URL('../store/', import.meta.url).pathname;
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 
-// 390x844 a densita' 3 = 1170x2532, la proporzione dei telefoni piu' diffusi.
-const LARGHEZZA = 390;
-const ALTEZZA = 844;
+// 412x732 a densita' 3 = 1236x2196, cioe' 9:16.
+//
+// PRIMA ERA 390x844 (1170x2532), e la Play Console non l'avrebbe accettato: la guida di
+// Google chiede che il lato lungo non superi il DOPPIO di quello corto, e 2532/1170 fa
+// 2,16. Raccomanda inoltre 9:16 con almeno 1080 px sul lato corto. 412x732 e' anche uno
+// dei formati che la prova di impaginazione controlla gia' ("schermo basso"), quindi
+// l'interfaccia e' verificata a questa misura e non solo fotografata.
+const LARGHEZZA = 412;
+const ALTEZZA = 732;
 const DENSITA = 3;
 
+// La Play Console accetta AL MASSIMO otto schermate per tipo di dispositivo.
+const MASSIMO_SCHERMATE = 8;
+
 await mkdir(USCITA, { recursive: true });
+
+// I NUMERI DEI FILE SONO L'ORDINE DI CARICAMENTO sulla scheda, deciso e motivato in
+// android/SCHEDA-PLAY-STORE.md: prima i livelli, che sono il percorso principale. Prima
+// i numeri seguivano l'ordine di produzione e serviva una tabella per tradurli.
+//
+// Le schermate di un giro precedente si tolgono prima di cominciare: con la numerazione
+// cambiata, una vecchia `9-livello.png` resterebbe li' e verrebbe caricata per sbaglio.
+{
+  const { readdir, unlink } = await import('node:fs/promises');
+  for (const nome of await readdir(USCITA)) {
+    if (/^(\d+|riserva)-.+\.png$/.test(nome)) await unlink(`${USCITA}${nome}`);
+  }
+}
 
 async function serverRisponde() {
   try { return (await fetch(INDIRIZZO, { signal: AbortSignal.timeout(1500) })).ok; }
@@ -49,8 +69,12 @@ async function serverRisponde() {
 let server = null;
 if (!(await serverRisponde())) {
   const { spawn } = await import('node:child_process');
+  // In un GRUPPO DI PROCESSI suo, per poterlo chiudere tutto. `npx` lancia `vite` come
+  // processo figlio, e `server.kill()` fermava solo `npx`: vite restava acceso a servire
+  // la versione di allora, ed e' proprio il server vecchio che fa fallire il gate al
+  // controllo "il server di prova serve questa versione". Visto succedere.
   server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
-    cwd: new URL('..', import.meta.url).pathname, stdio: 'ignore',
+    cwd: new URL('..', import.meta.url).pathname, stdio: 'ignore', detached: true,
   });
   const scadenza = Date.now() + 30000;
   while (Date.now() < scadenza && !(await serverRisponde())) await new Promise((r) => setTimeout(r, 400));
@@ -64,11 +88,13 @@ const page = await browser.newPage({
 });
 
 const impostazioni = {
-  introVista: true, tema: 'scuro', lingua: 'it',
+  introVista: true, lingua: 'it',
   audio: true, vibrazione: true, animazioni: true, aiutoVisivo: true,
 };
 
-async function prepara({ partita = null, record = null, statistiche = null, sfide = null, quadri = null }) {
+async function prepara({
+  partita = null, record = null, statistiche = null, sfide = null, quadri = null, attrezzi = null,
+}) {
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
   await page.evaluate((dati) => {
     window.localStorage.clear();
@@ -78,53 +104,9 @@ async function prepara({ partita = null, record = null, statistiche = null, sfid
     if (dati.statistiche) window.localStorage.setItem('plinto:statistiche', JSON.stringify(dati.statistiche));
     if (dati.sfide) window.localStorage.setItem('plinto:sfide', JSON.stringify(dati.sfide));
     if (dati.quadri) window.localStorage.setItem('plinto:quadri', JSON.stringify(dati.quadri));
-  }, { impostazioni, partita, record, statistiche, sfide, quadri });
+    if (dati.attrezzi) window.localStorage.setItem('plinto:attrezzi', JSON.stringify(dati.attrezzi));
+  }, { impostazioni, partita, record, statistiche, sfide, quadri, attrezzi });
   await page.reload({ waitUntil: 'networkidle' });
-}
-
-/**
- * Ridipinge una griglia con tutti i colori.
- *
- * `gridFromString` riempie ogni cella con lo stesso colore, perche' nasce per i test,
- * dove il colore non conta. In una schermata dello store conta eccome: una plancia
- * monocroma non e' il gioco che si vede giocando, e non c'e' motivo di mostrarne una.
- * Il seme e' fisso, quindi la stessa griglia produce sempre gli stessi colori.
- */
-function colora(grid, seme) {
-  const rng = createRng(seme);
-  const fuori = new Uint8Array(grid);
-  for (let i = 0; i < fuori.length; i += 1) {
-    if (fuori[i] !== 0) fuori[i] = rng.int(COLOR_COUNT) + 1;
-  }
-  return fuori;
-}
-
-/**
- * @param {object} [opzioni]
- * @param {boolean} [opzioni.manoPiazzabile=true] pretende che ogni pezzo in mano abbia un
- *   posto dove andare. Va spento SOLO per la schermata di fine partita, dove i pezzi che
- *   non entrano non sono un difetto: sono il motivo per cui la partita e' finita.
- */
-function partitaCon(grigliaTesto, forme, punteggio, catena = 0, seme = 77, { manoPiazzabile = true } = {}) {
-  const base = createGame({ seed: 77, now: 0 });
-  const grid = colora(gridFromString(grigliaTesto), seme);
-
-  // Una schermata con dei pezzi che non entrano mostra tre riquadri spenti nel punto
-  // in cui l'occhio cerca la mossa successiva. E' successo: la prima versione di questo
-  // strumento ne produceva due su tre. Qui si controlla, invece di guardare l'immagine
-  // e sperare.
-  const senzaPosto = forme.filter((id) => allPlacements(grid, getShape(id)).length === 0);
-  if (manoPiazzabile && senzaPosto.length > 0) {
-    throw new Error(`Pezzi senza posto sulla griglia: ${senzaPosto.join(', ')}`);
-  }
-
-  return serializeGame({
-    ...base,
-    grid,
-    hand: forme.map((id, i) => ({ uid: `s${i}`, shapeId: id, shape: getShape(id), color: (i % 6) + 1 })),
-    score: punteggio,
-    chain: catena,
-  });
 }
 
 /**
@@ -193,8 +175,15 @@ const STATISTICHE = {
   gruppiTotali: 3180, griglieSvuotate: 6, tempoTotaleMs: 27_600_000,
 };
 
-// --- 1. Home ------------------------------------------------------------------
-await prepara({ record: RECORD, sfide: { [new Date().toISOString().slice(0, 10)]: { best: 4120, partite: 3 } } });
+// --- Home (riserva, fuori dalle otto) ----------------------------------------
+// Lo stesso avanzamento della mappa (schermata 1): una home a "Livello 1, 0 di 100"
+// accanto a una mappa con ventitre' livelli superati raccontava due giocatori diversi.
+await prepara({
+  record: RECORD,
+  sfide: { [new Date().toISOString().slice(0, 10)]: { best: 4120, partite: 3 } },
+  quadri: progressiFinoA(23),
+  attrezzi: { disponibili: 2, riscossi: 4, versione: 1 },
+});
 
 /**
  * La versione mostrata dev'essere QUESTA versione.
@@ -222,9 +211,12 @@ await prepara({ record: RECORD, sfide: { [new Date().toISOString().slice(0, 10)]
   }
 }
 
-await page.screenshot({ path: `${USCITA}1-home.png` });
+// La home NON e' fra le otto: mostra bene l'insieme delle modalita' ma dice meno di una
+// schermata di gioco a chi scorre in fretta (vedi android/SCHEDA-PLAY-STORE.md). Resta
+// pronta come ricambio, con un nome che il controllo delle otto non conta.
+await page.screenshot({ path: `${USCITA}riserva-home.png` });
 
-// --- 2. Partita in corso, con la Catena accesa --------------------------------
+// --- 5. Partita in corso, con la Catena accesa --------------------------------
 // Lo stato non e' scritto a mano: e' il primo momento, in una partita vera giocata dal
 // giocatore simulato, in cui la Catena e' alta, la plancia e' piena a meta' e tutti e
 // tre i pezzi hanno un posto dove andare.
@@ -233,18 +225,18 @@ const CATENA_ALTA = (x) => x.score >= 6000 && x.chain >= 6
   && x.hand.every((p) => allPlacements(x.grid, p.shape).length > 0);
 
 const inCorso = giocaFinche(1, (x) => CATENA_ALTA(x) && fillRatio(x.grid) >= 0.33 && fillRatio(x.grid) <= 0.46);
-if (!inCorso) throw new Error('Nessuno stato adatto alla schermata 2');
+if (!inCorso) throw new Error('Nessuno stato adatto alla schermata 5');
 await prepara({ record: RECORD, partita: serializeGame(inCorso) });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.waitForTimeout(250);
-await page.screenshot({ path: `${USCITA}2-partita.png` });
+await page.screenshot({ path: `${USCITA}5-partita.png` });
 
-// --- 3. Il momento dell'eliminazione, con particelle e punti ------------------
+// --- 4. Il momento dell'eliminazione, con particelle e punti ------------------
 // Stessa partita, e la mossa che chiude due gruppi insieme: e' l'Intreccio, la mossa
 // che il gioco esiste per insegnare. Viene eseguita davvero, con i due tocchi.
 const primaDelColpo = giocaFinche(1, (x) => CATENA_ALTA(x) && (mossaPiuGrossa(x)?.gruppi ?? 0) >= 2);
-if (!primaDelColpo) throw new Error('Nessuno stato adatto alla schermata 3');
+if (!primaDelColpo) throw new Error('Nessuno stato adatto alla schermata 4');
 const colpo = mossaPiuGrossa(primaDelColpo);
 const tocco = cellaDaToccare(colpo.pezzo.shape, colpo.row, colpo.col);
 
@@ -254,54 +246,65 @@ await page.waitForSelector('.pl-plancia');
 await page.locator('.pl-tray .pl-pezzo').nth(colpo.handIndex).click();
 await page.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
 await page.waitForTimeout(150);   // a meta' animazione: particelle in volo e punti visibili
-await page.screenshot({ path: `${USCITA}3-eliminazione.png` });
+await page.screenshot({ path: `${USCITA}4-eliminazione.png` });
 
-// --- 4. Fine partita ----------------------------------------------------------
-await page.waitForTimeout(1200);
-await prepara({
-  record: { ...RECORD, best: 12000 },
-  partita: (() => {
-    const vuote = [
-      [0, 0], [1, 3], [2, 6], [3, 1], [4, 4], [5, 7], [6, 2], [7, 5], [8, 8],
-      [0, 4], [1, 7], [2, 1], [3, 5], [4, 8], [5, 2], [6, 6], [7, 0], [8, 3],
-    ];
-    const righe = Array.from({ length: 9 }, () => Array(9).fill('#'));
-    vuote.forEach(([r, c]) => { righe[r][c] = '.'; });
-    return partitaCon(
-      righe.map((r) => r.join('')).join('\n'), ['p1', 'b33', 'h5'], 15230, 4, 77,
-      { manoPiazzabile: false },   // e' la fine partita: e' proprio questo il punto
-    );
-  })(),
-});
+// --- 6. Fine partita ----------------------------------------------------------
+// UNA PARTITA VERA, fino all'ultima mossa. Prima lo stato era scritto a mano: una griglia
+// a scacchiera con 15.230 punti inventati, e il riepilogo lo tradiva -- "Mosse 1",
+// "Mossa migliore 1" e una durata di 29 milioni di minuti, perche' la partita finta
+// cominciava all'istante zero del 1970. Qui gioca il giocatore simulato finche' la mossa
+// successiva non chiuderebbe la partita; quella mossa la fa il dito, nel gioco vero.
+const ultima = (() => {
+  let stato = createGame({ seed: 3, now: 0 });
+  const rng = createRng((3 ^ 0x9e3779b9) >>> 0);
+  for (let m = 0; m < 2000 && stato.status === 'playing'; m += 1) {
+    const mossa = chooseMove(stato, 'esperto', rng);
+    if (!mossa) break;
+    const dopo = placePiece(stato, mossa.handIndex, mossa.row, mossa.col, m * 1000);
+    if (dopo.status === 'over') return { stato, mossa };
+    stato = dopo;
+  }
+  throw new Error('Nessuna partita finita per la schermata 6');
+})();
+// L'inizio si sposta a qualche minuto fa, altrimenti la durata sarebbe di nuovo quella
+// dal 1970: e' lo stesso campo, e si legge alla fine della partita.
+const minutiDiGioco = 11;
+const salvataggioFinale = {
+  ...serializeGame(ultima.stato),
+  startedAt: Date.now() - minutiDiGioco * 60_000,
+};
+await prepara({ record: { ...RECORD, best: Math.floor(ultima.stato.score * 0.9) }, partita: salvataggioFinale });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
-const finale = await page.evaluate(() => {
-  const c = document.querySelectorAll('.pl-plancia .pl-cella')[0].getBoundingClientRect();
-  const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
-  return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
-});
-await page.mouse.move(finale.px, finale.py);
-await page.mouse.down();
-await page.mouse.move(finale.cx, finale.cy, { steps: 8 });
-await page.mouse.up();
-await page.waitForTimeout(700);
-await page.screenshot({ path: `${USCITA}4-fine-partita.png` });
+{
+  const { handIndex, row, col } = ultima.mossa;
+  const tocco7 = cellaDaToccare(ultima.stato.hand[handIndex].shape, row, col);
+  // Per POSTO del vassoio e non per pezzo: all'ultima mossa la mano ha dei buchi, e
+  // l'ennesimo pezzo disegnato non e' l'ennesimo della mano.
+  await page.locator('.pl-tray .pl-tray__posto').nth(handIndex).locator('.pl-pezzo-presa').click();
+  await page.locator('.pl-plancia .pl-cella').nth(tocco7.row * 9 + tocco7.col).click();
+}
+await page.waitForSelector('.pl-fine', { timeout: 8000 });
+await page.waitForTimeout(900);
+await page.screenshot({ path: `${USCITA}6-fine-partita.png` });
 
-// --- 5. Statistiche -----------------------------------------------------------
+// --- 7. Statistiche -----------------------------------------------------------
 await prepara({ record: RECORD, statistiche: STATISTICHE });
 await page.getByRole('button', { name: 'Statistiche' }).click();
 await page.waitForTimeout(200);
-await page.screenshot({ path: `${USCITA}5-statistiche.png` });
+await page.screenshot({ path: `${USCITA}7-statistiche.png` });
 
-// --- 6. Impostazioni: si vede che non c'e' niente da comprare -----------------
+// --- 8. Impostazioni: si vede che non c'e' niente da comprare ---------------------
 await page.locator('.pl-pagina__testata .pl-hud__menu').click();
 await page.getByRole('button', { name: 'Impostazioni' }).click();
 await page.waitForTimeout(200);
-await page.screenshot({ path: `${USCITA}6-impostazioni.png` });
+await page.screenshot({ path: `${USCITA}8-impostazioni.png` });
 
-// --- 7. La mappa dei livelli, con un percorso gia' fatto ----------------------
-// Cento livelli sono la meta' del gioco, e finora nessuna schermata li mostrava.
-await prepara({ record: RECORD, quadri: progressiFinoA(23) });
+// --- 1. La mappa dei livelli, con un percorso gia' fatto ----------------------
+// Cento livelli sono la meta' del gioco, e finora nessuna schermata li mostrava. Con
+// ventitre' livelli superati se ne sono guadagnati quattro attrezzi; il magazzino ne tiene
+// tre e qui ne restano due, cosi' la schermata del livello mostra la cassetta in uso.
+await prepara({ record: RECORD, quadri: progressiFinoA(23), attrezzi: { disponibili: 2, riscossi: 4, versione: 1 } });
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
 // LA MAPPA SI PORTA DA SOLA SUL LIVELLO CORRENTE, e in una schermata dello store quel
@@ -334,15 +337,15 @@ if (mozzato.sopra.length) {
   throw new Error(`La mappa dei livelli ha ${mozzato.sopra.length} comandi sotto la testata `
     + `(che finisce a ${mozzato.sotto}px): ${mozzato.sopra.map((b) => `"${b.testo}" a ${b.top}px`).join(', ')}`);
 }
-await page.screenshot({ path: `${USCITA}7-mappa-livelli.png` });
+await page.screenshot({ path: `${USCITA}1-mappa-livelli.png` });
 
-// --- 8. L'apertura di un livello: l'obiettivo detto prima di giocare ----------
+// --- 2. L'apertura di un livello: l'obiettivo detto prima di giocare ----------
 await page.locator('.pl-tappa').nth(23).click();
 await page.waitForSelector('.pl-apertura');
 await page.waitForTimeout(300);
-await page.screenshot({ path: `${USCITA}8-apertura-livello.png` });
+await page.screenshot({ path: `${USCITA}2-apertura-livello.png` });
 
-// --- 9. Un livello in corso, con obiettivo e mosse in cima -------------------
+// --- 3. Un livello in corso, con obiettivo e mosse in cima -------------------
 // Appena aperto, un livello e' quasi vuoto e l'obiettivo segna zero: non e' il livello,
 // e' il suo primo istante. Qui se ne giocano alcune mosse davvero, cercando a tentativi
 // una posa valida -- non serve sapere quale sia, serve solo che il gioco l'accetti.
@@ -367,12 +370,35 @@ for (let fatte = 0; fatte < 6; fatte += 1) {
   await page.waitForTimeout(120);
 }
 await page.waitForTimeout(400);
-await page.screenshot({ path: `${USCITA}9-livello.png` });
+await page.screenshot({ path: `${USCITA}3-livello.png` });
 
 await browser.close();
-if (server) server.kill();
+if (server) {
+  try { process.kill(-server.pid); } catch { server.kill(); }
+}
 
-console.log(`\nSchermate generate in store/ a ${LARGHEZZA * DENSITA}x${ALTEZZA * DENSITA} px:`);
-console.log('  1-home            2-partita          3-eliminazione');
-console.log('  4-fine-partita    5-statistiche      6-impostazioni');
-console.log('  7-mappa-livelli   8-apertura-livello 9-livello');
+// I requisiti della Play Console si controllano sui FILE, non sulle costanti qui sopra:
+// e' il file che si carica. Guida di Google Play, "Add preview assets": PNG a 24 bit senza
+// trasparenza, lato fra 320 e 3840 px, lato lungo non oltre il doppio del corto, al
+// massimo otto per tipo di dispositivo.
+{
+  const { readdir, readFile } = await import('node:fs/promises');
+  const nomi = (await readdir(USCITA)).filter((n) => /^\d+-.+\.png$/.test(n)).sort();
+  const problemi = [];
+  if (nomi.length > MASSIMO_SCHERMATE) problemi.push(`${nomi.length} schermate, il massimo e' ${MASSIMO_SCHERMATE}`);
+  for (const nome of nomi) {
+    const png = await readFile(`${USCITA}${nome}`);
+    const larghezza = png.readUInt32BE(16);
+    const altezza = png.readUInt32BE(20);
+    const profondita = png[24];
+    const tipoColore = png[25];   // 2 = RGB senza alfa
+    const corto = Math.min(larghezza, altezza);
+    const lungo = Math.max(larghezza, altezza);
+    if (corto < 320 || lungo > 3840) problemi.push(`${nome}: ${larghezza}x${altezza} fuori da 320-3840`);
+    if (lungo > 2 * corto) problemi.push(`${nome}: lato lungo oltre il doppio del corto`);
+    if (tipoColore !== 2 || profondita !== 8) problemi.push(`${nome}: non e' PNG RGB a 24 bit senza alfa`);
+  }
+  if (problemi.length) throw new Error(`Schermate non caricabili sulla Play Console:\n- ${problemi.join('\n- ')}`);
+  console.log(`\n${nomi.length} schermate in store/ a ${LARGHEZZA * DENSITA}x${ALTEZZA * DENSITA} px, conformi alla Play Console:`);
+  console.log(`  ${nomi.join('\n  ')}`);
+}
