@@ -655,6 +655,11 @@ A fine partita `summarize()` restituisce: punteggio, mosse, durata, gruppi chius
 divisi per riga/colonna/quadrante), Catena massima raggiunta, mossa migliore, Intreccio
 massimo, numero di svuotamenti totali e celle ancora piene.
 
+La **durata** è il tempo *giocato*, non quello trascorso: si somma mossa per mossa, e una
+pausa fra due mosse conta al massimo due minuti (`PAUSA_MASSIMA_MS` in `core/engine.js`).
+Chi chiude l'app e riprende la partita giorni dopo, o la lascia in secondo piano, non si
+ritrova quei giorni nella durata né nel «Tempo di gioco» delle statistiche.
+
 ## La Sfida del Giorno e il suo archivio
 
 Ogni giorno la partita **parte uguale per tutti**: il seme del generatore è la data

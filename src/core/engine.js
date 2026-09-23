@@ -44,6 +44,22 @@ import { randomSeed, seedFromString } from './rng.js';
  */
 export const STATE_VERSION = 1;
 
+/**
+ * La pausa piu' lunga che conta come tempo di gioco, fra una mossa e la successiva.
+ *
+ * La durata di una partita era "fine meno inizio", cioe' tempo di orologio: una partita
+ * ripresa dopo tre giorni risultava lunga tre giorni, nella schermata di fine partita,
+ * nel "Tempo di gioco" delle statistiche e nel profilo. Misurato: cinque minuti giocati,
+ * 4.325 registrati. Adesso il tempo si somma mossa per mossa, e un intervallo piu' lungo
+ * di questo vale questo: chi pensa due minuti a una mossa sta giocando, chi chiude l'app
+ * o la lascia in secondo piano no, e da dentro il gioco le due cose non si distinguono.
+ *
+ * Sta qui e non in config/rules.js perche' non e' una regola del gioco: non cambia
+ * nessuna mossa. Li' entrerebbe nell'impronta delle regole (core/impronta.js) e
+ * dichiarerebbe vecchio un riferimento misurato con regole identiche.
+ */
+export const PAUSA_MASSIMA_MS = 120_000;
+
 /** @returns {object} statistiche azzerate di una partita */
 function emptyStats() {
   return {
@@ -131,6 +147,10 @@ export function createGame(options = {}) {
     lastMove: null,
     startedAt: options.now ?? Date.now(),
     endedAt: null,
+    // Il tempo GIOCATO, non quello trascorso: vedi PAUSA_MASSIMA_MS. `ultimaAttivitaAt`
+    // e' l'istante da cui si conta il prossimo intervallo.
+    tempoGiocatoMs: 0,
+    ultimaAttivitaAt: options.now ?? Date.now(),
   };
 }
 
@@ -314,8 +334,14 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     handsDealt,
   };
 
+  // Il tempo dall'ultima mossa, con il tetto: un'app chiusa per giorni non e' gioco.
+  // Un orologio che torna indietro (cambio d'ora a mano) vale zero, non un tempo negativo.
+  const intervallo = Math.min(PAUSA_MASSIMA_MS, Math.max(0, now - (state.ultimaAttivitaAt ?? now)));
+
   return {
     ...state,
+    tempoGiocatoMs: (state.tempoGiocatoMs ?? 0) + intervallo,
+    ultimaAttivitaAt: now,
     grid,
     hand: nextHand,
     manoSuccessiva,
@@ -492,7 +518,12 @@ export function riprendiDallaMensola(state, handIndex) {
 }
 
 export function gameDuration(state, now = Date.now()) {
-  return (state.endedAt ?? now) - state.startedAt;
+  // Il tempo giocato fino all'ultima mossa, piu' -- se la partita e' ancora aperta -- il
+  // tratto in corso, con lo stesso tetto di ogni altro intervallo.
+  const inCorso = state.status === 'playing' && state.ultimaAttivitaAt != null
+    ? Math.min(PAUSA_MASSIMA_MS, Math.max(0, now - state.ultimaAttivitaAt))
+    : 0;
+  return (state.tempoGiocatoMs ?? 0) + inCorso;
 }
 
 /** Riepilogo leggibile a fine partita. */
@@ -549,6 +580,8 @@ export function serializeGame(state) {
     stats: state.stats,
     startedAt: state.startedAt,
     endedAt: state.endedAt,
+    tempoGiocatoMs: state.tempoGiocatoMs ?? 0,
+    ultimaAttivitaAt: state.ultimaAttivitaAt ?? null,
   };
 }
 
@@ -626,6 +659,12 @@ export function deserializeGame(raw) {
       lastMove: null,
       startedAt: raw.startedAt,
       endedAt: raw.endedAt ?? null,
+      // Un salvataggio di prima della 1.19.1 non ha questi campi, e il tempo gia'
+      // giocato non si puo' ricostruire: "fine meno inizio" e' proprio il numero sbagliato
+      // che si sta correggendo. Si riparte da zero e si conta da qui, con il tetto: meglio
+      // qualche minuto in meno che tre giorni in piu'. Non invalida il salvataggio.
+      tempoGiocatoMs: numeroValido(raw.tempoGiocatoMs) ? raw.tempoGiocatoMs : 0,
+      ultimaAttivitaAt: numeroValido(raw.ultimaAttivitaAt) ? raw.ultimaAttivitaAt : null,
     };
   } catch {
     return null;

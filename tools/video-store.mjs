@@ -19,6 +19,7 @@
  * Uso: npm run video
  */
 
+import { chiudiAllUscita } from './server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -45,8 +46,9 @@ let server = null;
 if (!(await serverRisponde())) {
   const { spawn } = await import('node:child_process');
   server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
-    cwd: new URL('..', import.meta.url).pathname, stdio: 'ignore', detached: false,
+    cwd: new URL('..', import.meta.url).pathname, stdio: 'ignore', detached: true,
   });
+  chiudiAllUscita(server);
   for (let i = 0; i < 30 && !(await serverRisponde()); i += 1) {
     await new Promise((r) => setTimeout(r, 1000));
   }

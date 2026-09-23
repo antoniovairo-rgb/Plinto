@@ -18,14 +18,16 @@
 import {
   createGame, placePiece, cambiaPezzo, scavaCella, appoggiaSullaMensola,
   riprendiDallaMensola, serializeGame, deserializeGame, restaUnaMossa, annullabile,
-  canPlaceHandPiece, summarize,
+  canPlaceHandPiece, summarize, PAUSA_MASSIMA_MS,
 } from '../src/core/engine.js';
 import { findCompletedGroups, filledCount, canPlace, allPlacements, CELL_COUNT } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../src/core/quadro.js';
 import { suggerisciMossa } from '../src/core/suggerimento.js';
 import { QUADRI } from '../src/config/quadri.js';
-import { CHAIN_MAX, HAND_SIZE, MODALITA, VALORE_BOMBA, COLOR_COUNT } from '../src/config/rules.js';
+import {
+  CHAIN_MAX, HAND_SIZE, MODALITA, VALORE_BOMBA, COLOR_COUNT,
+} from '../src/config/rules.js';
 
 import { pathToFileURL } from 'node:url';
 
@@ -107,6 +109,9 @@ function controllaStato(s, dove, celleIniziali, scavate) {
   if (!Number.isInteger(s.score) || s.score < 0) difetto('punteggio-non-intero', dove, s.score);
   if (!Number.isInteger(s.chain) || s.chain < 0 || s.chain > CHAIN_MAX) difetto('catena-fuori', dove, s.chain);
   if (!Number.isInteger(s.chainDigiuno) || s.chainDigiuno < 0) difetto('digiuno-fuori', dove, s.chainDigiuno);
+  // Il tempo giocato non e' mai negativo e non supera una pausa massima per mossa.
+  if (!Number.isFinite(s.tempoGiocatoMs) || s.tempoGiocatoMs < 0
+    || s.tempoGiocatoMs > s.stats.moves * PAUSA_MASSIMA_MS) difetto('tempo-giocato', dove, s.tempoGiocatoMs);
 
   // Dopo qualunque azione non resta sulla griglia un gruppo pieno: si svuota subito.
   if (findCompletedGroups(g).length > 0) difetto('gruppo-pieno-rimasto', dove, findCompletedGroups(g).map((x) => x.type + x.index));

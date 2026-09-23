@@ -8,6 +8,7 @@
  * Uso: npm run schermate    (le immagini finiscono in store/)
  */
 
+import { chiudiAllUscita } from './server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { createGame, serializeGame, placePiece } from '../src/core/engine.js';
@@ -69,13 +70,10 @@ async function serverRisponde() {
 let server = null;
 if (!(await serverRisponde())) {
   const { spawn } = await import('node:child_process');
-  // In un GRUPPO DI PROCESSI suo, per poterlo chiudere tutto. `npx` lancia `vite` come
-  // processo figlio, e `server.kill()` fermava solo `npx`: vite restava acceso a servire
-  // la versione di allora, ed e' proprio il server vecchio che fa fallire il gate al
-  // controllo "il server di prova serve questa versione". Visto succedere.
   server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
     cwd: new URL('..', import.meta.url).pathname, stdio: 'ignore', detached: true,
   });
+  chiudiAllUscita(server);
   const scadenza = Date.now() + 30000;
   while (Date.now() < scadenza && !(await serverRisponde())) await new Promise((r) => setTimeout(r, 400));
 }
@@ -260,18 +258,20 @@ const ultima = (() => {
   for (let m = 0; m < 2000 && stato.status === 'playing'; m += 1) {
     const mossa = chooseMove(stato, 'esperto', rng);
     if (!mossa) break;
-    const dopo = placePiece(stato, mossa.handIndex, mossa.row, mossa.col, m * 1000);
+    // Due secondi e mezzo a mossa: il ritmo di chi gioca davvero, e da questi istanti il
+    // gioco ricava la durata mostrata nel riepilogo.
+    const dopo = placePiece(stato, mossa.handIndex, mossa.row, mossa.col, (m + 1) * 2500);
     if (dopo.status === 'over') return { stato, mossa };
     stato = dopo;
   }
   throw new Error('Nessuna partita finita per la schermata 6');
 })();
-// L'inizio si sposta a qualche minuto fa, altrimenti la durata sarebbe di nuovo quella
-// dal 1970: e' lo stesso campo, e si legge alla fine della partita.
-const minutiDiGioco = 11;
+// L'ultima mossa la fa il dito adesso, quindi l'ultima attivita' si sposta a pochi secondi
+// fa: il tratto fino all'ultima mossa conterebbe comunque al massimo PAUSA_MASSIMA_MS, ma
+// cosi' e' il ritmo delle altre.
 const salvataggioFinale = {
   ...serializeGame(ultima.stato),
-  startedAt: Date.now() - minutiDiGioco * 60_000,
+  ultimaAttivitaAt: Date.now() - 2500,
 };
 await prepara({ record: { ...RECORD, best: Math.floor(ultima.stato.score * 0.9) }, partita: salvataggioFinale });
 await page.getByRole('button', { name: /Riprendi la partita/ }).click();
@@ -373,9 +373,7 @@ await page.waitForTimeout(400);
 await page.screenshot({ path: `${USCITA}3-livello.png` });
 
 await browser.close();
-if (server) {
-  try { process.kill(-server.pid); } catch { server.kill(); }
-}
+if (server) server.kill();
 
 // I requisiti della Play Console si controllano sui FILE, non sulle costanti qui sopra:
 // e' il file che si carica. Guida di Google Play, "Add preview assets": PNG a 24 bit senza

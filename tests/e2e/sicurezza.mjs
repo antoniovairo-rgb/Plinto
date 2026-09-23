@@ -24,6 +24,7 @@
  *
  * Uso: npm run e2e-sicurezza
  */
+import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { spawn } from 'node:child_process';
@@ -38,14 +39,11 @@ const errori = [];
 const controlla = (cosa, condizione) => { if (!condizione) errori.push(cosa); };
 
 const server = spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORTA)], {
-  cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore',
+  cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore', detached: true,
 });
-// Si spegne SEMPRE, anche uscendo per un errore. Un `server.kill()` solo in fondo al file
-// vale solo quando tutto va bene, e quando qualcosa va male lascia acceso un server che
-// il prossimo giro trova e riusa: e' successo, e ha fatto misurare una versione vecchia a
-// tutti i controlli di un intero gate.
-process.on('exit', () => { try { server.kill(); } catch { /* gia' morto */ } });
-for (const segnale of ['SIGINT', 'SIGTERM']) process.on(segnale, () => process.exit(1));
+// Si spegne SEMPRE, anche uscendo per un errore: vedi tools/server-di-prova.mjs. Prima qui
+// c'era `server.kill()` all'uscita, che fermava npx e lasciava acceso vite.
+chiudiAllUscita(server);
 const risponde = async () => {
   try { return (await fetch(INDIRIZZO, { signal: AbortSignal.timeout(1500) })).ok; } catch { return false; }
 };

@@ -9,6 +9,7 @@
  * Uso: npm run precisione
  */
 
+import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { createGame, serializeGame, deserializeGame } from '../../src/core/engine.js';
 import {
@@ -55,8 +56,9 @@ let server = null;
 if (!(await serverRisponde())) {
   const { spawn } = await import('node:child_process');
   server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
-    cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore',
+    cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore', detached: true,
   });
+  chiudiAllUscita(server);
   const scadenza = Date.now() + 30000;
   while (Date.now() < scadenza && !(await serverRisponde())) await new Promise((r) => setTimeout(r, 400));
 }

@@ -10,6 +10,7 @@
  * Uso: npm run incitamenti
  */
 
+import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync, mkdirSync } from 'node:fs';
 
@@ -30,8 +31,9 @@ let server = null;
 if (!(await serverRisponde())) {
   const { spawn } = await import('node:child_process');
   server = spawn('npx', ['vite', '--host', '127.0.0.1', '--port', '5173'], {
-    cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore', detached: false,
+    cwd: new URL('../..', import.meta.url).pathname, stdio: 'ignore', detached: true,
   });
+  chiudiAllUscita(server);
   for (let i = 0; i < 30 && !(await serverRisponde()); i += 1) {
     await new Promise((r) => setTimeout(r, 1000));
   }
@@ -189,7 +191,11 @@ async function unaMossa(cercaChiusura = true) {
 
 /** Se la partita e' finita, ne comincia un'altra. */
 async function riparti() {
-  if (!(await page.locator('.pl-screen--fine').count())) return false;
+  // `.pl-fine` e' la radice di Fine.jsx. Qui c'era `.pl-screen--fine`, una classe che il
+  // gioco non ha mai avuto: a partita finita lo scenario non ripartiva e girava a vuoto
+  // fino all'ultimo giro. Passava solo se la partita, con un seme a caso, durava abbastanza
+  // -- ed e' fallito cosi' nel gate della 1.19.1 ("il pulsante non e mai comparso").
+  if (!(await page.locator('.pl-fine').count())) return false;
   await page.locator('.pl-fine__azioni button').first().click();
   await page.waitForSelector('.pl-plancia');
   return true;

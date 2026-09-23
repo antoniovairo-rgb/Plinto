@@ -7,6 +7,60 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.1] — 23 settembre 2026
+
+### Corretto
+
+**La durata di una partita contava anche il tempo con l'app chiusa.** Era «fine meno
+inizio», cioè tempo di orologio: una partita libera ripresa dopo tre giorni risultava lunga
+tre giorni. Trovato dal test massivo prima della domanda di accesso alla produzione, e
+riprodotto: **cinque minuti giocati, 4.325 registrati**. Il numero sbagliato finiva in tre
+posti — la schermata di fine partita, il «Tempo di gioco» delle statistiche e il profilo di
+gioco — e nelle statistiche restava per sempre, sommato a tutte le partite successive.
+
+Adesso il motore somma il tempo **mossa per mossa**, e una pausa fra due mosse conta al
+massimo due minuti. Chi ci pensa due minuti sta giocando; chi chiude l'app, o la lascia in
+secondo piano, no — e dall'interno del gioco le due cose non si distinguono, quindi il tetto
+vale per tutte e due. Un orologio spostato indietro a mano vale zero, non un tempo negativo.
+
+**Una partita salvata con la versione precedente si riprende normalmente**: il tempo già
+giocato non si può ricostruire (fine meno inizio è proprio il numero sbagliato), quindi si
+riparte da zero e si conta da lì. Meglio qualche minuto in meno che tre giorni in più. I
+totali già accumulati nelle statistiche **non** vengono corretti: non esiste un modo onesto
+di sapere quanta parte di quel numero era gioco.
+
+Il tetto sta in `core/engine.js` e non fra le regole: non cambia nessuna mossa, e lì avrebbe
+cambiato l'impronta delle regole, dichiarando vecchio un riferimento misurato con regole
+identiche.
+
+### Strumenti
+
+**Gli script di prova non lasciano più acceso il server di sviluppo.** Una ventina di script
+avviano `npx vite` quando non trovano un server, e alla fine chiamavano `server.kill()`, che
+ferma `npx` ma non `vite`: il server restava acceso a servire la versione di quel momento,
+e il giro successivo lo trovava e misurava una versione vecchia. È il motivo per cui il
+primo controllo del gate è «il server di prova serve questa versione», e per cui quel
+controllo è fallito più di una volta. Visto anche oggi: dopo il gate restavano accesi un
+`vite` e un `vite preview`. Adesso tutti e 24 gli script passano da
+`tools/server-di-prova.mjs`: il server nasce in un gruppo di processi suo e all'uscita si
+chiude il gruppo intero, per la fine normale, per ogni `process.exit` e per Ctrl+C.
+Verificato lanciando gli script senza server acceso e interrompendone uno a metà: in
+`/proc` non resta niente.
+
+**Lo scenario delle frasi di incitamento non ripartiva mai a fine partita.** Cercava la
+schermata finale con `.pl-screen--fine`, una classe che il gioco non ha mai avuto (la radice
+di `Fine.jsx` è `.pl-fine`): se la partita libera, che parte da un seme a caso, finiva prima
+del tempo, lo scenario girava a vuoto fino all'ultimo giro e dichiarava di non aver mai visto
+il pulsante «Rimetti a posto». È fallito così una volta nel gate di questa versione, e 13
+esecuzioni isolate dopo erano tutte verdi: un'intermittenza con una causa precisa, non un
+caso. Verificato nel browser portando una partita all'ultima mossa: `.pl-fine` presente,
+`.pl-screen--fine` assente.
+
+Nella stessa giornata, senza cambiare il gioco: la caccia ai difetti del motore
+(`tools/caccia-bug.mjs`, 40.000 partite senza incoerenze) e le schermate della scheda del
+Play Store rifatte nel formato che la Play Console accetta. Il cacciatore controlla ora anche
+che il tempo giocato non superi mai due minuti per mossa.
+
 ## [1.19.0] — 22 settembre 2026
 
 ### Tolto
