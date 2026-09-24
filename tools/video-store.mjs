@@ -21,8 +21,8 @@
 
 import { chiudiAllUscita } from './server-di-prova.mjs';
 import { chromium } from 'playwright';
-import { existsSync, mkdirSync, renameSync, unlinkSync } from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
+import { spawn as avvia } from 'node:child_process';
 
 /** L'ffmpeg che Playwright si porta dietro: nessuna dipendenza in piu' da installare. */
 const FFMPEG = process.env.PLINTO_FFMPEG ?? '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux';
@@ -32,6 +32,20 @@ const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
 const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const USCITA = new URL('../store/video/', import.meta.url).pathname;
+
+/**
+ * LA RISOLUZIONE E' QUELLA DI UN TELEFONO VERO: 390x844 punti a densita' 3, cioe'
+ * 1170x2532 pixel. Il video di prima era 390x844 PIXEL: il registratore di Playwright
+ * riduce i fotogrammi alla misura in punti CSS, e su YouTube il gioco arrivava sfocato,
+ * a 219 kb/s. Ingrandirlo dopo non recupera niente, rende solo piu' grande la sfocatura.
+ * Qui i fotogrammi si chiedono al browser (Page.startScreencast) alla densita' vera.
+ */
+const LARGHEZZA = 390;
+const ALTEZZA = 844;
+const DENSITA = 3;
+/** Fotogrammi al secondo del video finale: il browser ne manda solo quando cambia qualcosa. */
+const FPS = 30;
+const FOTOGRAMMI = `${USCITA}.fotogrammi/`;
 
 /** Il livello da mostrare: obiettivo semplice da leggere, vittoria alla portata. */
 const LIVELLO = 11;
@@ -56,22 +70,49 @@ if (!(await serverRisponde())) {
 }
 
 mkdirSync(USCITA, { recursive: true });
-const browser = await chromium.launch({ executablePath: ESEGUIBILE });
-const context = await browser.newContext({
-  viewport: { width: 390, height: 844 },
-  deviceScaleFactor: 2,
-  locale: 'it-IT',
-  // LA MISURA DEL VIDEO DEVE ESSERE QUELLA DELLA FINESTRA. Il primo tentativo chiedeva
-  // 780x1688 per avere un video piu' grande: Playwright non ingrandisce la pagina, la
-  // CENTRA, e il risultato erano bande nere ai lati con l'app larga meno della meta'
-  // del fotogramma. L'ingrandimento, se serve, si fa dopo con ffmpeg, che almeno sa di
-  // stare ingrandendo.
-  recordVideo: { dir: USCITA, size: { width: 390, height: 844 } },
+rmSync(FOTOGRAMMI, { recursive: true, force: true });
+mkdirSync(FOTOGRAMMI, { recursive: true });
+// Senza questa opzione il browser senza finestra manda i fotogrammi in punti CSS anche
+// con deviceScaleFactor 3: misurato, 390x844 invece di 1170x2532.
+const browser = await chromium.launch({
+  executablePath: ESEGUIBILE, args: [`--force-device-scale-factor=${DENSITA}`],
 });
-// La registrazione comincia QUI, con il contesto: tutto cio' che segue e' filmato,
-// compresa la preparazione dei dati. L'istante serve per tagliarlo alla fine.
-const avvioRegistrazione = Date.now();
+const context = await browser.newContext({
+  viewport: { width: LARGHEZZA, height: ALTEZZA },
+  deviceScaleFactor: DENSITA,
+  locale: 'it-IT',
+});
 const page = await context.newPage();
+
+// I fotogrammi arrivano con l'istante in cui il browser li ha disegnati. Si scrivono su
+// disco e non in memoria: un minuto a 1170x2532 sono duemila immagini.
+const fotogrammi = [];
+const cdp = await context.newCDPSession(page);
+/** Larghezza e altezza di un JPEG, lette dall'intestazione del fotogramma. */
+function misuraJpeg(buf) {
+  for (let i = 2; i + 9 < buf.length;) {
+    const marcatore = buf[i + 1];
+    if (marcatore === 0xc0 || marcatore === 0xc2) return [buf.readUInt16BE(i + 7), buf.readUInt16BE(i + 5)];
+    i += 2 + buf.readUInt16BE(i + 2);
+  }
+  return [0, 0];
+}
+let scartati = 0;
+cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
+  cdp.send('Page.screencastFrameAck', { sessionId }).catch(() => {});
+  const buf = Buffer.from(data, 'base64');
+  // Un video ha una misura sola: il primo fotogramma, disegnato mentre la finestra nasce,
+  // e' alto 247 punti. Si scarta tutto cio' che non e' a piena misura.
+  const [l, a] = misuraJpeg(buf);
+  if (l !== LARGHEZZA * DENSITA || a !== ALTEZZA * DENSITA) { scartati += 1; return; }
+  const file = `${FOTOGRAMMI}${String(fotogrammi.length).padStart(6, '0')}.jpg`;
+  writeFileSync(file, buf);
+  fotogrammi.push({ file, t: metadata.timestamp * 1000 });
+});
+await cdp.send('Page.startScreencast', {
+  format: 'jpeg', quality: 92,
+  maxWidth: LARGHEZZA * DENSITA, maxHeight: ALTEZZA * DENSITA, everyNthFrame: 1,
+});
 
 const livelli = {};
 for (let n = 1; n <= SUPERATI; n += 1) {
@@ -82,7 +123,11 @@ await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 await page.evaluate((q) => {
   window.localStorage.clear();
   window.localStorage.setItem('plinto:settings', JSON.stringify({
-    introVista: true, lingua: 'it', tema: 'scuro', animazioni: true, aiutoVisivo: true }));
+    introVista: true, lingua: 'it', animazioni: true, aiutoVisivo: true }));
+  // Dieci livelli superati valgono due attrezzi: cosi' nel livello si vede la cassetta
+  // accanto al gioco, com'e' per chi ci arriva davvero.
+  window.localStorage.setItem('plinto:attrezzi', JSON.stringify({
+    disponibili: 2, riscossi: 2, versione: 1 }));
   window.localStorage.setItem('plinto:records', JSON.stringify({
     best: 18740, bestChain: 7, bestMove: 612, bestGroupsInOneMove: 3 }));
   window.localStorage.setItem('plinto:quadri', JSON.stringify(q));
@@ -278,28 +323,52 @@ for (let i = 0; i < 8; i += 1) {
 }
 await pausa(1800);
 
-const video = page.video();
+const fine = Date.now();
+await cdp.send('Page.stopScreencast').catch(() => {});
 await context.close();
 await browser.close();
 if (server) server.kill();
 
-const percorso = await video.path();
-const grezzo = `${USCITA}grezzo.webm`;
-renameSync(percorso, grezzo);
-
-// Si taglia il caricamento iniziale. `-c copy` non basta: il taglio cadrebbe sul
-// fotogramma chiave piu' vicino e i primi istanti resterebbero dentro.
+/**
+ * DA FOTOGRAMMI SPARSI A UN VIDEO A CADENZA FISSA. Il browser manda un'immagine solo
+ * quando lo schermo cambia: a ogni istante del video finale si mette l'ultima arrivata.
+ * Il video comincia da `inizio`, quando la home e' gia' a schermo: il caricamento e la
+ * preparazione dei dati restano fuori, come prima.
+ */
+if (fotogrammi.length === 0) { console.error('Nessun fotogramma catturato'); process.exit(1); }
 const finale = `${USCITA}plinto-montaggio.webm`;
-const taglio = ((inizio - avvioRegistrazione) / 1000).toFixed(2);
-execFileSync(FFMPEG, ['-y', '-ss', taglio, '-i', grezzo, '-c:v', 'libvpx', '-b:v', '2M',
-  '-crf', '28', finale], { stdio: 'ignore' });
-unlinkSync(grezzo);
+const ffmpeg = avvia(FFMPEG, [
+  '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', 'pipe:0',
+  '-c:v', 'libvpx', '-b:v', '12M', '-crf', '8', '-qmin', '2', '-qmax', '24',
+  '-deadline', 'good', '-cpu-used', '1', '-pix_fmt', 'yuv420p', finale,
+], { stdio: ['pipe', 'ignore', 'ignore'] });
+const chiuso = new Promise((ok) => ffmpeg.on('close', ok));
+let indice = 0;
+let buchi = 0;
+for (let t = inizio; t <= fine; t += 1000 / FPS) {
+  while (indice + 1 < fotogrammi.length && fotogrammi[indice + 1].t <= t) indice += 1;
+  const scritto = ffmpeg.stdin.write(readFileSync(fotogrammi[indice].file));
+  if (!scritto) await new Promise((ok) => ffmpeg.stdin.once('drain', ok));
+}
+// Il buco piu' lungo fra due fotogrammi: se lo screencast si fermasse (per esempio al
+// cambio di pagina della sezione 6), il video mostrerebbe un'immagine ferma e lo si
+// deve sapere, non scoprirlo guardandolo.
+for (let i = 1; i < fotogrammi.length; i += 1) {
+  if (fotogrammi[i].t >= inizio) buchi = Math.max(buchi, fotogrammi[i].t - fotogrammi[i - 1].t);
+}
+ffmpeg.stdin.end();
+const codice = await chiuso;
+rmSync(FOTOGRAMMI, { recursive: true, force: true });
+if (codice !== 0) { console.error(`ffmpeg ha chiuso con codice ${codice}`); process.exit(1); }
 
 console.log(`\nVideo: ${finale}`);
-console.log(`Durata: ${Math.round((Date.now() - inizio) / 1000)}s (tagliati ${taglio}s di caricamento)`);
+console.log(`${LARGHEZZA * DENSITA}x${ALTEZZA * DENSITA} a ${FPS} fotogrammi al secondo, `
+  + `durata ${Math.round((fine - inizio) / 1000)}s, ${fotogrammi.length} fotogrammi catturati `
+  + `(${scartati} scartati perche' non a piena misura), `
+  + `pausa piu' lunga fra due fotogrammi ${Math.round(buchi)} ms`);
 console.log('\nLe parti, nell ordine:');
 tappe.forEach((t, i) => {
-  const fine = tappe[i + 1]?.a ?? Date.now();
-  console.log(`  ${String(Math.round((t.a - inizio) / 1000)).padStart(3)}s  ${t.nome.padEnd(16)} ${Math.round((fine - t.a) / 1000)}s`);
+  const termine = tappe[i + 1]?.a ?? fine;
+  console.log(`  ${String(Math.round((t.a - inizio) / 1000)).padStart(3)}s  ${t.nome.padEnd(16)} ${Math.round((termine - t.a) / 1000)}s`);
 });
 console.log(`\nLivello ${LIVELLO} ${vinto ? 'superato' : 'NON superato: il montaggio non ha la parte della vittoria'}`);

@@ -49,20 +49,23 @@ Righe, colonne e quadranti. Niente pubblicità, niente acquisti, niente conti.
 ```
 PLINTO è un puzzle a blocchi con una regola in più: oltre alle righe e alle colonne si eliminano anche i quadranti 3×3. Tre direzioni invece di due, e una mossa che ne chiude più di uno insieme vale molto di più.
 
-CENTO LIVELLI, TARATI E NON INVENTATI
-Ogni livello ha un obiettivo dichiarato e un tetto di mosse. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato dodici volte da un giocatore simulato e viene tenuto solo se ne riesce almeno quattro. Nessun livello è imbattibile, e un controllo automatico impedisce che ne nasca uno. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
+CENTO LIVELLI, MISURATI E NON INVENTATI
+I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
+
+GLI ATTREZZI DEL CANTIERE
+Nei livelli ne guadagni uno ogni cinque livelli superati, e ne tieni al massimo tre. Quando ti blocchi scegli tu quale usare: la carriola cambia un pezzo, il gessetto segna dove conviene appoggiare, il piccone toglie una casella già posata, la mensola mette da parte un pezzo per dopo. Non si comprano: si guadagnano giocando.
 
 L'INTRECCIO
 Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare.
 
 LA CATENA
-Chiudere qualcosa a ogni mano fa salire un moltiplicatore che resta. Saltare una mano non lo azzera: scende di uno. È una tolleranza dichiarata, non una regola nascosta.
+Ogni mossa che elimina qualcosa fa salire un moltiplicatore che resta. Una mossa a vuoto non lo tocca; dalla seconda di fila scende di uno a ogni mossa. È una tolleranza dichiarata, non una regola nascosta.
 
 LE BOMBE
 Ogni tanto un pezzo porta una bomba. Non fa niente finché non chiudi il gruppo che la contiene: a quel punto si porta via anche le celle intorno, e le bombe che investe esplodono a loro volta.
 
 LA TINTA
-Il colore non è decorazione. Chiudere un gruppo in cui almeno cinque celle su nove sono dello stesso colore paga di più. Con sei colori una maggioranza così non capita per caso: se scatta, è perché ci hai pensato.
+Il colore non è decorazione. Chiudere un gruppo in cui almeno sette celle su nove sono dello stesso colore paga di più. Una maggioranza così non capita per caso: se scatta, è perché ci hai pensato.
 
 LA SFIDA DEL GIORNO
 Ogni giorno la partita parte uguale per tutti. Nessun limite di tentativi, niente serie da mantenere: saltare un giorno non toglie niente. I giorni passati restano giocabili, perché si ricalcolano dalla data, e un archivio permette di tornarci.
@@ -71,7 +74,7 @@ PARTITA LIBERA
 Senza obiettivi e senza tetto di mosse, finché i pezzi entrano.
 
 IL GIOCO TI DICE QUELLO CHE SA
-La prossima terna di pezzi si vede prima di doverla giocare. Un pezzo appoggiato per sbaglio si rimette a posto. Le statistiche raccontano come giochi, non solo quanto hai fatto. E un risultato si condivide con una riga di testo, senza account e senza collegarsi a niente.
+Nei livelli la prossima terna di pezzi si vede prima di doverla giocare. Un pezzo appoggiato per sbaglio si rimette a posto. Le statistiche raccontano come giochi, non solo quanto hai fatto. Un risultato si condivide con un messaggio di testo, e i progressi si portano su un altro telefono con un file, senza account.
 
 COSA NON TROVERAI
 Nessuna pubblicità. Nessun acquisto. Nessun account. Nessuna vita da aspettare, nessun timer, nessuna notifica. Nessuna raccolta di dati: quello che giochi resta sul tuo telefono e non viene mandato da nessuna parte.
@@ -80,9 +83,9 @@ FUNZIONA SENZA RETE
 Una volta installato si gioca offline.
 
 ACCESSIBILE
-Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, animazioni disattivabili.
+Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, e se nel telefono hai chiesto di ridurre le animazioni il gioco lo rispetta.
 ```
-*2537 caratteri su 4000.*
+*3150 caratteri su 4000. Aggiornata alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
 
 ## In inglese (Play Console → Traduzioni)
 
@@ -110,19 +113,22 @@ A hundred levels, and 3×3 quadrants on top of rows and columns. No ads.
 PLINTO is a block puzzle with one extra rule: besides rows and columns, you also clear 3×3 quadrants. Three directions instead of two, and a move that closes more than one at once is worth far more.
 
 A HUNDRED LEVELS, MEASURED AND NOT INVENTED
-Every level has a stated goal and a move limit. The targets were not picked by eye: each level is played twelve times by a simulated player and is kept only if it comes off at least four times. No level is unbeatable, and an automatic check makes sure none can be. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
+The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
+
+THE SITE TOOLS
+In the levels you earn one every five levels cleared, and you keep three at most. When you are stuck you choose which one to use: the wheelbarrow swaps a piece, the chalk marks where a piece fits best, the pickaxe removes a cell already placed, the shelf sets a piece aside for later. They cannot be bought: you earn them by playing.
 
 THE INTERLOCK
 Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach.
 
 THE CHAIN
-Clearing something every hand raises a multiplier that stays. Skipping a hand does not reset it: it drops by one. That tolerance is stated, not hidden.
+Every move that clears something raises a multiplier that stays. One empty move leaves it alone; from the second in a row it drops by one with each move. That tolerance is stated, not hidden.
 
 BOMBS
 Now and then a piece carries a bomb. It does nothing until you close the group holding it: at that point it takes the surrounding cells with it, and any bombs it reaches go off in turn.
 
 THE TINT
-Colour is not decoration. Closing a group where at least five cells out of nine share one colour pays more. With six colours a majority like that does not happen by chance: if it triggers, it is because you planned it.
+Colour is not decoration. Closing a group where at least seven cells out of nine share one colour pays more. A majority like that does not happen by chance: if it triggers, it is because you planned it.
 
 THE DAILY CHALLENGE
 Every day the game starts the same for everyone. No attempt limit, no streak to keep: skipping a day costs you nothing. Past days stay playable, because they are recomputed from the date, and an archive lets you go back to them.
@@ -131,7 +137,7 @@ FREE PLAY
 No goals and no move limit, for as long as the pieces still fit.
 
 THE GAME TELLS YOU WHAT IT KNOWS
-You see the next three pieces before you have to play them. A piece dropped by mistake goes back. The stats say how you play, not just how much you scored. And a result shares as a line of text, with no account and nothing to connect to.
+In the levels you see the next three pieces before you have to play them. A piece dropped by mistake goes back. The stats say how you play, not just how much you scored. A result shares as a text message, and your progress moves to another phone with a file, with no account.
 
 WHAT YOU WILL NOT FIND
 No ads. No purchases. No account. No lives to wait for, no timers, no notifications. No data collection: what you play stays on your phone and is not sent anywhere.
@@ -140,9 +146,9 @@ WORKS OFFLINE
 Once installed, it plays without a connection.
 
 ACCESSIBLE
-Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, animations that can be turned off.
+Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, and if you asked your phone to reduce motion, the game respects it.
 ```
-*2353 caratteri su 4000.*
+*2931 caratteri su 4000.*
 
 ## Categoria
 
@@ -218,6 +224,28 @@ nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Ades
 Fuori dalle otto resta `riserva-home.png`, che mostra bene l'insieme delle modalita' ma dice
 meno di una schermata di gioco a chi scorre in fretta. Se una delle otto qui sopra non
 convince, e' il primo ricambio.
+
+### Il video (link YouTube)
+
+Il file è `store/video/plinto-montaggio.webm`, generato con `npm run video` dal gioco vero:
+1170×2532 (la densità di un telefono), 30 fotogrammi al secondo, circa 77 secondi, senza
+audio. Le parti, nell'ordine: home, mappa dei livelli, apertura del livello 11, il livello
+giocato fino alla vittoria, partita libera. La Play Console non prende il file: vuole il
+link a un video YouTube.
+
+Requisiti della Play Console, dalla sua guida («Add preview assets»):
+- link a **un singolo video**, non a un canale o a una playlist, e senza parametri come
+  l'istante di partenza;
+- visibilità **Pubblico** oppure **Non in elenco**, mai Privato;
+- **annunci disattivati** (monetizzazione spenta) e **nessun limite d'età**;
+- incorporamento consentito;
+- orizzontale o verticale, ma senza bande nere: questo è verticale e non ne ha;
+- si riproducono da soli solo i **primi 30 secondi**: qui coprono home, mappa, apertura e
+  la prima metà del livello.
+
+Un video verticale sotto i tre minuti YouTube lo può classificare come Short. Nella Play
+Console si incolla comunque il link nella forma `https://www.youtube.com/watch?v=...`:
+come la Play Console tratti un link in forma `/shorts/` non è verificato.
 
 ---
 
