@@ -1,10 +1,17 @@
 # Gate di rilascio — PLINTO
 
-Stato all'**11 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
-Store (canale Alpha, versione approvata e installata su telefoni veri). Non è ancora in
-produzione: Play chiede 12 tester per 14 giorni consecutivi prima di consentirlo, e quel
-conteggio non è ancora completo. Le voci aperte restano elencate per prime, senza
-addolcirle.
+Stato al **24 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
+Store (canale Alpha, pacchetto 10305). Il 24 settembre la Play Console ha segnato completati
+i tre requisiti per la produzione (release di test chiuso, almeno 12 tester, 14 giorni), e
+**la domanda di accesso alla produzione è stata inviata** lo stesso giorno: Google indica fino
+a sette giorni di revisione, a volte di più. Nello stesso giorno sono andate in revisione le
+modifiche alla scheda (descrizione completa, schermate). Le voci aperte restano elencate per
+prime, senza addolcirle.
+
+**Il questionario inviato**: sei risposte libere da **300 caratteri al massimo** ciascuna (il
+limite si scopre solo nel modulo: la guida di Google non lo dice) e due a scelta multipla. Le
+risposte brevi effettivamente preparate sono nella conversazione del 24 settembre; la bozza
+lunga, utile come fonte, è l'artefatto «Accesso alla produzione — PLINTO».
 
 Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATTO, in corso** una parte è verificata e la nota dice quale pezzo manca · **APERTO** da fare · **BLOCCATO** dipende da una decisione o da un dato che non abbiamo · **DA VERIFICARE FUORI** richiede una competenza che questo progetto non ha.
 
@@ -88,8 +95,8 @@ di estetica, se ne perdono settimane di attesa.
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Caricare l'AAB con l'icona corretta | **APERTO** | Il `versionCode` è a 11901 (`versionName` 1.19.1) e segue la versione del gioco. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
-| Attualizzare le schermate sulla scheda | **APERTO** | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, rigenerate alla 1.19.0: **otto** immagini da 1236×2196 (9:16). Le versioni precedenti dello strumento ne producevano nove da 1170×2532, e la Play Console non le avrebbe accettate: la sua guida ammette al massimo otto schermate per tipo di dispositivo e un lato lungo non oltre il doppio del corto (2532/1170 = 2,16). Adesso lo strumento controlla i file prodotti e si ferma se non sono caricabili. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
+| Caricare l'AAB con l'icona corretta | **APERTO, rimandato** alla prima release di produzione, per scelta del proprietario: il contenuto del gioco arriva comunque dal sito, il pacchetto cambia solo icona e numero di versione. | Il `versionCode` è a 11901 (`versionName` 1.19.1) e segue la versione del gioco. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
+| Attualizzare le schermate sulla scheda | **IN REVISIONE** (24 settembre) | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, rigenerate alla 1.19.0: **otto** immagini da 1236×2196 (9:16). Le versioni precedenti dello strumento ne producevano nove da 1170×2532, e la Play Console non le avrebbe accettate: la sua guida ammette al massimo otto schermate per tipo di dispositivo e un lato lungo non oltre il doppio del corto (2532/1170 = 2,16). Adesso lo strumento controlla i file prodotti e si ferma se non sono caricabili. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
 
 Nota su cosa richiede cosa: il caricamento delle schermate è una modifica alla **scheda**,
 non un rilascio, quindi non ha bisogno di un AAB nuovo. Si fanno comunque in
