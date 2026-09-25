@@ -24,12 +24,35 @@ export const VARIANTI_INCITA = Object.fromEntries(
   Object.entries(it.incita).map(([nome, frasi]) => [nome, Array.isArray(frasi) ? frasi.length : 1]),
 );
 
-/** Lingua suggerita dal browser, se la conosciamo. */
+/**
+ * La lingua per chi non parla nessuna delle nostre: l'inglese.
+ *
+ * PRIMA RICADEVA SULL'ITALIANO, cioe' su LINGUA_PREDEFINITA, che e' la lingua di
+ * riferimento delle traduzioni e non quella da offrire a uno sconosciuto. Con il gioco
+ * pubblicato in 177 paesi, un telefono in spagnolo, tedesco o portoghese si ritrovava
+ * il gioco in italiano, con la scelta della lingua nascosta nelle impostazioni -- scritte
+ * anche loro in italiano. Fra le due lingue che abbiamo, l'inglese e' quella che uno
+ * straniero ha piu' probabilita' di leggere.
+ */
+export const LINGUA_PER_GLI_ALTRI = 'en';
+
+/**
+ * Lingua suggerita dal browser: la prima che conosciamo fra quelle preferite dal
+ * telefono, nell'ordine in cui il telefono le mette. Chi ha il telefono in tedesco con
+ * l'italiano come seconda lingua gioca in italiano; chi non ne ha nessuna delle nostre,
+ * in inglese.
+ */
 export function linguaDelBrowser() {
   try {
-    const lang = (navigator.language || '').slice(0, 2).toLowerCase();
-    return LINGUE[lang] ? lang : LINGUA_PREDEFINITA;
+    const preferite = [...(navigator.languages ?? []), navigator.language ?? ''];
+    for (const voce of preferite) {
+      const lang = String(voce).slice(0, 2).toLowerCase();
+      if (LINGUE[lang]) return lang;
+    }
+    return LINGUA_PER_GLI_ALTRI;
   } catch {
+    // Senza `navigator` (non succede in un browser) non c'e' niente da leggere: resta la
+    // lingua di riferimento.
     return LINGUA_PREDEFINITA;
   }
 }

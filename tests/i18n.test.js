@@ -1,9 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 // Attenzione: NON importare queste traduzioni come `it` ed `en`: `it` collide con
 // la funzione di test di Vitest e il file non viene nemmeno raccolto.
 import italiano from '../src/i18n/it.js';
 import inglese from '../src/i18n/en.js';
-import { traduttore, LINGUE, LINGUA_PREDEFINITA } from '../src/i18n/index.js';
+import {
+  traduttore, LINGUE, LINGUA_PREDEFINITA, linguaDelBrowser, LINGUA_PER_GLI_ALTRI,
+} from '../src/i18n/index.js';
 import { REGOLE_INTRO } from '../src/config/intro.js';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -226,5 +228,35 @@ describe('regole della presentazione', () => {
       expect(testo, `${lingua}: manca intro.${chiave}`).not.toBe(`intro.${chiave}`);
       expect(testo.length, `${lingua}: intro.${chiave} e troppo corto`).toBeGreaterThan(20);
     }
+  });
+});
+
+/**
+ * Quale lingua trova chi apre il gioco la prima volta. Il gioco e' pubblicato in 177
+ * paesi: fino alla 1.19.1 chi aveva il telefono in una lingua che non e' fra le nostre
+ * trovava l'italiano.
+ */
+describe('lingua alla prima apertura', () => {
+  afterEach(() => vi.unstubAllGlobals());
+  const telefono = (language, languages = [language]) => vi.stubGlobal('navigator', { language, languages });
+
+  it('italiano e inglese si riconoscono', () => {
+    telefono('it-IT');
+    expect(linguaDelBrowser()).toBe('it');
+    telefono('en-GB');
+    expect(linguaDelBrowser()).toBe('en');
+  });
+
+  it('una lingua che non abbiamo porta all inglese, non all italiano', () => {
+    expect(LINGUA_PER_GLI_ALTRI).toBe('en');
+    for (const lingua of ['es-ES', 'de-DE', 'pt-BR', 'fr-FR', 'ja-JP']) {
+      telefono(lingua);
+      expect(linguaDelBrowser(), lingua).toBe('en');
+    }
+  });
+
+  it('si usa la prima delle lingue preferite che conosciamo', () => {
+    telefono('de-DE', ['de-DE', 'it-IT', 'en-US']);
+    expect(linguaDelBrowser()).toBe('it');
   });
 });

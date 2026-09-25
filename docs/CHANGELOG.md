@@ -7,6 +7,29 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.2] — 25 settembre 2026
+
+### Corretto
+
+**Chi ha il telefono in una lingua che il gioco non ha lo trova in inglese, non più in
+italiano.** La lingua della prima apertura si leggeva dal telefono e, se non era né
+l'italiano né l'inglese, ricadeva sull'italiano: la lingua di riferimento delle
+traduzioni, non quella da offrire a uno sconosciuto. Con il gioco in produzione in 177
+paesi, un telefono in spagnolo, tedesco o portoghese si trovava tutto in italiano,
+comprese le impostazioni dove si cambia lingua. Adesso si guarda anche l'elenco delle
+lingue preferite del telefono, nell'ordine in cui le mette: si prende la prima che il
+gioco conosce, e se non ce n'è nessuna l'inglese.
+
+Chi ha già aperto il gioco non vede cambiare niente: la lingua scelta resta salvata nelle
+impostazioni. Tre prove nuove in `tests/i18n.test.js`, e quella sulla lingua straniera
+fallisce sul codice di prima.
+
+### Versioni
+
+Il progetto Android passa a 11902 (1.19.2). Su Play è in revisione la prima release di
+produzione, 11901 (1.19.1): le informazioni dell'app diranno 1.19.1 finché non si carica
+il pacchetto nuovo, ma il gioco che si apre è quello del sito, cioè questo.
+
 ## [1.19.1] — 23 settembre 2026
 
 ### Corretto
