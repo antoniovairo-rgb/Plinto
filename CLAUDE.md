@@ -138,9 +138,15 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
   **una parola per una cosa sola**: se due cose diverse si chiamano allo stesso modo, il
   giocatore le confonde. Pagato una volta: il pannello diceva «Hai 3 attrezzi» e ne
   elencava quattro, perche' "attrezzi" indicava sia i quattro strumenti sia quante volte
-  si possono usare. Adesso gli **attrezzi** sono i quattro strumenti e gli **usi** sono
-  quello che si guadagna e si consuma. Prima di scrivere un testo nuovo chiediti: chi lo
-  legge per la prima volta, senza sapere niente del codice, capisce che cosa fare?
+  si possono usare. Adesso gli **attrezzi** sono i quattro strumenti e i **gettoni** sono
+  quello che si guadagna e si spende (in inglese *tools* e *tokens*; «usi» e' stato
+  scartato dal proprietario). Il vocabolario fissato: griglia (non tabellone), casella
+  (non cella, non quadratino), i prossimi tre pezzi (non terna), Record, Sfida del
+  giorno, Intreccio (in inglese Interlace). `tests/lessico.test.js` fa fallire i
+  sinonimi scartati: se ne aggiungi uno al gioco, aggiungilo li'. Un numero delle regole
+  dentro un testo si prende dalle regole, non si scrive a mano. Prima di scrivere un
+  testo nuovo chiediti: chi lo legge per la prima volta, senza sapere niente del codice,
+  capisce che cosa fare?
 - **I cento livelli non si modificano a mano.** `src/config/quadri.js` e' generato: si
   cambia la ricetta in `tools/genera-quadri.mjs` (atti, tipi, motivi, percentili, margini,
   bande di riuscita) e si rigenera. Una generazione intera dura ore, quindi si prova prima

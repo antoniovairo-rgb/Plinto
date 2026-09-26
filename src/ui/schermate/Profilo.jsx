@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Pagina, Vuoto } from './Pagina.jsx';
 import { numero } from '../../i18n/formato.js';
-import { CHAIN_MAX } from '../../config/rules.js';
+import { CHAIN_MAX, GROUP_BASE_POINTS } from '../../config/rules.js';
 import { IMPRONTA_REGOLE } from '../../core/impronta.js';
 import { caricaProfilo, quoteCatena, esportaProfilo } from '../../persistence/profilo.js';
 import riferimento from '../../data/riferimento-catena.json';
@@ -82,7 +82,13 @@ export function SchermoProfilo({ onIndietro, t, onGioca }) {
       {/* --- come chiudi i gruppi: il dato che racconta davvero lo stile --- */}
       <section className="pl-profilo__blocco">
         <h2 className="pl-profilo__titolo">{t('profilo.comeChiudi')}</h2>
-        <p className="pl-nota">{t('profilo.comeChiudiSpiega')}</p>
+        {/* I punti vengono dalle regole: scritti a mano nel testo, dicevano 9 per una riga
+            quando ne vale 18, e nessuno se n'era accorto. */}
+        <p className="pl-nota">
+          {t('profilo.comeChiudiSpiega')
+            .replace('{quadrante}', GROUP_BASE_POINTS.quadrant)
+            .replace('{riga}', GROUP_BASE_POINTS.row)}
+        </p>
         <table className="pl-tabella">
           <caption className="pl-sr">{t('profilo.comeChiudi')}</caption>
           <thead>
@@ -149,8 +155,6 @@ export function SchermoProfilo({ onIndietro, t, onGioca }) {
           <p className="pl-nota">
             {t('profilo.riferimento')
               .replace('{partite}', numero(riferimento.partite))
-              .replace('{mosse}', numero(riferimento.mosse))
-              .replace('{tetto}', numero(riferimento.tettoMosse))
               .replace('{data}', riferimento.misuratoIl)}
           </p>
         ) : (

@@ -53,7 +53,7 @@ CENTO LIVELLI, MISURATI E NON INVENTATI
 I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
 
 GLI ATTREZZI DEL CANTIERE
-Sono quattro: la carriola cambia un pezzo della mano, il gessetto ti mostra dove conviene mettere un pezzo, il piccone toglie un quadratino già posato, la mensola mette da parte un pezzo per dopo. Nei livelli guadagni gli usi: 1 ogni cinque livelli superati, al massimo tre da parte. Ogni uso vale per l'attrezzo che scegli tu, quando ti blocchi. Non si comprano: si guadagnano giocando.
+Sono quattro: la carriola cambia un pezzo della mano, il gessetto ti mostra dove conviene mettere un pezzo, il piccone svuota una casella occupata, la mensola mette da parte un pezzo per dopo. Per usarli servono i gettoni: nei livelli ne guadagni 1 ogni cinque livelli superati, e ne tieni al massimo tre. Con ogni gettone usi l'attrezzo che scegli tu, quando ti blocchi. Non si comprano: si guadagnano giocando.
 
 L'INTRECCIO
 Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare.
@@ -62,10 +62,10 @@ LA CATENA
 Ogni mossa che elimina qualcosa fa salire un moltiplicatore che resta. Una mossa a vuoto non lo tocca; dalla seconda di fila scende di uno a ogni mossa. È una tolleranza dichiarata, non una regola nascosta.
 
 LE BOMBE
-Ogni tanto un pezzo porta una bomba. Non fa niente finché non chiudi il gruppo che la contiene: a quel punto si porta via anche le celle intorno, e le bombe che investe esplodono a loro volta.
+Ogni tanto un pezzo porta una bomba. Non fa niente finché non chiudi il gruppo che la contiene: a quel punto si porta via anche le caselle intorno, e le bombe che investe esplodono a loro volta.
 
 LA TINTA
-Il colore non è decorazione. Chiudere un gruppo in cui almeno sette celle su nove sono dello stesso colore paga di più. Una maggioranza così non capita per caso: se scatta, è perché ci hai pensato.
+Il colore non è decorazione. Chiudere un gruppo in cui almeno sette caselle su nove sono dello stesso colore paga di più. Una maggioranza così non capita per caso: se scatta, è perché ci hai pensato.
 
 LA SFIDA DEL GIORNO
 Ogni giorno la partita parte uguale per tutti. Nessun limite di tentativi, niente serie da mantenere: saltare un giorno non toglie niente. I giorni passati restano giocabili, perché si ricalcolano dalla data, e un archivio permette di tornarci.
@@ -74,7 +74,7 @@ PARTITA LIBERA
 Senza obiettivi e senza tetto di mosse, finché i pezzi entrano.
 
 IL GIOCO TI DICE QUELLO CHE SA
-Nei livelli la prossima terna di pezzi si vede prima di doverla giocare. Un pezzo appoggiato per sbaglio si rimette a posto. Le statistiche raccontano come giochi, non solo quanto hai fatto. Un risultato si condivide con un messaggio di testo, e i progressi si portano su un altro telefono con un file, senza account.
+Nei livelli vedi in anticipo i prossimi tre pezzi. Un pezzo appoggiato per sbaglio si rimette a posto. Le statistiche raccontano come giochi, non solo quanto hai fatto. Un risultato si condivide con un messaggio di testo, e i progressi si portano su un altro telefono con un file, senza account.
 
 COSA NON TROVERAI
 Nessuna pubblicità. Nessun acquisto. Nessun account. Nessuna vita da aspettare, nessun timer, nessuna notifica. Nessuna raccolta di dati: quello che giochi resta sul tuo telefono e non viene mandato da nessuna parte.
@@ -85,7 +85,7 @@ Una volta installato si gioca offline.
 ACCESSIBILE
 Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, e se nel telefono hai chiesto di ridurre le animazioni il gioco lo rispetta.
 ```
-*3211 caratteri su 4000. Aggiornata alla 1.19.3 (attrezzi e usi distinti: gli attrezzi sono i quattro strumenti, gli usi sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
+*3218 caratteri su 4000. Aggiornata alla 1.19.4 (attrezzi e gettoni distinti: gli attrezzi sono i quattro strumenti, i gettoni sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
 
 ## In inglese (Play Console → Traduzioni)
 
@@ -116,19 +116,19 @@ A HUNDRED LEVELS, MEASURED AND NOT INVENTED
 The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
 
 THE SITE TOOLS
-There are four: the wheelbarrow swaps a piece in your hand, the chalk shows you where a piece fits best, the pickaxe removes a square already on the board, the shelf sets a piece aside for later. In the levels you earn uses: 1 every five levels cleared, three at most in reserve. Each use works for whichever tool you pick, when you are stuck. They cannot be bought: you earn them by playing.
+There are four: the wheelbarrow swaps a piece in your hand, the chalk shows you where a piece fits best, the pickaxe empties a filled square, the shelf sets a piece aside for later. To use them you need tokens: in the levels you earn 1 every five levels cleared, and you can keep up to three. With each token you use whichever tool you pick, when you are stuck. They cannot be bought: you earn them by playing.
 
-THE INTERLOCK
+THE INTERLACE
 Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach.
 
 THE CHAIN
 Every move that clears something raises a multiplier that stays. One empty move leaves it alone; from the second in a row it drops by one with each move. That tolerance is stated, not hidden.
 
 BOMBS
-Now and then a piece carries a bomb. It does nothing until you close the group holding it: at that point it takes the surrounding cells with it, and any bombs it reaches go off in turn.
+Now and then a piece carries a bomb. It does nothing until you close the group holding it: at that point it takes the surrounding squares with it, and any bombs it reaches go off in turn.
 
 THE TINT
-Colour is not decoration. Closing a group where at least seven cells out of nine share one colour pays more. A majority like that does not happen by chance: if it triggers, it is because you planned it.
+Colour is not decoration. Closing a group where at least seven squares out of nine share one colour pays more. A majority like that does not happen by chance: if it triggers, it is because you planned it.
 
 THE DAILY CHALLENGE
 Every day the game starts the same for everyone. No attempt limit, no streak to keep: skipping a day costs you nothing. Past days stay playable, because they are recomputed from the date, and an archive lets you go back to them.
@@ -148,7 +148,7 @@ Once installed, it plays without a connection.
 ACCESSIBLE
 Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, and if you asked your phone to reduce motion, the game respects it.
 ```
-*2990 caratteri su 4000. Aggiornata alla 1.19.3.*
+*3012 caratteri su 4000. Aggiornata alla 1.19.4.*
 
 ## Categoria
 
@@ -212,7 +212,7 @@ nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Ades
 
 | # | File | Che cosa dice nei primi due secondi |
 | --- | --- | --- |
-| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un uso degli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
+| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un gettone per gli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
 | 2 | `2-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
 | 3 | `3-livello.png` | Com'e' fatto un livello mentre lo giochi: l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
 | 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |

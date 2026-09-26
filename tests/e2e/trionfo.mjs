@@ -308,7 +308,9 @@ if (await vinciIlPrimo()) {
     }
 
     // E la condivisione deve esserci: chiudere cento livelli e' la cosa che si racconta.
-    if (await page.getByRole('button', { name: /li hai finiti|racconta/i }).count() === 0) {
+    // Il nome del pulsante si prende dai testi del gioco: cercava "li hai finiti|racconta"
+    // e si e' rotto quando il pulsante e' diventato "Condividi il traguardo" (1.19.4).
+    if (await page.getByRole('button', { name: traduttore('it')('scheda.condividiTrionfo') }).count() === 0) {
       errori.push('TRIONFO: manca il pulsante per condividere la fine del percorso');
     }
 

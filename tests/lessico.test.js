@@ -33,9 +33,35 @@ function testiDi(oggetto, strada = []) {
 
 const senzaSegnaposto = (s) => s.replace(/\{[^}]*\}/g, ' ');
 
+/**
+ * Il secondo giro, del 26 settembre 2026: nel gruppo dei tester qualcuno ha letto "Hai 3
+ * attrezzi" sopra un elenco di quattro e ha chiesto "sono quattro?". "Attrezzi" voleva dire due
+ * cose: i quattro strumenti e quante volte li puoi usare. Adesso gli attrezzi sono gli
+ * strumenti e i GETTONI sono quello che si guadagna e si spende. Nello stesso giro:
+ * "tabellone" e "griglia" erano la stessa cosa, "quadratino" e "casella" anche, la
+ * "terna" non era mai spiegata a nessuno, e in inglese l'Intreccio si chiamava in tre
+ * modi (Interlace, Interlock, Weave). "usi" come verbo ("usi un attrezzo") resta
+ * lecito: e' vietato solo come nome del conto.
+ */
 const VIETATE = {
-  it: [[/\bcell[ae]\b/i, 'cella/celle', 'casella/caselle']],
-  en: [[/\bcells?\b/i, 'cell/cells', 'square/squares']],
+  it: [
+    [/\bcell[ae]\b/i, 'cella/celle', 'casella/caselle'],
+    [/\btabellon[ei]\b/i, 'tabellone', 'griglia'],
+    [/\bquadratin[oi]\b/i, 'quadratino', 'casella'],
+    [/\bterne?\b/i, 'terna', 'i prossimi tre pezzi'],
+    [/\buso\b|\busi (degli|disponibili|appena|da parte)\b|\bmassimo di \d+ usi\b/i, 'uso/usi (il conto)', 'gettone/gettoni'],
+    [/\bancorat/i, 'ancorato', 'appoggiato'],
+    [/Sfida del Giorno/, 'Sfida del Giorno', 'Sfida del giorno'],
+  ],
+  en: [
+    [/\bcells?\b/i, 'cell/cells', 'square/squares'],
+    [/\bboards?\b/i, 'board', 'grid'],
+    [/\binterlock|\bweave/i, 'Interlock/Weave', 'Interlace'],
+    [/\bnext set\b/i, 'next set', 'next three pieces'],
+    [/\buses\b|\btool use\b|\ba use\b/i, 'use/uses (the count)', 'token/tokens'],
+    [/\banchor/i, 'anchored', 'placed'],
+    [/Daily Challenge/, 'Daily Challenge', 'Daily challenge'],
+  ],
 };
 
 describe('una cosa, un nome solo', () => {
@@ -52,6 +78,23 @@ describe('una cosa, un nome solo', () => {
       expect(colpevoli.join('\n')).toBe('');
     });
   }
+
+  it('i punti dei gruppi nel profilo vengono dalle regole, non da un numero scritto a mano', () => {
+    // Diceva "una riga o una colonna 9" quando nelle regole ne vale 18.
+    for (const testi of [testiIt, testiEn]) {
+      expect(testi.profilo.comeChiudiSpiega).toContain('{quadrante}');
+      expect(testi.profilo.comeChiudiSpiega).toContain('{riga}');
+      expect(senzaSegnaposto(testi.profilo.comeChiudiSpiega)).not.toMatch(/\d/);
+    }
+  });
+
+  it('nessun comando da programmatore nei testi del giocatore', () => {
+    // Il profilo diceva: 'Si rigenera con «npm run catena»'.
+    for (const testi of [testiIt, testiEn]) {
+      const colpevoli = testiDi(testi).filter(([, v]) => /\bnpm\b/.test(v)).map(([k]) => k);
+      expect(colpevoli).toEqual([]);
+    }
+  });
 
   it('la parola "gruppo" viene spiegata dove compare per la prima volta', () => {
     /**

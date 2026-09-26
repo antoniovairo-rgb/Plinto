@@ -7,6 +7,47 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.4] — 26 settembre 2026
+
+### Corretto
+
+**Tutti i testi del gioco riletti, uno per uno, con una regola sola: chiarissimi per
+chiunque, anche per un bambino, e una parola per una cosa sola.** Richiesta del
+proprietario dopo la domanda «sono quattro?» sugli attrezzi.
+
+- **Gli attrezzi si usano con i gettoni.** «Usi», introdotto nella 1.19.3, non convinceva:
+  adesso quello che si guadagna ogni 5 livelli è un **gettone**, e con ogni gettone usi
+  l'attrezzo che scegli tu. Il pannello dice «Hai 2 gettoni», la fine del livello «Hai
+  guadagnato 1 gettone per gli attrezzi». In inglese *tokens*.
+- **Un numero sbagliato nel profilo.** «Un quadrante vale 27 punti base, una riga o una
+  colonna 9»: nelle regole una riga ne vale **18**. Il testo adesso prende i due numeri
+  dalle regole, e non può più restare indietro.
+- **Un comando da programmatori mostrato ai giocatori.** Il profilo diceva «Si rigenera
+  con «npm run catena»». Tolto.
+- **Una parola per una cosa sola:** «griglia» e non «tabellone»; «casella» e non
+  «quadratino»; «i prossimi tre pezzi» e non «la prossima terna», parola che nessuno
+  aveva mai spiegato; «Record» invece di quattro nomi diversi per lo stesso numero;
+  «Condividi…» su tutti i pulsanti di condivisione; «Crea / Carica un salvataggio».
+  In inglese l'Intreccio si chiamava in tre modi (Interlace, Interlock, Weave): adesso
+  solo Interlace, e «grid» invece di «board».
+- **Frasi riscritte perché dicessero la cosa com'è:** la Catena «scende se fai due mosse
+  di fila senza eliminare niente» (diceva «se stai fermo»); il pezzo si rimette a posto
+  «per correggere un tocco sbagliato» (diceva «il dito»); le sfide passate sono «la
+  stessa partita di quel giorno» (diceva «ricalcolata»); l'introduzione spiega che i
+  pezzi in mano sono tre, prima che la carriola parli di «mano».
+
+`tests/lessico.test.js` adesso fa fallire le parole scartate, il numero scritto a mano e
+qualunque comando `npm` nei testi. Nessuna regola di gioco cambia.
+
+Anche la descrizione della scheda Play Store segue lo stesso vocabolario (caselle,
+prossimi tre pezzi, gettoni, Interlace). Le schermate sono rigenerate: mostrano
+«Prossimi tre pezzi» e «Record».
+
+### Versioni
+
+Il progetto Android passa a 11904 (1.19.4). I testi arrivano a tutti dal sito, senza
+caricare un pacchetto nuovo su Play.
+
 ## [1.19.3] — 26 settembre 2026
 
 ### Corretto
