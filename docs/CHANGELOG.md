@@ -7,6 +7,32 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.3] — 26 settembre 2026
+
+### Corretto
+
+**Il pannello degli attrezzi diceva «Hai 3 attrezzi» e poi ne elencava quattro.** Dal
+gruppo dei tester è arrivata la domanda: «sono quattro?». Ed era giusto non capire: la parola «attrezzi»
+indicava due cose diverse, i quattro attrezzi (carriola, gessetto, piccone, mensola) e il
+numero di volte che si possono usare. Adesso ogni parola indica una cosa sola:
+
+- **attrezzi** sono sempre i quattro strumenti;
+- **usi** è quello che si guadagna (1 ogni 5 livelli superati, al massimo 3 da parte) e
+  che si spende usando uno qualunque dei quattro.
+
+Il pannello ora dice «Puoi usare gli attrezzi ancora 3 volte. Ogni volta scegli tu quale
+ti serve: l'uso si consuma solo se l'attrezzo fa davvero qualcosa.», e quando non ne hai
+«Per ora non puoi usare gli attrezzi. Guadagni 1 uso ogni 5 livelli superati, e ne puoi
+mettere da parte al massimo 3.». Riscritte con la stessa regola, in italiano e in
+inglese, anche le descrizioni dei quattro attrezzi, i messaggi di fine livello («Hai
+guadagnato 1 uso degli attrezzi»), la legenda, la guida e l'aiuto. Nessuna regola di
+gioco cambia: cambiano solo le parole.
+
+### Versioni
+
+Il progetto Android passa a 11903 (1.19.3). Il testo arriva a tutti dal sito, senza
+caricare un pacchetto nuovo su Play.
+
 ## [1.19.2] — 25 settembre 2026
 
 ### Corretto

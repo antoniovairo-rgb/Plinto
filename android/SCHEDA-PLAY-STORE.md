@@ -53,7 +53,7 @@ CENTO LIVELLI, MISURATI E NON INVENTATI
 I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
 
 GLI ATTREZZI DEL CANTIERE
-Nei livelli ne guadagni uno ogni cinque livelli superati, e ne tieni al massimo tre. Quando ti blocchi scegli tu quale usare: la carriola cambia un pezzo, il gessetto segna dove conviene appoggiare, il piccone toglie una casella già posata, la mensola mette da parte un pezzo per dopo. Non si comprano: si guadagnano giocando.
+Sono quattro: la carriola cambia un pezzo della mano, il gessetto ti mostra dove conviene mettere un pezzo, il piccone toglie un quadratino già posato, la mensola mette da parte un pezzo per dopo. Nei livelli guadagni gli usi: 1 ogni cinque livelli superati, al massimo tre da parte. Ogni uso vale per l'attrezzo che scegli tu, quando ti blocchi. Non si comprano: si guadagnano giocando.
 
 L'INTRECCIO
 Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare.
@@ -85,7 +85,7 @@ Una volta installato si gioca offline.
 ACCESSIBILE
 Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, e se nel telefono hai chiesto di ridurre le animazioni il gioco lo rispetta.
 ```
-*3150 caratteri su 4000. Aggiornata alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
+*3211 caratteri su 4000. Aggiornata alla 1.19.3 (attrezzi e usi distinti: gli attrezzi sono i quattro strumenti, gli usi sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
 
 ## In inglese (Play Console → Traduzioni)
 
@@ -116,7 +116,7 @@ A HUNDRED LEVELS, MEASURED AND NOT INVENTED
 The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
 
 THE SITE TOOLS
-In the levels you earn one every five levels cleared, and you keep three at most. When you are stuck you choose which one to use: the wheelbarrow swaps a piece, the chalk marks where a piece fits best, the pickaxe removes a cell already placed, the shelf sets a piece aside for later. They cannot be bought: you earn them by playing.
+There are four: the wheelbarrow swaps a piece in your hand, the chalk shows you where a piece fits best, the pickaxe removes a square already on the board, the shelf sets a piece aside for later. In the levels you earn uses: 1 every five levels cleared, three at most in reserve. Each use works for whichever tool you pick, when you are stuck. They cannot be bought: you earn them by playing.
 
 THE INTERLOCK
 Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach.
@@ -148,7 +148,7 @@ Once installed, it plays without a connection.
 ACCESSIBLE
 Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, and if you asked your phone to reduce motion, the game respects it.
 ```
-*2931 caratteri su 4000.*
+*2990 caratteri su 4000. Aggiornata alla 1.19.3.*
 
 ## Categoria
 
@@ -212,7 +212,7 @@ nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Ades
 
 | # | File | Che cosa dice nei primi due secondi |
 | --- | --- | --- |
-| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un attrezzo. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
+| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un uso degli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
 | 2 | `2-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
 | 3 | `3-livello.png` | Com'e' fatto un livello mentre lo giochi: l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
 | 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |

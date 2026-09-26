@@ -133,6 +133,14 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
   volta: la 1.15.0 ha spostato la soglia della Tinta e l'aiuto ha continuato a dire
   "+100%" mentre il gioco ne pagava 60. Il promemoria e' `tests/aiuto-aggiornato.test.js`,
   che fallisce se cambi la taratura o aggiungi un attrezzo senza riaprire l'aiuto.
+- **I testi del gioco devono essere chiarissimi**, per chiunque, anche per un bambino
+  (regola del proprietario, 26 settembre 2026). Frasi brevi, parole di tutti i giorni, e
+  **una parola per una cosa sola**: se due cose diverse si chiamano allo stesso modo, il
+  giocatore le confonde. Pagato una volta: il pannello diceva «Hai 3 attrezzi» e ne
+  elencava quattro, perche' "attrezzi" indicava sia i quattro strumenti sia quante volte
+  si possono usare. Adesso gli **attrezzi** sono i quattro strumenti e gli **usi** sono
+  quello che si guadagna e si consuma. Prima di scrivere un testo nuovo chiediti: chi lo
+  legge per la prima volta, senza sapere niente del codice, capisce che cosa fare?
 - **I cento livelli non si modificano a mano.** `src/config/quadri.js` e' generato: si
   cambia la ricetta in `tools/genera-quadri.mjs` (atti, tipi, motivi, percentili, margini,
   bande di riuscita) e si rigenera. Una generazione intera dura ore, quindi si prova prima
@@ -146,5 +154,6 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
   registrati si riferiscono a livelli diversi, e va scritto nel changelog.
 - Non modificare `docs/` di altri progetti, ne' il progetto in `../` : si lavora qui.
 - Non committare `.env` ne' chiavi. Il `.gitignore` le esclude gia'.
-- Fino alla fine dei 14 giorni di test chiuso su Play (~24 settembre 2026) **non si tocca
-  il Play Console**. Le cose pronte da caricare sono in `docs/RELEASE_CHECKLIST.md`.
+- Il test chiuso e' finito e l'accesso alla produzione e' stato concesso (25 settembre
+  2026). Lo stato della Play Console e le cose da caricare sono in
+  `docs/RELEASE_CHECKLIST.md`.
