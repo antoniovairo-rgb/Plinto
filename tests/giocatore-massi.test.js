@@ -31,7 +31,7 @@ function gioca(quadro, tentativo) {
 }
 
 describe('il giocatore artificiale sui massi', () => {
-  it('gioca senza mosse illegali, i massi restano tutti, e l'obiettivo si raggiunge', () => {
+  it("gioca senza mosse illegali, i massi restano tutti, e l'obiettivo si raggiunge", () => {
     const quadro = { numero: 1001, nome: 'prova', obiettivi: [{ tipo: 'righe', quanti: 2 }], maxMosse: 12, griglia: GRIGLIA };
     const partita = gioca(quadro, 0);
     expect(partita.grid.filter((v) => v === MASSO).length).toBe(9);
