@@ -273,3 +273,16 @@ dell'opera successiva, così ogni opera porta una novità sua.
 - Il masso: grigio, con una crepa, senza animazioni. La presentazione di ogni livello
   della Torre ricorda la regola; le regole hanno la sezione «I massi»; il piccone dice
   che i massi non si toccano; l'evidenziazione «sta per sparire» non illumina i massi.
+
+### Verifica (3 ottobre 2026)
+- Gate completo: 26 controlli su 28 verdi al primo giro. I 2 rossi erano prove nel
+  browser che contavano le tappe come se la mappa mostrasse tutti i 200 livelli insieme;
+  corrette e rilanciate a parte: «livelli nel browser» verde, «tutti i livelli giocati
+  nell'app» 100/100 sul Ponte e 100/100 sulla Torre.
+- Prove automatiche: 615 su 615. Caccia ai difetti: 3.040 partite, nessun difetto.
+- Curva della Torre (riuscite del giocatore artificiale): 87%, 76%, 63%, 49%, 45%, 41%,
+  33%. Scende a ogni atto.
+- **Da decidere:** 3 livelli restano sotto la banda del loro atto, piu' duri del previsto
+  ma non imbattibili: 146 (catena 2 in 8 mosse, 5/20), 156 (catena 1 + 3 gruppi in 8
+  mosse, 5/20), 196 (15 gruppi + 12 quadranti in 32 mosse, 4/20). Correggerli vuol dire
+  ritoccare il progetto delle feritoie e della vetta e rigenerare la Torre.
