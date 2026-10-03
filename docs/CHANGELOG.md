@@ -19,8 +19,8 @@ Non ancora in produzione: aspetta il via del proprietario.
   portano via, il piccone non lo toglie, non conta per la Tinta; se sulla griglia restano
   solo massi, la griglia conta come svuotata.
 - **Sette atti:** il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
-  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 49%,
-  45%, 41%, 33%.
+  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 51%,
+  47%, 40%, 35%. Tutti i cento livelli stanno nella banda di difficolta' del loro atto.
 - **La Torre si apre solo finendo tutto il Ponte**, ogni livello con la spunta. La mappa
   ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
 - **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla

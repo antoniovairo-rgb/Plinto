@@ -267,7 +267,10 @@ const MOTIVI_TORRE = {
   pilastrini:    ['.........', '.M..M..M.', '.##...##.', '.........', '.M..M..M.', '.........', '.##...##.', '.M..M..M.', '.........'],
   anello:        ['.........', '.........', '..M...M..', '...###...', '...#.#...', '...###...', '..M...M..', '.........', '.........'],
   gradini:       ['MM.......', '.........', '..MM.....', '..##.....', '....MM...', '....##...', '......MM.', '.........', '........M'],
-  feritoie:      ['M..M..M..', '.........', 'M..M..M..', '.##..##..', 'M..M..M..', '.........', 'M..M..M..', '..##..##.', 'M..M..M..'],
+  // Era a 15 massi (cinque per colonna): nella prova di giocabilita' chiudeva solo 4
+  // gruppi in 30 mosse, e i livelli di Catena costruiti sopra restavano sotto la banda
+  // dell'atto (146 e 156 nella prima generazione). Nove massi, tre per colonna.
+  feritoie:      ['M..M..M..', '.........', '.........', '.##..##..', 'M..M..M..', '.........', '.........', '..##..##.', 'M..M..M..'],
   torrette:      ['MM.....MM', 'MM.....MM', '.........', '...#.#...', '.........', '...#.#...', '.........', 'MM.....MM', 'MM.....MM'],
   arcate:        ['.M.M.M.M.', '.........', '.##...##.', '.##...##.', '....M....', '.##...##.', '.##...##.', '.........', '.M.M.M.M.'],
   colonnato:     ['.M.....M.', '.........', '.M.....M.', '...###...', '.........', '...###...', '.M.....M.', '.........', '.M.....M.'],
@@ -738,6 +741,12 @@ if (PROVA_A === 0 && OPERA.pubblicata && process.env.QUADRI_RIGENERA_PUBBLICATA 
     + 'Se e\' davvero quello che si vuole: QUADRI_RIGENERA_PUBBLICATA=1.',
   );
 }
+// UNA PROVA A VUOTO SU UN TRATTO DEVE PROGETTARE GLI STESSI LIVELLI DEL GIRO INTERO.
+// `tipiDi` ricorda le coppie di obiettivi gia' usate, e senza i livelli prima del tratto
+// la memoria parte vuota: provando 193-200 il 196 riceveva una coppia diversa da quella
+// del giro intero, e la prova misurava un livello che non sarebbe mai uscito. Progettare
+// costa niente (nessuna partita): si progettano e si scartano.
+for (let n = OPERA.da; n < PRIMO; n += 1) progetta(n);
 for (let n = PRIMO; n <= ULTIMO; n += 1) {
   const progetto = progetta(n);
   const rng = createRng(seedFromString(`taratura-${n}`));
@@ -1310,6 +1319,28 @@ if (restanoBanali.length) {
  * disponibili raddoppiano: ventiquattro gradini sono +600 punti, abbastanza da mordere.
  */
 const PASSI_BERSAGLIO = 24;
+
+/**
+ * QUANTO E' LONTANO UN LIVELLO DALLA SUA BANDA, e perche' stare sotto costa sempre di piu'.
+ *
+ * A volte nessun tetto di mosse fa cadere la riuscita dentro la banda: misurato sul
+ * quadro 196 della Torre, con 32 mosse si vinceva 4 volte su 20 e con 33 undici, perche'
+ * sette partite su venti finivano esattamente alla trentatreesima. Due mosse sotto il
+ * pavimento o due sopra il soffitto pesavano uguale, e a parita' vinceva il tetto piu'
+ * stretto: il livello usciva sotto la soglia minima, cioe' dal lato che questo file
+ * promette di non superare mai. Un livello un po' troppo facile e' un difetto; uno sotto
+ * il pavimento e' la tortura che le bande esistono per evitare.
+ *
+ * Pesare il "sotto" il doppio non bastava: sul 180 con 13 mosse si vinceva 5 volte su 20 e
+ * con 14 tredici (pavimento 6, soffitto 11), cioe' uno sotto contro due sopra, e il pareggio
+ * tornava a scegliere il lato duro. La regola adesso e' netta: qualunque posizione sopra il
+ * pavimento batte qualunque posizione sotto.
+ */
+const SOTTO_IL_PAVIMENTO = 100;
+function distanzaDallaBanda(v, pavimento, soffitto) {
+  if (v < pavimento) return SOTTO_IL_PAVIMENTO + (pavimento - v);
+  return v > soffitto ? v - soffitto : 0;
+}
 console.log('  Porto ogni livello dentro la banda del suo atto');
 const tettiPerTensione = [];
 const bersagliPerTensione = [];
@@ -1350,8 +1381,7 @@ for (const q of quadri) {
     let migliore = q.maxMosse;
     let distanza = Infinity;
     for (let t = MOSSE_MINIME; t <= tettoLargo; t += 1) {
-      const v = vinteA(mosse, t);
-      const d = v < pavimento ? pavimento - v : v - soffitto;
+      const d = distanzaDallaBanda(vinteA(mosse, t), pavimento, soffitto);
       if (d < distanza) { distanza = d; migliore = t; }
     }
     q.maxMosse = migliore;
@@ -1388,12 +1418,18 @@ for (const q of quadri) {
         q.bersagli = tenta; q.maxMosse = t; mosse = m; vinte = vinteA(m, t);
         break;
       }
-      // Non rientra nemmeno cosi': si tiene il gradino solo se avvicina alla banda.
+      // Non rientra nemmeno cosi': si tiene il gradino solo se avvicina alla banda. Su un
+      // livello a due obiettivi un gradino che peggiora su uno non chiude la ricerca: si
+      // prova l'altro. Prima ci si fermava al primo, ed e' cosi' che il 196 della Torre e'
+      // uscito con i bersagli intatti e 4 riuscite su 20.
       const tOra = q.maxMosse;
       const vNuovo = vinteA(m, tOra);
-      const dOra = vinte < pavimento ? pavimento - vinte : vinte - soffitto;
-      const dNuovo = vNuovo < pavimento ? pavimento - vNuovo : vNuovo - soffitto;
-      if (dNuovo > dOra) break;
+      const dOra = distanzaDallaBanda(vinte, pavimento, soffitto);
+      const dNuovo = distanzaDallaBanda(vNuovo, pavimento, soffitto);
+      if (dNuovo > dOra) {
+        if (q.tipi.length > 1) continue;
+        break;
+      }
       q.bersagli = tenta; mosse = m; vinte = vNuovo;
     }
     if (q.bersagli.join('+') !== partenzaBersagli) {

@@ -280,9 +280,18 @@ dell'opera successiva, così ogni opera porta una novità sua.
   corrette e rilanciate a parte: «livelli nel browser» verde, «tutti i livelli giocati
   nell'app» 100/100 sul Ponte e 100/100 sulla Torre.
 - Prove automatiche: 615 su 615. Caccia ai difetti: 3.040 partite, nessun difetto.
-- Curva della Torre (riuscite del giocatore artificiale): 87%, 76%, 63%, 49%, 45%, 41%,
-  33%. Scende a ogni atto.
-- **Da decidere:** 3 livelli restano sotto la banda del loro atto, piu' duri del previsto
-  ma non imbattibili: 146 (catena 2 in 8 mosse, 5/20), 156 (catena 1 + 3 gruppi in 8
-  mosse, 5/20), 196 (15 gruppi + 12 quadranti in 32 mosse, 4/20). Correggerli vuol dire
-  ritoccare il progetto delle feritoie e della vetta e rigenerare la Torre.
+- Prima generazione: 3 livelli sotto la banda del loro atto (146, 156, 196: 4-5 riuscite
+  su 20). Sistemati il 3 ottobre su richiesta del proprietario:
+  - la griglia `feritoie` passa da 15 a 9 massi (chiudeva solo 4 gruppi in 30 mosse);
+  - il generatore aveva un difetto di taratura: quando nessun tetto di mosse fa cadere la
+    riuscita dentro la banda (molte partite finiscono alla stessa mossa: sul 196 con 32
+    mosse si vinceva 4 volte su 20, con 33 undici), a parita' sceglieva il lato duro, e su
+    un livello a due obiettivi si fermava al primo tentativo. Adesso stare sopra il
+    pavimento batte sempre stare sotto, e si prova anche l'altro obiettivo;
+  - le prove a vuoto su un tratto progettano gli stessi livelli del giro intero.
+- Seconda generazione: **tutti i 100 livelli nella banda del loro atto.** Curva: 87%,
+  76%, 63%, 51%, 47%, 40%, 35%. I quattro livelli toccati: 146 catena 5 in 23 mosse,
+  156 catena 2 + 4 gruppi in 13, 180 intrecci 2 + 175 punti in 24, 196 16 gruppi + 12
+  quadranti in 34.
+- Dopo la seconda generazione: prove automatiche 615/615, caccia ai difetti pulita,
+  livelli 101-200 giocati nell'app 100/100.
