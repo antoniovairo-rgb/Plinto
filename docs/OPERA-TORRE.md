@@ -219,6 +219,12 @@ una crescita graduale nei sette atti della Torre.
 I **mattoni rinforzati** sono un'ottima seconda scelta. Potrebbero essere la meccanica
 dell'opera successiva, così ogni opera porta una novità sua.
 
+**In sospeso (3 ottobre 2026):** il proprietario ha deciso di non avviare ancora i mattoni
+rinforzati, per non accumulare troppe novità. Proposte gia' fatte per i casi limite, da
+confermare quando si riprende: un Intreccio conta come una sola eliminazione; l'esplosione
+di una bomba conta come un'eliminazione; il piccone incrina un mattone intero e toglie uno
+incrinato; il mattone ha colore e conta per la Tinta.
+
 ## 6. Dopo la scelta (tutti i punti fatti nel branch, tranne la pubblicazione)
 
 1. Decidere i casi limite della meccanica scelta (sezione 3).
