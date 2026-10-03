@@ -260,8 +260,10 @@ dell'opera successiva, così ogni opera porta una novità sua.
 - Sette atti: il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
   merli, la vetta. Il primo e' di nuovo facile (insegna i massi), l'ultimo un po' piu'
   duro dell'ultimo atto del Ponte.
-- Nessun tipo di obiettivo nuovo (per esempio «chiudi righe che passano su un masso»):
-  avrebbe chiesto un contatore nuovo nel motore. Possibile in un'uscita successiva.
+- Nessun tipo di obiettivo nuovo (per esempio «chiudi righe che passano su un masso»).
+  Deciso col proprietario il 3 ottobre 2026: per ora no. Il dubbio: un gruppo con un masso
+  e' gia' il piu' comodo da chiudere, quindi l'obiettivo rischia di chiedere cio' che si fa
+  gia'. Si riconsidera dopo i pareri dei tester sulla Torre.
 
 ### Interfaccia
 - La Torre si apre solo con tutti i 100 livelli del Ponte superati, con la spunta.
