@@ -38,6 +38,7 @@ import {
   COLOR_COUNT,
   VALORE_BOMBA,
 } from '../config/rules.js';
+import { MASSO } from './grid.js';
 
 /**
  * Quante celle dello stesso colore ci sono, al massimo, in un insieme di celle.
@@ -51,7 +52,8 @@ export function maggioranzaColore(grid, cells) {
   const conteggi = new Uint8Array(COLOR_COUNT + 1);
   for (const cella of cells) {
     const valore = grid[cella];
-    if (valore === 0) continue;
+    // Il vuoto e il masso non hanno colore: un masso dentro un gruppo non aiuta la Tinta.
+    if (valore === 0 || valore === MASSO) continue;
     const colore = valore > VALORE_BOMBA ? valore - VALORE_BOMBA : valore;
     if (colore >= 1 && colore <= COLOR_COUNT) conteggi[colore] += 1;
   }

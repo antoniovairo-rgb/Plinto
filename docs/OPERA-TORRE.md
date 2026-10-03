@@ -1,6 +1,6 @@
 # La Torre — documento di progetto
 
-Stato: **bozza da decidere**. Branch: `opera-torre`. Nessuna riga di codice è ancora cambiata.
+Stato: **in sviluppo**. Branch: `opera-torre`. Meccanica scelta: **i massi**. Fatto: la regola nel motore, con le prove (punto 2 della sezione 6).
 
 La Torre è l'opera che viene dopo il Ponte. Il gioco la promette già: chi finisce i cento
 livelli vede «E adesso? La Torre — In lavorazione» (`src/ui/schermate/Trionfo.jsx`).
@@ -12,7 +12,7 @@ livelli vede «E adesso? La Torre — In lavorazione» (`src/ui/schermate/Trionf
 | Domanda | Scelta |
 |---|---|
 | Quanti livelli | **100**, come il Ponte: livelli dal 101 al 200 |
-| Che cosa porta di nuovo | **Una meccanica nuova** (quale: da decidere, vedi sezione 3) |
+| Che cosa porta di nuovo | **I massi** (sezione 3.1), scelti il 3 ottobre 2026 |
 | Chi può giocarla | **Solo chi ha superato tutto il Ponte**, cioè tutti i livelli da 1 a 100 con la spunta |
 | Ritmo delle uscite | Desiderio: un set di livelli ogni 1–2 mesi |
 
@@ -85,11 +85,15 @@ con un masso dentro», più tutti gli obiettivi che esistono già.
   occupata che però aiuta a chiudere;
 - interfaccia: un disegno nuovo per la casella.
 
-**Con le meccaniche esistenti — da decidere:**
-- bombe: un'esplosione porta via un masso? (proposta: no, i massi resistono);
-- piccone: può togliere un masso? (proposta: no, altrimenti la meccanica si annulla);
-- Tinta: un masso non ha colore; conta come casella del colore giusto o no?
-  (proposta: non conta, così la Tinta resta più difficile vicino ai massi).
+**Con le meccaniche esistenti — deciso il 3 ottobre 2026:**
+- bombe: il masso **resiste** all'esplosione;
+- piccone: **non** può togliere un masso;
+- Tinta: il masso **non ha colore** e non conta per la Tinta;
+- «Svuota la griglia»: se restano solo massi, la griglia **conta come svuotata**.
+
+Emerso scrivendo il codice: un gruppo fatto **solo** di massi non conta come chiuso,
+altrimenti darebbe punti e Catena a ogni mossa senza svuotare niente. Il generatore
+dovrà comunque evitare di crearne.
 
 **Pro:** è la più facile da spiegare e da vedere; cambia poco il motore; si presta a una
 crescita graduale (pochi massi nei primi atti, molti negli ultimi); ha un senso preciso

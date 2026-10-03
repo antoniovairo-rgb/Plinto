@@ -5,6 +5,7 @@
  *   0        = cella vuota
  *   1..6     = cella piena, il valore e' la famiglia cromatica (solo estetica)
  *   11..16   = come sopra, ma la cella e' una BOMBA (colore + VALORE_BOMBA)
+ *   30       = un MASSO (vedi MASSO qui sotto)
  * Un array solo invece di due: copie, salvataggi e simulazioni restano quelli di prima.
  */
 
@@ -14,18 +15,45 @@ export const CELL_COUNT = GRID_SIZE * GRID_SIZE;
 export const QUADRANTS_PER_SIDE = GRID_SIZE / QUADRANT_SIZE;
 export const QUADRANT_COUNT = QUADRANTS_PER_SIDE * QUADRANTS_PER_SIDE;
 
+/**
+ * IL MASSO, la meccanica della Torre: «un masso conta come pieno, ma non sparisce mai».
+ *
+ * Conta come pieno per chiudere una riga, una colonna o un quadrante, e non ci si puo'
+ * appoggiare sopra: per tutto questo basta che il suo valore sia diverso da zero, e il
+ * resto del motore lo tratta gia' cosi'. Le eccezioni sono quattro, decise il 3 ottobre
+ * 2026 e scritte qui una per una, perche' ognuna e' una regola che il giocatore legge:
+ *   1. quando il suo gruppo si chiude, il masso RESTA (svuotaCelle lo salta);
+ *   2. una bomba non lo distrugge (detonaBombe lo salta);
+ *   3. il piccone non lo toglie (scavaCella in engine.js);
+ *   4. non ha colore: non conta per la Tinta, e una griglia con solo massi conta come
+ *      svuotata (isEmpty lo ignora).
+ *
+ * STA QUI E NON IN config/rules.js, e non per caso: l'impronta delle regole e' calcolata
+ * da ogni costante numerica di quel file, e cambiarla marcherebbe come «ottenuti con una
+ * versione precedente» tutti i record delle sfide passate -- per una meccanica che nelle
+ * sfide e nella partita libera non compare mai. I massi esistono solo nelle griglie di
+ * partenza dei livelli che li mettono (lettera `M` in gridFromString).
+ */
+export const MASSO = 30;
+
+/** La cella e' un masso? */
+export function eMasso(valore) {
+  return valore === MASSO;
+}
+
 if (!Number.isInteger(QUADRANTS_PER_SIDE)) {
   throw new Error('GRID_SIZE deve essere divisibile per QUADRANT_SIZE');
 }
 
-/** Colore di una cella, bomba o no. 0 se vuota. */
+/** Colore di una cella, bomba o no. 0 se vuota, e 0 anche per un masso: non ha colore. */
 export function coloreDi(valore) {
-  return valore === 0 ? 0 : ((valore - 1) % VALORE_BOMBA) + 1;
+  if (valore === 0 || valore === MASSO) return 0;
+  return ((valore - 1) % VALORE_BOMBA) + 1;
 }
 
 /** La cella contiene una bomba? */
 export function eBomba(valore) {
-  return valore > VALORE_BOMBA;
+  return valore > VALORE_BOMBA && valore !== MASSO;
 }
 
 /** Valore di cella per un blocco-bomba del colore dato. */
@@ -66,6 +94,7 @@ export function detonaBombe(grid, celleIniziali) {
         if (r < 0 || c < 0 || r >= GRID_SIZE || c >= GRID_SIZE) continue;
         const vicina = idx(r, c);
         if (grid[vicina] === 0) continue;          // il vuoto non si elimina
+        if (grid[vicina] === MASSO) continue;      // e il masso resiste all'esplosione
         if (!tutte.has(vicina)) {
           tutte.add(vicina);
           daEsaminare.push(vicina);
@@ -228,6 +257,31 @@ export function placeShape(grid, shape, row, col, color, bombe = null) {
 }
 
 /**
+ * Le celle di ogni gruppo, calcolate una volta sola: `findCompletedGroups` gira a ogni
+ * mossa e, nel generatore dei livelli, milioni di volte. Nell'ordine di sempre: righe,
+ * colonne, quadranti.
+ */
+const TUTTI_I_GRUPPI = [
+  ...Array.from({ length: GRID_SIZE }, (_, r) => ({ type: 'row', index: r, cells: rowCells(r) })),
+  ...Array.from({ length: GRID_SIZE }, (_, c) => ({ type: 'col', index: c, cells: colCells(c) })),
+  ...Array.from({ length: QUADRANT_COUNT }, (_, q) => ({ type: 'quadrant', index: q, cells: quadrantCells(q) })),
+];
+
+/**
+ * Un gruppo e' chiuso se non ha caselle vuote. Un gruppo fatto SOLO di massi non conta:
+ * sarebbe pieno per sempre, e darebbe punti e Catena a ogni mossa senza svuotare niente.
+ */
+function gruppoChiuso(grid, cells) {
+  let soloMassi = true;
+  for (let i = 0; i < cells.length; i += 1) {
+    const v = grid[cells[i]];
+    if (v === 0) return false;
+    if (v !== MASSO) soloMassi = false;
+  }
+  return !soloMassi;
+}
+
+/**
  * Trova righe, colonne e quadranti completi.
  * Tutti e tre i tipi valgono contemporaneamente: una singola mossa puo' chiudere
  * una riga, una colonna e un quadrante insieme.
@@ -235,32 +289,10 @@ export function placeShape(grid, shape, row, col, color, bombe = null) {
  */
 export function findCompletedGroups(grid) {
   const groups = [];
-
-  for (let r = 0; r < GRID_SIZE; r += 1) {
-    let full = true;
-    for (let c = 0; c < GRID_SIZE; c += 1) {
-      if (grid[idx(r, c)] === 0) { full = false; break; }
-    }
-    if (full) groups.push({ type: 'row', index: r, cells: rowCells(r) });
+  for (let k = 0; k < TUTTI_I_GRUPPI.length; k += 1) {
+    const { type, index, cells } = TUTTI_I_GRUPPI[k];
+    if (gruppoChiuso(grid, cells)) groups.push({ type, index, cells: cells.slice() });
   }
-
-  for (let c = 0; c < GRID_SIZE; c += 1) {
-    let full = true;
-    for (let r = 0; r < GRID_SIZE; r += 1) {
-      if (grid[idx(r, c)] === 0) { full = false; break; }
-    }
-    if (full) groups.push({ type: 'col', index: c, cells: colCells(c) });
-  }
-
-  for (let q = 0; q < QUADRANT_COUNT; q += 1) {
-    const cells = quadrantCells(q);
-    let full = true;
-    for (let i = 0; i < cells.length; i += 1) {
-      if (grid[cells[i]] === 0) { full = false; break; }
-    }
-    if (full) groups.push({ type: 'quadrant', index: q, cells });
-  }
-
   return groups;
 }
 
@@ -278,10 +310,14 @@ export function clearGroups(grid, groups) {
   return svuotaCelle(grid, seen);
 }
 
-/** Svuota un insieme qualsiasi di celle. Usato anche dalle esplosioni. */
+/**
+ * Svuota un insieme qualsiasi di celle. Usato anche dalle esplosioni.
+ * I massi restano dove sono e non compaiono fra le celle svuotate: non contano per
+ * «Elimina N caselle», perche' non sono stati eliminati.
+ */
 export function svuotaCelle(grid, celle) {
   const next = grid.slice();
-  const elencate = [...new Set(celle)];
+  const elencate = [...new Set(celle)].filter((cella) => grid[cella] !== MASSO);
   for (const cella of elencate) next[cella] = 0;
   return { grid: next, clearedCells: elencate };
 }
@@ -298,9 +334,9 @@ export function fillRatio(grid) {
   return filledCount(grid) / CELL_COUNT;
 }
 
-/** La griglia e' completamente vuota? */
+/** La griglia e' vuota? I massi non contano: «svuotata» vuol dire nessun pezzo rimasto. */
 export function isEmpty(grid) {
-  for (let i = 0; i < grid.length; i += 1) if (grid[i] !== 0) return false;
+  for (let i = 0; i < grid.length; i += 1) if (grid[i] !== 0 && grid[i] !== MASSO) return false;
   return true;
 }
 
@@ -309,19 +345,27 @@ export function gridToString(grid) {
   const lines = [];
   for (let r = 0; r < GRID_SIZE; r += 1) {
     let line = '';
-    for (let c = 0; c < GRID_SIZE; c += 1) line += grid[idx(r, c)] === 0 ? '.' : '#';
+    for (let c = 0; c < GRID_SIZE; c += 1) {
+      const v = grid[idx(r, c)];
+      line += v === 0 ? '.' : v === MASSO ? 'M' : '#';
+    }
     lines.push(line);
   }
   return lines.join('\n');
 }
 
-/** Inverso di gridToString: comodo per costruire scenari nei test. */
+/**
+ * Inverso di gridToString: comodo per costruire scenari nei test, ed e' anche il formato
+ * delle griglie di partenza dei livelli. `.` vuota, `M` masso, qualunque altro carattere
+ * una casella piena del colore indicato.
+ */
 export function gridFromString(text, color = 1) {
   const lines = text.trim().split('\n').map((l) => l.trim());
   const grid = createGrid();
   lines.forEach((line, r) => {
     for (let c = 0; c < line.length; c += 1) {
-      if (line[c] !== '.' && line[c] !== ' ') grid[idx(r, c)] = color;
+      if (line[c] === 'M') grid[idx(r, c)] = MASSO;
+      else if (line[c] !== '.' && line[c] !== ' ') grid[idx(r, c)] = color;
     }
   });
   return grid;
