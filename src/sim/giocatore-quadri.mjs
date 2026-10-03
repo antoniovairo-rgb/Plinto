@@ -19,6 +19,15 @@
  * mentre non lo erano -- ma gioca a un pezzo alla volta dentro la mano, e usa l'anteprima
  * in modo volutamente modesto. Serve a leggere la CURVA e a escludere i muri; non dice se
  * un livello sia bello.
+ *
+ * I MASSI DELLA TORRE NON CHIEDONO REGOLE NUOVE QUI. Il giocatore valuta ogni mossa
+ * passando dal motore vero (`placeShape`, `findCompletedGroups`, `clearGroups`), che sa
+ * gia' che un masso conta come pieno e non sparisce. Le euristiche sotto contano come
+ * piena ogni casella diversa da zero, e per un masso e' la lettura giusta: aiuta a
+ * chiudere il suo gruppo (`vicinanza`) e una casella vuota chiusa fra massi e' un buco
+ * vero, che non si liberera' mai (`buchiIsolati`). Un gruppo fatto solo di massi ha
+ * nove caselle piene e `vicinanza` lo salta, come salta i gruppi gia' chiusi.
+ * Lo controlla tests/giocatore-massi.test.js.
  */
 
 import {
