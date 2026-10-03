@@ -14,7 +14,7 @@ import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { quadroNumero, TOTALE_QUADRI } from '../../src/config/quadri.js';
+import { quadroNumero, OPERE, livelliDellOpera } from '../../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
 import { createRng } from '../../src/core/rng.js';
@@ -182,7 +182,14 @@ const elencati = await page.locator('.pl-tappa').count();
 const aperti = await page.locator('.pl-tappa:not(.pl-tappa--chiusa)').count();
 await page.screenshot({ path: `${OUT}/1-elenco.png` });
 console.log(`1. mappa: ${elencati} tappe, ${aperti} aperte`);
-if (elencati !== TOTALE_QUADRI) errori.push(`MAPPA: mostra ${elencati} tappe invece di ${TOTALE_QUADRI}`);
+// Un'opera alla volta: all'inizio la mappa e' sul Ponte, e la Torre e' una scheda chiusa.
+const tappePonte = livelliDellOpera(OPERE[0]);
+if (elencati !== tappePonte) errori.push(`MAPPA: mostra ${elencati} tappe invece delle ${tappePonte} del Ponte`);
+const schede = await page.getByRole('tab').count();
+if (schede !== OPERE.length) errori.push(`MAPPA: ${schede} schede di opere invece di ${OPERE.length}`);
+if (await page.locator('.pl-opere__scheda--chiusa').count() !== OPERE.length - 1) {
+  errori.push('MAPPA: all inizio la Torre dovrebbe risultare chiusa');
+}
 if (aperti !== 1) errori.push(`MAPPA: ${aperti} tappe aperte all'inizio invece di 1`);
 
 // Plinto deve stare sulla tappa a cui si e' arrivati, e deve esserci una sola volta.

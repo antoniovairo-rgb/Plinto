@@ -7,6 +7,36 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [Non pubblicato] — La Torre (branch `opera-torre`)
+
+Non ancora in produzione: aspetta il via del proprietario.
+
+### Aggiunto
+
+- **La Torre: cento livelli nuovi, dal 101 al 200, con una regola nuova, i massi.** Un
+  masso conta come pieno ma non sparisce mai: aiuta a chiudere la riga, la colonna e il
+  quadrante in cui si trova, e resta li' quando il gruppo se ne va. Le bombe non lo
+  portano via, il piccone non lo toglie, non conta per la Tinta; se sulla griglia restano
+  solo massi, la griglia conta come svuotata.
+- **Sette atti:** il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
+  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 49%,
+  45%, 41%, 33%.
+- **La Torre si apre solo finendo tutto il Ponte**, ogni livello con la spunta. La mappa
+  ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
+- **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
+  fine della Torre.
+
+### Corretto
+
+- Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
+  Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
+
+### Interno
+
+- I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
+  senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
+  cambiano, e nemmeno i record di chi li ha gia' giocati.
+
 ## [1.19.4] — 26 settembre 2026
 
 ### Corretto
