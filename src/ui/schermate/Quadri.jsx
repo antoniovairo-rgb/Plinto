@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pagina } from './Pagina.jsx';
 import { Plinto } from '../Plinto.jsx';
-import { QUADRI, ATTI, OPERE, TOTALE_QUADRI } from '../../config/quadri.js';
+import {
+  QUADRI, OPERE, TOTALE_QUADRI, operaDelQuadro, operaPrecedente, livelliDellOpera, attiDellOpera,
+} from '../../config/quadri.js';
 import { ConfermaDoppia, VoceCancellata } from '../ConfermaDoppia.jsx';
 import {
   caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi, quantiSuperati,
+  superatiNellOpera,
 } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 import { CondividiPercorso } from '../Condividi.jsx';
@@ -23,6 +26,12 @@ import { OGNI_LIVELLI, tappeDelProssimoAttrezzo } from '../../persistence/attrez
  * all'apertura: chi torna dopo una settimana non deve cercarsi.
  *
  * Le tappe chiuse restano leggibili, spente ma non nascoste, e dicono cosa chiedono.
+ *
+ * UN'OPERA ALLA VOLTA. Con la Torre i livelli sono duecento, e una strada unica
+ * mescolerebbe due opere con regole diverse. In alto ci sono le schede delle opere; la
+ * mappa si apre su quella in cui si sta giocando. La Torre si vede anche quando e' ancora
+ * chiusa, per la stessa ragione delle tappe chiuse: sapere cosa arriva dopo, e cosa serve
+ * per aprirla, e' quello che fa venire voglia di arrivarci.
  */
 export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
   // Ricominciare da capo si conferma DUE volte. Non e' burocrazia: e' un'azione che
@@ -56,6 +65,18 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
 
   const corrente = prossimoQuadro(TOTALE_QUADRI, progressi);
   const tappaCorrente = useRef(null);
+  const [operaVista, setOperaVista] = useState(() => operaDelQuadro(corrente).id);
+  const opera = OPERE.find((o) => o.id === operaVista) ?? OPERE[0];
+  const totaleOpera = livelliDellOpera(opera);
+  const superatiOpera = superatiNellOpera(opera, progressi);
+  const operaAperta = quadroSbloccato(opera.da, progressi);
+  const prima = operaPrecedente(opera);
+  const mancantiPrima = prima ? livelliDellOpera(prima) - superatiNellOpera(prima, progressi) : 0;
+  const testoChiusa = !operaAperta && prima
+    ? `${t(`quadri.operaChiusa.${opera.id}`)} ${mancantiPrima === 1
+      ? t('quadri.operaMancaUno')
+      : t('quadri.operaMancano').replace('{n}', numero(mancantiPrima))}`
+    : '';
 
   // Si va dove sta il giocatore, senza animazione: all'apertura di una schermata
   // uno scorrimento animato e' solo attesa.
@@ -63,22 +84,50 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
     tappaCorrente.current?.scrollIntoView({ block: 'center' });
   }, []);
 
-  // Il titolo e' il nome dell'opera, non la parola "Livelli": i cento livelli sono UNA
-  // cosa, il Ponte, e quando ce ne sara' un'altra questa schermata sapra' gia' dire quale
-  // si sta guardando.
+  // Il titolo e' il nome dell'opera che si sta guardando, non la parola "Livelli": i
+  // cento livelli del Ponte sono UNA cosa, e i cento della Torre un'altra.
   return (
-    <Pagina titolo={t(`opere.${OPERE[0].id}`)} onIndietro={onIndietro} t={t}>
+    <Pagina titolo={t(`opere.${opera.id}`)} onIndietro={onIndietro} t={t}>
+      {OPERE.length > 1 ? (
+        <div className="pl-opere" role="tablist" aria-label={t('quadri.opere')}>
+          {OPERE.map((o) => {
+            const scelta = o.id === opera.id;
+            const aperta = quadroSbloccato(o.da, progressi);
+            return (
+              <button
+                key={o.id}
+                type="button"
+                role="tab"
+                aria-selected={scelta}
+                className={`pl-opere__scheda${scelta ? ' pl-opere__scheda--scelta' : ''}${aperta ? '' : ' pl-opere__scheda--chiusa'}`}
+                onClick={() => setOperaVista(o.id)}
+              >
+                {t(`opere.${o.id}`)}
+                {aperta ? null : (
+                  <svg className="pl-opere__lucchetto" viewBox="0 0 16 16" role="img" aria-label={t('quadri.operaChiusaBreve')}>
+                    <rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor" />
+                    <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                  </svg>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+
       <div className="pl-mappa__testata">
-        <Plinto espressione={superati >= TOTALE_QUADRI ? 'contento' : 'normale'} dimensione={56} className="pl-plinto--vivo" />
+        <Plinto espressione={superatiOpera >= totaleOpera ? 'contento' : 'normale'} dimensione={56} className="pl-plinto--vivo" />
         <div>
           <p className="pl-mappa__conteggio">
-            {t('quadri.avanzamento').replace('{fatti}', numero(superati)).replace('{totale}', numero(TOTALE_QUADRI))}
+            {t('quadri.avanzamento').replace('{fatti}', numero(superatiOpera)).replace('{totale}', numero(totaleOpera))}
           </p>
           <div className="pl-mappa__barra">
-            <div className="pl-mappa__riempimento" style={{ width: `${(superati / TOTALE_QUADRI) * 100}%` }} />
+            <div className="pl-mappa__riempimento" style={{ width: `${(superatiOpera / totaleOpera) * 100}%` }} />
           </div>
         </div>
       </div>
+
+      {testoChiusa ? <p className="pl-opera-chiusa">{testoChiusa}</p> : null}
 
       {/* LA LEGENDA DELLA CASSETTA. Un'icona che nessuno ha mai visto non spiega niente
           da sola: chi guarda la mappa vede un simbolo su una casella ogni cinque e deve
@@ -102,11 +151,11 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
           Compare solo dopo il primo livello superato: "0 livelli su 100" non e' un
           vanto, e un pulsante per raccontare che non hai ancora fatto niente e' una
           domanda a cui nessuno vuole rispondere. */}
-      {superati > 0 ? (
-        <CondividiPercorso superati={superati} totale={TOTALE_QUADRI} t={t} />
+      {superatiOpera > 0 ? (
+        <CondividiPercorso opera={opera} superati={superatiOpera} totale={totaleOpera} t={t} />
       ) : null}
 
-      {ATTI.map((atto) => {
+      {attiDellOpera(opera).map((atto) => {
         const dellAtto = QUADRI.filter((q) => q.numero >= atto.da && q.numero <= atto.a);
         // Lo stesso criterio della spunta e del conteggio grande, e per la stessa
         // ragione: qui diceva "8/10" con sette livelli superati e uno solo tentato.
@@ -142,7 +191,7 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                       disabled={!aperto}
                       aria-current={qui ? 'step' : undefined}
                       aria-label={`${t('quadri.quadro').replace('{n}', quadro.numero)}: ${
-                        aperto ? descriviObiettivi(quadro, t) : t('quadri.bloccato')}${
+                        aperto ? descriviObiettivi(quadro, t) : (testoChiusa && quadro.numero === opera.da ? testoChiusa : t('quadri.bloccato'))}${
                         fatto ? `. ${t('quadri.superato')}, ${t('quadri.tuoRecord').replace('{mosse}', fatto.mosse)}` : ''}${
                         daAttrezzo ? `. ${t('quadri.quiAttrezzo')}` : ''}`}
                     >

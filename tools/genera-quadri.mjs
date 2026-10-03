@@ -18,7 +18,17 @@
  * significherebbe pubblicare bersagli misurati su livelli che non esistono. Qui il
  * giocatore artificiale gioca nella stessa modalita' in cui giochera' la persona.
  *
- * Uso: node tools/genera-quadri.mjs [tentativi]   (riscrive src/config/quadri.js)
+ * Uso: QUADRI_OPERA=torre node tools/genera-quadri.mjs [tentativi]
+ *      (riscrive src/config/opere/torre.js; senza QUADRI_OPERA l'opera e' il Ponte)
+ *
+ * UN FILE PER OPERA, E IL PONTE NON SI RIGENERA. Fino alla Torre questo strumento
+ * riscriveva un unico src/config/quadri.js con tutti i livelli. Ma il seme di ogni livello
+ * dipende solo dal suo numero e i progressi sono salvati per numero: rigenerare il Ponte
+ * per aggiungere la Torre cambierebbe livelli che le persone hanno gia' giocato e
+ * superato. Adesso ogni opera ha il suo file in src/config/opere/, questo strumento ne
+ * scrive UNO solo, e src/config/quadri.js li mette in fila. Un'opera gia' pubblicata si
+ * rifiuta di farsi riscrivere (vedi `pubblicata` in OPERE_DA_GENERARE), e
+ * tests/opere.test.js controlla l'impronta dei cento livelli del Ponte.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -28,7 +38,7 @@ import { createRng } from '../src/core/rng.js';
 import { seedFromString } from '../src/core/rng.js';
 import {
   gridFromString, findCompletedGroups, filledCount, allPlacements, placeShape,
-  clearGroups, fillRatio, idx, quadrantCells, QUADRANT_COUNT,
+  clearGroups, fillRatio, idx, quadrantCells, QUADRANT_COUNT, rowCells, colCells, MASSO,
 } from '../src/core/grid.js';
 import { GRID_SIZE, QUADRANT_SIZE } from '../src/config/rules.js';
 import { MODALITA_QUADRI } from '../src/core/quadro.js';
@@ -44,8 +54,9 @@ import {
 
 const TENTATIVI = Number(process.argv[2] ?? 7);
 /**
- * PROVA A VUOTO: `QUADRI_PROVA=8` genera solo i primi otto livelli, `QUADRI_PROVA=41-58`
- * solo quel tratto, e in nessuno dei due casi si scrive niente.
+ * PROVA A VUOTO: `QUADRI_PROVA=8` genera solo i primi otto livelli dell'opera,
+ * `QUADRI_PROVA=41-58` solo quel tratto (numeri veri: per la Torre `QUADRI_PROVA=101-110`),
+ * e in nessuno dei due casi si scrive niente.
  *
  * Una generazione intera dura decine di minuti, e quasi tutto quel tempo se ne va nelle
  * partite. Quando si cambia la ricetta o un controllo si vuole sapere in due minuti se il
@@ -56,8 +67,7 @@ const TENTATIVI = Number(process.argv[2] ?? 7);
 const PROVA = process.env.QUADRI_PROVA ?? '';
 const [PROVA_DA, PROVA_A] = PROVA.includes('-')
   ? PROVA.split('-').map(Number)
-  : [1, Number(PROVA || 0)];
-const TOTALE = 100;
+  : [0, Number(PROVA || 0)];
 
 // ---------------------------------------------------------------- le griglie ---
 // Ogni motivo e' pensato per lasciare corridoi veri: le celle isolate una per una
@@ -72,7 +82,7 @@ const TOTALE = 100;
 // motivo deve lasciare tratti liberi lunghi almeno due, e regioni libere connesse.
 //
 // Il controllo piu' in basso non descrive questa regola: la MISURA, giocando ogni motivo.
-const MOTIVI = {
+const MOTIVI_PONTE = {
   nessuno: null,
   angoli:   ['##.....##', '##.....##', '.........', '.........', '.........', '.........', '.........', '##.....##', '##.....##'],
   croce:    ['.........', '.........', '.........', '...###...', '...#.#...', '...###...', '.........', '.........', '.........'],
@@ -214,7 +224,7 @@ const MOTIVI = {
  * IL PRIMO ATTO HA UN SOFFITTO DI VENTI SU VENTI, cioe' nessun soffitto: i primi dieci
  * livelli insegnano, e un livello che insegna si deve poter vincere sempre.
  */
-const ATTI = [
+const ATTI_PONTE = [
   { da:  1, a: 10, id: 'fondamenta',   tipi: ['righe','colonne','quadranti','gruppi'],                            motivi: ['nessuno'],                                             mosse: [12, 16], percentile: [12, 30], margine: [1.30, 1.22], riuscite: [15, 20] },
   { da: 11, a: 24, id: 'pilastri',     tipi: ['gruppi','quadranti','righe','colonne','catena'],                   motivi: ['nessuno','angoli','croce'],                            mosse: [16, 22], percentile: [20, 32], margine: [1.26, 1.20], riuscite: [13, 18] },
   { da: 25, a: 40, id: 'roccia',       tipi: ['gruppi','quadranti','righe','colonne','catena','intrecci'],        motivi: ['scala','isole','cornice','colonne','blocchi'],         mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18], riuscite: [11, 17] },
@@ -223,6 +233,91 @@ const ATTI = [
   { da: 77, a: 92, id: 'arco',         tipi: ['punteggio','catena','celle','intrecci','quadranti','gruppi'],      motivi: ['fitto','assedio','strettoia','labirinto','clessidra'], mosse: [22, 32], percentile: [42, 58], margine: [1.12, 1.08], doppi: 4, riuscite: [7, 12] },
   { da: 93, a:100, id: 'ultimaPietra', tipi: ['punteggio','celle','catena','gruppi','intrecci'],                  motivi: ['briciole','clessidra','labirinto','assedio'],          mosse: [26, 40], percentile: [48, 64], margine: [1.08, 1.05], doppi: 4, riuscite: [6, 10] },
 ];
+
+// ------------------------------------------------------------ la Torre ---
+/**
+ * LE GRIGLIE DELLA TORRE: i massi (`M`) sono la sua meccanica.
+ *
+ * Un masso conta come pieno ma non sparisce mai (src/core/grid.js). Quindi una griglia
+ * con i massi non si "libera" giocando bene, come succede ai blocchi `#` del Ponte: cio'
+ * che i massi tolgono di spazio e' tolto per tutto il livello, e cio' che danno -- una
+ * riga con tre massi si chiude con sei caselle invece di nove -- lo danno per sempre.
+ *
+ * La crescita e' graduale: un masso solo al primo livello, poi qualche masso sparso,
+ * poi massi e blocchi insieme, e negli ultimi atti griglie fitte di tutti e due.
+ *
+ * Tre regole in piu' rispetto ai motivi del Ponte, controllate piu' in basso:
+ *   - nessun gruppo fatto SOLO di massi (non si chiuderebbe mai, e la regola che lo
+ *     esclude dai gruppi chiusi lo renderebbe un pezzo di griglia morto);
+ *   - non piu' di MAX_MASSI_PER_GRUPPO massi in una riga, colonna o quadrante: un
+ *     gruppo che si chiude con tre caselle, per sempre, e' una macchina da punti;
+ *   - nessuna sacca: una zona che i massi chiudono tutto intorno resta chiusa per
+ *     sempre, e se e' piccola chiede pezzi piccoli che non arrivano a comando.
+ */
+const MOTIVI_TORRE = {
+  masso:         ['.........', '.........', '.........', '.........', '....M....', '.........', '.........', '.........', '.........'],
+  quattroMassi:  ['.........', '.M.....M.', '.........', '.........', '.........', '.........', '.........', '.M.....M.', '.........'],
+  filaMassi:     ['.........', '.........', '.........', '.........', '.M..M..M.', '.........', '.........', '.........', '.........'],
+  croceMassi:    ['.........', '....M....', '.........', '.........', '.M..M..M.', '.........', '.........', '....M....', '.........'],
+  diagonaleMassi:['M........', '.M.......', '..M......', '...M.....', '....M....', '.....M...', '......M..', '.......M.', '........M'],
+  cuori:         ['.........', '.M..M..M.', '.........', '.........', '.M..M..M.', '.........', '.........', '.M..M..M.', '.........'],
+  merlatura:     ['M.M.M.M.M', '.........', '.........', '.........', '.........', '.........', '.........', '.........', 'M.M.M.M.M'],
+  murettiMassi:  ['.........', '.MM...MM.', '.........', '...##....', '...##....', '.........', '.MM...MM.', '.........', '.........'],
+  spirale:       ['MM.......', '.........', '...MMM...', '...#.....', '.#.#.M.#.', '.....#...', '...MMM...', '.........', '.......MM'],
+  pilastrini:    ['.........', '.M..M..M.', '.##...##.', '.........', '.M..M..M.', '.........', '.##...##.', '.M..M..M.', '.........'],
+  anello:        ['.........', '.........', '..M...M..', '...###...', '...#.#...', '...###...', '..M...M..', '.........', '.........'],
+  gradini:       ['MM.......', '.........', '..MM.....', '..##.....', '....MM...', '....##...', '......MM.', '.........', '........M'],
+  feritoie:      ['M..M..M..', '.........', 'M..M..M..', '.##..##..', 'M..M..M..', '.........', 'M..M..M..', '..##..##.', 'M..M..M..'],
+  torrette:      ['MM.....MM', 'MM.....MM', '.........', '...#.#...', '.........', '...#.#...', '.........', 'MM.....MM', 'MM.....MM'],
+  arcate:        ['.M.M.M.M.', '.........', '.##...##.', '.##...##.', '....M....', '.##...##.', '.##...##.', '.........', '.M.M.M.M.'],
+  colonnato:     ['.M.....M.', '.........', '.M.....M.', '...###...', '.........', '...###...', '.M.....M.', '.........', '.M.....M.'],
+  crenellature:  ['M.M.M.M.M', '#.#...#.#', '.........', '.........', '...MMM...', '.........', '.........', '#.#...#.#', 'M.M.M.M.M'],
+  fortezza:      ['MM.....MM', 'M.......M', '...###...', '.........', '#..M.M..#', '.........', '...###...', 'M.......M', 'MM.....MM'],
+  pinnacolo:     ['M...M...M', '.##...##.', '.#.....#.', '...M.M...', 'M.......M', '...M.M...', '.#.....#.', '.##...##.', 'M...M...M'],
+  assedioMassi:  ['MM.....MM', 'M.......M', '.........', '#..M.M..#', '#.......#', '#..M.M..#', '.........', 'M.......M', 'MM.....MM'],
+};
+
+/**
+ * I SETTE ATTI DELLA TORRE.
+ *
+ * Stessa ossatura del Ponte -- gli stessi campi, lo stesso significato -- con due
+ * differenze volute:
+ *
+ * IL PRIMO ATTO E' DI NUOVO FACILE. Chi arriva alla Torre ha appena finito l'ultimo atto
+ * del Ponte, il piu' duro del gioco, ma i massi sono una regola nuova: il basamento la
+ * insegna con un masso solo e una banda da 14 a 20 riuscite su 20, come le fondamenta.
+ *
+ * LA FINE E' UN PO' PIU' DURA DI QUELLA DEL PONTE. La vetta chiede da 6 a 9 riuscite su
+ * 20 contro le 6-10 dell'ultima pietra: chi e' arrivato fin li' ha giocato duecento
+ * livelli. Il pavimento resta quello assoluto del generatore (MINIME_RIUSCITE).
+ */
+const ATTI_TORRE = [
+  { da: 101, a: 110, id: 'basamento',  tipi: ['righe','colonne','quadranti','gruppi'],                       motivi: ['masso','quattroMassi','filaMassi','croceMassi'],                mosse: [14, 18], percentile: [14, 30], margine: [1.30, 1.22], riuscite: [14, 20] },
+  { da: 111, a: 124, id: 'mura',       tipi: ['gruppi','quadranti','righe','colonne','catena'],              motivi: ['diagonaleMassi','cuori','merlatura','murettiMassi'],            mosse: [16, 22], percentile: [20, 34], margine: [1.26, 1.20], riuscite: [12, 18] },
+  { da: 125, a: 140, id: 'chiocciola', tipi: ['gruppi','quadranti','righe','colonne','catena','intrecci'],   motivi: ['spirale','pilastrini','anello','gradini'],                      mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18], riuscite: [10, 16] },
+  { da: 141, a: 158, id: 'feritoie',   tipi: ['catena','intrecci','gruppi','quadranti','punteggio'],         motivi: ['feritoie','torrette','cuori','spirale','pilastrini'],           mosse: [16, 24], percentile: [30, 44], margine: [1.20, 1.15], doppi: 4, riuscite: [8, 14] },
+  { da: 159, a: 176, id: 'loggia',     tipi: ['punteggio','catena','intrecci','gruppi','celle','righe'],     motivi: ['arcate','colonnato','torrette','anello','gradini'],             mosse: [20, 30], percentile: [36, 52], margine: [1.16, 1.11], doppi: 4, riuscite: [7, 12] },
+  { da: 177, a: 192, id: 'merli',      tipi: ['punteggio','catena','celle','intrecci','colonne','gruppi'],   motivi: ['crenellature','fortezza','arcate','feritoie','colonnato'],      mosse: [22, 32], percentile: [44, 60], margine: [1.12, 1.07], doppi: 4, riuscite: [6, 11] },
+  { da: 193, a: 200, id: 'vetta',      tipi: ['punteggio','celle','catena','gruppi','intrecci','quadranti'], motivi: ['pinnacolo','assedioMassi','fortezza','crenellature'],           mosse: [26, 40], percentile: [50, 66], margine: [1.08, 1.04], doppi: 4, riuscite: [6, 9] },
+];
+
+/**
+ * Le opere che questo strumento sa generare. `pubblicata: true` vuol dire che i suoi
+ * livelli sono gia' nelle mani di chi gioca: riscriverli cambierebbe livelli gia' giocati
+ * e superati, quindi lo strumento si rifiuta, a meno di chiederlo in modo esplicito con
+ * QUADRI_RIGENERA_PUBBLICATA=1.
+ */
+const OPERE_DA_GENERARE = {
+  ponte: { titolo: 'Il Ponte', da: 1, a: 100, atti: ATTI_PONTE, motivi: MOTIVI_PONTE, pubblicata: true },
+  torre: { titolo: 'La Torre', da: 101, a: 200, atti: ATTI_TORRE, motivi: MOTIVI_TORRE, pubblicata: false },
+};
+const OPERA_ID = process.env.QUADRI_OPERA ?? 'ponte';
+const OPERA = OPERE_DA_GENERARE[OPERA_ID];
+if (!OPERA) throw new Error(`Opera sconosciuta: ${OPERA_ID}. Conosco: ${Object.keys(OPERE_DA_GENERARE).join(', ')}`);
+const ATTI = OPERA.atti;
+const MOTIVI = OPERA.motivi;
+const MAX_MASSI_PER_GRUPPO = 5;
+const SACCA_MINIMA = 4;
 
 const NOMI = {
   righe: 'righe', colonne: 'colonne', quadranti: 'quadranti', gruppi: 'gruppi',
@@ -524,6 +619,52 @@ function percentile(v, p) {
 }
 
 // ----------------------------------------------------------------- controlli ---
+/**
+ * Le tre regole dei massi (vedi MOTIVI_TORRE). `findCompletedGroups` qui sopra non vede
+ * i gruppi fatti solo di massi -- per il motore non sono chiusi, apposta -- quindi vanno
+ * cercati a parte.
+ */
+function controllaMassi(nome, g) {
+  const gruppi = [
+    ...Array.from({ length: GRID_SIZE }, (_, i) => ['riga', i, rowCells(i)]),
+    ...Array.from({ length: GRID_SIZE }, (_, i) => ['colonna', i, colCells(i)]),
+    ...Array.from({ length: QUADRANT_COUNT }, (_, i) => ['quadrante', i, quadrantCells(i)]),
+  ];
+  for (const [tipo, i, celle] of gruppi) {
+    const massi = celle.filter((c) => g[c] === MASSO).length;
+    if (massi === celle.length) throw new Error(`motivo "${nome}": ${tipo} ${i} fatta solo di massi`);
+    if (massi > MAX_MASSI_PER_GRUPPO) {
+      throw new Error(`motivo "${nome}": ${tipo} ${i} ha ${massi} massi (al massimo ${MAX_MASSI_PER_GRUPPO})`);
+    }
+  }
+  // Sacche: zone di caselle non-masso chiuse tutto intorno da massi e bordi.
+  const vista = new Uint8Array(g.length);
+  for (let start = 0; start < g.length; start += 1) {
+    if (vista[start] || g[start] === MASSO) continue;
+    const coda = [start];
+    vista[start] = 1;
+    let quante = 0;
+    while (coda.length) {
+      const cella = coda.pop();
+      quante += 1;
+      const r = Math.floor(cella / GRID_SIZE);
+      const c = cella % GRID_SIZE;
+      for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const rr = r + dr;
+        const cc = c + dc;
+        if (rr < 0 || cc < 0 || rr >= GRID_SIZE || cc >= GRID_SIZE) continue;
+        const vicina = idx(rr, cc);
+        if (vista[vicina] || g[vicina] === MASSO) continue;
+        vista[vicina] = 1;
+        coda.push(vicina);
+      }
+    }
+    if (quante < SACCA_MINIMA) {
+      throw new Error(`motivo "${nome}": una sacca di ${quante} caselle chiusa dai massi (minimo ${SACCA_MINIMA})`);
+    }
+  }
+}
+
 for (const [nome, righe] of Object.entries(MOTIVI)) {
   if (!righe) continue;
   const g = gridFromString(righe.join('\n'), 3);
@@ -531,8 +672,9 @@ for (const [nome, righe] of Object.entries(MOTIVI)) {
   if (gruppi.length) throw new Error(`motivo "${nome}" contiene gia' ${gruppi.map((x) => x.type).join(',')}`);
   if (filledCount(g) > 48) throw new Error(`motivo "${nome}" riempie troppo: ${filledCount(g)} celle`);
   if (righe.length !== 9 || righe.some((r) => r.length !== 9)) throw new Error(`motivo "${nome}" malformato`);
+  controllaMassi(nome, g);
 }
-console.log(`Motivi verificati: ${Object.keys(MOTIVI).length - 1}, nessuno con gruppi gia' completi.`);
+console.log(`Motivi verificati: ${Object.values(MOTIVI).filter(Boolean).length}, nessuno con gruppi gia' completi.`);
 
 /**
  * E poi il controllo che mancava: ogni motivo dev'essere GIOCABILE.
@@ -584,8 +726,18 @@ console.log('');
 
 // ------------------------------------------------------------------ taratura ---
 const quadri = [];
-const PRIMO = PROVA_A > 0 ? PROVA_DA : 1;
-const ULTIMO = PROVA_A > 0 ? PROVA_A : TOTALE;
+// `QUADRI_PROVA=8` vuol dire i primi otto livelli DELL'OPERA; `41-58` sono numeri veri.
+const PRIMO = PROVA_A > 0 ? (PROVA_DA || OPERA.da) : OPERA.da;
+const ULTIMO = PROVA_A > 0 ? (PROVA_DA ? PROVA_A : OPERA.da + PROVA_A - 1) : OPERA.a;
+if (PRIMO < OPERA.da || ULTIMO > OPERA.a) {
+  throw new Error(`QUADRI_PROVA=${PROVA} esce dall'opera "${OPERA_ID}" (${OPERA.da}-${OPERA.a})`);
+}
+if (PROVA_A === 0 && OPERA.pubblicata && process.env.QUADRI_RIGENERA_PUBBLICATA !== '1') {
+  throw new Error(
+    `L'opera "${OPERA_ID}" e' gia' pubblicata: rigenerarla cambierebbe livelli gia' giocati. `
+    + 'Se e\' davvero quello che si vuole: QUADRI_RIGENERA_PUBBLICATA=1.',
+  );
+}
 for (let n = PRIMO; n <= ULTIMO; n += 1) {
   const progetto = progetta(n);
   const rng = createRng(seedFromString(`taratura-${n}`));
@@ -1365,11 +1517,12 @@ const motiviTesto = Object.entries(MOTIVI)
   .join('\n');
 
 const file = `/**
- * I Quadri di PLINTO: cento livelli a difficolta' crescente.
+ * ${OPERA.titolo}: i livelli di PLINTO dal ${OPERA.da} al ${OPERA.a}.
  *
- * QUESTO FILE E' GENERATO da tools/genera-quadri.mjs. Modificarlo a mano funziona,
- * ma la prossima rigenerazione cancella le modifiche: meglio cambiare il progetto
- * nel generatore, dove stanno gli atti, i motivi delle griglie e la curva.
+ * QUESTO FILE E' GENERATO da tools/genera-quadri.mjs (QUADRI_OPERA=${OPERA_ID}).
+ * Modificarlo a mano funziona, ma la prossima rigenerazione cancella le modifiche: meglio
+ * cambiare il progetto nel generatore, dove stanno gli atti, i motivi delle griglie e la
+ * curva. Le opere si mettono in fila in src/config/quadri.js.
  *
  * I BERSAGLI NON SONO INVENTATI. Ogni livello e' stato giocato ${TENTATIVI} volte dal
  * giocatore artificiale senza obiettivo, e il bersaglio e' un percentile di quanto ha
@@ -1402,7 +1555,7 @@ ${righe.join('\n')}
 ];
 
 /**
- * Gli atti del percorso: servono a far vedere dove si e' arrivati.
+ * Gli atti dell'opera: servono a far vedere dove si e' arrivati.
  *
  * Qui c'e' l'IDENTIFICATIVO, non il nome. Il nome visibile sta nelle traduzioni, sotto
  * "atti.<id>": finche' e' stato scritto qui, in italiano, chi giocava in inglese leggeva
@@ -1410,51 +1563,15 @@ ${righe.join('\n')}
  * i dati generati non passano da nessun controllo sulle traduzioni.
  */
 export const ATTI = ${JSON.stringify(ATTI.map((a) => ({ id: a.id, da: a.da, a: a.a })), null, 2).replace(/"([a-z]+)":/g, '$1:')};
-
-/**
- * Le opere: i gruppi di livelli, ognuno con i suoi atti.
- *
- * Oggi ce n'e' UNA, il Ponte, e sono i cento livelli che esistono. La struttura e' al
- * plurale lo stesso, perche' e' il punto: aggiungere un gruppo nuovo deve voler dire
- * aggiungere una voce qui e i suoi livelli, non rimettere mano a come il gioco e' fatto.
- * I progressi sono gia' salvati per numero di livello, quindi un secondo gruppo che parte
- * dal 101 non chiede nessuna migrazione di quello che le persone hanno gia' fatto.
- *
- * Il nome sta nelle traduzioni, sotto "opere.<id>", per la stessa ragione degli atti.
- */
-export const OPERE = [
-  { id: 'ponte', da: 1, a: ${quadri.length} },
-];
-
-/** @param {number} numero */
-export function quadroNumero(numero) {
-  return QUADRI.find((q) => q.numero === numero) ?? null;
-}
-
-/**
- * L'opera a cui appartiene un Quadro: oggi c'e' solo il Ponte, e sono tutti e cento.
- * Esiste per la stessa ragione di \`attoDelQuadro\`: chi deve NOMINARE il gruppo non deve
- * sapere dove comincia e dove finisce, altrimenti quel confine finisce scritto in due
- * posti e uno dei due invecchia.
- */
-export function operaDelQuadro(numero) {
-  return OPERE.find((o) => numero >= o.da && numero <= o.a) ?? OPERE[OPERE.length - 1];
-}
-
-/** L'atto a cui appartiene un Quadro. */
-export function attoDelQuadro(numero) {
-  return ATTI.find((a) => numero >= a.da && numero <= a.a) ?? ATTI[ATTI.length - 1];
-}
-
-export const TOTALE_QUADRI = QUADRI.length;
 `;
 
+const destinazione = `src/config/opere/${OPERA_ID}.js`;
 if (PROVA_A > 0) {
-  console.log(`\n  PROVA A VUOTO (quadri ${PRIMO}-${ULTIMO}): non scrivo src/config/quadri.js.\n`);
+  console.log(`\n  PROVA A VUOTO (quadri ${PRIMO}-${ULTIMO}): non scrivo ${destinazione}.\n`);
 } else {
-  writeFileSync(new URL('../src/config/quadri.js', import.meta.url), file);
+  writeFileSync(new URL(`../${destinazione}`, import.meta.url), file);
 }
 
 console.log(PROVA_A > 0
   ? `\nProvati ${quadri.length} Quadri, niente scritto su disco.\n`
-  : `\nScritti ${quadri.length} Quadri in src/config/quadri.js\n`);
+  : `\nScritti ${quadri.length} Quadri in ${destinazione}\n`);

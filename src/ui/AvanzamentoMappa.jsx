@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { QUADRI, TOTALE_QUADRI, attoDelQuadro } from '../config/quadri.js';
+import { QUADRI, attoDelQuadro, operaDelQuadro, livelliDellOpera } from '../config/quadri.js';
 import { numero } from '../i18n/formato.js';
 import { Plinto } from './Plinto.jsx';
 
@@ -35,17 +35,21 @@ export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, 
     return () => cancelAnimationFrame(primo);
   }, [animazioni]);
 
-  const da = Math.max(1, superato - INTORNO);
-  const a = Math.min(TOTALE_QUADRI, superato + INTORNO);
+  // La strada e i conteggi sono quelli dell'opera del livello appena superato: il
+  // pezzetto di strada non scavalca il confine fra il Ponte e la Torre.
+  const opera = operaDelQuadro(superato);
+  const totale = livelliDellOpera(opera);
+  const da = Math.max(opera.da, superato - INTORNO);
+  const a = Math.min(opera.a, superato + INTORNO);
   const tappe = QUADRI.filter((q) => q.numero >= da && q.numero <= a);
 
   // Prima della vittoria eri fermo su questo livello; adesso sei su quello dopo.
   const primaEra = superato;
-  const adesso = Math.min(TOTALE_QUADRI, superato + 1);
+  const adesso = Math.min(opera.a, superato + 1);
   const attivo = mosso ? adesso : primaEra;
 
   const fattiPrima = Math.max(0, superatiTotali - 1);
-  const quota = ((mosso ? superatiTotali : fattiPrima) / TOTALE_QUADRI) * 100;
+  const quota = ((mosso ? superatiTotali : fattiPrima) / totale) * 100;
   const atto = attoDelQuadro(adesso);
 
   return (
@@ -73,13 +77,13 @@ export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, 
       <p className="pl-avanza__conteggio">
         {t('quadri.avanzamento')
           .replace('{fatti}', numero(superatiTotali))
-          .replace('{totale}', numero(TOTALE_QUADRI))}
+          .replace('{totale}', numero(totale))}
       </p>
       <div
         className="pl-avanza__barra"
         role="progressbar"
         aria-valuemin={0}
-        aria-valuemax={TOTALE_QUADRI}
+        aria-valuemax={totale}
         aria-valuenow={superatiTotali}
       >
         <div className="pl-avanza__riempimento" style={{ width: `${quota}%` }} />

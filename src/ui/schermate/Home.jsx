@@ -29,12 +29,14 @@ import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
  */
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
-  livelloCorrente, versione,
+  livelloCorrente, operaCorrente = 'ponte', versione,
   onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, onSostieni, t,
 }) {
-  const progressoTesto = t('quadri.avanzamento')
+  // Con piu' di un'opera il numero da solo non dice di che cosa: "12 di 100" puo' essere
+  // il Ponte o la Torre. Il nome dell'opera viene prima.
+  const progressoTesto = `${t(`opere.${operaCorrente}`)}: ${t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
-    .replace('{totale}', numero(quadriTotali));
+    .replace('{totale}', numero(quadriTotali))}`;
   const etichettaLibera = cePartitaSalvata ? t('home.riprendi') : t('home.partitaLibera');
   const recordTesto = record.best > 0 ? `${t('home.record')} ${numero(record.best)}` : '';
   const etichettaSfida = sfidaInCorso ? t('sfida.riprendi') : t('sfida.breve');

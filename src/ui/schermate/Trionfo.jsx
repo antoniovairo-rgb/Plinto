@@ -3,7 +3,11 @@ import { OPERE } from '../../config/quadri.js';
 import { CondividiTrionfo } from '../Condividi.jsx';
 
 /**
- * La schermata di chi ha finito TUTTI i livelli.
+ * La schermata di chi ha finito TUTTI i livelli di un'opera.
+ *
+ * CON DUE OPERE HA DUE FINALI. Alla fine del Ponte e' il passaggio: la Torre si e' appena
+ * aperta, e il pulsante grande porta li'. Alla fine dell'ultima opera e' la festa finale,
+ * e quello che viene dopo si dice senza nome e senza data.
  *
  * E' l'unico momento in cui il gioco alza la voce, e per questo e' anche l'unico in cui
  * puo' permetterselo: chi arriva qui ha giocato cento livelli, e liquidarlo con la
@@ -48,7 +52,8 @@ const PIOGGIA = Array.from({ length: BLOCCHI_PIOGGIA }, (_, i) => ({
 }));
 
 export function SchermoTrionfo({
-  riepilogo, animazioni = true, onElenco, onLibera, t,
+  riepilogo, opera = OPERE[0], successiva = null, animazioni = true,
+  onElenco, onLibera, onSuccessiva, t,
 }) {
   return (
     <div className="pl-screen pl-trionfo">
@@ -89,7 +94,9 @@ export function SchermoTrionfo({
             un fondo pieno. Il velo serve solo al testo nudo. */}
         <div className="pl-trionfo__intestazione">
           <h1 className="pl-trionfo__titolo">
-            {t('trionfo.titolo').replace('{opera}', t(`opere.${OPERE[0].id}`))}
+            {/* Un titolo per opera, scritto per intero: con un segnaposto la Torre
+                diventava "La Torre è finito". */}
+            {t(`trionfo.titoli.${opera.id}`)}
           </h1>
           <p className="pl-trionfo__sotto">
             {t('trionfo.sotto').replace('{totale}', riepilogo.totale)}
@@ -121,15 +128,22 @@ export function SchermoTrionfo({
             livelli vorrebbe dire mostrarla a chi e' al livello 3, cioe' promettere una
             cosa che non esiste a chi non ha ancora finito quella che esiste.
 
-            Senza date: vedi il commento in testa al file. La Torre non ha livelli dietro,
-            e finche' non li ha si dice che e' in lavorazione, non che sta per arrivare. */}
+            Alla fine del Ponte la Torre c'e' gia', e si dice che e' aperta. Alla fine
+            dell'ultima opera niente nome e niente data: vedi il commento in testa al file. */}
         <div className="pl-trionfo__annuncio">
           <p className="pl-trionfo__annuncioTitolo">{t('trionfo.prossimiTitolo')}</p>
-          <p className="pl-trionfo__annuncioOpera">{t('opere.torre')}</p>
-          <p className="pl-trionfo__annuncioTesto">{t('trionfo.prossimiTesto')}</p>
+          {successiva ? (
+            <>
+              <p className="pl-trionfo__annuncioOpera">{t(`opere.${successiva.id}`)}</p>
+              <p className="pl-trionfo__annuncioTesto">{t(`trionfo.aperta.${successiva.id}`)}</p>
+            </>
+          ) : (
+            <p className="pl-trionfo__annuncioTesto">{t('trionfo.prossimiTesto')}</p>
+          )}
         </div>
 
         <CondividiTrionfo
+          opera={opera}
           totale={riepilogo.totale}
           mosseTotali={riepilogo.mosseTotali}
           alPrimoColpo={riepilogo.alPrimoColpo}
@@ -138,9 +152,15 @@ export function SchermoTrionfo({
       </div>
 
       <div className="pl-fine__azioni">
-        <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onLibera}>
-          {t('trionfo.libera')}
-        </button>
+        {successiva ? (
+          <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onSuccessiva}>
+            {t(`trionfo.vai.${successiva.id}`)}
+          </button>
+        ) : (
+          <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onLibera}>
+            {t('trionfo.libera')}
+          </button>
+        )}
         <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onElenco}>
           {t('quadri.elenco')}
         </button>

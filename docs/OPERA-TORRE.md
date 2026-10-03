@@ -1,6 +1,8 @@
 # La Torre — documento di progetto
 
-Stato: **in sviluppo**. Branch: `opera-torre`. Meccanica scelta: **i massi**. Fatto: la regola nel motore, con le prove (punto 2 della sezione 6).
+Stato: **in sviluppo, non pubblicata**. Branch: `opera-torre`. Meccanica scelta: **i massi**.
+Fatto: regola nel motore, giocatore artificiale, generatore e livelli 101-200, interfaccia.
+Il resoconto di cosa e' stato fatto e misurato sta nella sezione 7.
 
 La Torre è l'opera che viene dopo il Ponte. Il gioco la promette già: chi finisce i cento
 livelli vede «E adesso? La Torre — In lavorazione» (`src/ui/schermate/Trionfo.jsx`).
@@ -217,7 +219,7 @@ una crescita graduale nei sette atti della Torre.
 I **mattoni rinforzati** sono un'ottima seconda scelta. Potrebbero essere la meccanica
 dell'opera successiva, così ogni opera porta una novità sua.
 
-## 6. Dopo la scelta
+## 6. Dopo la scelta (tutti i punti fatti nel branch, tranne la pubblicazione)
 
 1. Decidere i casi limite della meccanica scelta (sezione 3).
 2. Scrivere la regola nel motore, con le prove automatiche, senza toccare partita libera
@@ -228,3 +230,46 @@ dell'opera successiva, così ogni opera porta una novità sua.
 6. Interfaccia: mappa a due opere, passaggio dal Ponte alla Torre, nuova festa finale,
    guida e aiuto aggiornati.
 7. Gate di verifica completo, poi pubblicazione.
+
+## 7. Come e' stata fatta (3 ottobre 2026)
+
+### Motore
+- `MASSO = 30` in `src/core/grid.js` (lettera `M` nelle griglie), NON in `rules.js`, per
+  non cambiare l'impronta delle regole e i record delle sfide passate.
+- Le quattro eccezioni decise sono nel motore, con 11 prove in `tests/massi.test.js`.
+- Un gruppo fatto solo di massi non conta come chiuso.
+
+### Giocatore artificiale
+- Non e' servito cambiarlo: valuta le mosse con il motore vero, che conosce gia' i massi.
+  Le sue euristiche contano il masso come casella piena, che e' la lettura giusta.
+  Prova: `tests/giocatore-massi.test.js`.
+
+### Livelli
+- Un file per opera: `src/config/opere/ponte.js` (i 100 livelli pubblicati, copiati
+  senza rigenerarli) e `src/config/opere/torre.js` (generato). `src/config/quadri.js`
+  li mette in fila. Il generatore scrive un'opera sola (`QUADRI_OPERA=torre`) e si
+  rifiuta di riscrivere il Ponte, che e' pubblicato.
+- `tests/opere.test.js` controlla l'impronta dei 100 livelli del Ponte: e' la stessa
+  dei livelli della 1.19.4.
+- Venti griglie con i massi, in crescita: un masso solo al livello 101, fino a 16 massi
+  con blocchi negli ultimi atti. Tre regole in piu' controllate dal generatore: nessun
+  gruppo fatto solo di massi, al massimo 5 massi per gruppo, nessuna zona chiusa dai
+  massi piu' piccola di 4 caselle. Ogni griglia e' anche giocata: due griglie
+  (`fortezza`, `assedioMassi`) sono state alleggerite perche' in una partita su tre non
+  si chiudeva nemmeno un gruppo.
+- Sette atti: il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
+  merli, la vetta. Il primo e' di nuovo facile (insegna i massi), l'ultimo un po' piu'
+  duro dell'ultimo atto del Ponte.
+- Nessun tipo di obiettivo nuovo (per esempio «chiudi righe che passano su un masso»):
+  avrebbe chiesto un contatore nuovo nel motore. Possibile in un'uscita successiva.
+
+### Interfaccia
+- La Torre si apre solo con tutti i 100 livelli del Ponte superati, con la spunta.
+  L'insistenza (8 tentativi) non apre il primo livello di un'opera.
+- Mappa a schede (Il Ponte / La Torre); la Torre chiusa dice quanti livelli mancano.
+- La festa del Ponte diventa il passaggio: «La Torre — È aperta» e il pulsante
+  «Entra nella Torre». La festa finale e' alla fine della Torre, senza date.
+- Titoli scritti per intero per ogni opera: niente piu' «La Torre è finito».
+- Il masso: grigio, con una crepa, senza animazioni. La presentazione di ogni livello
+  della Torre ricorda la regola; le regole hanno la sezione «I massi»; il piccone dice
+  che i massi non si toccano; l'evidenziazione «sta per sparire» non illumina i massi.

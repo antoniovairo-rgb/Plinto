@@ -1,7 +1,8 @@
 import { forwardRef, useMemo } from 'react';
 import { GRID_SIZE } from '../config/rules.js';
-import { idx, coloreDi, eBomba } from '../core/grid.js';
+import { idx, coloreDi, eBomba, eMasso } from '../core/grid.js';
 import { Bomba } from './Bomba.jsx';
+import { Masso } from './Masso.jsx';
 
 /**
  * La griglia 9x9.
@@ -36,6 +37,7 @@ export const Plancia = forwardRef(function Plancia(
         const sottoCursore = cursore && cursore.row === r && cursore.col === c;
         const colore = coloreDi(valore);
         const bomba = eBomba(valore);
+        const masso = eMasso(valore);
         const saltata = valore === 0 && celleEsplose?.has(i);
 
         const classi = ['pl-cella'];
@@ -55,11 +57,18 @@ export const Plancia = forwardRef(function Plancia(
             role="gridcell"
             aria-label={t
               ? `${t('a11y.cella').replace('{r}', r + 1).replace('{c}', c + 1)}, ${
-                valore === 0 ? t('a11y.cellaLibera') : t('a11y.cellaOccupata')}`
+                valore === 0 ? t('a11y.cellaLibera') : (masso ? t('a11y.cellaMasso') : t('a11y.cellaOccupata'))}`
               : undefined}
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
-            {valore !== 0 ? (
+            {/* Il masso della Torre non ha colore (`coloreDi` da' zero), quindi non puo'
+                passare dal ramo dei blocchi: avrebbe la classe di un colore che non c'e'
+                e nessun fondo. Ha un disegno suo, grigio e scolpito, che si distingue dai
+                sei colori anche per forma e non solo per tinta. */}
+            {masso ? (
+              <div className="pl-blocco pl-blocco--masso"><Masso /></div>
+            ) : null}
+            {valore !== 0 && !masso ? (
               <div className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''}`}>
                 {bomba ? <Bomba /> : null}
               </div>

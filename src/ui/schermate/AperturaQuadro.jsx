@@ -1,5 +1,6 @@
 import { Plinto } from '../Plinto.jsx';
 import { MiniGriglia, celleDa } from '../MiniGriglia.jsx';
+import { Masso } from '../Masso.jsx';
 import { descriviObiettivi } from './Quadri.jsx';
 
 /**
@@ -59,6 +60,18 @@ export function AperturaQuadro({ quadro, onGioca, onElenco, t }) {
             <p className="pl-apertura__consiglio-riga" key={tipo}>{t(`quadri.consigli.${tipo}`)}</p>
           ))}
         </div>
+
+        {/* I MASSI SI DICONO A OGNI LIVELLO DELLA TORRE, non solo al primo. Chi riprende
+            la Torre dopo un mese, o salta al livello 140 dalla mappa, deve trovare la
+            regola li' dove la incontra, non in una pagina letta settimane prima. */}
+        {quadro.griglia?.includes('M') ? (
+          <div className="pl-apertura__consiglio pl-apertura__massi">
+            <span className="pl-apertura__masso" aria-hidden="true">
+              <span className="pl-blocco pl-blocco--masso"><Masso /></span>
+            </span>
+            <p className="pl-apertura__consiglio-riga">{t('quadri.massiRegola')}</p>
+          </div>
+        ) : null}
 
         <p className="pl-apertura__mosse">
           {quadro.maxMosse != null

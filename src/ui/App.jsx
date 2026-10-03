@@ -25,9 +25,13 @@ import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { SchermoTrionfo } from './schermate/Trionfo.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
-import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/quadri.js';
 import {
-  quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto,
+  QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro, operaDelQuadro, operaSuccessiva,
+  livelliDellOpera,
+} from '../config/quadri.js';
+import {
+  quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto, quadroSbloccato,
+  superatiNellOpera,
 } from '../persistence/progressi.js';
 import { leggiRipresa } from '../persistence/ripresa.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
@@ -375,7 +379,11 @@ export function App() {
       const appenaVinto = quadri.esito.completato
         ? { numero: quadri.quadro.numero, primaVolta: Boolean(quadri.esito.primaVolta) }
         : null;
-      const percorso = riepilogoPercorso(undefined, TOTALE_QUADRI);
+      // Il percorso che conta qui e' quello dell'OPERA del livello: la festa del Ponte
+      // arriva quando e' finito il Ponte, quella della Torre quando e' finita la Torre.
+      const opera = operaDelQuadro(quadri.quadro.numero);
+      const percorso = riepilogoPercorso(undefined, livelliDellOpera(opera), opera.da);
+      const successiva = operaSuccessiva(opera);
       const atto = appenaVinto
         ? riepilogoAtto(attoDelQuadro(quadri.quadro.numero), appenaVinto)
         : null;
@@ -389,6 +397,13 @@ export function App() {
           <div className="pl-app">
             <SchermoTrionfo
               riepilogo={percorso}
+              opera={opera}
+              successiva={successiva}
+              onSuccessiva={() => {
+                const primo = successiva ? quadroNumero(successiva.da) : null;
+                if (primo) apriQuadro(primo);
+                else tornaAiQuadri();
+              }}
               animazioni={impostazioni.animazioni}
               onLibera={iniziaNuova}
               onElenco={tornaAiQuadri}
@@ -403,8 +418,13 @@ export function App() {
           <SchermoFineQuadro
             quadro={quadri.quadro}
             esito={quadri.esito}
-            ultimo={quadri.quadro.numero >= TOTALE_QUADRI}
-            superatiTotali={quadriFatti}
+            // L'ultimo livello giocabile, non solo l'ultimo del gioco: dopo il centesimo
+            // la Torre puo' essere ancora chiusa (si apre finendo tutto il Ponte), e un
+            // pulsante "Livello successivo" che porta a un livello chiuso non porta da
+            // nessuna parte.
+            ultimo={quadri.quadro.numero >= TOTALE_QUADRI || !quadroSbloccato(quadri.quadro.numero + 1)}
+            opera={opera}
+            superatiTotali={superatiNellOpera(opera)}
             atto={atto}
             percorsoCompleto={percorso.completo}
             animazioni={impostazioni.animazioni}
@@ -494,8 +514,11 @@ export function App() {
           cePartitaSalvata={salvataggioDisponibile}
           sfidaOggi={sfidaOggi}
           sfidaInCorso={sfidaSalvata}
-          quadriFatti={quadriFatti}
-          quadriTotali={TOTALE_QUADRI}
+          // Il conteggio della home e' quello dell'opera in cui si sta giocando: "12 di
+          // 100" della Torre, non "112 di 200" di un percorso che a meta' cambia regole.
+          quadriFatti={superatiNellOpera(operaDelQuadro(livelloCorrente))}
+          quadriTotali={livelliDellOpera(operaDelQuadro(livelloCorrente))}
+          operaCorrente={operaDelQuadro(livelloCorrente).id}
           livelloCorrente={livelloCorrente}
           versione={__APP_VERSION__}
           onQuadri={() => setSchermata('quadri')}

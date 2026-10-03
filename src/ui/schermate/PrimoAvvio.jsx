@@ -9,7 +9,7 @@ import { REGOLE_INTRO, PASSI_GUIDA } from '../../config/intro.js';
 import { CHAIN_MAX, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA, GRID_SIZE } from '../../config/rules.js';
 import { chainMultiplier, fattoreTinta } from '../../core/scoring.js';
 import { OGNI_LIVELLI } from '../../persistence/attrezzi.js';
-import { TOTALE_QUADRI } from '../../config/quadri.js';
+import { OPERE, livelliDellOpera } from '../../config/quadri.js';
 
 /**
  * La guida al primo avvio.
@@ -192,7 +192,7 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
         {nome === 'percorso' ? (
           <>
             <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-            <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
+            <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
             <p className="pl-testo">{t('guida.altreModalita')}</p>
           </>
         ) : null}

@@ -1,10 +1,11 @@
 import { Pagina } from './Pagina.jsx';
 import { Pezzo } from '../Pezzo.jsx';
 import { Bomba } from '../Bomba.jsx';
+import { Masso } from '../Masso.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
-import { TOTALE_QUADRI } from '../../config/quadri.js';
+import { OPERE, livelliDellOpera } from '../../config/quadri.js';
 import {
   CHAIN_MAX, INTRECCIO_STEP, CHAIN_GRACE, TINTA_SOGLIA,
   ESPLOSIONE_SOGLIA, PUNTI_CELLA_ESPLOSA, GRID_SIZE,
@@ -95,7 +96,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
           riaprire da qui: sarebbe una seconda strada, piu' povera, verso quello che
           questa pagina dice gia' meglio. */}
       <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-      <p className="pl-testo">{t('guida.percorso').replace('{n}', TOTALE_QUADRI).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
+      <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
       <p className="pl-testo">{t('guida.altreModalita')}</p>
 
       <h2 className="pl-sezione">{t('aiuto.baseTitolo')}</h2>
@@ -156,6 +157,17 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
           punti: PUNTI_CELLA_ESPLOSA,
         })}
       </p>
+
+      {/* I MASSI DELLA TORRE. Stanno nelle regole anche per chi non ha ancora aperto la
+          Torre: questa pagina promette che non ci sono altre regole nascoste. */}
+      <h2 className="pl-sezione">{t('aiuto.massiTitolo')}</h2>
+      <div className="pl-aiuto__bomba">
+        <span className="pl-intro__blocco-bomba">
+          <span className="pl-blocco pl-blocco--masso"><Masso /></span>
+        </span>
+        <p className="pl-testo">{t('aiuto.massi')}</p>
+      </div>
+      <p className="pl-testo">{t('aiuto.massiEccezioni')}</p>
 
       {/* GLI ATTREZZI. Stanno qui e non solo nel pannello che si apre in partita: quel
           pannello lo trova chi ha gia' capito che esistono, e chi non lo ha ancora

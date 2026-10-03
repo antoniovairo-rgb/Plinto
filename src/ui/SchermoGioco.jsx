@@ -14,7 +14,9 @@ import { useEffettiMossa } from '../feel/useEffettiMossa.js';
 import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
 import { vibraRifiuto } from '../feel/vibrazione.js';
-import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf } from '../core/grid.js';
+import {
+  canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf, eMasso,
+} from '../core/grid.js';
 import { AnteprimaTerna } from './AnteprimaTerna.jsx';
 import { MODALITA , TINTA_SOGLIA } from '../config/rules.js';
 import { giornoDiOggi } from '../core/sfida.js';
@@ -264,7 +266,9 @@ export function SchermoGioco({
       const gruppi = findCompletedGroups(dopo);
       if (gruppi.length > 0) {
         incandidate = new Set();
-        gruppi.forEach((g) => g.cells.forEach((c) => incandidate.add(c)));
+        // I massi della Torre restano: illuminarli come "sta per sparire" direbbe il
+        // contrario della loro regola.
+        gruppi.forEach((g) => g.cells.forEach((c) => { if (!eMasso(dopo[c])) incandidate.add(c); }));
       }
     }
     return { celle: new Set(celle), colore: pezzo.color, valida, incandidate };
@@ -466,7 +470,11 @@ export function SchermoGioco({
               /* Con un attrezzo in corso la riga smette di dire qualunque altra cosa:
                  c'e' una domanda aperta, e due messaggi insieme sarebbero due. */
               <span className="pl-attrezzi__invito">
-                {t(`attrezzi.${modoAttrezzo}Scegli`)}
+                {/* Con i massi sulla griglia il piccone li salta in silenzio: lo si dice
+                    prima, invece di lasciare che un tocco su un masso sembri non preso. */}
+                {modoAttrezzo === 'piccone' && partita.grid.some(eMasso)
+                  ? t('attrezzi.picconeScegliMassi')
+                  : t(`attrezzi.${modoAttrezzo}Scegli`)}
                 <button type="button" className="pl-attrezzi__annulla"
                         onClick={() => setModoAttrezzo('chiuso')}>
                   {t('attrezzi.lasciaStare')}

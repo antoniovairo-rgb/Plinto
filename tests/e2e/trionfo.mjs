@@ -19,7 +19,7 @@ import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { quadroNumero, TOTALE_QUADRI, ATTI } from '../../src/config/quadri.js';
+import { quadroNumero, ATTI, OPERE, livelliDellOpera, attiDellOpera } from '../../src/config/quadri.js';
 import { traduttore } from '../../src/i18n/index.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
@@ -140,11 +140,14 @@ async function preparaEGioca(superati) {
   await page.waitForSelector('.pl-plancia .pl-cella');
 }
 
-/** Rigioca la sequenza vincente sul livello 1 e restituisce l'esito letto a schermo. */
-async function vinciIlPrimo() {
-  const quadro = quadroNumero(1);
+/**
+ * Rigioca la sequenza vincente sul livello indicato (il primo della mappa che si apre) e
+ * restituisce l'esito letto a schermo.
+ */
+async function vinciIlPrimo(numero = 1) {
+  const quadro = quadroNumero(numero);
   const sequenza = sequenzaVincente(quadro);
-  if (!sequenza) { errori.push('il motore non riesce a superare il livello 1: il controllo non prova nulla'); return false; }
+  if (!sequenza) { errori.push(`il motore non riesce a superare il livello ${numero}: il controllo non prova nulla`); return false; }
   for (const mossa of sequenza) {
     const punti = await posizioneMossa(mossa);
     if (!punti) break;
@@ -159,10 +162,15 @@ async function vinciIlPrimo() {
   return true;
 }
 
-const tutti = Array.from({ length: TOTALE_QUADRI }, (_, i) => i + 1);
+// I livelli del Ponte: le prime quattro prove stanno tutte li'. La festa della Torre ha
+// la sua prova, la quinta.
+const PONTE = OPERE[0];
+const TORRE = OPERE[1];
+const tutti = Array.from({ length: livelliDellOpera(PONTE) }, (_, i) => PONTE.da + i);
+const totaleTorre = livelliDellOpera(TORRE);
 
-// ---------- 1. Novantanove su cento: l'ultimo che manca fa la festa ----------
-console.log('1. tutti i livelli superati tranne il primo: lo vinco e mi aspetto la festa finale...');
+// ---------- 1. Novantanove su cento: l'ultimo che manca fa la festa del Ponte ----------
+console.log('1. tutto il Ponte superato tranne il primo livello: lo vinco e mi aspetto la festa del Ponte...');
 await preparaEGioca(tutti.filter((n) => n !== 1));
 if (await vinciIlPrimo()) {
   await page.waitForTimeout(600);
@@ -182,13 +190,16 @@ if (await vinciIlPrimo()) {
       errori.push(`TRIONFO: le mosse totali a schermo sono "${mosse}", e i soli livelli scritti ne valgono ${99 * 12}`);
     }
     const livelli = Number((testo.match(/(\d+)\s*\n?\s*livelli superati/i) ?? [])[1] ?? NaN);
-    if (livelli !== TOTALE_QUADRI) {
-      errori.push(`TRIONFO: dice ${livelli} livelli superati invece di ${TOTALE_QUADRI}`);
+    if (livelli !== tutti.length) {
+      errori.push(`TRIONFO: dice ${livelli} livelli superati invece di ${tutti.length}`);
+    }
+    if (!testo.includes(traduttore('it')('trionfo.titoli.ponte'))) {
+      errori.push(`TRIONFO: il titolo non e quello del Ponte. Testo: "${testo.replace(/\n/g, ' | ')}"`);
     }
 
-    // L'annuncio dei prossimi livelli c'e' e non promette date.
-    if (!/in lavorazione/i.test(testo)) {
-      errori.push('TRIONFO: manca l annuncio dei prossimi livelli');
+    // Alla fine del Ponte la Torre si e' appena aperta: la festa lo dice.
+    if (!testo.includes(traduttore('it')('trionfo.aperta.torre'))) {
+      errori.push('TRIONFO: la festa del Ponte non dice che la Torre si e aperta');
     }
     if (/\b(20\d\d|presto|settiman|mes[ei])\b/i.test(testo)) {
       errori.push(`TRIONFO: la schermata promette una data. Testo: "${testo.replace(/\n/g, ' | ')}"`);
@@ -314,19 +325,28 @@ if (await vinciIlPrimo()) {
       errori.push('TRIONFO: manca il pulsante per condividere la fine del percorso');
     }
 
-    // Il pulsante grande porta davvero in partita libera, premuto con la pioggia addosso.
-    const bottone = page.getByRole('button', { name: /partita libera/i });
+    // Il pulsante grande porta davvero nella Torre, premuto con la pioggia addosso: al
+    // primo livello della Torre, con la regola dei massi detta prima di giocare.
+    const bottone = page.getByRole('button', { name: traduttore('it')('trionfo.vai.torre') });
     if (await bottone.count() === 0) {
-      errori.push('TRIONFO: manca il pulsante per la partita libera');
+      errori.push('TRIONFO: manca il pulsante per entrare nella Torre');
     } else {
       await bottone.first().click();
       await page.waitForTimeout(400);
       if (await page.locator('.pl-trionfo').count() > 0) {
-        errori.push('TRIONFO: premendo "partita libera" non succede niente: la pioggia si e mangiata il tocco');
+        errori.push('TRIONFO: premendo "Entra nella Torre" non succede niente: la pioggia si e mangiata il tocco');
+      } else {
+        await page.screenshot({ path: `${OUT}/1b-dentro-la-torre.png` });
+        const apertura = await page.locator('.pl-apertura').innerText().catch(() => '');
+        if (!apertura.includes(`${TORRE.da}`)) {
+          errori.push(`TRIONFO: "Entra nella Torre" non apre il livello ${TORRE.da}. Testo: "${apertura.replace(/\n/g, ' | ')}"`);
+        }
+        if (await page.locator('.pl-apertura__massi').count() !== 1) {
+          errori.push('TORRE: la presentazione del primo livello della Torre non spiega i massi');
+        }
       }
-      await page.goBack().catch(() => {});
     }
-    console.log('   festa finale: mostrata, con i numeri del percorso e l annuncio.');
+    console.log('   festa del Ponte: mostrata, con i numeri, la Torre aperta e il pulsante per entrarci.');
   }
 }
 
@@ -370,8 +390,10 @@ if (await vinciIlPrimo()) {
     // livelli che ha finito tutto il percorso.
     const pallini = await page.locator('.pl-atto-chiuso__pallino').count();
     const accesi = await page.locator('.pl-atto-chiuso__pallino--acceso').count();
-    if (pallini !== ATTI.length) {
-      errori.push(`ATTO: i pallini degli atti sono ${pallini}, gli atti sono ${ATTI.length}`);
+    // Gli atti si contano dentro l'opera: sette nel Ponte.
+    const attiPonte = attiDellOpera(PONTE).length;
+    if (pallini !== attiPonte) {
+      errori.push(`ATTO: i pallini degli atti sono ${pallini}, gli atti del Ponte sono ${attiPonte}`);
     }
     if (accesi !== 1) {
       errori.push(`ATTO: chiudendo il primo atto i pallini accesi sono ${accesi} invece di 1`);
@@ -398,6 +420,45 @@ if (await vinciIlPrimo()) {
   const fasce = await page.locator('.pl-atto-chiuso').count();
   if (fasce !== 0) {
     errori.push('ATTO: la fascia torna rigiocando un livello di un atto gia chiuso. Non e successo niente di nuovo.');
+  }
+}
+
+// ---------- 5. L'ultimo livello che manca della Torre fa la festa finale ----------
+console.log('5. tutto superato tranne il primo livello della Torre: lo vinco e mi aspetto la festa finale...');
+await preparaEGioca(Array.from({ length: TORRE.a }, (_, i) => i + 1).filter((n) => n !== TORRE.da));
+if (await vinciIlPrimo(TORRE.da)) {
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `${OUT}/5-trionfo-torre.png` });
+  if (await page.locator('.pl-trionfo').count() !== 1) {
+    errori.push('TRIONFO TORRE: chiudendo l ultimo livello della Torre la festa non compare');
+  } else {
+    const testo = await page.locator('.pl-trionfo').innerText();
+    if (!testo.includes(traduttore('it')('trionfo.titoli.torre'))) {
+      errori.push(`TRIONFO TORRE: il titolo non e quello della Torre. Testo: "${testo.replace(/\n/g, ' | ')}"`);
+    }
+    const livelli = Number((testo.match(/(\d+)\s*\n?\s*livelli superati/i) ?? [])[1] ?? NaN);
+    if (livelli !== totaleTorre) {
+      errori.push(`TRIONFO TORRE: dice ${livelli} livelli superati invece di ${totaleTorre}`);
+    }
+    // Dopo l'ultima opera i prossimi livelli si annunciano senza nome e senza data.
+    if (!/in lavorazione/i.test(testo)) {
+      errori.push('TRIONFO TORRE: manca l annuncio dei prossimi livelli');
+    }
+    if (/\b(20\d\d|presto|settiman|mes[ei])\b/i.test(testo)) {
+      errori.push(`TRIONFO TORRE: la schermata promette una data. Testo: "${testo.replace(/\n/g, ' | ')}"`);
+    }
+    // Il pulsante grande porta davvero in partita libera, premuto con la pioggia addosso.
+    const bottone = page.getByRole('button', { name: /partita libera/i });
+    if (await bottone.count() === 0) {
+      errori.push('TRIONFO TORRE: manca il pulsante per la partita libera');
+    } else {
+      await bottone.first().click();
+      await page.waitForTimeout(400);
+      if (await page.locator('.pl-trionfo').count() > 0) {
+        errori.push('TRIONFO TORRE: premendo "partita libera" non succede niente: la pioggia si e mangiata il tocco');
+      }
+    }
+    console.log('   festa finale della Torre: mostrata, con l annuncio senza date.');
   }
 }
 

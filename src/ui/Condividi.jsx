@@ -163,7 +163,7 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
   // Anche qui l'opera si chiama per nome, come nella scheda presa dalla mappa: "Il Ponte"
   // dice di che cosa sono quei livelli, "Percorso" non lo dice. Il nome arriva da OPERE,
   // cosi' le due schede non possono raccontare cose diverse.
-  const opera = operaDelQuadro(Math.min(Math.max(1, numero), totale || numero));
+  const opera = operaDelQuadro(Math.max(1, numero));
   const testo = formattaSchedaQuadro(
     { numero, obiettivo, mosse, record, superati, totale },
     {
@@ -192,14 +192,16 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
  * cento livelli non sta cercando di sbrigarsi, e vedere cosa manderebbe e' la cosa che
  * lo fa decidere di mandarlo.
  */
-export function CondividiTrionfo({ totale, mosseTotali, alPrimoColpo, t }) {
+export function CondividiTrionfo({ opera, totale, mosseTotali, alPrimoColpo, t }) {
   const testo = formattaSchedaTrionfo(
     { totale, mosseTotali, alPrimoColpo },
     {
       indirizzo: indirizzoDelGioco(null),
       testi: {
         gioco: 'PLINTO',
-        trionfoTitolo: t('scheda.trionfoTitolo'),
+        // Un titolo per opera, scritto per intero: "{opera} e' finito" sbaglia il genere
+        // con la Torre, e in italiano l'accordo non si puo' fare con un segnaposto.
+        trionfoTitolo: t(`scheda.trionfoOpera.${opera?.id ?? 'ponte'}`),
         tuttiILivelli: t('scheda.tuttiILivelli'),
         mosseInTutto: t('scheda.mosseInTutto'),
         alPrimoColpo: t('scheda.alPrimoColpo'),
@@ -210,7 +212,7 @@ export function CondividiTrionfo({ totale, mosseTotali, alPrimoColpo, t }) {
 }
 
 /** La scheda dell'avanzamento sul percorso, presa dalla mappa. */
-export function CondividiPercorso({ superati, totale, t }) {
+export function CondividiPercorso({ opera, superati, totale, t }) {
   /*
    * IL TITOLO NOMINA L'OPERA, non dice "il percorso" e basta.
    *
@@ -219,18 +221,15 @@ export function CondividiPercorso({ superati, totale, t }) {
    * motivo per cui esiste un gruppo: si sta costruendo qualcosa, e chi legge il messaggio
    * deve poterlo capire senza aver gia' giocato.
    *
-   * Il nome si chiede a OPERE e non e' scritto qui: quando arrivera' la Torre, questa
-   * scheda dira' "La Torre" da sola. Si guarda il livello a cui si e' arrivati, cioe' il
-   * prossimo da giocare, perche' e' quello che dice a che cantiere si sta lavorando.
+   * L'opera la passa la mappa, che sa quale si sta guardando: i conteggi sono i suoi.
    */
-  const opera = operaDelQuadro(Math.min(superati + 1, totale));
   const testo = formattaSchedaPercorso(
     { superati, totale },
     {
       indirizzo: indirizzoDelGioco(null),
       testi: {
         gioco: 'PLINTO',
-        percorsoTitolo: t(`opere.${opera.id}`),
+        percorsoTitolo: t(`opere.${opera?.id ?? 'ponte'}`),
         livelliSu: superati === 1 ? t('scheda.livelliSuUno') : t('scheda.livelliSu'),
       },
     },

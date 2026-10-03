@@ -218,7 +218,10 @@ export default {
     livelliSu: '{fatti} livelli su {totale}',
     livelliSuUno: '1 livello su {totale}',
     condividiTrionfo: 'Condividi il traguardo',
-    trionfoTitolo: 'Percorso completato',
+    trionfoOpera: {
+      ponte: 'Il Ponte è finito',
+      torre: 'La Torre è finita',
+    },
     tuttiILivelli: 'Tutti i {totale} livelli superati',
     mosseInTutto: '{mosse} mosse in tutto',
     alPrimoColpo: '{quanti} al primo colpo',
@@ -286,8 +289,13 @@ export default {
   // La fine del percorso: l'unico momento in cui il gioco alza la voce.
   trionfo: {
     // Il traguardo ha un nome: non "li hai finiti tutti", ma l'opera che hai costruito.
-    titolo: '{opera} è finito.',
-    sotto: '{totale} livelli, dal primo all\'ultimo. Il percorso è chiuso.',
+    // Un titolo per opera, scritto per intero: con un segnaposto ("{opera} è finito") la
+    // Torre diventava "La Torre è finito", e in italiano l'accordo non si fa da fuori.
+    titoli: {
+      ponte: 'Il Ponte è finito.',
+      torre: 'La Torre è finita.',
+    },
+    sotto: '{totale} livelli, dal primo all\'ultimo.',
     livelli: 'livelli superati',
     mosse: 'mosse spese',
     primoColpo: 'al primo colpo',
@@ -296,7 +304,14 @@ export default {
     // Senza date, per scelta. Vedi il commento in testa a ui/schermate/Trionfo.jsx.
     // L'opera successiva si annuncia per nome e come lavoro in corso. Niente date, niente
     // "presto": sono le parole che fanno sembrare imminente una cosa che non ha una data,
-    prossimiTesto: 'In lavorazione. Non c\'è ancora una data: quando ci sarà, la trovi qui.',
+    prossimiTesto: 'Altri livelli sono in lavorazione. Non c\'è ancora una data: quando ci saranno, li trovi qui.',
+    // L'opera successiva, quando c'e' gia': si e' appena aperta, e il pulsante porta li'.
+    aperta: {
+      torre: 'È aperta: altri cento livelli e una regola nuova, i massi.',
+    },
+    vai: {
+      torre: 'Entra nella Torre',
+    },
     libera: 'Gioca in partita libera',
   },
 
@@ -320,8 +335,9 @@ export default {
     gessetto: 'Il gessetto',
     gessettoSpiega: 'Ti mostra dove conviene mettere un pezzo.',
     piccone: 'Il piccone',
-    picconeSpiega: 'Svuota una casella occupata della griglia. Non costa una mossa.',
+    picconeSpiega: 'Svuota una casella occupata della griglia, tranne i massi. Non costa una mossa.',
     picconeScegli: 'Quale casella svuoto?',
+    picconeScegliMassi: 'Quale casella svuoto? I massi no: restano dove sono.',
     mensola: 'La mensola',
     mensolaSpiega: 'Mette da parte un pezzo: lo riprendi quando vuoi.',
     mensolaScegli: 'Quale pezzo metto da parte?',
@@ -347,6 +363,14 @@ export default {
     strada: 'La strada',
     arco: 'L\'arco',
     ultimaPietra: 'L\'ultima pietra',
+    // La Torre: dal basamento alla vetta, salendo.
+    basamento: 'Il basamento',
+    mura: 'Le mura',
+    chiocciola: 'La scala a chiocciola',
+    feritoie: 'Le feritoie',
+    loggia: 'La loggia',
+    merli: 'I merli',
+    vetta: 'La vetta',
   },
 
   opere: {
@@ -392,6 +416,15 @@ export default {
     superato: 'Superato',
     attoDaAprire: 'Si apre quando arrivi al livello {n}',
     bloccato: 'Supera il livello precedente',
+    opere: 'Le opere',
+    operaChiusaBreve: 'chiusa',
+    // Per opera e per intero, per la stessa ragione dei titoli del trionfo.
+    operaChiusa: {
+      torre: 'La Torre si apre quando hai superato tutti i livelli del Ponte, ognuno con la spunta.',
+    },
+    operaMancano: 'Te ne mancano {n}.',
+    operaMancaUno: 'Te ne manca uno.',
+    massiRegola: 'Le caselle grigie sono massi: contano come piene, ma non spariscono mai.',
     quadro: 'Livello {n}',
     mosse: 'Mosse',
     tuoRecord: 'Il tuo record: {mosse} mosse',
@@ -408,6 +441,7 @@ export default {
     // per insistenza, e dire "li hai superati tutti" a chi ne ha lasciati cinque e' la
     // bugia piu' facile da dire e la piu' facile da scoprire.
     finitoConBuchi: 'Sei in fondo al percorso, ma qualche livello è ancora da superare: li trovi in elenco senza la spunta.',
+    finitoConBuchiApre: 'Hai vinto l\'ultimo livello di quest\'opera, ma qualche livello è ancora da superare: li trovi in elenco senza la spunta. Superali tutti per aprire l\'opera successiva: {opera}.',
     attoChiuso: '{nome}: completo',
     attoFatti: 'Tutti i livelli dal {da} al {a}, superati.',
     // Una frase per atto, nell'ordine del percorso. Dice che cosa ha chiesto DAVVERO
@@ -415,15 +449,24 @@ export default {
     // (tipi di obiettivo, motivi della griglia di partenza, mosse concesse, margine di
     // taratura). Non sono complimenti: sono il motivo per cui quei livelli erano diversi
     // dai precedenti, e per cui chiuderli vuol dire qualcosa.
-    attoFrasi: [
-      'Righe, colonne e quadranti: le mosse che reggono tutto il resto.',
-      'I primi livelli che chiedono la Catena, non solo righe e quadranti.',
-      'Sedici livelli cominciati con la griglia già occupata.',
-      'Meno spazio e meno mosse, e li hai superati lo stesso.',
-      'Obiettivi che non si vincono con un colpo solo, ma costruendo.',
-      'Qui i bersagli hanno smesso di lasciare margine.',
-      'Gli otto livelli più difficili del percorso.',
-    ],
+    // Una frase per atto, cercata per nome dell'atto: con due opere "il primo atto"
+    // sono due atti diversi.
+    attoFrasi: {
+      fondamenta: 'Righe, colonne e quadranti: le mosse che reggono tutto il resto.',
+      pilastri: 'I primi livelli che chiedono la Catena, non solo righe e quadranti.',
+      roccia: 'Sedici livelli cominciati con la griglia già occupata.',
+      vuoto: 'Meno spazio e meno mosse, e li hai superati lo stesso.',
+      strada: 'Obiettivi che non si vincono con un colpo solo, ma costruendo.',
+      arco: 'Qui i bersagli hanno smesso di lasciare margine.',
+      ultimaPietra: 'Gli otto livelli più difficili del Ponte.',
+      basamento: 'Dieci livelli per imparare i massi: contano come pieni e restano dove sono.',
+      mura: 'Fino a dieci massi sulla griglia, sparsi dappertutto.',
+      chiocciola: 'Massi e blocchi insieme: i blocchi se ne vanno, i massi no.',
+      feritoie: 'I primi livelli della Torre che chiedono due obiettivi insieme.',
+      loggia: 'Le caselle da eliminare: contano quelle che spariscono, e i massi non spariscono mai.',
+      merli: 'Sedici livelli in cui il margine di mosse si fa sottile.',
+      vetta: 'Gli ultimi otto livelli: sei in cima alla Torre.',
+    },
     attiChiusi: '{n} atti su {totale} completati.',
     // Le forme al singolare. "1 atti su 7 completati" e' il genere di dettaglio che fa
     // sembrare tradotto male un gioco scritto in italiano, ed e' la stessa regola che
@@ -525,7 +568,7 @@ export default {
     intreccioTitolo: 'L\'Intreccio',
     tintaTitolo: 'La Tinta',
     percorsoTitolo: 'Il percorso',
-    percorso: 'Il gioco vero sono {n} livelli. Ognuno ha il suo obiettivo e un numero di mosse per riuscirci, e prima di cominciare ti spiega che cosa devi fare. Più avanti qualche livello ne chiede due insieme — tre righe e quattrocento punti, per dire — e allora servono tutti e due, con le stesse mosse. Ogni {attrezziOgni} livelli superati guadagni 1 gettone: con un gettone usi un attrezzo a tua scelta fra la carriola, il gessetto, il piccone e la mensola.',
+    percorso: 'Il gioco vero sono i livelli: {ponte} nel Ponte e, quando li hai superati tutti, altri {torre} nella Torre. Ognuno ha il suo obiettivo e un numero di mosse per riuscirci, e prima di cominciare ti spiega che cosa devi fare. Più avanti qualche livello ne chiede due insieme — tre righe e quattrocento punti, per dire — e allora servono tutti e due, con le stesse mosse. Ogni {attrezziOgni} livelli superati guadagni 1 gettone: con un gettone usi un attrezzo a tua scelta fra la carriola, il gessetto, il piccone e la mensola.',
     altreModalita: 'Ci sono anche la partita libera, che va avanti finché entra un pezzo e serve solo a fare punti, e la Sfida del giorno: la stessa identica partita per tutti, una al giorno.',
   },
   aiuto: {
@@ -542,6 +585,9 @@ export default {
     catena: 'Ogni volta che elimini qualcosa la Catena sale di un gradino, e ogni gradino alza il moltiplicatore che vedi sulla barra: si parte da ×{base} e si arriva a ×{max}. Quel moltiplicatore vale su tutti i punti della mossa. Se passi {n} mosse di fila senza eliminare niente la Catena scende, e la barra te lo dice prima che succeda.',
     tinta: 'Un gruppo è fatto di nove caselle. Quando almeno {soglia} di quelle nove hanno lo stesso colore, il gruppo vale di più; con tutte e nove uguali arriva a +{massimo}%. I colori dei pezzi non li scegli, ma scegli dove appoggiarli: la maggioranza si costruisce così.',
     bombeTitolo: 'Le bombe',
+    massiTitolo: 'I massi',
+    massi: 'Nei livelli della Torre la griglia parte con dei massi: le caselle grigie con i segni scolpiti. Un masso conta come pieno, quindi aiuta a chiudere la riga, la colonna e il quadrante in cui si trova, ma non sparisce mai: quando il gruppo si chiude, le altre caselle se ne vanno e il masso resta dov\'è.',
+    massiEccezioni: 'Non ci si può appoggiare sopra, le bombe non lo portano via e il piccone non lo toglie. Non ha colore, quindi non conta per la Tinta. E se sulla griglia restano solo massi, la griglia conta come svuotata.',
     bombe: 'La bomba è una casella segnata dentro un pezzo, e capita ogni tanto. Appoggiata sulla griglia non fa niente: esplode quando viene eliminata insieme al suo gruppo, e allora porta via anche le otto caselle intorno.',
     bombeCatena: 'Due bombe che si toccano si innescano a vicenda: tre in fila portano via quindici caselle. Se fra l\'una e l\'altra c\'è una casella libera, non succede. Le caselle fatte saltare fanno punti e seguono la Catena.',
     bombeGrandi: 'Ogni casella fatta saltare vale {punti} punti. E le esplosioni grandi rendono di più: oltre le {soglia} caselle, ogni casella in più fa valere un {premio}% in più tutta l\'esplosione, non solo quella casella. Per questo a volte conviene aspettare il momento buono invece di usare la bomba appena arriva.',
@@ -561,6 +607,7 @@ export default {
     cella: 'Casella riga {r} colonna {c}',
     cellaLibera: 'libera',
     cellaOccupata: 'occupata',
+    cellaMasso: 'masso',
     istruzioni: 'Usa Tab per scegliere un pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia e Invio per appoggiarlo. Esc annulla.',
   },
   varie: {
