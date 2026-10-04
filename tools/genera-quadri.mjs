@@ -26,8 +26,8 @@
  * dipende solo dal suo numero e i progressi sono salvati per numero: rigenerare il Ponte
  * per aggiungere la Torre cambierebbe livelli che le persone hanno gia' giocato e
  * superato. Adesso ogni opera ha il suo file in src/config/opere/, questo strumento ne
- * scrive UNO solo, e src/config/quadri.js li mette in fila. Un'opera gia' pubblicata si
- * rifiuta di farsi riscrivere (vedi `pubblicata` in OPERE_DA_GENERARE), e
+ * scrive UNO solo, e src/config/quadri.js li mette in fila. Un'opera bloccata si
+ * rifiuta di farsi riscrivere (vedi `bloccata` in OPERE_DA_GENERARE), e
  * tests/opere.test.js controlla l'impronta dei cento livelli del Ponte.
  */
 
@@ -49,7 +49,7 @@ import { accoglienza } from '../src/sim/accoglienza.mjs';
 // 1.1.0 si faceva -- e' avere due versioni diverse del giocatore che MIRA, una per chi
 // promette che il livello e' superabile e una per chi lo controlla.
 import {
-  preferenze as preferenzeObiettivo, scegliMossa as scegliMossaObiettivo,
+  preferenze as preferenzeObiettivo, scegliMossa as scegliMossaObiettivo, vicinanzaMattoni,
 } from '../src/sim/giocatore-quadri.mjs';
 
 const TENTATIVI = Number(process.argv[2] ?? 7);
@@ -304,15 +304,66 @@ const ATTI_TORRE = [
   { da: 193, a: 200, id: 'vetta',      tipi: ['punteggio','celle','catena','gruppi','intrecci','quadranti'], motivi: ['pinnacolo','assedioMassi','fortezza','crenellature'],           mosse: [26, 40], percentile: [50, 66], margine: [1.08, 1.04], doppi: 4, riuscite: [6, 9] },
 ];
 
+// ------------------------------------------------------------- l'Arena ---
 /**
- * Le opere che questo strumento sa generare. `pubblicata: true` vuol dire che i suoi
- * livelli sono gia' nelle mani di chi gioca: riscriverli cambierebbe livelli gia' giocati
- * e superati, quindi lo strumento si rifiuta, a meno di chiederlo in modo esplicito con
- * QUADRI_RIGENERA_PUBBLICATA=1.
+ * LE GRIGLIE DELL'ARENA: i mattoni rinforzati (`R`) sono la sua meccanica.
+ *
+ * Un mattone rinforzato va eliminato due volte (src/core/grid.js): la prima si incrina e
+ * resta, la seconda sparisce. Le griglie seguono la forma di un anfiteatro: nei primi atti
+ * pochi mattoni sparsi, poi anelli di mattoni e blocchi attorno a un centro libero, e
+ * negli ultimi atti le gradinate quasi piene. Niente massi: una regola nuova alla volta
+ * (deciso il 4 ottobre 2026).
+ */
+const MOTIVI_ARENA = {
+  mattoneCentrale:  ['.........', '.........', '.........', '.........', '....R....', '.........', '.........', '.........', '.........'],
+  // Due mattoni gia' incrinati (`r`) e due intatti: e' la griglia dei primi livelli che
+  // chiedono di demolire, e con quattro intatti il metro non arrivava al pavimento del
+  // primo atto nemmeno a «Demolisci 1» (202, 206, 210 nella prima generazione). Cosi'
+  // chi gioca vede subito tutti e due gli stati, e il primo mattone cade con un colpo.
+  quattroMattoni:   ['.........', '.r.....R.', '.........', '.........', '.........', '.........', '.........', '.R.....r.', '.........'],
+  filaMattoni:      ['.........', '.........', '.........', '.........', '.R..R..R.', '.........', '.........', '.........', '.........'],
+  croceMattoni:     ['.........', '....R....', '.........', '.........', '.R..R..R.', '.........', '.........', '....R....', '.........'],
+  portali:          ['....R....', '.........', '..R...R..', '.........', 'R.......R', '.........', '..R...R..', '.........', '....R....'],
+  diagonaleMattoni: ['R........', '.R.......', '..R......', '...R.....', '....R....', '.....R...', '......R..', '.......R.', '........R'],
+  anelloMattoni:    ['.........', '...R.R...', '.........', '.R.....R.', '.........', '.R.....R.', '.........', '...R.R...', '.........'],
+  coppie:           ['.........', '.RR...RR.', '.........', '.........', '.........', '.........', '.........', '.RR...RR.', '.........'],
+  gradinata:        ['##.....##', '#R.....R#', '.........', '.........', '.........', '.........', '.........', '#R.....R#', '##.....##'],
+  cerchio:          ['...###...', '..R...R..', '.R.....R.', '#.......#', '#...R...#', '#.......#', '.R.....R.', '..R...R..', '...###...'],
+  spalti:           ['RR.....RR', 'R.......R', '.........', '.........', '.........', '.........', '.........', 'R.......R', 'RR.....RR'],
+  portico:          ['.#.#.#.#.', '.R.R.R.R.', '.........', '.........', '.........', '.........', '.........', '.R.R.R.R.', '.#.#.#.#.'],
+  volta:            ['...RRR...', '.R.....R.', 'R.......R', 'R.......R', '.........', 'R.......R', 'R.......R', '.R.....R.', '...RRR...'],
+  velario:          ['R.#.R.#.R', '.........', '#.......#', '.........', 'R...R...R', '.........', '#.......#', '.........', 'R.#.R.#.R'],
+  tribuna:          ['##R#.#R##', '.R.....R.', '.........', '.........', '....R....', '.........', '.........', '.R.....R.', '##R#.#R##'],
+  anfiteatro:       ['.RRR.RRR.', 'R.......R', 'R.......R', 'R.......R', '.........', 'R.......R', 'R.......R', 'R.......R', '.RRR.RRR.'],
+};
+
+/**
+ * I SETTE ATTI DELL'ARENA. Stessa ossatura della Torre: il primo atto torna facile per
+ * insegnare la regola nuova, l'ultimo e' un po' piu' duro della fine dell'opera prima.
+ * L'obiettivo «Demolisci N mattoni» compare in ogni atto, ed e' il primo del giro dal
+ * terzo in poi: e' la meccanica dell'opera, e un'opera che non la chiede la nasconde.
+ */
+const ATTI_ARENA = [
+  { da: 201, a: 210, id: 'tracciato',  tipi: ['righe','demolizioni','colonne','gruppi'],                    motivi: ['mattoneCentrale','quattroMattoni','filaMattoni','croceMattoni'], mosse: [14, 18], percentile: [14, 30], margine: [1.30, 1.22], riuscite: [14, 20] },
+  { da: 211, a: 224, id: 'ingressi',   tipi: ['gruppi','demolizioni','quadranti','righe','catena'],         motivi: ['portali','diagonaleMattoni','anelloMattoni','coppie'],         mosse: [16, 22], percentile: [20, 34], margine: [1.26, 1.20], riuscite: [12, 18] },
+  { da: 225, a: 240, id: 'gradinate',  tipi: ['demolizioni','gruppi','quadranti','colonne','catena','intrecci'], motivi: ['gradinata','cerchio','spalti','anelloMattoni'],        mosse: [18, 26], percentile: [26, 38], margine: [1.22, 1.18], riuscite: [10, 16] },
+  { da: 241, a: 258, id: 'portici',    tipi: ['demolizioni','catena','intrecci','gruppi','punteggio'],      motivi: ['portico','cerchio','spalti','gradinata','portali'],            mosse: [18, 26], percentile: [30, 44], margine: [1.20, 1.15], doppi: 4, riuscite: [8, 14] },
+  { da: 259, a: 276, id: 'volte',      tipi: ['demolizioni','punteggio','intrecci','gruppi','celle','righe'], motivi: ['volta','portico','velario','spalti','cerchio'],            mosse: [20, 30], percentile: [36, 52], margine: [1.16, 1.11], doppi: 4, riuscite: [7, 12] },
+  { da: 277, a: 292, id: 'velario',    tipi: ['demolizioni','punteggio','catena','celle','intrecci','gruppi'], motivi: ['velario','tribuna','volta','portico','spalti'],          mosse: [22, 32], percentile: [44, 60], margine: [1.12, 1.07], doppi: 4, riuscite: [6, 11] },
+  { da: 293, a: 300, id: 'tribuna',    tipi: ['demolizioni','punteggio','celle','gruppi','intrecci','quadranti'], motivi: ['anfiteatro','tribuna','volta','velario'],           mosse: [26, 40], percentile: [50, 66], margine: [1.08, 1.04], doppi: 4, riuscite: [6, 9] },
+];
+
+/**
+ * Le opere che questo strumento sa generare. `bloccata: true` vuol dire che i livelli
+ * sono definitivi: il Ponte perche' e' nelle mani di chi gioca, la Torre perche' e' stata
+ * verificata livello per livello (4 ottobre 2026) e aspetta solo di uscire. Riscriverli
+ * cambierebbe livelli gia' giocati o gia' verificati, quindi lo strumento si rifiuta, a
+ * meno di chiederlo in modo esplicito con QUADRI_RIGENERA_BLOCCATA=1.
  */
 const OPERE_DA_GENERARE = {
-  ponte: { titolo: 'Il Ponte', da: 1, a: 100, atti: ATTI_PONTE, motivi: MOTIVI_PONTE, pubblicata: true },
-  torre: { titolo: 'La Torre', da: 101, a: 200, atti: ATTI_TORRE, motivi: MOTIVI_TORRE, pubblicata: false },
+  ponte: { titolo: 'Il Ponte', da: 1, a: 100, atti: ATTI_PONTE, motivi: MOTIVI_PONTE, bloccata: true },
+  torre: { titolo: 'La Torre', da: 101, a: 200, atti: ATTI_TORRE, motivi: MOTIVI_TORRE, bloccata: true },
+  arena: { titolo: "L'Arena", da: 201, a: 300, atti: ATTI_ARENA, motivi: MOTIVI_ARENA, bloccata: false },
 };
 const OPERA_ID = process.env.QUADRI_OPERA ?? 'ponte';
 const OPERA = OPERE_DA_GENERARE[OPERA_ID];
@@ -325,7 +376,7 @@ const SACCA_MINIMA = 4;
 const NOMI = {
   righe: 'righe', colonne: 'colonne', quadranti: 'quadranti', gruppi: 'gruppi',
   catena: 'catena', punteggio: 'punti', celle: 'celle', intreccio: 'intreccio', intrecci: 'intrecci',
-  pulizia: 'pulizia', sopravvivi: 'resistenza',
+  pulizia: 'pulizia', sopravvivi: 'resistenza', demolizioni: 'mattoni',
 };
 
 function attoDi(n) { return ATTI.find((a) => n >= a.da && n <= a.a); }
@@ -459,7 +510,7 @@ function vicinanza(grid) {
  * caso, e il controllo di superabilita' ha comunque l'ultima parola.
  */
 function preferenze(tipi) {
-  const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, nonSpezzare: 240 };
+  const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, nonSpezzare: 240, incrinare: 0, demolire: 0, versoMattoni: 0 };
   for (const tipo of [].concat(tipi)) {
     if (tipo === 'righe') p.row = 6;
     else if (tipo === 'colonne') p.col = 6;
@@ -467,12 +518,16 @@ function preferenze(tipi) {
     else if (tipo === 'pulizia') { p.svuotare = 320; p.nonSpezzare = 40; }
     else if (tipo === 'catena') p.nonSpezzare = 900;
     else if (tipo === 'intreccio' || tipo === 'intrecci') p.nonSpezzare = 40;
+    // Gli stessi pesi del giocatore che mira (src/sim/giocatore-quadri.mjs).
+    else if (tipo === 'demolizioni') { p.incrinare = 140; p.demolire = 420; p.versoMattoni = 60; }
   }
   return p;
 }
-function valuta(dopo, gruppi, pref, rumore) {
+function valuta(dopo, gruppi, pref, rumore, mattoni = null) {
   const v = vicinanza(dopo);
   let val = gruppi.length === 0 ? -pref.nonSpezzare : 0;
+  if (mattoni) val += mattoni.incrinati.length * pref.incrinare + mattoni.demoliti.length * pref.demolire;
+  if (pref.versoMattoni) val += vicinanzaMattoni(dopo) * pref.versoMattoni;
   for (const g of gruppi) val += 150 * pref[g.type];
   val += gruppi.length > 1 ? 280 * (gruppi.length - 1) : 0;
   val -= buchi(dopo) * 16;
@@ -496,8 +551,8 @@ function ramiDiRadice(grid, pezzi, pref, prof, rng) {
     const cand = case_.map(([row, col]) => {
       const { grid: posata } = placeShape(grid, pezzo.shape, row, col, 1, pezzo.bombe);
       const gruppi = findCompletedGroups(posata);
-      const { grid: dopo } = clearGroups(posata, gruppi);
-      return { row, col, dopo, valore: valuta(dopo, gruppi, pref, rng.float() * 45) };
+      const pulita = clearGroups(posata, gruppi);
+      return { row, col, dopo: pulita.grid, valore: valuta(pulita.grid, gruppi, pref, rng.float() * 45, pulita) };
     }).sort((a, b) => b.valore - a.valore).slice(0, 6);
     const resto = pezzi.slice(); resto[i] = null;
     for (const c of cand) {
@@ -735,10 +790,10 @@ const ULTIMO = PROVA_A > 0 ? (PROVA_DA ? PROVA_A : OPERA.da + PROVA_A - 1) : OPE
 if (PRIMO < OPERA.da || ULTIMO > OPERA.a) {
   throw new Error(`QUADRI_PROVA=${PROVA} esce dall'opera "${OPERA_ID}" (${OPERA.da}-${OPERA.a})`);
 }
-if (PROVA_A === 0 && OPERA.pubblicata && process.env.QUADRI_RIGENERA_PUBBLICATA !== '1') {
+if (PROVA_A === 0 && OPERA.bloccata && process.env.QUADRI_RIGENERA_BLOCCATA !== '1') {
   throw new Error(
-    `L'opera "${OPERA_ID}" e' gia' pubblicata: rigenerarla cambierebbe livelli gia' giocati. `
-    + 'Se e\' davvero quello che si vuole: QUADRI_RIGENERA_PUBBLICATA=1.',
+    `L'opera "${OPERA_ID}" e' bloccata: rigenerarla cambierebbe livelli gia' giocati o verificati. `
+    + 'Se e\' davvero quello che si vuole: QUADRI_RIGENERA_BLOCCATA=1.',
   );
 }
 // UNA PROVA A VUOTO SU UN TRATTO DEVE PROGETTARE GLI STESSI LIVELLI DEL GIRO INTERO.

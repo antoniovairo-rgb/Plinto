@@ -166,8 +166,10 @@ async function vinciIlPrimo(numero = 1) {
 // la sua prova, la quinta.
 const PONTE = OPERE[0];
 const TORRE = OPERE[1];
+// L'ultima opera: la sua festa e' quella finale, senza un'opera dopo.
+const ULTIMA = OPERE[OPERE.length - 1];
 const tutti = Array.from({ length: livelliDellOpera(PONTE) }, (_, i) => PONTE.da + i);
-const totaleTorre = livelliDellOpera(TORRE);
+const totaleUltima = livelliDellOpera(ULTIMA);
 
 // ---------- 1. Novantanove su cento: l'ultimo che manca fa la festa del Ponte ----------
 console.log('1. tutto il Ponte superato tranne il primo livello: lo vinco e mi aspetto la festa del Ponte...');
@@ -423,42 +425,42 @@ if (await vinciIlPrimo()) {
   }
 }
 
-// ---------- 5. L'ultimo livello che manca della Torre fa la festa finale ----------
-console.log('5. tutto superato tranne il primo livello della Torre: lo vinco e mi aspetto la festa finale...');
-await preparaEGioca(Array.from({ length: TORRE.a }, (_, i) => i + 1).filter((n) => n !== TORRE.da));
-if (await vinciIlPrimo(TORRE.da)) {
+// ---------- 5. L'ultimo livello che manca dell'ultima opera fa la festa finale ----------
+console.log(`5. tutto superato tranne il primo livello dell'ultima opera (${ULTIMA.id}): lo vinco e mi aspetto la festa finale...`);
+await preparaEGioca(Array.from({ length: ULTIMA.a }, (_, i) => i + 1).filter((n) => n !== ULTIMA.da));
+if (await vinciIlPrimo(ULTIMA.da)) {
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/5-trionfo-torre.png` });
   if (await page.locator('.pl-trionfo').count() !== 1) {
-    errori.push('TRIONFO TORRE: chiudendo l ultimo livello della Torre la festa non compare');
+    errori.push('TRIONFO FINALE: chiudendo l ultimo livello della Torre la festa non compare');
   } else {
     const testo = await page.locator('.pl-trionfo').innerText();
-    if (!testo.includes(traduttore('it')('trionfo.titoli.torre'))) {
-      errori.push(`TRIONFO TORRE: il titolo non e quello della Torre. Testo: "${testo.replace(/\n/g, ' | ')}"`);
+    if (!testo.includes(traduttore('it')(`trionfo.titoli.${ULTIMA.id}`))) {
+      errori.push(`TRIONFO FINALE: il titolo non e quello dell ultima opera. Testo: "${testo.replace(/\n/g, ' | ')}"`);
     }
     const livelli = Number((testo.match(/(\d+)\s*\n?\s*livelli superati/i) ?? [])[1] ?? NaN);
-    if (livelli !== totaleTorre) {
-      errori.push(`TRIONFO TORRE: dice ${livelli} livelli superati invece di ${totaleTorre}`);
+    if (livelli !== totaleUltima) {
+      errori.push(`TRIONFO FINALE: dice ${livelli} livelli superati invece di ${totaleUltima}`);
     }
     // Dopo l'ultima opera i prossimi livelli si annunciano senza nome e senza data.
     if (!/in lavorazione/i.test(testo)) {
-      errori.push('TRIONFO TORRE: manca l annuncio dei prossimi livelli');
+      errori.push('TRIONFO FINALE: manca l annuncio dei prossimi livelli');
     }
     if (/\b(20\d\d|presto|settiman|mes[ei])\b/i.test(testo)) {
-      errori.push(`TRIONFO TORRE: la schermata promette una data. Testo: "${testo.replace(/\n/g, ' | ')}"`);
+      errori.push(`TRIONFO FINALE: la schermata promette una data. Testo: "${testo.replace(/\n/g, ' | ')}"`);
     }
     // Il pulsante grande porta davvero in partita libera, premuto con la pioggia addosso.
     const bottone = page.getByRole('button', { name: /partita libera/i });
     if (await bottone.count() === 0) {
-      errori.push('TRIONFO TORRE: manca il pulsante per la partita libera');
+      errori.push('TRIONFO FINALE: manca il pulsante per la partita libera');
     } else {
       await bottone.first().click();
       await page.waitForTimeout(400);
       if (await page.locator('.pl-trionfo').count() > 0) {
-        errori.push('TRIONFO TORRE: premendo "partita libera" non succede niente: la pioggia si e mangiata il tocco');
+        errori.push('TRIONFO FINALE: premendo "partita libera" non succede niente: la pioggia si e mangiata il tocco');
       }
     }
-    console.log('   festa finale della Torre: mostrata, con l annuncio senza date.');
+    console.log('   festa finale: mostrata, con l annuncio senza date.');
   }
 }
 

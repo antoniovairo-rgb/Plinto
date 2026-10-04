@@ -53,6 +53,8 @@ function coloreBomba() {
 
 export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni }) {
   const [appoggiate, setAppoggiate] = useState(null);
+  // I mattoni rinforzati che questa mossa ha incrinato: un sussulto, non una sparizione.
+  const [incrinatiOra, setIncrinatiOra] = useState(null);
   const [esplosioni, setEsplosioni] = useState(null);
   const [celleEsplose, setCelleEsplose] = useState(null);
   const [puntiVolanti, setPuntiVolanti] = useState(null);
@@ -138,6 +140,10 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     // --- pop delle celle appena appoggiate ----------------------------------
     setAppoggiate(new Set(lastMove.placedCells));
     timers.push(setTimeout(() => setAppoggiate(null), DURATA_ATTERRAGGIO));
+    if (lastMove.mattoniIncrinati?.length) {
+      setIncrinatiOra(new Set(lastMove.mattoniIncrinati));
+      timers.push(setTimeout(() => setIncrinatiOra(null), DURATA_ESPLOSIONE));
+    }
 
     // --- celle che stanno sparendo ------------------------------------------
     if (gruppi > 0) {
@@ -279,5 +285,5 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     return () => timers.forEach(clearTimeout);
   }, [lastMove, campo, cellRefs, plancia, animazioni]);
 
-  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita, svuotata };
+  return { appoggiate, incrinatiOra, esplosioni, celleEsplose, puntiVolanti, incita, svuotata };
 }

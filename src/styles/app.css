@@ -353,11 +353,43 @@ button {
   inset: 0;
   width: 100%;
   height: 100%;
+  fill: var(--pl-masso-segno);
+}
+
+/* Il mattone rinforzato dell'Arena: il colore del suo blocco, le righe della malta, e
+   una crepa quando e' gia' stato colpito. La malta e' scura e semitrasparente, cosi'
+   regge su tutti e sei i colori; la crepa e' chiara con un bordo scuro, per la stessa
+   ragione. */
+.pl-mattone__segni {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.pl-mattone__malta {
   fill: none;
-  stroke: var(--pl-masso-segno);
-  stroke-width: 1.6;
+  stroke: var(--pl-mattone-malta);
+  stroke-width: 1.3;
+}
+.pl-mattone__crepa {
+  fill: none;
+  stroke: var(--pl-mattone-crepa);
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+  paint-order: stroke;
+  filter: drop-shadow(0 0 0.6px rgba(0, 0, 0, 0.85));
+}
+/* L'attimo in cui un mattone si incrina: un sussulto, non una sparizione. */
+.pl-blocco--incrinato-ora { animation: pl-incrina var(--pl-t-esplosione) var(--pl-ease-out) both; }
+@keyframes pl-incrina {
+  0%   { transform: translateX(0); filter: brightness(1.6); }
+  25%  { transform: translateX(-1.5px); }
+  50%  { transform: translateX(1.5px); }
+  100% { transform: translateX(0); filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pl-blocco--incrinato-ora { animation: none; }
 }
 
 /* Anteprima del pezzo sotto il dito. */
@@ -2188,6 +2220,7 @@ button {
   gap: 12px;
   border-left-color: var(--pl-masso);
 }
+.pl-apertura__mattoni { border-left-color: var(--pl-block-3); }
 .pl-apertura__masso { flex: none; position: relative; width: 30px; height: 30px; }
 .pl-apertura__masso .pl-blocco { position: absolute; inset: 0; }
 /* Con due obiettivi i consigli sono due, dentro lo stesso riquadro: separati da uno

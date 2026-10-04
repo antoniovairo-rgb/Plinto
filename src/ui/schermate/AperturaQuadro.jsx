@@ -1,6 +1,7 @@
 import { Plinto } from '../Plinto.jsx';
 import { MiniGriglia, celleDa } from '../MiniGriglia.jsx';
 import { Masso } from '../Masso.jsx';
+import { Mattone } from '../Mattone.jsx';
 import { descriviObiettivi } from './Quadri.jsx';
 
 /**
@@ -70,6 +71,17 @@ export function AperturaQuadro({ quadro, onGioca, onElenco, t }) {
               <span className="pl-blocco pl-blocco--masso"><Masso /></span>
             </span>
             <p className="pl-apertura__consiglio-riga">{t('quadri.massiRegola')}</p>
+          </div>
+        ) : null}
+
+        {/* I mattoni rinforzati dell'Arena, per la stessa ragione dei massi: la regola si
+            dice dove la si incontra. */}
+        {/[Rr]/.test(quadro.griglia ?? '') ? (
+          <div className="pl-apertura__consiglio pl-apertura__massi pl-apertura__mattoni">
+            <span className="pl-apertura__masso" aria-hidden="true">
+              <span className="pl-blocco pl-blocco--3"><Mattone /></span>
+            </span>
+            <p className="pl-apertura__consiglio-riga">{t('quadri.mattoniRegola')}</p>
           </div>
         ) : null}
 

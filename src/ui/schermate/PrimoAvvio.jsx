@@ -192,7 +192,7 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
         {nome === 'percorso' ? (
           <>
             <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-            <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
+            <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{arena}', livelliDellOpera(OPERE[2])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
             <p className="pl-testo">{t('guida.altreModalita')}</p>
           </>
         ) : null}

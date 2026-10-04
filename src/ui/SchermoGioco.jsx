@@ -15,7 +15,7 @@ import { CampoParticelle } from '../feel/particelle.js';
 import { suonoPresa, suonoRifiuto, sbloccaAudio } from '../audio/suoni.js';
 import { vibraRifiuto } from '../feel/vibrazione.js';
 import {
-  canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf, eMasso,
+  canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf, eMasso, eMattoneIntatto,
 } from '../core/grid.js';
 import { AnteprimaTerna } from './AnteprimaTerna.jsx';
 import { MODALITA , TINTA_SOGLIA } from '../config/rules.js';
@@ -266,9 +266,12 @@ export function SchermoGioco({
       const gruppi = findCompletedGroups(dopo);
       if (gruppi.length > 0) {
         incandidate = new Set();
-        // I massi della Torre restano: illuminarli come "sta per sparire" direbbe il
-        // contrario della loro regola.
-        gruppi.forEach((g) => g.cells.forEach((c) => { if (!eMasso(dopo[c])) incandidate.add(c); }));
+        // I massi della Torre restano, e i mattoni rinforzati intatti dell'Arena pure (si
+        // incrinano soltanto): illuminarli come "sta per sparire" direbbe il contrario
+        // della loro regola.
+        gruppi.forEach((g) => g.cells.forEach((c) => {
+          if (!eMasso(dopo[c]) && !eMattoneIntatto(dopo[c])) incandidate.add(c);
+        }));
       }
     }
     return { celle: new Set(celle), colore: pezzo.color, valida, incandidate };
@@ -338,6 +341,7 @@ export function SchermoGioco({
               anteprimaValida={anteprima?.valida ?? true}
               incandidate={anteprima?.incandidate}
               appoggiate={effetti.appoggiate}
+              incrinatiOra={effetti.incrinatiOra}
               esplosioni={effetti.esplosioni}
               celleEsplose={effetti.celleEsplose}
               svuotata={effetti.svuotata}

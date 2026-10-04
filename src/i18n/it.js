@@ -221,6 +221,7 @@ export default {
     trionfoOpera: {
       ponte: 'Il Ponte è finito',
       torre: 'La Torre è finita',
+      arena: 'L\'Arena è finita',
     },
     tuttiILivelli: 'Tutti i {totale} livelli superati',
     mosseInTutto: '{mosse} mosse in tutto',
@@ -294,6 +295,7 @@ export default {
     titoli: {
       ponte: 'Il Ponte è finito.',
       torre: 'La Torre è finita.',
+      arena: 'L\'Arena è finita.',
     },
     sotto: '{totale} livelli, dal primo all\'ultimo.',
     livelli: 'livelli superati',
@@ -308,9 +310,11 @@ export default {
     // L'opera successiva, quando c'e' gia': si e' appena aperta, e il pulsante porta li'.
     aperta: {
       torre: 'È aperta: altri cento livelli e una regola nuova, i massi.',
+      arena: 'È aperta: altri cento livelli e una regola nuova, i mattoni rinforzati.',
     },
     vai: {
       torre: 'Entra nella Torre',
+      arena: 'Entra nell\'Arena',
     },
     libera: 'Gioca in partita libera',
   },
@@ -335,7 +339,7 @@ export default {
     gessetto: 'Il gessetto',
     gessettoSpiega: 'Ti mostra dove conviene mettere un pezzo.',
     piccone: 'Il piccone',
-    picconeSpiega: 'Svuota una casella occupata della griglia, tranne i massi. Non costa una mossa.',
+    picconeSpiega: 'Svuota una casella occupata della griglia, tranne i massi. Un mattone rinforzato lo incrina soltanto. Non costa una mossa.',
     picconeScegli: 'Quale casella svuoto?',
     picconeScegliMassi: 'Quale casella svuoto? I massi no: restano dove sono.',
     mensola: 'La mensola',
@@ -371,11 +375,20 @@ export default {
     loggia: 'La loggia',
     merli: 'I merli',
     vetta: 'La vetta',
+    // L'Arena: dal tracciato sul terreno alla tribuna.
+    tracciato: 'Il tracciato',
+    ingressi: 'Gli ingressi',
+    gradinate: 'Le gradinate',
+    portici: 'I portici',
+    volte: 'Le volte',
+    velario: 'Il velario',
+    tribuna: 'La tribuna',
   },
 
   opere: {
     ponte: 'Il Ponte',
     torre: 'La Torre',
+    arena: 'L\'Arena',
   },
 
   salvataggio: {
@@ -421,10 +434,12 @@ export default {
     // Per opera e per intero, per la stessa ragione dei titoli del trionfo.
     operaChiusa: {
       torre: 'La Torre si apre quando hai superato tutti i livelli del Ponte, ognuno con la spunta.',
+      arena: 'L\'Arena si apre quando hai superato tutti i livelli della Torre, ognuno con la spunta.',
     },
     operaMancano: 'Te ne mancano {n}.',
     operaMancaUno: 'Te ne manca uno.',
     massiRegola: 'Le caselle grigie sono massi: contano come piene, ma non spariscono mai.',
+    mattoniRegola: 'Le caselle con le fasce sono mattoni rinforzati: vanno eliminati due volte. La prima volta si incrinano, la seconda spariscono.',
     quadro: 'Livello {n}',
     mosse: 'Mosse',
     tuoRecord: 'Il tuo record: {mosse} mosse',
@@ -466,6 +481,13 @@ export default {
       loggia: 'Le caselle da eliminare: contano quelle che spariscono, e i massi non spariscono mai.',
       merli: 'Sedici livelli in cui il margine di mosse si fa sottile.',
       vetta: 'Gli ultimi otto livelli: sei in cima alla Torre.',
+      tracciato: 'Dieci livelli per imparare i mattoni rinforzati: la prima volta si incrinano, la seconda spariscono.',
+      ingressi: 'Fino a nove mattoni sulla griglia, sparsi dappertutto.',
+      gradinate: 'Anelli di mattoni attorno al centro della griglia.',
+      portici: 'I primi livelli dell\'Arena che chiedono due obiettivi insieme.',
+      volte: 'Griglie con fino a diciotto mattoni da demolire.',
+      velario: 'Sedici livelli con meno margine di mosse, e mattoni fino ai bordi.',
+      tribuna: 'Gli ultimi otto livelli: sei sulla tribuna dell\'Arena.',
     },
     attiChiusi: '{n} atti su {totale} completati.',
     // Le forme al singolare. "1 atti su 7 completati" e' il genere di dettaglio che fa
@@ -572,7 +594,7 @@ export default {
     intreccioTitolo: 'L\'Intreccio',
     tintaTitolo: 'La Tinta',
     percorsoTitolo: 'Il percorso',
-    percorso: 'Il gioco vero sono i livelli: {ponte} nel Ponte e, quando li hai superati tutti, altri {torre} nella Torre. Ognuno ha il suo obiettivo e un numero di mosse per riuscirci, e prima di cominciare ti spiega che cosa devi fare. Più avanti qualche livello ne chiede due insieme — tre righe e quattrocento punti, per dire — e allora servono tutti e due, con le stesse mosse. Ogni {attrezziOgni} livelli superati guadagni 1 gettone: con un gettone usi un attrezzo a tua scelta fra la carriola, il gessetto, il piccone e la mensola.',
+    percorso: 'Il gioco vero sono i livelli: {ponte} nel Ponte e, quando li hai superati tutti, altri {torre} nella Torre, e poi {arena} nell\'Arena. Ognuno ha il suo obiettivo e un numero di mosse per riuscirci, e prima di cominciare ti spiega che cosa devi fare. Più avanti qualche livello ne chiede due insieme — tre righe e quattrocento punti, per dire — e allora servono tutti e due, con le stesse mosse. Ogni {attrezziOgni} livelli superati guadagni 1 gettone: con un gettone usi un attrezzo a tua scelta fra la carriola, il gessetto, il piccone e la mensola.',
     altreModalita: 'Ci sono anche la partita libera, che va avanti finché entra un pezzo e serve solo a fare punti, e la Sfida del giorno: la stessa identica partita per tutti, una al giorno.',
   },
   aiuto: {
@@ -590,8 +612,11 @@ export default {
     tinta: 'Un gruppo è fatto di nove caselle. Quando almeno {soglia} di quelle nove hanno lo stesso colore, il gruppo vale di più; con tutte e nove uguali arriva a +{massimo}%. I colori dei pezzi non li scegli, ma scegli dove appoggiarli: la maggioranza si costruisce così.',
     bombeTitolo: 'Le bombe',
     massiTitolo: 'I massi',
-    massi: 'Nei livelli della Torre la griglia parte con dei massi: le caselle grigie con i segni scolpiti. Un masso conta come pieno, quindi aiuta a chiudere la riga, la colonna e il quadrante in cui si trova, ma non sparisce mai: quando il gruppo si chiude, le altre caselle se ne vanno e il masso resta dov\'è.',
+    massi: 'Nei livelli della Torre la griglia parte con dei massi: le caselle grigie puntinate. Un masso conta come pieno, quindi aiuta a chiudere la riga, la colonna e il quadrante in cui si trova, ma non sparisce mai: quando il gruppo si chiude, le altre caselle se ne vanno e il masso resta dov\'è.',
     massiEccezioni: 'Non ci si può appoggiare sopra, le bombe non lo portano via e il piccone non lo toglie. Non ha colore, quindi non conta per la Tinta. E se sulla griglia restano solo massi, la griglia conta come svuotata.',
+    mattoniTitolo: 'I mattoni rinforzati',
+    mattoni: 'Nei livelli dell\'Arena la griglia parte con dei mattoni rinforzati: le caselle colorate con due fasce. Un mattone rinforzato conta come pieno e va eliminato due volte: la prima volta che il suo gruppo si chiude si incrina e resta al suo posto, la seconda sparisce.',
+    mattoniEccezioni: 'Una mossa fa al massimo un passo per mattone, anche se chiude insieme due gruppi che lo contengono. Una bomba vale come un\'eliminazione, e anche il piccone: incrinano un mattone intatto e fanno sparire uno incrinato. Il mattone ha il suo colore e conta per la Tinta. Finché ne resta uno, anche incrinato, la griglia non è svuotata.',
     bombe: 'La bomba è una casella segnata dentro un pezzo, e capita ogni tanto. Appoggiata sulla griglia non fa niente: esplode quando viene eliminata insieme al suo gruppo, e allora porta via anche le otto caselle intorno.',
     bombeCatena: 'Due bombe che si toccano si innescano a vicenda: tre in fila portano via quindici caselle. Se fra l\'una e l\'altra c\'è una casella libera, non succede. Le caselle fatte saltare fanno punti e seguono la Catena.',
     bombeGrandi: 'Ogni casella fatta saltare vale {punti} punti. E le esplosioni grandi rendono di più: oltre le {soglia} caselle, ogni casella in più fa valere un {premio}% in più tutta l\'esplosione, non solo quella casella. Per questo a volte conviene aspettare il momento buono invece di usare la bomba appena arriva.',
@@ -612,6 +637,8 @@ export default {
     cellaLibera: 'libera',
     cellaOccupata: 'occupata',
     cellaMasso: 'masso',
+    cellaMattone: 'mattone rinforzato',
+    cellaMattoneIncrinato: 'mattone incrinato',
     istruzioni: 'Usa Tab per scegliere un pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia e Invio per appoggiarlo. Esc annulla.',
   },
   varie: {

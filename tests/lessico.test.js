@@ -56,6 +56,9 @@ const VIETATE = {
     // nomi di atti del Ponte ("La roccia", "L'ultima pietra"), e "sasso" o "macigno"
     // farebbero pensare a una cosa diversa.
     [/\bsass[oi]\b|\bmacign[oi]\b|\bmacerie\b/i, 'sasso/macigno', 'masso'],
+    // Il mattone dell'Arena e' «rinforzato» e, dopo il primo colpo, «incrinato»: non
+    // «crepato», «rotto» o «spaccato», che farebbero pensare che sia gia' sparito.
+    [/\bmattoncin|\bmattone crepato|\bmattone rotto|\bmattone spaccato/i, 'mattoncino/rotto', 'mattone rinforzato/incrinato'],
   ],
   en: [
     [/\bcells?\b/i, 'cell/cells', 'square/squares'],
@@ -67,6 +70,7 @@ const VIETATE = {
     [/Daily Challenge/, 'Daily Challenge', 'Daily challenge'],
     // The grey Tower square is a boulder. "The Rock" and "The Last Stone" are Bridge acts.
     [/\brocks\b|\bstones\b|\bpebbles?\b/i, 'rocks/stones', 'boulders'],
+    [/\bbroken bricks?\b|\bstrong bricks?\b|\btiles?\b/i, 'broken/strong brick', 'reinforced/cracked brick'],
   ],
 };
 

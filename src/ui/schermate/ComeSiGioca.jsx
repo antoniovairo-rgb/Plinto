@@ -2,6 +2,7 @@ import { Pagina } from './Pagina.jsx';
 import { Pezzo } from '../Pezzo.jsx';
 import { Bomba } from '../Bomba.jsx';
 import { Masso } from '../Masso.jsx';
+import { Mattone } from '../Mattone.jsx';
 import { Plinto } from '../Plinto.jsx';
 import { getShape } from '../../core/shapes.js';
 import { REGOLE_INTRO } from '../../config/intro.js';
@@ -96,7 +97,7 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
           riaprire da qui: sarebbe una seconda strada, piu' povera, verso quello che
           questa pagina dice gia' meglio. */}
       <h2 className="pl-sezione">{t('guida.percorsoTitolo')}</h2>
-      <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
+      <p className="pl-testo">{t('guida.percorso').replace('{ponte}', livelliDellOpera(OPERE[0])).replace('{torre}', livelliDellOpera(OPERE[1])).replace('{arena}', livelliDellOpera(OPERE[2])).replace('{attrezziOgni}', OGNI_LIVELLI)}</p>
       <p className="pl-testo">{t('guida.altreModalita')}</p>
 
       <h2 className="pl-sezione">{t('aiuto.baseTitolo')}</h2>
@@ -168,6 +169,16 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
         <p className="pl-testo">{t('aiuto.massi')}</p>
       </div>
       <p className="pl-testo">{t('aiuto.massiEccezioni')}</p>
+
+      {/* I MATTONI RINFORZATI DELL'ARENA, per la stessa ragione dei massi. */}
+      <h2 className="pl-sezione">{t('aiuto.mattoniTitolo')}</h2>
+      <div className="pl-aiuto__bomba">
+        <span className="pl-intro__blocco-bomba">
+          <span className="pl-blocco pl-blocco--3"><Mattone /></span>
+        </span>
+        <p className="pl-testo">{t('aiuto.mattoni')}</p>
+      </div>
+      <p className="pl-testo">{t('aiuto.mattoniEccezioni')}</p>
 
       {/* GLI ATTREZZI. Stanno qui e non solo nel pannello che si apre in partita: quel
           pannello lo trova chi ha gia' capito che esistono, e chi non lo ha ancora

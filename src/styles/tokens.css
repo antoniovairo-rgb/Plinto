@@ -88,6 +88,11 @@
   --pl-masso-ombra: #6b7280;
   --pl-masso-segno: rgba(20, 22, 31, 0.55);
 
+  /* --- Il mattone rinforzato dell'Arena ------------------------------------
+     Malta scura semitrasparente e una crepa chiara: reggono sopra tutti e sei i colori. */
+  --pl-mattone-malta: rgba(14, 17, 24, 0.5);
+  --pl-mattone-crepa: rgba(255, 255, 255, 0.92);
+
   /* --- Geometria ---------------------------------------------------------- */
   --pl-radius-cell: 22%;      /* raggio del blocco, in percentuale del lato */
   --pl-radius-sm: 8px;

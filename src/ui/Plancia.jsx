@@ -1,8 +1,11 @@
 import { forwardRef, useMemo } from 'react';
 import { GRID_SIZE } from '../config/rules.js';
-import { idx, coloreDi, eBomba, eMasso } from '../core/grid.js';
+import {
+  idx, coloreDi, eBomba, eMasso, eMattone, eMattoneIncrinato,
+} from '../core/grid.js';
 import { Bomba } from './Bomba.jsx';
 import { Masso } from './Masso.jsx';
+import { Mattone } from './Mattone.jsx';
 
 /**
  * La griglia 9x9.
@@ -17,7 +20,7 @@ import { Masso } from './Masso.jsx';
 export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
-    appoggiate, esplosioni, celleEsplose, svuotata, cursore, pezzoInMano,
+    appoggiate, incrinatiOra, esplosioni, celleEsplose, svuotata, cursore, pezzoInMano,
     // Le caselle segnate col gesso: dove il gessetto dice di appoggiare.
     segnate,
     cellRefs, canvasRef, onCellPointerUp, t,
@@ -38,6 +41,8 @@ export const Plancia = forwardRef(function Plancia(
         const colore = coloreDi(valore);
         const bomba = eBomba(valore);
         const masso = eMasso(valore);
+        const mattone = eMattone(valore);
+        const incrinato = eMattoneIncrinato(valore);
         const saltata = valore === 0 && celleEsplose?.has(i);
 
         const classi = ['pl-cella'];
@@ -57,7 +62,10 @@ export const Plancia = forwardRef(function Plancia(
             role="gridcell"
             aria-label={t
               ? `${t('a11y.cella').replace('{r}', r + 1).replace('{c}', c + 1)}, ${
-                valore === 0 ? t('a11y.cellaLibera') : (masso ? t('a11y.cellaMasso') : t('a11y.cellaOccupata'))}`
+                valore === 0 ? t('a11y.cellaLibera')
+                  : masso ? t('a11y.cellaMasso')
+                    : mattone ? (incrinato ? t('a11y.cellaMattoneIncrinato') : t('a11y.cellaMattone'))
+                      : t('a11y.cellaOccupata')}`
               : undefined}
             onPointerUp={onCellPointerUp ? (e) => onCellPointerUp(e, r, c) : undefined}
           >
@@ -69,8 +77,9 @@ export const Plancia = forwardRef(function Plancia(
               <div className="pl-blocco pl-blocco--masso"><Masso /></div>
             ) : null}
             {valore !== 0 && !masso ? (
-              <div className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''}`}>
+              <div className={`pl-blocco pl-blocco--${colore} ${appenaPosata ? 'pl-blocco--posato' : ''} ${incrinatiOra?.has(i) ? 'pl-blocco--incrinato-ora' : ''}`}>
                 {bomba ? <Bomba /> : null}
+                {mattone ? <Mattone incrinato={incrinato} /> : null}
               </div>
             ) : null}
             {valore === 0 && inAnteprima ? (
@@ -97,7 +106,7 @@ export const Plancia = forwardRef(function Plancia(
       }
     }
     return out;
-  }, [grid, segnate, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, esplosioni,
+  }, [grid, segnate, anteprima, anteprimaColore, anteprimaValida, incandidate, appoggiate, incrinatiOra, esplosioni,
       celleEsplose, cursore, cellRefs, onCellPointerUp, t]);
 
   return (

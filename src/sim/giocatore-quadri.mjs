@@ -39,7 +39,7 @@
 
 import {
   allPlacements, placeShape, findCompletedGroups, clearGroups, fillRatio, idx,
-  quadrantCells, QUADRANT_COUNT,
+  quadrantCells, rowCells, colCells, QUADRANT_COUNT, eMattoneIntatto, eMattoneIncrinato,
 } from '../core/grid.js';
 import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
 import { accoglienza } from './accoglienza.mjs';
@@ -83,6 +83,37 @@ function vicinanza(grid) {
 }
 
 /**
+ * Quanto sono vicini a chiudersi i gruppi che contengono MATTONI RINFORZATI.
+ *
+ * Premiare la demolizione quando avviene non basta: arriva solo se il gruppo giusto si
+ * chiude, e un giocatore che non lo cerca chiude i gruppi comodi e incontra i mattoni per
+ * caso. Misurato sul primo atto dell'Arena: «Demolisci 1» con due mattoni gia' incrinati
+ * restava sotto 14 vittorie su 20 in 18 mosse. Qui un gruppo quasi pieno vale per ogni
+ * mattone che contiene: un incrinato pesa intero (alla prossima chiusura sparisce), un
+ * intatto meno della meta' (gli servono ancora due chiusure).
+ */
+const GRUPPI = [
+  ...Array.from({ length: GRID_SIZE }, (_, i) => rowCells(i)),
+  ...Array.from({ length: GRID_SIZE }, (_, i) => colCells(i)),
+  ...Array.from({ length: QUADRANT_COUNT }, (_, i) => quadrantCells(i)),
+];
+export function vicinanzaMattoni(grid) {
+  let totale = 0;
+  for (const celle of GRUPPI) {
+    let piene = 0;
+    let peso = 0;
+    for (const c of celle) {
+      const v = grid[c];
+      if (v !== 0) piene += 1;
+      if (eMattoneIncrinato(v)) peso += 1;
+      else if (eMattoneIntatto(v)) peso += 0.4;
+    }
+    if (peso > 0 && piene < celle.length) totale += peso * (piene / celle.length) ** 3;
+  }
+  return totale;
+}
+
+/**
  * Peso che il giocatore da' a ciascun tipo di gruppo, dato l'obiettivo del Quadro.
  *
  * `catena` merita una spiegazione. Chiudere gruppi in totale non basta: la Catena sale
@@ -95,7 +126,7 @@ function vicinanza(grid) {
 export function preferenze(quadro) {
   const p = {
     row: 1, col: 1, quadrant: 1, svuotare: 0, mira: 6, nonSpezzare: 0, intreccio: 0,
-    incrinare: 0, demolire: 0,
+    incrinare: 0, demolire: 0, versoMattoni: 0,
   };
   for (const { tipo } of quadro.obiettivi) {
     if (tipo === 'righe') p.row = 6;
@@ -107,7 +138,7 @@ export function preferenze(quadro) {
     else if (tipo === 'catena') p.nonSpezzare = 900;
     else if (tipo === 'punteggio') p.nonSpezzare = 500;
     // Un'incrinatura e' meta' di una demolizione: vale, ma molto meno della seconda.
-    else if (tipo === 'demolizioni') { p.incrinare = 140; p.demolire = 420; }
+    else if (tipo === 'demolizioni') { p.incrinare = 140; p.demolire = 420; p.versoMattoni = 60; }
     /**
      * L'INTRECCIO MANCAVA, e la mancanza si e' vista molto piu' tardi.
      *
@@ -144,6 +175,7 @@ function valuta(grigliaDopo, gruppi, pref, rumore = 0, mattoni = null) {
   const vic = vicinanza(grigliaDopo);
   let valore = 0;
   if (mattoni) valore += mattoni.incrinati.length * pref.incrinare + mattoni.demoliti.length * pref.demolire;
+  if (pref.versoMattoni) valore += vicinanzaMattoni(grigliaDopo) * pref.versoMattoni;
   // Non spezzare la Catena vale piu' di qualunque singolo gruppo in piu'.
   if (gruppi.length === 0) valore -= pref.nonSpezzare;
   for (const g of gruppi) valore += 150 * pref[g.type];

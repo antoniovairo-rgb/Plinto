@@ -9,11 +9,12 @@
  * progressi sono salvati per numero: per aggiungere la Torre non si deve rigenerare il
  * Ponte, che cambierebbe livelli gia' giocati e superati. Con un file per opera il
  * generatore scrive solo quello dell'opera nuova, e tests/opere.test.js controlla che i
- * cento livelli del Ponte restino quelli pubblicati.
+ * cento livelli del Ponte e della Torre restino quelli verificati.
  */
 
 import * as ponte from './opere/ponte.js';
 import * as torre from './opere/torre.js';
+import * as arena from './opere/arena.js';
 
 /**
  * L'ordine e' quello in cui si giocano. Il nome di ogni opera sta nelle traduzioni,
@@ -22,6 +23,7 @@ import * as torre from './opere/torre.js';
 const ELENCO = [
   ['ponte', ponte],
   ['torre', torre],
+  ['arena', arena],
 ];
 
 for (const [id, opera] of ELENCO) {
