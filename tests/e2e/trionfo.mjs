@@ -22,8 +22,8 @@ import { mkdir } from 'node:fs/promises';
 import { quadroNumero, ATTI, OPERE, livelliDellOpera, attiDellOpera } from '../../src/config/quadri.js';
 import { traduttore } from '../../src/i18n/index.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
-import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
-import { createRng } from '../../src/core/rng.js';
+import { createRng, seedFromString } from '../../src/core/rng.js';
+import { preferenze, scegliMossa } from '../../src/sim/giocatore-quadri.mjs';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -49,42 +49,27 @@ if (!(await serverRisponde())) {
   while (Date.now() < scadenza && !(await serverRisponde())) await new Promise((r) => setTimeout(r, 400));
 }
 
-/** Le celle vuote senza vicine vuote: un pezzo non ci entrera' mai. */
-function buchi(grid) {
-  let n = 0;
-  for (let r = 0; r < 9; r += 1) for (let c = 0; c < 9; c += 1) {
-    if (grid[idx(r, c)] !== 0) continue;
-    const vicine = [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]]
-      .filter(([y, x]) => y >= 0 && y < 9 && x >= 0 && x < 9);
-    if (vicine.every(([y, x]) => grid[idx(y, x)] !== 0)) n += 1;
-  }
-  return n;
-}
 
 /** La sequenza che supera il Quadro, calcolata con il motore vero. */
-function sequenzaVincente(quadro, tentativi = 40) {
+/**
+ * La sequenza di mosse che vince il livello, trovata dal giocatore artificiale CONDIVISO
+ * (src/sim/giocatore-quadri.mjs) sugli stessi venti semi su cui il generatore garantisce
+ * che il livello sia vincibile. Qui c'era un giocatore semplificato tutto suo, che non
+ * sapeva mirare all'obiettivo: con i mattoni rinforzati dell'Arena non trovava nessuna
+ * vittoria al livello 201, e la prova si fermava senza aver provato niente.
+ */
+function sequenzaVincente(quadro, tentativi = 20) {
   for (let prova = 0; prova < tentativi; prova += 1) {
-    const rng = createRng(1000 + prova);
+    const rng = createRng(seedFromString(`prova-${quadro.numero}-${prova}`));
+    const pref = preferenze(quadro);
     let partita = iniziaQuadro(quadro, { now: 0 });
     const mosse = [];
-    let guardia = 0;
-    while (guardia < (quadro.maxMosse ?? 60)) {
+    for (let guardia = 0; guardia < (quadro.maxMosse ?? 60); guardia += 1) {
       if (statoQuadro(quadro, partita).finito) break;
-      let migliore = null, valore = -1e9;
-      partita.hand.forEach((pezzo, i) => {
-        if (!pezzo) return;
-        for (const [r, c] of allPlacements(partita.grid, pezzo.shape)) {
-          const { grid: dopo } = placeShape(partita.grid, pezzo.shape, r, c, 1);
-          const gruppi = findCompletedGroups(dopo);
-          const v = gruppi.length * 400 + (gruppi.length ? 200 : 0)
-            - buchi(dopo) * 16 - fillRatio(dopo) * 60 + rng.float() * 40;
-          if (v > valore) { valore = v; migliore = { handIndex: i, row: r, col: c }; }
-        }
-      });
-      if (!migliore) break;
-      mosse.push(migliore);
-      partita = giocaNelQuadro(quadro, partita, migliore.handIndex, migliore.row, migliore.col, guardia * 1000);
-      guardia += 1;
+      const mossa = scegliMossa(partita, pref, rng);
+      if (!mossa) break;
+      mosse.push(mossa);
+      partita = giocaNelQuadro(quadro, partita, mossa.handIndex, mossa.row, mossa.col, guardia * 1000);
     }
     if (statoQuadro(quadro, partita).completato) return mosse;
   }
