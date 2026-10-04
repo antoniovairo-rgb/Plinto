@@ -427,6 +427,7 @@ export default {
       intreccio: 'Clearing several groups is not enough here: you must clear them with ONE single move.',
       intrecci: 'An Interlace is clearing two or more groups with ONE move. One is not enough here: you must do it as many times as asked.',
       pulizia: 'You must end up with a completely empty grid.',
+      demolizioni: 'A reinforced brick must be cleared twice: the first time it cracks, the second time it disappears. It only counts when it disappears.',
       sopravvivi: 'Nothing to clear: you just have to keep placing pieces for the required number of moves.',
     },
     consigli: {
@@ -440,6 +441,7 @@ export default {
       intreccio: 'Bring two groups to one square from complete, then look for the piece that touches both. Where a row crosses a quadrant is the place to be.',
       intrecci: 'Do not clear groups as soon as they are ready: leave two of them one square short and wait for the piece that touches both. It costs a few moves and it is worth it.',
       pulizia: 'Near the end every square counts: do not put anything down that does not help close something.',
+      demolizioni: 'As soon as a brick cracks, close the same group again quickly: it is already almost full, and the second time the brick disappears.',
       sopravvivi: 'Do not chase points: keep the grid clear, because here losing means running out of room.',
     },
     obiettivi: {
@@ -458,6 +460,8 @@ export default {
       colonneUno: 'Clear one column',
       quadrantiUno: 'Clear one quadrant',
       pulizia: 'Empty the grid',
+      demolizioni: 'Demolish {n} bricks',
+      demolizioniUno: 'Demolish a brick',
       sopravvivi: 'Survive {n} moves',
     },
   },

@@ -36,9 +36,8 @@ import {
   TINTA_SOGLIA,
   TINTA_PASSO,
   COLOR_COUNT,
-  VALORE_BOMBA,
 } from '../config/rules.js';
-import { MASSO } from './grid.js';
+import { coloreDi } from './grid.js';
 
 /**
  * Quante celle dello stesso colore ci sono, al massimo, in un insieme di celle.
@@ -51,10 +50,10 @@ import { MASSO } from './grid.js';
 export function maggioranzaColore(grid, cells) {
   const conteggi = new Uint8Array(COLOR_COUNT + 1);
   for (const cella of cells) {
-    const valore = grid[cella];
-    // Il vuoto e il masso non hanno colore: un masso dentro un gruppo non aiuta la Tinta.
-    if (valore === 0 || valore === MASSO) continue;
-    const colore = valore > VALORE_BOMBA ? valore - VALORE_BOMBA : valore;
+    // Il colore lo dice `coloreDi`, l'unica funzione che conosce tutti i tipi di casella:
+    // il vuoto e il masso non hanno colore (zero), bombe e mattoni rinforzati hanno quello
+    // del loro blocco. Una formula a parte qui ignorava i mattoni dell'Arena.
+    const colore = coloreDi(grid[cella]);
     if (colore >= 1 && colore <= COLOR_COUNT) conteggi[colore] += 1;
   }
   let massimo = 0;

@@ -504,6 +504,7 @@ export default {
       intreccio: 'Qui non basta chiudere più gruppi: devi chiuderli con UNA SOLA mossa.',
       intrecci: 'Un Intreccio è chiudere due o più gruppi con UNA SOLA mossa. Qui non ne basta uno: devi rifarlo il numero di volte richiesto.',
       pulizia: 'Devi arrivare a lasciare la griglia completamente vuota.',
+      demolizioni: 'Un mattone rinforzato va eliminato due volte: la prima si incrina, la seconda sparisce. Conta solo quando sparisce.',
       sopravvivi: 'Non c\'è niente da chiudere: devi solo riuscire a piazzare pezzi per tutte le mosse richieste.',
     },
     consigli: {
@@ -517,6 +518,7 @@ export default {
       intreccio: 'Porta due gruppi a una casella dal completarsi, poi cerca il pezzo che li tocca entrambi. Gli incroci fra una riga e un quadrante sono il posto giusto.',
       intrecci: 'Non chiudere i gruppi appena sono pronti: lasciane due a una casella dalla fine e aspetta il pezzo che li tocca entrambi. Costa qualche mossa e ne vale la pena.',
       pulizia: 'Verso la fine conta ogni casella: non appoggiare niente che non serva a chiudere qualcosa.',
+      demolizioni: 'Appena un mattone si incrina, richiudi presto lo stesso gruppo: è già quasi pieno, e la seconda volta il mattone sparisce.',
       sopravvivi: 'Non fare punti a tutti i costi: tieni la griglia sgombra, perché qui perdere significa restare senza spazio.',
     },
     obiettivi: {
@@ -535,6 +537,8 @@ export default {
       colonneUno: 'Chiudi una colonna',
       quadrantiUno: 'Chiudi un quadrante',
       pulizia: 'Svuota la griglia',
+      demolizioni: 'Demolisci {n} mattoni',
+      demolizioniUno: 'Demolisci un mattone',
       sopravvivi: 'Resisti {n} mosse',
     },
   },

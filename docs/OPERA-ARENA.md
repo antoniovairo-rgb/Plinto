@@ -1,6 +1,6 @@
 # L'Arena — documento di progetto
 
-Stato: **progetto, in attesa del via**. Branch: `opera-arena` (parte da `opera-torre`).
+Stato: **in sviluppo** (via del proprietario il 4 ottobre 2026). Branch: `opera-arena` (parte da `opera-torre`).
 
 L'Arena e' la terza opera: livelli dal 201 al 300, dopo il Ponte e la Torre.
 
@@ -12,7 +12,10 @@ L'Arena e' la terza opera: livelli dal 201 al 300, dopo il Ponte e la Torre.
 | Quanti livelli | 100, dal 201 al 300 |
 | Che cosa porta di nuovo | **I mattoni rinforzati** |
 | Quando esce | Uno o due mesi dopo la Torre |
-| Chi la gioca | Proposta: solo chi ha finito tutta la Torre, come la Torre dopo il Ponte |
+| Chi la gioca | Solo chi ha finito tutta la Torre, ogni livello con la spunta |
+| Massi nell'Arena | No: solo mattoni rinforzati e blocchi normali |
+| Disegno del masso | Diventa una pietra grigia puntinata; la crepa resta al mattone incrinato |
+| Nomi degli atti | Il tracciato, Gli ingressi, Le gradinate, I portici, Le volte, Il velario, La tribuna |
 
 ## 2. La regola
 

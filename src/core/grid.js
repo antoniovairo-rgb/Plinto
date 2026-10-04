@@ -6,6 +6,8 @@
  *   1..6     = cella piena, il valore e' la famiglia cromatica (solo estetica)
  *   11..16   = come sopra, ma la cella e' una BOMBA (colore + VALORE_BOMBA)
  *   30       = un MASSO (vedi MASSO qui sotto)
+ *   41..46   = un MATTONE RINFORZATO intatto, del colore 1..6 (vedi MATTONE qui sotto)
+ *   51..56   = lo stesso mattone, incrinato
  * Un array solo invece di due: copie, salvataggi e simulazioni restano quelli di prima.
  */
 
@@ -41,6 +43,43 @@ export function eMasso(valore) {
   return valore === MASSO;
 }
 
+/**
+ * IL MATTONE RINFORZATO, la meccanica dell'Arena: «va eliminato due volte».
+ *
+ * Conta come pieno, come ogni casella diversa da zero. La prima volta che viene eliminato
+ * -- il suo gruppo si chiude, una bomba lo raggiunge, il piccone lo colpisce -- si
+ * INCRINA e resta al suo posto; la seconda volta sparisce come un blocco qualunque.
+ * Casi decisi il 4 ottobre 2026 (docs/OPERA-ARENA.md):
+ *   1. una mossa fa al massimo UN passo per mattone, anche se il mattone sta all'incrocio
+ *      di due gruppi chiusi insieme (un Intreccio) o anche dentro un'esplosione: le celle
+ *      da eliminare sono un insieme, e ogni cella ci compare una volta sola;
+ *   2. un'esplosione conta come un'eliminazione;
+ *   3. il piccone conta come un'eliminazione (scavaCella in engine.js);
+ *   4. il mattone ha un colore e conta per la Tinta, come gli altri blocchi.
+ *
+ * Il colore e' l'unita' del valore, come per le bombe: 41 e 51 sono il colore 1. Fuori da
+ * config/rules.js per la stessa ragione del masso: l'impronta delle regole non cambia, e
+ * le sfide passate restano confrontabili. Nelle griglie dei livelli: `R` intatto, `r`
+ * incrinato.
+ */
+export const MATTONE = 40;
+export const MATTONE_INCRINATO = 50;
+
+/** La cella e' un mattone rinforzato, intatto o incrinato? */
+export function eMattone(valore) {
+  return eMattoneIntatto(valore) || eMattoneIncrinato(valore);
+}
+
+/** La cella e' un mattone ancora intatto? */
+export function eMattoneIntatto(valore) {
+  return valore > MATTONE && valore <= MATTONE + 6;
+}
+
+/** La cella e' un mattone gia' incrinato? */
+export function eMattoneIncrinato(valore) {
+  return valore > MATTONE_INCRINATO && valore <= MATTONE_INCRINATO + 6;
+}
+
 if (!Number.isInteger(QUADRANTS_PER_SIDE)) {
   throw new Error('GRID_SIZE deve essere divisibile per QUADRANT_SIZE');
 }
@@ -51,9 +90,9 @@ export function coloreDi(valore) {
   return ((valore - 1) % VALORE_BOMBA) + 1;
 }
 
-/** La cella contiene una bomba? */
+/** La cella contiene una bomba? Solo 11..16: masso e mattoni hanno valori piu' alti. */
 export function eBomba(valore) {
-  return valore > VALORE_BOMBA && valore !== MASSO;
+  return valore > VALORE_BOMBA && valore <= VALORE_BOMBA + 6;
 }
 
 /** Valore di cella per un blocco-bomba del colore dato. */
@@ -314,12 +353,32 @@ export function clearGroups(grid, groups) {
  * Svuota un insieme qualsiasi di celle. Usato anche dalle esplosioni.
  * I massi restano dove sono e non compaiono fra le celle svuotate: non contano per
  * «Elimina N caselle», perche' non sono stati eliminati.
+ *
+ * I mattoni rinforzati fanno un passo: l'intatto si incrina e resta (non e' fra le celle
+ * svuotate, perche' non e' sparito), l'incrinato sparisce (e' fra le svuotate, ed e'
+ * anche un mattone demolito). Le celle sono un insieme, quindi ogni mattone fa un passo
+ * solo anche se compare in due gruppi o in un gruppo e in un'esplosione.
+ *
+ * @returns {{grid: Uint8Array, clearedCells: number[], incrinati: number[], demoliti: number[]}}
  */
 export function svuotaCelle(grid, celle) {
   const next = grid.slice();
-  const elencate = [...new Set(celle)].filter((cella) => grid[cella] !== MASSO);
-  for (const cella of elencate) next[cella] = 0;
-  return { grid: next, clearedCells: elencate };
+  const clearedCells = [];
+  const incrinati = [];
+  const demoliti = [];
+  for (const cella of new Set(celle)) {
+    const v = grid[cella];
+    if (v === MASSO) continue;
+    if (eMattoneIntatto(v)) {
+      next[cella] = v + (MATTONE_INCRINATO - MATTONE);
+      incrinati.push(cella);
+      continue;
+    }
+    if (eMattoneIncrinato(v)) demoliti.push(cella);
+    next[cella] = 0;
+    clearedCells.push(cella);
+  }
+  return { grid: next, clearedCells, incrinati, demoliti };
 }
 
 /** Numero di celle piene. */
@@ -347,7 +406,7 @@ export function gridToString(grid) {
     let line = '';
     for (let c = 0; c < GRID_SIZE; c += 1) {
       const v = grid[idx(r, c)];
-      line += v === 0 ? '.' : v === MASSO ? 'M' : '#';
+      line += v === 0 ? '.' : v === MASSO ? 'M' : eMattoneIntatto(v) ? 'R' : eMattoneIncrinato(v) ? 'r' : '#';
     }
     lines.push(line);
   }
@@ -356,8 +415,9 @@ export function gridToString(grid) {
 
 /**
  * Inverso di gridToString: comodo per costruire scenari nei test, ed e' anche il formato
- * delle griglie di partenza dei livelli. `.` vuota, `M` masso, qualunque altro carattere
- * una casella piena del colore indicato.
+ * delle griglie di partenza dei livelli. `.` vuota, `M` masso, `R` mattone rinforzato
+ * intatto e `r` incrinato (del colore indicato), qualunque altro carattere una casella
+ * piena del colore indicato.
  */
 export function gridFromString(text, color = 1) {
   const lines = text.trim().split('\n').map((l) => l.trim());
@@ -365,6 +425,8 @@ export function gridFromString(text, color = 1) {
   lines.forEach((line, r) => {
     for (let c = 0; c < line.length; c += 1) {
       if (line[c] === 'M') grid[idx(r, c)] = MASSO;
+      else if (line[c] === 'R') grid[idx(r, c)] = MATTONE + color;
+      else if (line[c] === 'r') grid[idx(r, c)] = MATTONE_INCRINATO + color;
       else if (line[c] !== '.' && line[c] !== ' ') grid[idx(r, c)] = color;
     }
   });

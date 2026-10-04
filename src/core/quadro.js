@@ -67,6 +67,9 @@ export const OBIETTIVI = {
   // ripiego un livello ripreso mostrerebbe NaN al posto dell'avanzamento.
   intrecci:   { progresso: (s) => s.stats.intrecci ?? 0 },
   pulizia:    { progresso: (s) => s.stats.boardClears },
+  // I mattoni rinforzati dell'Arena fatti sparire. Il `?? 0` per la stessa ragione di
+  // `intrecci`: una partita salvata prima del contatore non ce l'ha.
+  demolizioni: { progresso: (s) => s.stats.mattoniDemoliti ?? 0 },
   sopravvivi: { progresso: (s) => s.stats.moves },
 };
 

@@ -24,6 +24,9 @@ import {
   hasAnyPlacement,
   isEmpty,
   eMasso,
+  eMattoneIntatto,
+  MATTONE,
+  MATTONE_INCRINATO,
   fillRatio,
   filledCount,
 } from './grid.js';
@@ -81,6 +84,9 @@ function emptyStats() {
     // chiedere in dose crescente come tutte le altre.
     intrecci: 0,
     boardClears: 0,
+    // I mattoni rinforzati dell'Arena fatti sparire (la seconda eliminazione). Esiste
+    // solo dove ci sono mattoni: nella partita libera e nelle sfide resta a zero.
+    mattoniDemoliti: 0,
     bombeEsplose: 0,
     celleEsplose: 0,
     handsDealt: 0,
@@ -275,7 +281,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     : { tutte: new Set(), esplose: [], bombe: [] };
   const cleared = groups.length > 0
     ? svuotaCelle(placed.grid, detonazione.tutte)
-    : { grid: placed.grid, clearedCells: [] };
+    : { grid: placed.grid, clearedCells: [], incrinati: [], demoliti: [] };
   const boardCleared = groups.length > 0 && isEmpty(cleared.grid);
 
   // 4. Punteggio, con il moltiplicatore Catena che il giocatore vedeva prima di muovere.
@@ -330,6 +336,7 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
     bestIntreccio: Math.max(state.stats.bestIntreccio, groups.length),
     intrecci: state.stats.intrecci + (groups.length > 1 ? 1 : 0),
     boardClears: state.stats.boardClears + (boardCleared ? 1 : 0),
+    mattoniDemoliti: (state.stats.mattoniDemoliti ?? 0) + cleared.demoliti.length,
     bombeEsplose: (state.stats.bombeEsplose ?? 0) + detonazione.bombe.length,
     celleEsplose: (state.stats.celleEsplose ?? 0) + detonazione.esplose.length,
     handsDealt,
@@ -364,6 +371,10 @@ export function placePiece(state, handIndex, row, col, now = Date.now()) {
       placedCells: placed.cells,
       groups: groups.map((g) => ({ type: g.type, index: g.index, cells: g.cells })),
       clearedCells: cleared.clearedCells,
+      // I mattoni rinforzati: quelli che questa mossa ha incrinato (restano) e quelli che
+      // ha fatto sparire (sono gia' anche fra le clearedCells). Servono agli effetti.
+      mattoniIncrinati: cleared.incrinati,
+      mattoniDemoliti: cleared.demoliti,
       celleEsplose: detonazione.esplose,
       bombeDetonate: detonazione.bombe,
       points: scored.points,
@@ -456,7 +467,13 @@ export function scavaCella(state, index) {
   // Il masso non si scava: con un gettone si annullerebbe la meccanica della Torre.
   if (eMasso(state.grid[index])) return null;
   const grid = Uint8Array.from(state.grid);
-  grid[index] = 0;
+  // Il mattone rinforzato dell'Arena: il piccone vale come un'eliminazione, quindi
+  // incrina un mattone intatto e toglie uno incrinato. NON conta fra i mattoni demoliti,
+  // come le caselle tolte col piccone non contano fra quelle eliminate: altrimenti un
+  // gettone sarebbe una scorciatoia per l'obiettivo del livello.
+  grid[index] = eMattoneIntatto(state.grid[index])
+    ? state.grid[index] + (MATTONE_INCRINATO - MATTONE)
+    : 0;
   return { ...state, grid };
 }
 
@@ -545,6 +562,7 @@ export function summarize(state, now = Date.now()) {
     bestIntreccio: state.stats.bestIntreccio,
     intrecci: state.stats.intrecci,
     boardClears: state.stats.boardClears,
+    mattoniDemoliti: state.stats.mattoniDemoliti ?? 0,
     filledCells: filledCount(state.grid),
     piecesPlaced: state.stats.piecesPlaced,
     // Le bombe non erano nel riepilogo perche' nessuno le leggeva: il profilo di gioco

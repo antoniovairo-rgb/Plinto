@@ -22,6 +22,7 @@ import {
 } from '../src/core/engine.js';
 import {
   findCompletedGroups, filledCount, canPlace, allPlacements, CELL_COUNT, MASSO,
+  eMattone, eMattoneIntatto, eMattoneIncrinato,
 } from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../src/core/quadro.js';
@@ -94,7 +95,7 @@ function controllaStato(s, dove, celleIniziali, scavate, massiIniziali = 0) {
   if (!(g instanceof Uint8Array) || g.length !== CELL_COUNT) difetto('griglia-forma', dove, g?.length);
   for (let i = 0; i < g.length; i += 1) {
     const v = g[i];
-    const ok = v === 0 || v === MASSO
+    const ok = v === 0 || v === MASSO || eMattone(v)
       || (v >= 1 && v <= COLOR_COUNT) || (v > VALORE_BOMBA && v <= VALORE_BOMBA + COLOR_COUNT);
     if (!ok) { difetto('griglia-valore', dove, { i, v }); break; }
   }
@@ -145,6 +146,28 @@ function controllaStato(s, dove, celleIniziali, scavate, massiIniziali = 0) {
   } else if (s.manoSuccessiva != null) difetto('anteprima-in-base', dove, null);
 }
 
+/**
+ * I mattoni rinforzati dell'Arena fra uno stato e il successivo. Qualunque azione -- una
+ * mossa che chiude un Intreccio, una bomba, il piccone -- fa al massimo UN passo per
+ * mattone: un intatto non sparisce mai di colpo, un incrinato non torna intatto, e i
+ * mattoni demoliti crescono soltanto, senza superare quelli che c'erano.
+ */
+function controllaMattoni(prima, dopo, dove, mattoniIniziali) {
+  for (let i = 0; i < prima.grid.length; i += 1) {
+    const a = prima.grid[i];
+    const b = dopo.grid[i];
+    if (eMattoneIntatto(a) && !(eMattoneIntatto(b) || eMattoneIncrinato(b))) {
+      difetto('mattone-due-passi', dove, { i, prima: a, dopo: b });
+    }
+    if (eMattoneIncrinato(a) && eMattoneIntatto(b)) difetto('mattone-riparato', dove, { i });
+    if (!eMattone(a) && eMattone(b)) difetto('mattone-comparso', dove, { i, prima: a, dopo: b });
+  }
+  const da = dopo.stats.mattoniDemoliti ?? 0;
+  const pa = prima.stats.mattoniDemoliti ?? 0;
+  if (da < pa) difetto('mattoni-demoliti-calano', dove, [pa, da]);
+  if (da > mattoniIniziali) difetto('mattoni-demoliti-troppi', dove, [da, mattoniIniziali]);
+}
+
 /** I percorsi dei campi che differiscono fra due oggetti JSON (i primi cinque). */
 function differenze(a, b, via = '', out = []) {
   if (out.length >= 5 || JSON.stringify(a) === JSON.stringify(b)) return out;
@@ -183,6 +206,7 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
     : createGame({ seed: seme, modalita, now: ORA });
   const celleIniziali = filledCount(s.grid);
   const massiIniziali = s.grid.filter((v) => v === MASSO).length;
+  const mattoniIniziali = s.grid.filter(eMattone).length;
   let scavate = 0;
   let prevStato = quadro ? statoQuadro(quadro, s) : null;
   const etichetta = quadro ? `livello ${quadro.numero}` : `${modalita} seme ${seme}`;
@@ -228,7 +252,9 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
         : Math.floor(rnd() * 90) - 4;
       const x = scavaCella(s, bersaglio);
       if (x) {
-        dopo = x; scavate += 1;
+        // Il piccone su un mattone intatto lo incrina e basta: la casella resta piena, e
+        // la conservazione delle celle qui sotto deve saperlo.
+        dopo = x; if (x.grid[bersaglio] === 0) scavate += 1;
         if (finita) difetto('piccone-a-partita-finita', { etichetta, passo }, null);
         if (s.grid[bersaglio] === MASSO) difetto('piccone-su-masso', { etichetta, passo }, bersaglio);
       } else if (!finita && s.grid[bersaglio] > 0 && s.grid[bersaglio] !== MASSO) {
@@ -266,6 +292,7 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
 
     const dove = { etichetta, passo, azione };
     controllaStato(dopo, dove, celleIniziali, scavate, massiIniziali);
+    controllaMattoni(prima, dopo, dove, mattoniIniziali);
 
     // Regole di cio' che ogni azione PUO' toccare.
     const pa = prima.stats; const da = dopo.stats;
@@ -382,6 +409,17 @@ export function caccia(partite, seme) {
       giocate += 1;
     }
   }
+  // I mattoni rinforzati, con l'obiettivo che li conta.
+  for (const [n, griglia] of GRIGLIE_CON_MATTONI.entries()) {
+    const quadro = {
+      numero: 2001 + n, nome: `mattoni${n}`, atto: 'prova',
+      obiettivi: [{ tipo: 'demolizioni', quanti: 3 }], maxMosse: 40, griglia,
+    };
+    for (let k = 0; k < giriLivello; k += 1) {
+      passi += giocaUna({ quadro }, mulberry(quadro.numero * 7919 + k + seme), contatori);
+      giocate += 1;
+    }
+  }
   return { difetti, giocate, passi, giriLivello, tentate, contatori };
 }
 
@@ -394,6 +432,17 @@ const GRIGLIE_CON_MASSI = [
   ['M........', '.M.......', '..M......', '...M.....', '....M....', '.....M...', '......M..', '.......M.', '........M'],
   ['.........', '.........', '...MMM...', '...M.M...', '...MMM...', '.........', '.........', '.........', '.........'],
   ['##M......', '#........', 'M........', '.........', '....M#...', '....##...', '.........', '........#', '......M##'],
+].map((righe) => righe.join('\n'));
+
+/**
+ * Griglie di prova per i mattoni rinforzati: intatti (`R`) e incrinati (`r`), sparsi,
+ * agli incroci fra riga e quadrante (dove un Intreccio li tocca due volte), accanto a
+ * blocchi normali che possono diventare bombe.
+ */
+const GRIGLIE_CON_MATTONI = [
+  ['R.......R', '.........', '..R...R..', '.........', '....R....', '.........', '..r...r..', '.........', 'R.......R'],
+  ['RR.......', 'R........', '.........', '...RrR...', '...r.r...', '...RrR...', '.........', '........R', '.......RR'],
+  ['##R......', '#........', 'R........', '.........', '....r#...', '....##...', '.........', '........#', '......R##'],
 ].map((righe) => righe.join('\n'));
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
