@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [Non pubblicato] — L'Arena (branch `opera-arena`)
+
+Non ancora in produzione: deve uscire uno o due mesi dopo la Torre.
+
+### Aggiunto
+
+- **L'Arena: cento livelli nuovi, dal 201 al 300, con i mattoni rinforzati.** Un mattone
+  rinforzato va eliminato due volte: la prima si incrina e resta, la seconda sparisce.
+  Un Intreccio fa un passo solo; bombe e piccone valgono come un'eliminazione; il
+  mattone ha il suo colore e conta per la Tinta.
+- **Obiettivo nuovo: «Demolisci N mattoni».**
+- **Sette atti:** il tracciato, gli ingressi, le gradinate, i portici, le volte, il
+  velario, la tribuna. Riuscite del giocatore artificiale: 80, 75, 60, 50, 43, 38, 35%.
+- **L'Arena si apre finendo tutta la Torre.** La festa della Torre apre l'Arena; la festa
+  finale arriva alla fine dell'Arena.
+
+### Cambiato
+
+- Il masso della Torre non ha piu' la crepa: e' una pietra grigia puntinata. La crepa e'
+  del mattone incrinato.
+
+### Corretto
+
+- La Tinta ignorava il colore dei mattoni rinforzati.
+
 ## [Non pubblicato] — La Torre (branch `opera-torre`)
 
 Non ancora in produzione: aspetta il via del proprietario.
