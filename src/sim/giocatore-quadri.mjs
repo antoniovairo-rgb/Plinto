@@ -28,6 +28,13 @@
  * vero, che non si liberera' mai (`buchiIsolati`). Un gruppo fatto solo di massi ha
  * nove caselle piene e `vicinanza` lo salta, come salta i gruppi gia' chiusi.
  * Lo controlla tests/giocatore-massi.test.js.
+ *
+ * I MATTONI RINFORZATI DELL'ARENA CHIEDONO UNA MIRA, INVECE. Per gli obiettivi di sempre
+ * basta il motore: un gruppo chiuso su un mattone intatto lascia il mattone incrinato, e
+ * il gruppo resta quasi vuoto ma si richiude presto. Ma «Demolisci N mattoni» conta solo
+ * la SECONDA eliminazione, e un giocatore che non lo sa chiude i gruppi comodi e lascia i
+ * mattoni dove sono. Con quell'obiettivo ogni incrinatura vale qualcosa (e' meta' strada)
+ * e ogni demolizione molto di piu'. Lo controlla tests/giocatore-mattoni.test.js.
  */
 
 import {
@@ -86,7 +93,10 @@ function vicinanza(grid) {
  * metro che giocava per il punteggio invece che per l'obiettivo.
  */
 export function preferenze(quadro) {
-  const p = { row: 1, col: 1, quadrant: 1, svuotare: 0, mira: 6, nonSpezzare: 0, intreccio: 0 };
+  const p = {
+    row: 1, col: 1, quadrant: 1, svuotare: 0, mira: 6, nonSpezzare: 0, intreccio: 0,
+    incrinare: 0, demolire: 0,
+  };
   for (const { tipo } of quadro.obiettivi) {
     if (tipo === 'righe') p.row = 6;
     else if (tipo === 'colonne') p.col = 6;
@@ -96,6 +106,8 @@ export function preferenze(quadro) {
     // punta a non spezzarla mai.
     else if (tipo === 'catena') p.nonSpezzare = 900;
     else if (tipo === 'punteggio') p.nonSpezzare = 500;
+    // Un'incrinatura e' meta' di una demolizione: vale, ma molto meno della seconda.
+    else if (tipo === 'demolizioni') { p.incrinare = 140; p.demolire = 420; }
     /**
      * L'INTRECCIO MANCAVA, e la mancanza si e' vista molto piu' tardi.
      *
@@ -128,9 +140,10 @@ export function preferenze(quadro) {
  * la percentuale torna a dire qualcosa. La stessa lezione era gia' scritta in
  * tools/taratura.mjs: qui non era mai stata applicata.
  */
-function valuta(grigliaDopo, gruppi, pref, rumore = 0) {
+function valuta(grigliaDopo, gruppi, pref, rumore = 0, mattoni = null) {
   const vic = vicinanza(grigliaDopo);
   let valore = 0;
+  if (mattoni) valore += mattoni.incrinati.length * pref.incrinare + mattoni.demoliti.length * pref.demolire;
   // Non spezzare la Catena vale piu' di qualunque singolo gruppo in piu'.
   if (gruppi.length === 0) valore -= pref.nonSpezzare;
   for (const g of gruppi) valore += 150 * pref[g.type];
@@ -178,8 +191,8 @@ function ramiDiRadice(grid, pezzi, pref, profondita, rng) {
     const candidate = case_.map(([row, col]) => {
       const { grid: posata } = placeShape(grid, pezzo.shape, row, col, 1, pezzo.bombe);
       const gruppi = findCompletedGroups(posata);
-      const { grid: dopo } = clearGroups(posata, gruppi);
-      return { row, col, dopo, valore: valuta(dopo, gruppi, pref, rng.float() * 45) };
+      const pulita = clearGroups(posata, gruppi);
+      return { row, col, dopo: pulita.grid, valore: valuta(pulita.grid, gruppi, pref, rng.float() * 45, pulita) };
     }).sort((a, b) => b.valore - a.valore).slice(0, AMPIEZZA);
 
     const resto = pezzi.slice();

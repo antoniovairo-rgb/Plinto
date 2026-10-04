@@ -343,7 +343,7 @@ export function findCompletedGroups(grid) {
  * @returns {{grid: Uint8Array, clearedCells: number[]}}
  */
 export function clearGroups(grid, groups) {
-  if (groups.length === 0) return { grid, clearedCells: [] };
+  if (groups.length === 0) return { grid, clearedCells: [], incrinati: [], demoliti: [] };
   const seen = new Set();
   for (const group of groups) for (const cell of group.cells) seen.add(cell);
   return svuotaCelle(grid, seen);
