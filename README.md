@@ -3,7 +3,7 @@
 Puzzle game a blocchi. Gratuito, **senza pubblicita**, senza account, senza attese.
 
 > Stato: **pubblicato** su [GitHub Pages](https://antoniovairo-rgb.github.io/Plinto/) e
-> **in test chiuso su Google Play** come Trusted Web Activity. Le voci ancora aperte del
+> **su Google Play dal 5 ottobre 2026** come Trusted Web Activity. Le voci ancora aperte del
 > [gate di rilascio](docs/RELEASE_CHECKLIST.md) sono quelle che nessun controllo automatico
 > puo' chiudere: la prova su iPhone e la verifica legale del nome.
 

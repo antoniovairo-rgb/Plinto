@@ -6,8 +6,8 @@ il codice non concordano, vince il codice: correggi questo file.
 ## Cos'e'
 Puzzle a blocchi su griglia 9x9 (righe, colonne E quadranti 3x3), gratuito, senza
 pubblicita', senza account, senza rete. Web app installabile (PWA) e, su Google Play,
-una **Trusted Web Activity** senza codice nativo. E' **in test chiuso su Google Play**:
-la stabilita' viene prima di qualunque funzionalita' nuova.
+una **Trusted Web Activity** senza codice nativo. E' **pubblico su Google Play dal 5 ottobre
+2026**: la stabilita' viene prima di qualunque funzionalita' nuova.
 
 ## Stack
 - React 18 + Vite 5, JSX puro, ESM (`"type": "module"`). **Niente TypeScript.**
