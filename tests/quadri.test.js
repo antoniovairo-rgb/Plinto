@@ -250,6 +250,26 @@ describe('la strada non si chiude mai', () => {
     expect(progressi.quadroSbloccato(1), 'e resta riprendibile').toBe(true);
   });
 
+  it('«livello successivo» dopo un livello recuperato salta quelli gia superati', () => {
+    // Il caso segnalato: 85 lasciato indietro, 86 e 87 superati, poi l'85 vinto.
+    // Il pulsante portava sull'86, che aveva gia' la spunta; deve portare sull'88.
+    const vinci = (n) => progressi.registraTentativo(n, { superato: true, mosse: 9, punteggio: 400 });
+    for (let n = 1; n <= 84; n += 1) vinci(n);
+    fallisci(85, progressi.TENTATIVI_PER_APRIRE);
+    vinci(86);
+    vinci(87);
+    expect(progressi.quadroDopo(85, TOTALE_QUADRI), 'perso l 85, si va comunque sull 88').toBe(88);
+    vinci(85);
+    expect(progressi.quadroDopo(85, TOTALE_QUADRI), 'vinto l 85, si va sull 88').toBe(88);
+    expect(progressi.quadroDopo(87, TOTALE_QUADRI), 'in ordine resta il vicino').toBe(88);
+  });
+
+  it('«livello successivo» non apre un livello ancora chiuso', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE - 1);
+    expect(progressi.quadroDopo(1, TOTALE_QUADRI)).toBe(null);
+    expect(progressi.quadroDopo(TOTALE_QUADRI, TOTALE_QUADRI), 'dopo l ultimo non c e niente').toBe(null);
+  });
+
   it('la porta si apre di UNO alla volta, non su tutto il resto del percorso', () => {
     fallisci(1, progressi.TENTATIVI_PER_APRIRE);
     expect(progressi.quadroSbloccato(2)).toBe(true);

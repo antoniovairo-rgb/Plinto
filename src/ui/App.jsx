@@ -27,7 +27,7 @@ import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/quadri.js';
 import {
-  quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto,
+  quantiSuperati, prossimoQuadro, quadroDopo, riepilogoPercorso, riepilogoAtto,
 } from '../persistence/progressi.js';
 import { leggiRipresa } from '../persistence/ripresa.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
@@ -243,7 +243,7 @@ export function App() {
   }, [livelloCorrente, apriQuadro]);
 
   const quadroSuccessivo = useCallback(() => {
-    const prossimo = quadroNumero((quadri.quadro?.numero ?? 0) + 1);
+    const prossimo = quadroNumero(quadroDopo(quadri.quadro?.numero ?? 0, TOTALE_QUADRI));
     if (prossimo) apriQuadro(prossimo);
     else tornaAiQuadri();
   }, [quadri.quadro, apriQuadro, tornaAiQuadri]);

@@ -130,6 +130,23 @@ export function prossimoQuadro(totale, progressi = caricaProgressi()) {
 }
 
 /**
+ * Il Quadro che apre «Livello successivo», partendo da quello appena giocato: il primo
+ * DOPO di lui non ancora superato, se e' aperto. Null se non ce n'e' uno.
+ *
+ * Era semplicemente numero + 1, e bastava finche' si andava avanti in ordine. Da quando un
+ * livello si puo' lasciare indietro e riprendere piu' tardi, chi tornava a vincere l'85
+ * dopo aver gia' superato l'86 e l'87 veniva rimandato sull'86, che aveva gia' la spunta.
+ * Il successivo di un livello recuperato e' il primo buco che viene dopo, non il vicino.
+ */
+export function quadroDopo(numero, totale, progressi = caricaProgressi()) {
+  for (let n = numero + 1; n <= totale; n += 1) {
+    if (quadroSuperato(n, progressi)) continue;
+    return quadroSbloccato(n, progressi) ? n : null;
+  }
+  return null;
+}
+
+/**
  * Registra un tentativo. Conserva il risultato migliore: meno mosse a parita' di
  * successo, e a parita' di mosse il punteggio piu' alto.
  *
