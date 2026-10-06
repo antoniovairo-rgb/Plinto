@@ -37,6 +37,19 @@ Non ancora in produzione: aspetta il via del proprietario.
   senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
   cambiano, e nemmeno i record di chi li ha gia' giocati.
 
+## [1.19.5] — 6 ottobre 2026
+
+### Corretto
+
+**«Livello successivo» dopo un livello recuperato portava su un livello già superato.**
+Segnalato dal proprietario: lasciato indietro l'85 (aperto l'86 per insistenza), superati
+86 e 87, poi tornato a vincere l'85, il pulsante apriva l'86, che aveva già la spunta, invece
+dell'88. Il pulsante calcolava semplicemente «numero + 1», giusto finché si va avanti in
+ordine. Adesso apre il primo livello **dopo** quello giocato che non è ancora superato
+(`quadroDopo` in `src/persistence/progressi.js`); se quel livello non è aperto, si torna alla
+mappa. Vale anche per lo stesso pulsante dopo una sconfitta. Due prove nuove in
+`tests/quadri.test.js` riproducono il caso segnalato.
+
 ## [1.19.4] — 26 settembre 2026
 
 ### Corretto

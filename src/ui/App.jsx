@@ -30,7 +30,7 @@ import {
   livelliDellOpera,
 } from '../config/quadri.js';
 import {
-  quantiSuperati, prossimoQuadro, riepilogoPercorso, riepilogoAtto, quadroSbloccato,
+  quantiSuperati, prossimoQuadro, quadroDopo, riepilogoPercorso, riepilogoAtto, quadroSbloccato,
   superatiNellOpera,
 } from '../persistence/progressi.js';
 import { leggiRipresa } from '../persistence/ripresa.js';
@@ -247,7 +247,7 @@ export function App() {
   }, [livelloCorrente, apriQuadro]);
 
   const quadroSuccessivo = useCallback(() => {
-    const prossimo = quadroNumero((quadri.quadro?.numero ?? 0) + 1);
+    const prossimo = quadroNumero(quadroDopo(quadri.quadro?.numero ?? 0, TOTALE_QUADRI));
     if (prossimo) apriQuadro(prossimo);
     else tornaAiQuadri();
   }, [quadri.quadro, apriQuadro, tornaAiQuadri]);
