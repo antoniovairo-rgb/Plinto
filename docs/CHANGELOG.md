@@ -7,6 +7,21 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.19.6] — 8 ottobre 2026
+
+### Corretto
+
+**Da PC la griglia usciva a destra dal riquadro del gioco, tagliata.** Segnalato dal
+proprietario da Chrome su PC, con uno screenshot del livello 2. Su schermi larghi il gioco
+sta in una cornice da 430 px, ma il tetto della plancia (`--pl-plancia-max`) era misurato
+sulla finestra: `58vh`, cioè 626 px su un monitor alto 1080. La plancia, quadrata, usciva
+di 160 px e l'`overflow: hidden` della cornice la tagliava. Sotto i 720 px di altezza della
+finestra non succedeva, e sul telefono nemmeno: è il motivo per cui non era stato visto.
+Dentro la cornice il tetto ora è la larghezza della cornice stessa. La prova degli schermi
+grandi (`npm run prova-desktop`) misurava solo l'altezza della plancia: adesso controlla
+anche che stia dentro la cornice, e prova anche 1920×1080 e 1366×768. Con il CSS vecchio la
+prova nuova fallisce su quattro schermi su sei.
+
 ## [1.19.5] — 6 ottobre 2026
 
 ### Corretto

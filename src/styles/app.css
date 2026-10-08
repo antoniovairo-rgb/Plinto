@@ -1697,6 +1697,14 @@ button {
 
   /* Dentro la cornice non serve lo spazio per le tacche dei telefoni. */
   .pl-app { padding: 0; }
+
+  /* IL TETTO DELLA PLANCIA E' LA CORNICE, NON LA FINESTRA. Il token misura in vw e vh,
+     cioe' sulla finestra: sul telefono coincidono, dentro la cornice no. Su un monitor
+     alto 58vh supera i 430 px della cornice (626 px a 1080 di altezza) e la plancia,
+     quadrata, usciva a destra, tagliata dall'`overflow: hidden` del riquadro. Segnalato
+     dal proprietario da Chrome su PC, 8 ottobre 2026. I 4 px sono il padding laterale
+     di .pl-plancia-area. */
+  :root { --pl-plancia-max: min(calc(min(430px, 92vw) - 4px), 58vh); }
 }
 
 /* Schermi larghi ma bassi (un portatile molto panoramico): niente cornice, che
