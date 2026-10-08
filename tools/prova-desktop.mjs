@@ -56,6 +56,8 @@ const SCHERMI = [
   { nome: 'monitor-grande', width: 1920, height: 1200 },
   { nome: 'portatile-basso', width: 1440, height: 700 },
   { nome: 'tablet', width: 820, height: 1180 },
+  { nome: 'monitor-comune', width: 1920, height: 1080 },
+  { nome: 'portatile', width: 1366, height: 768 },
 ];
 
 for (const schermo of SCHERMI) {
@@ -93,6 +95,13 @@ for (const schermo of SCHERMI) {
   await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => errori.push(`${schermo.nome}: la plancia non compare`));
   const plancia = await page.locator('.pl-plancia').boundingBox();
   if (plancia && plancia.height < 240) errori.push(`${schermo.nome}: plancia alta solo ${Math.round(plancia.height)} px`);
+  // La plancia deve stare DENTRO la cornice, non solo esserci. Si misurava solo l'altezza,
+  // e su questi stessi schermi la plancia usciva a destra di quasi 200 px, tagliata dal
+  // riquadro: segnalato da PC l'8 ottobre 2026.
+  const cornice = await page.locator('#root').boundingBox();
+  if (plancia && cornice && plancia.x + plancia.width > cornice.x + cornice.width + 1) {
+    errori.push(`${schermo.nome}: la plancia esce a destra dalla cornice di ${Math.round(plancia.x + plancia.width - cornice.x - cornice.width)} px`);
+  }
   await page.screenshot({ path: `${USCITA}/${schermo.nome}-partita.png` });
   await page.close();
 }
