@@ -119,10 +119,10 @@ body,
 
 /* La plancia: cornice d'ottone piena, alone caldo, linee dei quadranti dorate. */
 .pl-plancia {
-  --pl-line-strong: #e3b04a;
+  --pl-line-strong: var(--pl-ottone);
   background: linear-gradient(180deg, #171c29 0%, #10141d 100%);
   box-shadow:
-    0 0 0 2px #e3b04a,
+    0 0 0 2px var(--pl-ottone),
     0 0 0 6px color-mix(in srgb, var(--pl-brand) 12%, transparent),
     0 0 44px color-mix(in srgb, var(--pl-brand) 28%, transparent),
     0 26px 60px rgba(0, 0, 0, 0.6),
