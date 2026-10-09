@@ -7,6 +7,39 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.0] — 9 ottobre 2026
+
+La veste nuova pensata per la Torre esce prima della Torre, sul Ponte: grafica e
+animazioni. Restano per dopo l'icona, il logo a gemme e la Torre stessa.
+
+### Cambiato
+
+- **Grafica nuova, il «cantiere di notte»** (`src/styles/finiture.css`, scelta dal
+  proprietario fra tre anteprime): fondo con luci e reticolo, scritta PLINTO d'ottone,
+  pulsante del livello piu' grande (testo da 19 a 21 px), le tre voci della home ognuna
+  col suo colore, plancia con cornice d'ottone e caselle incassate, blocchi come gemme.
+  Nessun testo e' diventato piu' piccolo: un confronto di tutti i testi a schermo con la
+  grafica di prima, piu' contrasti, fluidita' e impaginazione con le prove di sempre.
+  Sui telefoni bassi il pulsante del livello resta alto 64 px, perche' a 70 la home
+  scorreva di 5 px a 360x640.
+
+### Aggiunto
+
+- **Animazioni nuove durante la partita** (`src/styles/animazioni.css`), scelte dopo un
+  video di prova:
+  - **l'onda**: i blocchi spariscono a partire dal pezzo appena appoggiato, al massimo
+    210 ms fra il primo e l'ultimo (`src/feel/onda.js`);
+  - **le scie**: una striscia di luce lungo ogni riga o colonna chiusa, un lampo dal
+    centro per ogni quadrante;
+  - **l'Intreccio**: con due o piu' gruppi in una mossa compare «Intreccio ×N!» in alto
+    sulla plancia (in inglese «Interlace») e la plancia trema per 0,4 secondi;
+  - **l'atterraggio elastico**: il pezzo rimbalza (da 260 a 380 ms).
+
+  Chi chiede meno movimento al sistema non vede scie, scritta, scossa e onda; chi spegne
+  gli effetti nelle impostazioni non li riceve. `npm run e2e-scenografie` prova un
+  Intreccio vero, una riga sola (niente scritta), la versione con meno movimento e il
+  colore dei blocchi che esplodono (la prima stesura delle gemme li rendeva trasparenti).
+
 ## [1.20.2] — 9 ottobre 2026
 
 ### Cambiato
