@@ -358,15 +358,27 @@ await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|
 await page.waitForSelector('.pl-plancia');
 const geoLibera = await page.evaluate(() => {
   const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
-  const c = document.querySelectorAll('.pl-plancia .pl-cella')[40].getBoundingClientRect();
+  // Casella 39 (riga 4, colonna 3) e NON la 40, il centro esatto. Se il primo pezzo
+  // della mano e' il quadrato 3x3, centrato sulla 40 riempie per intero il quadrante
+  // centrale, che si chiude e sparisce: la partita libera salvata resta vuota e la
+  // ripresa qui sotto non trova blocchi. Successo in integrazione continua sulla
+  // 1.20.1 (seme casuale con il 3x3 per primo) e rifatto apposta con il seme 84.
+  // Spostato di una colonna, nessun pezzo puo' chiudere niente: il 3x3 copre le
+  // colonne 2-4, a cavallo di due quadranti, e nessun pezzo e' lungo nove.
+  const c = document.querySelectorAll('.pl-plancia .pl-cella')[39].getBoundingClientRect();
   return { px: p.left + p.width / 2, py: p.top + p.height / 2, cx: c.left + c.width / 2, cy: c.top + c.height / 2 };
 });
 await page.mouse.move(geoLibera.px, geoLibera.py);
 await page.mouse.down();
 await page.mouse.move(geoLibera.cx, geoLibera.cy, { steps: 8 });
 await page.mouse.up();
+// Si contano i blocchi quando le eventuali esplosioni sono finite: un blocco che sta
+// sparendo e' ancora nella plancia, ma nella partita salvata non c'e' gia' piu'.
+await page.waitForFunction(() => document.querySelectorAll('.pl-blocco--esploso').length === 0,
+  null, { timeout: 5000 }).catch(() => {});
 await page.waitForTimeout(120);
 const blocchiLibera = await contaBlocchi();
+if (blocchiLibera === 0) errori.push('SFIDA: la mossa nella partita libera non ha lasciato blocchi, la prova di ripresa non proverebbe niente');
 await page.locator('.pl-hud__menu').first().click();
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
