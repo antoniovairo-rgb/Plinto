@@ -50,9 +50,9 @@ const svg = readFileSync(new URL('../public/icon.svg', import.meta.url).pathname
  * Le due sostituzioni sono verificate: se un giorno `icon.svg` cambia forma, questo
  * strumento si ferma invece di produrre in silenzio un'icona senza marchio.
  */
-const FONDO = '<rect width="48" height="48" rx="11" fill="#0e1118"/>';
+const FONDO = /<g id="fondo">[\s\S]*?<\/g>/;
 const VISTA = 'viewBox="0 0 48 48"';
-if (!svg.includes(FONDO) || !svg.includes(VISTA)) {
+if (!FONDO.test(svg) || !svg.includes(VISTA)) {
   throw new Error('public/icon.svg e\' cambiato: il ritaglio per Android va rifatto');
 }
 const svgSoloMarchio = svg.replace(FONDO, '').replace(VISTA, 'viewBox="3 3 42 42"');

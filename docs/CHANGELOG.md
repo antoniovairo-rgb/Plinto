@@ -31,6 +31,11 @@ Non ancora in produzione: aspetta il via del proprietario.
   blocchi come gemme. Nessun testo e' diventato piu' piccolo; contrasti, fluidita' e
   impaginazione verificati con le prove di sempre, piu' un confronto di tutti i 3.130
   testi a schermo con la grafica di prima.
+- **Icona e logo con le stesse finiture**: blocchi come gemme, filo e tratteggio d'ottone,
+  luce calda in alto. Stessa geometria di prima, quindi si riconosce subito. Le icone per
+  Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
+  margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
+  la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
 
 ### Corretto
 

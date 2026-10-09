@@ -22,13 +22,16 @@ function token(nome) {
 }
 
 describe('icona statica', () => {
+  // Nella Torre il marchio ha le finiture del gioco: filo e tratteggio d'ottone, blocchi
+  // come gemme con il loro alone. I colori pieni restano tutti token del tema scuro.
   it('usa gli stessi colori del marchio nel tema scuro', () => {
     const attesi = [
       token('pl-ink'),
+      token('pl-ottone'),
       token('pl-block-4'),
       token('pl-block-2'),
       token('pl-block-3'),
-      token('pl-line-strong'),
+      token('pl-ottone'),
     ];
     const usati = [...icona.matchAll(/(?:fill|stroke)="(#[0-9a-fA-F]{6})"/g)]
       .map((m) => m[1].toLowerCase());
@@ -36,8 +39,14 @@ describe('icona statica', () => {
   });
 
   it('mantiene la geometria del logo (quarto riquadro tratteggiato e vuoto)', () => {
-    expect(icona).toContain('stroke-dasharray="4 3"');
-    expect((icona.match(/rx="5"/g) ?? []).length).toBe(4);
+    const tessere = new Set([...icona.matchAll(/<rect x="(\d+)" y="(\d+)" width="19" height="19" rx="5"/g)]
+      .map((m) => `${m[1]},${m[2]}`));
+    expect([...tessere].sort()).toEqual(['26,26', '26,3', '3,26', '3,3']);
+    expect(icona).toMatch(/<rect x="26" y="26" width="19" height="19" rx="5" fill="none"[^>]*stroke-dasharray="4 3"/);
+  });
+
+  it('tiene il fondo in un gruppo a parte, che tools/icone.mjs toglie per Android', () => {
+    expect(icona).toMatch(/<g id="fondo">[\s\S]*?<\/g>/);
   });
 });
 

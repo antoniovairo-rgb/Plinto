@@ -49,6 +49,9 @@
   /* --- Colore identitario ------------------------------------------------- */
   --pl-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
   --pl-brand-deep: #c9922a;
+  /* L'ottone della Torre: cornice della plancia, tratteggio del marchio, filo dell'icona.
+     Un token solo perche' icon.svg lo ripete in esadecimale e tests/icona.test.js lo confronta. */
+  --pl-ottone: #e3b04a;
   --pl-danger: #ec6d8e;        /* 5.21 su --pl-surface-2 */
   /* Fondo dei comandi distruttivi: il testo bianco sopra --pl-danger stava a 2.94:1,
      e quel pulsante e' proprio quello che cancella i dati del giocatore. */
