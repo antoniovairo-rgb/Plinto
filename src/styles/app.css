@@ -2516,14 +2516,21 @@ button {
    Due colonne: bilanciato, prevedibile, e ogni voce resta su una riga. */
 .pl-home__menu {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2px 8px;
   max-width: 380px;
   margin: 0 auto;
   width: 100%;
 }
+/* Su due colonne una voce lunga va a capo invece di allargare la sua colonna.
+   Con `1fr` e `nowrap` "Il tuo profilo di gioco" (200 px) si prendeva la colonna di
+   sinistra e spingeva quella di destra fuori dallo schermo: su 360 px "Impostazioni"
+   e "Statistiche" uscivano tagliate dal bordo. Visto il 9 ottobre 2026; ora lo misura
+   `npm run impaginazione`. */
 .pl-home__menu .pl-btn {
-  white-space: nowrap;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.2;
   min-height: 44px;
 }
 /* Con un numero DISPARI di voci l'ultima resterebbe appoggiata alla colonna di
@@ -2552,6 +2559,7 @@ button {
     grid-template-columns: repeat(auto-fit, minmax(0, max-content));
     justify-content: center;
   }
+  .pl-home__menu .pl-btn { white-space: nowrap; }
   /* In fila l'ultima voce non e' piu' spaiata: la regola di sopra non deve applicarsi. */
   .pl-home__menu .pl-btn:last-child:nth-child(odd) { grid-column: auto; }
 }

@@ -132,6 +132,21 @@ for (const [larghezza, altezza, nome] of FORMATI) {
   if (eccessoLungo > 0 && eccessoLungo > eccesso) {
     errori.push(`${nome} (${larghezza}x${altezza}): la home entra con ${versione} ma scorre di ${eccessoLungo}px con una versione piu lunga. Entra per fortuna, non per costruzione.`);
   }
+
+  // Le voci del menu in fondo: ognuna dentro lo schermo e con il testo intero. Il
+  // controllo in altezza qui sopra non le vedeva: su 360 px la colonna di destra
+  // usciva dal bordo e "Impostazioni" restava tagliata senza far scorrere niente.
+  const voci = await page.evaluate(() => [...document.querySelectorAll('.pl-home__menu .pl-btn')].map((b) => {
+    const r = b.getBoundingClientRect();
+    return { testo: b.textContent.trim(), fuori: r.left < 0 || r.right > window.innerWidth + 0.5,
+      tagliata: b.scrollWidth > b.clientWidth + 1 };
+  }));
+  for (const v of voci) {
+    if (v.fuori || v.tagliata) {
+      console.log(`  NO  ${nome.padEnd(18)} ${larghezza}x${altezza}  menu: "${v.testo}" ${v.fuori ? 'esce dallo schermo' : 'ha il testo tagliato'}`);
+      errori.push(`${nome} (${larghezza}x${altezza}): la voce "${v.testo}" del menu ${v.fuori ? 'esce dallo schermo' : 'ha il testo tagliato'}`);
+    }
+  }
   await page.close();
 }
 

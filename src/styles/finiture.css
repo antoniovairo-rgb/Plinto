@@ -1,0 +1,174 @@
+/*
+ * LE FINITURE: il «cantiere di notte».
+ *
+ * Scelto dal proprietario il 9 ottobre 2026 fra tre anteprime (proposta 2, la piu'
+ * spinta), per la Torre. Sta in un file suo, caricato DOPO app.css: le regole di base
+ * (misure, disposizione, accessibilita') restano tutte la', qui ci sono solo luce,
+ * profondita' e colore. Togliere questo file riporta il gioco com'era.
+ *
+ * Tre vincoli, e ognuno ha la sua prova:
+ *  - NESSUN TESTO PIU' PICCOLO di prima, e nessuno che va a capo o esce dal suo spazio
+ *    (prova-desktop, impaginazione, comunicazioni in due lingue);
+ *  - i contrasti WCAG AA restano quelli misurati (npm run contrasti): qui si cambiano
+ *    fondi e ombre, mai il colore di un testo su un fondo nuovo senza misurarlo;
+ *  - la fluidita' non peggiora (npm run soak): niente `backdrop-filter`, e gli aloni
+ *    sono ombre statiche, che non si ricalcolano durante le animazioni.
+ */
+
+/* --------------------------------------------------------------- il fondo --- */
+/* Tre luci (ottone in alto, viola e verde in basso) su un reticolo da progetto appena
+   visibile. Sullo stesso elemento in cui app.css mette il colore di fondo. */
+body,
+.pl-app {
+  background:
+    radial-gradient(70% 40% at 50% 0%, color-mix(in srgb, var(--pl-brand) 22%, transparent) 0%, transparent 70%),
+    radial-gradient(60% 40% at 0% 100%, color-mix(in srgb, var(--pl-block-3) 20%, transparent) 0%, transparent 70%),
+    radial-gradient(60% 40% at 100% 100%, color-mix(in srgb, var(--pl-block-2) 16%, transparent) 0%, transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+    var(--pl-ink);
+}
+
+/* --------------------------------------------------------------- la home --- */
+.pl-logo {
+  filter: drop-shadow(0 0 28px color-mix(in srgb, var(--pl-brand) 45%, transparent))
+          drop-shadow(0 8px 20px rgba(0, 0, 0, 0.6));
+}
+/* Lettere d'ottone. Il colore pieno resta come ripiego per chi non ha background-clip. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .pl-logo__testo {
+    background: linear-gradient(180deg, #fff6d8 0%, var(--pl-brand) 55%, var(--pl-brand-deep) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+.pl-home__claim { color: var(--pl-brand); }
+
+/* Il pulsante del livello: piu' alto e con il testo piu' grande (19 -> 21 px). */
+.pl-home__azioni .pl-btn--primario {
+  min-height: 70px;
+  font-size: 21px;
+  letter-spacing: 0.12em;
+  background: linear-gradient(180deg, #ffd873 0%, var(--pl-brand) 45%, var(--pl-brand-deep) 100%);
+  box-shadow:
+    0 0 0 2px rgba(255, 236, 170, 0.55),
+    0 0 40px color-mix(in srgb, var(--pl-brand) 55%, transparent),
+    0 14px 30px rgba(0, 0, 0, 0.5),
+    inset 0 3px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Sui telefoni bassi (360x640) quei 6 px in piu' facevano scorrere la home di 5 px:
+   li' il pulsante torna all'altezza di prima, il testo resta a 21 px. */
+@media (max-height: 680px) and (orientation: portrait) {
+  .pl-home__azioni .pl-btn--primario { min-height: 64px; }
+}
+
+/* Le tre voci principali: ognuna il suo colore, per riconoscerle a colpo d'occhio. */
+.pl-sfida-avvio--mappa,
+.pl-sfida-avvio--libera,
+.pl-sfida-avvio--sfida {
+  --voce: var(--pl-brand);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--voce) 22%, transparent),
+                              color-mix(in srgb, var(--voce) 4%, transparent) 60%), var(--pl-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--voce) 40%, transparent),
+              0 10px 24px rgba(0, 0, 0, 0.45);
+}
+.pl-sfida-avvio--libera { --voce: var(--pl-block-2); }
+.pl-sfida-avvio--sfida { --voce: var(--pl-block-3); }
+
+/* Il menu in fondo: tessere con l'icona in un riquadro. Testo invariato (14 px). */
+.pl-home__menu { gap: 10px; }
+.pl-home__menu .pl-btn {
+  padding: 0 10px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+.pl-home__voce-icona {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--pl-brand) 14%, transparent);
+}
+
+/* Sui telefoni stretti (360 px) le tessere si stringono un po', cosi' "Come si gioca"
+   resta su una riga; quella lunga ("Il tuo profilo di gioco") va a capo comunque. */
+@media (max-width: 380px) {
+  .pl-home__menu .pl-btn { padding: 0 7px; gap: 7px; }
+  .pl-home__voce-icona { width: 26px; height: 26px; }
+}
+
+/* --------------------------------------------------------------- la partita --- */
+.pl-hud__valore { text-shadow: 0 0 24px color-mix(in srgb, var(--pl-brand) 70%, transparent), 0 2px 0 rgba(0, 0, 0, 0.5); }
+.pl-hud__valore--piccolo { text-shadow: none; }
+
+.pl-obiettivo {
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--pl-brand) 26%, transparent),
+                    color-mix(in srgb, var(--pl-block-3) 12%, transparent)),
+    var(--pl-surface);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--pl-brand) 55%, transparent),
+              0 0 26px color-mix(in srgb, var(--pl-brand) 22%, transparent);
+}
+
+.pl-catena__barra { height: 8px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6); }
+.pl-catena__valore--attiva { text-shadow: 0 0 12px color-mix(in srgb, var(--pl-brand) 70%, transparent); }
+
+/* La plancia: cornice d'ottone piena, alone caldo, linee dei quadranti dorate. */
+.pl-plancia {
+  --pl-line-strong: #e3b04a;
+  background: linear-gradient(180deg, #171c29 0%, #10141d 100%);
+  box-shadow:
+    0 0 0 2px #e3b04a,
+    0 0 0 6px color-mix(in srgb, var(--pl-brand) 12%, transparent),
+    0 0 44px color-mix(in srgb, var(--pl-brand) 28%, transparent),
+    0 26px 60px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.6);
+}
+/* Le caselle vuote sembrano incassate. */
+.pl-plancia .pl-cella { box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.05); }
+
+/* I blocchi come gemme: riflesso, bordo chiaro e un alone del loro colore. Valgono
+   ovunque ci sia un blocco (plancia, pezzi in mano, pezzo trascinato). */
+.pl-blocco {
+  background:
+    radial-gradient(120% 70% at 30% 15%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, color-mix(in srgb, var(--blocco) 85%, white) 0%, var(--blocco) 45%,
+                    color-mix(in srgb, var(--blocco) 75%, black) 100%);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.25),
+    inset 0 3px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.32),
+    0 0 18px color-mix(in srgb, var(--blocco) 85%, transparent),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.pl-tray__posto {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)), var(--pl-ink);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 8px 18px rgba(0, 0, 0, 0.4);
+}
+.pl-anteprima {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: color-mix(in srgb, var(--pl-brand) 25%, transparent);
+}
+
+/* --------------------------------------------------------------- la mappa --- */
+.pl-tappa--fatta {
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.25), inset 0 3px 0 rgba(255, 255, 255, 0.4),
+              0 0 14px color-mix(in srgb, var(--pl-ok) 45%, transparent);
+}
+.pl-tappa--qui {
+  box-shadow: 0 0 0 3px #fff2c4, 0 0 0 7px color-mix(in srgb, var(--pl-brand) 35%, transparent),
+              0 0 34px color-mix(in srgb, var(--pl-brand) 80%, transparent);
+}
+/* Il nome dell'atto in oro, un punto piu' grande (12 -> 13 px). */
+.pl-atto__nome { color: var(--pl-brand); font-size: 13px; }
+
+/* Il pulsante principale delle altre schermate (apertura del livello, fine). */
+.pl-btn--primario {
+  box-shadow: 0 0 0 2px rgba(255, 236, 170, 0.5), 0 0 30px color-mix(in srgb, var(--pl-brand) 45%, transparent),
+              inset 0 3px 0 rgba(255, 255, 255, 0.55);
+}

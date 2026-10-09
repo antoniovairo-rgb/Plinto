@@ -50,9 +50,19 @@ Non ancora in produzione: aspetta il via del proprietario.
   ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
 - **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
   fine della Torre.
+- **Grafica nuova, il «cantiere di notte»** (`src/styles/finiture.css`): fondo con luci e
+  reticolo, logo d'ottone, pulsante del livello piu' grande (testo da 19 a 21 px), le tre
+  voci della home ognuna col suo colore, plancia con cornice d'ottone e caselle incassate,
+  blocchi come gemme. Nessun testo e' diventato piu' piccolo; contrasti, fluidita' e
+  impaginazione verificati con le prove di sempre, piu' un confronto di tutti i 3.130
+  testi a schermo con la grafica di prima.
 
 ### Corretto
 
+- Il menu in fondo alla home usciva dallo schermo sui telefoni larghi 360 px:
+  «Statistiche» e «Impostazioni» restavano tagliate dal bordo, perche' «Il tuo profilo di
+  gioco» allargava la sua colonna. Adesso le colonne sono uguali e la voce lunga va a capo.
+  `npm run impaginazione` controlla anche che ogni voce del menu stia dentro lo schermo.
 - Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
   Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
 
