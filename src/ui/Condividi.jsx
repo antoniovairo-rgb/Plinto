@@ -65,21 +65,20 @@ function indirizzoDelGioco(giorno) {
  * comportano diversamente, e il posto in cui accadrebbe per primo e' proprio il ramo
  * che quasi nessuno vede: quello di chi non puo' nemmeno copiare.
  *
- * L'ANTEPRIMA SI PUO' SPEGNERE, e in un posto sola lo e'. Di norma la scheda sta a
- * schermo prima ancora di toccare il pulsante: quello che si vede e' esattamente quello
- * che verra' condiviso, e non c'e' niente da scoprire dopo. Sulla mappa dei livelli
- * invece la scheda starebbe fra l'avanzamento e i cento livelli, spingendoli tutti piu'
- * giu' per mostrare un testo che nessuno ha ancora chiesto di vedere.
+ * IL TESTO NON SI MOSTRA, in nessun posto. Prima stava a schermo sotto il pulsante (e,
+ * dove l'anteprima era spenta, ricompariva dopo il tocco): il proprietario l'ha giudicato
+ * inutile -- chi tocca «Condividi» lo vede comunque nella finestra di condivisione del
+ * sistema -- e ha chiesto di toglierlo dalla fine del livello (8 ottobre 2026) e poi
+ * anche dalla festa finale, dove dopo «Condiviso.» tornava a schermo (9 ottobre 2026).
  *
- * Anche spenta, l'anteprima RIAPPARE quando serve davvero: se copiare non riesce, il
- * testo torna a schermo da solo. Il terzo gradino del ripiego non puo' dipendere da un
- * parametro, perche' e' l'unico che non ha altro sotto di se'.
+ * Resta UN caso in cui compare: quando non si puo' ne' condividere ne' copiare. Li' e'
+ * l'unico modo di prendere il testo, selezionandolo a mano, e il terzo gradino del
+ * ripiego non ha altro sotto di se'.
  *
  * @param {string} testo      la scheda gia' composta
  * @param {string} etichetta  il testo del pulsante
- * @param {boolean} [anteprima] false per mostrare la scheda solo dopo l'azione
  */
-export function CondividiTesto({ testo, etichetta, anteprima = true, t }) {
+export function CondividiTesto({ testo, etichetta, t }) {
   const [esito, setEsito] = useState(null);   // null | 'condiviso' | 'copiato' | 'manuale'
 
   async function condividi() {
@@ -112,10 +111,10 @@ export function CondividiTesto({ testo, etichetta, anteprima = true, t }) {
       {esito === 'condiviso' ? <p className="pl-nota">{t('scheda.condiviso')}</p> : null}
       {esito === 'manuale' ? <p className="pl-nota">{t('scheda.copiaAMano')}</p> : null}
 
-      {/* Il testo e' sempre a schermo: e' la card, ed e' leggibile da chiunque. Le righe
-          di blocchi sono decorative e vengono nascoste a chi ascolta, perche' ripeterebbero
-          in simboli quello che le righe sopra dicono a parole. */}
-      {anteprima || esito !== null ? (
+      {/* Solo quando ne' condividere ne' copiare e' riuscito. Le righe di blocchi sono
+          decorative e vengono nascoste a chi ascolta, perche' ripeterebbero in simboli
+          quello che le righe sopra dicono a parole. */}
+      {esito === 'manuale' ? (
       <pre className="pl-scheda" aria-label={t('scheda.anteprima')}>
         {testo.split('\n').map((riga, i) => (
           RIGA_DISEGNATA.test(riga)
@@ -181,20 +180,16 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
       },
     },
   );
-  // SENZA ANTEPRIMA. La fine del livello deve stare tutta nello schermo, senza scorrere
-  // (richiesta del proprietario, 8 ottobre 2026), e il riquadro del messaggio era il
-  // blocco piu' alto. Chi tocca il pulsante vede il messaggio nella finestra di
-  // condivisione del sistema; se copiare non riesce, il testo ricompare da solo.
-  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} anteprima={false} t={t} />;
+  // La fine del livello deve stare tutta nello schermo, senza scorrere (richiesta del
+  // proprietario, 8 ottobre 2026): il riquadro del messaggio era il blocco piu' alto.
+  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} t={t} />;
 }
 
 /**
  * La scheda di chi ha CHIUSO il percorso.
  *
  * Distinta da `CondividiPercorso` perche' il testo e' diverso (vedi
- * `formattaSchedaTrionfo`) e perche' qui l'anteprima si mostra: chi ha appena finito
- * cento livelli non sta cercando di sbrigarsi, e vedere cosa manderebbe e' la cosa che
- * lo fa decidere di mandarlo.
+ * `formattaSchedaTrionfo`). Il testo non si mostra nemmeno qui: vedi CondividiTesto.
  */
 export function CondividiTrionfo({ totale, mosseTotali, alPrimoColpo, t }) {
   const testo = formattaSchedaTrionfo(
@@ -243,7 +238,7 @@ export function CondividiPercorso({ superati, totale, t }) {
     <CondividiTesto
       testo={testo}
       etichetta={t('scheda.condividiPercorso')}
-      anteprima={false}
+     
       t={t}
     />
   );
