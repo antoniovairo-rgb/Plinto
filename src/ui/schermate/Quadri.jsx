@@ -8,6 +8,7 @@ import { ConfermaDoppia, VoceCancellata } from '../ConfermaDoppia.jsx';
 import {
   caricaProgressi, quadroSbloccato, quadroSuperato, prossimoQuadro, azzeraProgressi, quantiSuperati,
   superatiNellOpera,
+  mancantiPerUltimo,
 } from '../../persistence/progressi.js';
 import { numero } from '../../i18n/formato.js';
 import { CondividiPercorso } from '../Condividi.jsx';
@@ -191,7 +192,10 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                       disabled={!aperto}
                       aria-current={qui ? 'step' : undefined}
                       aria-label={`${t('quadri.quadro').replace('{n}', quadro.numero)}: ${
-                        aperto ? descriviObiettivi(quadro, t) : (testoChiusa && quadro.numero === opera.da ? testoChiusa : t('quadri.bloccato'))}${
+                        aperto ? descriviObiettivi(quadro, t)
+                          : (testoChiusa && quadro.numero === opera.da ? testoChiusa
+                            : (mancantiPerUltimo(quadro.numero, progressi).length > 0
+                              ? t('quadri.ultimoBloccato') : t('quadri.bloccato')))}${
                         fatto ? `. ${t('quadri.superato')}, ${t('quadri.tuoRecord').replace('{mosse}', fatto.mosse)}` : ''}${
                         daAttrezzo ? `. ${t('quadri.quiAttrezzo')}` : ''}`}
                     >
@@ -235,6 +239,25 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                   : '')
                 : t('quadri.attoDaAprire').replace('{n}', atto.da);
               return testo ? <p className="pl-atto__obiettivo">{testo}</p> : null;
+            })()}
+            {/* L'ULTIMO LIVELLO CHIUSO DALLA SUA REGOLA: si dice perche' e quali livelli
+                mancano, con i numeri veri. Senza, la casella del 100 resterebbe spenta
+                accanto al 99 superato e sembrerebbe un errore. Solo ad atto aperto: prima
+                di arrivarci non serve. Al massimo otto numeri, poi "e altri N". */}
+            {(() => {
+              const ultimo = dellAtto.find((q) => mancantiPerUltimo(q.numero, progressi).length > 0
+                && !quadroSuperato(q.numero, progressi));
+              if (!ultimo || !apertoQui) return null;
+              const mancanti = mancantiPerUltimo(ultimo.numero, progressi);
+              // Chi gioca in ordine ed e' al penultimo non ha niente da recuperare: dirgli
+              // "ti manca il 99" sarebbe ovvio. Il messaggio serve solo con un buco vero.
+              if (!mancanti.some((m) => m !== ultimo.numero - 1)) return null;
+              const testo = mancanti.length === 1
+                ? t('quadri.ultimoChiusoUno').replace('{n}', ultimo.numero).replace('{m}', mancanti[0])
+                : t('quadri.ultimoChiuso').replace('{n}', ultimo.numero).replace('{elenco}',
+                  mancanti.slice(0, 8).join(', ')
+                    + (mancanti.length > 8 ? ` ${t('quadri.eAltri').replace('{n}', mancanti.length - 8)}` : ''));
+              return <p className="pl-atto__obiettivo pl-atto__ultimo">{testo}</p>;
             })()}
           </section>
         );

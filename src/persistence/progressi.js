@@ -100,22 +100,46 @@ export function operaCompletata(opera, progressi = caricaProgressi()) {
 }
 
 /**
+ * L'ULTIMO LIVELLO SI GUADAGNA PER INTERO. Regola del proprietario (9 ottobre 2026):
+ * l'ultimo livello di un'opera -- 100, 200, 300 -- si apre solo quando TUTTI i
+ * livelli prima di lui sono superati. La via d'uscita degli otto tentativi vale per gli
+ * altri, non per lui: chiudere l'opera vuol dire averla fatta tutta.
+ *
+ * Restituisce i livelli che mancano, in ordine; vuoto se il livello non e' l'ultimo o se
+ * non manca niente.
+ */
+export function mancantiPerUltimo(numero, progressi = caricaProgressi()) {
+  const opera = operaDelQuadro(numero);
+  if (numero !== opera.a) return [];
+  const mancanti = [];
+  for (let n = opera.da; n < numero; n += 1) if (!quadroSuperato(n, progressi)) mancanti.push(n);
+  return mancanti;
+}
+
+/**
  * Il Quadro e' giocabile? Il primo lo e' sempre; gli altri dopo aver superato il
- * precedente, oppure dopo averci provato abbastanza volte.
+ * precedente, oppure dopo averci provato abbastanza volte. L'ultimo di un'opera solo con
+ * tutti i precedenti di quell'opera superati (vedi `mancantiPerUltimo`).
  *
  * IL PRIMO LIVELLO DI UN'OPERA E' L'ECCEZIONE: si apre solo quando l'opera precedente e'
  * finita TUTTA, ogni livello con la spunta. Deciso il 3 ottobre 2026 per la Torre: e' il
  * premio di chi ha costruito il Ponte, e la via dell'insistenza qui non vale. Quella
  * esiste perche' un muro non chiuda tutti i livelli dopo; ma i livelli lasciati indietro
  * restano li', aperti, e finirli e' sempre possibile.
+ *
+ * Un livello GIA' SUPERATO resta giocabile sempre: chi aveva vinto il 100 prima che
+ * esistesse la regola dell'ultimo livello lo tiene, e puo' rigiocarlo (decisione del
+ * proprietario, 9 ottobre 2026).
  */
 export function quadroSbloccato(numero, progressi = caricaProgressi()) {
   if (numero === 1) return true;
+  if (quadroSuperato(numero, progressi)) return true;
   const opera = operaDelQuadro(numero);
   if (numero === opera.da) {
     const prima = operaPrecedente(opera);
     return !prima || operaCompletata(prima, progressi);
   }
+  if (mancantiPerUltimo(numero, progressi).length > 0) return false;
   return quadroSuperato(numero - 1, progressi)
     || tentativiDi(numero - 1, progressi) >= TENTATIVI_PER_APRIRE;
 }
@@ -173,7 +197,11 @@ export function prossimoQuadro(totale, progressi = caricaProgressi()) {
 export function quadroDopo(numero, totale, progressi = caricaProgressi()) {
   for (let n = numero + 1; n <= totale; n += 1) {
     if (quadroSuperato(n, progressi)) continue;
-    return quadroSbloccato(n, progressi) ? n : null;
+    if (quadroSbloccato(n, progressi)) return n;
+    // Davanti c'e' l'ultimo livello, chiuso finche' ne manca qualcuno: si va al primo
+    // lasciato indietro. Mai al livello appena giocato, che sarebbe "Riprova".
+    const mancanti = mancantiPerUltimo(n, progressi).filter((m) => m !== numero);
+    return mancanti.length > 0 ? mancanti[0] : null;
   }
   return null;
 }
