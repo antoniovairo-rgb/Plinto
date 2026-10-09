@@ -2500,6 +2500,11 @@ button {
   line-height: 1.2;
   min-height: 44px;
 }
+/* Sui telefoni stretti si stringono i margini della voce, cosi' "Come si gioca" resta
+   su una riga: va a capo solo la voce lunga. */
+@media (max-width: 380px) {
+  .pl-home__menu .pl-home__voce { padding: 0 8px; gap: 8px; }
+}
 /* Con un numero DISPARI di voci l'ultima resterebbe appoggiata alla colonna di
    sinistra, come se quella accanto fosse sparita: si legge come un errore, non come
    una scelta. Occupando tutta la riga e centrandosi, la colonna vuota non si vede.

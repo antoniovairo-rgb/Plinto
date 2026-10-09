@@ -39,10 +39,6 @@ Non ancora in produzione: aspetta il via del proprietario.
 
 ### Corretto
 
-- Il menu in fondo alla home usciva dallo schermo sui telefoni larghi 360 px:
-  «Statistiche» e «Impostazioni» restavano tagliate dal bordo, perche' «Il tuo profilo di
-  gioco» allargava la sua colonna. Adesso le colonne sono uguali e la voce lunga va a capo.
-  `npm run impaginazione` controlla anche che ogni voce del menu stia dentro lo schermo.
 - Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
   Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
 
@@ -51,6 +47,15 @@ Non ancora in produzione: aspetta il via del proprietario.
 - I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
   senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
   cambiano, e nemmeno i record di chi li ha gia' giocati.
+
+## [1.20.1] — 9 ottobre 2026
+
+### Corretto
+
+- Il menu in fondo alla home usciva dallo schermo sui telefoni larghi 360 px:
+  «Statistiche» e «Impostazioni» restavano tagliate dal bordo, perche' «Il tuo profilo di
+  gioco» allargava la sua colonna. Adesso le colonne sono uguali e la voce lunga va a capo.
+  `npm run impaginazione` controlla anche che ogni voce del menu stia dentro lo schermo.
 
 ## [1.20.0] — 9 ottobre 2026
 
