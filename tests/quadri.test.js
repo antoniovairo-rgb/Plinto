@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
+import { QUADRI, quadroNumero, TOTALE_QUADRI, OPERE } from '../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI, MODALITA_QUADRI } from '../src/core/quadro.js';
 import { gridFromString, findCompletedGroups, filledCount, allPlacements, placeShape } from '../src/core/grid.js';
 import { createGame } from '../src/core/engine.js';
@@ -268,6 +268,49 @@ describe('la strada non si chiude mai', () => {
     fallisci(1, progressi.TENTATIVI_PER_APRIRE - 1);
     expect(progressi.quadroDopo(1, TOTALE_QUADRI)).toBe(null);
     expect(progressi.quadroDopo(TOTALE_QUADRI, TOTALE_QUADRI), 'dopo l ultimo non c e niente').toBe(null);
+  });
+
+  it('l ultimo livello si apre solo con tutti i precedenti superati', () => {
+    // Regola del proprietario (9 ottobre 2026): la via d'uscita degli otto tentativi non
+    // apre l'ultimo livello. Basta un solo buco per tenerlo chiuso.
+    const vinci = (n) => progressi.registraTentativo(n, { superato: true, mosse: 9, punteggio: 400 });
+    const ultimo = OPERE[0].a;   // l'ultimo livello del Ponte
+    for (let n = 1; n < ultimo - 1; n += 1) if (n !== 55) vinci(n);
+    fallisci(ultimo - 1, progressi.TENTATIVI_PER_APRIRE);
+    expect(progressi.quadroSbloccato(ultimo), 'otto tentativi sul penultimo non bastano').toBe(false);
+    expect(progressi.mancantiPerUltimo(ultimo)).toEqual([55, ultimo - 1]);
+    vinci(ultimo - 1);
+    expect(progressi.quadroSbloccato(ultimo), 'manca ancora il 55').toBe(false);
+    expect(progressi.mancantiPerUltimo(ultimo)).toEqual([55]);
+    expect(progressi.prossimoQuadro(TOTALE_QUADRI), 'la home porta al livello lasciato indietro').toBe(55);
+    expect(progressi.quadroDopo(ultimo - 1, TOTALE_QUADRI), '«livello successivo» porta al 55').toBe(55);
+    vinci(55);
+    expect(progressi.quadroSbloccato(ultimo), 'tutti superati: si apre').toBe(true);
+    expect(progressi.quadroDopo(55, TOTALE_QUADRI)).toBe(ultimo);
+    expect(progressi.prossimoQuadro(TOTALE_QUADRI)).toBe(ultimo);
+  });
+
+  it('vale per l ultimo livello di ogni opera, contando solo i livelli di quell opera', () => {
+    const vinci = (n) => progressi.registraTentativo(n, { superato: true, mosse: 9, punteggio: 400 });
+    const seconda = OPERE[1];
+    for (let n = 1; n < seconda.a; n += 1) if (n !== seconda.da + 4) vinci(n);
+    expect(progressi.quadroSbloccato(seconda.a)).toBe(false);
+    expect(progressi.mancantiPerUltimo(seconda.a)).toEqual([seconda.da + 4]);
+    vinci(seconda.da + 4);
+    expect(progressi.quadroSbloccato(seconda.a)).toBe(true);
+  });
+
+  it('chi aveva gia superato l ultimo livello lo tiene, anche con dei buchi', () => {
+    const ultimo = OPERE[0].a;
+    progressi.registraTentativo(ultimo, { superato: true, mosse: 20, punteggio: 900 });
+    expect(progressi.quadroSuperato(ultimo)).toBe(true);
+    expect(progressi.quadroSbloccato(ultimo), 'resta rigiocabile').toBe(true);
+  });
+
+  it('la regola dell ultimo livello non tocca gli altri', () => {
+    fallisci(1, progressi.TENTATIVI_PER_APRIRE);
+    expect(progressi.mancantiPerUltimo(2)).toEqual([]);
+    expect(progressi.quadroSbloccato(2)).toBe(true);
   });
 
   it('la porta si apre di UNO alla volta, non su tutto il resto del percorso', () => {

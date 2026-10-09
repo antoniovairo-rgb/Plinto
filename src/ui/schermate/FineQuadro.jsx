@@ -36,15 +36,18 @@ export function SchermoFineQuadro({
   // mostrare "quadri.attoFrasi.vetta" a chi ha appena finito un atto.
   const dettaAtto = t(`quadri.attoFrasi.${atto?.id ?? ''}`);
   const fraseAtto = dettaAtto.startsWith('quadri.') ? null : dettaAtto;
+  // Con il gettone guadagnato o l'atto appena chiuso la schermata ha due blocchi in piu':
+  // Plinto si fa piu' piccolo, perche' tutto deve stare nello schermo senza scorrere.
+  const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
 
   return (
-    <div className="pl-screen pl-fine">
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 
         {/* Plinto dice l'esito prima delle parole: si legge in mezzo secondo. */}
         <div className={`pl-fine__plinto ${vinto && animazioni ? 'pl-festa' : ''}`}>
-          <Plinto espressione={vinto ? 'contento' : 'dispiaciuto'} dimensione={92} className="pl-plinto--vivo" />
+          <Plinto espressione={vinto ? 'contento' : 'dispiaciuto'} dimensione={affollata ? 56 : 92} className="pl-plinto--vivo" />
         </div>
 
         <p className={`pl-quadro-esito ${vinto ? 'pl-quadro-esito--vinto' : ''}`}>
@@ -143,8 +146,11 @@ export function SchermoFineQuadro({
           </div>
         ) : null}
 
-        {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti". */}
-        {vinto && !ultimo ? (
+        {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti".
+            Quando l'atto si chiude ADESSO lascia il posto alla fascia dell'atto, che dice
+            la stessa cosa in grande: insieme non stavano nello schermo, e la fine del
+            livello non deve scorrere (richiesta del proprietario, 8 ottobre 2026). */}
+        {vinto && !ultimo && !atto?.appenaChiuso ? (
           <AvanzamentoMappa
             superato={quadro.numero}
             superatiTotali={superatiTotali}

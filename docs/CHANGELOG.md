@@ -62,6 +62,63 @@ Non ancora in produzione: aspetta il via del proprietario.
   senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
   cambiano, e nemmeno i record di chi li ha gia' giocati.
 
+## [1.20.0] — 9 ottobre 2026
+
+### Cambiato
+
+**L'ultimo livello si guadagna per intero.** Regola del proprietario: il livello 100 si
+apre solo quando tutti i 99 livelli precedenti sono superati. La via d'uscita degli otto
+tentativi resta per tutti gli altri livelli, ma non apre l'ultimo: chiudere il Ponte vuol
+dire averlo fatto tutto.
+
+- Chi aveva **già superato** il 100 lo tiene e può rigiocarlo (decisione del
+  proprietario): un livello superato resta sempre giocabile.
+- Sulla mappa, sotto l'ultimo atto, una riga dice quali livelli mancano, con i numeri
+  veri: «Il livello 100 si apre quando hai superato tutti gli altri. Ti mancano: 55, 72.»
+  (al massimo otto numeri, poi «e altri N»). Non compare a chi gioca in ordine ed è
+  semplicemente al 99.
+- Il pulsante grande della home e «Livello successivo» non portano più su un livello
+  chiuso: se il prossimo sarebbe il 100, portano al primo livello lasciato indietro.
+- `mancantiPerUltimo` in `src/persistence/progressi.js`; tre prove nuove in
+  `tests/quadri.test.js`.
+
+Vale per l'ultimo livello di ogni opera: quando usciranno la Torre e l'Arena, anche il 200
+e il 300.
+
+## [1.19.7] — 8 ottobre 2026
+
+### Corretto
+
+Tre segnalazioni del proprietario dallo stesso giorno, con screenshot da Chrome su PC.
+
+- **La fine del livello sta tutta nello schermo, senza scorrere**, dal telefono da 320×700
+  al PC. Richiesta esplicita: «bisogna proprio evitare la necessità di scendere giù», anche
+  da telefono. Misurato prima della modifica: fino a 90 px da scorrere nel caso normale e
+  fino a 267 px nel caso più affollato (atto chiuso e gettone guadagnato insieme). Cosa è
+  cambiato:
+  - **niente anteprima del messaggio**: resta il pulsante «Condividi il risultato»; il
+    testo si vede nella finestra di condivisione del sistema, e ricompare a schermo solo
+    se copiarlo non riesce (come già sulla mappa dei livelli);
+  - meno aria: gli 8vh in cima sono diventati 2vh, e alcuni margini si sono stretti;
+  - sui telefoni bassi il numero delle mosse cede qualche pixel;
+  - **quando l'atto si chiude**, la fascia dell'atto prende il posto dell'avanzamento sul
+    percorso (dicevano la stessa cosa); il gettone guadagnato è una riga sola invece di un
+    riquadro da quattro righe; in quella schermata Plinto e il numero sono più piccoli.
+  `e2e-quadri` misura vittoria e sconfitta e `e2e-trionfo` il caso dell'atto chiuso, a sei
+  dimensioni (390×844, 360×800, 360×740, 320×700, 1920×1080, 1366×768): nessuna scorre.
+  Non misurato: la chiusura dell'ultimo atto con livelli lasciati indietro, che aggiunge
+  una riga alla fascia.
+- **Da PC le voci in fondo alla home si accavallavano.** Si mettevano tutte in fila quando
+  la FINESTRA era larga almeno 560 px, ma da 720 in su la home sta in una colonna da 430
+  px. Ora vanno in fila solo fra 560 e 719 px; altrove restano su due colonne.
+- **Da PC compariva una barra di scorrimento larga dentro il riquadro.** Chrome su Windows
+  le disegna larghe e sempre visibili. Dentro la cornice da PC sono nascoste; il contenuto
+  scorre come prima.
+
+`npm run prova-desktop` controlla anche che le voci del menu non si sovrappongano e che
+nella cornice non ci siano barre visibili, con un browser che le mostra come su Windows:
+con il CSS vecchio fallisce, con il nuovo passa.
+
 ## [1.19.6] — 8 ottobre 2026
 
 ### Corretto
