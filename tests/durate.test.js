@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import {
   DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
-  DURATA_SVUOTAMENTO,
+  DURATA_SVUOTAMENTO, DURATA_SCIA, DURATA_INTRECCIO,
 } from '../src/feel/durate.js';
 
 /**
@@ -26,6 +26,11 @@ describe('allineamento fra durate JavaScript e CSS', () => {
 
   it('il token dell esplosione corrisponde alla costante JavaScript', () => {
     expect(millisecondi('pl-t-esplosione')).toBe(DURATA_ESPLOSIONE);
+  });
+
+  it('i token della scia e dell intreccio corrispondono alle costanti JavaScript', () => {
+    expect(millisecondi('pl-t-scia')).toBe(DURATA_SCIA);
+    expect(millisecondi('pl-t-intreccio')).toBe(DURATA_INTRECCIO);
   });
 
   it('il token dei punti volanti corrisponde alla costante JavaScript', () => {

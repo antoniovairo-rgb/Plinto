@@ -549,6 +549,11 @@ export default {
     equitaTitolo: 'No hidden difficulty',
     equita: 'The pieces you get do not depend on how you are doing: the game will not send you awkward pieces because you are winning, or easy ones because you are losing. The multiplier you read on the bar is exactly the one that will be applied, with no hidden maths between what you read and what you get. The only rules you cannot see are there to help you: early on the game avoids handing you three pieces that fit nowhere, and with a very full grid it guarantees at least one small piece. There are no lives, no timer, nothing to buy.',
   },
+  // La scritta che compare sulla plancia quando una mossa chiude due o piu' gruppi.
+  // Stessa parola delle statistiche e degli obiettivi, cosi' il giocatore la riconosce.
+  plancia: {
+    intreccio: 'Interlace',
+  },
   a11y: {
     riga: 'row', righe: 'rows',
     colonna: 'column', colonne: 'columns',
