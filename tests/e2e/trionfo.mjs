@@ -375,6 +375,22 @@ await preparaEGioca(tutti.filter((n) => n > 1 && n <= primoAtto.a));
 if (await vinciIlPrimo()) {
   await page.waitForTimeout(1000);
   await page.screenshot({ path: `${OUT}/3-atto-chiuso.png` });
+  // Il caso piu' affollato della fine del livello: atto chiuso E gettone guadagnato (il
+  // decimo livello superato). Deve stare tutto nello schermo anche cosi', senza scorrere:
+  // richiesta del proprietario dell'8 ottobre 2026.
+  console.log(`   gettone guadagnato a schermo: ${await page.locator('.pl-fine__premio').count() > 0 ? 'si' : 'no'}`);
+  for (const [w, h] of [[390, 844], [360, 800], [360, 740], [320, 700], [1920, 1080], [1366, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(150);
+    const eccesso = await page.evaluate(() => {
+      const s = document.querySelector('.pl-fine .pl-scroll');
+      return s ? s.scrollHeight - s.clientHeight : null;
+    });
+    console.log(`   fine del livello con l atto chiuso a ${w}x${h}: ${eccesso > 0 ? `da scorrere ${eccesso} px` : 'sta tutta nello schermo'}`);
+    if (eccesso > 0) errori.push(`ATTO: a ${w}x${h} la fine del livello va scorsa di ${eccesso} px`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
   const fasce = await page.locator('.pl-atto-chiuso').count();
   if (fasce !== 1) {
     errori.push(`ATTO: chiudendo "${nomeAtto}" la fascia non compare (trovate ${fasce})`);

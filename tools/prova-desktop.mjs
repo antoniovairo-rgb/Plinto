@@ -91,6 +91,24 @@ for (const schermo of SCHERMI) {
   // hanno una prova tutta loro -- e dalla home si avvia la partita libera.
   await page.getByRole('button', { name: /Non mostrarmela/ }).click();
   await page.waitForSelector('.pl-home', { timeout: 5000 }).catch(() => errori.push(`${schermo.nome}: la home non compare dopo la guida`));
+  // Le voci del menu in fondo alla home non devono sovrapporsi ne' uscire dalla colonna.
+  // Da PC si mettevano in fila in 430 px e si accavallavano: segnalato l'8 ottobre 2026.
+  const menu = await page.evaluate(() => {
+    const voci = [...document.querySelectorAll('.pl-home__menu .pl-btn')].map((b) => b.getBoundingClientRect());
+    const colonna = document.querySelector('.pl-home__menu')?.getBoundingClientRect();
+    let sovrapposte = 0;
+    for (let i = 0; i < voci.length; i += 1) for (let j = i + 1; j < voci.length; j += 1) {
+      const a = voci[i]; const b = voci[j];
+      if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) sovrapposte += 1;
+    }
+    const fuori = colonna ? voci.filter((v) => v.left < colonna.left - 1 || v.right > colonna.right + 1).length : 0;
+    const tagliate = [...document.querySelectorAll('.pl-home__menu .pl-btn')].filter((b) => b.scrollWidth > b.clientWidth + 1).length;
+    return { sovrapposte, fuori, tagliate };
+  });
+  if (menu.sovrapposte || menu.fuori || menu.tagliate) {
+    errori.push(`${schermo.nome}: menu della home rotto (${menu.sovrapposte} coppie sovrapposte, ${menu.fuori} voci fuori dalla colonna, ${menu.tagliate} con il testo tagliato)`);
+  }
+  await page.screenshot({ path: `${USCITA}/${schermo.nome}-home.png` });
   await page.locator('.pl-home__azioni .pl-sfida-avvio').nth(1).click();
   await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => errori.push(`${schermo.nome}: la plancia non compare`));
   const plancia = await page.locator('.pl-plancia').boundingBox();
@@ -254,6 +272,33 @@ for (const schermo of TELEFONI) {
 }
 
 await browser.close();
+
+// ---------------------------------------------------------------------------
+// Barre di scorrimento dentro la cornice. Chromium di prova le nasconde di suo
+// (`--hide-scrollbars`), Chrome su Windows le disegna larghe e fisse: senza togliere
+// quell'opzione la prova non vedrebbe mai quello che vede chi gioca da PC.
+// ---------------------------------------------------------------------------
+const conBarre = await chromium.launch({ executablePath: ESEGUIBILE, ignoreDefaultArgs: ['--hide-scrollbars'] });
+{
+  const page = await conBarre.newPage({ viewport: { width: 1920, height: 1080 }, locale: 'it-IT' });
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await page.evaluate(() => window.localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /Non mostrarmela/ }).click();
+  await page.locator('.pl-home__menu .pl-btn').first().click();   // Come si gioca: scorre
+  await page.waitForTimeout(300);
+  const barre = await page.evaluate(() => [...document.querySelectorAll('#root *')]
+    .filter((e) => /(auto|scroll)/.test(getComputedStyle(e).overflowY) && e.scrollHeight > e.clientHeight + 1)
+    .map((e) => ({ barra: e.offsetWidth - e.clientWidth, scorre: (() => { const p = e.scrollTop; e.scrollTop = p + 100; return e.scrollTop > p; })() })));
+  console.log(`barre nella cornice (Come si gioca, 1920x1080): ${JSON.stringify(barre)}`);
+  if (barre.length === 0) errori.push('Come si gioca non scorre: la prova delle barre non misura niente');
+  barre.forEach((b) => {
+    if (b.barra > 0) errori.push(`barra di scorrimento visibile nella cornice: ${b.barra} px`);
+    if (!b.scorre) errori.push('nascondendo la barra il contenuto non scorre piu');
+  });
+  await page.close();
+}
+await conBarre.close();
 if (server) server.kill();
 
 console.log('\n================ ESITO ================');
