@@ -652,38 +652,43 @@ button {
 /* IL PREMIO: l'attrezzo appena guadagnato. Un riquadro, non una riga fra le altre --
    e' la cosa migliore che succede in quel livello e deve vedersi come tale. */
 .pl-fine__premio {
+  /* Una riga sola con la cassetta a sinistra: era un riquadro da quattro righe, e con
+     l'atto chiuso la fine del livello non stava piu' nello schermo. Resta evidente per
+     il colore e il bordo, non per l'altezza. */
   display: grid;
-  justify-items: center;
-  gap: 2px;
-  margin: 14px auto 20px;
-  padding: 12px 18px;
-  max-width: 300px;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 10px;
+  margin: 8px auto 12px;
+  padding: 8px 14px;
+  max-width: 320px;
   border-radius: var(--pl-radius-md);
   background: color-mix(in srgb, var(--pl-brand) 12%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-brand) 34%, transparent);
+  text-align: left;
 }
 .pl-fine__premio-icona {
+  grid-row: span 2;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--pl-brand) 22%, transparent);
   color: var(--pl-brand);
-  margin-bottom: 4px;
 }
 .pl-fine__premio-titolo {
   margin: 0;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--pl-brand);
-  text-align: center;
+  text-align: left;
 }
 .pl-fine__premio-conto {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--pl-text-dim);
-  text-align: center;
+  text-align: left;
 }
 
 
@@ -882,7 +887,11 @@ button {
 
 /* ------------------------------------------------------------------ fine --- */
 .pl-fine { text-align: center; }
-.pl-fine .pl-scroll { padding-top: 8vh; }
+.pl-fine .pl-scroll { padding-top: 2vh; padding-bottom: 12px; }
+/* La fine del livello deve stare tutta nello schermo, senza scorrere, dal telefono da
+   320x700 al portatile da 1366x768 (richiesta del proprietario, 8 ottobre 2026; misurato
+   da e2e-quadri). Gli 8vh di aria in cima e i margini larghi costavano fino a 90 px:
+   la schermata e' gia' centrata in verticale, quell'aria non serviva. */
 .pl-fine__titolo {
   margin: 0;
   font-size: 13px;
@@ -890,8 +899,8 @@ button {
   text-transform: uppercase;
   color: var(--pl-text-faint);
 }
-.pl-fine__motivo { margin: 8px auto 26px; max-width: 320px; color: var(--pl-text-dim); font-size: 14px; }
-.pl-fine__punteggio { display: grid; gap: 4px; justify-items: center; margin-bottom: 22px; }
+.pl-fine__motivo { margin: 6px auto 16px; max-width: 320px; color: var(--pl-text-dim); font-size: 14px; }
+.pl-fine__punteggio { display: grid; gap: 4px; justify-items: center; margin-bottom: 14px; }
 .pl-fine__numero {
   font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
@@ -900,6 +909,17 @@ button {
   line-height: 1;
   color: var(--pl-brand);
 }
+/* Sui telefoni bassi (fino a 720 px, fuori dalla cornice da PC) il numero delle mosse
+   cede qualche pixel: a 320x700 erano gli ultimi 6 che facevano scorrere la schermata. */
+@media (max-height: 720px) and (max-width: 719px) {
+  .pl-fine__numero { font-size: 50px; }
+}
+/* La fine del livello affollata (gettone guadagnato o atto appena chiuso): qualche
+   pixel in meno a numero e margini, perche' tutto stia nello schermo senza scorrere. */
+.pl-fine--affollata .pl-fine__numero { font-size: 46px; }
+.pl-fine--affollata .pl-scroll { padding-top: 4px; }
+.pl-fine--affollata .pl-fine__motivo { margin-bottom: 10px; }
+.pl-fine--affollata .pl-fine__punteggio { margin-bottom: 8px; }
 .pl-fine__nastro {
   margin-top: 6px;
   padding: 5px 14px;
@@ -1705,6 +1725,14 @@ button {
      dal proprietario da Chrome su PC, 8 ottobre 2026. I 4 px sono il padding laterale
      di .pl-plancia-area. */
   :root { --pl-plancia-max: min(calc(min(430px, 92vw) - 4px), 58vh); }
+
+  /* NIENTE BARRE DI SCORRIMENTO DENTRO LA CORNICE. Sul telefono le barre sono sottili e
+     spariscono da sole; Chrome su Windows le disegna larghe e sempre visibili, e dentro
+     un riquadro da telefono stonano (segnalato dal proprietario l'8 ottobre 2026, sulla
+     fine del livello). Si nasconde solo la barra: il contenuto scorre come prima, con la
+     rotella, il trascinamento e la tastiera. */
+  #root, #root * { scrollbar-width: none; }
+  #root ::-webkit-scrollbar { display: none; }
 }
 
 /* Schermi larghi ma bassi (un portatile molto panoramico): niente cornice, che
@@ -2001,7 +2029,7 @@ button {
   .pl-plinto--vivo { animation: none; }
 }
 
-.pl-fine__plinto { display: grid; place-items: center; margin: 14px 0 6px; }
+.pl-fine__plinto { display: grid; place-items: center; margin: 8px 0 4px; }
 
 /* Ultima chiamata della Catena: il momento in cui il giocatore sta per perdere il
    moltiplicatore. Va sulla riga sotto, allineato al valore, senza mai coprirlo. */
@@ -2176,7 +2204,7 @@ button {
   100% { transform: translateY(0) scale(1); }
 }
 
-.pl-avanza { margin: 22px 0 6px; }
+.pl-avanza { margin: 14px 0 6px; }
 
 .pl-avanza__atto {
   margin: 0 0 10px;
@@ -2403,8 +2431,14 @@ button {
 /* Dove c'e' spazio tornano tutte in fila, che resta la forma migliore. `auto-fit` e non
    un numero: il numero era 4 ed e' rimasto indietro quando le voci sono diventate 5,
    lasciando di nuovo "Info" da solo -- stavolta su uno schermo grande, dove lo spazio
-   c'era eccome. */
-@media (min-width: 560px) {
+   c'era eccome.
+
+   SOLO FRA 560 E 719 PX. Da 720 in su la home sta in una colonna da 430 px (la cornice,
+   o la colonna limitata sugli schermi bassi), qualunque sia la larghezza della finestra:
+   la media query misura la finestra e non la colonna, e da PC metteva le cinque voci in
+   fila in 430 px. Con `minmax(0, max-content)` e `nowrap` si schiacciavano fino a
+   sovrapporsi. Segnalato dal proprietario da Chrome su PC, 8 ottobre 2026. */
+@media (min-width: 560px) and (max-width: 719px) {
   .pl-home__menu {
     grid-template-columns: repeat(auto-fit, minmax(0, max-content));
     justify-content: center;

@@ -116,6 +116,22 @@ function sequenzaVincente(quadro, tentativi = 40) {
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
+
+/** La fine del livello deve stare tutta nello schermo, dal telefono piu' stretto al PC. */
+async function misuraFine(quale) {
+  for (const [w, h] of [[390, 844], [360, 800], [360, 740], [320, 700], [1920, 1080], [1366, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(150);
+    const eccesso = await page.evaluate(() => {
+      const s = document.querySelector('.pl-fine .pl-scroll');
+      return s ? s.scrollHeight - s.clientHeight : null;
+    });
+    console.log(`   fine del livello (${quale}) a ${w}x${h}: ${eccesso > 0 ? `da scorrere ${eccesso} px` : 'sta tutta nello schermo'}`);
+    if (eccesso > 0) errori.push(`FINE LIVELLO (${quale}): a ${w}x${h} bisogna scorrere di ${eccesso} px`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
+}
 page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 
 /**
@@ -287,7 +303,17 @@ if (!sequenza) {
   // Per tre versioni il percorso e' stato l'unica modalita' MUTA: la scheda
   // condivisibile esisteva solo per la partita libera, cioe' per la modalita'
   // secondaria. Chi superava un livello non aveva modo di dirlo a nessuno.
+  // ---------- 3c bis. La fine del livello sta tutta nello schermo ----------
+  // Senza scorrere, dal telefono piu' stretto al PC (dove il gioco sta in una cornice):
+  // richiesta del proprietario dell'8 ottobre 2026. Si misura sulla stessa schermata
+  // appena vinta, cambiando solo la dimensione della finestra.
+  await misuraFine('vittoria');
+
+  // Il messaggio non e' piu' a schermo prima di toccare il pulsante: si tocca, e senza
+  // `navigator.share` il gioco lo copia o, se non puo', lo mostra.
   {
+    await page.locator('.pl-fine .pl-condividi .pl-btn').first().click();
+    await page.waitForTimeout(200);
     const schedaQuadro = (await page.locator('.pl-fine .pl-scheda').innerText().catch(() => '')).trim();
     console.log(`3c. scheda del livello: ${schedaQuadro.split('\n').length} righe`);
     if (!schedaQuadro) {
@@ -363,6 +389,7 @@ if (!sequenza) {
     const righe = await page.locator('.pl-fine__riga').count();
     const riprova = await page.getByRole('button', { name: /Riprova/ }).count();
     await page.screenshot({ path: `${OUT}/3c-sconfitta.png` });
+    await misuraFine('sconfitta');
     console.log(`3d. sconfitta: "${esitoPerso}", ${righe} righe di obiettivo`);
 
     // Due modi in cui questo passaggio puo' andare male, ed entrambi sono fatali per

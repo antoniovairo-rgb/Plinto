@@ -181,7 +181,11 @@ export function CondividiQuadro({ numero, obiettivo, mosse, record, superati, to
       },
     },
   );
-  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} t={t} />;
+  // SENZA ANTEPRIMA. La fine del livello deve stare tutta nello schermo, senza scorrere
+  // (richiesta del proprietario, 8 ottobre 2026), e il riquadro del messaggio era il
+  // blocco piu' alto. Chi tocca il pulsante vede il messaggio nella finestra di
+  // condivisione del sistema; se copiare non riesce, il testo ricompare da solo.
+  return <CondividiTesto testo={testo} etichetta={t('scheda.condividiQuadro')} anteprima={false} t={t} />;
 }
 
 /**
