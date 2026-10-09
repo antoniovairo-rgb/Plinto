@@ -554,6 +554,11 @@ export default {
     equitaTitolo: 'Nessuna difficoltà nascosta',
     equita: 'I pezzi che ricevi non dipendono da come stai andando: il gioco non ti manda pezzi scomodi perché stai vincendo, né pezzi comodi perché stai perdendo. Il moltiplicatore che leggi sulla barra è esattamente quello che ti verrà applicato, senza calcoli nascosti fra quello che leggi e quello che incassi. Le uniche regole che non vedi servono ad aiutarti: a inizio partita il gioco evita di darti tre pezzi che non entrano da nessuna parte, e con la griglia molto piena ti garantisce almeno un pezzo piccolo. Non ci sono vite, non c\'è tempo, non c\'è niente da comprare.',
   },
+  // La scritta che compare sulla plancia quando una mossa chiude due o piu' gruppi.
+  // Stessa parola delle statistiche e degli obiettivi, cosi' il giocatore la riconosce.
+  plancia: {
+    intreccio: 'Intreccio',
+  },
   a11y: {
     riga: 'riga', righe: 'righe',
     colonna: 'colonna', colonne: 'colonne',

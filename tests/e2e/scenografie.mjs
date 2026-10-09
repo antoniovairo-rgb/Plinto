@@ -115,6 +115,15 @@ async function scena(nome, stato, bersaglio) {
       tinta: document.querySelectorAll('.pl-blocco--tinta').length,
       lampo: document.querySelectorAll('.pl-plancia__lampo').length,
       pixel: opachi,
+      scie: [...document.querySelectorAll('.pl-scia')].map((e) => e.className.replace('pl-scia ', '')),
+      colpo: document.querySelector('.pl-colpo')?.textContent ?? null,
+      colpoVisibile: (() => { const e = document.querySelector('.pl-colpo'); return !!e && getComputedStyle(e).display !== 'none'; })(),
+      scossa: document.querySelector('.pl-plancia')?.classList.contains('pl-plancia--scossa') ?? false,
+      // Il fondo di un blocco che esplode: il 9 ottobre 2026 la regola delle gemme lo
+      // rendeva trasparente (nella Torre, lo stesso succedeva ai massi).
+      fondoEsploso: (() => { const e = document.querySelector('.pl-blocco--esploso'); return e ? getComputedStyle(e).backgroundColor : null; })(),
+      ritardi: [...new Set([...document.querySelectorAll('.pl-blocco--esploso')]
+        .map((e) => getComputedStyle(e).animationDelay))].sort(),
     };
   });
   await page.screenshot({ path: `${OUT}/${nome}.png` });
@@ -172,6 +181,62 @@ console.log('4. la griglia svuotata accende il lampo...');
   for (let c = 0; c < 8; c += 1) r[4][c] = '#';
   const v = await scena('4-svuotamento', { ...base, grid: tinteggia(r, 3), hand: mano() }, 4 * 9 + 8);
   controlla('SVUOTAMENTO: la griglia si svuota ma il lampo non compare', v.lampo === 1);
+}
+
+// ---------- 4b. L'Intreccio: riga e colonna con la stessa mossa ----------
+// Le animazioni della Torre. Una casella sola chiude la riga 0 e la colonna 8: due
+// gruppi, quindi la scritta, due scie, la plancia che trema e l'onda che parte
+// dall'angolo in alto a destra (ritardi diversi fra i blocchi vicini e i lontani).
+console.log('4b. l Intreccio accende scritta, scie, scossa e onda...');
+const grigliaIntreccio = () => {
+  const r = vuote();
+  for (let c = 0; c < 8; c += 1) r[0][c] = '#';
+  for (let rr = 1; rr < 9; rr += 1) r[rr][8] = '#';
+  return mescola(r);
+};
+{
+  const v = await scena('4b-intreccio', { ...base, grid: grigliaIntreccio(), hand: mano() }, 8);
+  controlla(`INTRECCIO: dovevano sparire 17 blocchi, ne spariscono ${v.esplosi}`, v.esplosi === 17);
+  controlla(`INTRECCIO: la scritta non c e o e sbagliata ("${v.colpo}")`, v.colpo === 'Intreccio\u00d72!');
+  controlla('INTRECCIO: la scritta c e ma non si vede', v.colpoVisibile);
+  controlla(`INTRECCIO: le scie non sono una per gruppo (${v.scie.join(', ')})`,
+    v.scie.length === 2 && v.scie.includes('pl-scia--row') && v.scie.includes('pl-scia--col'));
+  controlla('INTRECCIO: la plancia non trema', v.scossa);
+  controlla(`ONDA: i blocchi partono tutti insieme (${v.ritardi.join(', ')})`, v.ritardi.length >= 5);
+  await page.waitForTimeout(1100);
+  const dopo = await page.evaluate(() => ({
+    colpo: document.querySelectorAll('.pl-colpo').length,
+    scie: document.querySelectorAll('.pl-scia').length,
+    esplosi: document.querySelectorAll('.pl-blocco--esploso').length,
+    scossa: document.querySelector('.pl-plancia').classList.contains('pl-plancia--scossa'),
+  }));
+  controlla('INTRECCIO: dopo un secondo la scritta e ancora li', dopo.colpo === 0);
+  controlla('INTRECCIO: dopo un secondo le scie sono ancora li', dopo.scie === 0);
+  controlla('ONDA: dopo un secondo restano blocchi in esplosione', dopo.esplosi === 0);
+  controlla('INTRECCIO: dopo un secondo la plancia trema ancora', !dopo.scossa);
+}
+{
+  // Una riga sola: niente Intreccio. La meta' al contrario, come per la Tinta.
+  const r = vuote();
+  for (let c = 0; c < 8; c += 1) r[0][c] = '#';
+  r[5][5] = '#';
+  const v = await scena('4c-un-gruppo', { ...base, grid: mescola(r), hand: mano() }, 8);
+  controlla(`ESPLOSIONE: il blocco che esplode e trasparente (${v.fondoEsploso})`,
+    v.fondoEsploso !== null && v.fondoEsploso !== 'rgba(0, 0, 0, 0)');
+  controlla('UN GRUPPO: compare la scritta dell Intreccio', v.colpo === null);
+  controlla('UN GRUPPO: la plancia trema', !v.scossa);
+  controlla(`UN GRUPPO: le scie non sono una (${v.scie.join(', ')})`, v.scie.length === 1);
+}
+{
+  // Chi ha chiesto meno movimento: niente scritta, scie, scossa e onda. Il gioco e i
+  // punti restano identici, cambia solo cio' che si muove.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const v = await scena('4d-meno-movimento', { ...base, grid: grigliaIntreccio(), hand: mano() }, 8);
+  const scossaAnimata = await page.evaluate(() => getComputedStyle(document.querySelector('.pl-plancia')).animationName);
+  controlla('MENO MOVIMENTO: la scritta dell Intreccio si vede', !v.colpoVisibile);
+  controlla(`MENO MOVIMENTO: la plancia trema (${scossaAnimata})`, scossaAnimata === 'none');
+  controlla(`MENO MOVIMENTO: l onda resta (${v.ritardi.join(', ')})`, v.ritardi.length <= 1);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
 }
 
 // ---------- 5. A riposo il canvas torna pulito ----------

@@ -49,6 +49,9 @@
   /* --- Colore identitario ------------------------------------------------- */
   --pl-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
   --pl-brand-deep: #c9922a;
+  /* L'ottone del «cantiere di notte»: cornice della plancia (src/styles/finiture.css).
+     Nella Torre lo usano anche il tratteggio del marchio e il filo dell'icona. */
+  --pl-ottone: #e3b04a;
   --pl-danger: #ec6d8e;        /* 5.21 su --pl-surface-2 */
   /* Fondo dei comandi distruttivi: il testo bianco sopra --pl-danger stava a 2.94:1,
      e quel pulsante e' proprio quello che cancella i dati del giocatore. */
@@ -105,9 +108,11 @@
   /* Durate degli effetti di gioco. Sono le stesse costanti usate da
      src/feel/useEffettiMossa.js: se cambiano qui devono cambiare anche li',
      altrimenti l'animazione e il momento in cui viene rimossa si scollano. */
-  --pl-t-atterraggio: 260ms;
+  --pl-t-atterraggio: 380ms;
   --pl-t-esplosione: 420ms;
   --pl-t-punti: 950ms;
+  --pl-t-scia: 520ms;
+  --pl-t-intreccio: 950ms;
   --pl-t-svuotamento: 700ms;
   /* La frase di incitamento. NON compare nel blocco prefers-reduced-motion qui sotto,
      ed e' l'unica durata che non ci compare: le altre misurano un movimento, questa
@@ -144,6 +149,8 @@
     --pl-t-atterraggio: 1ms;
     --pl-t-esplosione: 1ms;
     --pl-t-punti: 1ms;
+    --pl-t-scia: 1ms;
+    --pl-t-intreccio: 1ms;
     --pl-t-svuotamento: 1ms;
     --pl-t-festa: 1ms;
   }

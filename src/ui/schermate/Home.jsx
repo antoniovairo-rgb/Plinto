@@ -59,7 +59,7 @@ export function SchermoHome({
             diventavano fragili. L'etichetta esplicita risolve tutte e due le cose. */}
         <button
           type="button"
-          className="pl-btn pl-btn--largo pl-sfida-avvio"
+          className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--mappa"
           onClick={onQuadri}
           aria-label={`${t('home.mappa')}, ${progressoTesto}`}
         >
@@ -71,7 +71,7 @@ export function SchermoHome({
             sta accanto e' il suo, non un record generale del gioco. */}
         <button
           type="button"
-          className="pl-btn pl-btn--largo pl-sfida-avvio"
+          className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera"
           onClick={cePartitaSalvata ? onRiprendi : onGioca}
           aria-label={recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera}
         >
@@ -92,7 +92,7 @@ export function SchermoHome({
 
         <button
           type="button"
-          className="pl-btn pl-btn--largo pl-sfida-avvio"
+          className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--sfida"
           onClick={onSfida}
           aria-label={sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida}
         >
