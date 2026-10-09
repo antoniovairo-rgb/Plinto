@@ -7,6 +7,29 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.20.0] — 9 ottobre 2026
+
+### Cambiato
+
+**L'ultimo livello si guadagna per intero.** Regola del proprietario: il livello 100 si
+apre solo quando tutti i 99 livelli precedenti sono superati. La via d'uscita degli otto
+tentativi resta per tutti gli altri livelli, ma non apre l'ultimo: chiudere il Ponte vuol
+dire averlo fatto tutto.
+
+- Chi aveva **già superato** il 100 lo tiene e può rigiocarlo (decisione del
+  proprietario): un livello superato resta sempre giocabile.
+- Sulla mappa, sotto l'ultimo atto, una riga dice quali livelli mancano, con i numeri
+  veri: «Il livello 100 si apre quando hai superato tutti gli altri. Ti mancano: 55, 72.»
+  (al massimo otto numeri, poi «e altri N»). Non compare a chi gioca in ordine ed è
+  semplicemente al 99.
+- Il pulsante grande della home e «Livello successivo» non portano più su un livello
+  chiuso: se il prossimo sarebbe il 100, portano al primo livello lasciato indietro.
+- `mancantiPerUltimo` in `src/persistence/progressi.js`; tre prove nuove in
+  `tests/quadri.test.js`.
+
+Vale per l'ultimo livello di ogni opera: quando usciranno la Torre e l'Arena, anche il 200
+e il 300.
+
 ## [1.19.7] — 8 ottobre 2026
 
 ### Corretto
