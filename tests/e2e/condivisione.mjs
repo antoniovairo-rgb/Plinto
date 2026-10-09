@@ -122,14 +122,28 @@ await page.mouse.up();
 await page.waitForSelector('.pl-fine', { timeout: 10000 });
 console.log('1. partita finita: schermata di fine mostrata');
 
-// ---------- 2. La scheda e' a schermo, ed e' testo ----------
-const scheda = (await page.locator('.pl-scheda').innerText()).trim();
+// ---------- 2. Il testo NON e' a schermo ----------
+// Richiesta del proprietario (8 e 9 ottobre 2026): il messaggio si vede nella finestra
+// di condivisione del sistema, a schermo e' solo ingombro. Ne' prima del tocco, ne' dopo.
+const primaDelTocco = await page.locator('.pl-scheda').count();
 await page.screenshot({ path: `${OUT}/condivisione-01.png`, fullPage: true });
+console.log(`2. testo a schermo prima del tocco: ${primaDelTocco}`);
+if (primaDelTocco !== 0) errori.push('SCHEDA: il testo da condividere e a schermo prima ancora di toccare');
+
+// ---------- 3. Il ripiego sugli appunti, che e' il motivo di questo scenario ----------
+await page.getByRole('button', { name: /Condividi il risultato/ }).click();
+await page.waitForTimeout(400);
+const conferma = await page.locator('.pl-condividi .pl-nota').innerText().catch(() => '');
+const scheda = (await page.evaluate(() => navigator.clipboard.readText().catch(() => ''))).trim();
+const dopoIlTocco = await page.locator('.pl-scheda').count();
 const righe = scheda.split('\n');
-console.log(`2. scheda a schermo: ${righe.length} righe, ${scheda.length} caratteri`);
+console.log(`3. senza navigator.share: conferma "${conferma.trim()}", testo a schermo dopo il tocco ${dopoIlTocco}`);
+console.log(`   negli appunti: ${righe.length} righe, ${scheda.length} caratteri`);
 righe.forEach((r) => console.log(`     ${r}`));
 
-if (scheda.length === 0) errori.push('SCHEDA: non compare nessun testo');
+if (!conferma.trim()) errori.push('CONDIVISIONE: nessuna conferma a schermo dopo il tocco');
+if (dopoIlTocco !== 0) errori.push('SCHEDA: dopo una copia riuscita il testo torna a schermo');
+if (scheda.length === 0) errori.push('SCHEDA: negli appunti non c e nessun testo');
 if (scheda.length > LIMITE) {
   errori.push(`SCHEDA: ${scheda.length} caratteri, oltre il limite di ${LIMITE}`);
 }
@@ -140,25 +154,19 @@ if (/undefined|NaN|null/.test(scheda)) errori.push(`SCHEDA: contiene un valore r
 // Niente spoiler: gli identificativi delle forme non devono comparire.
 if (/\b[bhvpd]\d{1,2}\b/.test(scheda)) errori.push('SCHEDA: contiene identificativi di forme (spoiler)');
 
-// ---------- 3. Il ripiego sugli appunti, che e' il motivo di questo scenario ----------
+// ---------- 4. Se non si puo' nemmeno copiare, il testo torna a schermo ----------
+// E' l'unico caso in cui serve: l'ultimo gradino del ripiego, da selezionare a mano.
+// La riga di blocchi resta decorativa, nascosta a chi usa un lettore di schermo.
+await page.evaluate(() => {
+  navigator.clipboard.writeText = () => Promise.reject(new Error('copia negata per la prova'));
+});
 await page.getByRole('button', { name: /Condividi il risultato/ }).click();
 await page.waitForTimeout(400);
-const conferma = await page.locator('.pl-condividi .pl-nota').innerText().catch(() => '');
-const appunti = await page.evaluate(() => navigator.clipboard.readText().catch(() => ''));
-console.log(`3. senza navigator.share: conferma "${conferma.trim()}"`);
-console.log(`   negli appunti: ${appunti.length} caratteri`);
-
-if (!conferma.trim()) errori.push('CONDIVISIONE: nessuna conferma a schermo dopo il tocco');
-if (appunti.trim() !== scheda) {
-  errori.push('CONDIVISIONE: negli appunti non c e lo stesso testo mostrato a schermo');
-}
-
-// ---------- 4. La riga di blocchi e' decorativa ----------
+const aMano = (await page.locator('.pl-scheda').innerText().catch(() => '')).trim();
 const nascosta = await page.locator('.pl-scheda__forma[aria-hidden="true"]').count();
-console.log(`4. riga di blocchi nascosta ai lettori di schermo: ${nascosta === 1}`);
-if (nascosta !== 1) {
-  errori.push('ACCESSIBILITA: la riga di blocchi non e marcata come decorativa');
-}
+console.log(`4. copia impossibile: testo a schermo ${aMano === scheda}, riga di blocchi nascosta ai lettori di schermo ${nascosta === 1}`);
+if (aMano !== scheda) errori.push('RIPIEGO: se non si puo copiare, il testo da prendere a mano non compare (o e diverso)');
+if (nascosta !== 1) errori.push('ACCESSIBILITA: la riga di blocchi non e marcata come decorativa');
 
 // ---------- 5. La scheda del PERCORSO, presa dalla mappa ----------
 // Esiste perche' la condivisione a fine livello si puo' cogliere solo nell'istante in
@@ -178,8 +186,6 @@ await page.waitForSelector('.pl-tappe');
 
 const pulsantePercorso = page.getByRole('button', { name: /Condividi il tuo percorso/ });
 const cePercorso = await pulsantePercorso.count();
-// Sulla mappa l'anteprima e' spenta: la scheda starebbe fra l'avanzamento e i cento
-// livelli, spingendoli tutti piu' giu' per mostrare un testo che nessuno ha chiesto.
 const anteprimaPrima = await page.locator('.pl-condividi .pl-scheda').count();
 console.log(`5. mappa: pulsante del percorso presente ${cePercorso === 1}, anteprima prima del tocco ${anteprimaPrima}`);
 if (cePercorso !== 1) {
@@ -195,10 +201,9 @@ if (cePercorso !== 1) {
   if (!/[■□]{16}/u.test(schedaPercorso)) errori.push('PERCORSO: manca la barra dell avanzamento');
   if (!/https?:\/\//.test(schedaPercorso)) errori.push('PERCORSO: manca il collegamento al gioco');
   if (/undefined|NaN|null/.test(schedaPercorso)) errori.push(`PERCORSO: valore rotto — "${schedaPercorso}"`);
-  // Il terzo gradino del ripiego non dipende da un parametro: se copiare non riesce, il
-  // testo deve tornare a schermo anche dove l'anteprima e' spenta.
+  // Copia riuscita: il testo resta fuori dallo schermo anche qui.
   const anteprimaDopo = await page.locator('.pl-condividi .pl-scheda').count();
-  if (anteprimaDopo !== 1) errori.push('PERCORSO: dopo il tocco la scheda non compare a schermo');
+  if (anteprimaDopo !== 0) errori.push('PERCORSO: dopo una copia riuscita la scheda torna a schermo');
   await page.screenshot({ path: `${OUT}/condivisione-02-percorso.png`, fullPage: true });
 }
 

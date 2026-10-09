@@ -7,6 +7,17 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.20.2] — 9 ottobre 2026
+
+### Cambiato
+
+- **Il testo da condividere non compare piu' a schermo**, in nessun punto: fine partita,
+  fine livello, mappa e festa finale. Sulla festa del Ponte tornava a schermo dopo
+  «Condiviso.» (segnalato dal proprietario con una foto). Chi condivide lo vede nella
+  finestra del sistema; il testo ricompare solo se non si puo' ne' condividere ne'
+  copiare, perche' li' e' l'unico modo di prenderlo a mano. `npm run condivisione`
+  controlla tutti e tre i casi.
+
 ## [1.20.1] — 9 ottobre 2026
 
 ### Corretto
