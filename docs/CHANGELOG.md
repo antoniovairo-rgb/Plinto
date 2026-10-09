@@ -74,11 +74,21 @@ Non ancora in produzione: aspetta il via del proprietario.
   Chi chiede meno movimento al sistema non vede scie, scritta, scossa e onda; chi spegne
   gli effetti nelle impostazioni non li riceve. `npm run e2e-scenografie` prova un
   Intreccio vero, una riga sola (niente scritta) e la versione con meno movimento.
+- **Testi della scheda e schermate per l'uscita della Torre**: duecento livelli, i massi,
+  l'ultimo livello di ogni opera, note di rilascio in italiano e inglese
+  (`android/SCHEDA-PLAY-STORE.md`). Le schermate mostrano la Torre; quella
+  dell'eliminazione si scatta a orologio fermo, perche' la scritta dell'Intreccio dura
+  meno della cattura. Da rigenerare il giorno dell'uscita, per il numero di versione.
 - **Immagine in evidenza dello store** con il marchio a gemme (letto da `public/icon.svg`),
   la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
 
 ### Corretto
 
+- **I massi quasi non si vedevano con la grafica nuova**, e i blocchi che esplodono
+  perdevano il loro colore: la regola delle gemme valeva per ogni blocco, anche per
+  quelli senza colore, e per loro il fondo diventava trasparente. Ora vale solo per i sei
+  colori. Visto nelle schermate per lo store; `npm run e2e-scenografie` controlla adesso
+  il fondo del masso e quello del blocco che esplode.
 - Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
   Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
 

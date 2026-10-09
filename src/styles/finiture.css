@@ -132,8 +132,16 @@ body,
 .pl-plancia .pl-cella { box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(255, 255, 255, 0.05); }
 
 /* I blocchi come gemme: riflesso, bordo chiaro e un alone del loro colore. Valgono
-   ovunque ci sia un blocco (plancia, pezzi in mano, pezzo trascinato). */
-.pl-blocco {
+   ovunque ci sia un blocco COLORATO (plancia, pezzi in mano, pezzo trascinato).
+
+   SOLO I SEI COLORI, e non `.pl-blocco` e basta. Con la regola su tutti i blocchi il
+   masso (che non ha colore) e il blocco che esplode (che ha il suo fondo, --esploso)
+   ereditavano una sfumatura costruita su `--blocco`, che per loro non esiste: la
+   dichiarazione diventava invalida e il fondo trasparente. I massi della Torre erano
+   caselle scure con una crepa, quasi invisibili. Visto nelle schermate per lo store,
+   9 ottobre 2026. `:where` e non `:is`: tiene la regola leggera come prima, cosi' le
+   regole di app.css che la battevano (anteprima, posa non valida) la battono ancora. */
+.pl-blocco:where(.pl-blocco--1, .pl-blocco--2, .pl-blocco--3, .pl-blocco--4, .pl-blocco--5, .pl-blocco--6) {
   background:
     radial-gradient(120% 70% at 30% 15%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 45%),
     linear-gradient(180deg, color-mix(in srgb, var(--blocco) 85%, white) 0%, var(--blocco) 45%,

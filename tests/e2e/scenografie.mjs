@@ -22,7 +22,7 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { createGame, serializeGame } from '../../src/core/engine.js';
-import { gridFromString, conBomba } from '../../src/core/grid.js';
+import { gridFromString, conBomba, MASSO } from '../../src/core/grid.js';
 import { getShape } from '../../src/core/shapes.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -119,6 +119,10 @@ async function scena(nome, stato, bersaglio) {
       colpo: document.querySelector('.pl-colpo')?.textContent ?? null,
       colpoVisibile: (() => { const e = document.querySelector('.pl-colpo'); return !!e && getComputedStyle(e).display !== 'none'; })(),
       scossa: document.querySelector('.pl-plancia')?.classList.contains('pl-plancia--scossa') ?? false,
+      // Il fondo di un blocco che esplode e quello di un masso: il 9 ottobre 2026 la
+      // regola delle gemme li rendeva trasparenti, e i massi della Torre sparivano.
+      fondoEsploso: (() => { const e = document.querySelector('.pl-blocco--esploso'); return e ? getComputedStyle(e).backgroundColor : null; })(),
+      fondoMasso: (() => { const e = document.querySelector('.pl-blocco--masso'); return e ? getComputedStyle(e).backgroundImage : null; })(),
       ritardi: [...new Set([...document.querySelectorAll('.pl-blocco--esploso')]
         .map((e) => getComputedStyle(e).animationDelay))].sort(),
     };
@@ -213,11 +217,18 @@ const grigliaIntreccio = () => {
   controlla('INTRECCIO: dopo un secondo la plancia trema ancora', !dopo.scossa);
 }
 {
-  // Una riga sola: niente Intreccio. La meta' al contrario, come per la Tinta.
+  // Una riga sola: niente Intreccio. La meta' al contrario, come per la Tinta. In
+  // mezzo alla plancia c'e' un masso, per controllare che si veda.
   const r = vuote();
   for (let c = 0; c < 8; c += 1) r[0][c] = '#';
   r[5][5] = '#';
-  const v = await scena('4c-un-gruppo', { ...base, grid: mescola(r), hand: mano() }, 8);
+  const g = mescola(r);
+  g[5 * 9 + 5] = MASSO;
+  const v = await scena('4c-un-gruppo', { ...base, grid: g, hand: mano() }, 8);
+  controlla(`MASSO: il masso non ha il suo fondo grigio (${v.fondoMasso})`,
+    typeof v.fondoMasso === 'string' && v.fondoMasso.startsWith('linear-gradient'));
+  controlla(`ESPLOSIONE: il blocco che esplode e trasparente (${v.fondoEsploso})`,
+    v.fondoEsploso !== null && v.fondoEsploso !== 'rgba(0, 0, 0, 0)');
   controlla('UN GRUPPO: compare la scritta dell Intreccio', v.colpo === null);
   controlla('UN GRUPPO: la plancia trema', !v.scossa);
   controlla(`UN GRUPPO: le scie non sono una (${v.scie.join(', ')})`, v.scie.length === 1);

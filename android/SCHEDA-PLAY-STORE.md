@@ -7,7 +7,10 @@ Scheda principale dello Store. Nomi delle voci letti dalla console dell'11 sette
 Google li rinomina ogni tanto. L'AAB invece sta sotto **Testa e rilascia**, ed e' un'altra
 revisione: aggiornare testi e immagini NON richiede un rilascio nuovo.
 
-**Stato dei testi.** Riscritti l'11 settembre 2026, con la versione 1.9.1. La stesura
+**Stato dei testi.** Ramo `opera-torre`: riscritti il 9 ottobre 2026 per l'uscita della
+Torre (duecento livelli, i massi, la regola dell'ultimo livello di ogni opera). Finche' la
+Torre non esce, sulla scheda restano quelli di `main`. Stesura precedente: 11 settembre
+2026, con la versione 1.9.1. La stesura
 precedente era ferma a prima delle bombe, della Tinta, dell'anteprima della terna,
 dell'archivio delle sfide, delle statistiche e della condivisione: raccontava un gioco
 piu' piccolo di quello che si scarica. I cento livelli sono stati portati in apertura,
@@ -24,39 +27,37 @@ PLINTO - puzzle a blocchi
 
 ## Descrizione breve (max 80 caratteri)
 
-Questa e' quella consigliata: dice il numero che colpisce, la regola che distingue il
+Quella consigliata: il numero che colpisce (adesso duecento), la regola che distingue il
 gioco dagli altri puzzle a blocchi, e la cosa che piu' spesso manca agli altri.
 
 ```
-Cento livelli, e i quadranti 3×3 oltre a righe e colonne. Niente pubblicità.
+Duecento livelli, e i quadranti 3×3 oltre a righe e colonne. Niente pubblicità.
 ```
-*76 caratteri.*
+*79 caratteri: un solo carattere di margine.*
 
-Due alternative gia' misurate, se preferisci un'altra enfasi:
-
-```
-Cento livelli tarati. Righe, colonne e quadranti. Senza pubblicità né acquisti.
-```
-*79 caratteri: passa, ma con un solo carattere di margine.*
+Alternativa, se si preferisce nominare la novita':
 
 ```
-Righe, colonne e quadranti. Niente pubblicità, niente acquisti, niente conti.
+Arriva la Torre: 200 livelli di righe, colonne e quadranti 3×3. Zero pubblicità.
 ```
-*77 caratteri. E' la versione attualmente in linea: non nomina i livelli.*
+*80 caratteri. Da riportare alla prima dopo qualche settimana: «arriva» invecchia.*
 
 ## Descrizione completa (max 4000 caratteri)
 
 ```
 PLINTO è un puzzle a blocchi con una regola in più: oltre alle righe e alle colonne si eliminano anche i quadranti 3×3. Tre direzioni invece di due, e una mossa che ne chiude più di uno insieme vale molto di più.
 
-CENTO LIVELLI, MISURATI E NON INVENTATI
-I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
+DUECENTO LIVELLI IN DUE OPERE, MISURATI E NON INVENTATI
+Prima si costruisce il Ponte: cento livelli in sette atti, dalle Fondamenta all'Ultima pietra. Poi si sale sulla Torre: altri cento, dal Basamento alla Vetta, che si aprono quando hai superato tutto il Ponte. Ogni livello ha un obiettivo dichiarato e un tetto di mosse, e più avanti alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato. Solo l'ultimo livello di ogni opera non fa sconti: si apre quando hai superato tutti gli altri.
+
+I MASSI
+Nella Torre compaiono i massi: caselle grigie che contano come piene ma non spariscono mai. Aiutano a chiudere la riga, la colonna e il quadrante in cui stanno, e restano lì quando il gruppo se ne va. Le bombe non li portano via e il piccone non li toglie: vanno messi nel conto.
 
 GLI ATTREZZI DEL CANTIERE
 Sono quattro: la carriola cambia un pezzo della mano, il gessetto ti mostra dove conviene mettere un pezzo, il piccone svuota una casella occupata, la mensola mette da parte un pezzo per dopo. Per usarli servono i gettoni: nei livelli ne guadagni 1 ogni cinque livelli superati, e ne tieni al massimo tre. Con ogni gettone usi l'attrezzo che scegli tu, quando ti blocchi. Non si comprano: si guadagnano giocando.
 
 L'INTRECCIO
-Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare.
+Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare. Quando ci riesci, la plancia te lo fa vedere.
 
 LA CATENA
 Ogni mossa che elimina qualcosa fa salire un moltiplicatore che resta. Una mossa a vuoto non lo tocca; dalla seconda di fila scende di uno a ogni mossa. È una tolleranza dichiarata, non una regola nascosta.
@@ -85,7 +86,7 @@ Una volta installato si gioca offline.
 ACCESSIBILE
 Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, e se nel telefono hai chiesto di ridurre le animazioni il gioco lo rispetta.
 ```
-*3218 caratteri su 4000. Aggiornata alla 1.19.4 (attrezzi e gettoni distinti: gli attrezzi sono i quattro strumenti, i gettoni sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
+*3781 caratteri su 4000. Aggiornata per la Torre (9 ottobre 2026): duecento livelli in due opere, i massi, l'ultimo livello di ogni opera che si apre solo superando tutti gli altri, l'Intreccio che si vede. Prima: 1.19.4.*
 
 ## In inglese (Play Console → Traduzioni)
 
@@ -103,23 +104,26 @@ PLINTO - block puzzle
 ### Short description (max 80)
 
 ```
-A hundred levels, and 3×3 quadrants on top of rows and columns. No ads.
+Two hundred levels, and 3×3 quadrants on top of rows and columns. No ads.
 ```
-*71 caratteri. Alternativa piu' piana, 68: «A hundred levels. Rows, columns and quadrants. No ads, no purchases.»*
+*73 caratteri.*
 
 ### Full description (max 4000)
 
 ```
 PLINTO is a block puzzle with one extra rule: besides rows and columns, you also clear 3×3 quadrants. Three directions instead of two, and a move that closes more than one at once is worth far more.
 
-A HUNDRED LEVELS, MEASURED AND NOT INVENTED
-The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
+TWO HUNDRED LEVELS IN TWO WORKS, MEASURED AND NOT INVENTED
+First you build the Bridge: a hundred levels in seven acts, from the Foundations to the Last Stone. Then you climb the Tower: a hundred more, from the Base to the Summit, which open once you have cleared the whole Bridge. Each level has a stated goal and a move limit, and further on some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it. Only the last level of each work makes no allowances: it opens once you have cleared all the others.
+
+BOULDERS
+In the Tower you meet boulders: grey squares that count as filled but never disappear. They help close the row, the column and the quadrant they sit in, and they stay put when the group goes. Bombs do not carry them off and the pickaxe does not remove them: you have to plan around them.
 
 THE SITE TOOLS
 There are four: the wheelbarrow swaps a piece in your hand, the chalk shows you where a piece fits best, the pickaxe empties a filled square, the shelf sets a piece aside for later. To use them you need tokens: in the levels you earn 1 every five levels cleared, and you can keep up to three. With each token you use whichever tool you pick, when you are stuck. They cannot be bought: you earn them by playing.
 
 THE INTERLACE
-Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach.
+Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach. When you pull it off, the board lets you see it.
 
 THE CHAIN
 Every move that clears something raises a multiplier that stays. One empty move leaves it alone; from the second in a row it drops by one with each move. That tolerance is stated, not hidden.
@@ -148,7 +152,25 @@ Once installed, it plays without a connection.
 ACCESSIBLE
 Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, and if you asked your phone to reduce motion, the game respects it.
 ```
-*3012 caratteri su 4000. Aggiornata alla 1.19.4.*
+*3604 caratteri su 4000. Aggiornata per la Torre (9 ottobre 2026).*
+
+## Note di rilascio della Torre («Novità»)
+
+Si incollano nella release di produzione, non nella scheda. Limite: **500 caratteri
+Unicode per lingua** (guida di Play Console, «Preparare e implementare una release»,
+letta il 9 ottobre 2026).
+
+```
+<it-IT>
+Arriva la Torre: cento livelli nuovi, dal 101 al 200, che si aprono quando hai finito il Ponte. Con una regola nuova, i massi: caselle che contano come piene ma non spariscono mai. E il gioco ha una veste nuova: blocchi lucidi, la plancia d'ottone e nuove animazioni quando chiudi più gruppi insieme.
+</it-IT>
+<en-US>
+The Tower is here: a hundred new levels, 101 to 200, opening once you finish the Bridge. With a new rule, boulders: squares that count as filled but never disappear. And the game has a new look: glossy blocks, a brass board and new animations when you close several groups at once.
+</en-US>
+```
+*Italiano 300 caratteri, inglese 281. I tag `<it-IT>` e `<en-US>` sono il formato con cui la
+console accetta piu' lingue in un solo campo; se la console mostra un campo per lingua,
+si incolla solo il testo.*
 
 ## Categoria
 
@@ -212,10 +234,10 @@ nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Ades
 
 | # | File | Che cosa dice nei primi due secondi |
 | --- | --- | --- |
-| 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un gettone per gli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
+| 1 | `1-mappa-livelli.png` | Ci sono due opere da costruire, il Ponte e la Torre, duecento livelli in tutto: qui la Torre, con il Ponte gia' finito. La cassetta segna dove si guadagna un gettone per gli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
 | 2 | `2-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
-| 3 | `3-livello.png` | Com'e' fatto un livello mentre lo giochi: l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
-| 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |
+| 3 | `3-livello.png` | Com'e' fatto un livello della Torre mentre lo giochi: i massi grigi, l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
+| 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: l'Intreccio con la sua scritta, le scie di luce, le particelle, i punti |
 | 5 | `5-partita.png` | La partita libera, per chi vuole giocare senza obiettivi |
 | 6 | `6-fine-partita.png` | La fine dice il motivo e i numeri di una partita vera, e il pulsante per rigiocare e' sotto il pollice |
 | 7 | `7-statistiche.png` | Il gioco tiene traccia di come giochi, non solo di quanto hai fatto |
