@@ -7,6 +7,15 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.20.1] — 9 ottobre 2026
+
+### Corretto
+
+- Il menu in fondo alla home usciva dallo schermo sui telefoni larghi 360 px:
+  «Statistiche» e «Impostazioni» restavano tagliate dal bordo, perche' «Il tuo profilo di
+  gioco» allargava la sua colonna. Adesso le colonne sono uguali e la voce lunga va a capo.
+  `npm run impaginazione` controlla anche che ogni voce del menu stia dentro lo schermo.
+
 ## [1.20.0] — 9 ottobre 2026
 
 ### Cambiato
