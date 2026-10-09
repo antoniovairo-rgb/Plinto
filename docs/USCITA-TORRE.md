@@ -14,12 +14,12 @@ Android Studio (Claude non ha accesso a nessuno dei due).
       la Torre sull'Arena.
 - [ ] **[C]** Gate completo sulla Torre: `npm run verifica`, 28 controlli, tutti i 200
       livelli rigiocati nell'app. Supera le 2 ore: si fa a pezzi, come il 9 ottobre.
-- [ ] **[C]** Testi della scheda (`android/SCHEDA-PLAY-STORE.md`), italiano e inglese:
+- [x] **[C]** Testi della scheda (`android/SCHEDA-PLAY-STORE.md`), italiano e inglese:
       «cento livelli» diventa 200 (il Ponte e la Torre), si spiegano i massi e la regola
       dell'ultimo livello di ogni opera, si toglie o si riscrive la frase degli «otto
       tentativi». Rispettare i limiti: nome 30, breve 80, completa 4000 caratteri.
-- [ ] **[C]** Note di rilascio («Novita'») in italiano e inglese, entro 500 caratteri.
-- [ ] **[C]** Rigenerare le otto schermate con la grafica nuova (`npm run schermate`) e
+- [x] **[C]** Note di rilascio («Novita'») in italiano e inglese, entro 500 caratteri.
+- [x] **[C]** Rigenerare le otto schermate con la grafica nuova (`npm run schermate`) e
       aggiornare la tabella delle schermate nella scheda (la prima parla di «cento livelli»).
 - [ ] **[C]** Facoltativo: video nuovo (`npm run video`), da caricare su YouTube.
 - [ ] **[P]** Decidere come provare la Torre su un telefono vero PRIMA dell'uscita.
@@ -35,21 +35,23 @@ Android Studio (Claude non ha accesso a nessuno dei due).
 2. [ ] **[C]** Versione **1.21.0** (contenuto nuovo): `package.json`, `versionName`,
        `versionCode` = ultimo caricato + 1; nel CHANGELOG il blocco «Non pubblicato — La
        Torre» diventa «1.21.0» con la data.
-3. [ ] **[C]** `opera-torre` su `main`, push. La pubblicazione del sito e' automatica e
+3. [ ] **[C]** Rigenerare le schermate (`npm run schermate`), DOPO il cambio di versione: quelle pronte dicono
+       v1.20.1 nella home di riserva, e lo strumento si ferma se la versione non torna.
+4. [ ] **[C]** `opera-torre` su `main`, push. La pubblicazione del sito e' automatica e
        **arriva subito anche a chi gioca dall'app del Play Store**, perche' l'app mostra il sito.
-4. [ ] **[C]** Controllo che il sito pubblicato serva la 1.21.0 e che la CI sia verde; avviso.
-5. [ ] **[P]** Android Studio → *Build → Generate Signed App Bundle* → release, con la
+5. [ ] **[C]** Controllo che il sito pubblicato serva la 1.21.0 e che la CI sia verde; avviso.
+6. [ ] **[P]** Android Studio → *Build → Generate Signed App Bundle* → release, con la
        chiave di sempre (`android/COME-PUBBLICARE.md`, passo 1). Serve per la nuova icona
        sui telefoni e per il numero di versione in «Informazioni app».
-6. [ ] **[P]** Play Console → Produzione → nuova release → carica l'AAB → incolla le note
+7. [ ] **[P]** Play Console → Produzione → nuova release → carica l'AAB → incolla le note
        di rilascio → invia in revisione.
-7. [ ] **[P]** Play Console → Scheda dello store:
+8. [ ] **[P]** Play Console → Scheda dello store:
        - icona 512×512: `public/icone/icona-512.png`;
        - immagine in evidenza 1024×500: `store/immagine-in-evidenza.png`;
        - le otto schermate da `store/`, nell'ordine della scheda;
        - descrizione breve e completa, italiano e inglese;
        - video, se rifatto.
-8. [ ] **[P]** Provare sul proprio telefono: home, mappa con le due schede, un livello
+9. [ ] **[P]** Provare sul proprio telefono: home, mappa con le due schede, un livello
        con un masso, un Intreccio.
 
 ## C. Dopo
