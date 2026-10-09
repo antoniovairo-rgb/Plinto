@@ -316,12 +316,20 @@ if (!sequenza) {
   // appena vinta, cambiando solo la dimensione della finestra.
   await misuraFine('vittoria');
 
-  // Il messaggio non e' piu' a schermo prima di toccare il pulsante: si tocca, e senza
-  // `navigator.share` il gioco lo copia o, se non puo', lo mostra.
+  // Il messaggio non e' a schermo (ne' prima ne' dopo il tocco: 1.20.2). Si tocca, e
+  // senza `navigator.share` il gioco lo copia: lo si legge da li', intercettando la
+  // copia, perche' questo contesto non ha il permesso di rileggere gli appunti.
   {
+    await page.evaluate(() => {
+      window.__copiato = '';
+      navigator.clipboard.writeText = (testo) => { window.__copiato = testo; return Promise.resolve(); };
+    });
     await page.locator('.pl-fine .pl-condividi .pl-btn').first().click();
     await page.waitForTimeout(200);
-    const schedaQuadro = (await page.locator('.pl-fine .pl-scheda').innerText().catch(() => '')).trim();
+    const schedaQuadro = (await page.evaluate(() => window.__copiato)).trim();
+    if (await page.locator('.pl-fine .pl-scheda').count() !== 0) {
+      errori.push('SCHEDA LIVELLO: dopo una copia riuscita il testo torna a schermo');
+    }
     console.log(`3c. scheda del livello: ${schedaQuadro.split('\n').length} righe`);
     if (!schedaQuadro) {
       errori.push('SCHEDA LIVELLO: dopo la vittoria non compare nessuna scheda da condividere');

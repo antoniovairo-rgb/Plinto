@@ -34,7 +34,8 @@ Non ancora in produzione: deve uscire uno o due mesi dopo la Torre.
 
 ## [Non pubblicato] — La Torre (branch `opera-torre`)
 
-Non ancora in produzione: aspetta il via del proprietario.
+Non ancora in produzione: aspetta il via del proprietario. La grafica e le animazioni nate
+qui sono gia' uscite sul Ponte con la 1.21.0; restano l'icona, il logo a gemme e la Torre.
 
 ### Aggiunto
 
@@ -50,30 +51,11 @@ Non ancora in produzione: aspetta il via del proprietario.
   ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
 - **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
   fine della Torre.
-- **Grafica nuova, il «cantiere di notte»** (`src/styles/finiture.css`): fondo con luci e
-  reticolo, logo d'ottone, pulsante del livello piu' grande (testo da 19 a 21 px), le tre
-  voci della home ognuna col suo colore, plancia con cornice d'ottone e caselle incassate,
-  blocchi come gemme. Nessun testo e' diventato piu' piccolo; contrasti, fluidita' e
-  impaginazione verificati con le prove di sempre, piu' un confronto di tutti i 3.130
-  testi a schermo con la grafica di prima.
 - **Icona e logo con le stesse finiture**: blocchi come gemme, filo e tratteggio d'ottone,
   luce calda in alto. Stessa geometria di prima, quindi si riconosce subito. Le icone per
   Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
   margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
   la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
-- **Animazioni nuove durante la partita** (`src/styles/animazioni.css`), scelte dal
-  proprietario dopo un video di prova:
-  - **l'onda**: i blocchi spariscono a partire dal pezzo appena appoggiato, al massimo
-    210 ms fra il primo e l'ultimo (`src/feel/onda.js`);
-  - **le scie**: una striscia di luce lungo ogni riga o colonna chiusa, un lampo dal
-    centro per ogni quadrante;
-  - **l'Intreccio**: con due o piu' gruppi in una mossa compare «Intreccio ×N!» in alto
-    sulla plancia (in inglese «Interlace»), e la plancia trema per 0,4 secondi;
-  - **l'atterraggio elastico**: il pezzo rimbalza (da 260 a 380 ms).
-
-  Chi chiede meno movimento al sistema non vede scie, scritta, scossa e onda; chi spegne
-  gli effetti nelle impostazioni non li riceve. `npm run e2e-scenografie` prova un
-  Intreccio vero, una riga sola (niente scritta) e la versione con meno movimento.
 - **Testi della scheda e schermate per l'uscita della Torre**: duecento livelli, i massi,
   l'ultimo livello di ogni opera, note di rilascio in italiano e inglese
   (`android/SCHEDA-PLAY-STORE.md`). Le schermate mostrano la Torre; quella
@@ -97,6 +79,50 @@ Non ancora in produzione: aspetta il via del proprietario.
 - I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
   senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
   cambiano, e nemmeno i record di chi li ha gia' giocati.
+
+## [1.21.0] — 9 ottobre 2026
+
+La veste nuova pensata per la Torre esce prima della Torre, sul Ponte: grafica e
+animazioni. Restano per dopo l'icona, il logo a gemme e la Torre stessa.
+
+### Cambiato
+
+- **Grafica nuova, il «cantiere di notte»** (`src/styles/finiture.css`, scelta dal
+  proprietario fra tre anteprime): fondo con luci e reticolo, scritta PLINTO d'ottone,
+  pulsante del livello piu' grande (testo da 19 a 21 px), le tre voci della home ognuna
+  col suo colore, plancia con cornice d'ottone e caselle incassate, blocchi come gemme.
+  Nessun testo e' diventato piu' piccolo: un confronto di tutti i testi a schermo con la
+  grafica di prima, piu' contrasti, fluidita' e impaginazione con le prove di sempre.
+  Sui telefoni bassi il pulsante del livello resta alto 64 px, perche' a 70 la home
+  scorreva di 5 px a 360x640.
+
+### Aggiunto
+
+- **Animazioni nuove durante la partita** (`src/styles/animazioni.css`), scelte dopo un
+  video di prova:
+  - **l'onda**: i blocchi spariscono a partire dal pezzo appena appoggiato, al massimo
+    210 ms fra il primo e l'ultimo (`src/feel/onda.js`);
+  - **le scie**: una striscia di luce lungo ogni riga o colonna chiusa, un lampo dal
+    centro per ogni quadrante;
+  - **l'Intreccio**: con due o piu' gruppi in una mossa compare «Intreccio ×N!» in alto
+    sulla plancia (in inglese «Interlace») e la plancia trema per 0,4 secondi;
+  - **l'atterraggio elastico**: il pezzo rimbalza (da 260 a 380 ms).
+
+  Chi chiede meno movimento al sistema non vede scie, scritta, scossa e onda; chi spegne
+  gli effetti nelle impostazioni non li riceve. `npm run e2e-scenografie` prova un
+  Intreccio vero, una riga sola (niente scritta), la versione con meno movimento e il
+  colore dei blocchi che esplodono (la prima stesura delle gemme li rendeva trasparenti).
+
+## [1.20.2] — 9 ottobre 2026
+
+### Cambiato
+
+- **Il testo da condividere non compare piu' a schermo**, in nessun punto: fine partita,
+  fine livello, mappa e festa finale. Sulla festa del Ponte tornava a schermo dopo
+  «Condiviso.» (segnalato dal proprietario con una foto). Chi condivide lo vede nella
+  finestra del sistema; il testo ricompare solo se non si puo' ne' condividere ne'
+  copiare, perche' li' e' l'unico modo di prenderlo a mano. `npm run condivisione`
+  controlla tutti e tre i casi.
 
 ## [1.20.1] — 9 ottobre 2026
 
