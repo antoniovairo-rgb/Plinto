@@ -7,9 +7,21 @@
  * resta appeso dopo (un residuo). Il test tests/durate.test.js confronta i due file
  * e fallisce se qualcuno ne cambia uno solo.
  */
-export const DURATA_ATTERRAGGIO = 260;
+// 380 e non piu' 260: nella Torre l'atterraggio rimbalza (grande, piccolo, di nuovo
+// un po' grande, fermo) e in 260 ms i tre tempi si impastavano in un tremolio.
+export const DURATA_ATTERRAGGIO = 380;
 export const DURATA_ESPLOSIONE = 420;
 export const DURATA_PUNTI = 950;
+
+/**
+ * La scia di luce che corre lungo un gruppo chiuso, e la scritta dell'Intreccio.
+ *
+ * La scia sta dentro la vita dell'esplosione (che dura DURATA_ESPLOSIONE piu' l'onda):
+ * se durasse di piu' verrebbe tolta a meta' corsa. La scritta e' piu' lunga, ma non
+ * quanto la frase di incitamento: e' un titolo da cogliere al volo, non da leggere.
+ */
+export const DURATA_SCIA = 520;
+export const DURATA_INTRECCIO = 950;
 
 /**
  * Quanto dura il lampo che attraversa la plancia quando la griglia si svuota.

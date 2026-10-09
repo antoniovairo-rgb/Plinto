@@ -341,6 +341,7 @@ export function SchermoGioco({
               esplosioni={effetti.esplosioni}
               celleEsplose={effetti.celleEsplose}
               svuotata={effetti.svuotata}
+              intreccio={effetti.intreccio}
               cursore={tastiera.cursore}
               segnate={segnate}
               pezzoInMano={drag.selezionato !== null}

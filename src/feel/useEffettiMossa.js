@@ -24,8 +24,9 @@ import {
 
 import {
   DURATA_ATTERRAGGIO, DURATA_ESPLOSIONE, DURATA_PUNTI, DURATA_INCITAMENTO,
-  ATTESA_INCITAMENTO, DURATA_SVUOTAMENTO,
+  ATTESA_INCITAMENTO, DURATA_SVUOTAMENTO, DURATA_INTRECCIO,
 } from './durate.js';
+import { ritardoMassimo } from './onda.js';
 import { respiroRimasto } from '../core/scoring.js';
 import { incitamento } from '../core/incitamenti.js';
 import { VARIANTI_INCITA } from '../i18n/index.js';
@@ -58,6 +59,9 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
   const [puntiVolanti, setPuntiVolanti] = useState(null);
   const [incita, setIncita] = useState(null);
   const [svuotata, setSvuotata] = useState(null);
+  // L'Intreccio: due o piu' gruppi chiusi dalla stessa mossa. La chiave e' il numero
+  // della mossa, cosi' due Intrecci di fila rimontano la scritta e l'animazione riparte.
+  const [intreccio, setIntreccio] = useState(null);
   const ultimaMossa = useRef(null);
   // I sacchetti delle frasi, uno per categoria: si pesca senza rimettere dentro, cosi'
   // escono tutte prima che una si ripeta. Vivono in un ref e non in uno stato perche'
@@ -143,9 +147,22 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     if (gruppi > 0) {
       const colore = coloreBlocco(lastMove.color);
       const tintaPiena = (lastMove.breakdown?.tintaMassima ?? 0) >= TINTA_SOGLIA;
-      setEsplosioni({ celle: new Set(lastMove.clearedCells), colore, tinta: tintaPiena });
+      // `origine` e `gruppi` servono all'onda e alle scie: l'onda parte dalle caselle
+      // del pezzo appena appoggiato, le scie corrono lungo ogni riga, colonna o
+      // quadrante chiuso. I blocchi partono in ritardo, quindi si ripulisce quando e'
+      // finito l'ULTIMO, non quando finirebbe il primo.
+      const origine = lastMove.placedCells ?? [];
+      const onda = ritardoMassimo([...lastMove.clearedCells, ...(lastMove.celleEsplose ?? [])], origine);
+      setEsplosioni({
+        celle: new Set(lastMove.clearedCells), colore, tinta: tintaPiena, origine,
+        gruppi: lastMove.groups.map((g) => ({ type: g.type, index: g.index })),
+      });
       setCelleEsplose(new Set(lastMove.celleEsplose ?? []));
-      timers.push(setTimeout(() => { setEsplosioni(null); setCelleEsplose(null); }, DURATA_ESPLOSIONE));
+      timers.push(setTimeout(() => { setEsplosioni(null); setCelleEsplose(null); }, DURATA_ESPLOSIONE + onda));
+      if (gruppi >= 2) {
+        setIntreccio({ n: gruppi, chiave: lastMove.moveNumber });
+        timers.push(setTimeout(() => setIntreccio(null), DURATA_INTRECCIO));
+      }
 
       // --- particelle ------------------------------------------------------
       if (campo.current && plancia.current) {
@@ -279,5 +296,5 @@ export function useEffettiMossa({ lastMove, campo, cellRefs, plancia, animazioni
     return () => timers.forEach(clearTimeout);
   }, [lastMove, campo, cellRefs, plancia, animazioni]);
 
-  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita, svuotata };
+  return { appoggiate, esplosioni, celleEsplose, puntiVolanti, incita, svuotata, intreccio };
 }

@@ -1,8 +1,9 @@
 import { forwardRef, useMemo } from 'react';
-import { GRID_SIZE } from '../config/rules.js';
+import { GRID_SIZE, QUADRANT_SIZE } from '../config/rules.js';
 import { idx, coloreDi, eBomba, eMasso } from '../core/grid.js';
 import { Bomba } from './Bomba.jsx';
 import { Masso } from './Masso.jsx';
+import { ritardoOnda } from '../feel/onda.js';
 
 /**
  * La griglia 9x9.
@@ -14,10 +15,21 @@ import { Masso } from './Masso.jsx';
  * `cellRefs` viene riempito con i nodi delle celle: servono al trascinamento per
  * misurare con esattezza dove cade il dito, e alle particelle per sapere da dove partire.
  */
+/** Dove sta la scia di un gruppo, in caselle: prima riga, prima colonna, quante. */
+function posizioneScia({ type, index }) {
+  if (type === 'row') return { '--r': index, '--c': 0, '--nr': 1, '--nc': GRID_SIZE };
+  if (type === 'col') return { '--r': 0, '--c': index, '--nr': GRID_SIZE, '--nc': 1 };
+  const lato = QUADRANT_SIZE;
+  const perRiga = GRID_SIZE / lato;
+  return {
+    '--r': Math.floor(index / perRiga) * lato, '--c': (index % perRiga) * lato, '--nr': lato, '--nc': lato,
+  };
+}
+
 export const Plancia = forwardRef(function Plancia(
   {
     grid, anteprima, anteprimaColore, anteprimaValida, incandidate,
-    appoggiate, esplosioni, celleEsplose, svuotata, cursore, pezzoInMano,
+    appoggiate, esplosioni, celleEsplose, svuotata, intreccio, cursore, pezzoInMano,
     // Le caselle segnate col gesso: dove il gessetto dice di appoggiare.
     segnate,
     cellRefs, canvasRef, onCellPointerUp, t,
@@ -89,7 +101,7 @@ export const Plancia = forwardRef(function Plancia(
                   // dieci, quindi si nota senza diventare rumore.
                   esplosioni.tinta ? 'pl-blocco--tinta' : '',
                 ].filter(Boolean).join(' ')}
-                style={{ '--esploso': esplosioni.colore }}
+                style={{ '--esploso': esplosioni.colore, '--ritardo': `${ritardoOnda(i, esplosioni.origine)}ms` }}
               />
             ) : null}
           </div>,
@@ -102,7 +114,7 @@ export const Plancia = forwardRef(function Plancia(
 
   return (
     <div
-      className="pl-plancia"
+      className={`pl-plancia${intreccio ? ' pl-plancia--scossa' : ''}`}
       ref={ref}
       role="grid"
       aria-label="PLINTO"
@@ -122,6 +134,25 @@ export const Plancia = forwardRef(function Plancia(
           rimessa sullo stesso nodo, in CSS, non fa ripartire niente. */}
       {svuotata ? <div key={svuotata} className="pl-plancia__lampo" aria-hidden="true" /> : null}
       <canvas className="pl-plancia__particelle" ref={canvasRef} aria-hidden="true" />
+      {/* Le scie: una striscia di luce che corre lungo ogni riga o colonna chiusa, un
+          lampo dal centro per ogni quadrante. La posizione si calcola qui, in caselle,
+          e non in CSS con mod()/round(): i browser un po' vecchi non li conoscono. */}
+      {esplosioni?.gruppi?.map((g) => (
+        <div
+          key={`${g.type}${g.index}`}
+          aria-hidden="true"
+          className={`pl-scia pl-scia--${g.type}`}
+          style={{ '--colore': esplosioni.colore, ...posizioneScia(g) }}
+        />
+      ))}
+      {/* L'Intreccio: due o piu' gruppi con una mossa. Nascosto ai lettori di schermo,
+          che i punti della mossa li sentono gia' dall'annuncio. */}
+      {intreccio ? (
+        <div key={intreccio.chiave} className="pl-colpo" aria-hidden="true">
+          <span className="pl-colpo__testo">{t('plancia.intreccio')}</span>
+          <span className="pl-colpo__per">{`\u00d7${intreccio.n}!`}</span>
+        </div>
+      ) : null}
     </div>
   );
 });

@@ -117,9 +117,11 @@
   /* Durate degli effetti di gioco. Sono le stesse costanti usate da
      src/feel/useEffettiMossa.js: se cambiano qui devono cambiare anche li',
      altrimenti l'animazione e il momento in cui viene rimossa si scollano. */
-  --pl-t-atterraggio: 260ms;
+  --pl-t-atterraggio: 380ms;
   --pl-t-esplosione: 420ms;
   --pl-t-punti: 950ms;
+  --pl-t-scia: 520ms;
+  --pl-t-intreccio: 950ms;
   --pl-t-svuotamento: 700ms;
   /* La frase di incitamento. NON compare nel blocco prefers-reduced-motion qui sotto,
      ed e' l'unica durata che non ci compare: le altre misurano un movimento, questa
@@ -156,6 +158,8 @@
     --pl-t-atterraggio: 1ms;
     --pl-t-esplosione: 1ms;
     --pl-t-punti: 1ms;
+    --pl-t-scia: 1ms;
+    --pl-t-intreccio: 1ms;
     --pl-t-svuotamento: 1ms;
     --pl-t-festa: 1ms;
   }

@@ -36,6 +36,21 @@ Non ancora in produzione: aspetta il via del proprietario.
   Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
   margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
   la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
+- **Animazioni nuove durante la partita** (`src/styles/animazioni.css`), scelte dal
+  proprietario dopo un video di prova:
+  - **l'onda**: i blocchi spariscono a partire dal pezzo appena appoggiato, al massimo
+    210 ms fra il primo e l'ultimo (`src/feel/onda.js`);
+  - **le scie**: una striscia di luce lungo ogni riga o colonna chiusa, un lampo dal
+    centro per ogni quadrante;
+  - **l'Intreccio**: con due o piu' gruppi in una mossa compare «Intreccio ×N!» in alto
+    sulla plancia (in inglese «Interlace»), e la plancia trema per 0,4 secondi;
+  - **l'atterraggio elastico**: il pezzo rimbalza (da 260 a 380 ms).
+
+  Chi chiede meno movimento al sistema non vede scie, scritta, scossa e onda; chi spegne
+  gli effetti nelle impostazioni non li riceve. `npm run e2e-scenografie` prova un
+  Intreccio vero, una riga sola (niente scritta) e la versione con meno movimento.
+- **Immagine in evidenza dello store** con il marchio a gemme (letto da `public/icon.svg`),
+  la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
 
 ### Corretto
 

@@ -5,6 +5,7 @@ import { Salvagente } from './ui/Salvagente.jsx';
 import { traduttore, linguaDelBrowser } from './i18n/index.js';
 import './styles/app.css';
 import './styles/finiture.css';
+import './styles/animazioni.css';
 
 /**
  * La rete di sicurezza sta FUORI da App e usa un traduttore proprio.
