@@ -34,7 +34,7 @@ Android Studio (Claude non ha accesso a nessuno dei due).
 1. [ ] **[P]** Dare il via.
 2. [ ] **[C]** Versione **1.22.0** (contenuto nuovo): `package.json`, `versionName`,
        `versionCode` = ultimo caricato + 1; nel CHANGELOG il blocco «Non pubblicato — La
-       Torre» diventa «1.21.0» con la data.
+       Torre» diventa «1.22.0» con la data.
 3. [ ] **[C]** Rigenerare le schermate (`npm run schermate`), DOPO il cambio di versione: quelle pronte dicono
        v1.20.1 nella home di riserva, e lo strumento si ferma se la versione non torna.
 4. [ ] **[C]** `opera-torre` su `main`, push. La pubblicazione del sito e' automatica e
