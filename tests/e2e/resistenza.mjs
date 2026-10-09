@@ -212,7 +212,16 @@ await page.evaluate(() => window.gc?.());
 await page.waitForTimeout(600);
 const memoriaFinale = await memoria();
 const nodiFinali = await page.evaluate(() => document.querySelectorAll('*').length);
-const particelleVive = await page.evaluate(() => {
+// IL CANVAS DEVE RIPULIRSI DA SOLO, e si aspetta che lo faccia invece di fotografarlo a
+// un istante fisso. Sulla 1.21.0 l'integrazione continua ha trovato 344 pixel a riposo;
+// in locale, dieci giri puliti su dieci. La causa probabile, NON dimostrata: la vita di
+// una scheggia si conta in FOTOGRAMMI (quelle della Tinta circa novanta, un secondo e
+// mezzo a 60 al secondo), e su una macchina rallentata anche per poco novanta fotogrammi
+// superano il secondo e otto di attesa fissa. Quello che conta e' che a riposo si
+// svuoti, non entro quanto: cinque secondi sono il triplo della vita piu' lunga, e se
+// dopo cinque secondi c'e' ancora qualcosa il ciclo non si e' fermato. Provato al
+// contrario togliendo la pulizia fra un fotogramma e l'altro: 148.243 pixel, bocciato.
+const contaParticelle = () => page.evaluate(() => {
   const cv = document.querySelector('.pl-plancia__particelle');
   if (!cv) return -1;
   const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -220,6 +229,13 @@ const particelleVive = await page.evaluate(() => {
   for (let i = 3; i < d.length; i += 4) if (d[i] > 0) opachi += 1;
   return opachi;
 });
+const inizioRiposo = Date.now();
+let particelleVive = await contaParticelle();
+while (particelleVive > 0 && Date.now() - inizioRiposo < 5000) {
+  await page.waitForTimeout(100);
+  particelleVive = await contaParticelle();
+}
+const attesaRiposo = Date.now() - inizioRiposo;
 
 await browser.close();
 if (server) server.kill();
@@ -229,7 +245,7 @@ console.log(`\nPLINTO — prova di resistenza: ${mosseRiuscite} mosse valide su 
 console.log(`Fotogrammi        mediana ${mediana.toFixed(1)} ms | p95 ${p95.toFixed(1)} ms | sopra 50 ms: ${lunghi} su ${fotogrammi.length}`);
 console.log(`Memoria JS        ${mb(memoriaIniziale)} MB -> ${mb(memoriaFinale)} MB`);
 console.log(`Nodi nel DOM      ${nodiIniziali} -> ${nodiFinali}`);
-console.log(`Particelle rimaste sul canvas a riposo: ${particelleVive} pixel`);
+console.log(`Particelle rimaste sul canvas a riposo: ${particelleVive} pixel (controllate per ${attesaRiposo} ms in piu')`);
 if (fallimenti.length > 0) {
   console.log(`\nMosse non andate a segno (prime ${fallimenti.length}):`);
   fallimenti.forEach((f) => console.log(`  ${f}`));
