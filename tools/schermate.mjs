@@ -92,9 +92,9 @@ const impostazioni = {
 
 async function prepara({
   partita = null, record = null, statistiche = null, sfide = null, quadri = null, attrezzi = null,
-}) {
-  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate((dati) => {
+}, p = page) {
+  await p.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await p.evaluate((dati) => {
     window.localStorage.clear();
     window.localStorage.setItem('plinto:settings', JSON.stringify(dati.impostazioni));
     if (dati.partita) window.localStorage.setItem('plinto:partita', JSON.stringify(dati.partita));
@@ -104,7 +104,7 @@ async function prepara({
     if (dati.quadri) window.localStorage.setItem('plinto:quadri', JSON.stringify(dati.quadri));
     if (dati.attrezzi) window.localStorage.setItem('plinto:attrezzi', JSON.stringify(dati.attrezzi));
   }, { impostazioni, partita, record, statistiche, sfide, quadri, attrezzi });
-  await page.reload({ waitUntil: 'networkidle' });
+  await p.reload({ waitUntil: 'networkidle' });
 }
 
 /**
@@ -158,7 +158,13 @@ function cellaDaToccare(shape, row, col) {
   return { row: row + Math.floor((shape.height - 1) / 2), col: col + Math.floor((shape.width - 1) / 2) };
 }
 
-/** Avanzamento finto: i primi `quanti` livelli superati, per mostrare la mappa viva. */
+/**
+ * Avanzamento finto: i primi `quanti` livelli superati, per mostrare la mappa viva.
+ * Ventitre' livelli: abbastanza per due atti chiusi e una cassetta in uso. Il conto degli
+ * attrezzi segue: chi ne ha superati 23 li ha gia' riscossi tutti, e ne tiene due.
+ */
+const SUPERATI = 23;
+const ATTREZZI_MOSTRATI = { disponibili: 2, riscossi: Math.floor(SUPERATI / 5), versione: 1 };
 function progressiFinoA(quanti) {
   const livelli = {};
   for (let n = 1; n <= quanti; n += 1) {
@@ -179,8 +185,8 @@ const STATISTICHE = {
 await prepara({
   record: RECORD,
   sfide: { [new Date().toISOString().slice(0, 10)]: { best: 4120, partite: 3 } },
-  quadri: progressiFinoA(23),
-  attrezzi: { disponibili: 2, riscossi: 4, versione: 1 },
+  quadri: progressiFinoA(SUPERATI),
+  attrezzi: ATTREZZI_MOSTRATI,
 });
 
 /**
@@ -238,13 +244,54 @@ if (!primaDelColpo) throw new Error('Nessuno stato adatto alla schermata 4');
 const colpo = mossaPiuGrossa(primaDelColpo);
 const tocco = cellaDaToccare(colpo.pezzo.shape, colpo.row, colpo.col);
 
-await prepara({ record: RECORD, partita: serializeGame(primaDelColpo) });
-await page.getByRole('button', { name: /Riprendi la partita/ }).click();
-await page.waitForSelector('.pl-plancia');
-await page.locator('.pl-tray .pl-pezzo').nth(colpo.handIndex).click();
-await page.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
-await page.waitForTimeout(150);   // a meta' animazione: particelle in volo e punti visibili
-await page.screenshot({ path: `${USCITA}4-eliminazione.png` });
+// L'OROLOGIO SI FERMA. La scritta dell'Intreccio vive meno di un secondo, e una cattura
+// a 1236x2196 ne impiega di piu': la prima versione di questa schermata controllava che
+// la scritta ci fosse e poi fotografava una plancia in cui era gia' sparita, con al suo
+// posto la frase di incitamento. Su una pagina a parte, con l'orologio finto di
+// Playwright, i timer del gioco avanzano solo quando lo dice questo script; le
+// animazioni CSS, che seguono il tempo vero, si mettono in pausa nello stesso istante.
+const pagina4 = await browser.newPage({
+  viewport: { width: LARGHEZZA, height: ALTEZZA },
+  deviceScaleFactor: DENSITA,
+  locale: 'it-IT',
+});
+await pagina4.clock.install();
+await prepara({ record: RECORD, partita: serializeGame(primaDelColpo) }, pagina4);
+await pagina4.getByRole('button', { name: /Riprendi la partita/ }).click();
+await pagina4.waitForSelector('.pl-plancia');
+// `install` da solo non ferma niente: l'orologio finto va avanti in tempo reale finche'
+// non lo si mette in pausa. Da qui in poi i timer del gioco scattano solo con runFor.
+{
+  const ora = await pagina4.evaluate(() => Date.now());
+  await pagina4.clock.pauseAt(ora + 1000);
+}
+await pagina4.locator('.pl-tray .pl-pezzo').nth(colpo.handIndex).click();
+await pagina4.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
+// A meta' animazione: particelle in volo, punti visibili, le scie di luce e la scritta
+// dell'Intreccio gia' grande. A 150 ms la scritta era ancora piccola e inclinata.
+await pagina4.clock.runFor(230);
+await pagina4.waitForTimeout(230);
+await pagina4.evaluate(() => document.getAnimations().forEach((a) => a.pause()));
+{
+  // La schermata esiste per mostrare l'Intreccio: se la scritta non c'e', l'immagine
+  // racconta un'altra mossa. Meglio fermarsi che caricarla sullo store.
+  const visto = await pagina4.evaluate(() => ({
+    colpo: document.querySelector('.pl-colpo')?.textContent ?? null,
+    scie: document.querySelectorAll('.pl-scia').length,
+    esplosi: document.querySelectorAll('.pl-blocco--esploso').length,
+  }));
+  if (!visto.colpo || visto.scie < 2) {
+    throw new Error(`Schermata 4: la mossa chiude ${colpo.gruppi} gruppi ma a schermo ci sono `
+      + `scritta "${visto.colpo}", ${visto.scie} scie e ${visto.esplosi} blocchi in esplosione`);
+  }
+}
+await pagina4.screenshot({ path: `${USCITA}4-eliminazione.png` });
+{
+  // E si ricontrolla DOPO lo scatto: e' l'immagine che conta, non l'istante prima.
+  const ancora = await pagina4.locator('.pl-colpo').count();
+  if (!ancora) throw new Error('Schermata 4: la scritta dell\'Intreccio e\' sparita durante lo scatto');
+}
+await pagina4.close();
 
 // --- 6. Fine partita ----------------------------------------------------------
 // UNA PARTITA VERA, fino all'ultima mossa. Prima lo stato era scritto a mano: una griglia
@@ -304,7 +351,7 @@ await page.screenshot({ path: `${USCITA}8-impostazioni.png` });
 // Cento livelli sono la meta' del gioco, e finora nessuna schermata li mostrava. Con
 // ventitre' livelli superati se ne sono guadagnati quattro attrezzi; il magazzino ne tiene
 // tre e qui ne restano due, cosi' la schermata del livello mostra la cassetta in uso.
-await prepara({ record: RECORD, quadri: progressiFinoA(23), attrezzi: { disponibili: 2, riscossi: 4, versione: 1 } });
+await prepara({ record: RECORD, quadri: progressiFinoA(SUPERATI), attrezzi: ATTREZZI_MOSTRATI });
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
 // LA MAPPA SI PORTA DA SOLA SUL LIVELLO CORRENTE, e in una schermata dello store quel
@@ -340,7 +387,8 @@ if (mozzato.sopra.length) {
 await page.screenshot({ path: `${USCITA}1-mappa-livelli.png` });
 
 // --- 2. L'apertura di un livello: l'obiettivo detto prima di giocare ----------
-await page.locator('.pl-tappa').nth(23).click();
+// La tappa numero SUPERATI e' il primo livello non ancora superato.
+await page.locator('.pl-tappa').nth(SUPERATI).click();
 await page.waitForSelector('.pl-apertura');
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${USCITA}2-apertura-livello.png` });

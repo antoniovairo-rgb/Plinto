@@ -7,7 +7,9 @@ Scheda principale dello Store. Nomi delle voci letti dalla console dell'11 sette
 Google li rinomina ogni tanto. L'AAB invece sta sotto **Testa e rilascia**, ed e' un'altra
 revisione: aggiornare testi e immagini NON richiede un rilascio nuovo.
 
-**Stato dei testi.** Riscritti l'11 settembre 2026, con la versione 1.9.1. La stesura
+**Stato dei testi.** Ritoccati il 10 ottobre 2026 per la 1.21.0: la regola dell'ultimo
+livello (1.20.0) e l'Intreccio che ora si vede. Riscritti per intero l'11 settembre 2026,
+con la versione 1.9.1. I testi per l'uscita della Torre stanno sul ramo `opera-torre`. La stesura
 precedente era ferma a prima delle bombe, della Tinta, dell'anteprima della terna,
 dell'archivio delle sfide, delle statistiche e della condivisione: raccontava un gioco
 piu' piccolo di quello che si scarica. I cento livelli sono stati portati in apertura,
@@ -50,13 +52,13 @@ Righe, colonne e quadranti. Niente pubblicità, niente acquisti, niente conti.
 PLINTO è un puzzle a blocchi con una regola in più: oltre alle righe e alle colonne si eliminano anche i quadranti 3×3. Tre direzioni invece di due, e una mossa che ne chiude più di uno insieme vale molto di più.
 
 CENTO LIVELLI, MISURATI E NON INVENTATI
-I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato.
+I cento livelli formano un percorso in sette atti, dalle Fondamenta all'Ultima pietra. Ognuno ha un obiettivo dichiarato e un tetto di mosse, e dal quarto atto in poi alcuni ne chiedono due insieme. I bersagli non li ha scelti nessuno a occhio: ogni livello viene giocato venti volte da un giocatore simulato, deve riuscire almeno sei volte, e ogni atto ha una sua fascia di difficoltà, che sale lungo il percorso. Nessun livello è imbattibile. Se uno proprio non riesce, dopo otto tentativi il successivo si apre lo stesso, senza che il gioco finga che tu l'abbia superato. Solo il centesimo non fa sconti: si apre quando hai superato tutti gli altri.
 
 GLI ATTREZZI DEL CANTIERE
 Sono quattro: la carriola cambia un pezzo della mano, il gessetto ti mostra dove conviene mettere un pezzo, il piccone svuota una casella occupata, la mensola mette da parte un pezzo per dopo. Per usarli servono i gettoni: nei livelli ne guadagni 1 ogni cinque livelli superati, e ne tieni al massimo tre. Con ogni gettone usi l'attrezzo che scegli tu, quando ti blocchi. Non si comprano: si guadagnano giocando.
 
 L'INTRECCIO
-Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare.
+Chiudere due o tre gruppi con un solo pezzo è la mossa che vale di più, ed è quella che il gioco esiste per insegnare. Quando ci riesci, la plancia te lo fa vedere.
 
 LA CATENA
 Ogni mossa che elimina qualcosa fa salire un moltiplicatore che resta. Una mossa a vuoto non lo tocca; dalla seconda di fila scende di uno a ogni mossa. È una tolleranza dichiarata, non una regola nascosta.
@@ -85,7 +87,7 @@ Una volta installato si gioca offline.
 ACCESSIBILE
 Contrasti verificati secondo lo standard WCAG AA, gioco completo da tastiera, descrizioni per chi usa un lettore di schermo, e se nel telefono hai chiesto di ridurre le animazioni il gioco lo rispetta.
 ```
-*3218 caratteri su 4000. Aggiornata alla 1.19.4 (attrezzi e gettoni distinti: gli attrezzi sono i quattro strumenti, i gettoni sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
+*3342 caratteri su 4000. Ritoccata per la 1.21.0 (ultimo livello, Intreccio che si vede); prima aggiornata alla 1.19.4 (attrezzi e gettoni distinti: gli attrezzi sono i quattro strumenti, i gettoni sono quello che si guadagna); prima alla 1.19.1: soglia della Tinta (sette su nove, dalla 1.15.0), Catena contata in mosse, taratura a venti partite con fasce per atto (1.17.0), attrezzi del cantiere, animazioni che seguono il sistema invece di un interruttore.*
 
 ## In inglese (Play Console → Traduzioni)
 
@@ -113,13 +115,13 @@ A hundred levels, and 3×3 quadrants on top of rows and columns. No ads.
 PLINTO is a block puzzle with one extra rule: besides rows and columns, you also clear 3×3 quadrants. Three directions instead of two, and a move that closes more than one at once is worth far more.
 
 A HUNDRED LEVELS, MEASURED AND NOT INVENTED
-The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it.
+The hundred levels form a path in seven acts, from the Foundations to the Last Stone. Each has a stated goal and a move limit, and from the fourth act on, some ask for two at once. The targets were not picked by eye: every level is played twenty times by a simulated player, must come off at least six times, and each act has its own difficulty band, rising along the path. No level is unbeatable. If one really will not go, after eight attempts the next one opens anyway, without the game pretending you cleared it. Only the hundredth makes no allowances: it opens once you have cleared all the others.
 
 THE SITE TOOLS
 There are four: the wheelbarrow swaps a piece in your hand, the chalk shows you where a piece fits best, the pickaxe empties a filled square, the shelf sets a piece aside for later. To use them you need tokens: in the levels you earn 1 every five levels cleared, and you can keep up to three. With each token you use whichever tool you pick, when you are stuck. They cannot be bought: you earn them by playing.
 
 THE INTERLACE
-Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach.
+Closing two or three groups with a single piece is the move that pays most, and it is the one the game exists to teach. When you pull it off, the board lets you see it.
 
 THE CHAIN
 Every move that clears something raises a multiplier that stays. One empty move leaves it alone; from the second in a row it drops by one with each move. That tolerance is stated, not hidden.
@@ -148,7 +150,24 @@ Once installed, it plays without a connection.
 ACCESSIBLE
 Contrast verified to the WCAG AA standard, full keyboard play, descriptions for people using a screen reader, and if you asked your phone to reduce motion, the game respects it.
 ```
-*3012 caratteri su 4000. Aggiornata alla 1.19.4.*
+*3148 caratteri su 4000. Ritoccata per la 1.21.0; prima aggiornata alla 1.19.4.*
+
+## Note di rilascio della 1.21.0 («Novità»)
+
+Si incollano nella release di produzione, non nella scheda, e servono solo se si carica
+un pacchetto nuovo: il gioco arriva gia' a tutti dal sito. Limite: **500 caratteri
+Unicode per lingua** (guida di Play Console, «Preparare e implementare una release»,
+letta il 9 ottobre 2026), ogni lingua fra i suoi tag.
+
+```
+<it-IT>
+PLINTO ha una veste nuova: blocchi lucidi, la plancia d'ottone, la home più chiara. E nuove animazioni: i blocchi spariscono a onda dal pezzo che hai appena messo, una scia di luce corre lungo ogni riga e colonna chiusa, e quando chiudi più gruppi con una mossa la plancia te lo dice. Chi ha chiesto meno animazioni al telefono non le vede.
+</it-IT>
+<en-US>
+PLINTO has a new look: glossy blocks, a brass board, a clearer home screen. And new animations: blocks clear in a wave from the piece you just placed, a streak of light runs along every row and column you close, and when one move closes several groups the board tells you. If you asked your phone for reduced motion, you will not see them.
+</en-US>
+```
+*Italiano 340 caratteri, inglese 339.*
 
 ## Categoria
 
@@ -215,7 +234,7 @@ nove immagini da 1170×2532 (rapporto 2,16): non sarebbero state accettate. Ades
 | 1 | `1-mappa-livelli.png` | Ci sono cento livelli e un percorso da fare, e la cassetta segna dove si guadagna un gettone per gli attrezzi. E' l'informazione che distingue PLINTO da un puzzle a blocchi infinito |
 | 2 | `2-apertura-livello.png` | Ogni livello ha un obiettivo dichiarato e un tetto di mosse: non si gioca a caso |
 | 3 | `3-livello.png` | Com'e' fatto un livello mentre lo giochi: l'obiettivo in cima, la prossima terna in vista, la cassetta degli attrezzi |
-| 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: colore, particelle, punti |
+| 4 | `4-eliminazione.png` | Il momento in cui la mossa va a segno: l'Intreccio con la sua scritta, le scie di luce, le particelle, i punti |
 | 5 | `5-partita.png` | La partita libera, per chi vuole giocare senza obiettivi |
 | 6 | `6-fine-partita.png` | La fine dice il motivo e i numeri di una partita vera, e il pulsante per rigiocare e' sotto il pollice |
 | 7 | `7-statistiche.png` | Il gioco tiene traccia di come giochi, non solo di quanto hai fatto |
