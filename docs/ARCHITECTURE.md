@@ -30,7 +30,7 @@ Stato dei comandi, verificato eseguendoli il 14 settembre 2026 (1.10.3):
 - `npm test` passa: **522 test in 32 file**, ~20 s (i più lunghi sono `incitamenti.test.js`,
   che simula decine di migliaia di mosse, e `invarianti.test.js`, che gioca 240 partite
   complete);
-- `npm run verifica` passa: **24 controlli**, ~65 minuti di cui 56 per rigiocare i cento
+- `npm run verifica` passa: **28 controlli**, ~65 minuti di cui 56 per rigiocare i cento
   livelli nell'app; è lo stesso comando della CI;
 - `npm run build` riesce: 106 moduli, `dist/assets` da **311.55 kB di JS** (97.99 kB gzip) e
   **40.97 kB di CSS** (8.66 kB gzip).
