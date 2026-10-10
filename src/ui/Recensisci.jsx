@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PLAY_URL } from '../config/progetto.js';
 import { nellAppPlay, recensioneToccata, segnaRecensione } from '../persistence/recensione.js';
-import { IconaStella } from './IconeMenu.jsx';
+import { IconaCuore } from './IconeMenu.jsx';
 
 /**
  * L'invito a recensire PLINTO sul Play Store, nei momenti belli del gioco.
@@ -30,7 +30,7 @@ export function InvitoRecensione({ t, className = '' }) {
       rel="noopener noreferrer"
       onClick={segnaRecensione}
     >
-      <IconaStella />
+      <IconaCuore />
       <span>{t('recensione.invito')}</span>
     </a>
   );
@@ -48,7 +48,7 @@ export function VoceRecensione({ t }) {
       rel="noopener noreferrer"
       onClick={segnaRecensione}
     >
-      <span className="pl-home__voce-icona"><IconaStella /></span>
+      <span className="pl-home__voce-icona"><IconaCuore /></span>
       <span>{t('recensione.voce')}</span>
     </a>
   );
