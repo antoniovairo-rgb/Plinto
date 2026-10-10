@@ -94,7 +94,7 @@ body,
   background: color-mix(in srgb, var(--pl-brand) 14%, transparent);
 }
 
-/* La voce "Recensisci" (solo nell'app del Play Store): la stella d'ottone e il bordo
+/* La voce "Recensisci" (solo nell'app del Play Store): il cuore d'ottone e il bordo
    caldo la fanno trovare a colpo d'occhio, senza diventare un secondo pulsante Gioca. */
 .pl-home__menu .pl-home__voce--recensisci {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-ottone) 55%, transparent);
@@ -105,7 +105,7 @@ body,
   background: color-mix(in srgb, var(--pl-ottone) 18%, transparent);
 }
 
-/* L'invito sulle vittorie: un pulsante largo con la stella, dentro la fascia dell'atto
+/* L'invito sulle vittorie: un pulsante largo con il cuore, dentro la fascia dell'atto
    chiuso o fra i numeri della festa finale. */
 .pl-btn.pl-recensisci {
   gap: 8px;

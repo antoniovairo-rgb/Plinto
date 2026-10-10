@@ -77,11 +77,11 @@ export function IconaInfo() {
   );
 }
 
-/** Recensisci: la stella delle valutazioni del Play Store. */
-export function IconaStella() {
+/** Recensisci: un cuore (scelto dal proprietario al posto della stella). */
+export function IconaCuore() {
   return (
     <svg {...COMUNI}>
-      <path d="M12 3.6l2.5 5.1 5.6.8-4.05 3.95.96 5.58L12 16.4l-5.01 2.63.96-5.58L3.9 9.5l5.6-.8z" />
+      <path d="M12 19.5s-7.2-4.4-7.2-9.6A4 4 0 0 1 12 7.6a4 4 0 0 1 7.2 2.3c0 5.2-7.2 9.6-7.2 9.6z" />
     </svg>
   );
 }
