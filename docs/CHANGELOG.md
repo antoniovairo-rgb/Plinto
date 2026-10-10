@@ -7,6 +7,20 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.1] — 10 ottobre 2026
+
+### Cambiato
+
+- **La veste nuova anche fuori dalla partita** (richiesta del proprietario): la guida
+  del primo avvio, «Come si gioca», le pagine, le finestre (menu, attrezzi, conferme),
+  la fine del livello, la festa finale e l'archivio. Riquadri e finestre con un filo
+  d'ottone e un velo di luce, i pulsanti secondari come le voci della home (quelli
+  discreti, come «Torna ai livelli», restano discreti), i titoletti delle sezioni in
+  ottone, i numeri della guida come piccole targhe, le mini-plance con la cornice
+  d'ottone, i giorni giocati dell'archivio con il loro filo. Solo fondi, bordi, ombre e
+  colore dei titoletti: nessuna misura e nessun testo cambiati.
+- Schermate e video per la scheda del Play Store rigenerati con la grafica nuova.
+
 ## [1.21.0] — 9 ottobre 2026
 
 La veste nuova pensata per la Torre esce prima della Torre, sul Ponte: grafica e

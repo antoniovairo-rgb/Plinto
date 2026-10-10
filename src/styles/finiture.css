@@ -180,3 +180,78 @@ body,
   box-shadow: 0 0 0 2px rgba(255, 236, 170, 0.5), 0 0 30px color-mix(in srgb, var(--pl-brand) 45%, transparent),
               inset 0 3px 0 rgba(255, 255, 255, 0.55);
 }
+
+/* ===================================================== il resto del gioco ===
+ * La stessa veste anche fuori dalla partita: guida, pagine, finestre, festa, archivio.
+ * Richiesta del proprietario (10 ottobre 2026): «rendere coerente la nuova veste grafica».
+ * Stesse tre regole di sopra: niente testo piu' piccolo, nessuna misura o disposizione
+ * cambiata (solo fondi, bordi, ombre e il colore dei titoletti), nessun backdrop-filter.
+ */
+
+/* I riquadri: un filo d'ottone appena visibile e un velo di luce in alto, come
+   l'obiettivo della partita. Valgono per le finestre (menu, attrezzi, conferme) e per i
+   cartellini (numeri della festa, «E adesso?», esempi della guida, fumetto
+   dell'apertura, istruzioni per installare). */
+.pl-menu,
+.pl-attrezzi__pannello,
+.pl-trionfo__numero,
+.pl-trionfo__annuncio,
+.pl-intro__esempio,
+.pl-apertura__fumetto,
+.pl-installa__come {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pl-brand) 7%, transparent), transparent 55%),
+    var(--pl-surface);
+  border-color: color-mix(in srgb, var(--pl-ottone) 28%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--pl-ottone) 26%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 14px 34px rgba(0, 0, 0, 0.5);
+}
+.pl-trionfo__numero,
+.pl-trionfo__annuncio { background:
+    linear-gradient(180deg, color-mix(in srgb, var(--pl-brand) 9%, transparent), transparent 60%),
+    var(--pl-surface-2); }
+
+/* I pulsanti secondari (Condividi, Torna alla partita, Scarica il file...): la stessa
+   tessera delle voci della home. Non quelli «fantasma» (Torna ai livelli...), che sono
+   discreti apposta. `:where` tiene la regola leggera: le tre voci colorate
+   della home, scritte piu' sopra con una classe sola, restano come sono. */
+.pl-btn--largo:where(:not(.pl-btn--primario):not(.pl-sfida-avvio):not(.pl-btn--fantasma)) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)), var(--pl-surface);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08),
+              0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* I titoletti delle sezioni (LE REGOLE, IL PERCORSO, PRIVACY...): in ottone, come il
+   nome degli atti sulla mappa. Stessa misura di prima. */
+.pl-sezione { color: var(--pl-brand); }
+
+/* La guida: il passo in ottone tenue, i numeri delle regole come piccole targhe. */
+.pl-guida__passo { color: color-mix(in srgb, var(--pl-brand) 75%, var(--pl-text-faint)); }
+.pl-intro__numero {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--pl-brand) 22%, var(--pl-surface-2)), var(--pl-surface-2));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-ottone) 45%, transparent),
+              0 0 14px color-mix(in srgb, var(--pl-brand) 18%, transparent);
+}
+
+/* Le mini-plance (guida e apertura del livello): la cornice e le linee dei quadranti
+   d'ottone, le caselle accese come gemme. */
+.pl-mini {
+  --pl-line-strong: var(--pl-ottone);
+  background: linear-gradient(180deg, #171c29 0%, #10141d 100%);
+  border-color: color-mix(in srgb, var(--pl-ottone) 70%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--pl-brand) 18%, transparent), inset 0 0 14px rgba(0, 0, 0, 0.6);
+}
+.pl-mini__cella--accesa {
+  background: linear-gradient(180deg, #ffe07a 0%, var(--pl-brand) 55%, var(--pl-brand-deep) 100%);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--pl-brand) 70%, transparent);
+}
+
+/* Il calendario dell'archivio: caselle incassate come quelle della plancia, i giorni
+   giocati con il filo d'ottone. */
+.pl-giorno:not(.pl-giorno--spento) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)), var(--pl-ink-2);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35);
+}
+.pl-giorno--giocato { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-ottone) 50%, transparent), 0 0 10px color-mix(in srgb, var(--pl-brand) 20%, transparent); }
