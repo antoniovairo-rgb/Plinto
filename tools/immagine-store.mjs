@@ -42,6 +42,8 @@ const C = {
   testo: token('pl-text'),
   tenue: token('pl-text-dim'),
   marchio: token('pl-brand'),
+  marchioScuro: token('pl-brand-deep'),
+  ottone: token('pl-ottone'),
   b: [1, 2, 3, 4, 5, 6].map((n) => token(`pl-block-${n}`)),
 };
 
@@ -66,7 +68,11 @@ const pagina = `
   body {
     width: 1024px; height: 500px; overflow: hidden;
     background:
+      radial-gradient(520px 300px at 76% 0%, color-mix(in srgb, ${C.marchio} 24%, transparent) 0%, transparent 70%),
+      radial-gradient(420px 260px at 0% 100%, color-mix(in srgb, ${C.b[2]} 20%, transparent) 0%, transparent 70%),
       radial-gradient(900px 500px at 78% 50%, #1a2133 0%, ${C.fondo} 62%),
+      linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 26px 26px,
+      linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px) 0 0 / 26px 26px,
       ${C.fondo};
     color: ${C.testo};
     font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -74,9 +80,15 @@ const pagina = `
   }
   .sinistra { flex: 1; }
   .marchio { display: flex; align-items: center; gap: 20px; margin-bottom: 22px; }
-  .nome { font-size: 76px; font-weight: 800; letter-spacing: 0.16em; line-height: 1; }
+  .nome {
+    font-size: 76px; font-weight: 800; letter-spacing: 0.16em; line-height: 1;
+    background: linear-gradient(180deg, #fff6d8 0%, ${C.marchio} 55%, ${C.marchioScuro} 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 22px color-mix(in srgb, ${C.marchio} 45%, transparent));
+  }
+  .marchio svg { filter: drop-shadow(0 0 18px color-mix(in srgb, ${C.marchio} 40%, transparent)); }
   .claim {
-    font-size: 21px; letter-spacing: 0.22em; color: ${C.tenue};
+    font-size: 21px; letter-spacing: 0.22em; color: ${C.marchio};
     text-transform: uppercase; margin-bottom: 34px;
   }
   .punti { display: flex; flex-direction: column; gap: 12px; font-size: 20px; color: ${C.testo}; }
@@ -84,12 +96,29 @@ const pagina = `
   .pallino { width: 11px; height: 11px; border-radius: 3px; flex: none; }
   .plancia {
     width: 414px; height: 414px; flex: none; padding: 9px; border-radius: 26px;
-    background: ${C.plancia};
-    box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 0 0 1px ${C.linea};
+    background: linear-gradient(180deg, #171c29 0%, #10141d 100%);
+    box-shadow: 0 0 0 2px ${C.ottone}, 0 0 0 7px color-mix(in srgb, ${C.marchio} 12%, transparent),
+                0 0 50px color-mix(in srgb, ${C.marchio} 28%, transparent),
+                0 24px 60px rgba(0,0,0,0.55), inset 0 0 30px rgba(0,0,0,0.6);
     display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px;
   }
-  .cella { border-radius: 22%; background: rgba(255,255,255,0.035); }
-  .cella.piena { box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25); }
+  .cella { border-radius: 22%; background: rgba(255,255,255,0.035);
+           box-shadow: inset 0 3px 5px rgba(0,0,0,0.6); }
+  /* I blocchi come gemme, come nel gioco (src/styles/finiture.css). */
+  .cella.piena {
+    background:
+      radial-gradient(120% 70% at 30% 15%, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 45%),
+      linear-gradient(180deg, color-mix(in srgb, var(--b) 85%, white) 0%, var(--b) 45%,
+                      color-mix(in srgb, var(--b) 75%, black) 100%);
+    box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.25), inset 0 3px 0 rgba(255,255,255,0.5),
+                inset 0 -4px 0 rgba(0,0,0,0.32), 0 0 14px color-mix(in srgb, var(--b) 80%, transparent);
+  }
+  .cella.masso {
+    background: linear-gradient(150deg, ${C.masso} 0%, ${C.massoOmbra} 100%);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .cella.masso svg { position: absolute; inset: 0; width: 100%; height: 100%; }
   /* I separatori dei quadranti: la firma del tabellone, e l'unica cosa che distingue
      questa plancia da quella di ogni altro gioco a blocchi. Devono VEDERSI. */
   .cella:nth-child(9n+4), .cella:nth-child(9n+7) { margin-left: 9px; }
@@ -117,8 +146,14 @@ const pagina = `
   ${PIENE.flatMap((riga, r) => [...riga].map((ch, c) => {
     const classe = ['cella'];
     if (r === 3 || r === 6) classe.push(`r${r}`);
+    if (ch === 'M') {
+      classe.push('masso');
+      return `<div class="${classe.join(' ')}"><svg viewBox="0 0 20 20" fill="none" stroke="rgba(20,22,31,0.55)"
+        stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 L9 8 L7.5 11 L11 15.5"/>
+        <path d="M13.5 6 L15.5 9.5"/></svg></div>`;
+    }
     if (ch !== '.') classe.push('piena');
-    const colore = ch === '.' ? '' : `background:${C.b[Number(ch) - 1]}`;
+    const colore = ch === '.' ? '' : `--b:${C.b[Number(ch) - 1]}`;
     return `<div class="${classe.join(' ')}" style="${colore}"></div>`;
   })).join('')}
 </div>
