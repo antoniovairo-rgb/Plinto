@@ -247,10 +247,12 @@ convince, e' il primo ricambio.
 ### Il video (link YouTube)
 
 Il file è `store/video/plinto-montaggio.webm`, generato con `npm run video` dal gioco vero:
-1170×2532 (la densità di un telefono), 30 fotogrammi al secondo, circa 77 secondi, senza
-audio. Le parti, nell'ordine: home, mappa dei livelli, apertura del livello 11, il livello
-giocato fino alla vittoria, partita libera. La Play Console non prende il file: vuole il
-link a un video YouTube.
+780×1688 (densità 2: a densità 3 il browser di registrazione perdeva fotogrammi proprio
+negli Intrecci), 30 fotogrammi al secondo, circa 30 secondi, senza audio. Rifatto il 10
+ottobre 2026 su richiesta del proprietario: più veloce, una partita vinta, tante
+animazioni. Le parti: home, mappa, apertura del livello 46, il livello vinto in sette
+mosse (sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, e un tratto di partita
+libera che si apre con un Intreccio da quattro gruppi.
 
 Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - link a **un singolo video**, non a un canale o a una playlist, e senza parametri come
@@ -259,8 +261,7 @@ Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - **annunci disattivati** (monetizzazione spenta) e **nessun limite d'età**;
 - incorporamento consentito;
 - orizzontale o verticale, ma senza bande nere: questo è verticale e non ne ha;
-- si riproducono da soli solo i **primi 30 secondi**: qui coprono home, mappa, apertura e
-  la prima metà del livello.
+- si riproducono da soli solo i **primi 30 secondi**: qui coprono quasi tutto il video.
 
 Un video verticale sotto i tre minuti YouTube lo può classificare come Short. Nella Play
 Console si incolla comunque il link nella forma `https://www.youtube.com/watch?v=...`:

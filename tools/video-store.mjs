@@ -6,15 +6,18 @@
  * il tabellone si riempie, i punti salgono, e non si capisce ne' che cosa distingue
  * questo gioco dagli altri ne' che cosa si e' chiamati a fare.
  *
- * Qui le sei parti sono in un ordine deciso: prima che cosa c'e' dentro (la home), poi
- * che esiste un percorso di cento livelli, poi che ogni livello dichiara il suo
- * obiettivo PRIMA di farti giocare, poi il gioco vero, poi la vittoria, e alla fine la
- * partita libera per chi non vuole obiettivi. Ogni parte risponde a una domanda che chi
- * guarda si sta facendo in quel momento.
+ * Qui le parti sono in un ordine deciso: la home, il percorso, un livello che dichiara
+ * il suo obiettivo PRIMA di farti giocare, il livello giocato fino alla vittoria, e alla
+ * fine un tratto di partita libera con gli Intrecci piu' grossi.
  *
- * Il giocatore e' un algoritmo: sceglie la posa che chiude piu' gruppi. Si vede che non
- * esita mai, ed e' un limite dichiarato -- ma le mosse sono vere, le regole sono quelle
- * del gioco, e quello che si vede e' quello che si scarica.
+ * VELOCE E PIENO DI ANIMAZIONI (richiesta del proprietario, 10 ottobre 2026). Il video
+ * di prima durava oltre due minuti: un algoritmo giocava a passo lento ventidue mosse di
+ * un livello qualunque. Adesso le mosse sono decise PRIMA, in Node, con il motore vero:
+ * fra i primi sessanta livelli si e' cercato quello che si vince con meno mosse e piu'
+ * eliminazioni (il 46: sette mosse, sei eliminazioni, un Intreccio e cinque Tinte), e per
+ * la partita libera una posizione di partenza in cui la prima mossa chiude quattro gruppi
+ * e le due dopo eliminano ancora (la prima scelta aveva due mosse a vuoto di fila).
+ * Le ricerche stanno qui sotto, con i loro semi: il video si rifa' identico.
  *
  * Uso: npm run video
  */
@@ -23,6 +26,11 @@ import { chiudiAllUscita } from './server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync, mkdirSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { spawn as avvia } from 'node:child_process';
+import { quadroNumero } from '../src/config/quadri.js';
+import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../src/core/quadro.js';
+import { createGame, placePiece, serializeGame } from '../src/core/engine.js';
+import { allPlacements, placeShape, findCompletedGroups, fillRatio } from '../src/core/grid.js';
+import { createRng } from '../src/core/rng.js';
 
 /** L'ffmpeg che Playwright si porta dietro: nessuna dipendenza in piu' da installare. */
 const FFMPEG = process.env.PLINTO_FFMPEG ?? '/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux';
@@ -34,22 +42,86 @@ const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const USCITA = new URL('../store/video/', import.meta.url).pathname;
 
 /**
- * LA RISOLUZIONE E' QUELLA DI UN TELEFONO VERO: 390x844 punti a densita' 3, cioe'
- * 1170x2532 pixel. Il video di prima era 390x844 PIXEL: il registratore di Playwright
- * riduce i fotogrammi alla misura in punti CSS, e su YouTube il gioco arrivava sfocato,
- * a 219 kb/s. Ingrandirlo dopo non recupera niente, rende solo piu' grande la sfocatura.
- * Qui i fotogrammi si chiedono al browser (Page.startScreencast) alla densita' vera.
+ * LA RISOLUZIONE: 390x844 punti a densita' 2, cioe' 780x1688 pixel. Il primo video era
+ * 390x844 PIXEL e su YouTube arrivava sfocato; i fotogrammi si chiedono al browser
+ * (Page.startScreencast) alla densita' vera, non ridotti alla misura in punti CSS.
+ *
+ * Perche' 2 e non 3. A densita' 3 (1170x2532) il browser senza scheda grafica non stava
+ * dietro agli aloni e alle animazioni della 1.21: circa 15 fotogrammi al secondo, e nei
+ * momenti piu' carichi -- l'Intreccio, proprio quello da mostrare -- la scritta passava
+ * in tre fotogrammi senza il suo «×4». A densita' 2 ne arrivano circa 35 al secondo
+ * (misurato il 10 ottobre 2026) e l'Intreccio si vede intero. PLINTO_VIDEO_DENSITA=3
+ * rifa' il video alla densita' piena, su una macchina che regge.
  */
 const LARGHEZZA = 390;
 const ALTEZZA = 844;
-const DENSITA = 3;
+const DENSITA = Number(process.env.PLINTO_VIDEO_DENSITA ?? 2);
 /** Fotogrammi al secondo del video finale: il browser ne manda solo quando cambia qualcosa. */
 const FPS = 30;
 const FOTOGRAMMI = `${USCITA}.fotogrammi/`;
 
-/** Il livello da mostrare: obiettivo semplice da leggere, vittoria alla portata. */
-const LIVELLO = 11;
+/** Il livello da mostrare e il seme del giocatore che lo vince (vedi l'intestazione). */
+const LIVELLO = 46;
+const SEME_LIVELLO = 1004;
 const SUPERATI = LIVELLO - 1;
+/** La partita libera: il seme della posizione di partenza e quante mosse mostrarne. */
+const SEME_LIBERA = 17671;
+const MOSSE_LIBERA = 3;
+
+/**
+ * Il giocatore delle due ricerche: sceglie la posa che chiude piu' gruppi (al quadrato,
+ * cosi' un Intreccio vale molto piu' di due mosse semplici), a parita' quella che lascia
+ * la griglia piu' vuota, con un po' di caso deciso dal seme.
+ */
+function migliorPosa(grid, mano, rng, conCaso = true) {
+  let migliore = null; let valore = -1e9;
+  mano.forEach((pezzo, handIndex) => {
+    if (!pezzo) return;
+    for (const [row, col] of allPlacements(grid, pezzo.shape)) {
+      const dopo = placeShape(grid, pezzo.shape, row, col, pezzo.color, pezzo.bombe).grid;
+      const gruppi = findCompletedGroups(dopo).length;
+      const v = conCaso
+        ? gruppi * gruppi * 300 + (gruppi ? 150 : 0) - fillRatio(dopo) * 40 + rng.float() * 60
+        : gruppi * gruppi * 100 + rng.float();
+      if (v > valore) { valore = v; migliore = { handIndex, row, col }; }
+    }
+  });
+  return migliore;
+}
+
+/** Le mosse che vincono il livello, giocate in Node con il motore vero. */
+function mosseDelLivello() {
+  const quadro = quadroNumero(LIVELLO);
+  const rng = createRng(SEME_LIVELLO);
+  let partita = iniziaQuadro(quadro, { now: 0 });
+  const mosse = [];
+  for (let m = 0; m < (quadro.maxMosse ?? 40) && !statoQuadro(quadro, partita).finito; m += 1) {
+    const posa = migliorPosa(partita.grid, partita.hand, rng);
+    if (!posa) break;
+    partita = giocaNelQuadro(quadro, partita, posa.handIndex, posa.row, posa.col, (m + 1) * 1000);
+    mosse.push(posa);
+  }
+  if (!statoQuadro(quadro, partita).completato) throw new Error(`Il livello ${LIVELLO} non si vince con il seme ${SEME_LIVELLO}`);
+  return mosse;
+}
+
+/** La partita libera preparata: griglia di partenza, e le mosse che la sfruttano. */
+function partitaLibera() {
+  const rng = createRng(SEME_LIBERA * 7919);
+  const riempimento = 0.55 + rng.float() * 0.15;
+  const griglia = new Uint8Array(81);
+  for (let i = 0; i < 81; i += 1) if (rng.float() < riempimento) griglia[i] = rng.int(6) + 1;
+  let stato = createGame({ seed: SEME_LIBERA, grigliaIniziale: griglia, now: 0 });
+  const iniziale = serializeGame(stato);
+  const mosse = []; const gruppi = [];
+  for (let m = 0; m < MOSSE_LIBERA; m += 1) {
+    const posa = migliorPosa(stato.grid, stato.hand, rng, false);
+    if (!posa) break;
+    stato = placePiece(stato, posa.handIndex, posa.row, posa.col, (m + 1) * 1000);
+    mosse.push(posa); gruppi.push(stato.lastMove?.groups?.length ?? 0);
+  }
+  return { iniziale, mosse, gruppi };
+}
 
 async function serverRisponde() {
   try { return (await fetch(INDIRIZZO, { signal: AbortSignal.timeout(1500) })).ok; }
@@ -124,10 +196,10 @@ await page.evaluate((q) => {
   window.localStorage.clear();
   window.localStorage.setItem('plinto:settings', JSON.stringify({
     introVista: true, lingua: 'it', animazioni: true, aiutoVisivo: true }));
-  // Dieci livelli superati valgono due attrezzi: cosi' nel livello si vede la cassetta
-  // accanto al gioco, com'e' per chi ci arriva davvero.
+  // Chi e' al livello 46 ha superato 45 livelli, cioe' riscosso nove gettoni: ne tiene
+  // due, cosi' nel livello si vede la cassetta accanto al gioco.
   window.localStorage.setItem('plinto:attrezzi', JSON.stringify({
-    disponibili: 2, riscossi: 2, versione: 1 }));
+    disponibili: 2, riscossi: 9, versione: 1 }));
   window.localStorage.setItem('plinto:records', JSON.stringify({
     best: 18740, bestChain: 7, bestMove: 612, bestGroupsInOneMove: 3 }));
   window.localStorage.setItem('plinto:quadri', JSON.stringify(q));
@@ -136,99 +208,43 @@ await page.reload({ waitUntil: 'networkidle' });
 
 const pausa = (ms) => page.waitForTimeout(ms);
 
-/** La posa che chiude di piu'. Stessa logica del controllo delle frasi. */
-const scegliMossa = () => page.evaluate(() => {
-  const L = 9;
-  const celle = [...document.querySelectorAll('.pl-plancia .pl-cella')];
-  if (celle.length !== L * L) return null;
-  const pieno = celle.map((c) => !!c.querySelector('.pl-blocco'));
-  const forme = [...document.querySelectorAll('.pl-tray .pl-pezzo')].map((n) => {
-    const col = getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length;
-    const riq = [...n.children]; const punti = [];
-    riq.forEach((c, i) => { if (c.querySelector('.pl-blocco')) punti.push([Math.floor(i / col), i % col]); });
-    return { col, righe: riq.length / col, punti };
-  });
-  const chiusure = (d) => {
-    let n = 0;
-    for (let r = 0; r < L; r += 1) { let t = true; for (let c = 0; c < L; c += 1) if (!d[r*L+c]) { t = false; break; } if (t) n += 1; }
-    for (let c = 0; c < L; c += 1) { let t = true; for (let r = 0; r < L; r += 1) if (!d[r*L+c]) { t = false; break; } if (t) n += 1; }
-    for (let q = 0; q < L; q += 1) {
-      const r0 = Math.floor(q / 3) * 3; const c0 = (q % 3) * 3; let t = true;
-      for (let r = r0; r < r0 + 3 && t; r += 1) for (let c = c0; c < c0 + 3; c += 1) if (!d[r*L+c]) { t = false; break; }
-      if (t) n += 1;
-    }
-    return n;
-  };
-  let best = null;
-  forme.forEach((f, i) => {
-    for (let r = 0; r + f.righe <= L; r += 1) for (let c = 0; c + f.col <= L; c += 1) {
-      const b = f.punti.map(([dr, dc]) => (r + dr) * L + (c + dc));
-      if (b.some((x) => pieno[x])) continue;
-      const d = pieno.slice(); b.forEach((x) => { d[x] = true; });
-      const voto = chiusure(d) * 1000 - (r * L + c);
-      if (!best || voto > best.voto) {
-        best = { voto, pezzo: i, riga: r, colonna: c, larghezza: f.col, altezza: f.righe };
-      }
-    }
-  });
-  return best;
-});
-
-/**
- * Una mossa TRASCINATA, non toccata.
- *
- * PERCHE' NON BASTAVANO I DUE TOCCHI. Il primo montaggio guidava il gioco con la
- * modalita' a due tocchi -- tocca il pezzo, tocca la casella -- che nel gioco esiste
- * davvero ed e' la strada di chi non riesce a trascinare. Ma a video il pezzo spariva
- * dal vassoio e ricompariva sulla griglia senza percorrere niente, e il risultato
- * sembrava un gioco che scatta. Non era il gioco: era il modo di filmarlo. Un video
- * dello store deve mostrare il gesto con cui si gioca davvero.
- *
- * DOVE ATTERRA IL PEZZO. Il trascinamento non centra il pezzo sulla casella sotto il
- * dito: tiene il punto in cui l'hai AFFERRATO e da li' calcola l'angolo. Prendendolo
- * esattamente al centro del disegno, la presa vale meta' larghezza e meta' altezza in
- * unita' di cella, quindi per far atterrare l'angolo in (riga, colonna) si lascia a
- * mezza forma di distanza. La formula e' ricopiata da useTrascinamento.js: se quella
- * cambia, questa smette di funzionare e il video lo mostra subito.
- */
-async function unaMossa(respiro = 520) {
-  const s = await scegliMossa();
-  if (!s) return false;
-
+async function unaMossa({ handIndex, row, col }, respiro = 700) {
   const punti = await page.evaluate((m) => {
     const celle = document.querySelectorAll('.pl-plancia .pl-cella');
     const primo = celle[0]?.getBoundingClientRect();
     const destra = celle[8]?.getBoundingClientRect();
     const basso = celle[72]?.getBoundingClientRect();
-    const disegno = document.querySelectorAll('.pl-tray .pl-pezzo')[m.pezzo]?.getBoundingClientRect();
-    if (!primo || !destra || !basso || !disegno) return null;
+    // Per POSTO del vassoio: dopo una mossa la mano ha dei buchi, e l'ennesimo pezzo
+    // disegnato non e' l'ennesimo della mano.
+    const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[m.handIndex]?.querySelector('.pl-pezzo');
+    if (!primo || !destra || !basso || !pezzo) return null;
+    const disegno = pezzo.getBoundingClientRect();
+    const cellaVassoio = pezzo.firstElementChild.getBoundingClientRect();
     const passoX = (destra.left - primo.left) / 8;
     const passoY = (basso.top - primo.top) / 8;
+    const presaX = disegno.left + disegno.width / 2;
+    const presaY = disegno.top + disegno.height / 2;
     return {
-      presaX: disegno.left + disegno.width / 2,
-      presaY: disegno.top + disegno.height / 2,
-      lasciaX: primo.left + m.colonna * passoX + (m.larghezza / 2) * primo.width,
-      lasciaY: primo.top + m.riga * passoY + (m.altezza / 2) * primo.width,
+      presaX, presaY,
+      lasciaX: primo.left + m.col * passoX + ((presaX - disegno.left) / cellaVassoio.width) * primo.width,
+      lasciaY: primo.top + m.row * passoY + ((presaY - disegno.top) / cellaVassoio.height) * primo.height,
     };
-  }, s);
+  }, { handIndex, row, col });
   if (!punti) return false;
 
-  // Il gesto: presa, un istante di sollevamento, tre tratti di percorso, rilascio.
-  // A tappe e non in un balzo solo, perche' e' il percorso a raccontare il gioco --
-  // l'anteprima che segue il pezzo, le caselle che si accendono sotto.
+  // Il gesto, svelto: presa, due tratti, rilascio. Il respiro dopo lascia vedere
+  // l'eliminazione intera (onda, scie, Intreccio), che e' la ragione del video.
   await page.mouse.move(punti.presaX, punti.presaY);
   await page.mouse.down();
-  await pausa(140);
-  const tratti = 3;
-  for (let i = 1; i <= tratti; i += 1) {
+  await pausa(60);
+  for (let i = 1; i <= 2; i += 1) {
     await page.mouse.move(
-      punti.presaX + ((punti.lasciaX - punti.presaX) * i) / tratti,
-      punti.presaY + ((punti.lasciaY - punti.presaY) * i) / tratti,
-      { steps: 10 },
+      punti.presaX + ((punti.lasciaX - punti.presaX) * i) / 2,
+      punti.presaY + ((punti.lasciaY - punti.presaY) * i) / 2,
+      { steps: 6 },
     );
-    await pausa(70);
   }
-  await pausa(120);
+  await pausa(60);
   await page.mouse.up();
   await pausa(respiro);
   return true;
@@ -245,55 +261,35 @@ await page.waitForSelector('.pl-home__azioni');
 await pausa(400);
 const inizio = Date.now();
 
+const sequenza = mosseDelLivello();
+const libera = partitaLibera();
+
 // --- 1. La home: che cosa c'e' dentro ----------------------------------------
 segna('home');
-await pausa(3200);
+await pausa(1600);
 
 // --- 2. La mappa: esiste un percorso, e sei a un punto preciso ----------------
 segna('mappa');
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
-await page.evaluate(() => {
-  const s = [...document.querySelectorAll('*')].find((n) => n.scrollTop > 0);
-  if (s) s.scrollTop = 0;
-});
-await pausa(2200);
-// Una scorsa lenta: cento livelli non si raccontano con un fotogramma fermo.
-await page.evaluate(async () => {
-  const s = [...document.querySelectorAll('*')].find((n) => n.scrollHeight > n.clientHeight + 40);
-  if (!s) return;
-  const meta = Math.min(s.scrollHeight - s.clientHeight, 1500);
-  const passi = 90;
-  for (let i = 1; i <= passi; i += 1) {
-    s.scrollTop = (meta * i) / passi;
-    await new Promise((r) => setTimeout(r, 26));
-  }
-});
-await pausa(900);
+// La mappa si porta da sola sul livello corrente: un istante per vederla, poi si entra.
+await pausa(1700);
 
 // --- 3. L'apertura: l'obiettivo detto PRIMA di giocare ------------------------
 segna('apertura');
-await page.evaluate(() => {
-  const s = [...document.querySelectorAll('*')].find((n) => n.scrollTop > 0);
-  if (s) s.scrollTop = 0;
-});
-await pausa(500);
 await page.locator('.pl-tappa').nth(LIVELLO - 1).click();
 await page.waitForSelector('.pl-apertura');
-await pausa(3600);
+await pausa(2300);
 
-// --- 4. Il livello: il gioco vero ---------------------------------------------
+// --- 4. Il livello, vinto ------------------------------------------------------
 segna('livello');
 await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
-await pausa(700);
-for (let i = 0; i < 22; i += 1) {
+await pausa(500);
+for (const mossa of sequenza) {
   // La schermata di fine livello e' `.pl-screen.pl-fine`, la stessa della fine partita.
-  // Il primo tentativo cercava `.pl-fine-quadro`, che non esiste: il montaggio veniva
-  // dichiarato senza vittoria mentre la vittoria c'era. Un selettore inventato non
-  // fallisce, mente.
   if (await page.locator('.pl-fine').count()) break;
-  if (!(await unaMossa())) break;
+  if (!(await unaMossa(mossa))) break;
 }
 
 // --- 5. L'esito del livello ---------------------------------------------------
@@ -306,22 +302,25 @@ const vinto = await page.evaluate((n) => {
     return Boolean(p?.livelli?.[n]);
   } catch { return false; }
 }, LIVELLO);
-await pausa(4200);
+await pausa(2600);
 
-// --- 6. La partita libera: per chi non vuole obiettivi -------------------------
+// --- 6. La partita libera: gli Intrecci piu' grossi ----------------------------
 segna('partita libera');
+await page.evaluate((stato) => {
+  window.localStorage.setItem('plinto:partita', JSON.stringify(
+    { ...stato, startedAt: Date.now(), ultimaAttivitaAt: Date.now() }));
+}, libera.iniziale);
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-await pausa(900);
-await page.locator('.pl-home__azioni .pl-sfida-avvio').nth(1).click();
+await page.getByRole('button', { name: /^Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
-await pausa(700);
-// Otto mosse. Erano sedici, poi undici: ogni taratura e' stata rifatta dopo aver
-// MISURATO il video, non stimato. Col trascinamento vero una mossa costa piu' tempo di
-// quanto ne costasse col tocco, e il conto andava rifatto.
-for (let i = 0; i < 8; i += 1) {
-  if (!(await unaMossa(620))) break;
+await pausa(500);
+for (let i = 0; i < libera.mosse.length; i += 1) {
+  // Dopo un Intreccio si aspetta che la scritta finisca; una mossa a vuoto passa svelta.
+  if (!(await unaMossa(libera.mosse[i], libera.gruppi[i] >= 2 ? 1150 : 700))) break;
 }
-await pausa(1800);
+// Il video non si chiude a meta' di un'animazione: la prima stesura finiva proprio
+// mentre compariva la scritta dell'Intreccio, tagliandola.
+await pausa(1400);
 
 const fine = Date.now();
 await cdp.send('Page.stopScreencast').catch(() => {});
@@ -371,4 +370,5 @@ tappe.forEach((t, i) => {
   const termine = tappe[i + 1]?.a ?? fine;
   console.log(`  ${String(Math.round((t.a - inizio) / 1000)).padStart(3)}s  ${t.nome.padEnd(16)} ${Math.round((termine - t.a) / 1000)}s`);
 });
-console.log(`\nLivello ${LIVELLO} ${vinto ? 'superato' : 'NON superato: il montaggio non ha la parte della vittoria'}`);
+console.log(`\nLivello ${LIVELLO} ${vinto ? `superato in ${sequenza.length} mosse` : 'NON superato: il montaggio non ha la parte della vittoria'}`);
+console.log(`Partita libera: gruppi chiusi mossa per mossa ${libera.gruppi.join(', ')}`);
