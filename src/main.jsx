@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './ui/App.jsx';
 import { Salvagente } from './ui/Salvagente.jsx';
 import { traduttore, linguaDelBrowser } from './i18n/index.js';
+import { registraOrigine } from './persistence/recensione.js';
 import './styles/app.css';
 import './styles/finiture.css';
 import './styles/animazioni.css';
@@ -37,6 +38,12 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     });
   });
 }
+
+/**
+ * Da dove si gioca: va letto PRIMA del primo disegno, perche' il parametro e il
+ * referrer ci sono solo all'apertura (vedi persistence/recensione.js).
+ */
+registraOrigine();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -1,5 +1,5 @@
 /**
- * Le icone delle cinque voci di menu della home.
+ * Le icone delle voci di menu della home (cinque, sei nell'app del Play Store).
  *
  * PERCHE' ESISTONO. Le voci erano cinque etichette di solo testo dentro una riga che
  * andava a capo: due, due, e "Info" spaiata in mezzo. Il blocco si leggeva come un
@@ -73,6 +73,15 @@ export function IconaInfo() {
       <circle cx="12" cy="12" r="8.2" />
       <path d="M12 11v5.2" />
       <path d="M12 7.9v.1" strokeWidth="2.4" />
+    </svg>
+  );
+}
+
+/** Recensisci: la stella delle valutazioni del Play Store. */
+export function IconaStella() {
+  return (
+    <svg {...COMUNI}>
+      <path d="M12 3.6l2.5 5.1 5.6.8-4.05 3.95.96 5.58L12 16.4l-5.01 2.63.96-5.58L3.9 9.5l5.6-.8z" />
     </svg>
   );
 }

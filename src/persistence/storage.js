@@ -83,6 +83,9 @@ export const KEYS = {
   PROFILO: 'profilo',
   // Gli attrezzi del cantiere: quanti se ne hanno e fin dove si e' gia' convertito.
   ATTREZZI: 'attrezzi',
+  // Il gioco e' aperto dall'app del Play Store, e l'invito a recensirlo gia' toccato.
+  ORIGINE: 'origine',
+  RECENSIONE: 'recensione',
 };
 
 /**
