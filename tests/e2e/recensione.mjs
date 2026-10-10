@@ -19,7 +19,7 @@ import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
-import { quadroNumero, TOTALE_QUADRI, ATTI } from '../../src/config/quadri.js';
+import { quadroNumero, ATTI, OPERE } from '../../src/config/quadri.js';
 import { PLAY_URL } from '../../src/config/progetto.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
@@ -237,9 +237,11 @@ if (await vinciIlPrimo()) {
 }
 
 // ---------- 4. La festa finale ----------
-console.log('4. nell app vinco l ultimo livello che manca: la festa finale ha l invito...');
+console.log('4. nell app vinco l ultimo livello che manca della prima opera: la festa ha l invito...');
 await page.setViewportSize({ width: 390, height: 844 });
-await prepara(Array.from({ length: TOTALE_QUADRI - 1 }, (_, i) => i + 2), { app: true });
+// La festa della PRIMA opera: tutti i suoi livelli tranne il primo. (Con la Torre i
+// livelli diventano duecento, ma la festa del Ponte resta quella al centesimo.)
+await prepara(Array.from({ length: OPERE[0].a - 1 }, (_, i) => i + 2), { app: true });
 if (await vinciIlPrimo()) {
   await page.waitForSelector('.pl-trionfo');
   await page.screenshot({ path: `${OUT}/4-trionfo-app.png` });
