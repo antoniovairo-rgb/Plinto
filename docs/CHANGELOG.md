@@ -32,6 +32,16 @@ Non ancora in produzione: deve uscire uno o due mesi dopo la Torre.
 
 - La Tinta ignorava il colore dei mattoni rinforzati.
 
+## [1.21.4] — 10 ottobre 2026
+
+### Aggiunto
+
+- **In Info, perché si chiama PLINTO** (richiesta del proprietario), con Plinto accanto:
+  il plinto è il blocco squadrato su cui poggia una colonna, dal greco *plínthos*,
+  «mattone» (fonte: vocabolario Treccani, voce «plinto»); nel gioco si costruisce il Ponte
+  blocco dopo blocco, e Plinto è un blocco di pietra che ha preso vita. In italiano e in
+  inglese.
+
 ## [1.21.3] — 10 ottobre 2026
 
 ### Cambiato
