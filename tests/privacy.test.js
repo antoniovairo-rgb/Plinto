@@ -83,6 +83,7 @@ describe('promessa di privacy', () => {
     //   paypal.me      la donazione, facoltativa e senza niente in cambio;
     //   play.google.com la scheda del gioco, messa in fondo alle schede da condividere
     //                  perche' chi riceve un risultato deve poter installare il gioco;
+    //                  e l'invito a recensire, solo nell'app del Play Store;
     //   il sito stesso  non e' un terzo: e' il gioco. Serve scritto per esteso perche'
     //                  l'anteprima dei collegamenti vuole indirizzi assoluti.
     const AMMESSI = [

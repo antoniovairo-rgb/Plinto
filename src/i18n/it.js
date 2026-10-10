@@ -31,6 +31,12 @@ export default {
     sostieni: 'Sostieni il progetto',
     feedback: 'Idee e segnalazioni',
   },
+  // L'invito a recensire: compare solo nell'app del Play Store. Niente stelle chieste,
+  // niente "ti piace?", niente in cambio: lo vietano le regole di Google Play.
+  recensione: {
+    voce: 'Recensisci',
+    invito: 'Recensisci sul Play Store',
+  },
   hud: {
     punteggio: 'Punteggio',
     record: 'Record',

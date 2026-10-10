@@ -71,6 +71,10 @@ const VERIFICHE = [
   { nome: 'frasi di incitamento sulla plancia', comando: 'npm', argomenti: ['run', 'incitamenti'] },
   { nome: 'archivio delle sfide nel browser', comando: 'npm', argomenti: ['run', 'archivio'] },
   { nome: 'scheda condivisibile e ripiego sugli appunti', comando: 'npm', argomenti: ['run', 'condivisione'] },
+  // L'invito a recensire: deve esserci SOLO nell'app del Play Store e vedersi senza
+  // scorrere. Un invito nel browser proporrebbe una cosa impossibile; uno sotto il
+  // pulsante "Livello successivo" non lo vedrebbe nessuno.
+  { nome: 'invito a recensire, solo nell app del Play Store', comando: 'npm', argomenti: ['run', 'recensione'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
   { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },

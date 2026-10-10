@@ -1,6 +1,7 @@
 import { Plinto } from '../Plinto.jsx';
 import { OPERE } from '../../config/quadri.js';
 import { CondividiTrionfo } from '../Condividi.jsx';
+import { InvitoRecensione } from '../Recensisci.jsx';
 
 /**
  * La schermata di chi ha finito TUTTI i livelli di un'opera.
@@ -141,6 +142,10 @@ export function SchermoTrionfo({
             <p className="pl-trionfo__annuncioTesto">{t('trionfo.prossimiTesto')}</p>
           )}
         </div>
+
+        {/* Il momento piu' felice del gioco e' anche quello giusto per chiedere una
+            recensione: dopo i numeri e l'annuncio, prima della condivisione. */}
+        <InvitoRecensione t={t} />
 
         <CondividiTrionfo
           opera={opera}

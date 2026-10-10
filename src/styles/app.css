@@ -879,7 +879,7 @@ button {
 }
 /* L'ultima voce prende tutta la riga: con cinque voci una resta spaiata comunque, e
    una larga in fondo si legge come una scelta, una stretta a sinistra come un avanzo. */
-.pl-home__menu .pl-home__voce:last-child { grid-column: 1 / -1; }
+.pl-home__menu .pl-home__voce:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .pl-home__voce {
   display: flex;
   align-items: center;

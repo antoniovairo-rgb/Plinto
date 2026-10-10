@@ -18,6 +18,10 @@ export default {
     sostieni: 'Support the project',
     feedback: 'Ideas and feedback',
   },
+  recensione: {
+    voce: 'Review',
+    invito: 'Review on Google Play',
+  },
   hud: {
     punteggio: 'Score',
     record: 'Best',

@@ -5,6 +5,7 @@ import { CondividiQuadro } from '../Condividi.jsx';
 import { quadroSbloccato } from '../../persistence/progressi.js';
 import { IconaCassetta } from '../Attrezzi.jsx';
 import { OPERE, livelliDellOpera, operaSuccessiva } from '../../config/quadri.js';
+import { InvitoRecensione } from '../Recensisci.jsx';
 
 
 /**
@@ -208,6 +209,9 @@ export function SchermoFineQuadro({
                 ? t('quadri.attiChiusiUno', { totale: atto.totaleAtti })
                 : t('quadri.attiChiusi', { n: atto.attiChiusi, totale: atto.totaleAtti })}
             </p>
+            {/* Il momento in cui chiedere una recensione: un traguardo appena raggiunto,
+                dopo almeno dieci livelli giocati (il primo atto finisce al 10). */}
+            <InvitoRecensione t={t} className="pl-recensisci--atto" />
           </div>
         ) : null}
 
