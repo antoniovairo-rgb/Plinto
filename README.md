@@ -79,7 +79,7 @@ Istruzioni passo passo, telefono compreso: **[AVVIO-RAPIDO.md](AVVIO-RAPIDO.md)*
 npm install
 npm run dev        # server di sviluppo
 npm run build      # build di produzione in dist/
-npm run verifica   # IL GATE: 24 controlli, lo stesso comando della CI (~65 min)
+npm run verifica   # IL GATE: 28 controlli, lo stesso comando della CI (~65 min)
 npm run verifica -- --veloce   # salta i cento livelli SOLO se il diff lo permette (~10 min)
 npm test           # 32 file Vitest, 522 test, ~20 s
 npm run e2e        # partita completa guidata in un browser reale
