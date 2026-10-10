@@ -12,7 +12,7 @@ Android Studio (Claude non ha accesso a nessuno dei due).
 
 - [ ] **[C]** Portare sulla Torre tutto cio' che e' uscito su `main` nel frattempo, e poi
       la Torre sull'Arena.
-- [ ] **[C]** Gate completo sulla Torre: `npm run verifica`, 28 controlli, tutti i 200
+- [ ] **[C]** Gate completo sulla Torre: `npm run verifica`, 29 controlli, tutti i 200
       livelli rigiocati nell'app. Supera le 2 ore: si fa a pezzi, come il 9 ottobre.
 - [x] **[C]** Testi della scheda (`android/SCHEDA-PLAY-STORE.md`), italiano e inglese:
       «cento livelli» diventa 200 (il Ponte e la Torre), si spiegano i massi e la regola
@@ -53,6 +53,10 @@ Android Studio (Claude non ha accesso a nessuno dei due).
        - video, se rifatto.
 9. [ ] **[P]** Provare sul proprio telefono: home, mappa con le due schede, un livello
        con un masso, un Intreccio.
+       Dopo aver aggiornato l'app dal Play Store: nella home deve esserci la sesta voce
+       «Recensisci» (l'AAB nuovo avvia il gioco con `?origine=play`); toccandola deve
+       aprirsi la scheda di PLINTO nell'app Play Store. Se la voce manca, l'avvio non
+       passa il parametro: dirlo a Claude.
 
 ## C. Dopo
 

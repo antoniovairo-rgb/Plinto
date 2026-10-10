@@ -7,6 +7,25 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.2] — 10 ottobre 2026
+
+### Aggiunto
+
+- **Invito a recensire il gioco sul Play Store** (richiesta del proprietario: «più
+  visibile possibile»), **solo nell'app del Play Store**: nel browser non compare, perché
+  da lì non si può recensire. Tre posti: la sesta voce del menu della home
+  («Recensisci», con la stella d'ottone: chiude la griglia pari e la home non si
+  allunga), la fascia che annuncia un atto chiuso (il primo al livello 10) e la festa
+  finale. Sulle vittorie sparisce dopo che il giocatore l'ha toccato una volta; la voce
+  del menu resta. È un collegamento alla scheda del gioco, non la scheda di recensione
+  di Google dentro l'app, che richiederebbe codice Android: niente stelle chieste, niente
+  «ti piace?», niente in cambio, come vogliono le regole di Google Play.
+- Il gioco riconosce l'app da `?origine=play` nell'indirizzo di avvio (arriverà con il
+  prossimo pacchetto Android) o dal referrer `android-app://` che Chrome può impostare
+  (da verificare su un telefono vero: nessuna documentazione ufficiale lo garantisce per
+  le TWA), e lo ricorda nel dispositivo. Informativa privacy aggiornata.
+- Nuova prova nel gate, `npm run recensione`: 29 controlli.
+
 ## [Non pubblicato] — La Torre (branch `opera-torre`)
 
 Non ancora in produzione: aspetta il via del proprietario. La grafica e le animazioni nate

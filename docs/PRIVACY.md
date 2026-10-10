@@ -21,6 +21,7 @@ locale del browser (`localStorage`), sotto le chiavi con prefisso `plinto:`:
 | Partita in corso | Riprendere la partita se chiudi il gioco |
 | Risultati della Sfida del Giorno | Il tuo miglior punteggio di ciascun giorno, per gli ultimi 60 giorni |
 | Impostazioni | Audio, vibrazione, animazioni, tema, lingua |
+| Provenienza dall'app del Play Store | Mostrare l'invito a recensire solo a chi gioca dall'app, e non riproporlo dopo che l'hai toccato |
 
 Questi dati **non lasciano mai il dispositivo**. Non esiste alcun server a cui possano
 essere inviati: il gioco è un'applicazione che gira interamente nel browser.
@@ -35,7 +36,7 @@ essere inviati: il gioco è un'applicazione che gira interamente nel browser.
   né l'età, né la posizione.
 - Nessuna condivisione con nessuno, perché non c'è nulla da condividere.
 
-## Le tre eccezioni: tre collegamenti che portano fuori
+## Le quattro eccezioni: quattro collegamenti che portano fuori
 
 **Il collegamento alla donazione.** Nella schermata "Sostieni il progetto" c'è un
 collegamento a PayPal. **Il collegamento non fa nulla finché non lo tocchi tu.** Se lo
@@ -71,6 +72,15 @@ sarebbe tracciarti.
 L'unica eccezione alla frase qui sopra è il collegamento della **sfida del giorno**, che
 porta scritta la data della sfida. Non è un dato su di te: serve a far giocare a chi lo
 riceve la stessa identica partita, ed è la ragione per cui quel collegamento esiste.
+
+**Il collegamento per recensire il gioco.** Solo se giochi dall'app scaricata dal Play
+Store, nel menu della schermata iniziale e quando chiudi un tratto del percorso c'è
+«Recensisci sul Play Store». Toccandolo si apre la pagina del gioco sul Play Store, che
+ha una propria informativa privacy. Come gli altri, **non fa nulla finché non lo tocchi
+tu**, e non porta con sé niente che ti riguardi: è lo stesso indirizzo per tutti. Per
+sapere se giochi dall'app, il gioco guarda solo come è stato aperto e ricorda la risposta
+(un valore, non un identificativo) nel tuo dispositivo, insieme al fatto che hai già
+toccato l'invito.
 
 **L'anteprima che si vede in chat.** Quando incolli il collegamento del gioco in una
 conversazione, l'applicazione di messaggistica mostra un riquadro con un'immagine. Quel

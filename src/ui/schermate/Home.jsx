@@ -4,6 +4,7 @@ import {
   IconaAiuto, IconaStatistiche, IconaProfilo, IconaImpostazioni, IconaInfo,
 } from '../IconeMenu.jsx';
 import { Installa } from '../Installa.jsx';
+import { VoceRecensione } from '../Recensisci.jsx';
 import { CONTATTO } from '../../config/progetto.js';
 import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
 
@@ -140,6 +141,9 @@ export function SchermoHome({
             <span>{etichetta}</span>
           </button>
         ))}
+        {/* La sesta voce, solo nell'app del Play Store: chiude la griglia pari (tre righe
+            da due) invece di aggiungerne una, quindi la home non si allunga. */}
+        <VoceRecensione t={t} />
       </nav>
 
       {/* Il sostegno sta in fondo e in piccolo, sotto tutto il resto e sopra la sola

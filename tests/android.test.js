@@ -156,4 +156,16 @@ describe('il patto con il sito', () => {
     const aperto = strings.match(/name="urlIniziale"[^>]*>([^<]+)</)[1];
     expect(new URL(aperto).origin).toBe(new URL(dichiarato).origin);
   });
+
+  it('l\'app avvia il gioco con ?origine=play, e il sito la riconosce', async () => {
+    // Senza il parametro l'invito a recensire comparirebbe solo se Chrome passasse il
+    // referrer android-app://, cosa che nessuna documentazione garantisce.
+    const strings = readFileSync(join(MAIN, 'res/values/strings.xml'), 'utf8');
+    const avvio = strings.match(/name="urlAvvio"[^>]*>([^<]+)</)[1];
+    const aperto = strings.match(/name="urlIniziale"[^>]*>([^<]+)</)[1];
+    expect(manifest).toMatch(/DEFAULT_URL"\s+android:value="@string\/urlAvvio"/);
+    expect(new URL(avvio).origin + new URL(avvio).pathname).toBe(aperto);
+    const { apertaDallApp } = await import('../src/persistence/recensione.js');
+    expect(apertaDallApp(new URL(avvio).search, '')).toBe(true);
+  });
 });

@@ -14,6 +14,11 @@
          rispondono con un reindirizzamento e la finestra di fiducia parte due volte. -->
     <string name="urlIniziale" translatable="false">https://antoniovairo-rgb.github.io/Plinto/</string>
 
+    <!-- L'indirizzo con cui l'app AVVIA il gioco: lo stesso, con `?origine=play`. E' cosi'
+         che il sito sa di essere dentro l'app del Play Store e mostra l'invito a recensire
+         (src/persistence/recensione.js). La gestione dei dati usa ancora `urlIniziale`. -->
+    <string name="urlAvvio" translatable="false">https://antoniovairo-rgb.github.io/Plinto/?origine=play</string>
+
     <!--
       La meta' "app" del patto con il sito.
 
