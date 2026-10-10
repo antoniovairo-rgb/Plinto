@@ -248,13 +248,13 @@ convince, e' il primo ricambio.
 
 Il file è `store/video/plinto-montaggio.webm`, generato con `npm run video` dal gioco vero:
 780×1688 (densità 2: a densità 3 il browser di registrazione perdeva fotogrammi proprio
-negli Intrecci), 30 fotogrammi al secondo, circa 62 secondi, senza audio. Rifatto il 10
-ottobre 2026 su richiesta del proprietario: una panoramica di almeno un minuto, una
-partita vinta, tante animazioni. Le parti: la guida in sei passi, la home, la mappa,
+negli Intrecci), 30 fotogrammi al secondo, circa 90 secondi, senza audio. Rifatto il 10
+ottobre 2026 su richiesta del proprietario: una panoramica di un minuto e mezzo, a ritmo
+calmo, con una partita vinta e tante animazioni. Le parti: la guida in sei passi, la home, la mappa,
 l'apertura del livello 46 con la cassetta degli attrezzi, il livello vinto in sette mosse
-(sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, la Sfida del giorno e il suo
-archivio, un tratto di partita libera che si apre con un Intreccio da quattro gruppi, le
-statistiche e «Come si gioca». YouTube vuole un MP4: la conversione in H.264 si fa con un
+(sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, la Sfida del giorno (tre mosse)
+e il suo archivio, sette mosse di partita libera che si aprono con un Intreccio da quattro
+gruppi, le statistiche e «Come si gioca». YouTube vuole un MP4: la conversione in H.264 si fa con un
 ffmpeg completo (quello di Playwright scrive solo VP8).
 
 Requisiti della Play Console, dalla sua guida («Add preview assets»):
