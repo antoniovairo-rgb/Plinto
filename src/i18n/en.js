@@ -145,6 +145,12 @@ export default {
       'PLINTO collects nothing. No account, no sign-up, no tracking, no advertising. '
       + 'Records and settings stay on your device and are never sent anywhere.',
     licenzeTitolo: 'Assets and licences',
+    nomeTitolo: 'Why it is called PLINTO',
+    nome:
+      'In Italian a plinto is a plinth: the square block a column stands on, the base that holds '
+      + 'everything else up. The word comes from the Greek plínthos, "brick". In the game you do the '
+      + 'same: block by block, level by level, you build the Bridge. And Plinto, the character who '
+      + 'keeps you company, is exactly that: a stone block that came to life.',
   },
   sostieni: {
     titolo: 'Support the project',

@@ -179,6 +179,14 @@ export default {
       'PLINTO non raccoglie nulla. Nessun account, nessuna registrazione, nessun tracciamento, '
       + 'nessuna pubblicità. Record e impostazioni restano nel tuo dispositivo e non vengono mai inviati altrove.',
     licenzeTitolo: 'Risorse e licenze',
+    // Il significato viene dal vocabolario Treccani, voce «plinto»: basamento della
+    // colonna nell'architettura classica, dal greco plínthos, «mattone».
+    nomeTitolo: 'Perché si chiama PLINTO',
+    nome:
+      'Il plinto è il blocco squadrato su cui poggia una colonna: la base che regge tutto il resto. '
+      + 'La parola viene dal greco plínthos, «mattone». Nel gioco fai lo stesso: blocco dopo blocco, '
+      + 'livello dopo livello, costruisci il Ponte. E Plinto, il personaggio che ti accompagna, '
+      + 'è proprio questo: un blocco di pietra che ha preso vita.',
   },
   sostieni: {
     titolo: 'Sostieni il progetto',
