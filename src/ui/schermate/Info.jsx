@@ -1,8 +1,9 @@
 import { Pagina } from './Pagina.jsx';
+import { Plinto } from '../Plinto.jsx';
 import { PAYPAL_URL, CONTATTO, ANNO } from '../../config/progetto.js';
 
 /**
- * Info e privacy.
+ * Info: il nome, la privacy, le licenze.
  *
  * Il testo sulla privacy descrive esattamente cio' che il codice fa: nessuna
  * richiesta di rete, nessun identificativo, nessuna analitica, dati solo locali.
@@ -14,6 +15,14 @@ export function SchermoInfo({ onIndietro, onSostieni, t }) {
       <p className="pl-nota">
         {t('info.versione')} {__APP_VERSION__}
       </p>
+
+      {/* Il nome, spiegato: chi non e' italiano non lo sa, e anche molti italiani non
+          ricordano che un plinto e' la base di una colonna. Richiesta del proprietario. */}
+      <h2 className="pl-sezione">{t('info.nomeTitolo')}</h2>
+      <div className="pl-info__nome">
+        <Plinto espressione="contento" dimensione={52} />
+        <p className="pl-testo">{t('info.nome')}</p>
+      </div>
 
       <h2 className="pl-sezione">{t('info.privacyTitolo')}</h2>
       <p className="pl-testo">{t('info.privacy')}</p>

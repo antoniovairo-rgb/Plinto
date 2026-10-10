@@ -7,6 +7,16 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.4] — 10 ottobre 2026
+
+### Aggiunto
+
+- **In Info, perché si chiama PLINTO** (richiesta del proprietario), con Plinto accanto:
+  il plinto è il blocco squadrato su cui poggia una colonna, dal greco *plínthos*,
+  «mattone» (fonte: vocabolario Treccani, voce «plinto»); nel gioco si costruisce il Ponte
+  blocco dopo blocco, e Plinto è un blocco di pietra che ha preso vita. In italiano e in
+  inglese.
+
 ## [1.21.3] — 10 ottobre 2026
 
 ### Cambiato
