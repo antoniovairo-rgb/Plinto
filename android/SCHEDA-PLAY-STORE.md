@@ -248,11 +248,14 @@ convince, e' il primo ricambio.
 
 Il file è `store/video/plinto-montaggio.webm`, generato con `npm run video` dal gioco vero:
 780×1688 (densità 2: a densità 3 il browser di registrazione perdeva fotogrammi proprio
-negli Intrecci), 30 fotogrammi al secondo, circa 30 secondi, senza audio. Rifatto il 10
-ottobre 2026 su richiesta del proprietario: più veloce, una partita vinta, tante
-animazioni. Le parti: home, mappa, apertura del livello 46, il livello vinto in sette
-mosse (sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, e un tratto di partita
-libera che si apre con un Intreccio da quattro gruppi.
+negli Intrecci), 30 fotogrammi al secondo, circa 62 secondi, senza audio. Rifatto il 10
+ottobre 2026 su richiesta del proprietario: una panoramica di almeno un minuto, una
+partita vinta, tante animazioni. Le parti: la guida in sei passi, la home, la mappa,
+l'apertura del livello 46 con la cassetta degli attrezzi, il livello vinto in sette mosse
+(sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, la Sfida del giorno e il suo
+archivio, un tratto di partita libera che si apre con un Intreccio da quattro gruppi, le
+statistiche e «Come si gioca». YouTube vuole un MP4: la conversione in H.264 si fa con un
+ffmpeg completo (quello di Playwright scrive solo VP8).
 
 Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - link a **un singolo video**, non a un canale o a una playlist, e senza parametri come
@@ -261,7 +264,8 @@ Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - **annunci disattivati** (monetizzazione spenta) e **nessun limite d'età**;
 - incorporamento consentito;
 - orizzontale o verticale, ma senza bande nere: questo è verticale e non ne ha;
-- si riproducono da soli solo i **primi 30 secondi**: qui coprono quasi tutto il video.
+- si riproducono da soli solo i **primi 30 secondi**: qui la guida, la home, la mappa,
+  l'apertura e l'inizio del livello.
 
 Un video verticale sotto i tre minuti YouTube lo può classificare come Short. Nella Play
 Console si incolla comunque il link nella forma `https://www.youtube.com/watch?v=...`:

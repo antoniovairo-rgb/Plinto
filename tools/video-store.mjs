@@ -195,7 +195,9 @@ await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 await page.evaluate((q) => {
   window.localStorage.clear();
   window.localStorage.setItem('plinto:settings', JSON.stringify({
-    introVista: true, lingua: 'it', animazioni: true, aiutoVisivo: true }));
+    // introVista falso: il video si apre con la guida del primo avvio, che e' la
+    // panoramica delle regole fatta dal gioco stesso.
+    introVista: false, lingua: 'it', animazioni: true, aiutoVisivo: true }));
   // Chi e' al livello 46 ha superato 45 livelli, cioe' riscosso nove gettoni: ne tiene
   // due, cosi' nel livello si vede la cassetta accanto al gioco.
   window.localStorage.setItem('plinto:attrezzi', JSON.stringify({
@@ -203,6 +205,16 @@ await page.evaluate((q) => {
   window.localStorage.setItem('plinto:records', JSON.stringify({
     best: 18740, bestChain: 7, bestMove: 612, bestGroupsInOneMove: 3 }));
   window.localStorage.setItem('plinto:quadri', JSON.stringify(q));
+  // Le statistiche di chi gioca da un po', e qualche sfida del giorno nell'archivio.
+  window.localStorage.setItem('plinto:statistiche', JSON.stringify({
+    partite: 84, punteggioTotale: 268400, mosseTotali: 9120,
+    gruppiTotali: 3180, griglieSvuotate: 6, tempoTotaleMs: 27600000 }));
+  const sfide = {};
+  for (const giorni of [1, 2, 4, 5, 8]) {
+    const d = new Date(Date.now() - giorni * 86400000).toISOString().slice(0, 10);
+    sfide[d] = { best: 2600 + giorni * 410, partite: 1 + (giorni % 3) };
+  }
+  window.localStorage.setItem('plinto:sfide', JSON.stringify(sfide));
 }, { versione: 1, livelli });
 await page.reload({ waitUntil: 'networkidle' });
 
@@ -257,23 +269,53 @@ const segna = (nome) => tappe.push({ nome, a: Date.now() });
 // anche il caricamento e la preparazione dei dati: nel primo montaggio erano due secondi
 // di schermo nero in apertura, e sfasavano tutte le parti successive. Si segna qui
 // l'istante in cui la home e' davvero a schermo, e alla fine si taglia il video fin li'.
-await page.waitForSelector('.pl-home__azioni');
+const sequenza = mosseDelLivello();
+const libera = partitaLibera();
+await page.waitForSelector('.pl-guida');
 await pausa(400);
 const inizio = Date.now();
 
-const sequenza = mosseDelLivello();
-const libera = partitaLibera();
+/** Torna alla home da una pagina: la freccia in alto, come farebbe un dito. */
+const allaHome = async () => {
+  await page.locator('.pl-pagina__testata .pl-hud__menu').first().click();
+  await page.waitForSelector('.pl-home__azioni');
+};
+
+// PANORAMICA (richiesta del proprietario, 10 ottobre 2026): almeno un minuto, che
+// racconti tutto il gioco e non solo una partita. Le parti piu' lunghe restano quelle
+// giocate; le pagine passano svelte.
+
+// --- 0. La guida: le regole, come le spiega il gioco ---------------------------
+segna('guida');
+await pausa(1500);
+for (let passo = 2; passo <= 6; passo += 1) {
+  await page.getByRole('button', { name: /^Avanti$/ }).click();
+  await pausa(1500);
+}
+await page.getByRole('button', { name: /Non mostrarmela/ }).click();
+await page.waitForSelector('.pl-home__azioni');
 
 // --- 1. La home: che cosa c'e' dentro ----------------------------------------
 segna('home');
-await pausa(1600);
+await pausa(1800);
 
 // --- 2. La mappa: esiste un percorso, e sei a un punto preciso ----------------
 segna('mappa');
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
-// La mappa si porta da sola sul livello corrente: un istante per vederla, poi si entra.
-await pausa(1700);
+// La mappa si porta da sola sul livello corrente: un istante per vederla, una scorsa
+// fino ai livelli che mancano, e si entra.
+await pausa(1500);
+await page.evaluate(async () => {
+  const s = [...document.querySelectorAll('*')].find((n) => n.scrollHeight > n.clientHeight + 40);
+  if (!s) return;
+  const da = s.scrollTop;
+  const a = Math.min(s.scrollHeight - s.clientHeight, da + 900);
+  for (let i = 1; i <= 40; i += 1) { s.scrollTop = da + ((a - da) * i) / 40; await new Promise((r) => setTimeout(r, 24)); }
+  await new Promise((r) => setTimeout(r, 500));
+  for (let i = 1; i <= 25; i += 1) { s.scrollTop = a - ((a - da) * i) / 25; await new Promise((r) => setTimeout(r, 20)); }
+});
+await pausa(500);
 
 // --- 3. L'apertura: l'obiettivo detto PRIMA di giocare ------------------------
 segna('apertura');
@@ -285,7 +327,12 @@ await pausa(2300);
 segna('livello');
 await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
-await pausa(500);
+await pausa(600);
+// La cassetta degli attrezzi: si apre, si legge, si richiude senza usarla.
+await page.locator('.pl-attrezzi__pastiglia').first().click();
+await pausa(2200);
+await page.getByRole('button', { name: /Torna alla partita/ }).click();
+await pausa(400);
 for (const mossa of sequenza) {
   // La schermata di fine livello e' `.pl-screen.pl-fine`, la stessa della fine partita.
   if (await page.locator('.pl-fine').count()) break;
@@ -304,7 +351,21 @@ const vinto = await page.evaluate((n) => {
 }, LIVELLO);
 await pausa(2600);
 
-// --- 6. La partita libera: gli Intrecci piu' grossi ----------------------------
+// --- 6. La sfida del giorno e il suo archivio ----------------------------------
+segna('sfida del giorno');
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.getByRole('button', { name: /^Sfida del giorno/ }).click();
+await page.waitForSelector('.pl-plancia');
+await pausa(2200);
+await page.locator('.pl-hud__menu').first().click();
+await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForSelector('.pl-home__azioni');
+segna('archivio');
+await page.getByRole('button', { name: /Archivio delle sfide/ }).click();
+await page.waitForSelector('.pl-calendario');
+await pausa(2200);
+
+// --- 7. La partita libera: gli Intrecci piu' grossi ----------------------------
 segna('partita libera');
 await page.evaluate((stato) => {
   window.localStorage.setItem('plinto:partita', JSON.stringify(
@@ -318,9 +379,31 @@ for (let i = 0; i < libera.mosse.length; i += 1) {
   // Dopo un Intreccio si aspetta che la scritta finisca; una mossa a vuoto passa svelta.
   if (!(await unaMossa(libera.mosse[i], libera.gruppi[i] >= 2 ? 1150 : 700))) break;
 }
-// Il video non si chiude a meta' di un'animazione: la prima stesura finiva proprio
-// mentre compariva la scritta dell'Intreccio, tagliandola.
+// Non si esce a meta' di un'animazione: la prima stesura finiva proprio mentre
+// compariva la scritta dell'Intreccio, tagliandola.
 await pausa(1400);
+
+// --- 8. Le statistiche e le regole ---------------------------------------------
+segna('statistiche');
+await page.locator('.pl-hud__menu').first().click();
+await page.getByRole('button', { name: /Torna alla home/ }).click();
+await page.waitForSelector('.pl-home__azioni');
+await page.getByRole('button', { name: /^Statistiche$/ }).click();
+await pausa(2400);
+await allaHome();
+segna('come si gioca');
+await page.getByRole('button', { name: /^Come si gioca$/ }).click();
+await pausa(1400);
+await page.evaluate(async () => {
+  const s = [...document.querySelectorAll('*')].find((n) => n.scrollHeight > n.clientHeight + 40);
+  if (!s) return;
+  const a = Math.min(s.scrollHeight - s.clientHeight, 1400);
+  for (let i = 1; i <= 60; i += 1) { s.scrollTop = (a * i) / 60; await new Promise((r) => setTimeout(r, 25)); }
+});
+await pausa(900);
+await allaHome();
+segna('chiusura');
+await pausa(1800);
 
 const fine = Date.now();
 await cdp.send('Page.stopScreencast').catch(() => {});
