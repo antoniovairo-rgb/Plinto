@@ -1,6 +1,7 @@
-# La quarta opera — documento di progetto
+# La Piazza (quarta opera) — documento di progetto
 
-Stato: **proposta, niente di deciso**. Branch: `opera-quarta` (parte da `opera-arena`).
+Stato: **decisa, lavoro non ancora iniziato** (si comincia dopo l'uscita dell'Arena).
+Branch: `opera-quarta` (parte da `opera-arena`). Opera: **La Piazza**. Regola: **il pavimento**.
 Scritto l'11 ottobre 2026 su richiesta del proprietario («Nuova opera»).
 
 La quarta opera viene dopo il Ponte (1-100), la Torre (101-200, i massi) e l'Arena
@@ -11,12 +12,20 @@ livelli.
 
 ---
 
-## 1. Da decidere
+## 1. Decisioni
 
-| Domanda | Proposta (opinione) |
+Prese dal proprietario l'11 ottobre 2026:
+
+| Domanda | Scelta |
 |---|---|
 | Che regola nuova porta | **Il pavimento** (sezione 3.1) |
-| Che cosa si costruisce | Da scegliere insieme alla regola: con il pavimento, **La Piazza** |
+| Che cosa si costruisce | **La Piazza** |
+| Quando si comincia | **Dopo l'uscita dell'Arena** |
+
+Ancora da decidere (proposte, opinione):
+
+| Domanda | Proposta |
+|---|---|
 | Quanti livelli | 100, dal 301 al 400, come le altre opere |
 | Chi la gioca | Solo chi ha finito tutta l'Arena, come per le opere precedenti |
 | Massi e mattoni | Nei primi atti no; negli ultimi, forse, insieme alla regola nuova (sezione 5) |
