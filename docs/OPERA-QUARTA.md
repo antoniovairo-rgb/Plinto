@@ -1,6 +1,6 @@
 # La Piazza (quarta opera) — documento di progetto
 
-Stato: **decisa, lavoro non ancora iniziato** (si comincia dopo l'uscita dell'Arena).
+Stato: **decisa in tutto, lavoro non ancora iniziato** (si comincia dopo l'uscita dell'Arena).
 Branch: `opera-quarta` (parte da `opera-arena`). Opera: **La Piazza**. Regola: **il pavimento**.
 Scritto l'11 ottobre 2026 su richiesta del proprietario («Nuova opera»).
 
@@ -21,14 +21,10 @@ Prese dal proprietario l'11 ottobre 2026:
 | Che regola nuova porta | **Il pavimento** (sezione 3.1) |
 | Che cosa si costruisce | **La Piazza** |
 | Quando si comincia | **Dopo l'uscita dell'Arena** |
-
-Ancora da decidere (proposte, opinione):
-
-| Domanda | Proposta |
-|---|---|
-| Quanti livelli | 100, dal 301 al 400, come le altre opere |
-| Chi la gioca | Solo chi ha finito tutta l'Arena, come per le opere precedenti |
-| Massi e mattoni | Nei primi atti no; negli ultimi, forse, insieme alla regola nuova (sezione 5) |
+| Quanti livelli | **100**, dal 301 al 400 |
+| Chi la gioca | **Solo chi ha finito tutta l'Arena** |
+| Massi e mattoni | **Sì, qualcuno**: negli atti finali, mai nei primi (sezione 3.1, casi 6-7) |
+| Casi particolari | Lasciati a Claude: decisi nella sezione 3.1 |
 | Quando esce | Uno o due mesi dopo l'Arena |
 
 ---
@@ -75,12 +71,35 @@ pochi riquadri da coprire), più gli obiettivi che esistono gia'.
 - giocatore artificiale: deve preferire i gruppi che passano sulle piastrelle;
 - interfaccia: il disegno della piastrella sotto i blocchi.
 
-**Casi limite da decidere:**
-1. **Bombe**: l'esplosione posa le piastrelle sotto le caselle che fa sparire? (Proposta:
-   sì, come un gruppo chiuso.)
-2. **Piccone**: no, come oggi non conta per «Elimina N caselle».
-3. **Intreccio**: una piastrella all'incrocio si posa una volta sola.
-4. **Pezzo posato sopra una piastrella gia' posata**: non succede niente, resta posata.
+**Casi particolari — decisi l'11 ottobre 2026** (il proprietario li ha lasciati a Claude;
+il criterio è la coerenza con le regole che esistono già):
+1. **Bombe: sì, posano.** Le caselle fatte sparire da un'esplosione posano la loro
+   piastrella. Coerenza: nel codice di oggi quelle caselle contano già per «Elimina N
+   caselle» (`svuotaCelle` sulle celle della detonazione, `src/core/engine.js`).
+2. **Piccone: no, non posa.** Come oggi non conta per «Elimina N caselle» e un mattone
+   tolto col piccone non conta per «Demolisci»: gli attrezzi aiutano, non completano gli
+   obiettivi al posto del giocatore.
+3. **Intreccio: una volta sola.** Una piastrella all'incrocio di due gruppi chiusi con la
+   stessa mossa si posa una volta e conta uno per l'obiettivo, come il mattone che
+   nell'Arena fa un passo solo.
+4. **Pezzo sopra una piastrella già posata:** resta posata. Non si può «perdere» niente.
+5. **Niente punti in più:** posare una piastrella non cambia il punteggio. Così le regole
+   del punteggio e l'impronta delle sfide restano identiche; la piastrella conta solo per
+   l'obiettivo.
+6. **Mai una piastrella sotto un masso o un mattone all'inizio del livello.** Il masso non
+   sparisce mai e il mattone resta dopo la prima chiusura: una piastrella sotto di loro
+   non si vedrebbe e non si capirebbe quando è posata. Lo garantisce il generatore, con
+   una prova automatica.
+7. **Massi e mattoni solo negli atti finali** (indicativamente gli ultimi due o tre), pochi
+   e già noti: sono la difficoltà in più per il finale, non una regola da reimparare.
+   Un gruppo fatto solo di massi continua a non contare come chiuso (regola della Torre),
+   quindi non posa niente.
+8. **«Rimetti a posto il pezzo»:** riporta indietro anche le piastrelle posate da quella
+   mossa.
+9. **Salvataggio e ripresa:** lo strato delle piastrelle si salva e si riprende con la
+   partita; la caccia ai difetti controlla che una piastrella posata non torni mai da
+   posare.
+10. **Solo nella Piazza:** niente piastrelle in partita libera e nella Sfida del giorno.
 
 **Pro:** si spiega in una frase e si vede a colpo d'occhio; e' un obiettivo, non una
 minaccia, quindi non aggiunge tensione; nel tema del cantiere e' naturale (si pavimenta una
@@ -156,7 +175,7 @@ degli atti o delle opere esistenti.)
 
 ## 6. Dopo la scelta
 
-1. Decidere i casi limite (sezione 3).
+1. ~~Decidere i casi particolari~~ (fatto, sezione 3.1).
 2. Regola nel motore con le prove automatiche, fuori da `rules.js`.
 3. Insegnarla al giocatore artificiale.
 4. Generatore per i livelli 301-400, lasciando identiche le opere precedenti.
