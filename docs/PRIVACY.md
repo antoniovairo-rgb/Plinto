@@ -36,7 +36,7 @@ essere inviati: il gioco è un'applicazione che gira interamente nel browser.
   né l'età, né la posizione.
 - Nessuna condivisione con nessuno, perché non c'è nulla da condividere.
 
-## Le quattro eccezioni: quattro collegamenti che portano fuori
+## Le eccezioni: collegamenti che portano fuori
 
 **Il collegamento alla donazione.** Nella schermata "Sostieni il progetto" c'è un
 collegamento a PayPal. **Il collegamento non fa nulla finché non lo tocchi tu.** Se lo
@@ -81,6 +81,12 @@ tu**, e non porta con sé niente che ti riguardi: è lo stesso indirizzo per tut
 sapere se giochi dall'app, il gioco guarda solo come è stato aperto e ricorda la risposta
 (un valore, non un identificativo) nel tuo dispositivo, insieme al fatto che hai già
 toccato l'invito.
+
+**Il collegamento per scaricare l'app.** Se giochi dal browser di un telefono Android, nel
+menu della schermata iniziale c'è «Scarica l'app»: porta alla stessa pagina del Play Store
+e, come gli altri, non fa nulla finché non lo tocchi. Per capire se il telefono è Android
+il gioco legge solo l'identificazione che il browser dichiara da sé; non la salva e non la
+manda a nessuno.
 
 **L'anteprima che si vede in chat.** Quando incolli il collegamento del gioco in una
 conversazione, l'applicazione di messaggistica mostra un riquadro con un'immagine. Quel
