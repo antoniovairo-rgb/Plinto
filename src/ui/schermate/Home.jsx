@@ -3,7 +3,7 @@ import { numero } from '../../i18n/formato.js';
 import {
   IconaAiuto, IconaStatistiche, IconaProfilo, IconaImpostazioni, IconaInfo,
 } from '../IconeMenu.jsx';
-import { Installa } from '../Installa.jsx';
+import { Installa, VoceScaricaApp } from '../Installa.jsx';
 import { VoceRecensione } from '../Recensisci.jsx';
 import { CONTATTO } from '../../config/progetto.js';
 import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
@@ -142,6 +142,8 @@ export function SchermoHome({
         {/* La sesta voce, solo nell'app del Play Store: chiude la griglia pari (tre righe
             da due) invece di aggiungerne una, quindi la home non si allunga. */}
         <VoceRecensione t={t} />
+        {/* Oppure, nel browser di un telefono Android, la sesta voce porta all'app. */}
+        <VoceScaricaApp t={t} />
       </nav>
 
       {/* Il sostegno sta in fondo e in piccolo, sotto tutto il resto e sopra la sola

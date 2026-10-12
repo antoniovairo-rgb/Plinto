@@ -1,5 +1,6 @@
 /**
- * Le icone delle voci di menu della home (cinque, sei nell'app del Play Store).
+ * Le icone delle voci di menu della home (cinque; sei nell'app del Play Store, con
+ * «Recensisci», e nel browser di Android, con «Scarica l'app»).
  *
  * PERCHE' ESISTONO. Le voci erano cinque etichette di solo testo dentro una riga che
  * andava a capo: due, due, e "Info" spaiata in mezzo. Il blocco si leggeva come un
@@ -82,6 +83,17 @@ export function IconaCuore() {
   return (
     <svg {...COMUNI}>
       <path d="M12 19.5s-7.2-4.4-7.2-9.6A4 4 0 0 1 12 7.6a4 4 0 0 1 7.2 2.3c0 5.2-7.2 9.6-7.2 9.6z" />
+    </svg>
+  );
+}
+
+/** Scarica l'app: la freccia verso il basso sul vassoio. */
+export function IconaScarica() {
+  return (
+    <svg {...COMUNI}>
+      <path d="M12 4.5v10" />
+      <path d="M7.8 10.6 12 14.8l4.2-4.2" />
+      <path d="M5 16.5v2.2h14v-2.2" />
     </svg>
   );
 }

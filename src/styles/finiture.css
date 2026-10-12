@@ -96,10 +96,12 @@ body,
 
 /* La voce "Recensisci" (solo nell'app del Play Store): il cuore d'ottone e il bordo
    caldo la fanno trovare a colpo d'occhio, senza diventare un secondo pulsante Gioca. */
-.pl-home__menu .pl-home__voce--recensisci {
+.pl-home__menu .pl-home__voce--recensisci,
+.pl-home__menu .pl-home__voce--scarica {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-ottone) 55%, transparent);
   text-decoration: none;
 }
+.pl-home__voce--scarica .pl-home__voce-icona,
 .pl-home__voce--recensisci .pl-home__voce-icona {
   color: var(--pl-ottone);
   background: color-mix(in srgb, var(--pl-ottone) 18%, transparent);

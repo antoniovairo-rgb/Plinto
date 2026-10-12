@@ -7,7 +7,9 @@
  *      l'indirizzo giusto, e la home non si allunga ne' scorre;
  *   3. chiudendo un atto nell'app compare il pulsante, visibile senza scorrere anche a
  *      360x640, e dopo averlo toccato non torna (la voce del menu invece resta);
- *   4. la festa finale ha l'invito.
+ *   4. la festa finale ha l'invito;
+ *   5. nel browser di un telefono Android la sesta voce del menu e' «Scarica l'app» (non
+ *      per chi ha gia' l'app, non sul computer), e la home non scorre a 360x640.
  *
  * Il Play Store non si contatta mai: le richieste verso play.google.com sono
  * intercettate e risposte qui.
@@ -249,6 +251,44 @@ if (await vinciIlPrimo()) {
   if (await invito.count() !== 1) errori.push('TRIONFO: la festa finale non ha l invito a recensire');
   else if (await invito.getAttribute('href') !== PLAY_URL) errori.push('TRIONFO: l invito non porta alla scheda del Play Store');
 }
+
+// ---------- 5. Nel browser di un telefono Android: «Scarica da Google Play» ----------
+console.log('5. browser Android: la sesta voce manda al Play Store, non a chi ha gia l app...');
+const UA_ANDROID = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
+const android = await browser.newContext({ viewport: { width: 360, height: 640 }, locale: 'it-IT', userAgent: UA_ANDROID });
+const pa = await android.newPage();
+pa.on('pageerror', (e) => errori.push(`errore di pagina (Android): ${e.message}`));
+const homeAndroid = async (app) => {
+  await pa.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await pa.evaluate((inApp) => {
+    window.localStorage.clear();
+    window.localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true, lingua: 'it' }));
+    if (inApp) window.localStorage.setItem('plinto:origine', JSON.stringify('play'));
+  }, app);
+  await pa.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await pa.waitForSelector('.pl-home__menu');
+};
+await homeAndroid(false);
+await pa.screenshot({ path: `${OUT}/5-android-browser.png` });
+const play = pa.locator('.pl-home__voce--scarica');
+if (await play.count() !== 1) {
+  errori.push('ANDROID: nel browser manca «Scarica da Google Play»');
+} else {
+  if (await play.getAttribute('href') !== PLAY_URL) errori.push('ANDROID: «Scarica da Google Play» non porta alla scheda del Play Store');
+  if ((await play.innerText()).trim() !== "Scarica l'app") errori.push(`ANDROID: testo della voce inatteso: ${await play.innerText()}`);
+  if ((await pa.locator('.pl-home__menu').evaluate((m) => m.children.length)) !== 6) errori.push('ANDROID: il menu non ha sei voci');
+  if (await pa.locator('.pl-installa').count() !== 0) errori.push('ANDROID: c e ancora il pulsante per installare il sito');
+}
+const scorreAndroid = await pa.evaluate(() => { const el = document.querySelector('.pl-home'); return el.scrollHeight - el.clientHeight; });
+if (scorreAndroid > 0) errori.push(`ANDROID: con il pulsante la home scorre di ${scorreAndroid}px a 360x640`);
+await homeAndroid(true);
+if (await pa.locator('.pl-home__voce--scarica').count() !== 0) errori.push('ANDROID: chi ha gia l app vede «Scarica l app»');
+await android.close();
+// E sul computer il pulsante non c'e' (il browser di prova non si dichiara Android).
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.evaluate(() => window.localStorage.removeItem('plinto:origine'));
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+if (await page.locator('.pl-home__voce--scarica').count() !== 0) errori.push('COMPUTER: compare «Scarica l app» fuori da Android');
 
 await browser.close();
 if (server) server.kill();
