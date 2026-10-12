@@ -7,6 +7,19 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.5] — 12 ottobre 2026
+
+### Cambiato
+
+- **Nel browser di un telefono Android, «Scarica l'app» porta al Play Store** (richiesta
+  del proprietario). È la sesta voce del menu della home, al posto del pulsante «Installa
+  sul telefono», che installava il sito: quell'installazione non passava dal Play Store,
+  non entrava nei suoi numeri e non permetteva di recensire. Come voce del menu non
+  allunga la home (un pulsante in più la faceva scorrere di 70 px a 360x640). Non compare
+  nell'app, sul computer né su iPhone, dove resta la spiegazione per aggiungerlo alla
+  schermata Home. Informativa privacy aggiornata; la prova `npm run recensione` lo
+  controlla.
+
 ## [1.21.4] — 10 ottobre 2026
 
 ### Aggiunto

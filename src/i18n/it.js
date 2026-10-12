@@ -647,6 +647,8 @@ export default {
   },
   installa: {
     azione: 'Installa sul telefono',
+    play: 'Scarica da Google Play',
+    voce: 'Scarica l\'app',
     apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
   },
   comune: {

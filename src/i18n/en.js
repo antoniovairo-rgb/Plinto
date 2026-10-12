@@ -564,6 +564,8 @@ export default {
   },
   installa: {
     azione: 'Install on your phone',
+    play: 'Get it on Google Play',
+    voce: 'Get the app',
     apple: 'Tap the Share button at the bottom, then "Add to Home Screen". The game opens like an app, full screen and even offline.',
   },
   comune: {
