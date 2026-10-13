@@ -26,7 +26,8 @@ PLINTO - puzzle a blocchi
 
 ## Descrizione breve (max 80 caratteri)
 
-Questa e' quella consigliata: dice il numero che colpisce, la regola che distingue il
+**In linea (verificato sulla scheda pubblica il 13 ottobre 2026)**: questa, in italiano, e la sua
+versione inglese in tutte le varianti en-*. Dice il numero che colpisce, la regola che distingue il
 gioco dagli altri puzzle a blocchi, e la cosa che piu' spesso manca agli altri.
 
 ```
@@ -44,7 +45,7 @@ Cento livelli tarati. Righe, colonne e quadranti. Senza pubblicità né acquisti
 ```
 Righe, colonne e quadranti. Niente pubblicità, niente acquisti, niente conti.
 ```
-*77 caratteri. E' la versione attualmente in linea: non nomina i livelli.*
+*77 caratteri. Era la versione in linea fino all'aggiornamento della scheda per la 1.21.0.*
 
 ## Descrizione completa (max 4000 caratteri)
 
