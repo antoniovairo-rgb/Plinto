@@ -29,3 +29,4 @@ store/prove/
 # rifa' a ogni versione con `npm run video`, e la storia di git non ha motivo di
 # portarsene dietro una copia per ogni giro.
 store/video/
+dist-itch

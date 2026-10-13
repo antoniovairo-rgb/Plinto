@@ -170,6 +170,38 @@ const pagina = `
 `;
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
+
+/**
+ * `--copertina`: la stessa grafica ricomposta per la copertina della pagina di itch.io,
+ * 630x500 (la misura che itch.io suggerisce nel suo modulo), marchio sopra e plancia
+ * sotto, motto in inglese perche' quella vetrina e' internazionale. Si usa la STESSA
+ * pagina e si cambia solo l'impaginazione: le due vetrine restano uguali per costruzione.
+ * Esce in dist-itch/ e non tocca store/ ne' public/. La chiama `npm run itch`.
+ */
+if (process.argv.includes('--copertina')) {
+  const cartella = `${RADICE}dist-itch/`;
+  await mkdir(cartella, { recursive: true });
+  const copertina = await browser.newPage({ viewport: { width: 630, height: 500 }, deviceScaleFactor: 1 });
+  await copertina.setContent(pagina, { waitUntil: 'load' });
+  await copertina.addStyleTag({ content: `
+    body { width: 630px; flex-direction: column; justify-content: center; gap: 22px; padding: 0; }
+    .sinistra { flex: none; text-align: center; }
+    .marchio { justify-content: center; gap: 16px; margin-bottom: 8px; }
+    .marchio svg { width: 58px; height: 58px; }
+    .nome { font-size: 62px; }
+    .claim { font-size: 17px; margin-bottom: 0; }
+    .punti { display: none; }
+    .plancia { width: 324px; height: 324px; padding: 7px; gap: 2px; border-radius: 20px; }
+    .cella:nth-child(9n+4), .cella:nth-child(9n+7) { margin-left: 7px; }
+    .r3, .r6 { margin-top: 7px; }
+  ` });
+  await copertina.evaluate(() => { document.querySelector('.claim').textContent = 'Row, column, quadrant.'; });
+  await copertina.screenshot({ path: `${cartella}copertina-630x500.png` });
+  await browser.close();
+  console.log('dist-itch/copertina-630x500.png — 630x500');
+  process.exit(0);
+}
+
 const page = await browser.newPage({ viewport: { width: 1024, height: 500 }, deviceScaleFactor: 1 });
 await page.setContent(pagina, { waitUntil: 'load' });
 await page.screenshot({ path: `${USCITA}immagine-in-evidenza.png` });
