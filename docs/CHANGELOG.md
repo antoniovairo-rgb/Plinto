@@ -32,6 +32,23 @@ Non ancora in produzione: deve uscire uno o due mesi dopo la Torre.
 
 - La Tinta ignorava il colore dei mattoni rinforzati.
 
+## [1.21.6] — 13 ottobre 2026
+
+### Corretto
+
+- **Le voci del menu sui telefoni stretti** (fino a 380 px) tornano compatte, e «Come si
+  gioca» torna su una riga. Dalla 1.21.2 la regola era morta: un ritocco a
+  `finiture.css` aveva cancellato la prima riga di un commento, e il browser scartava la
+  regola successiva. La build stampava solo un avviso. Nuova prova `tests/css.test.js`:
+  ogni foglio di stile deve compilare senza avvisi.
+
+### Aggiunto
+
+- **PLINTO su itch.io** (preparazione): `npm run itch` crea lo ZIP per la pagina HTML5 e lo
+  prova dentro un iframe di un altro indirizzo, come su itch.io; la copertina 630x500 la
+  disegna `tools/immagine-store.mjs --copertina`. Testi, impostazioni e checklist in
+  `docs/ITCH.md`. Informativa privacy: una riga sulla pagina di itch.io.
+
 ## [1.21.5] — 12 ottobre 2026
 
 ### Cambiato
