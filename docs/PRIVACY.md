@@ -88,6 +88,12 @@ e, come gli altri, non fa nulla finché non lo tocchi. Per capire se il telefono
 il gioco legge solo l'identificazione che il browser dichiara da sé; non la salva e non la
 manda a nessuno.
 
+**La pagina del gioco su itch.io.** PLINTO si può giocare anche dalla sua pagina su
+itch.io, un sito di giochi indipendenti. Il gioco è lo stesso e non manda niente a nessuno;
+la pagina che lo contiene però è di itch.io, che ha le sue statistiche e la sua informativa
+privacy, sulle quali non abbiamo alcun controllo. Chi gioca da lì ha i progressi separati da
+quelli del sito e dell'app.
+
 **L'anteprima che si vede in chat.** Quando incolli il collegamento del gioco in una
 conversazione, l'applicazione di messaggistica mostra un riquadro con un'immagine. Quel
 riquadro lo costruisce lei, leggendo la pagina del gioco, e l'immagine arriva dallo stesso
