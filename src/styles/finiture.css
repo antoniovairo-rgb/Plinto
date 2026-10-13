@@ -128,7 +128,7 @@ body,
   width: 100%;
 }
 
-
+/* Sui telefoni stretti (360 px) le tessere si stringono un po', cosi' "Come si gioca"
    resta su una riga; quella lunga ("Il tuo profilo di gioco") va a capo comunque. */
 @media (max-width: 380px) {
   .pl-home__menu .pl-btn { padding: 0 7px; gap: 7px; }
