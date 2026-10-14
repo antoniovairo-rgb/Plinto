@@ -57,6 +57,8 @@ Android Studio (Claude non ha accesso a nessuno dei due).
        «Recensisci» (l'AAB nuovo avvia il gioco con `?origine=play`); toccandola deve
        aprirsi la scheda di PLINTO nell'app Play Store. Se la voce manca, l'avvio non
        passa il parametro: dirlo a Claude.
+       E il gioco deve essere a **schermo intero**: niente ora in alto, niente pulsanti di
+       Android in basso (riappaiono solo scorrendo dal bordo).
 
 ## C. Dopo
 

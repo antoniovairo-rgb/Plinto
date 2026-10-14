@@ -140,6 +140,13 @@ describe('orientamento', () => {
   });
 });
 
+describe('schermo intero', () => {
+  it('l\'app si apre a schermo intero vero (sticky-immersive)', () => {
+    // Senza, restano visibili l'ora in alto e i pulsanti di Android in basso.
+    expect(manifest).toMatch(/trusted\.DISPLAY_MODE"\s+android:value="sticky-immersive"/);
+  });
+});
+
 describe('il patto con il sito', () => {
   it('il manifest e assetlinks.json parlano dello stesso pacchetto', () => {
     const assetlinks = JSON.parse(
