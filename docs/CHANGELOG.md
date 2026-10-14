@@ -80,6 +80,11 @@ qui sono gia' uscite sul Ponte con la 1.21.0; restano l'icona, il logo a gemme e
 
 ### Aggiunto
 
+- **L'app Android a schermo intero vero** (pacchetto nuovo della Torre): niente ora in alto
+  e niente pulsanti di Android in basso, come ogni gioco. Modalità «sticky-immersive» della
+  libreria di Google: le barre riappaiono solo scorrendo dal bordo. Richiesta del
+  proprietario, 14 ottobre 2026.
+
 - **La Torre: cento livelli nuovi, dal 101 al 200, con una regola nuova, i massi.** Un
   masso conta come pieno ma non sparisce mai: aiuta a chiudere la riga, la colonna e il
   quadrante in cui si trova, e resta li' quando il gruppo se ne va. Le bombe non lo
