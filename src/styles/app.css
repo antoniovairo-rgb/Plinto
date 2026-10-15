@@ -877,6 +877,15 @@ button {
   gap: 4px;
   text-decoration: none;
 }
+/* BERSAGLIO DA DITO, NON DA MOUSE. I due collegamenti erano alti 15 px: sotto i 24 che
+   chiede la WCAG 2.2 (2.5.8) e difficili da prendere al primo colpo (collaudo 1.21.6,
+   B10). Il riempimento allarga la zona che si tocca e il margine negativo lo restituisce
+   subito, cosi' la riga resta alta uguale: la home a 360x640 entra ancora per pochi px. */
+.pl-home__pie .pl-home__sostieni {
+  padding: 6px 2px;
+  margin: -6px -2px;
+  min-height: 24px;
+}
 .pl-home__sostieni .pl-icona + * { text-decoration: underline; text-underline-offset: 3px; }
 /* Un filo piu' grande del testo: a 12px un disegno della stessa altezza delle lettere
    sembra piu' piccolo di loro, perche' le lettere hanno le aste e lui no.
@@ -1973,10 +1982,17 @@ button {
 .pl-obiettivo__testi { display: grid; gap: 2px; min-width: 0; }
 .pl-obiettivo__frase {
   font-size: 13.5px;
+  line-height: 1.25;
   color: var(--pl-text);
+  /* DUE RIGHE, non una con i puntini. Nei livelli con due obiettivi, sui telefoni da
+     360-390 px, la frase finiva in «Arriva a Catena 3 + Fai 450 p…»: il giocatore
+     perdeva proprio il secondo obiettivo (collaudo 1.21.6, B8, almeno 11 livelli).
+     Due righe bastano per tutte le frasi di oggi; i puntini restano come ultima rete. */
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 .pl-obiettivo__progressi { display: flex; gap: 8px; }
