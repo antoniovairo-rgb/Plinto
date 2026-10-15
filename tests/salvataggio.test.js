@@ -167,3 +167,29 @@ describe('rimettere il salvataggio', () => {
     expect(leggi('records').bestChain).toBe(9);
   });
 });
+
+describe('un file modificato a mano (collaudo 1.21.6, B9)', () => {
+  // L'impronta dice che il file non si e' rovinato, non che abbia senso: chi lo modifica
+  // a mano e ricalcola l'impronta puo' metterci qualunque cosa.
+  const busta = (dati) => ({ gioco: 'plinto', formato: FORMATO, impronta: impronta(dati), dati });
+  const strani = {
+    records: { versione: 1, best: 'abc', bestChain: 5, bestMove: -3, bestGroupsInOneMove: Infinity },
+    statistiche: { versione: 1, partite: 4, punteggioTotale: 'x', mosseTotali: null },
+    sfide: { versione: 2, giorni: { '2026-10-10': { best: 300, partite: 1, regole: null }, 'ieri': { best: 9 }, '2026-02-31': { best: 9 }, '2026-10-11': [1, 2] } },
+  };
+
+  for (const sostituisci of [false, true]) {
+    it(`${sostituisci ? 'Sostituisci' : 'Unisci'}: entrano solo numeri veri e giorni veri`, () => {
+      applicaSalvataggio(busta(strani), { sostituisci });
+      const records = leggi('records');
+      expect(Number.isFinite(records.best ?? 0)).toBe(true);
+      expect(records.bestChain).toBe(5);
+      expect(records.bestMove ?? 0).toBeGreaterThanOrEqual(0);
+      expect(Number.isFinite(records.bestGroupsInOneMove ?? 0)).toBe(true);
+      const stats = leggi('statistiche');
+      expect(stats.partite).toBe(4);
+      expect(typeof (stats.punteggioTotale ?? 0)).toBe('number');
+      expect(Object.keys(leggi('sfide').giorni)).toEqual(['2026-10-10']);
+    });
+  }
+});

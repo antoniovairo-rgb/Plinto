@@ -23,7 +23,7 @@ import { numero } from '../../i18n/formato.js';
  * src/state/useImpostazioni.js). Chi ha bisogno di meno movimento lo ha gia' detto al
  * sistema operativo, e non deve ridirlo a ogni applicazione.
  */
-export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, onIndietro, t }) {
+export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, onImportato, onIndietro, t }) {
   // Zero e' il primo passo, uno e due sono le due conferme. Lo stesso meccanismo del
   // "ricomincia dal livello 1", e per la stessa ragione: questa e' l'azione piu'
   // distruttiva del gioco, e stava dietro un tocco solo.
@@ -60,7 +60,7 @@ export function SchermoImpostazioni({ impostazioni, cambia, inverti, onAzzera, o
         </div>
       </div>
 
-      <Salvataggio t={t} />
+      <Salvataggio t={t} onApplicato={onImportato} />
 
       {/* AZZERARE TUTTO: DUE CONFERME, come il "ricomincia dal livello 1".
           Era l'azione piu' distruttiva del gioco -- toglie i livelli, i record, le
