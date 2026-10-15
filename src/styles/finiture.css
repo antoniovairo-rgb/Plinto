@@ -176,24 +176,16 @@ body,
    9 ottobre 2026. `:where` e non `:is`: tiene la regola leggera come prima, cosi' le
    regole di app.css che la battevano (anteprima, posa non valida) la battono ancora. */
 .pl-blocco:where(.pl-blocco--1, .pl-blocco--2, .pl-blocco--3, .pl-blocco--4, .pl-blocco--5, .pl-blocco--6) {
-  /* PIU' MORBIDI DAL 14 OTTOBRE 2026 (il proprietario: «sgranato, accecante»).
-     Prima: un alone di 18 px quasi pieno, che con tanti blocchi vicini si sommava e
-     faceva brillare tutta la plancia; e due righe fisse, 3 px chiara in alto e 4 px scura
-     in basso, che sui pezzi piccoli in mano occupavano meta' del blocco e lo facevano
-     sembrare a strisce. Adesso il volume lo fa soprattutto la sfumatura, che scala con il
-     blocco; le righe sono di 2-3 px e l'alone e' a 10 px. Una prima versione (alone a
-     7 px) era troppo spenta: questa e' la via di mezzo scelta dal proprietario.
-     I colori di base non cambiano. */
   background:
-    radial-gradient(120% 70% at 30% 12%, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 48%),
-    linear-gradient(180deg, color-mix(in srgb, var(--blocco) 88%, white) 0%, var(--blocco) 50%,
-                    color-mix(in srgb, var(--blocco) 80%, black) 100%);
+    radial-gradient(120% 70% at 30% 15%, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(180deg, color-mix(in srgb, var(--blocco) 85%, white) 0%, var(--blocco) 45%,
+                    color-mix(in srgb, var(--blocco) 75%, black) 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 2px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.28),
-    0 0 10px color-mix(in srgb, var(--blocco) 55%, transparent),
-    0 3px 6px rgba(0, 0, 0, 0.38);
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.25),
+    inset 0 3px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.32),
+    0 0 18px color-mix(in srgb, var(--blocco) 85%, transparent),
+    0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .pl-tray__posto {
