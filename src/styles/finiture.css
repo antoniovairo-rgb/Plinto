@@ -188,6 +188,19 @@ body,
     0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* I pezzi IN MANO sono piccoli (blocchi di circa 17 px): le righe fisse di luce (3 px)
+   e di ombra (4 px) ne occupavano quasi meta' e li facevano sembrare a strisce. Qui sono
+   proporzionate alla misura; l'alone e il resto restano quelli della plancia, che il
+   proprietario preferisce cosi' (14-15 ottobre 2026). */
+.pl-tray .pl-blocco:where(.pl-blocco--1, .pl-blocco--2, .pl-blocco--3, .pl-blocco--4, .pl-blocco--5, .pl-blocco--6) {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.32),
+    0 0 18px color-mix(in srgb, var(--blocco) 85%, transparent),
+    0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
 .pl-tray__posto {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)), var(--pl-ink);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 8px 18px rgba(0, 0, 0, 0.4);
