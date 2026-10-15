@@ -31,6 +31,7 @@
  */
 
 import { KEYS, chiaveRecord, read, write } from './storage.js';
+import { giornoValido } from '../core/sfida.js';
 
 /** Versione del FORMATO del file, non del gioco. Cambia solo se cambia la busta. */
 export const FORMATO = 1;
@@ -182,6 +183,44 @@ function fondiDocumento(chiave, locale, entrante) {
   return { ...fondiNumeri(locale, entrante), ...(versione ? { versione } : {}) };
 }
 
+const vuoto = (x) => !x || typeof x !== 'object' || Array.isArray(x);
+const numeroBuono = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+
+/** Solo i campi numerici sensati (piu' la versione del documento). */
+function soloNumeri(documento) {
+  const uscita = {};
+  for (const [chiave, valore] of Object.entries(documento)) {
+    if (chiave === 'versione' || numeroBuono(valore)) uscita[chiave] = valore;
+  }
+  return uscita;
+}
+
+/**
+ * Ripulisce un documento entrante PRIMA di scriverlo.
+ *
+ * L'impronta garantisce che il file non si sia rovinato per strada, non che il contenuto
+ * abbia senso: un file modificato a mano, con l'impronta ricalcolata, faceva comparire
+ * «NaN» nel record e nelle statistiche e «Invalid Date» nello storico delle sfide
+ * (collaudo 1.21.6, B9). Qui si tengono solo numeri veri e giorni veri; il resto si
+ * scarta in silenzio, perche' non c'e' niente che il giocatore possa farci.
+ */
+function ripulisci(chiave, documento) {
+  if (vuoto(documento)) return null;
+  if (chiave === KEYS.STATS || chiave === chiaveRecord()) return soloNumeri(documento);
+  if (chiave === KEYS.CHALLENGES) {
+    const giorni = {};
+    for (const [giorno, voce] of Object.entries(vuoto(documento.giorni) ? {} : documento.giorni)) {
+      if (!giornoValido(giorno) || vuoto(voce)) continue;
+      giorni[giorno] = {
+        ...soloNumeri(voce),
+        regole: typeof voce.regole === 'string' ? voce.regole : null,
+      };
+    }
+    return { ...documento, giorni };
+  }
+  return documento;
+}
+
 /**
  * Mette il salvataggio nel gioco.
  *
@@ -194,8 +233,8 @@ export function applicaSalvataggio(salvataggio, { sostituisci = false } = {}) {
   const scritti = [];
 
   for (const chiave of DOCUMENTI) {
-    const entrante = salvataggio.dati?.[chiave];
-    if (!entrante || typeof entrante !== 'object') continue;
+    const entrante = ripulisci(chiave, salvataggio.dati?.[chiave]);
+    if (!entrante) continue;
     if (!sostituisci && SOLO_SE_SOSTITUISCI.has(chiave)) continue;
 
     const daScrivere = sostituisci ? entrante : fondiDocumento(chiave, read(chiave, null), entrante);

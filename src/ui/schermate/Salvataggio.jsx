@@ -20,7 +20,7 @@ import { read, KEYS } from '../../persistence/storage.js';
  * azioni. "Unisci" e' quella normale e non toglie mai niente; "Sostituisci tutto" chiede
  * conferma, perche' e' l'unica che puo' far perdere qualcosa.
  */
-export function Salvataggio({ t }) {
+export function Salvataggio({ t, onApplicato }) {
   const [copiato, setCopiato] = useState(false);
   const [testo, setTesto] = useState('');
   const [mostraIncolla, setMostraIncolla] = useState(false);
@@ -85,6 +85,9 @@ export function Salvataggio({ t }) {
     setLetto(null);
     setTesto('');
     setMostraIncolla(false);
+    // Chi mostra i dati (la home, le impostazioni) li rilegge adesso, non alla prossima
+    // apertura del gioco (collaudo 1.21.6, B1).
+    onApplicato?.();
   }
 
   return (
