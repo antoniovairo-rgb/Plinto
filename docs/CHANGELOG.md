@@ -103,6 +103,12 @@ Non ancora in produzione: deve uscire uno o due mesi dopo la Torre.
 Non ancora in produzione: aspetta il via del proprietario. La grafica e le animazioni nate
 qui sono gia' uscite sul Ponte con la 1.21.0; restano l'icona, il logo a gemme e la Torre.
 
+### Cambiato
+
+- **Pezzi in mano più nitidi** (richiesta del proprietario, 15 ottobre 2026): sui blocchi
+  piccoli le righe di luce e d'ombra sono più sottili e non li fanno più sembrare a
+  strisce. La plancia e l'alone restano come prima.
+
 ### Aggiunto
 
 - **L'app Android a schermo intero vero** (pacchetto nuovo della Torre): niente ora in alto
