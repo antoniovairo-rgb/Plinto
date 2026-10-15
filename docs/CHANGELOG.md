@@ -7,6 +7,43 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.7] — 15 ottobre 2026
+
+Le correzioni del **collaudo approfondito** della 1.21.6 (rapporto completo sul ramo
+`collaudo-produzione`, `collaudo/RAPPORTO.md`): nessun difetto bloccante, tre medi e otto
+bassi. Corretti i tre medi e quattro bassi; ognuno ha una prova che sul codice di prima
+falliva.
+
+### Corretto
+
+- **Importare un salvataggio aggiorna subito la home** (B1, media): prima restavano
+  «Livello 1», «0 di 100» e nessun record finché non si ricaricava, e il pulsante grande
+  apriva il livello sbagliato. Con «Sostituisci tutto» il primo interruttore toccato
+  poteva anche riscrivere le impostazioni vecchie sopra quelle importate.
+- **Un gesto annullato dal telefono non posa più il pezzo** (B5, media): uno scorrimento
+  dal bordo o il palmo durante il trascinamento lo facevano appoggiare dove si trovava.
+  Adesso il pezzo torna in mano.
+- **«Riprendi la sfida» solo per la sfida di oggi** (B4, media): con la sfida di ieri
+  lasciata a metà la home diceva «Riprendi la sfida» e poi ne partiva una nuova.
+- **«Azzera i miei dati» toglie anche il record dalla home** (B2).
+- **A mezzanotte la card della sfida passa al giorno nuovo** senza ricaricare (B3).
+- **Nei livelli con due obiettivi la frase va su due righe** invece di essere tagliata con
+  «…» sui telefoni stretti (B8, almeno 11 livelli).
+- **«Sostieni il progetto» e «Idee e segnalazioni» si toccano meglio**: bersaglio alto
+  almeno 24 px, senza allungare la home (B10).
+- **Un file di salvataggio modificato a mano** non fa più comparire «NaN» o «Invalid Date»:
+  entrano solo numeri e giorni veri (B9).
+
+### Aggiunto
+
+- Nuova prova nel gate, `npm run correzioni`: 30 controlli.
+
+### Non ancora corretti (da decidere)
+
+- B6 (tasto Indietro dopo una ricarica a metà livello), B7 (la «Partita libera» mostra il
+  record condiviso con la Sfida: è una scelta di progetto, separarli cambia i dati), B11
+  (gettoni degli attrezzi reimportati: visto solo nel codice).
+
 ## [1.21.6] — 13 ottobre 2026
 
 ### Corretto

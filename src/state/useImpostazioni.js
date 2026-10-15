@@ -45,14 +45,9 @@ function migra(dati) {
   return resto;
 }
 
-/**
- * Impostazioni del giocatore, salvate in locale.
- * Tutte le preferenze partono da un valore che rispetta il giocatore: audio e
- * vibrazione accesi ma disattivabili, aiuto visivo acceso perche' chiarisce le
- * regole invece di nasconderle.
- */
-export function useImpostazioni() {
-  const [impostazioni, setImpostazioni] = useState(() => leggiDocumento(KEYS.SETTINGS, {
+/** Le impostazioni come sono nell'archivio, con i predefiniti per quelle che mancano. */
+function leggiImpostazioni() {
+  return leggiDocumento(KEYS.SETTINGS, {
     versione: VERSIONE,
     predefiniti: {
       audio: true,
@@ -62,7 +57,17 @@ export function useImpostazioni() {
       introVista: false,
     },
     migra,
-  }));
+  });
+}
+
+/**
+ * Impostazioni del giocatore, salvate in locale.
+ * Tutte le preferenze partono da un valore che rispetta il giocatore: audio e
+ * vibrazione accesi ma disattivabili, aiuto visivo acceso perche' chiarisce le
+ * regole invece di nasconderle.
+ */
+export function useImpostazioni() {
+  const [impostazioni, setImpostazioni] = useState(leggiImpostazioni);
 
   useEffect(() => { scriviDocumento(KEYS.SETTINGS, VERSIONE, impostazioni); }, [impostazioni]);
 
@@ -83,5 +88,12 @@ export function useImpostazioni() {
     setImpostazioni((prev) => ({ ...prev, [chiave]: !prev[chiave] }));
   }, []);
 
-  return { impostazioni, cambia, inverti, setImpostazioni };
+  /**
+   * Rilegge dall'archivio. Serve dopo un'importazione «Sostituisci tutto»: senza, lo
+   * stato restava quello di prima e il primo interruttore toccato riscriveva le
+   * impostazioni vecchie sopra quelle importate (collaudo 1.21.6, B1).
+   */
+  const ricarica = useCallback(() => setImpostazioni(leggiImpostazioni()), []);
+
+  return { impostazioni, cambia, inverti, setImpostazioni, ricarica };
 }

@@ -153,5 +153,13 @@ export function usePartita() {
     abbandona,
     gioca,
     cePartitaSalvata: (quale = 'libera') => partitaSalvata(quale) !== null,
+    /**
+     * C'e' una sfida lasciata a meta' PROPRIO di quel giorno? Il salvataggio della sfida
+     * e' uno solo: quella di ieri non si "riprende" aprendo quella di oggi (collaudo
+     * 1.21.6, B4: la home diceva «Riprendi la sfida» e poi ne partiva una nuova).
+     */
+    sfidaInCorsoDi: (giorno) => partitaSalvata('sfida')?.seedLabel === giorno,
+    /** Rilegge i record dall'archivio (dopo un'importazione o un azzeramento). */
+    ricaricaRecord: () => setRecord(loadRecords()),
   };
 }

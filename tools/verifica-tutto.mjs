@@ -75,6 +75,9 @@ const VERIFICHE = [
   // scorrere. Un invito nel browser proporrebbe una cosa impossibile; uno sotto il
   // pulsante "Livello successivo" non lo vedrebbe nessuno.
   { nome: 'Play Store: invito a recensire e Scarica da Google Play', comando: 'npm', argomenti: ['run', 'recensione'] },
+  // I difetti trovati dal collaudo della 1.21.6, uno per uno: ognuno di questi era
+  // passato da tutte le altre prove (rapporto sul ramo `collaudo-produzione`).
+  { nome: 'correzioni del collaudo (importa, azzera, mezzanotte, sfida, gesto annullato)', comando: 'npm', argomenti: ['run', 'correzioni'] },
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
   { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },

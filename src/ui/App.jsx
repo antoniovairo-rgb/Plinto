@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePartita } from '../state/usePartita.js';
 import { useImpostazioni } from '../state/useImpostazioni.js';
 import { traduttore } from '../i18n/index.js';
@@ -72,7 +72,7 @@ export function App() {
   const [guidaSaltata, setGuidaSaltata] = useState(false);
   const [statistiche, setStatistiche] = useState(() => loadStats());
 
-  const { impostazioni, cambia, inverti } = useImpostazioni();
+  const { impostazioni, cambia, inverti, ricarica: ricaricaImpostazioni } = useImpostazioni();
 
   // Le preferenze audio e vibrazione vivono in moduli senza React: qui le si tiene
   // allineate, cosi' i componenti non devono passarsele di mano in mano.
@@ -84,11 +84,13 @@ export function App() {
   const {
     partita, modalita, esitoSfida, record, nuoviRecord, pezziMorti, riepilogo,
     nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
-    siPuoAnnullare, annulla,
+    siPuoAnnullare, annulla, sfidaInCorsoDi, ricaricaRecord,
   } = usePartita();
 
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
-  const [sfidaSalvata, setSfidaSalvata] = useState(() => cePartitaSalvata('sfida'));
+  // Solo la sfida di OGGI lasciata a meta' fa dire «Riprendi la sfida» alla home: quella
+  // di un altro giorno non si riprende da li' (collaudo 1.21.6, B4).
+  const [sfidaSalvata, setSfidaSalvata] = useState(() => sfidaInCorsoDi(giornoDiOggi()));
   const [sfidaOggi, setSfidaOggi] = useState(() => sfidaDelGiorno());
   const [quadriFatti, setQuadriFatti] = useState(() => quantiSuperati());
   // Il livello a cui il giocatore e' arrivato. Dipende dai progressi salvati, non dal
@@ -207,13 +209,51 @@ export function App() {
     abbandona();
     setStatistiche(loadStats());
     setSalvataggioDisponibile(cePartitaSalvata());
-    setSfidaSalvata(cePartitaSalvata('sfida'));
+    setSfidaSalvata(sfidaInCorsoDi(giornoDiOggi()));
     setSfidaOggi(sfidaDelGiorno());
     setQuadriFatti(quantiSuperati());
     quadri.chiudi();
     setMenuAperto(false);
     setSchermata('home');
-  }, [abbandona, cePartitaSalvata, quadri]);
+  }, [abbandona, cePartitaSalvata, sfidaInCorsoDi, quadri]);
+
+  /**
+   * Tutto quello che la home mostra, riletto dall'archivio. Serve dopo un'importazione
+   * del salvataggio: la home teneva i numeri di prima («Livello 1», «0 di 100») finche'
+   * non si ricaricava la pagina, e il pulsante grande apriva il livello sbagliato
+   * (collaudo 1.21.6, B1). Rilegge anche record e impostazioni, che vivono negli hook.
+   */
+  const rileggiTutto = useCallback(() => {
+    setStatistiche(loadStats());
+    setSalvataggioDisponibile(cePartitaSalvata());
+    setSfidaSalvata(sfidaInCorsoDi(giornoDiOggi()));
+    setSfidaOggi(sfidaDelGiorno());
+    setQuadriFatti(quantiSuperati());
+    ricaricaRecord();
+    ricaricaImpostazioni();
+  }, [cePartitaSalvata, sfidaInCorsoDi, ricaricaRecord, ricaricaImpostazioni]);
+
+  /**
+   * Il giorno cambia anche a home aperta. La card della sfida diceva ancora il risultato
+   * di ieri finche' non si ricaricava (collaudo 1.21.6, B3): si ricontrolla ogni minuto
+   * e quando il gioco torna in primo piano, e si rilegge solo se il giorno e' cambiato.
+   */
+  const giornoVisto = useRef(giornoDiOggi());
+  useEffect(() => {
+    const controlla = () => {
+      const oggi = giornoDiOggi();
+      if (oggi === giornoVisto.current) return;
+      giornoVisto.current = oggi;
+      setSfidaOggi(sfidaDelGiorno());
+      setSfidaSalvata(sfidaInCorsoDi(oggi));
+    };
+    const ogniMinuto = window.setInterval(controlla, 60000);
+    document.addEventListener('visibilitychange', controlla);
+    return () => {
+      window.clearInterval(ogniMinuto);
+      document.removeEventListener('visibilitychange', controlla);
+    };
+  }, [sfidaInCorsoDi]);
 
   const azzeraDati = useCallback(() => {
     clearAll();
@@ -222,8 +262,11 @@ export function App() {
     setSfidaSalvata(false);
     setSfidaOggi(sfidaDelGiorno());
     setQuadriFatti(0);
+    // Anche il record: la home mostrava ancora «Record 4.321» a dati azzerati
+    // (collaudo 1.21.6, B2).
+    ricaricaRecord();
     quadri.chiudi();
-  }, [quadri]);
+  }, [quadri, ricaricaRecord]);
 
   // --- Quadri --------------------------------------------------------------
   const apriQuadro = useCallback((definizione) => {
@@ -574,6 +617,7 @@ export function App() {
           cambia={cambia}
           inverti={inverti}
           onAzzera={azzeraDati}
+          onImportato={rileggiTutto}
           onIndietro={() => setSchermata('home')}
           t={t}
         />

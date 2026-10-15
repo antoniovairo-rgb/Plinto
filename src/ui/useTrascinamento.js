@@ -145,13 +145,23 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       onPosiziona(p.handIndex, row, col);
     };
 
+    // Un gesto ANNULLATO non e' un rilascio. Il sistema manda `pointercancel` quando si
+    // prende il gesto per se' (scorrimento dal bordo, palmo, notifica): prima finiva
+    // nello stesso `rilascia` e il pezzo veniva posato dove si trovava, una mossa che
+    // nessuno aveva fatto (collaudo 1.21.6, B5). Adesso il pezzo torna in mano.
+    const annulla = (e) => {
+      const p = presoRef.current;
+      if (!p || e.pointerId !== p.pointerId) return;
+      setPreso(null);
+    };
+
     window.addEventListener('pointermove', muovi, { passive: true });
     window.addEventListener('pointerup', rilascia);
-    window.addEventListener('pointercancel', rilascia);
+    window.addEventListener('pointercancel', annulla);
     return () => {
       window.removeEventListener('pointermove', muovi);
       window.removeEventListener('pointerup', rilascia);
-      window.removeEventListener('pointercancel', rilascia);
+      window.removeEventListener('pointercancel', annulla);
     };
   }, [preso !== null, onPosiziona]); // eslint-disable-line react-hooks/exhaustive-deps
 
