@@ -62,6 +62,12 @@ async function apri({ dati = {}, orologio = null, viewport = { width: 360, heigh
   return { contesto, page };
 }
 const testoHome = (page) => page.locator('.pl-home').innerText();
+// Il record si cerca senza separatore delle migliaia. Con i dati CLDR piu' recenti
+// l'italiano non raggruppa i numeri di quattro cifre («4321», ma «14.321»): il Chromium
+// di prova in locale scrive «4.321», quello piu' nuovo dell'integrazione continua no,
+// e la 1.21.7 e' caduta li'. Si tolgono solo i separatori fra cifre.
+const conRecord = (testo) => /(^|\D)4321(\D|$)/.test(testo.replace(/(\d)[.,\s\u00a0\u202f'](?=\d{3}(\D|$))/g, '$1'));
+const riassunto = (testo) => testo.replace(/\s+/g, ' ').slice(0, 200);
 const vinto = (n) => ({ mosse: 10 + n, punteggio: 100 * n, tentativi: 1 });
 
 // ---------- B1 ----------
@@ -88,7 +94,7 @@ console.log('B1. importo un salvataggio: la home si aggiorna senza ricaricare...
   const home = await testoHome(page);
   if (!/12 di 100/.test(home)) errori.push(`B1: dopo l importazione la home non dice «12 di 100»: ${home.replace(/\s+/g, ' ').slice(0, 160)}`);
   if (!/LIVELLO 13/i.test(home)) errori.push('B1: il pulsante grande non porta al livello 13');
-  if (!/4\.321/.test(home)) errori.push('B1: il record importato (4.321) non compare in home');
+  if (!conRecord(home)) errori.push(`B1: il record importato (4.321) non compare in home: ${riassunto(home)}`);
   await contesto.close();
 }
 
@@ -96,7 +102,8 @@ console.log('B1. importo un salvataggio: la home si aggiorna senza ricaricare...
 console.log('B2. azzero i dati: il record sparisce anche dalla home...');
 {
   const { contesto, page } = await apri({ dati: { records: { versione: 1, best: 4321, bestChain: 7, bestMove: 250, bestGroupsInOneMove: 3 } } });
-  if (!/4\.321/.test(await testoHome(page))) errori.push('B2: il record di partenza non compare: la prova non prova nulla');
+  const partenza = await testoHome(page);
+  if (!conRecord(partenza)) errori.push(`B2: il record di partenza non compare, la prova non prova nulla: ${riassunto(partenza)}`);
   await page.getByRole('button', { name: 'Impostazioni' }).click();
   await page.getByRole('button', { name: 'Azzera i miei dati' }).last().click();
   for (let i = 0; i < 3; i += 1) {
@@ -106,7 +113,7 @@ console.log('B2. azzero i dati: il record sparisce anche dalla home...');
   }
   await page.getByRole('button', { name: 'Indietro' }).first().click();
   await page.waitForSelector('.pl-home__menu');
-  if (/4\.321/.test(await testoHome(page))) errori.push('B2: dopo l azzeramento la home mostra ancora il record 4.321');
+  if (conRecord(await testoHome(page))) errori.push('B2: dopo l azzeramento la home mostra ancora il record 4.321');
   await contesto.close();
 }
 
