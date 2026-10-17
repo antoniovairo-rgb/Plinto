@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePartita } from '../state/usePartita.js';
 import { useImpostazioni } from '../state/useImpostazioni.js';
 import { traduttore } from '../i18n/index.js';
-import { impostaLingua } from '../i18n/formato.js';
+import { impostaLingua, dataDistesa } from '../i18n/formato.js';
 import { impostaAudio, suonoBottone, sbloccaAudio } from '../audio/suoni.js';
 import { impostaVibrazione } from '../feel/vibrazione.js';
 import { clearAll, RECORD_SEPARATI } from '../persistence/storage.js';
@@ -24,6 +24,7 @@ import { SchermoComeSiGioca } from './schermate/ComeSiGioca.jsx';
 import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { SchermoTrionfo } from './schermate/Trionfo.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
+import { ConfermaPerdita } from './ConfermaDoppia.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/quadri.js';
 import {
@@ -49,6 +50,25 @@ import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
  */
 export const RIPRENDI_LIVELLO_A_MANO = true;
 export const RIPRESA_SENZA_GUIDA = true;
+/*
+ * PO-008, seconda parte: le tre strade con cui il collaudo 1.21.9 perdeva una partita a
+ * meta' con un tocco solo. Decisione del PO (docs/DECISIONI.md): «Chiedo conferma».
+ * Interruttori per la prova rosso/verde, casi J, K, L di `tests/e2e/ripresa-livello.mjs`.
+ *
+ * CONFERMA_ALTRO_LIVELLO (E1): con il livello 3 a meta', «Gioca» sull'obiettivo di un
+ * altro livello sovrascriveva il salvataggio, che e' uno solo. Si chiede prima di «Gioca»
+ * e non all'apertura: leggere l'obiettivo non costa niente (NON_COPRE_UN_ALTRO_LIVELLO).
+ *
+ * CONFERMA_RIPROVA (E2): «Riprova» nel menu del livello ricominciava senza chiedere,
+ * a un centimetro da «Torna alla partita». Dopo un livello finito non si chiede: li'
+ * riprovare e' l'unica cosa che si puo' voler fare.
+ *
+ * CONFERMA_ALTRA_SFIDA: aprire dall'archivio (o da un collegamento) la sfida di un altro
+ * giorno copriva in silenzio quella a meta', perche' anche la sfida ha un salvataggio solo.
+ */
+export const CONFERMA_ALTRO_LIVELLO = true;
+export const CONFERMA_RIPROVA = true;
+export const CONFERMA_ALTRA_SFIDA = true;
 
 /**
  * Radice dell'applicazione.
@@ -96,7 +116,7 @@ export function App() {
   const {
     partita, modalita, esitoSfida, record, recordLibera, nuoviRecord, pezziMorti, riepilogo,
     nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
-    siPuoAnnullare, annulla, sfidaInCorsoDi, ricaricaRecord,
+    siPuoAnnullare, annulla, sfidaInCorsoDi, sfidaAMeta, ricaricaRecord,
   } = usePartita();
 
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
@@ -114,6 +134,13 @@ export function App() {
   );
 
   const quadri = useQuadro();
+  /**
+   * La domanda prima di perdere una partita a meta' (PO-008): `{ titolo, testo,
+   * etichettaTorna, etichettaContinua, onTorna, onContinua }`, oppure null. Una sola per
+   * tutta l'app, cosi' il tasto Indietro sa che c'e' e la chiude per prima, come il menu.
+   */
+  const [conferma, setConferma] = useState(null);
+  const chiudiConferma = useCallback(() => setConferma(null), []);
 
   /**
    * Un collegamento del tipo `#/sfida/2026-09-12` apre quella sfida all'avvio.
@@ -150,10 +177,32 @@ export function App() {
    * marzo darebbe al giocatore una partita che non ha chiesto, con il punteggio che
    * finisce nel giorno sbagliato.
    */
-  const apriSfida = useCallback((giorno = giornoDiOggi()) => {
+  const apriSfida = useCallback((giorno = giornoDiOggi(), confermato = false) => {
     if (!sfidaGiocabile(giorno)) return;
     sbloccaAudio();
     suonoBottone();
+    // Quella di un altro giorno a meta' si perderebbe: prima si chiede (PO-008).
+    const lasciata = sfidaAMeta();
+    if (CONFERMA_ALTRA_SFIDA && !confermato && lasciata && lasciata !== giorno) {
+      const quando = dataDistesa(lasciata);
+      const nuova = giorno === giornoDiOggi()
+        ? t('conferma.sfidaOggi')
+        : t('conferma.sfidaDel').replace('{giorno}', dataDistesa(giorno));
+      setConferma({
+        titolo: t('conferma.sfidaTitolo').replace('{giorno}', quando),
+        testo: t('conferma.sfidaTesto').replace('{nuova}', nuova).replace('{giorno}', quando),
+        etichettaTorna: t('conferma.riprendiSfida').replace('{giorno}', quando),
+        etichettaContinua: t('conferma.apri').replace('{nuova}', nuova),
+        onTorna: () => {
+          setConferma(null);
+          if (!riprendi('sfida')) return;
+          scriviRotta(rottaSfida(lasciata));
+          setSchermata('gioco');
+        },
+        onContinua: () => { setConferma(null); apriSfida(giorno, true); },
+      });
+      return;
+    }
     const salvata = cePartitaSalvata('sfida') ? riprendi('sfida') : null;
     if (salvata && salvata.seedLabel === giorno) {
       scriviRotta(rottaSfida(giorno));
@@ -165,7 +214,7 @@ export function App() {
     setSfidaSalvata(false);
     scriviRotta(rottaSfida(giorno));
     setSchermata('gioco');
-  }, [cePartitaSalvata, riprendi, nuovaSfida, abbandona]);
+  }, [cePartitaSalvata, riprendi, nuovaSfida, abbandona, sfidaAMeta, t]);
 
   useEffect(() => {
     if (!rotta || rotta.nome !== 'sfida') return;
@@ -298,6 +347,45 @@ export function App() {
     setSchermata('quadro');
   }, [quadri]);
 
+  /** «Gioca» sull'obiettivo: se c'e' un ALTRO livello a meta', prima si chiede (PO-008, E1). */
+  const avviaQuadro = useCallback(() => {
+    const lasciato = quadri.livelloAMeta();
+    if (CONFERMA_ALTRO_LIVELLO && lasciato !== null && lasciato !== quadri.quadro?.numero) {
+      const altro = quadri.quadro?.numero;
+      setConferma({
+        titolo: t('conferma.livelloTitolo').replace('{n}', lasciato),
+        testo: t('conferma.livelloTesto').replace('{altro}', altro).replace('{n}', lasciato),
+        etichettaTorna: t('conferma.riprendiLivello').replace('{n}', lasciato),
+        etichettaContinua: t('conferma.giocaLivello').replace('{altro}', altro),
+        onTorna: () => { setConferma(null); quadri.riprendiSalvato(); },
+        onContinua: () => { setConferma(null); quadri.avvia(); },
+      });
+      return;
+    }
+    quadri.avvia();
+  }, [quadri, t]);
+
+  /**
+   * «Riprova» dal menu del livello in corso: con almeno una mossa fatta, prima si chiede
+   * (PO-008, E2). «Torna al livello» chiude la domanda e lascia la partita com'era.
+   */
+  const riprovaLivello = useCallback(() => {
+    setMenuAperto(false);
+    if (CONFERMA_RIPROVA && !quadri.esito && quadri.partita?.stats.moves > 0) {
+      const n = quadri.quadro.numero;
+      setConferma({
+        titolo: t('conferma.riprovaTitolo').replace('{n}', n),
+        testo: t('conferma.riprovaTesto'),
+        etichettaTorna: t('comune.tornaAllaPartita'),
+        etichettaContinua: t('conferma.riprovaSi'),
+        onTorna: () => setConferma(null),
+        onContinua: () => { setConferma(null); quadri.riprova(); },
+      });
+      return;
+    }
+    quadri.riprova();
+  }, [quadri, t]);
+
   const tornaAiQuadri = useCallback(() => {
     setQuadriFatti(quantiSuperati());
     quadri.chiudi();
@@ -349,12 +437,14 @@ export function App() {
   // si chiude il menu se e' aperto, poi si risale di una schermata. Dalla home non si
   // fa niente, e il tasto torna a fare il suo mestiere: uscire dall'app.
   const passoIndietro = useCallback(() => {
+    // La domanda di conferma per prima: Indietro la chiude e non perde niente.
+    if (conferma) { setConferma(null); return; }
     if (menuAperto) { setMenuAperto(false); return; }
     if (schermata === 'quadro') { tornaAiQuadri(); return; }
     if (schermata === 'gioco') { tornaAllaHome(); return; }
     if (schermata === 'sostieni') { setSchermata(sostieniDa); return; }
     setSchermata(GENITORE[schermata] ?? 'home');
-  }, [menuAperto, schermata, sostieniDa, tornaAiQuadri, tornaAllaHome]);
+  }, [conferma, menuAperto, schermata, sostieniDa, tornaAiQuadri, tornaAllaHome]);
 
   useTastoIndietro(
     // Il menu conta come un gradino: si chiude col tasto Indietro senza uscire dalla
@@ -362,12 +452,24 @@ export function App() {
     // "Sostieni" sta a due gradini se ci si e' arrivati da Info, a uno se dalla home:
     // la profondita' non e' una proprieta' della schermata, e' del percorso fatto.
     (schermata === 'sostieni' ? (sostieniDa === 'home' ? 1 : 2) : (PROFONDITA[schermata] ?? 1))
-      + (menuAperto ? 1 : 0),
+      + (menuAperto ? 1 : 0) + (conferma ? 1 : 0),
     passoIndietro,
     // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
     useCallback(() => { if (schermata === 'home') scriviRotta(''); }, [schermata]),
   );
+
+  const finestraConferma = conferma ? (
+    <ConfermaPerdita
+      titolo={conferma.titolo}
+      testo={conferma.testo}
+      etichettaTorna={conferma.etichettaTorna}
+      etichettaContinua={conferma.etichettaContinua}
+      onTorna={conferma.onTorna}
+      onContinua={conferma.onContinua}
+      onAnnulla={chiudiConferma}
+    />
+  ) : null;
 
   // Partita finita: si passa automaticamente al riepilogo.
   const inGioco = partita && partita.status === 'playing';
@@ -506,10 +608,11 @@ export function App() {
         <div className="pl-app">
           <AperturaQuadro
             quadro={quadri.quadro}
-            onGioca={quadri.avvia}
+            onGioca={avviaQuadro}
             onElenco={tornaAiQuadri}
             t={t}
           />
+          {finestraConferma}
         </div>
       );
     }
@@ -542,7 +645,7 @@ export function App() {
               <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
                 {t('comune.tornaAllaPartita')}
               </button>
-              <button type="button" className="pl-btn pl-btn--largo" onClick={() => { setMenuAperto(false); quadri.riprova(); }}>
+              <button type="button" className="pl-btn pl-btn--largo" onClick={riprovaLivello}>
                 {t('quadri.riprova')}
               </button>
               <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { setMenuAperto(false); tornaAiQuadri(); }}>
@@ -551,6 +654,7 @@ export function App() {
             </div>
           </div>
         ) : null}
+        {finestraConferma}
       </div>
     );
   }
@@ -674,6 +778,7 @@ export function App() {
           </div>
         </div>
       ) : null}
+      {finestraConferma}
     </div>
   );
 }

@@ -606,6 +606,24 @@ export default {
     voce: 'Scarica l\'app',
     apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
   },
+  // PO-008: la domanda prima di perdere una partita lasciata a meta' (collaudo 1.21.9).
+  // Ogni pulsante dice CHE COSA fa: la prima versione diceva «se continui la perdi» con un
+  // pulsante «Continua», e il proprietario l'ha trovata poco chiara (17 ottobre 2026).
+  conferma: {
+    livelloTitolo: 'Il livello {n} è a metà.',
+    livelloTesto: 'Se giochi il livello {altro}, perdi le mosse fatte nel livello {n}.',
+    riprendiLivello: 'Riprendi il livello {n}',
+    giocaLivello: 'Gioca il livello {altro}',
+    riprovaTitolo: 'Vuoi ricominciare il livello {n}?',
+    riprovaTesto: 'Le mosse che hai fatto finora si perdono.',
+    riprovaSi: 'Sì, ricomincia da capo',
+    sfidaTitolo: 'La sfida del {giorno} è a metà.',
+    sfidaTesto: 'Se apri {nuova}, perdi le mosse fatte nella sfida del {giorno}.',
+    riprendiSfida: 'Riprendi la sfida del {giorno}',
+    apri: 'Apri {nuova}',
+    sfidaOggi: 'la sfida di oggi',
+    sfidaDel: 'la sfida del {giorno}',
+  },
   comune: {
     /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.
        In un menu sospeso sopra la partita l'ambiguita' pesa, perche' la voce sotto

@@ -125,6 +125,21 @@ export function useQuadro() {
     return stato && stato.status === 'playing' ? voce.numero : null;
   }, []);
 
+  /**
+   * Il numero del livello che si PERDEREBBE cominciandone un altro, oppure null (PO-008).
+   *
+   * Piu' stretto di `numeroSalvato`: un livello di cui si e' solo letto l'obiettivo, o
+   * aperto senza fare una mossa, si ricomincia identico, e chiedere conferma per quello
+   * sarebbe una domanda senza niente in gioco.
+   */
+  const livelloAMeta = useCallback(() => {
+    const voce = read(KEYS.CURRENT_LEVEL, null);
+    if (!voce || voce.presentazione === true) return null;
+    if (!Number.isFinite(voce.numero) || !quadroNumero(voce.numero)) return null;
+    const stato = deserializeGame(voce.partita);
+    return stato && stato.status === 'playing' && stato.stats.moves > 0 ? voce.numero : null;
+  }, []);
+
   /** Chiude l'apertura e comincia a giocare. */
   const avvia = useCallback(() => setDaPresentare(false), []);
 
@@ -313,6 +328,7 @@ export function useQuadro() {
     riprova,
     riprendiSalvato,
     numeroSalvato,
+    livelloAMeta,
     gioca,
     attrezzi,
     suggerimento,

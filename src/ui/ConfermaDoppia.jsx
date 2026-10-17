@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * La conferma in due passi per le azioni che cancellano.
@@ -68,5 +68,57 @@ export function VoceCancellata({ etichetta, valore }) {
       <span>{etichetta}</span>
       <strong>{valore}</strong>
     </li>
+  );
+}
+
+/**
+ * La domanda prima di perdere una partita lasciata a meta' (PO-008, collaudo 1.21.9: E1,
+ * E2 e la sfida dall'archivio). Decisione del PO: «Chiedo conferma».
+ *
+ * UN PASSO SOLO, e non i due di `ConfermaDoppia`: qui si perde una partita, non mesi di
+ * gioco, e chi ha toccato «Riprova» di solito vuole davvero riprovare. Due passi per ogni
+ * riprova sarebbero un pedaggio. Lo stile e il velo sono gli stessi, cosi' il giocatore
+ * riconosce la forma: una finestra che chiede, sopra tutto il resto.
+ *
+ * OGNI PULSANTE DICE CHE COSA FA («Riprendi il livello 2», «Gioca il livello 1»). La
+ * prima versione aveva «Continua», e il proprietario l'ha trovata poco chiara: continuare
+ * che cosa? Il titolo dice che cosa c'e' a meta', il testo che cosa si perde.
+ *
+ * LA STRADA SICURA E' QUELLA FACILE: quella che non perde niente e' il pulsante pieno, in
+ * alto, e ha il fuoco appena la finestra si apre; l'altra e' trasparente. Escape, il tocco fuori e
+ * il tasto Indietro di Android (gestito da App) chiudono la domanda senza perdere niente.
+ */
+export function ConfermaPerdita({
+  titolo, testo, etichettaTorna, etichettaContinua, onTorna, onContinua, onAnnulla,
+}) {
+  const sicuro = useRef(null);
+  useEffect(() => { sicuro.current?.focus(); }, []);
+  useEffect(() => {
+    const esci = (e) => { if (e.key === 'Escape') onAnnulla(); };
+    window.addEventListener('keydown', esci);
+    return () => window.removeEventListener('keydown', esci);
+  }, [onAnnulla]);
+
+  return (
+    <div className="pl-velo" onClick={onAnnulla}>
+      <div
+        className="pl-azzera pl-azzera--perdita"
+        role="dialog"
+        aria-modal="true"
+        aria-label={titolo}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="pl-azzera__titolo">{titolo}</p>
+        <p className="pl-azzera__testo">{testo}</p>
+        <div className="pl-azzera__scelte">
+          <button ref={sicuro} type="button" className="pl-btn pl-btn--largo" onClick={onTorna}>
+            {etichettaTorna}
+          </button>
+          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onContinua}>
+            {etichettaContinua}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

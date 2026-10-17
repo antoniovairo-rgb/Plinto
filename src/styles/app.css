@@ -2626,6 +2626,10 @@ button {
    leggerla bene. */
 .pl-azzera .pl-segmenti .pl-btn { flex: 1; padding: 0 12px; }
 .pl-velo .pl-azzera { width: 100%; max-width: 360px; box-shadow: var(--pl-shadow-lift); }
+/* La domanda prima di perdere una partita a meta' (PO-008). I pulsanti uno sopra l'altro
+   e non affiancati: le etichette dicono dove si torna e sono lunghe. Anche cosi', a 360 px
+   «Torna alla sfida del 16 ottobre» va su due righe (schermata in docs/sviluppo). */
+.pl-azzera__scelte { display: grid; gap: 8px; }
 
 /* Il salvataggio: due pulsanti per riga, con il respiro laterale stretto. Con quello di
    un pulsante normale "Scarica il file" andava a capo, e un'etichetta spezzata in due su
