@@ -7,6 +7,7 @@
  *   B3  a mezzanotte la card della sfida passa al giorno nuovo senza ricaricare;
  *   B4  la sfida di ieri lasciata a meta' non fa dire «Riprendi la sfida» oggi;
  *   B5  un gesto annullato dal sistema (pointercancel) non posa il pezzo;
+ *   B6  dopo una ricarica dentro un livello, Indietro fa mappa › home › uscita;
  *   B8  nei livelli con due obiettivi la frase non e' tagliata a 360 px;
  *   B10 i collegamenti in fondo alla home sono alti almeno 24 px da toccare.
  *
@@ -166,6 +167,42 @@ console.log('B5. trascino un pezzo e il sistema annulla il gesto: il pezzo non s
   await page.waitForTimeout(300);
   const dopo = await piene();
   if (dopo !== prima) errori.push(`B5: dopo pointercancel le caselle piene passano da ${prima} a ${dopo}: il pezzo e stato posato`);
+  await contesto.close();
+}
+
+// ---------- B6 ----------
+console.log('B6. ricarico dentro un livello, poi Indietro: mappa, home, fuori...');
+{
+  // Una scheda nuova con una sola pagina prima del gioco: `apri` apre l'indirizzo due
+  // volte, e il secondo Indietro dalla home finirebbe sulla prima copia invece di uscire.
+  const { contesto, page: preparata } = await apri();
+  await preparata.close();
+  const page = await contesto.newPage();
+  await page.goto('about:blank');
+  await page.goto(INDIRIZZO, { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.pl-home__menu');
+  const dove = () => page.evaluate(() => (document.querySelector('.pl-plancia') ? 'livello'
+    : document.querySelector('.pl-tappe') ? 'mappa' : document.querySelector('.pl-home') ? 'home' : '?'));
+  await page.getByRole('button', { name: /Mappa dei livelli/ }).click();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').first().click();
+  const gioca = page.getByRole('button', { name: /^Gioca/ });
+  if (await gioca.count()) await gioca.first().click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+  const partenza = await dove();
+  const passi = [];
+  for (let i = 0; i < 6; i += 1) {
+    await page.goBack({ timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(250);
+    if (!page.url().startsWith(INDIRIZZO)) { passi.push('fuori'); break; }
+    passi.push(await dove());
+  }
+  const atteso = 'mappa > home > fuori';
+  if (partenza !== 'livello') errori.push(`B6: dopo la ricarica non si riparte dal livello (${partenza}): la prova non prova nulla`);
+  else if (passi.join(' > ') !== atteso) errori.push(`B6: dopo una ricarica Indietro fa «${passi.join(' > ')}», atteso «${atteso}»`);
+  else console.log(`  ${passi.join(' > ')}`);
   await contesto.close();
 }
 
