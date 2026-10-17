@@ -30,7 +30,7 @@ import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 import { IMPRONTA_REGOLE } from '../core/impronta.js';
 import { giornoDiOggi } from '../core/sfida.js';
-import { VOCI_GUASTE_SCARTATE } from './salvataggio.js';
+import { LETTURA_RIPULITA, VOCI_GUASTE_SCARTATE, numeroBuono } from './salvataggio.js';
 
 const CHIAVE = KEYS.CHALLENGES;
 
@@ -65,7 +65,17 @@ function documento() {
 /** @returns {Record<string, {best:number, partite:number, regole:string|null}>} */
 export function caricaSfide() {
   const giorni = documento().giorni;
-  return giorni && typeof giorni === 'object' ? giorni : {};
+  if (!giorni || typeof giorni !== 'object') return {};
+  if (!LETTURA_RIPULITA) return giorni;
+  // Le stesse voci che l'importazione scarterebbe (C2), qui gia' in localStorage (D3):
+  // senza, Statistiche scriveva «10 ott 99 (undefined)». Il nome del giorno NON si
+  // controlla: `tests/sfide.test.js` scrive 80 giorni con date finte, e un giorno guasto
+  // in localStorage non e' fra i casi misurati dal collaudo.
+  const buoni = {};
+  for (const [giorno, voce] of Object.entries(giorni)) {
+    if (voce && numeroBuono(voce.best) && numeroBuono(voce.partite)) buoni[giorno] = voce;
+  }
+  return buoni;
 }
 
 /** Risultato del giocatore per un giorno. */
