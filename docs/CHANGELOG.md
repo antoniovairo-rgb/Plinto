@@ -7,6 +7,36 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.8] — 17 ottobre 2026
+
+Le ultime correzioni del collaudo della 1.21.6 (B6, B7, B11) e i due difetti trovati dal
+collaudo della 1.21.7 (C1, C2; rapporto sul ramo `collaudo-1.21.7`). Ogni correzione ha un
+interruttore per spegnerla e una prova che con l'interruttore spento fallisce, misurata
+anche sulla build di produzione.
+
+### Cambiato
+
+- **Due record separati** (B7, decisione del PO): la Partita libera e la Sfida del giorno
+  hanno ciascuna il suo record. Il record che c'era resta alla Partita libera; quello della
+  Sfida parte dal punteggio migliore già nell'archivio delle sfide. In Statistiche compare
+  la riga «Record della Sfida del giorno». Interruttore: `RECORD_SEPARATI`.
+
+### Corretto
+
+- **Tasto Indietro dopo una ricarica a metà livello** (B6): ora fa mappa › home › uscita,
+  senza Indietro «a vuoto». Interruttore: `ADOTTA_VOCI_DOPO_RICARICA`.
+- **Unendo un salvataggio, i gettoni degli attrezzi spesi non tornano** (B11): vince il
+  documento che ha riscosso più gettoni, a parità quello con meno disponibili.
+  Interruttore: `GETTONI_SPESI_NON_TORNANO`.
+- **La home non scorre di 2 px sui telefoni da 360x640** (C1), quando il piè di pagina va a
+  capo: si avvicina al menu di 4 px fino a 380x680. Interruttore: `HOME_STRETTA_COMPATTA`.
+- **Niente «NaN» da un salvataggio guasto** (C2): si scartano le sfide senza punteggi
+  numerici e gli attrezzi con numeri non validi. Interruttore: `VOCI_GUASTE_SCARTATE`.
+- **App Android, pacchetto 11905** (da caricare su Play Console): nuova icona di avvio e
+  schermata d'apertura a gemme, schermo intero vero (`sticky-immersive`: niente ora in alto
+  né pulsanti in basso), avvio con `?origine=play` perché il gioco sappia di essere
+  nell'app e mostri «Recensisci». I livelli e la grafica della Torre restano per la 1.22.0.
+
 ## [1.21.7] — 15 ottobre 2026
 
 Le correzioni del **collaudo approfondito** della 1.21.6 (rapporto completo sul ramo
