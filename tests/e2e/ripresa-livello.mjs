@@ -480,6 +480,36 @@ function fuocoSicuro(caso, d, atteso) {
   await contesto.close();
 }
 
+// ---------- M ----------
+// Dall'archivio, dopo la domanda, la sfida aperta tiene il suo indirizzo `#/sfida/<giorno>`.
+{
+  const { contesto, page } = await prepara();
+  const giornoFa = (d) => page.evaluate((d) => { const g = new Date(); g.setDate(g.getDate() - d); return `${g.getFullYear()}-${String(g.getMonth() + 1).padStart(2, '0')}-${String(g.getDate()).padStart(2, '0')}`; }, d);
+  const ieri = await giornoFa(1), altro = await giornoFa(2);
+  async function apri(giorno) {
+    await page.getByRole('button', { name: /Archivio delle sfide/ }).click();
+    await page.waitForSelector('.pl-calendario');
+    const c = () => page.locator(`button.pl-giorno[aria-label^="${Number(giorno.slice(8))} "]`).first();
+    if (!(await c().count())) await page.getByRole('button', { name: /Mese precedente/ }).click().catch(() => {});
+    await c().click();
+    await page.waitForTimeout(400);
+  }
+  await apri(ieri);
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 2; i += 1) await unaMossa(page);
+  await page.locator('.pl-hud__menu').click();
+  await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+  await page.waitForSelector('.pl-home__menu');
+  await apri(altro);
+  await page.getByRole('button', { name: /^Riprendi la sfida/ }).click();
+  await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(700);
+  const ancora = await page.evaluate(() => location.hash);
+  righe.push({ caso: 'M dall archivio, dopo la domanda, l indirizzo della sfida', primo: await dove(page), daZero: false, nota: `ancora: «${ancora}»` });
+  if (ancora !== `#/sfida/${ieri}`) errori.push(`M: dopo la domanda dall archivio l indirizzo e «${ancora}», atteso «#/sfida/${ieri}»`);
+  await contesto.close();
+}
+
 await browser.close();
 if (server) server.kill();
 

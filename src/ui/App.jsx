@@ -69,6 +69,10 @@ export const RIPRESA_SENZA_GUIDA = true;
 export const CONFERMA_ALTRO_LIVELLO = true;
 export const CONFERMA_RIPROVA = true;
 export const CONFERMA_ALTRA_SFIDA = true;
+// Dopo la domanda aperta dall'archivio la cronologia torna indietro di un gradino e
+// l'indirizzo perdeva `#/sfida/<giorno>` (misurato sulla build di produzione: ancora
+// vuota con la domanda, `#/sfida/2026-10-15` senza). Rimesso a ogni `popstate` nostro.
+const ANCORA_SFIDA_DOPO_INDIETRO = true;
 
 /**
  * Radice dell'applicazione.
@@ -456,7 +460,12 @@ export function App() {
     passoIndietro,
     // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
-    useCallback(() => { if (schermata === 'home') scriviRotta(''); }, [schermata]),
+    useCallback(() => {
+      if (schermata === 'home') scriviRotta('');
+      else if (ANCORA_SFIDA_DOPO_INDIETRO && schermata === 'gioco' && modalita === 'sfida' && partita?.seedLabel) {
+        scriviRotta(rottaSfida(partita.seedLabel));
+      }
+    }, [schermata, modalita, partita?.seedLabel]),
   );
 
   const finestraConferma = conferma ? (
