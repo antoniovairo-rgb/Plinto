@@ -1,0 +1,2 @@
+"" Recensisci presente: false | origine in LS: null | url finale: https://antoniovairo-rgb.github.io/Plinto/
+"?origine=play" Recensisci presente: true | origine in LS: "play" | url finale: https://antoniovairo-rgb.github.io/Plinto/?origine=play
