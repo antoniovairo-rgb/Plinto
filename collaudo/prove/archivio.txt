@@ -1,0 +1,10 @@
+1. calendario: 8 intestazioni di colonna, 5 di riga, 31 giorni
+2. giorni non apribili: 14, di cui con la spiegazione 14
+3. tastiera: "17 ottobre. La" -> "16 ottobre" | mese ottobre 2026 -> settembre 2026 (mese precedente disponibile: true)
+4. sfida del 2026-10-16 ripresa: 63 blocchi sulla plancia, intestazione "Sfida del 16 ottobreLa stessa partita di quel giorno. Fai più punti che puoi."
+5. giorni registrati: 2026-10-16
+6. la casella del 2026-10-16: punti "1.235", segno "◆"
+
+================ ESITO ================
+Archivio: calendario accessibile, giorni passati giocabili, punteggi nel giorno giusto.
+exit 0

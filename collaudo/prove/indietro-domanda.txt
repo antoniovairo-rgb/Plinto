@@ -1,0 +1,3 @@
+K domanda aperta    partita dialog=1 -
+K dopo 1 Indietro   partita dialog=0 - partita-quadro=si partita-sfida=no
+K dopo 2 Indietro   mappa dialog=0 - partita-quadro=si partita-sfida=no

@@ -1,0 +1,4 @@
+sfida oggi, 2 mosse                      #/sfida/2026-10-17 | partita | 0 | sfida salvata: | 2026-10-17
+NUOVA SCHEDA: #/sfida/2026-10-10 | home | 1 | La sfida del 17 ottobre è a metà. Se apri la sfida del 10 ottobre, perdi le mosse fatte nella sfida del 17 ottobre. Riprendi la sfida del 17 ottobre Apri la sfida del 10 ottobre
+reload scheda vecchia (hash 17)          #/sfida/2026-10-17 | partita | 0 | sfida salvata: | 2026-10-17
+hashchange a 10-10                        | home | 0 | sfida salvata: | 2026-10-17

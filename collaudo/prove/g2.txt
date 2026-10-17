@@ -1,0 +1,3 @@
+home, nessuna partita              home hash=- dialog=0
+dopo cambio ancora (10-10)         home hash=- dialog=0
+dopo cambio ancora (10-11)         home hash=- dialog=0

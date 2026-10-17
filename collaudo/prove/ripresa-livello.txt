@@ -1,0 +1,19 @@
+
+| Caso | Dove si riapre | Riparte da 0 | Nota |
+|---|---|---|---|
+| A Indietro dal livello, poi riapro il livello dalla mappa | mappa | no | salvataggio dopo Indietro: true |
+| B oltre 2 ore, poi pulsante grande della home | home | no | pulsante: «RIPRENDI IL LIVELLO 1» |
+| C esco mentre leggo l obiettivo, ricarico | obiettivo | no | salvato durante la presentazione: true |
+| D secondo piano (visibilitychange, pagehide, freeze CDP 3 s) | partita | no |  |
+| E ricarica (pagina buttata via) | partita | no |  |
+| F nuova navigazione a ?origine=play | partita | no |  |
+| G introVista falso, livello, ricarica | partita | no |  |
+| H introVista falso, partita libera, ricarica | partita | no |  |
+| I guardo solo l obiettivo di un altro livello | obiettivo | no | livello salvato: 2 |
+| J livello 2 a meta, «Gioca» sul livello 1 | domanda | no | domanda: «Il livello 2 è a metà. Se giochi il livello 1, perdi le mosse fatte nel livello 2. Riprendi il livello 2 Gioca il livello 1»; livello salvato: 2 |
+| K «Riprova» nel menu del livello | domanda | no | domanda: «Vuoi ricominciare il livello 1? Le mosse che hai fatto finora si perdono. Torna alla partita Sì, ricomincia da capo»; dopo la scelta che perde: ricomincia |
+| L sfida di ieri a meta, apro quella di oggi | domanda | no | domanda: «La sfida del 16 ottobre è a metà. Se apri la sfida di oggi, perdi le mosse fatte nella sfida del 16 ottobre. Riprendi la sfida del 16 ottobre Apri la sfida di oggi»; sfida salvata: 2026-10-16; dopo la scelta che perde: 2026-10-17 |
+| M dall archivio, dopo la domanda, l indirizzo della sfida | partita | no | ancora: «#/sfida/2026-10-16» |
+
+Tutto a posto.
+exit 0

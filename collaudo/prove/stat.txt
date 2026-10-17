@@ -1,0 +1,16 @@
+it 360x640 partite 1000 totale 5000000 -> media mostrata: 5000 Mosse  attesa 5000  scroll-x: false
+it 360x640 partite 3 totale 4500 -> media mostrata: 1500 Mosse  attesa 1500  scroll-x: false
+it 360x640 partite 1234 totale 987654321 -> media mostrata: 800368 Mosse  attesa 800044  scroll-x: false
+it 360x640 partite 0 totale 0 -> media mostrata: (assente)  attesa   scroll-x: false
+it 390x844 partite 1000 totale 5000000 -> media mostrata: 5000 Mosse  attesa 5000  scroll-x: false
+it 390x844 partite 3 totale 4500 -> media mostrata: 1500 Mosse  attesa 1500  scroll-x: false
+it 390x844 partite 1234 totale 987654321 -> media mostrata: 800368 Mosse  attesa 800044  scroll-x: false
+it 390x844 partite 0 totale 0 -> media mostrata: (assente)  attesa   scroll-x: false
+en 360x640 partite 1000 totale 5000000 -> media mostrata: 5000 Total  attesa 5000  scroll-x: false
+en 360x640 partite 3 totale 4500 -> media mostrata: 1500 Total  attesa 1500  scroll-x: false
+en 360x640 partite 1234 totale 987654321 -> media mostrata: 800368 Total  attesa 800044  scroll-x: false
+en 360x640 partite 0 totale 0 -> media mostrata: (assente)  attesa   scroll-x: false
+en 390x844 partite 1000 totale 5000000 -> media mostrata: 5000 Total  attesa 5000  scroll-x: false
+en 390x844 partite 3 totale 4500 -> media mostrata: 1500 Total  attesa 1500  scroll-x: false
+en 390x844 partite 1234 totale 987654321 -> media mostrata: 800368 Total  attesa 800044  scroll-x: false
+en 390x844 partite 0 totale 0 -> media mostrata: (assente)  attesa   scroll-x: false
