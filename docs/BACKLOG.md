@@ -15,3 +15,4 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | PO-006 | «oggi vorrei rilasciare il pacchetto con la nuova icona e problemi emersi che richiedono altrettanto il pacchetto aggiornato su android»; scelta: «Solo il pacchetto» | chiusa: AAB 11905 caricato dal PO, in revisione Google | `android/`, `docs/CHANGELOG.md` |
 | PO-007 | «avvisami quando posso generare l'AAB» | chiusa | notifica dopo la pubblicazione |
 | PO-008 | «fai in modo che quando l'app viene messa in background per qualche secondo la partita / missione non deve partire da 0!» | chiusa con la 1.21.9 | `docs/sviluppo/RAPPORTO-PO-008.md` |
+| PO-009 | «Nella home del gioco non si capisce bene la distinzione tra partita libera e sfida del giorno, si confonde il player»; scelta: «Riga di spiegazione» | in corso | ramo `sviluppo/home-spiegazione-po009` |
