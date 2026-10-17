@@ -9,6 +9,17 @@ import { CONTATTO } from '../../config/progetto.js';
 import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
 
 /**
+ * Interruttore della riga che spiega le due modalita' (PO-009).
+ *
+ * Il PO: «nella home non si capisce bene la distinzione tra partita libera e sfida del
+ * giorno, si confonde il player». Le due card avevano il nome e lo stato, e nient'altro
+ * che dicesse in che cosa sono diverse. Acceso, sotto il nome c'e' una riga fissa che lo
+ * dice; spento, la home torna quella della 1.21.9. `npm run home-spiegazione` e' rosso
+ * da spento.
+ */
+const SPIEGAZIONE_MODI = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -79,6 +90,7 @@ export function SchermoHome({
           className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera"
           onClick={cePartitaSalvata ? onRiprendi : onGioca}
           aria-label={recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera}
+          aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-libera' : undefined}
         >
           <span>{etichettaLibera}</span>
           {/* Il numero da solo non direbbe di che cosa e' il record: la parola serve. */}
@@ -87,6 +99,9 @@ export function SchermoHome({
               niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
               impressione sbagliata. La parola lo dice e basta. */}
           <span className="pl-sfida-avvio__esito">{recordTesto || t('home.maiGiocata')}</span>
+          {SPIEGAZIONE_MODI ? (
+            <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
+          ) : null}
         </button>
 
         {cePartitaSalvata ? (
@@ -100,9 +115,13 @@ export function SchermoHome({
           className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--sfida"
           onClick={onSfida}
           aria-label={sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida}
+          aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
           <span className="pl-sfida-avvio__esito">{sfidaTesto || t('home.daGiocare')}</span>
+          {SPIEGAZIONE_MODI ? (
+            <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
+          ) : null}
         </button>
 
         {/* L'archivio sta SOTTO la sfida di oggi e non accanto: oggi e' la sfida che

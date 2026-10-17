@@ -30,6 +30,9 @@ export default {
     info: 'Info',
     sostieni: 'Sostieni il progetto',
     feedback: 'Idee e segnalazioni',
+    // PO-009: la riga fissa sotto il nome delle due card della home.
+    spiegaLibera: 'Senza livelli: gioca finché i pezzi entrano',
+    spiegaSfida: 'Nuova ogni giorno, parte uguale per tutti',
   },
   // L'invito a recensire: compare solo nell'app del Play Store. Niente stelle chieste,
   // niente "ti piace?", niente in cambio: lo vietano le regole di Google Play.

@@ -17,6 +17,9 @@ export default {
     info: 'About',
     sostieni: 'Support the project',
     feedback: 'Ideas and feedback',
+    // PO-009: la riga fissa sotto il nome delle due card della home.
+    spiegaLibera: 'No levels: play until no piece fits',
+    spiegaSfida: 'New every day, same start for everyone',
   },
   recensione: {
     voce: 'Review',

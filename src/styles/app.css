@@ -1697,6 +1697,33 @@ button {
   justify-content: space-between;
   padding: 0 18px;
 }
+/* PO-009: la card con la riga di spiegazione e' una griglia, nome e stato sulla prima
+   riga e la spiegazione sotto, LARGA QUANTO LA CARD. Messa sotto il solo nome, a 360 px
+   avrebbe avuto meno di 160 px e sarebbe andata a capo due volte, allungando la card;
+   cosi' sta su una riga e la card resta alta 52 px come prima (misurato da
+   `npm run home-spiegazione`). Senza la riga, `:has()` non scatta e la card e' quella
+   di sempre. */
+.pl-sfida-avvio:has(.pl-sfida-avvio__spiega) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  column-gap: 10px;
+  row-gap: 1px;
+  text-align: left;
+  padding-block: 6px;
+}
+.pl-sfida-avvio__spiega {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: normal;
+  /* NON --pl-text-dim: sul punto piu' chiaro del fondo verde della Partita libera da'
+     4.497:1, cioe' sotto il 4.5 di WCAG AA per un soffio. Un 40% di --pl-text lo porta
+     a 6.35 (verde) e 8.10 (viola della Sfida), restando piu' tenue del nome. */
+  color: color-mix(in srgb, var(--pl-text) 40%, var(--pl-text-dim));
+}
 .pl-sfida-avvio__esito {
   font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
