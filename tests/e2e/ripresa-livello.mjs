@@ -296,6 +296,33 @@ function registra(caso, { primo, prima, dopo, nota = '' }) {
   await contesto.close();
 }
 
+// ---------- I ----------
+// Il livello 2 giocato a meta' non si perde se si apre soltanto l'obiettivo del livello 1.
+{
+  const { contesto, page } = await prepara();
+  await page.evaluate(() => localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: { 1: { mosse: 10, punteggio: 100, tentativi: 1 } } })));
+  await page.reload();
+  await page.waitForSelector('.pl-home__menu');
+  await page.getByRole('button', { name: /Mappa dei livelli/ }).click();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').nth(1).click();
+  await page.waitForTimeout(300);
+  if (await dove(page) === 'obiettivo') await page.getByRole('button', { name: /^Gioca$/ }).click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 3; i += 1) await unaMossa(page);
+  await page.waitForTimeout(400);
+  const prima = await firma(page);
+  await page.goBack();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').first().click();
+  await page.waitForSelector('.pl-apertura');
+  await page.waitForTimeout(400);
+  const numero = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-quadro') ?? 'null')?.numero ?? null);
+  righe.push({ caso: 'I guardo solo l obiettivo di un altro livello', primo: 'obiettivo', daZero: numero !== 2, nota: `livello salvato: ${numero}` });
+  if (numero !== 2) errori.push(`I: aprire l obiettivo del livello 1 ha sovrascritto il livello 2 a meta (salvato: ${numero}; prima: «${prima}»)`);
+  await contesto.close();
+}
+
 await browser.close();
 if (server) server.kill();
 

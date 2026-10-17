@@ -29,6 +29,13 @@ import { quadroNumero } from '../config/quadri.js';
  */
 export const CONSERVA_ALL_USCITA = true;
 export const SALVA_IN_PRESENTAZIONE = true;
+/*
+ * NON_COPRE_UN_ALTRO_LIVELLO: guardare soltanto l'obiettivo di un livello non cancella un
+ * ALTRO livello lasciato a meta'. Senza, bastava aprire la presentazione del livello 3
+ * per sovrascrivere il livello 5 giocato a meta' (lettura della madre sul ramo PO-008).
+ * Il livello nuovo prende il posto del vecchio solo quando lo si comincia a giocare.
+ */
+export const NON_COPRE_UN_ALTRO_LIVELLO = true;
 
 /**
  * Gestisce la partita di un Quadro.
@@ -151,6 +158,13 @@ export function useQuadro() {
     // (misurato, PO-008 caso C). Adesso si salva anche il fatto di essere sulla
     // presentazione, e la ripresa riporta a quella schermata.
     if (daPresentare && !SALVA_IN_PRESENTAZIONE) return;
+    if (daPresentare && NON_COPRE_UN_ALTRO_LIVELLO) {
+      const voce = read(KEYS.CURRENT_LEVEL, null);
+      if (voce && voce.numero !== quadro.numero && voce.presentazione !== true) {
+        const salvata = deserializeGame(voce.partita);
+        if (salvata && salvata.status === 'playing') return;
+      }
+    }
     write(KEYS.CURRENT_LEVEL, {
       numero: quadro.numero, partita: serializeGame(partita), presentazione: daPresentare,
     });
