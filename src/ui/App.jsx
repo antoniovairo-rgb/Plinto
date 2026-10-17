@@ -35,6 +35,22 @@ import { usaRotta, rottaSfida, scriviRotta } from './rotta.js';
 import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
 
 /**
+ * PO-008, interruttori per la prova rosso/verde in `tests/e2e/ripresa-livello.mjs`.
+ *
+ * RIPRENDI_LIVELLO_A_MANO: un livello lasciato a meta' si riprende riaprendolo, dalla
+ * mappa o dal pulsante grande della home, che allora dice «Riprendi il livello N». Sulla
+ * 1.21.7 la ripresa era solo automatica: oltre le due ore, o dopo essere tornati alla
+ * mappa, riaprire il livello lo ricominciava da capo (misurato, casi A e B).
+ *
+ * RIPRESA_SENZA_GUIDA: la ripresa automatica non aspetta `introVista`. Chi sceglie
+ * «Salta per ora» rivede la guida a ogni avvio, ed era proprio la guida a fermare la
+ * ripresa: dopo un secondo piano si ritrovava la guida e il livello ricominciava (caso G).
+ * Un posto da riprendere esiste solo se si e' gia' giocato, quindi la guida non serve.
+ */
+export const RIPRENDI_LIVELLO_A_MANO = true;
+export const RIPRESA_SENZA_GUIDA = true;
+
+/**
  * Radice dell'applicazione.
  *
  * Niente router: le schermate sono poche e la navigazione e' un valore di stato.
@@ -184,10 +200,15 @@ export function App() {
    * La finestra di due ore e il perche' stanno in persistence/ripresa.js.
    */
   useEffect(() => {
-    if (!impostazioni.introVista) return;
     if (rotta && rotta.nome === 'sfida') return;
     const dove = leggiRipresa();
     if (!dove) return;
+    if (!impostazioni.introVista) {
+      if (!RIPRESA_SENZA_GUIDA) return;
+      // Vale come «Salta per ora»: per questa sessione e basta, la guida torna al
+      // prossimo avvio senza partita in corso.
+      setGuidaSaltata(true);
+    }
 
     if (dove.dove === 'quadro') {
       if (quadri.riprendiSalvato()) setSchermata('quadro');
@@ -268,7 +289,12 @@ export function App() {
   const apriQuadro = useCallback((definizione) => {
     sbloccaAudio();
     suonoBottone();
-    quadri.apri(definizione);
+    // Lo stesso livello lasciato a meta' si riprende, non si ricomincia. Per ricominciare
+    // c'e' «Riprova» nel menu del livello.
+    const riprende = RIPRENDI_LIVELLO_A_MANO
+      && quadri.numeroSalvato() === definizione.numero
+      && quadri.riprendiSalvato();
+    if (!riprende) quadri.apri(definizione);
     setSchermata('quadro');
   }, [quadri]);
 
@@ -278,12 +304,27 @@ export function App() {
     setSchermata('quadri');
   }, [quadri]);
 
-  /** Il pulsante principale della home: entra direttamente nel livello corrente. */
+  /**
+   * Il livello lasciato a meta', da mostrare sul pulsante grande della home. Si rilegge
+   * a ogni cambio di schermata: la voce cambia uscendo da un livello, finendolo,
+   * importando un salvataggio o azzerando i dati, e tutte queste strade passano da li'.
+   */
+  const livelloInSospeso = useMemo(
+    () => (RIPRENDI_LIVELLO_A_MANO && schermata === 'home' ? quadri.numeroSalvato() : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [schermata, quadri.quadro, quadri.esito],
+  );
+
+  /**
+   * Il pulsante principale della home: entra direttamente nel livello corrente, oppure
+   * riprende quello lasciato a meta' (anche se non e' il corrente: e' la partita aperta,
+   * come «Riprendi la partita» per la partita libera).
+   */
   const giocaLivelloCorrente = useCallback(() => {
-    const livello = quadroNumero(livelloCorrente);
+    const livello = quadroNumero(livelloInSospeso ?? livelloCorrente);
     if (livello) apriQuadro(livello);
     else setSchermata('quadri');
-  }, [livelloCorrente, apriQuadro]);
+  }, [livelloCorrente, livelloInSospeso, apriQuadro]);
 
   const quadroSuccessivo = useCallback(() => {
     const prossimo = quadroNumero(quadroDopo(quadri.quadro?.numero ?? 0, TOTALE_QUADRI));
@@ -540,6 +581,7 @@ export function App() {
           quadriFatti={quadriFatti}
           quadriTotali={TOTALE_QUADRI}
           livelloCorrente={livelloCorrente}
+          livelloInSospeso={livelloInSospeso}
           versione={__APP_VERSION__}
           onQuadri={() => setSchermata('quadri')}
           onGiocaLivello={giocaLivelloCorrente}

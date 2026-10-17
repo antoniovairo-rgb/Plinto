@@ -30,7 +30,7 @@ import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
  */
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
-  livelloCorrente, versione,
+  livelloCorrente, livelloInSospeso = null, versione,
   onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, onSostieni, t,
 }) {
   const progressoTesto = t('quadri.avanzamento')
@@ -50,8 +50,12 @@ export function SchermoHome({
 
       <div className="pl-home__azioni">
         {/* Il percorso e' il gioco: sta nel pulsante grande, e dice a quale livello sei. */}
+        {/* Con un livello lasciato a meta' lo dice, come «Riprendi la partita» qui sotto:
+            stesso pulsante, nessuna riga in piu' (la home non deve scorrere a 360x640). */}
         <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onGiocaLivello}>
-          {t('quadri.quadro').replace('{n}', livelloCorrente)}
+          {livelloInSospeso
+            ? t('quadri.riprendiLivello').replace('{n}', livelloInSospeso)
+            : t('quadri.quadro').replace('{n}', livelloCorrente)}
         </button>
 
         {/* Questi pulsanti hanno due scritte, e senza aria-label il nome che arriva a

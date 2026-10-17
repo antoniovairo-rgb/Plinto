@@ -13,6 +13,24 @@ import { segnaPosto, dimenticaPosto } from '../persistence/ripresa.js';
 import { quadroNumero } from '../config/quadri.js';
 
 /**
+ * PO-008, «la missione non deve partire da 0». Interruttori per la prova rosso/verde in
+ * `tests/e2e/ripresa-livello.mjs`.
+ *
+ * CONSERVA_ALL_USCITA: tornare alla mappa (pulsante o tasto Indietro di Android) NON
+ * cancella il livello. Misurato sulla 1.21.7: Indietro dal livello e poi riaprirlo lo
+ * ricominciava da capo, perche' `chiudi` buttava via il salvataggio. Indietro e' anche
+ * il gesto con cui su Android si "mette da parte" l'app: trattarlo come una resa faceva
+ * perdere il livello a chi voleva solo guardare la mappa.
+ *
+ * SALVA_IN_PRESENTAZIONE: il livello si salva dal primo istante, anche mentre e' a
+ * schermo la presentazione dell'obiettivo, insieme al fatto che la si stava leggendo.
+ * Riprendendo si torna a quella schermata e non dentro la partita: la ragione per cui
+ * prima non si salvava (non saltare l'obiettivo) resta rispettata.
+ */
+export const CONSERVA_ALL_USCITA = true;
+export const SALVA_IN_PRESENTAZIONE = true;
+
+/**
  * Gestisce la partita di un Quadro.
  *
  * Sta separato da usePartita di proposito: la registrazione del risultato, lo sblocco
@@ -56,10 +74,11 @@ export function useQuadro() {
   }, []);
 
   const chiudi = useCallback(() => {
-    // Uscire di propria volonta' cancella sia il salvataggio sia il posto: chi torna
-    // all'elenco ha deciso di lasciare quel livello, e ritrovarcisi dentro al prossimo
-    // avvio sarebbe il contrario di quello che ha chiesto.
-    remove(KEYS.CURRENT_LEVEL);
+    // Tornare alla mappa cancella il POSTO: chi esce di sua volonta' al prossimo avvio
+    // vuole il menu, non ritrovarsi dentro il livello. Il SALVATAGGIO invece resta, come
+    // per la partita libera: il livello si riprende riaprendolo dalla mappa o dalla home,
+    // e si perde solo finendolo, ricominciandolo o aprendone un altro (PO-008).
+    if (!CONSERVA_ALL_USCITA) remove(KEYS.CURRENT_LEVEL);
     dimenticaPosto();
     setQuadro(null);
     setPartita(null);
@@ -86,8 +105,17 @@ export function useQuadro() {
     setPartita(stato);
     setEsito(null);
     setRegistrato(false);
-    setDaPresentare(false);
+    // Lasciato mentre si leggeva l'obiettivo: si torna li', non dentro la partita.
+    setDaPresentare(SALVA_IN_PRESENTAZIONE && voce.presentazione === true);
     return definizione;
+  }, []);
+
+  /** Il numero del livello lasciato a meta' e riprendibile, oppure null. */
+  const numeroSalvato = useCallback(() => {
+    const voce = read(KEYS.CURRENT_LEVEL, null);
+    if (!voce || !Number.isFinite(voce.numero) || !quadroNumero(voce.numero)) return null;
+    const stato = deserializeGame(voce.partita);
+    return stato && stato.status === 'playing' ? voce.numero : null;
   }, []);
 
   /** Chiude l'apertura e comincia a giocare. */
@@ -117,13 +145,15 @@ export function useQuadro() {
    */
   useEffect(() => {
     if (!quadro || !partita || esito) return;
-    // Finche' e' sullo schermo la presentazione di Plinto non si e' ancora giocato
-    // niente, e non si salva niente. Non e' un risparmio: riprendendo da li' il
-    // giocatore si ritroverebbe DENTRO il livello senza aver letto l'obiettivo, che e'
-    // proprio la cosa che quella schermata esiste per dirgli. Senza salvataggio riparte
-    // dalla home e riapre il livello leggendola, come la prima volta.
-    if (daPresentare) return;
-    write(KEYS.CURRENT_LEVEL, { numero: quadro.numero, partita: serializeGame(partita) });
+    // Prima la presentazione di Plinto non si salvava, perche' riprendendo da li' il
+    // giocatore si sarebbe ritrovato DENTRO il livello senza aver letto l'obiettivo.
+    // Ma cosi' chi usciva in quel momento ritrovava la home e il livello spariva
+    // (misurato, PO-008 caso C). Adesso si salva anche il fatto di essere sulla
+    // presentazione, e la ripresa riporta a quella schermata.
+    if (daPresentare && !SALVA_IN_PRESENTAZIONE) return;
+    write(KEYS.CURRENT_LEVEL, {
+      numero: quadro.numero, partita: serializeGame(partita), presentazione: daPresentare,
+    });
     segnaPosto('quadro', quadro.numero);
   }, [quadro, partita, esito, daPresentare]);
 
@@ -268,6 +298,7 @@ export function useQuadro() {
     chiudi,
     riprova,
     riprendiSalvato,
+    numeroSalvato,
     gioca,
     attrezzi,
     suggerimento,

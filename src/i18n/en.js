@@ -351,6 +351,7 @@ export default {
     eAltri: 'and {n} more',
     ultimoBloccato: 'Clear all the other levels first',
     quadro: 'Level {n}',
+    riprendiLivello: 'Resume level {n}',
     mosse: 'Moves',
     tuoRecord: 'Your best: {mosse} moves',
     riprova: 'Try again',
