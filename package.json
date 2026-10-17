@@ -45,6 +45,7 @@
     "recensione": "node tests/e2e/recensione.mjs",
     "correzioni": "node tests/e2e/correzioni.mjs",
     "e2e-ripresa": "node tests/e2e/ripresa.mjs",
+    "e2e-po008": "node tests/e2e/ripresa-livello.mjs",
     "e2e-salvataggio": "node tests/e2e/salvataggio.mjs",
     "e2e-sicurezza": "node tests/e2e/sicurezza.mjs",
     "e2e-attrezzi": "node tests/e2e/attrezzi.mjs",
