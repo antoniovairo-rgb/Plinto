@@ -16,6 +16,12 @@
  *   F  nuova navigazione all'indirizzo di avvio dell'app, `?origine=play`.
  *   G  `introVista` falso ("salta per ora"): la ripresa automatica avviene lo stesso.
  *   H  come G, per la partita libera.
+ *   I  guardare solo l'obiettivo di un altro livello non copre quello a meta'.
+ *   J  con il livello 2 a meta', «Gioca» sul livello 1 chiede conferma (collaudo 1.21.9, E1).
+ *   K  «Riprova» nel menu del livello chiede conferma (collaudo 1.21.9, E2).
+ *   L  con la sfida di ieri a meta', aprire quella di oggi chiede conferma.
+ *   In J, K e L il tasto Indietro chiude la domanda e non perde niente; «Torna al...»
+ *   riporta dentro la partita lasciata, «Continua» fa davvero quello che si era chiesto.
  *
  * Stampa una tabella; esce con 1 se in almeno un caso si riparte da zero.
  * Uso: npm run e2e-po008
@@ -320,6 +326,143 @@ function registra(caso, { primo, prima, dopo, nota = '' }) {
   const numero = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-quadro') ?? 'null')?.numero ?? null);
   righe.push({ caso: 'I guardo solo l obiettivo di un altro livello', primo: 'obiettivo', daZero: numero !== 2, nota: `livello salvato: ${numero}` });
   if (numero !== 2) errori.push(`I: aprire l obiettivo del livello 1 ha sovrascritto il livello 2 a meta (salvato: ${numero}; prima: «${prima}»)`);
+  await contesto.close();
+}
+
+// ---------- J, K, L: le tre strade che perdevano la partita con un tocco ----------
+/** La domanda di conferma, se e' a schermo: il testo e il pulsante che ha il fuoco. */
+const domanda = (page) => page.evaluate(() => {
+  const d = document.querySelector('[role="dialog"]');
+  if (!d) return null;
+  return {
+    testo: d.innerText.replace(/\s+/g, ' '),
+    fuoco: d.contains(document.activeElement) ? document.activeElement.innerText.trim() : '',
+  };
+});
+
+/** Il fuoco deve stare sul pulsante che NON perde niente. */
+function fuocoSicuro(caso, d, atteso) {
+  if (d && !atteso.test(d.fuoco)) errori.push(`${caso}: il fuoco e' su «${d.fuoco}», non sul pulsante che torna indietro`);
+}
+
+// ---------- J ----------
+{
+  const { contesto, page } = await prepara();
+  await page.evaluate(() => localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: { 1: { mosse: 10, punteggio: 100, tentativi: 1 } } })));
+  await page.reload();
+  await page.waitForSelector('.pl-home__menu');
+  await page.getByRole('button', { name: /Mappa dei livelli/ }).click();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').nth(1).click();
+  await page.waitForTimeout(300);
+  if (await dove(page) === 'obiettivo') await page.getByRole('button', { name: /^Gioca$/ }).click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 3; i += 1) await unaMossa(page);
+  await page.waitForTimeout(400);
+  const prima = await firma(page);
+  await page.goBack();
+  await page.waitForSelector('.pl-tappe');
+  await page.locator('.pl-tappa').first().click();
+  await page.waitForSelector('.pl-apertura');
+  await page.getByRole('button', { name: /^Gioca$/ }).click();
+  await page.waitForTimeout(400);
+  const d = await domanda(page);
+  let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
+  let dopo = '';
+  if (d) {
+    fuocoSicuro('J', d, /Torna al livello 2/);
+    await page.goBack();
+    await page.waitForTimeout(400);
+    const dopoIndietro = await dove(page);
+    if (await domanda(page) || dopoIndietro !== 'obiettivo') errori.push(`J: Indietro non chiude la domanda restando sull obiettivo (sono su "${dopoIndietro}")`);
+    await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: /^Torna al livello 2$/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    dopo = await firma(page);
+  }
+  const numero = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-quadro') ?? 'null')?.numero ?? null);
+  nota += `; livello salvato: ${numero}`;
+  registra('J livello 2 a meta, «Gioca» sul livello 1', { primo: d ? 'domanda' : await dove(page), prima, dopo: d ? dopo : `${numero}`, nota });
+  if (!d) errori.push(`J: «Gioca» sul livello 1 non chiede niente e il livello 2 a meta sparisce (salvato: ${numero})`);
+  await contesto.close();
+}
+
+// ---------- K ----------
+{
+  const { contesto, page } = await prepara();
+  const prima = await entraEGioca(page);
+  const riprova = async () => {
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Riprova$/ }).click();
+    await page.waitForTimeout(400);
+  };
+  await riprova();
+  const d = await domanda(page);
+  let dopo = await firma(page);
+  let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
+  if (d) {
+    fuocoSicuro('K', d, /Torna al livello 1/);
+    await page.goBack();
+    await page.waitForTimeout(400);
+    dopo = await firma(page);
+    if (await domanda(page) || await dove(page) !== 'partita') errori.push('K: Indietro non chiude la domanda restando nel livello');
+    // «Continua» deve ricominciare davvero: una domanda che blocca e basta non e' una correzione.
+    await riprova();
+    await page.getByRole('button', { name: /^Continua$/ }).click();
+    await page.waitForTimeout(500);
+    const ricominciato = await firma(page);
+    nota += `; dopo «Continua»: ${ricominciato === prima ? 'NON ricomincia' : 'ricomincia'}`;
+    if (ricominciato === prima) errori.push('K: «Continua» non ricomincia il livello');
+  }
+  registra('K «Riprova» nel menu del livello', { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
+  if (!d) errori.push('K: «Riprova» azzera il livello senza chiedere');
+  await contesto.close();
+}
+
+// ---------- L ----------
+{
+  const { contesto, page } = await prepara();
+  const ieri = await page.evaluate(() => {
+    const g = new Date(); g.setDate(g.getDate() - 1);
+    return `${g.getFullYear()}-${String(g.getMonth() + 1).padStart(2, '0')}-${String(g.getDate()).padStart(2, '0')}`;
+  });
+  // Dall'archivio, come farebbe il giocatore. Il primo del mese il giorno prima sta nel
+  // mese precedente: il calendario si apre sul mese corrente, e lo si sfoglia indietro.
+  await page.getByRole('button', { name: /Archivio delle sfide/ }).click();
+  await page.waitForSelector('.pl-calendario');
+  const cella = () => page.locator(`button.pl-giorno[aria-label^="${Number(ieri.slice(8))} "]`).first();
+  if (!(await cella().count())) await page.getByRole('button', { name: /Mese precedente/ }).click().catch(() => {});
+  await cella().click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 3; i += 1) await unaMossa(page);
+  await page.waitForTimeout(400);
+  const prima = await firma(page);
+  await page.locator('.pl-hud__menu').click();
+  await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+  await page.waitForSelector('.pl-home__menu');
+  await page.locator('.pl-sfida-avvio--sfida').click();
+  await page.waitForTimeout(400);
+  const d = await domanda(page);
+  let dopo = await firma(page);
+  let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
+  if (d) {
+    fuocoSicuro('L', d, /Torna alla sfida/);
+    await page.goBack();
+    await page.waitForTimeout(400);
+    if (await domanda(page) || await dove(page) !== 'home') errori.push('L: Indietro non chiude la domanda restando sulla home');
+    await page.locator('.pl-sfida-avvio--sfida').click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: /^Torna alla sfida/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    dopo = await firma(page);
+  }
+  const salvata = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-sfida') ?? 'null')?.seedLabel ?? null);
+  nota += `; sfida salvata: ${salvata}`;
+  registra('L sfida di ieri a meta, apro quella di oggi', { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
+  if (!d) errori.push('L: aprire la sfida di oggi non chiede niente e quella di ieri a meta sparisce');
   await contesto.close();
 }
 
