@@ -30,6 +30,7 @@ import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 import { IMPRONTA_REGOLE } from '../core/impronta.js';
 import { giornoDiOggi } from '../core/sfida.js';
+import { VOCI_GUASTE_SCARTATE } from './salvataggio.js';
 
 const CHIAVE = KEYS.CHALLENGES;
 
@@ -84,7 +85,13 @@ export function sfidaDelGiorno(giorno = giornoDiOggi()) {
  */
 export function registraSfida(punteggio, giorno = giornoDiOggi()) {
   const tutte = caricaSfide();
-  const precedente = tutte[giorno] ?? { best: 0, partite: 0, regole: null };
+  const voce = tutte[giorno] ?? { best: 0, partite: 0, regole: null };
+  // Una voce gia' guasta (importata prima della 1.21.8, collaudo 1.21.7, C2) riparte da
+  // zero invece di dare Math.max(undefined, punteggio) = NaN.
+  const numero = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
+  const precedente = VOCI_GUASTE_SCARTATE
+    ? { ...voce, best: numero(voce.best), partite: numero(voce.partite) }
+    : voce;
   const nuovoRecordDiGiornata = punteggio > precedente.best;
 
   tutte[giorno] = {

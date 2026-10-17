@@ -41,6 +41,15 @@ import { giornoValido } from '../core/sfida.js';
  */
 export const GETTONI_SPESI_NON_TORNANO = true;
 
+/**
+ * Una voce delle sfide senza `best` e `partite` numerici, o un attrezzo che non e' un
+ * intero non negativo, si scarta importando (collaudo 1.21.7, C2). Spento, un giorno con
+ * `best: '99'` entrava come `{regole: null}` e Statistiche scriveva «NaN (undefined)»;
+ * `registraSfida` (in `sfide.js`) partiva da quella voce e salvava NaN. Interruttore per
+ * la prova rosso/verde in `tests/salvataggio.test.js` e `npm run correzioni`.
+ */
+export const VOCI_GUASTE_SCARTATE = true;
+
 /** Versione del FORMATO del file, non del gioco. Cambia solo se cambia la busta. */
 export const FORMATO = 1;
 
@@ -243,12 +252,23 @@ function ripulisci(chiave, documento) {
     const giorni = {};
     for (const [giorno, voce] of Object.entries(vuoto(documento.giorni) ? {} : documento.giorni)) {
       if (!giornoValido(giorno) || vuoto(voce)) continue;
+      if (VOCI_GUASTE_SCARTATE && !(numeroBuono(voce.best) && numeroBuono(voce.partite))) continue;
       giorni[giorno] = {
         ...soloNumeri(voce),
         regole: typeof voce.regole === 'string' ? voce.regole : null,
       };
     }
     return { ...documento, giorni };
+  }
+  if (chiave === KEYS.ATTREZZI && VOCI_GUASTE_SCARTATE) {
+    // Sono gettoni: si contano a uno a uno. Un campo che non e' un intero non negativo
+    // si scarta; se non ne resta nessuno, si scarta il documento.
+    const uscita = {};
+    for (const campo of ['disponibili', 'riscossi']) {
+      if (Number.isInteger(documento[campo]) && documento[campo] >= 0) uscita[campo] = documento[campo];
+    }
+    if (!Object.keys(uscita).length) return null;
+    return { ...(documento.versione !== undefined ? { versione: documento.versione } : {}), ...uscita };
   }
   return documento;
 }
