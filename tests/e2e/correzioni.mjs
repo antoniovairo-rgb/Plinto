@@ -12,6 +12,11 @@
  *   B8  nei livelli con due obiettivi la frase non e' tagliata a 360 px;
  *   B10 i collegamenti in fondo alla home sono alti almeno 24 px da toccare.
  *
+ * E quelle del collaudo della 1.21.7 (rapporto sul ramo `collaudo-1.21.7`):
+ *
+ *   C1  a 360x640 la home non scorre nemmeno con il pie' di pagina a capo, con qualunque font;
+ *   C2  una sfida importata con numeri guasti non fa comparire «NaN» in Statistiche e Archivio.
+ *
  * Uso: npm run correzioni
  */
 
@@ -305,6 +310,75 @@ console.log('B10. collegamenti in fondo alla home: almeno 24 px da toccare...');
   for (const h of altezze) if (h < 24) errori.push(`B10: un collegamento in fondo alla home e alto ${h} px`);
   const scorre = await page.evaluate(() => { const el = document.querySelector('.pl-home'); return el.scrollHeight - el.clientHeight; });
   if (scorre > 0) errori.push(`B10: con il bersaglio piu grande la home scorre di ${scorre} px a 360x640`);
+  await contesto.close();
+}
+
+// ---------- C1 ----------
+console.log('C1. home a 360x640 con il pie di pagina a capo: non scorre, con qualunque font...');
+{
+  // Il difetto dipendeva dal font: con Inter (il ripiego dei container di prova) il pie'
+  // a capo e' alto 32 px e la home scorreva di 2; con DejaVu e' alto 30 e non scorreva.
+  // Per essere rosso in qualunque container, il caso peggiore si fabbrica: interlinea
+  // fissa a 1.21 (quella di Inter) su tutta la home, cosi' le altezze non dipendono piu'
+  // dal font, e il pie' forzato su due righe. Misurato con otto font (Inter, DejaVu Sans
+  // e Serif, Liberation Sans, FreeSans, Carlito, Caladea): senza la correzione scorre di
+  // 3 px con tutti, con la correzione di 0.
+  const { contesto, page } = await apri();
+  const scorre = () => page.evaluate(() => { const el = document.querySelector('.pl-home'); return el.scrollHeight - el.clientHeight; });
+  const reale = await scorre();
+  if (reale > 0) errori.push(`C1: con il font di questo container la home scorre di ${reale} px a 360x640`);
+  await page.addStyleTag({ content: '.pl-home, .pl-home * { line-height: 1.21 !important; } .pl-home__pie .pl-home__sostieni { white-space: nowrap; }' });
+  const righe = await page.evaluate(() => {
+    const pie = document.querySelector('.pl-home__pie');
+    pie.querySelector('.pl-home__sostieni').after(document.createElement('br'));
+    return Math.round(pie.getBoundingClientRect().height / (12 * 1.21));
+  });
+  const peggio = await scorre();
+  const altezze = await page.locator('.pl-home__pie .pl-home__sostieni').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+  // La stessa pagina senza la classe dell'interruttore: deve scorrere, o la prova non prova nulla.
+  const acceso = await page.evaluate(() => document.documentElement.classList.contains('pl-home-stretta'));
+  await page.evaluate(() => document.documentElement.classList.remove('pl-home-stretta'));
+  const senza = await scorre();
+  console.log(`   reale ${reale} px; caso peggiore (pie su ${righe} righe): ${peggio} px; senza la correzione: ${senza} px; collegamenti ${altezze.join(', ')} px`);
+  if (!acceso) errori.push('C1: la radice non ha la classe pl-home-stretta (interruttore HOME_STRETTA_COMPATTA spento?)');
+  if (righe < 2) errori.push('C1: il pie di pagina non e andato a capo: la prova non prova nulla');
+  if (peggio > 0) errori.push(`C1: con il pie di pagina a capo la home scorre di ${peggio} px a 360x640`);
+  if (senza <= 0) errori.push('C1: anche senza la correzione la home non scorre: la prova non prova nulla');
+  for (const h of altezze) if (h < 24) errori.push(`C1: un collegamento in fondo alla home e alto ${h} px (B10 chiede 24)`);
+  await contesto.close();
+}
+
+// ---------- C2 ----------
+console.log('C2. importo sfide con numeri guasti: niente «NaN» in Statistiche e Archivio...');
+{
+  // Il caso «sfide strane» di collaudo/import-fuzz.mjs, incollato come farebbe chi gioca.
+  const dati = {
+    sfide: { versione: 2, giorni: { '2026-13-45': { best: 5 }, x: 1, '2026-10-10': { best: '99', partite: 'a' }, '2026-10-12': { best: 210, partite: 3, regole: null } } },
+    attrezzi: { versione: 1, disponibili: '2', riscossi: 'x' },
+  };
+  const testo = JSON.stringify({ gioco: 'plinto', formato: 1, versioneGioco: '1.21.7', impronta: impronta(dati), dati });
+  const { contesto, page } = await apri({ orologio: '2026-10-16T10:00:00+02:00' });
+  await page.getByRole('button', { name: 'Impostazioni' }).click();
+  await page.getByRole('button', { name: /Oppure incolla/ }).click();
+  await page.locator('textarea').fill(testo);
+  await page.getByRole('button', { name: /^Leggi/ }).click();
+  await page.getByRole('button', { name: /^Sostituisci tutto/ }).click();
+  await page.getByRole('button', { name: /^Sì$/ }).click();
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.pl-home__menu');
+  let visti = 0;
+  for (const schermata of ['Statistiche', 'Archivio delle sfide']) {
+    await page.getByRole('button', { name: schermata }).first().click();
+    await page.waitForTimeout(300);
+    const t = await page.locator('body').innerText();
+    const guasto = t.match(/NaN|undefined|Infinity/);
+    if (guasto) errori.push(`C2: in ${schermata} compare «${guasto[0]}»: ${riassunto(t)}`);
+    if (/210/.test(t)) visti += 1;
+    await page.getByRole('button', { name: 'Indietro' }).first().click();
+    await page.waitForSelector('.pl-home__menu');
+  }
+  // La voce buona deve arrivare: senza, «niente NaN» vorrebbe solo dire «niente importato».
+  if (!visti) errori.push('C2: il giorno buono (210 punti) non compare ne in Statistiche ne nell Archivio: la prova non prova nulla');
   await contesto.close();
 }
 
