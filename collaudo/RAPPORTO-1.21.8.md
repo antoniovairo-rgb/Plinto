@@ -72,4 +72,4 @@ Regressioni cercate e **non trovate**: record in home / fine partita / Statistic
 - Cambio di giorno (mezzanotte) e fuso orario non provati.
 
 ## Commit
-Ramo `collaudo-1.21.8` (da `main` @ `a14a25b`). Hash dell'ultimo commit al momento della stesura: vedi `git log` sul ramo; l'hash finale è riportato nella risposta di consegna.
+Ramo `collaudo-1.21.8` (da `main` @ `a14a25b`): `3bae953` (libreria, C1), `a483fde` (prove dati, B6, Azzera), `3a47ae5` (rapporto); l'ultimo commit con gli allegati è indicato nella risposta di consegna.

@@ -1,0 +1,76 @@
+{
+  "gioco": "plinto",
+  "formato": 1,
+  "versioneGioco": "1.21.8",
+  "esportatoIl": "2026-10-17T15:54:09.482Z",
+  "impronta": "7ff21b4c",
+  "dati": {
+    "quadri": {
+      "versione": 1,
+      "livelli": {
+        "1": {
+          "mosse": 10,
+          "punteggio": 100,
+          "tentativi": 1
+        },
+        "2": {
+          "mosse": 12,
+          "punteggio": 90,
+          "tentativi": 2
+        }
+      }
+    },
+    "attrezzi": {
+      "versione": 1,
+      "disponibili": 2,
+      "riscossi": 2
+    },
+    "records": {
+      "versione": 1,
+      "best": 500,
+      "bestChain": 4,
+      "bestMove": 80,
+      "bestGroupsInOneMove": 2
+    },
+    "records-sfida": {
+      "versione": 1,
+      "best": 1500,
+      "bestChain": 5,
+      "bestMove": 100,
+      "bestGroupsInOneMove": 1
+    },
+    "statistiche": {
+      "versione": 1,
+      "partite": 7,
+      "punteggioTotale": 5000,
+      "mosseTotali": 300,
+      "gruppiTotali": 40,
+      "griglieSvuotate": 1,
+      "tempoTotaleMs": 600000
+    },
+    "sfide": {
+      "versione": 2,
+      "giorni": {
+        "2026-10-10": {
+          "best": 900,
+          "partite": 2,
+          "regole": null
+        },
+        "2026-10-11": {
+          "best": 300,
+          "partite": 1,
+          "regole": null
+        }
+      }
+    },
+    "settings": {
+      "audio": false,
+      "vibrazione": false,
+      "animazioni": false,
+      "lingua": "it",
+      "introVista": true,
+      "aiutoVisivo": true,
+      "versione": 2
+    }
+  }
+}
