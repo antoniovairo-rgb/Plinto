@@ -1,0 +1,18 @@
+  it conferma: IMPOSTAZIONI Suoni Vibrazione LINGUA Italiano English SALVATAGGIO I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser. CREA UN SALVATAGGIO Scarica il file Copia il testo Comodo per incollarlo in una nota o in un messaggio a te stesso. CARICA UN SALVATAGGIO Scegli un file da importare Oppure incolla qui un salvataggio Azzera i miei dati CONFERMA 1 DI 2 Azzera i miei dati CHE COSA SPARISCE Livelli superati 1 Record 500 Giorni di Sfida 1 Spariscono anche il profilo di gioco, le impostazioni e la partita in corso. No Sì
+  chiavi rimaste it  undefined
+  ok  Azzera it: nessun documento di gioco resta
+  ok  Azzera it: la schermata non mostra più record  [IMPOSTAZIONI Suoni Vibrazione LINGUA Italiano English SALVATAGGIO I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambian]
+  ok  Azzera it: dopo ricarica home pulita  [PLINTO PASSO 1 DI 6 LE REGOLE 1 Trascina i pezzi sulla griglia. Non si ruotano: entrano come sono. 2 Riempi tutta una riga, tutta una colonna o un quadrante 3x3: sparisce e ti fa punti. Riga, colonna ]
+  ok  nessun errore
+  en conferma: SETTINGS Sound Vibration LANGUAGE Italiano English SAVE FILE Your progress lives only on this device. Export it if you do not want to lose it when you change phone or clear your browser data. CREATE A SAVE FILE Download the file Copy the text Handy to paste into a note or a message to yourself. LOAD A SAVE FILE Choose a file to import Or paste a save file here Erase my data CONFIRMATION 1 OF 2 Erase my data WHAT DISAPPEARS Levels cleared 1 Best score 500 Challenge days 1 Your play profile, your settings and the game in progress go too. No Yes
+  chiavi rimaste en  undefined
+  ok  Azzera en: nessun documento di gioco resta
+  ok  Azzera en: la schermata non mostra più record  [SETTINGS Sound Vibration LANGUAGE Italiano English SAVE FILE Your progress lives only on this device. Export it if you do not want to lose it when you change ph]
+  ok  Azzera en: dopo ricarica home pulita  [PLINTO STEP 1 OF 6 THE RULES 1 Drag the pieces onto the grid. They do not rotate: they go in as they are. 2 Fill a whole row, a whole column or a 3x3 quadrant: it clears and scores. Row, column and qu]
+  ok  nessun errore
+  home guasta: PLINTO RIGA, COLONNA, QUADRANTE. LIVELLO 1 Mappa dei livelli 0 di 100 Partita libera Mai giocata Sfida del giorno Da giocare Archivio delle sfide Come si gioca Statistiche Il tuo profilo di gioco Impostazioni Info Sostieni il progetto · Idee e segnalazioni · v
+  ok  localStorage guasto: home senza NaN/undefined
+  stat guasta: STATISTICHE Record della Partita libera NaN Record della Sfida del giorno 77 Partite giocate a Punteggio medio NaN Mosse totali 0 Gruppi chiusi 0 Griglie svuotate 0 Tempo di gioco 0 min Catena record Mossa record -5 Intreccio record 0 ULTIMI GIORNI 11 ott 40 (1) 10 ott 99 (undefined)
+  NO  localStorage guasto: Statistiche senza NaN/undefined/Invalid  [STATISTICHE Record della Partita libera NaN Record della Sfida del giorno 77 Partite giocate a Punteggio medio NaN Mosse totali 0 Gruppi chiusi 0 Griglie svuotate 0 Tempo di gioco 0 min Catena record Mossa record -5 Intreccio record 0 ULTIMI GIORNI 11 ott 40 (1) 10 ott 99 (undefined)]
+  ok  nessun errore console con dati guasti
+KO 1

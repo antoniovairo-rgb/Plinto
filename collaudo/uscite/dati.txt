@@ -1,0 +1,97 @@
+
+== B7 testi it
+  bottoni home: ["LIVELLO 3","Mappa dei livelli, 2 di 100","Partita libera, Record 500","Sfida del giorno","Archivio delle sfide","Come si gioca","Statistiche","Il tuo profilo di gioco","Impostazioni","Info","Sostieni il progetto"]
+  ok  home it: Partita libera mostra Record 500
+  ok  home it: la Sfida di oggi non mostra 900 (giorno diverso)
+  statistiche: STATISTICHE Record della Partita libera 500 Record della Sfida del giorno 900 Partite giocate 7 Punteggio medio 714 Mosse totali 300 Gruppi chiusi 40 Griglie svuotate 1 Tempo di gioco 10 min Catena record 4 Mossa record 80 Intreccio record 2 ULTIMI GIORNI 11 ott 300 (1) 10 ott 900 (2)
+  ok  stat it: 500 libera e 900 sfida
+  ok  nessun errore console
+
+== B7 testi en
+  bottoni home: ["LEVEL 3","Level map, 2 of 100","Free play, Best 500","Daily challenge","Challenge archive","How to play","Stats","Your play profile","Settings","About","Support the project"]
+  ok  home en: Partita libera mostra Record 500
+  ok  home en: la Sfida di oggi non mostra 900 (giorno diverso)
+  statistiche: STATISTICS Free play best score 500 Daily challenge best score 900 Games played 7 Average score 714 Total moves 300 Groups cleared 40 Grids emptied 1 Time played 10 min Chain record 4 Move record 80 Interlace record 2 RECENT DAYS Oct 11 300 (1) Oct 10 900 (2)
+  ok  stat en: 500 libera e 900 sfida
+  ok  nessun errore console
+
+== B7 fine partita
+  fine sfida: SFIDA DEL GIORNO Oggi la partita è la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine. PUNTEGGIO 1.235 NUOVO RECORD DI GIORNATA! Mosse 1 Gruppi chiusi 0 Catena massima 0 Mossa migliore 1 Durata 2s Tentativi 1 Condividi il risultato GIOCA ANCORA Torna alla home
+  records: {"versione":1,"best":500,"bestChain":4,"bestMove":80,"bestGroupsInOneMove":2}  records-sfida: {"best":1235,"bestChain":0,"bestMove":1,"bestGroupsInOneMove":0,"versione":1}
+  ok  sfida finita: il record della Partita libera resta 500
+  ok  sfida finita: record della Sfida >= 1234  [{"best":1235,"bestChain":0,"bestMove":1,"bestGroupsInOneMove":0,"versione":1}]
+  ok  fine sfida: compare "record"
+  fine libera: PARTITA FINITA Nessuno dei pezzi rimasti entra più sulla griglia. PUNTEGGIO 701 NUOVO RECORD! Mosse 1 Gruppi chiusi 0 Catena massima 0 Mossa migliore 1 Durata 1s Condividi il risultato GIOCA ANCORA Torna alla home
+  records: {"best":701,"bestChain":4,"bestMove":80,"bestGroupsInOneMove":2,"versione":1}  records-sfida: {"best":1235,"bestChain":0,"bestMove":1,"bestGroupsInOneMove":0,"versione":1}
+  NO  libera finita (700>500): record libera 700
+  ok  libera finita: record Sfida non toccato
+  ok  nessun errore console
+
+== export/import
+  chiavi nel file: quadri,attrezzi,records,records-sfida,statistiche,sfide,settings
+  ok  file esportato contiene entrambi i record
+  ok  impronta del file valida
+  ok  sostituisci su vergine: record 500/1500, attrezzi 2  [[500,1500,{"versione":1,"disponibili":2,"riscossi":2}]]
+  ok  nessun errore
+  ok  unisci su vergine: record 500/1500, attrezzi 2  [[500,1500,{"versione":1,"disponibili":2,"riscossi":2}]]
+  ok  nessun errore
+  ok  B11 loc {"d":1,"r":2} + file {"d":2,"r":2} -> disponibili 1  [{"versione":1,"disponibili":1,"riscossi":2}]
+  ok  B11 loc {"d":3,"r":4} + file {"d":0,"r":5} -> disponibili 0  [{"versione":1,"disponibili":0,"riscossi":5}]
+  ok  B11 loc {"d":0,"r":5} + file {"d":3,"r":4} -> disponibili 0  [{"versione":1,"disponibili":0,"riscossi":5}]
+  ok  
+  ok  C2 unisci: Statistiche senza NaN/undefined/Invalid  [STATISTICHE Record della Partita libera 500 Record della Sfida del giorno 900 Partite giocate 7 Punteggio medio 714 Mosse totali 300 Gruppi chiusi 40 Griglie svuotate 1 Tempo di gioco 10 min Catena record 4 Mossa record 80 Intreccio record 2 ULTIMI G]
+  C2 unisci sfide -> {"2026-10-10":{"best":900,"partite":2,"regole":null},"2026-10-11":{"best":300,"partite":1,"regole":null},"2026-10-14":{"best":50,"partite":1,"regole":null}}  attrezzi -> undefined  records -> {"versione":1,"best":500,"bestChain":4,"bestMove":80,"bestGroupsInOneMove":2}
+  ok  nessun errore
+  ok  
+  ok  C2 sostituisci: Statistiche senza NaN/undefined/Invalid  [STATISTICHE Non hai ancora giocato nessuna partita. GIOCA UNA PARTITA ULTIMI GIORNI 14 ott 50 (1)]
+  C2 sostituisci sfide -> {"2026-10-14":{"best":50,"partite":1,"regole":null}}  attrezzi -> undefined  records -> {"versione":1}
+  ok  nessun errore
+
+== B7 x import
+  records-sfida dopo unisci: {"versione":1,"best":100,"bestChain":0,"bestMove":0,"bestGroupsInOneMove":0}
+  NO  Unisci: record Sfida non scende sotto il massimo dell archivio locale (900)  [{"versione":1,"best":100,"bestChain":0,"bestMove":0,"bestGroupsInOneMove":0}]
+  dopo sostituisci con file senza records-sfida: {"r":{"versione":1,"best":50,"bestChain":1,"bestMove":1,"bestGroupsInOneMove":1},"rs":{"versione":1,"best":5000,"bestChain":1,"bestMove":1,"bestGroupsInOneMove":1},"sf":{"versione":2,"giorni":{"2026-10-10":{"best":900,"partite":2,"regole":null},"2026-10-11":{"best":300,"partite":1,"regole":null}}},"st":{"versione":1,"partite":7,"punteggioTotale":5000,"mosseTotali":300,"gruppiTotali":40,"griglieSvuotate":1,"tempoTotaleMs":600000}}
+  NO  "Sostituisci tutto": il record Sfida locale (5000) non sopravvive a un file che non lo contiene  [{"versione":1,"best":5000,"bestChain":1,"bestMove":1,"bestGroupsInOneMove":1}]
+  NO  "Sostituisci tutto": l archivio sfide locale non sopravvive  [{"versione":2,"giorni":{"2026-10-10":{"best":900,"partite":2,"regole":null},"2026-10-11":{"best":300,"partite":1,"regole":null}}}]
+
+== Azzera
+  bottoni: [
+  '',
+  'Suoni',
+  'Vibrazione',
+  'Italiano',
+  'English',
+  'Scarica il file',
+  'Copia il testo',
+  'Scegli un file da importare',
+  'Oppure incolla qui un salvataggio',
+  'Azzera i miei dati',
+  'No',
+  'Sì'
+]
+  it chiavi rimaste: partita-sfida,profilo,settings,records-sfida,quadri,attrezzi,sfide,statistiche,records
+  NO  Azzera it: nessun dato resta (tranne eventuali impostazioni ricreate)  [partita-sfida,profilo,settings,records-sfida,quadri,attrezzi,sfide,statistiche,records]
+  NO  Azzera it: home senza record  [PLINTO RIGA, COLONNA, QUADRANTE. LIVELLO 3 Mappa dei livelli 2 di 100 Partita libera Record 500 Riprendi la sfida Da giocare Archivio delle sfide Come si gioca Statistiche Il tuo profilo di gioco Impo]
+  ok  Azzera it: Statistiche pulite
+  ok  nessun errore
+  bottoni: [
+  '',
+  'Sound',
+  'Vibration',
+  'Italiano',
+  'English',
+  'Download the file',
+  'Copy the text',
+  'Choose a file to import',
+  'Or paste a save file here',
+  'Erase my data',
+  'No',
+  'Yes'
+]
+  en chiavi rimaste: partita-sfida,profilo,settings,records-sfida,quadri,attrezzi,sfide,statistiche,records
+  NO  Azzera en: nessun dato resta (tranne eventuali impostazioni ricreate)  [partita-sfida,profilo,settings,records-sfida,quadri,attrezzi,sfide,statistiche,records]
+  ok  Azzera en: home senza record  [PLINTO ROW, COLUMN, QUADRANT. LEVEL 3 Level map 2 of 100 Free play Best 500 Resume challenge Not played yet Challenge archive How to play Stats Your play profile Settings About Support the project · I]
+  ok  Azzera en: Statistiche pulite
+  ok  nessun errore
+
+KO: 7

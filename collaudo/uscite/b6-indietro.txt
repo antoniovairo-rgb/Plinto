@@ -1,0 +1,12 @@
+  ok  390x844: dopo ricarica #1 si è riportati nel livello  [quadro]
+  ok  390x844: dopo ricarica #2 si è riportati nel livello  [quadro]
+  ok  390x844: Indietro 1 -> mappa  [quadri]
+  ok  390x844: Indietro 2 -> home  [home]
+  ok  390x844: Indietro 3 -> fuori  [about:blank hist=4]
+  ok  nessun errore console
+  ok  360x640: dopo ricarica #1 si è riportati nel livello  [quadro]
+  ok  360x640: dopo ricarica #2 si è riportati nel livello  [quadro]
+  ok  360x640: Indietro 1 -> mappa  [quadri]
+  ok  360x640: Indietro 2 -> home  [home]
+  ok  360x640: Indietro 3 -> fuori  [about:blank hist=4]
+  ok  nessun errore console
