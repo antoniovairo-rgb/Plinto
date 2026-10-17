@@ -1676,6 +1676,20 @@ button {
   .pl-home__azioni { gap: 10px; }
 }
 
+/*
+ * SCHERMI STRETTI E BASSI (360x640): il pie' di pagina si avvicina al menu di 4 px.
+ * A 360 px la riga del pie' va a capo e diventa alta 32 px invece di 17 (misurato con
+ * Inter, il font di ripiego dei container di prova): la home arrivava a 642 px su 640
+ * e scorreva di 2 (collaudo 1.21.7, C1, residuo di B10). Con altri font la stessa riga
+ * a capo e' alta 30 e non scorre: per questo il difetto si vedeva in un container si'
+ * e in un altro no. I 4 px si tolgono dal respiro sopra il pie', non dai collegamenti:
+ * il loro bersaglio da dito resta di 24 px o piu' (B10). La classe sulla radice e'
+ * l'interruttore, comandato da HOME_STRETTA_COMPATTA in `src/main.jsx`.
+ */
+@media (max-width: 380px) and (max-height: 680px) and (orientation: portrait) {
+  :root.pl-home-stretta .pl-home__pie { margin-top: -4px; }
+}
+
 /* ------------------------------------------------------- sfida del giorno --- */
 /* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
    secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */
