@@ -7,6 +7,32 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.10] — 18 ottobre 2026
+
+Una riga in home spiega le due modalità (PO-009), il gioco chiede conferma prima di far
+perdere una partita a metà (PO-008), e la media dei punteggi in Statistiche è giusta (D4).
+Ogni correzione ha un interruttore e una prova che con l'interruttore spento fallisce,
+misurata anche sulla build di produzione. Arriva anche nell'app Android: nessun pacchetto
+nuovo.
+
+### Aggiunto
+
+- **In home una riga fissa spiega le due modalità** (PO-009): «Senza livelli: gioca
+  finché i pezzi entrano» sotto «Partita libera», «Nuova ogni giorno, parte uguale per
+  tutti» sotto «Sfida del giorno» (in inglese: «No levels: play until no piece fits» /
+  «New every day, same start for everyone»). La home non diventa più alta. Interruttore
+  `SPIEGAZIONE_MODI`; nuova prova nel gate: `npm run home-spiegazione`.
+- **Conferma prima di perdere una partita a metà** (PO-008, decisione del PO): prima di
+  giocare un altro livello, di «Riprova» e di aprire dall'archivio la sfida di un altro
+  giorno. La domanda compare solo se c'è almeno una mossa da perdere; il pulsante
+  evidenziato riprende. Interruttori `CONFERMA_ALTRO_LIVELLO`, `CONFERMA_RIPROVA`,
+  `CONFERMA_ALTRA_SFIDA`, `ANCORA_SFIDA_DOPO_INDIETRO`; casi J-M in `npm run e2e-po008`.
+
+### Corretto
+
+- **Il punteggio medio in Statistiche** è il totale diviso per le partite (D4): con molte
+  partite mostrava 5.000.000 in italiano e «NaN» in inglese. Interruttore `MEDIA_VERA`.
+
 ## [1.21.9] — 17 ottobre 2026
 
 La partita o il livello non ripartono più da zero (PO-008) e i tre difetti del collaudo
