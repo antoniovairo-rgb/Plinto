@@ -1,6 +1,24 @@
 import { useEffect, useRef } from 'react';
 
 /**
+ * Dopo una ricarica, riprendersi le voci di cronologia messe prima (collaudo 1.21.6, B6).
+ * Spento, l'hook riparte da zero voci e la ripresa del livello ne aggiunge altre due
+ * sopra quelle rimaste: `mappa > home > home > home > uscito`. Interruttore per la prova
+ * rosso/verde in `tests/e2e/correzioni.mjs`.
+ */
+export const ADOTTA_VOCI_DOPO_RICARICA = true;
+
+/** Quante voci nostre stanno sotto quella corrente, lette dalla cronologia. */
+function vociGiaMesse() {
+  try {
+    const n = window.history.state?.plinto;
+    return Number.isInteger(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Il tasto Indietro di Android, dentro un gioco che non ha un router.
  *
  * PERCHE' ESISTE. PLINTO cambia schermata con lo stato di React: la cronologia del
@@ -38,7 +56,19 @@ import { useEffect, useRef } from 'react';
 export function useTastoIndietro(profondita, passoIndietro, normalizza) {
   // Quante voci abbiamo messo noi. Riferimento e non stato: cambia dentro il gestore di
   // un evento, e deve essere gia' aggiornato quando l'effetto lo rilegge.
-  const messe = useRef(0);
+  //
+  // DOPO UNA RICARICA la cronologia NON riparte: le voci messe prima ci sono ancora, e
+  // ognuna si ricorda il suo gradino (`{ plinto: n }`). Ripartire da zero le lasciava li'
+  // a vuoto e ne aggiungeva altre: due Indietro che non facevano niente per ogni
+  // ricarica dentro un livello (collaudo 1.21.6, B6). Quindi si parte da quelle.
+  const messe = useRef(null);
+  if (messe.current === null) messe.current = ADOTTA_VOCI_DOPO_RICARICA ? vociGiaMesse() : 0;
+  // Il primo giro dell'effetto avviene con la home, PRIMA che la ripresa riporti dentro
+  // il livello (`App.jsx`, effetto della ripresa): se qui si tornasse indietro delle voci
+  // adottate, la ripresa ne rimetterebbe due mentre `go()` e' ancora in viaggio, e i
+  // conti salterebbero. Al primo giro quindi si aggiunge se serve, ma non si toglie: se
+  // la ripresa non c'e', le voci in piu' si consumano alla prossima risalita.
+  const primoGiro = useRef(true);
   // Quanti `popstate` in arrivo sono provocati da noi e non dall'utente.
   const daIgnorare = useRef(0);
   const passo = useRef(passoIndietro);
@@ -53,7 +83,7 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
           window.history.pushState({ plinto: i + 1 }, '');
         }
         messe.current = profondita;
-      } else if (profondita < messe.current) {
+      } else if (profondita < messe.current && !primoGiro.current) {
         // Si e' risaliti con un pulsante: le voci in piu' vanno consumate, altrimenti
         // il prossimo Indietro le troverebbe e sembrerebbe non fare niente.
         const gradini = messe.current - profondita;
@@ -65,6 +95,7 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
       // Un browser che non permette di scrivere la cronologia non deve rompere il gioco:
       // si perde solo il tasto Indietro, e i pulsanti sullo schermo restano.
     }
+    primoGiro.current = false;
   }, [profondita]);
 
   useEffect(() => {

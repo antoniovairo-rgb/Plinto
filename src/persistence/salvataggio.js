@@ -33,6 +33,14 @@
 import { KEYS, chiaveRecord, read, write } from './storage.js';
 import { giornoValido } from '../core/sfida.js';
 
+/**
+ * Unendo, i gettoni degli attrezzi spesi non tornano (collaudo 1.21.6, B11). Spento, il
+ * documento degli attrezzi si fonde come gli altri numeri, e `disponibili` prende il piu'
+ * alto: esporti con 3 gettoni, li spendi, reimporti, e sono di nuovo 3. Interruttore per
+ * la prova rosso/verde in `tests/salvataggio.test.js`.
+ */
+export const GETTONI_SPESI_NON_TORNANO = true;
+
 /** Versione del FORMATO del file, non del gioco. Cambia solo se cambia la busta. */
 export const FORMATO = 1;
 
@@ -153,6 +161,25 @@ function fondiNumeri(locale, entrante) {
 }
 
 /**
+ * Gli attrezzi: `disponibili` e' un saldo, non un traguardo, e scende a ogni gettone
+ * speso. Il "piu' alto vince" degli altri numeri qui restituisce i gettoni spesi dopo
+ * l'esportazione (B11). Si tiene invece il documento che ha RISCOSSO di piu', cioe' quello
+ * che ha convertito piu' livelli: e' l'unico confronto che dice chi e' andato piu' avanti.
+ * A pari riscossione i due hanno guadagnato gli stessi gettoni, e quello con meno in mano
+ * li ha spesi: vince il piu' basso. Cosi' un file vecchio non regala niente, e un file
+ * da un telefono che ha convertito piu' livelli porta i suoi gettoni.
+ */
+function fondiAttrezzi(locale, entrante) {
+  const unione = fondiNumeri(locale, entrante);
+  const rL = Number.isFinite(locale?.riscossi) ? locale.riscossi : 0;
+  const rE = Number.isFinite(entrante?.riscossi) ? entrante.riscossi : 0;
+  const dL = Number.isFinite(locale?.disponibili) ? locale.disponibili : 0;
+  const dE = Number.isFinite(entrante?.disponibili) ? entrante.disponibili : 0;
+  const disponibili = rE > rL ? dE : rL > rE ? dL : Math.min(dL, dE);
+  return { ...unione, disponibili, riscossi: Math.max(rL, rE) };
+}
+
+/**
  * Fonde un documento entrante sopra quello locale.
  *
  * Si parte SEMPRE dal locale: cosi' un campo che questa versione del gioco non conosce,
@@ -178,6 +205,10 @@ function fondiDocumento(chiave, locale, entrante) {
       giorni[giorno] = fondiNumeri(giorni[giorno] ?? {}, voce);
     }
     return { ...locale, ...(versione ? { versione } : {}), giorni };
+  }
+
+  if (chiave === KEYS.ATTREZZI && GETTONI_SPESI_NON_TORNANO) {
+    return { ...fondiAttrezzi(locale, entrante), ...(versione ? { versione } : {}) };
   }
 
   return { ...fondiNumeri(locale, entrante), ...(versione ? { versione } : {}) };
