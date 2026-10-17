@@ -412,6 +412,7 @@ export default {
     eAltri: 'e altri {n}',
     ultimoBloccato: 'Supera prima tutti gli altri livelli',
     quadro: 'Livello {n}',
+    riprendiLivello: 'Riprendi il livello {n}',
     mosse: 'Mosse',
     tuoRecord: 'Il tuo record: {mosse} mosse',
     riprova: 'Riprova',

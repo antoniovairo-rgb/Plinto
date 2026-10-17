@@ -48,6 +48,7 @@ const VERIFICHE = [
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
   { nome: 'fine del percorso: festa finale e atti chiusi', comando: 'npm', argomenti: ['run', 'e2e-trionfo'] },
   { nome: 'ripresa dopo l interruzione (partita e livello)', comando: 'npm', argomenti: ['run', 'e2e-ripresa'] },
+  { nome: 'un livello lasciato a meta non riparte da zero (PO-008)', comando: 'npm', argomenti: ['run', 'e2e-po008'] },
   { nome: 'salvataggio: esce, rientra e non cancella niente', comando: 'npm', argomenti: ['run', 'e2e-salvataggio'] },
   { nome: 'politica di sicurezza attiva, e non rompe niente', comando: 'npm', argomenti: ['run', 'e2e-sicurezza'] },
   { nome: 'attrezzi del cantiere: tutti e quattro nel gioco', comando: 'npm', argomenti: ['run', 'e2e-attrezzi'] },
