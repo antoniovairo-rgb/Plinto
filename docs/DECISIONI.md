@@ -10,3 +10,6 @@ Le decisioni del PO e della sessione madre, con data e motivo. Le più recenti i
 | 2026-10-17 | madre | PO-004 | B6 (Indietro dopo una ricarica): si corregge. | Comportamento atteso già deciso (mappa › home › uscita); è un difetto, non una scelta di prodotto |
 | 2026-10-17 | madre | PO-004 | B11 (gettoni degli attrezzi dopo «Unisci»): prima si misura; se si riproduce, si corregge. | Il codice dichiara già la regola («mai la somma», `src/persistence/salvataggio.js`); il difetto è solo da lettura del codice |
 | 2026-10-17 | madre | PO-004 | B7 (record della Partita libera condiviso con la Sfida): portato al PO. | Separarli cambia i dati e ciò che il giocatore vede: è una scelta di prodotto non ancora presa |
+| 2026-10-17 | PO | PO-004 | B7: i record della Partita libera e della Sfida si separano. Il record esistente resta alla Partita libera. | Scelta del PO tra tre opzioni («Separo i due record») |
+| 2026-10-17 | PO | PO-002 | La Torre (1.22.0) esce dopo la 1.21.8, con dentro le sue correzioni. | Scelta del PO («Dopo la 1.21.8») |
+| 2026-10-17 | madre | PO-004 | B7 va a una figlia a parte (ramo `sviluppo/b7-record-1.21.8`). | Le figlie nel cloud non ricevono messaggi dalla madre; un filone per figlia |

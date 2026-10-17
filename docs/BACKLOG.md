@@ -8,6 +8,6 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | Voce | Richiesta | Stato | Dove |
 |------|-----------|-------|------|
 | PO-001 | Regole di lavoro della sessione madre: verità e misura, registri, sessioni figlie, chi decide, rilasci (messaggio del 17 ottobre 2026) | in corso (regole in vigore) | questo file, `docs/DECISIONI.md`, `docs/ROADMAP.md` |
-| PO-002 | Uscita della Torre (1.22.0) sul Play Store: «rilasciamo con la torre!» | in attesa del PO (manca il via) | ramo `opera-torre`, `docs/USCITA-TORRE.md` |
+| PO-002 | Uscita della Torre (1.22.0) sul Play Store: «rilasciamo con la torre!» | aperta: esce dopo la 1.21.8 | ramo `opera-torre`, `docs/USCITA-TORRE.md` |
 | PO-003 | Quarta opera, La Piazza: «Sempre 100 livelli, solo dopo l'arena, valuta tu i casi particolari, ok qualche masso e mattone» | aperta (progetto scritto, sviluppo non avviato) | ramo `opera-quarta`, `docs/OPERA-QUARTA.md` |
-| PO-004 | «affida una sessione ramo con sonnet 5.5 o haiku 5.5 un collaudo approfondito per verificare che in produzione non ci siano bug» | in corso: 8 difetti su 11 corretti nella 1.21.7; restano B6, B7, B11 | ramo `collaudo-produzione`, `collaudo/RAPPORTO.md` |
+| PO-004 | «affida una sessione ramo con sonnet 5.5 o haiku 5.5 un collaudo approfondito per verificare che in produzione non ci siano bug» | in corso: 8 difetti su 11 corretti nella 1.21.7; restano B6, B7 (record separati, deciso dal PO), B11 | ramo `collaudo-produzione`, `collaudo/RAPPORTO.md` |
