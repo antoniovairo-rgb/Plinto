@@ -1,0 +1,20 @@
+  ok  home 360x640 it non scorre  [{"sH":640,"cH":640,"bsH":640,"scroll":[],"ultimoBottom":623,"vh":640,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 360x640 it
+  ok  home 360x640 en non scorre  [{"sH":640,"cH":640,"bsH":640,"scroll":[],"ultimoBottom":623,"vh":640,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 360x640 en
+  ok  home 375x667 it non scorre  [{"sH":667,"cH":667,"bsH":667,"scroll":[],"ultimoBottom":637,"vh":667,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 375x667 it
+  ok  home 375x667 en non scorre  [{"sH":667,"cH":667,"bsH":667,"scroll":[],"ultimoBottom":637,"vh":667,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 375x667 en
+  ok  home 412x915 it non scorre  [{"sH":915,"cH":915,"bsH":915,"scroll":[],"ultimoBottom":786,"vh":915,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 412x915 it
+  ok  home 412x915 en non scorre  [{"sH":915,"cH":915,"bsH":915,"scroll":[],"ultimoBottom":786,"vh":915,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 412x915 en
+  NO  home 320x568 it non scorre  [{"sH":568,"cH":568,"bsH":568,"scroll":["pl-screen pl-home:66"],"ultimoBottom":622,"vh":568,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 320x568 it
+  NO  home 320x568 en non scorre  [{"sH":568,"cH":568,"bsH":568,"scroll":["pl-screen pl-home:66"],"ultimoBottom":622,"vh":568,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 320x568 en
+  NO  home 360x600 it non scorre  [{"sH":600,"cH":600,"bsH":600,"scroll":["pl-screen pl-home:35"],"ultimoBottom":619,"vh":600,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 360x600 it
+  NO  home 360x600 en non scorre  [{"sH":600,"cH":600,"bsH":600,"scroll":["pl-screen pl-home:35"],"ultimoBottom":619,"vh":600,"classe":"pl-home-stretta","az":true}]
+  ok  nessun errore console 360x600 en
