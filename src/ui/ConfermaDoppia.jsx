@@ -80,11 +80,17 @@ export function VoceCancellata({ etichetta, valore }) {
  * riprova sarebbero un pedaggio. Lo stile e il velo sono gli stessi, cosi' il giocatore
  * riconosce la forma: una finestra che chiede, sopra tutto il resto.
  *
- * LA STRADA SICURA E' QUELLA FACILE: «Torna a...» e' il pulsante pieno, in alto, e ha il
- * fuoco appena la finestra si apre; «Continua» e' trasparente. Escape, il tocco fuori e
+ * OGNI PULSANTE DICE CHE COSA FA («Riprendi il livello 2», «Gioca il livello 1»). La
+ * prima versione aveva «Continua», e il proprietario l'ha trovata poco chiara: continuare
+ * che cosa? Il titolo dice che cosa c'e' a meta', il testo che cosa si perde.
+ *
+ * LA STRADA SICURA E' QUELLA FACILE: quella che non perde niente e' il pulsante pieno, in
+ * alto, e ha il fuoco appena la finestra si apre; l'altra e' trasparente. Escape, il tocco fuori e
  * il tasto Indietro di Android (gestito da App) chiudono la domanda senza perdere niente.
  */
-export function ConfermaPerdita({ titolo, etichettaTorna, onTorna, onContinua, onAnnulla, t }) {
+export function ConfermaPerdita({
+  titolo, testo, etichettaTorna, etichettaContinua, onTorna, onContinua, onAnnulla,
+}) {
   const sicuro = useRef(null);
   useEffect(() => { sicuro.current?.focus(); }, []);
   useEffect(() => {
@@ -103,12 +109,13 @@ export function ConfermaPerdita({ titolo, etichettaTorna, onTorna, onContinua, o
         onClick={(e) => e.stopPropagation()}
       >
         <p className="pl-azzera__titolo">{titolo}</p>
+        <p className="pl-azzera__testo">{testo}</p>
         <div className="pl-azzera__scelte">
           <button ref={sicuro} type="button" className="pl-btn pl-btn--largo" onClick={onTorna}>
             {etichettaTorna}
           </button>
           <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onContinua}>
-            {t('conferma.continua')}
+            {etichettaContinua}
           </button>
         </div>
       </div>

@@ -607,13 +607,22 @@ export default {
     apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
   },
   // PO-008: la domanda prima di perdere una partita lasciata a meta' (collaudo 1.21.9).
-  // «Continua» fa quello che si era chiesto; «Torna...» riporta alla partita lasciata.
+  // Ogni pulsante dice CHE COSA fa: la prima versione diceva «se continui la perdi» con un
+  // pulsante «Continua», e il proprietario l'ha trovata poco chiara (17 ottobre 2026).
   conferma: {
-    livello: 'Hai il livello {n} a metà: se continui lo perdi.',
-    tornaLivello: 'Torna al livello {n}',
-    sfida: 'Hai la sfida del {giorno} a metà: se continui la perdi.',
-    tornaSfida: 'Torna alla sfida del {giorno}',
-    continua: 'Continua',
+    livelloTitolo: 'Il livello {n} è a metà.',
+    livelloTesto: 'Se giochi il livello {altro}, perdi le mosse fatte nel livello {n}.',
+    riprendiLivello: 'Riprendi il livello {n}',
+    giocaLivello: 'Gioca il livello {altro}',
+    riprovaTitolo: 'Vuoi ricominciare il livello {n}?',
+    riprovaTesto: 'Le mosse che hai fatto finora si perdono.',
+    riprovaSi: 'Sì, ricomincia da capo',
+    sfidaTitolo: 'La sfida del {giorno} è a metà.',
+    sfidaTesto: 'Se apri {nuova}, perdi le mosse fatte nella sfida del {giorno}.',
+    riprendiSfida: 'Riprendi la sfida del {giorno}',
+    apri: 'Apri {nuova}',
+    sfidaOggi: 'la sfida di oggi',
+    sfidaDel: 'la sfida del {giorno}',
   },
   comune: {
     /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.

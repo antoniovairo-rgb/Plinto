@@ -135,9 +135,9 @@ export function App() {
 
   const quadri = useQuadro();
   /**
-   * La domanda prima di perdere una partita a meta' (PO-008): `{ titolo, etichettaTorna,
-   * onTorna, onContinua }`, oppure null. Una sola per tutta l'app, cosi' il tasto
-   * Indietro sa che c'e' e la chiude per prima, come fa con il menu.
+   * La domanda prima di perdere una partita a meta' (PO-008): `{ titolo, testo,
+   * etichettaTorna, etichettaContinua, onTorna, onContinua }`, oppure null. Una sola per
+   * tutta l'app, cosi' il tasto Indietro sa che c'e' e la chiude per prima, come il menu.
    */
   const [conferma, setConferma] = useState(null);
   const chiudiConferma = useCallback(() => setConferma(null), []);
@@ -185,9 +185,14 @@ export function App() {
     const lasciata = sfidaAMeta();
     if (CONFERMA_ALTRA_SFIDA && !confermato && lasciata && lasciata !== giorno) {
       const quando = dataDistesa(lasciata);
+      const nuova = giorno === giornoDiOggi()
+        ? t('conferma.sfidaOggi')
+        : t('conferma.sfidaDel').replace('{giorno}', dataDistesa(giorno));
       setConferma({
-        titolo: t('conferma.sfida').replace('{giorno}', quando),
-        etichettaTorna: t('conferma.tornaSfida').replace('{giorno}', quando),
+        titolo: t('conferma.sfidaTitolo').replace('{giorno}', quando),
+        testo: t('conferma.sfidaTesto').replace('{nuova}', nuova).replace('{giorno}', quando),
+        etichettaTorna: t('conferma.riprendiSfida').replace('{giorno}', quando),
+        etichettaContinua: t('conferma.apri').replace('{nuova}', nuova),
         onTorna: () => {
           setConferma(null);
           if (!riprendi('sfida')) return;
@@ -346,9 +351,12 @@ export function App() {
   const avviaQuadro = useCallback(() => {
     const lasciato = quadri.livelloAMeta();
     if (CONFERMA_ALTRO_LIVELLO && lasciato !== null && lasciato !== quadri.quadro?.numero) {
+      const altro = quadri.quadro?.numero;
       setConferma({
-        titolo: t('conferma.livello').replace('{n}', lasciato),
-        etichettaTorna: t('conferma.tornaLivello').replace('{n}', lasciato),
+        titolo: t('conferma.livelloTitolo').replace('{n}', lasciato),
+        testo: t('conferma.livelloTesto').replace('{altro}', altro).replace('{n}', lasciato),
+        etichettaTorna: t('conferma.riprendiLivello').replace('{n}', lasciato),
+        etichettaContinua: t('conferma.giocaLivello').replace('{altro}', altro),
         onTorna: () => { setConferma(null); quadri.riprendiSalvato(); },
         onContinua: () => { setConferma(null); quadri.avvia(); },
       });
@@ -366,8 +374,10 @@ export function App() {
     if (CONFERMA_RIPROVA && !quadri.esito && quadri.partita?.stats.moves > 0) {
       const n = quadri.quadro.numero;
       setConferma({
-        titolo: t('conferma.livello').replace('{n}', n),
-        etichettaTorna: t('conferma.tornaLivello').replace('{n}', n),
+        titolo: t('conferma.riprovaTitolo').replace('{n}', n),
+        testo: t('conferma.riprovaTesto'),
+        etichettaTorna: t('comune.tornaAllaPartita'),
+        etichettaContinua: t('conferma.riprovaSi'),
         onTorna: () => setConferma(null),
         onContinua: () => { setConferma(null); quadri.riprova(); },
       });
@@ -452,11 +462,12 @@ export function App() {
   const finestraConferma = conferma ? (
     <ConfermaPerdita
       titolo={conferma.titolo}
+      testo={conferma.testo}
       etichettaTorna={conferma.etichettaTorna}
+      etichettaContinua={conferma.etichettaContinua}
       onTorna={conferma.onTorna}
       onContinua={conferma.onContinua}
       onAnnulla={chiudiConferma}
-      t={t}
     />
   ) : null;
 

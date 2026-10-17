@@ -20,8 +20,8 @@
  *   J  con il livello 2 a meta', «Gioca» sul livello 1 chiede conferma (collaudo 1.21.9, E1).
  *   K  «Riprova» nel menu del livello chiede conferma (collaudo 1.21.9, E2).
  *   L  con la sfida di ieri a meta', aprire quella di oggi chiede conferma.
- *   In J, K e L il tasto Indietro chiude la domanda e non perde niente; «Torna al...»
- *   riporta dentro la partita lasciata, «Continua» fa davvero quello che si era chiesto.
+ *   In J, K e L il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
+ *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
  * Stampa una tabella; esce con 1 se in almeno un caso si riparte da zero.
  * Uso: npm run e2e-po008
@@ -370,14 +370,14 @@ function fuocoSicuro(caso, d, atteso) {
   let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
   let dopo = '';
   if (d) {
-    fuocoSicuro('J', d, /Torna al livello 2/);
+    fuocoSicuro('J', d, /Riprendi il livello 2/);
     await page.goBack();
     await page.waitForTimeout(400);
     const dopoIndietro = await dove(page);
     if (await domanda(page) || dopoIndietro !== 'obiettivo') errori.push(`J: Indietro non chiude la domanda restando sull obiettivo (sono su "${dopoIndietro}")`);
     await page.getByRole('button', { name: /^Gioca$/ }).click();
     await page.waitForTimeout(300);
-    await page.getByRole('button', { name: /^Torna al livello 2$/ }).click();
+    await page.getByRole('button', { name: /^Riprendi il livello 2$/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(400);
     dopo = await firma(page);
@@ -403,18 +403,18 @@ function fuocoSicuro(caso, d, atteso) {
   let dopo = await firma(page);
   let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
   if (d) {
-    fuocoSicuro('K', d, /Torna al livello 1/);
+    fuocoSicuro('K', d, /Torna alla partita/);
     await page.goBack();
     await page.waitForTimeout(400);
     dopo = await firma(page);
     if (await domanda(page) || await dove(page) !== 'partita') errori.push('K: Indietro non chiude la domanda restando nel livello');
-    // «Continua» deve ricominciare davvero: una domanda che blocca e basta non e' una correzione.
+    // Il pulsante che perde deve ricominciare davvero: una domanda che blocca e basta non e' una correzione.
     await riprova();
-    await page.getByRole('button', { name: /^Continua$/ }).click();
+    await page.getByRole('button', { name: /^Sì, ricomincia da capo$/ }).click();
     await page.waitForTimeout(500);
     const ricominciato = await firma(page);
-    nota += `; dopo «Continua»: ${ricominciato === prima ? 'NON ricomincia' : 'ricomincia'}`;
-    if (ricominciato === prima) errori.push('K: «Continua» non ricomincia il livello');
+    nota += `; dopo la scelta che perde: ${ricominciato === prima ? 'NON ricomincia' : 'ricomincia'}`;
+    if (ricominciato === prima) errori.push('K: il pulsante che perde non ricomincia il livello');
   }
   registra('K «Riprova» nel menu del livello', { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
   if (!d) errori.push('K: «Riprova» azzera il livello senza chiedere');
@@ -448,13 +448,13 @@ function fuocoSicuro(caso, d, atteso) {
   let dopo = await firma(page);
   let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
   if (d) {
-    fuocoSicuro('L', d, /Torna alla sfida/);
+    fuocoSicuro('L', d, /Riprendi la sfida/);
     await page.goBack();
     await page.waitForTimeout(400);
     if (await domanda(page) || await dove(page) !== 'home') errori.push('L: Indietro non chiude la domanda restando sulla home');
     await page.locator('.pl-sfida-avvio--sfida').click();
     await page.waitForTimeout(300);
-    await page.getByRole('button', { name: /^Torna alla sfida/ }).click();
+    await page.getByRole('button', { name: /^Riprendi la sfida/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(400);
     dopo = await firma(page);
@@ -462,18 +462,18 @@ function fuocoSicuro(caso, d, atteso) {
   const salvata = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-sfida') ?? 'null')?.seedLabel ?? null);
   nota += `; sfida salvata: ${salvata}`;
   if (d) {
-    // «Continua» deve aprire davvero quella di oggi.
+    // Il pulsante che perde deve aprire davvero quella di oggi.
     await page.locator('.pl-hud__menu').click();
     await page.getByRole('button', { name: /^Torna alla home$/ }).click();
     await page.waitForSelector('.pl-home__menu');
     await page.locator('.pl-sfida-avvio--sfida').click();
     await page.waitForTimeout(300);
-    await page.getByRole('button', { name: /^Continua$/ }).click();
+    await page.getByRole('button', { name: /^Apri la sfida di oggi$/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
     await page.waitForTimeout(300);
     const oggi = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-sfida') ?? 'null')?.seedLabel ?? null);
-    nota += `; dopo «Continua»: ${oggi}`;
-    if (oggi === ieri || await dove(page) !== 'partita') errori.push(`L: «Continua» non apre la sfida di oggi (salvata: ${oggi})`);
+    nota += `; dopo la scelta che perde: ${oggi}`;
+    if (oggi === ieri || await dove(page) !== 'partita') errori.push(`L: il pulsante che perde non apre la sfida di oggi (salvata: ${oggi})`);
   }
   registra('L sfida di ieri a meta, apro quella di oggi', { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
   if (!d) errori.push('L: aprire la sfida di oggi non chiede niente e quella di ieri a meta sparisce');
