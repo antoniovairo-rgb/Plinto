@@ -41,6 +41,7 @@ export const DOCUMENTI = [
   KEYS.PROGRESS,
   KEYS.ATTREZZI,
   chiaveRecord(),
+  KEYS.RECORDS_SFIDA,
   KEYS.STATS,
   KEYS.PROFILO,
   KEYS.CHALLENGES,
@@ -206,7 +207,7 @@ function soloNumeri(documento) {
  */
 function ripulisci(chiave, documento) {
   if (vuoto(documento)) return null;
-  if (chiave === KEYS.STATS || chiave === chiaveRecord()) return soloNumeri(documento);
+  if (chiave === KEYS.STATS || chiave === chiaveRecord() || chiave === KEYS.RECORDS_SFIDA) return soloNumeri(documento);
   if (chiave === KEYS.CHALLENGES) {
     const giorni = {};
     for (const [giorno, voce] of Object.entries(vuoto(documento.giorni) ? {} : documento.giorni)) {

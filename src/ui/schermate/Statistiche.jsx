@@ -11,7 +11,7 @@ function tempo(ms) {
  * Statistiche personali. Sono l'unica progressione del gioco: nessun livello,
  * nessuna valuta, nessuna ricompensa a tempo. Si torna per battere se stessi.
  */
-export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietro, onGioca, t }) {
+export function SchermoStatistiche({ record, recordSfida = null, stats, storicoSfide = [], onIndietro, onGioca, t }) {
   const vuoto = stats.partite === 0;
   return (
     <Pagina titolo={t('stats.titolo')} onIndietro={onIndietro} t={t}>
@@ -20,6 +20,10 @@ export function SchermoStatistiche({ record, stats, storicoSfide = [], onIndietr
       ) : (
         <div className="pl-lista">
           <Voce etichetta={t('stats.migliore')} valore={numero(record.best)} />
+          {/* Il record della Sfida e' un altro numero (B7): accanto, e con il suo nome. */}
+          {recordSfida && recordSfida.best > 0 ? (
+            <Voce etichetta={t('stats.recordSfida')} valore={numero(recordSfida.best)} />
+          ) : null}
           <Voce etichetta={t('stats.partite')} valore={stats.partite} />
           <Voce
             etichetta={t('stats.mediaPunteggio')}

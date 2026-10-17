@@ -5,7 +5,7 @@ import { traduttore } from '../i18n/index.js';
 import { impostaLingua } from '../i18n/formato.js';
 import { impostaAudio, suonoBottone, sbloccaAudio } from '../audio/suoni.js';
 import { impostaVibrazione } from '../feel/vibrazione.js';
-import { clearAll } from '../persistence/storage.js';
+import { clearAll, RECORD_SEPARATI } from '../persistence/storage.js';
 import { deadPieces } from '../core/engine.js';
 import { loadStats, loadRecords } from '../persistence/records.js';
 import { sfidaDelGiorno, storicoSfide } from '../persistence/sfide.js';
@@ -78,7 +78,7 @@ export function App() {
   const t = useMemo(() => traduttore(impostazioni.lingua), [impostazioni.lingua]);
 
   const {
-    partita, modalita, esitoSfida, record, nuoviRecord, pezziMorti, riepilogo,
+    partita, modalita, esitoSfida, record, recordLibera, nuoviRecord, pezziMorti, riepilogo,
     nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
     siPuoAnnullare, annulla, sfidaInCorsoDi, ricaricaRecord,
   } = usePartita();
@@ -479,7 +479,7 @@ export function App() {
           partita={quadri.partita}
           siPuoAnnullare={quadri.siPuoAnnullare}
           onAnnulla={quadri.annulla}
-          record={record}
+          record={recordLibera}
           pezziMorti={deadPiecesDi(quadri.partita)}
           onGioca={quadri.gioca}
           onMenu={() => setMenuAperto(true)}
@@ -533,7 +533,7 @@ export function App() {
 
       {schermata === 'home' ? (
         <SchermoHome
-          record={record}
+          record={recordLibera}
           cePartitaSalvata={salvataggioDisponibile}
           sfidaOggi={sfidaOggi}
           sfidaInCorso={sfidaSalvata}
@@ -580,7 +580,8 @@ export function App() {
       {schermata === 'statistiche' ? (
         <SchermoStatistiche
           onGioca={iniziaNuova}
-          record={loadRecords()}
+          record={loadRecords('libera')}
+          recordSfida={RECORD_SEPARATI ? loadRecords('sfida') : null}
           stats={statistiche}
           storicoSfide={storicoSfide()}
           onIndietro={() => setSchermata('home')}
