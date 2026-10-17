@@ -20,6 +20,28 @@ import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
 const SPIEGAZIONE_MODI = true;
 
 /**
+ * Interruttore F1 (PO-004): con una partita libera in corso, «Nuova partita» non e' piu'
+ * una riga della home.
+ *
+ * Era un pulsante largo in piu' sotto la card della libera, alto 52 px piu' lo spazio:
+ * con una partita libera da riprendere la home scorreva di 60 px a 360x640, 35 a
+ * 375x667 e 25 a 1366x768 (misure in docs/sviluppo/RAPPORTO-F1-F3.md), e nessun'altra
+ * riga cambia fra i due stati. Una partita nuova si comincia dal menu della partita
+ * («Nuova partita», App.jsx), dove c'era gia': la card riprende, il menu ricomincia.
+ * Spento, il pulsante torna e la home torna a scorrere: `npm run home-spiegazione` e
+ * `npm run impaginazione` sono rossi.
+ */
+const NUOVA_PARTITA_SOLO_NEL_MENU = true;
+
+/**
+ * Interruttore F2 (PO-004): la card della Sfida non dice «Da giocare» accanto a «Riprendi
+ * la sfida». Con la sfida di oggi in corso e nessuna partita finita, lo stato a destra
+ * era «Da giocare» (in inglese «Resume challenge» / «Not played yet»): due scritte che si
+ * smentiscono. Acceso dice «In corso», che sta nello stesso posto e non aggiunge altezza.
+ */
+const STATO_SFIDA_IN_CORSO = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -51,6 +73,7 @@ export function SchermoHome({
   const recordTesto = record.best > 0 ? `${t('home.record')} ${numero(record.best)}` : '';
   const etichettaSfida = sfidaInCorso ? t('sfida.riprendi') : t('sfida.breve');
   const sfidaTesto = sfidaOggi.partite > 0 ? `${t('home.record')} ${numero(sfidaOggi.best)}` : '';
+  const sfidaStato = sfidaTesto || (sfidaInCorso && STATO_SFIDA_IN_CORSO ? t('home.inCorso') : t('home.daGiocare'));
 
   return (
     <div className="pl-screen pl-home">
@@ -104,7 +127,7 @@ export function SchermoHome({
           ) : null}
         </button>
 
-        {cePartitaSalvata ? (
+        {cePartitaSalvata && !NUOVA_PARTITA_SOLO_NEL_MENU ? (
           <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onGioca}>
             {t('home.nuovaPartita')}
           </button>
@@ -118,7 +141,7 @@ export function SchermoHome({
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className="pl-sfida-avvio__esito">{sfidaTesto || t('home.daGiocare')}</span>
+          <span className="pl-sfida-avvio__esito">{sfidaStato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}
