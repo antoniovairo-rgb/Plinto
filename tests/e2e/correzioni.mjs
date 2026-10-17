@@ -8,6 +8,7 @@
  *   B4  la sfida di ieri lasciata a meta' non fa dire «Riprendi la sfida» oggi;
  *   B5  un gesto annullato dal sistema (pointercancel) non posa il pezzo;
  *   B6  dopo una ricarica dentro un livello, Indietro fa mappa › home › uscita;
+ *   B7  una Sfida del giorno giocata non da' un record alla Partita libera;
  *   B8  nei livelli con due obiettivi la frase non e' tagliata a 360 px;
  *   B10 i collegamenti in fondo alla home sono alti almeno 24 px da toccare.
  *
@@ -19,6 +20,8 @@ import { chromium } from 'playwright';
 import { existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { impronta } from '../../src/persistence/salvataggio.js';
 import { createGame, serializeGame } from '../../src/core/engine.js';
+import { gridFromString } from '../../src/core/grid.js';
+import { getShape } from '../../src/core/shapes.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -204,6 +207,72 @@ console.log('B6. ricarico dentro un livello, poi Indietro: mappa, home, fuori...
   else if (passi.join(' > ') !== atteso) errori.push(`B6: dopo una ricarica Indietro fa «${passi.join(' > ')}», atteso «${atteso}»`);
   else console.log(`  ${passi.join(' > ')}`);
   await contesto.close();
+}
+
+// ---------- B7 ----------
+console.log('B7. finisco una Sfida del giorno: la Partita libera resta senza record...');
+{
+  // Una sfida di oggi a una mossa dalla fine: lo stesso schema di tests/e2e/partita.mjs
+  // (due caselle vuote per riga, colonna e quadrante; il punto chiude la partita).
+  const GIORNO = '2026-10-16';
+  const base = createGame({ seed: GIORNO, now: 0 });
+  const vuote = [
+    [0, 0], [1, 3], [2, 6], [3, 1], [4, 4], [5, 7], [6, 2], [7, 5], [8, 8],
+    [0, 4], [1, 7], [2, 1], [3, 5], [4, 8], [5, 2], [6, 6], [7, 0], [8, 3],
+  ];
+  const righe = Array.from({ length: 9 }, () => Array(9).fill('#'));
+  vuote.forEach(([r, c]) => { righe[r][c] = '.'; });
+  const quasiFinita = serializeGame({
+    ...base,
+    grid: gridFromString(righe.map((r) => r.join('')).join('\n')),
+    hand: [
+      { uid: 'x1', shapeId: 'p1', shape: getShape('p1'), color: 1 },
+      { uid: 'x2', shapeId: 'b33', shape: getShape('b33'), color: 2 },
+      { uid: 'x3', shapeId: 'h5', shape: getShape('h5'), color: 3 },
+    ],
+    score: 395,
+  });
+  const finisciLaSfida = async (page) => {
+    await page.locator('.pl-sfida-avvio--sfida').click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    const g = await page.evaluate(() => {
+      const c = document.querySelectorAll('.pl-plancia .pl-cella')[0].getBoundingClientRect();
+      const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+      return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
+    });
+    await page.mouse.move(g.px, g.py);
+    await page.mouse.down();
+    await page.mouse.move(g.cx, g.cy, { steps: 10 });
+    await page.mouse.up();
+    await page.waitForSelector('.pl-fine__numero', { timeout: 5000 });
+    await page.getByRole('button', { name: /Torna alla home/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+  };
+  const orologio = `${GIORNO}T10:00:00+02:00`;
+
+  // a) Chi non ha mai giocato la Partita libera: dopo la sfida deve leggere «Mai giocata».
+  const a = await apri({ orologio, dati: { 'partita-sfida': quasiFinita } });
+  await finisciLaSfida(a.page);
+  const libera = await a.page.locator('.pl-sfida-avvio--libera').innerText();
+  console.log(`   a) card della Partita libera dopo una sola sfida: «${riassunto(libera)}»`);
+  if (!/Mai giocata/.test(libera)) errori.push(`B7: dopo una sola Sfida la Partita libera dice «${riassunto(libera)}» invece di «Mai giocata»`);
+  const sfida = await a.page.locator('.pl-sfida-avvio--sfida').innerText();
+  if (!/396/.test(sfida)) errori.push(`B7: la card della Sfida non mostra il 396 appena fatto (395 + 1 del punto): «${riassunto(sfida)}»`);
+  await a.contesto.close();
+
+  // b) Chi ha gia' un record: resta alla Partita libera, e la sfida non lo tocca.
+  const b = await apri({
+    orologio,
+    dati: {
+      'partita-sfida': quasiFinita,
+      records: { versione: 1, best: 4321, bestChain: 7, bestMove: 250, bestGroupsInOneMove: 3 },
+    },
+  });
+  await finisciLaSfida(b.page);
+  const liberaB = await b.page.locator('.pl-sfida-avvio--libera').innerText();
+  console.log(`   b) con un record di 4321 gia' salvato: «${riassunto(liberaB)}»`);
+  if (!conRecord(liberaB)) errori.push(`B7: il record esistente non e' piu' della Partita libera: «${riassunto(liberaB)}»`);
+  await b.contesto.close();
 }
 
 // ---------- B8 ----------
