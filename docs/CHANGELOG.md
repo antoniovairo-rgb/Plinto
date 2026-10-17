@@ -7,6 +7,33 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.9] — 17 ottobre 2026
+
+La partita o il livello non ripartono più da zero (PO-008) e i tre difetti del collaudo
+della 1.21.8 (D1-D3, rapporto sul ramo `collaudo-1.21.8`). Ogni correzione ha un
+interruttore e una prova che con l'interruttore spento fallisce, misurata anche sulla build
+di produzione. Arriva anche nell'app Android, che mostra il sito: nessun pacchetto nuovo.
+
+### Corretto
+
+- **Un livello lasciato a metà non riparte da zero** (PO-008): Indietro porta alla mappa
+  ma il livello resta salvato; in home il pulsante grande dice «Riprendi il livello N»
+  anche dopo più di due ore; uscendo mentre si legge l'obiettivo si torna lì; la ripresa
+  vale anche con la guida rimandata; guardare solo l'obiettivo di un altro livello non
+  cancella quello a metà. Interruttori: `CONSERVA_ALL_USCITA`, `SALVA_IN_PRESENTAZIONE`,
+  `NON_COPRE_UN_ALTRO_LIVELLO` (`useQuadro.js`), `RIPRENDI_LIVELLO_A_MANO`,
+  `RIPRESA_SENZA_GUIDA` (`App.jsx`). Nuova prova nel gate: `npm run e2e-po008`.
+- **Unendo un salvataggio il record della Sfida non scende sotto il massimo
+  dell'archivio** (D1, `RECORD_SFIDA_DALL_ARCHIVIO`).
+- **«Sostituisci tutto» toglie i dati di gioco assenti dal file**, come promette la
+  conferma (D2, `SOSTITUISCI_TOGLIE_ASSENTI`); impostazioni e partite in corso restano.
+- **Niente «NaN» in Statistiche da dati già guasti nel telefono** (D3, `LETTURA_RIPULITA`).
+
+### Android
+
+- Il pacchetto caricato su Play Console il 17 ottobre è il **11905 (1.21.8)**. Il
+  repository è già pronto per il prossimo caricamento: 11906, versionName 1.21.9.
+
 ## [1.21.8] — 17 ottobre 2026
 
 Le ultime correzioni del collaudo della 1.21.6 (B6, B7, B11) e i due difetti trovati dal
