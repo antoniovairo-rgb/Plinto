@@ -461,6 +461,20 @@ function fuocoSicuro(caso, d, atteso) {
   }
   const salvata = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-sfida') ?? 'null')?.seedLabel ?? null);
   nota += `; sfida salvata: ${salvata}`;
+  if (d) {
+    // «Continua» deve aprire davvero quella di oggi.
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+    await page.locator('.pl-sfida-avvio--sfida').click();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: /^Continua$/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(300);
+    const oggi = await page.evaluate(() => JSON.parse(localStorage.getItem('plinto:partita-sfida') ?? 'null')?.seedLabel ?? null);
+    nota += `; dopo «Continua»: ${oggi}`;
+    if (oggi === ieri || await dove(page) !== 'partita') errori.push(`L: «Continua» non apre la sfida di oggi (salvata: ${oggi})`);
+  }
   registra('L sfida di ieri a meta, apro quella di oggi', { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
   if (!d) errori.push('L: aprire la sfida di oggi non chiede niente e quella di ieri a meta sparisce');
   await contesto.close();

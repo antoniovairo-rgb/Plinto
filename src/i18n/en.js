@@ -530,6 +530,13 @@ export default {
     voce: 'Get the app',
     apple: 'Tap the Share button at the bottom, then "Add to Home Screen". The game opens like an app, full screen and even offline.',
   },
+  conferma: {
+    livello: 'You have level {n} in progress: if you continue, you lose it.',
+    tornaLivello: 'Back to level {n}',
+    sfida: 'You have the {giorno} challenge in progress: if you continue, you lose it.',
+    tornaSfida: 'Back to the {giorno} challenge',
+    continua: 'Continue',
+  },
   comune: {
     tornaAllaPartita: 'Back to the game',
     indietro: 'Back',

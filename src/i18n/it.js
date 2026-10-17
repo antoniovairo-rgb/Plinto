@@ -606,6 +606,15 @@ export default {
     voce: 'Scarica l\'app',
     apple: 'Tocca il pulsante Condividi in basso, poi «Aggiungi alla schermata Home». Il gioco si apre come un\'app, a schermo intero e anche senza connessione.',
   },
+  // PO-008: la domanda prima di perdere una partita lasciata a meta' (collaudo 1.21.9).
+  // «Continua» fa quello che si era chiesto; «Torna...» riporta alla partita lasciata.
+  conferma: {
+    livello: 'Hai il livello {n} a metà: se continui lo perdi.',
+    tornaLivello: 'Torna al livello {n}',
+    sfida: 'Hai la sfida del {giorno} a metà: se continui la perdi.',
+    tornaSfida: 'Torna alla sfida del {giorno}',
+    continua: 'Continua',
+  },
   comune: {
     /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.
        In un menu sospeso sopra la partita l'ambiguita' pesa, perche' la voce sotto

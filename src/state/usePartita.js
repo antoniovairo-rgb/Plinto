@@ -165,6 +165,15 @@ export function usePartita() {
      * 1.21.6, B4: la home diceva «Riprendi la sfida» e poi ne partiva una nuova).
      */
     sfidaInCorsoDi: (giorno) => partitaSalvata('sfida')?.seedLabel === giorno,
+    /**
+     * La sfida lasciata a meta' con almeno una mossa, senza caricarla: serve a chiedere
+     * conferma prima di coprirla con quella di un altro giorno (PO-008). Una sfida aperta
+     * e mai toccata non ha niente da perdere, e non merita la domanda.
+     */
+    sfidaAMeta: () => {
+      const stato = partitaSalvata('sfida');
+      return stato && stato.stats.moves > 0 ? stato.seedLabel : null;
+    },
     /** Rilegge i record dall'archivio (dopo un'importazione o un azzeramento). */
     ricaricaRecord: () => {
       setRecord(loadRecords(modalita));
