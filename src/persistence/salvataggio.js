@@ -30,8 +30,37 @@
  * giocato davvero, i totali non si sommano.
  */
 
-import { KEYS, chiaveRecord, read, write } from './storage.js';
+import { KEYS, RECORD_SEPARATI, chiaveRecord, read, remove, write } from './storage.js';
 import { giornoValido } from '../core/sfida.js';
+import { loadRecords, recordSfidaIniziale } from './records.js';
+
+/**
+ * Unendo, il record della Sfida non scende sotto il massimo dell'archivio delle sfide
+ * (collaudo 1.21.8, D1). Spento, chi non ha ancora il documento `records-sfida` (era
+ * sulla 1.21.7 e non ha chiuso una Sfida con la 1.21.8) fondeva con `null`, quindi
+ * vinceva il file: archivio con 900, file con record 100, e Statistiche passava da 900 a
+ * 100. Regola B7: il record della Sfida parte dal massimo dell'archivio. Interruttore
+ * per la prova rosso/verde in `tests/correzioni-d1-d3.test.js` e `npm run correzioni`.
+ */
+export const RECORD_SFIDA_DALL_ARCHIVIO = true;
+
+/**
+ * «Sostituisci tutto» toglie i documenti locali che il file non contiene (collaudo
+ * 1.21.8, D2). Spento, un file della 1.21.7 (senza `records-sfida`) lasciava il record
+ * della Sfida, l'archivio e le statistiche di questo telefono mescolati a quelli del
+ * file, mentre la conferma prometteva «resta solo quello che c'e' nel salvataggio».
+ * Si tocca solo l'elenco DOCUMENTI, e non le impostazioni: partite a meta', ripresa,
+ * origine e recensione restano. Interruttore per la prova rosso/verde come sopra.
+ */
+export const SOSTITUISCI_TOGLIE_ASSENTI = true;
+
+/**
+ * Record, statistiche e sfide gia' guasti in localStorage si ripuliscono in LETTURA
+ * (collaudo 1.21.8, D3). C2 ripulisce solo all'importazione: chi aveva importato un file
+ * guasto con la 1.21.7 o prima continuava a leggere «NaN» e «10 ott 99 (undefined)» in
+ * Statistiche. Lo usano `records.js` e `sfide.js`. Interruttore come sopra.
+ */
+export const LETTURA_RIPULITA = true;
 
 /**
  * Unendo, i gettoni degli attrezzi spesi non tornano (collaudo 1.21.6, B11). Spento, il
@@ -225,7 +254,7 @@ function fondiDocumento(chiave, locale, entrante) {
 }
 
 const vuoto = (x) => !x || typeof x !== 'object' || Array.isArray(x);
-const numeroBuono = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+export const numeroBuono = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 
 /** Solo i campi numerici sensati (piu' la versione del documento). */
 function soloNumeri(documento) {
@@ -283,17 +312,40 @@ function ripulisci(chiave, documento) {
 export function applicaSalvataggio(salvataggio, { sostituisci = false } = {}) {
   const livelliPrima = quantiLivelli(read(KEYS.PROGRESS, null));
   const scritti = [];
+  const rimossi = [];
 
   for (const chiave of DOCUMENTI) {
     const entrante = ripulisci(chiave, salvataggio.dati?.[chiave]);
-    if (!entrante) continue;
+    if (!entrante) {
+      // Le impostazioni sono del telefono: senza le loro nel file, restano quelle di qui.
+      if (sostituisci && SOSTITUISCI_TOGLIE_ASSENTI && !SOLO_SE_SOSTITUISCI.has(chiave)
+        && read(chiave, null) !== null && remove(chiave)) rimossi.push(chiave);
+      continue;
+    }
     if (!sostituisci && SOLO_SE_SOSTITUISCI.has(chiave)) continue;
 
-    const daScrivere = sostituisci ? entrante : fondiDocumento(chiave, read(chiave, null), entrante);
+    // Senza documento, il record della Sfida locale e' quello che Statistiche mostra: il
+    // massimo dell'archivio (B7), non null. Con l'archivio vuoto resta null, e il
+    // documento entra com'e' (lo vuole `tests/record-separati.test.js`).
+    let locale = read(chiave, null);
+    if (locale === null && RECORD_SFIDA_DALL_ARCHIVIO && RECORD_SEPARATI && chiave === KEYS.RECORDS_SFIDA
+      && recordSfidaIniziale().best > 0) locale = loadRecords('sfida');
+    const daScrivere = sostituisci ? entrante : fondiDocumento(chiave, locale, entrante);
     if (write(chiave, daScrivere)) scritti.push(chiave);
   }
 
-  return { scritti, livelliPrima, livelliDopo: quantiLivelli(read(KEYS.PROGRESS, null)) };
+  // L'archivio si fonde DOPO il record (ordine di DOCUMENTI): un giorno importato piu'
+  // alto del record lo rialza. Solo se il documento c'e': senza, la lettura lo deriva.
+  if (RECORD_SFIDA_DALL_ARCHIVIO && RECORD_SEPARATI) {
+    const record = read(KEYS.RECORDS_SFIDA, null);
+    const massimo = recordSfidaIniziale().best;
+    if (record && typeof record === 'object' && massimo > 0 && !(numeroBuono(record.best) && record.best >= massimo)
+      && write(KEYS.RECORDS_SFIDA, { ...record, best: massimo }) && !scritti.includes(KEYS.RECORDS_SFIDA)) {
+      scritti.push(KEYS.RECORDS_SFIDA);
+    }
+  }
+
+  return { scritti, rimossi, livelliPrima, livelliDopo: quantiLivelli(read(KEYS.PROGRESS, null)) };
 }
 
 /** Quanti livelli risultano superati in un documento dei progressi. */

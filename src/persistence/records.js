@@ -7,6 +7,7 @@
 import { KEYS, chiaveRecord } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 import { caricaSfide } from './sfide.js';
+import { LETTURA_RIPULITA, numeroBuono } from './salvataggio.js';
 
 /**
  * Versione dei due documenti di questo modulo.
@@ -38,7 +39,7 @@ const STATISTICHE_PREDEFINITE = {
  * Intreccio partono da zero: non si possono ricostruire, e inventarli sarebbe peggio.
  * Non si scrive niente finche' non si chiude una sfida: tornare indietro resta gratis.
  */
-function recordSfidaIniziale() {
+export function recordSfidaIniziale() {
   let best = 0;
   for (const voce of Object.values(caricaSfide())) {
     const punti = voce?.best;
@@ -54,12 +55,29 @@ function recordSfidaIniziale() {
 export function loadRecords(modalita = 'libera') {
   const chiave = chiaveRecord(modalita);
   const predefiniti = chiave === KEYS.RECORDS_SFIDA ? recordSfidaIniziale() : RECORD_PREDEFINITI;
-  return leggiDocumento(chiave, { versione: VERSIONE, predefiniti });
+  return ripulito(leggiDocumento(chiave, { versione: VERSIONE, predefiniti }), predefiniti);
+}
+
+/**
+ * Un campo che non e' un numero sensato torna al suo valore iniziale (collaudo 1.21.8,
+ * D3): un dato importato guasto prima della 1.21.8 faceva scrivere «NaN» a Statistiche.
+ * I campi sconosciuti restano, come vuole `leggiDocumento` per le versioni future.
+ */
+function ripulito(documento, predefiniti) {
+  if (!LETTURA_RIPULITA) return documento;
+  const uscita = { ...documento };
+  for (const [campo, iniziale] of Object.entries(predefiniti)) {
+    if (!numeroBuono(uscita[campo])) uscita[campo] = iniziale;
+  }
+  return uscita;
 }
 
 /** @returns {{partite:number, punteggioTotale:number, mosseTotali:number, gruppiTotali:number, griglieSvuotate:number, tempoTotaleMs:number}} */
 export function loadStats() {
-  return leggiDocumento(KEYS.STATS, { versione: VERSIONE, predefiniti: STATISTICHE_PREDEFINITE });
+  return ripulito(
+    leggiDocumento(KEYS.STATS, { versione: VERSIONE, predefiniti: STATISTICHE_PREDEFINITE }),
+    STATISTICHE_PREDEFINITE,
+  );
 }
 
 /**

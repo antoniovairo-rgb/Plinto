@@ -17,6 +17,12 @@
  *   C1  a 360x640 la home non scorre nemmeno con il pie' di pagina a capo, con qualunque font;
  *   C2  una sfida importata con numeri guasti non fa comparire «NaN» in Statistiche e Archivio.
  *
+ * E quelle del collaudo della 1.21.8 (rapporto sul ramo `collaudo-1.21.8`):
+ *
+ *   D1  unendo, il record della Sfida non scende sotto il massimo dell'archivio;
+ *   D2  «Sostituisci tutto» toglie i documenti locali che il file non contiene;
+ *   D3  record, statistiche e sfide gia' guasti in localStorage non mostrano «NaN».
+ *
  * Uso: npm run correzioni
  */
 
@@ -379,6 +385,87 @@ console.log('C2. importo sfide con numeri guasti: niente «NaN» in Statistiche 
   }
   // La voce buona deve arrivare: senza, «niente NaN» vorrebbe solo dire «niente importato».
   if (!visti) errori.push('C2: il giorno buono (210 punti) non compare ne in Statistiche ne nell Archivio: la prova non prova nulla');
+  await contesto.close();
+}
+
+// ---------- D1, D2, D3 (collaudo 1.21.8) ----------
+
+/** Incolla un salvataggio e sceglie Unisci o Sostituisci, come farebbe chi gioca. */
+async function importaIncollando(page, dati, modo) {
+  const testo = JSON.stringify({ gioco: 'plinto', formato: 1, versioneGioco: '1.21.7', impronta: impronta(dati), dati });
+  await page.getByRole('button', { name: 'Impostazioni' }).click();
+  await page.getByRole('button', { name: /Oppure incolla/ }).click();
+  await page.locator('textarea').fill(testo);
+  await page.getByRole('button', { name: /^Leggi/ }).click();
+  if (modo === 'sostituisci') {
+    await page.getByRole('button', { name: /^Sostituisci tutto/ }).click();
+    await page.getByRole('button', { name: /^Sì$/ }).click();
+  } else {
+    await page.getByRole('button', { name: /^Unisci ai miei/ }).click();
+  }
+  await page.waitForTimeout(300);
+}
+const leggiTutto = (page) => page.evaluate(() => Object.fromEntries(
+  Object.keys(window.localStorage).filter((k) => k.startsWith('plinto:'))
+    .map((k) => [k.slice(7), JSON.parse(window.localStorage.getItem(k))]),
+));
+async function testoStatistiche(page) {
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.pl-home__menu');
+  await page.getByRole('button', { name: 'Statistiche' }).first().click();
+  await page.waitForTimeout(300);
+  return page.locator('body').innerText();
+}
+const ARCHIVIO = { versione: 2, giorni: { '2026-10-10': { best: 900, partite: 2, regole: null }, '2026-10-11': { best: 300, partite: 1, regole: null } } };
+const STAT = { versione: 1, partite: 4, punteggioTotale: 2000, mosseTotali: 40, gruppiTotali: 8, griglieSvuotate: 0, tempoTotaleMs: 600000 };
+
+console.log('D1. unisco un file con record della Sfida 100 su un archivio con 900: il record resta 900...');
+{
+  const { contesto, page } = await apri({ dati: { sfide: ARCHIVIO, statistiche: STAT }, orologio: '2026-10-16T10:00:00+02:00' });
+  await importaIncollando(page, { 'records-sfida': { versione: 1, best: 100, bestChain: 0, bestMove: 0, bestGroupsInOneMove: 0 } }, 'unisci');
+  const s = await leggiTutto(page);
+  console.log('  records-sfida dopo Unisci:', JSON.stringify(s['records-sfida']));
+  if (!(s['records-sfida']?.best >= 900)) errori.push(`D1: dopo Unisci records-sfida.best = ${s['records-sfida']?.best}, atteso 900`);
+  const t = await testoStatistiche(page);
+  const riga = t.match(/Record della Sfida del giorno\s*([\d.,\s]+)/)?.[1]?.replace(/\D/g, '');
+  console.log('  Statistiche, Record della Sfida del giorno:', riga);
+  if (riga !== '900') errori.push(`D1: Statistiche mostra il record della Sfida «${riga}», atteso 900`);
+  await contesto.close();
+}
+
+console.log('D2. sostituisco con un file senza records-sfida, sfide e statistiche: quelli locali spariscono...');
+{
+  const { contesto, page } = await apri({
+    dati: { 'records-sfida': { versione: 1, best: 5000, bestChain: 1, bestMove: 1, bestGroupsInOneMove: 1 }, sfide: ARCHIVIO, statistiche: STAT },
+    orologio: '2026-10-16T10:00:00+02:00',
+  });
+  await importaIncollando(page, { records: { versione: 1, best: 50, bestChain: 1, bestMove: 1, bestGroupsInOneMove: 1 }, quadri: { versione: 1, livelli: { 1: vinto(1) } } }, 'sostituisci');
+  const s = await leggiTutto(page);
+  console.log('  dopo Sostituisci:', JSON.stringify({ rs: s['records-sfida'], sf: s.sfide, st: s.statistiche, r: s.records?.best, settings: Boolean(s.settings) }));
+  for (const via of ['records-sfida', 'sfide', 'statistiche']) {
+    if (s[via] !== undefined) errori.push(`D2: dopo «Sostituisci tutto» resta il documento locale «${via}»: ${JSON.stringify(s[via])}`);
+  }
+  if (s.records?.best !== 50) errori.push(`D2: il record del file (50) non e' arrivato: ${JSON.stringify(s.records)}`);
+  if (!s.settings) errori.push('D2: le impostazioni sono sparite, e non dovevano');
+  await contesto.close();
+}
+
+console.log('D3. dati gia guasti in localStorage: niente «NaN» ne «undefined» in Statistiche...');
+{
+  const { contesto, page } = await apri({
+    dati: {
+      records: { versione: 1, best: 'x', bestChain: 2, bestMove: -5, bestGroupsInOneMove: 1 },
+      statistiche: { ...STAT, punteggioTotale: 'a' },
+      sfide: { versione: 2, giorni: { '2026-10-10': { best: '99', regole: null }, '2026-10-12': { best: 210, partite: 3, regole: null } } },
+    },
+    orologio: '2026-10-16T10:00:00+02:00',
+  });
+  const t = await testoStatistiche(page);
+  const guasto = t.match(/NaN|undefined|Infinity|-5/);
+  console.log('  Statistiche:', riassunto(t));
+  if (guasto) errori.push(`D3: in Statistiche compare «${guasto[0]}»: ${riassunto(t)}`);
+  // La voce buona deve restare: senza, «niente NaN» vorrebbe dire «niente di niente».
+  if (!/210 \(3\)/.test(t)) errori.push('D3: il giorno buono (210, 3 partite) non compare: la prova non prova nulla');
   await contesto.close();
 }
 
