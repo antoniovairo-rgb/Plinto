@@ -193,3 +193,33 @@ describe('un file modificato a mano (collaudo 1.21.6, B9)', () => {
     });
   }
 });
+
+describe('gli attrezzi unendo (collaudo 1.21.6, B11)', () => {
+  // Il percorso del rapporto, con le funzioni vere: esporto con 3 gettoni, li spendo,
+  // reimporto lo stesso file con «Unisci». Prima della correzione tornavano tutti e tre.
+  it('i gettoni spesi dopo l esportazione non tornano reimportando', async () => {
+    const { riscuoti, usaAttrezzo, caricaAttrezzi } = await import('../src/persistence/attrezzi.js');
+    const vinti = {};
+    for (let n = 1; n <= 15; n += 1) vinti[n] = { mosse: 10, tentativi: 1 };
+    scrivi('progress', livelli(vinti));
+    riscuoti(15);
+    expect(caricaAttrezzi().disponibili).toBe(3);
+    const file = leggiSalvataggio(serializza(componiSalvataggio()));
+    usaAttrezzo(); usaAttrezzo(); usaAttrezzo();
+    applicaSalvataggio(file.salvataggio);
+    riscuoti(15);   // come fa il gioco quando riapre la mappa
+    expect(caricaAttrezzi().disponibili).toBe(0);
+  });
+
+  it('un file da un telefono che ha convertito piu livelli porta i suoi gettoni', () => {
+    scrivi('attrezzi', { versione: 1, disponibili: 0, riscossi: 1 });
+    applicaSalvataggio({ formato: 1, dati: { attrezzi: { versione: 1, disponibili: 2, riscossi: 3 } } });
+    expect(leggi('attrezzi')).toMatchObject({ disponibili: 2, riscossi: 3 });
+  });
+
+  it('un file vecchio, che ha riscosso meno, non cambia il saldo di qui', () => {
+    scrivi('attrezzi', { versione: 1, disponibili: 1, riscossi: 4 });
+    applicaSalvataggio({ formato: 1, dati: { attrezzi: { versione: 1, disponibili: 3, riscossi: 3 } } });
+    expect(leggi('attrezzi')).toMatchObject({ disponibili: 1, riscossi: 4 });
+  });
+});
