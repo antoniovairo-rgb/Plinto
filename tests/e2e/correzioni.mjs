@@ -23,6 +23,10 @@
  *   D2  «Sostituisci tutto» toglie i documenti locali che il file non contiene;
  *   D3  record, statistiche e sfide gia' guasti in localStorage non mostrano «NaN».
  *
+ * E quella del collaudo della 1.21.9 (rapporto `docs/sviluppo/RAPPORTO-D4.md`):
+ *
+ *   D4  il punteggio medio e' il totale diviso per le partite, in italiano e in inglese.
+ *
  * Uso: npm run correzioni
  */
 
@@ -466,6 +470,28 @@ console.log('D3. dati gia guasti in localStorage: niente «NaN» ne «undefined�
   if (guasto) errori.push(`D3: in Statistiche compare «${guasto[0]}»: ${riassunto(t)}`);
   // La voce buona deve restare: senza, «niente NaN» vorrebbe dire «niente di niente».
   if (!/210 \(3\)/.test(t)) errori.push('D3: il giorno buono (210, 3 partite) non compare: la prova non prova nulla');
+  await contesto.close();
+}
+
+// ---------- D4 (collaudo 1.21.9) ----------
+// 12 345 partite rompevano la media in tutte e due le lingue: «12,345» e' NaN, «12.345»
+// vale 12,345. Totale scelto perche' la media giusta sia esattamente 5000.
+console.log('D4. 12345 partite, totale 61725000: il punteggio medio e 5000, in italiano e in inglese...');
+for (const [lingua, bottone, etichetta] of [['it', 'Statistiche', 'Punteggio medio'], ['en', 'Stats', 'Average score']]) {
+  const { contesto, page } = await apri({
+    dati: {
+      settings: { versione: 2, introVista: true, lingua },
+      statistiche: { ...STAT, partite: 12345, punteggioTotale: 61725000 },
+    },
+  });
+  await page.getByRole('button', { name: bottone }).first().click();
+  await page.waitForTimeout(300);
+  const t = await page.locator('body').innerText();
+  const riga = t.match(new RegExp(`${etichetta}\\s*([^\\n]+)`))?.[1]?.trim();
+  console.log(`  ${lingua}: ${etichetta} = ${riga}`);
+  if (riga?.replace(/(?<=\d)[.,\s\u00a0\u202f](?=\d)/g, '') !== '5000') {
+    errori.push(`D4 (${lingua}): «${etichetta}» mostra «${riga}», atteso 5000`);
+  }
   await contesto.close();
 }
 
