@@ -1,0 +1,25 @@
+S2 salvato dopo Indietro: liv1
+S2 tappa 2 bloccata: true
+S3 chiavi: plinto:settings
+S4 dove dopo click libera: partita
+S4 firma libera: PUNTEGGIO 3 RECORD 0 / 0 piene
+S4 home azioni: LIVELLO 1 Mappa dei livelli 0 di 100 Riprendi la partita Mai giocata Nuova partita Sfida del giorno Da giocare Archivio delle sfide
+S4 dove dopo due indietro: home
+S4 home azioni con entrambi: RIPRENDI IL LIVELLO 1 Mappa dei livelli 0 di 100 Riprendi la partita Mai giocata Nuova partita Sfida del giorno Da giocare Archivio delle sfide
+S4 dopo ricarica dove: home
+S5 it 360x640: {"testo":"RIPRENDI IL LIVELLO 1","scrollH":640,"clientH":640,"ovX":false,"btnTaglio":false,"btnBottom":165}
+S5 it 412x915: {"testo":"RIPRENDI IL LIVELLO 1","scrollH":915,"clientH":915,"ovX":false,"btnTaglio":false,"btnBottom":303}
+S5 it 1280x800: {"testo":"RIPRENDI IL LIVELLO 1","scrollH":800,"clientH":800,"ovX":false,"btnTaglio":false,"btnBottom":247}
+S5 en 360x640: {"testo":"RESUME LEVEL 1","scrollH":640,"clientH":640,"ovX":false,"btnTaglio":false,"btnBottom":165}
+S5 en 412x915: {"testo":"RESUME LEVEL 1","scrollH":915,"clientH":915,"ovX":false,"btnTaglio":false,"btnBottom":303}
+S5 en 1280x800: {"testo":"RESUME LEVEL 1","scrollH":800,"clientH":800,"ovX":false,"btnTaglio":false,"btnBottom":247}
+S6 dove: partita
+S6 dopo ricarica: partita | PUNTEGGIO 4 RECORD 0 / 0 piene -> PUNTEGGIO 4 RECORD 0 / 0 piene
+S6 indietro dove: home
+S6 ricarica da home: home
+S6 azioni: LIVELLO 1 Mappa dei livelli 0 di 100 Partita libera Mai giocata Riprendi la sfida Da giocare Archivio delle sfide
+S7 menu presente: 1
+S7 ricarica: partita PUNTEGGIO 3 RECORD 0 / 0 piene -> PUNTEGGIO 3 RECORD 0 / 0 piene
+S7 indietro1: mappa
+S7 indietro2: home
+errori di pagina: nessuno

@@ -1,0 +1,12 @@
+
+Tasto Indietro:
+  ok  si entra nel livello 1
+  ok  da un livello si torna alla mappa, non si esce
+  ok  dalla mappa si torna alla home
+  ok  dalla home Indietro esce, invece di lasciare il gioco bloccato
+  ok  dopo un Indietro resta gia una voce in cronologia (nell app installata: non si chiude)
+  ok  Indietro chiude il menu
+  ok  chiudere il menu non esce dalla partita
+  ok  dalla partita si torna alla home
+
+Tutte le verifiche del tasto Indietro sono passate.

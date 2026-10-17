@@ -1,0 +1,16 @@
+T1 firma liv3 a meta: PUNTEGGIO 2 RECORD 0 / LIVELLO 3 Chiudi 2 quadranti 0/2 MOSSE 11
+T1 salvato: liv3
+T1 guardo obiettivo liv1, salvato: liv3
+T1 dopo Gioca su liv1, salvato: liv1
+T1 home etichetta: RIPRENDI IL LIVELLO 1
+T2 Riprova: PUNTEGGIO 16 RECORD 0 / LIVELLO 3 Chiudi 2 quadranti 0/2 MOSSE 8 -> PUNTEGGIO 0 RECORD 0 / LIVELLO 3 Chiudi 2 quadranti 0/2 MOSSE 12 | dove partita | salvato liv3 | conferma? 0
+T2 dopo ricarica: partita liv3
+T3 mosse prima della fine: 68 dove fine
+T3 fine: salvato/ripresa: nessuno / null
+T3 ricarica sulla schermata di fine: home etichetta LIVELLO 3
+T3 riaperto dopo la fine: partita PUNTEGGIO 0 RECORD 0 / LIVELLO 3 Chiudi 2 quadranti 0/2 MOSSE 12
+T4 pulsante riprova: 1
+T4 dopo Riprova: partita salvato liv3
+T4 salvato dopo 1 mossa: liv3
+T4 ricarica: partita PUNTEGGIO 2 RECORD 0 / LIVELLO 3 Chiudi 2 quadranti 0/2 MOSSE 11
+errori di pagina: nessuno
