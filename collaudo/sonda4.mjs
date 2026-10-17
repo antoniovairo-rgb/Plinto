@@ -1,0 +1,16 @@
+import { apri } from './lib.mjs';
+import { leggi, mosseValide, tocca2, trascina } from './gioco.mjs';
+const { browser, page, errori } = await apri({ storage: { settings: { versione: 1, introVista: true } } });
+await page.getByRole('button', { name: 'Partita libera' }).click();
+await page.waitForSelector('.pl-plancia .pl-cella');
+let s = await leggi(page);
+console.log(JSON.stringify(s.pezzi.map(p=>p&&p.celle.length)), s.hud);
+let m = mosseValide(s)[0]; console.log('mossa', m);
+await tocca2(page, m);
+s = await leggi(page); console.log('dopo tocca2', s.griglia.flat().reduce((a,b)=>a+b,0), s.hud);
+m = mosseValide(s).find(x=>x.pezzo!==m.pezzo); console.log('mossa', m);
+await trascina(page, m);
+s = await leggi(page); console.log('dopo trascina', s.griglia.flat().reduce((a,b)=>a+b,0), s.hud);
+console.log(s.griglia.map(r=>r.join('')).join('\n'));
+console.log(errori);
+await browser.close();

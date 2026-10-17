@@ -1,0 +1,10 @@
+inizio Thu Oct 15 2026 23:58:31 GMT+0200 (Ora legale dell’Europa centrale)
+CARD SFIDA: Sfida del giorno / Da giocare
+seedLabel: 2026-10-15
+FINE: SFIDA DEL GIORNO | Oggi la partita è la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine. | PUNTEGGIO
+CARD dopo partita (giorno 15): Sfida del giorno / Record 395
+ora -> Fri Oct 16 2026 00:03:39 GMT+0200 (Ora legale dell’Europa centrale)
+CARD senza ricaricare (giorno 16): Sfida del giorno / Da giocare
+seedLabel dopo mezzanotte: 2026-10-16
+CARD dopo tornare in home: Riprendi la sfida / Da giocare
+[]

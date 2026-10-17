@@ -1,0 +1,22 @@
+360 en L100: "Reach Chain 3 + Score 450 points" 218>199
+360 en L48: "Clear 6 groups + Score 225 points" 219>199
+360 en L66: "Reach Chain 5 + Clear 90 squares" 218>206
+360 en L74: "Clear 11 groups + Make 2 Interlaces" 227>206
+360 en L80: "Make 2 Interlaces + Score 500 points" 239>199
+360 en L88: "Clear 10 groups + Clear 90 squares" 226>199
+360 en L92: "Make 3 Interlaces + Clear 117 squares" 241>199
+360 it L100: "Arriva a Catena 3 + Fai 450 punti" 211>199
+360 it L44: "Chiudi 4 quadranti + Arriva a Catena 2" 245>214
+360 it L52: "Fai un Intreccio + Chiudi 7 quadranti" 230>214
+360 it L56: "Arriva a Catena 3 + Chiudi 9 gruppi" 225>214
+360 it L66: "Arriva a Catena 5 + Elimina 90 caselle" 242>206
+360 it L70: "Chiudi 5 righe + Arriva a Catena 6" 216>214
+360 it L88: "Chiudi 10 gruppi + Elimina 90 caselle" 235>199
+360 it L92: "Fai 3 Intrecci + Elimina 117 caselle" 215>199
+390 en L52: "Make one Interlace + Clear 7 quadrants" 251>243
+390 en L80: "Make 2 Interlaces + Score 500 points" 239>228
+390 en L92: "Make 3 Interlaces + Clear 117 squares" 241>228
+390 it L44: "Chiudi 4 quadranti + Arriva a Catena 2" 245>243
+390 it L66: "Arriva a Catena 5 + Elimina 90 caselle" 242>236
+390 it L88: "Chiudi 10 gruppi + Elimina 90 caselle" 235>229
+totale 90
