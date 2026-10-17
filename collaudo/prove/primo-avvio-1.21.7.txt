@@ -1,0 +1,8 @@
+loc s360 it-IT: 5 passi; ultimo: PLINTO | PASSO 6 DI 6 | IL PERCORSO | Il gioco vero sono 100 livelli. Ognuno ha il suo obi; errori: []
+loc s360 en-US: 5 passi; ultimo: PLINTO | STEP 6 OF 6 | THE PATH | The real game is 100 levels. Each has its own goal and a; errori: []
+loc s390 it-IT: 5 passi; ultimo: PLINTO | PASSO 6 DI 6 | IL PERCORSO | Il gioco vero sono 100 livelli. Ognuno ha il suo obi; errori: []
+loc s390 en-US: 5 passi; ultimo: PLINTO | STEP 6 OF 6 | THE PATH | The real game is 100 levels. Each has its own goal and a; errori: []
+loc s412 it-IT: 5 passi; ultimo: PLINTO | PASSO 6 DI 6 | IL PERCORSO | Il gioco vero sono 100 livelli. Ognuno ha il suo obi; errori: []
+loc s412 en-US: 5 passi; ultimo: PLINTO | STEP 6 OF 6 | THE PATH | The real game is 100 levels. Each has its own goal and a; errori: []
+loc d1280 it-IT: 5 passi; ultimo: PLINTO | PASSO 6 DI 6 | IL PERCORSO | Il gioco vero sono 100 livelli. Ognuno ha il suo obi; errori: []
+loc d1280 en-US: 5 passi; ultimo: PLINTO | STEP 6 OF 6 | THE PATH | The real game is 100 levels. Each has its own goal and a; errori: []

@@ -1,0 +1,6 @@
+HOME PRIMA: LIVELLO 1 | 0 di 100 | Partita libera | Sfida del giorno
+DOPO FILE: Nel salvataggio ci sono 12 livelli superati. Adesso ne hai 0. | Unisci ai miei | Sostituisci tutto
+DOPO UNISCI: Scegli un file da importare | Fatto. Adesso hai 12 livelli superati.
+HOME DOPO IMPORT (senza ricaricare): LIVELLO 13 | 12 di 100 | Partita libera | Record 4.321 | Sfida del giorno
+HOME DOPO RICARICA: LIVELLO 13 | 12 di 100 | Partita libera | Record 4.321 | Sfida del giorno
+[]

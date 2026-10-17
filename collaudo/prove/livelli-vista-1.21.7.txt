@@ -1,0 +1,9 @@
+livelli provati 32
+1: LE FONDAMENTA /  / LIVELLO 1 /  / Chiudi 2 righe / 
+2: LE FONDAMENTA /  / LIVELLO 2 /  / Chiudi una colonna / 
+11: I PILASTRI /  / LIVELLO 11 /  / Chiudi 5 gruppi / 
+21: I PILASTRI /  / LIVELLO 21 /  / Chiudi 7 gruppi / 
+41: IL VUOTO /  / LIVELLO 41 /  / Arriva a Catena 4 / 
+61: LA STRADA /  / LIVELLO 61 /  / Fai 4 Intrecci / 
+81: L'ARCO /  / LIVELLO 81 /  / Chiudi 11 quadranti / 
+100: L'ULTIMA PIETRA /  / LIVELLO 100 /  / Arriva a Catena 3 + Fai 450 punti / 

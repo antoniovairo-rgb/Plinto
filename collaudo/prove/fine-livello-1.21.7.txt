@@ -1,0 +1,22 @@
+
+## fine-atto: livello 10, sequenza 13 mosse
+s360 it: LIVELLO 10 | Livello superato! | Chiudi 3 colonne | Hai guadagnato 2 gettoni per gli attrezzi. | Adesso hai 2 gettoni. | MOSSE | 13 | NUOVO RECORD: 13 MOSSE | Le fondamenta: completo | Righe, colonne e quadranti: le mosse che regg
+   overflow=[] scroll=no errori=[]
+s360 en: LEVEL 10 | Level cleared! | Clear 3 columns | You earned 2 tool tokens. | You now have 2 tokens. | MOVES | 13 | NEW BEST: 13 MOVES | Foundations: complete | Rows, columns and quadrants: the moves everything else rests on. | Every 
+   overflow=[] scroll=no errori=[]
+
+## vittoria-5: livello 5, sequenza NON TROVATA
+
+## sconfitta-5: livello 5, sequenza 15 mosse
+s360 it: LIVELLO 5 | Livello non superato | Hai finito le mosse. | Chiudi 3 righe | 0 / 3 | RIPROVA | Torna ai livelli
+   overflow=[] scroll=no errori=[]
+s360 en: LEVEL 5 | Level failed | You ran out of moves. | Clear 3 rows | 0 / 3 | TRY AGAIN | Back to levels
+   overflow=[] scroll=no errori=[]
+
+## festa-finale: livello 1, sequenza 14 mosse
+s360 it: Il Ponte è finito. | 100 livelli, dal primo all'ultimo. Il percorso è chiuso. | 100 | livelli superati | 1202 | mosse spese | 100 | al primo colpo | E adesso? | La Torre | In lavorazione. Non c'è ancora una data: quando ci sarà, l
+   overflow=["fuori orizzontale: <span class=\"pl-pioggia__blocco\"> \"\" l=-1 r=15","fuori orizzontale: <span class=\"pl-pioggia__blocco\"> \"\" l=341 r=371"] scroll=no errori=[]
+s360 en: The Bridge is finished. | 100 levels, from the first to the last. The path is closed. | 100 | levels cleared | 1202 | moves spent | 100 | on the first try | What now? | The Tower | In the works. There is no date yet: when it is re
+   overflow=["fuori orizzontale: <span class=\"pl-pioggia__blocco\"> \"\" l=-1 r=15","fuori orizzontale: <span class=\"pl-pioggia__blocco\"> \"\" l=342 r=370"] scroll=no errori=[]
+
+## attrezzo-5: livello 5, sequenza NON TROVATA

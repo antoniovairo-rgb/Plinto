@@ -1,0 +1,22 @@
+html lang (IT): it | title: PLINTO
+html lang dopo cambio a EN: en | title: PLINTO
+home: elementi interattivi senza nome: []
+LEVEL 1 | outline=solid 2px shadow=si | 380x70
+Level map, 0 of 100 | outline=solid 2px shadow=si | 380x52
+Free play | outline=solid 2px shadow=si | 380x52
+Daily challenge | outline=solid 2px shadow=si | 380x52
+Challenge archive | outline=solid 2px shadow=no | 380x52
+How to play | outline=solid 2px shadow=si | 185x44
+Stats | outline=solid 2px shadow=si | 185x44
+Your play profile | outline=solid 2px shadow=si | 185x44
+Settings | outline=solid 2px shadow=si | 185x44
+About | outline=solid 2px shadow=si | 99x44
+Support the project | outline=solid 2px shadow=no | 138x27
+Ideas and feedback | outline=solid 2px shadow=no | 140x27
+(body)
+LEVEL 1 | outline=solid 2px shadow=si | 380x70
+home 360: bersagli < 40px: [
+  { t: 'Support the project', w: 138, h: 27 },
+  { t: 'Ideas and feedback', w: 140, h: 27 }
+]
+[]

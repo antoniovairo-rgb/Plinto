@@ -1,0 +1,36 @@
+[Sostituisci tutto] livelli array: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] livelli stringa: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] livello null: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] livelli fuori range: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] mosse enormi: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] records stringhe: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] statistiche stringhe: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] sfide strane: msg="I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser. | Nel salvataggio ci sono 0 livelli superati. Adesso ne hai 0."
+   PROBLEMI ["Statistiche: compare \"NaN\" -> STATISTICHE | Non hai ancora giocato nessuna partita. | GIOCA UNA PARTITA | ULTIMI GIORNI | 1 gen | 1 (1) | 10 ott | NaN (undefined)","Archivio delle sfide: compare \"NaN\" -> ARCHIVIO DELLE SFIDE | Puoi giocare anche le sfide dei giorni passati. Quelle dei giorni futuri si aprono quando arriva il giorno. | ‹ | ottobre 2026 | › | Sfid"]
+   ERRORI []
+   storage {"sfide":"{\"versione\":2,\"giorni\":{\"2026-10-10\":{\"regole\":null},\"2099-01-01\":{\"best\":1,\"partite\":1,\"r"}
+[Sostituisci tutto] sfide array: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] attrezzi strani: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] attrezzi stringa: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] settings strani: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] profilo strano: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] versione futura: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Sostituisci tutto] proto: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] livelli array: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] livelli stringa: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] livello null: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] livelli fuori range: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] mosse enormi: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] records stringhe: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] statistiche stringhe: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] sfide strane: msg="I tuoi progressi stanno soltanto su questo dispositivo. Esportali se non vuoi perderli cambiando telefono o cancellando i dati del browser. | Nel salvataggio ci sono 0 livelli superati. Adesso ne hai 0."
+   PROBLEMI ["Statistiche: compare \"NaN\" -> STATISTICHE | Non hai ancora giocato nessuna partita. | GIOCA UNA PARTITA | ULTIMI GIORNI | 1 gen | 1 (1) | 10 ott | NaN (undefined)","Archivio delle sfide: compare \"NaN\" -> ARCHIVIO DELLE SFIDE | Puoi giocare anche le sfide dei giorni passati. Quelle dei giorni futuri si aprono quando arriva il giorno. | ‹ | ottobre 2026 | › | Sfid"]
+   ERRORI []
+   storage {"sfide":"{\"versione\":2,\"giorni\":{\"2026-10-10\":{\"regole\":null},\"2099-01-01\":{\"best\":1,\"partite\":1,\"r"}
+[Unisci] sfide array: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] attrezzi strani: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] attrezzi stringa: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] settings strani: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] profilo strano: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] versione futura: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)
+[Unisci] proto: ok (I tuoi progressi stanno soltanto su questo dispositivo. Esportali se n)

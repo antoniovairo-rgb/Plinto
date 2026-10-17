@@ -1,0 +1,3 @@
+prima: Partita libera / Mai giocata
+dopo UNA sfida (mai giocato la partita libera): Partita libera / Record 322 | Sfida del giorno / Record 322
+records: {"best":322,"bestChain":2,"bestMove":86,"bestGroupsInOneMove":2,"versione":1}

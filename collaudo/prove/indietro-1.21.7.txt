@@ -1,0 +1,12 @@
+normale schermata: gioco history.length 6
+normale Indietro ripetuto -> mappa > home > USCITO(about:blank)
+[
+  "pageerror: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.",
+  "pageerror: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document."
+]
+dopo-ricarica schermata: gioco history.length 8
+dopo-ricarica Indietro ripetuto -> mappa > home > home > home > USCITO(about:blank)
+[
+  "pageerror: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document.",
+  "pageerror: Failed to read the 'sessionStorage' property from 'Window': Access is denied for this document."
+]

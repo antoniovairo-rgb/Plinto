@@ -1,0 +1,25 @@
+
+== desktop senza segnali []
+  scorrimento home: 640 / 640 overflow: []
+  errori []
+
+== desktop ?origine=play ["A:Recensisci→https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto target=_blank rel=noopener noreferrer"]
+  scorrimento home: 640 / 640 overflow: []
+  ricaricata senza parametro: ["A:Recensisci→https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto target=_blank rel=noopener noreferrer"]
+  errori []
+
+== Android UA browser ["A:Scarica l'app→https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto target=_blank rel=noopener noreferrer"]
+  scorrimento home: 640 / 640 overflow: []
+  errori []
+
+== Android UA + ?origine=play ["A:Recensisci→https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto target=_blank rel=noopener noreferrer"]
+  scorrimento home: 640 / 640 overflow: []
+  ricaricata senza parametro: ["A:Recensisci→https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto target=_blank rel=noopener noreferrer"]
+  errori []
+
+== ?origine=altro []
+  scorrimento home: 640 / 640 overflow: []
+  ricaricata senza parametro: []
+  errori []
+
+(da fare a mano: vittoria del livello 10 per l'invito di fine atto)

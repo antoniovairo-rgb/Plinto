@@ -14,7 +14,7 @@ const dati = {
   sfide: { versione: 2, giorni: { '2026-10-10': { best: 777, partite: 2, regole: null } } },
   settings: { versione: 1, introVista: true, lingua: 'en', tema: 'chiaro' },
 };
-const p = '/tmp/claude-0/-home-user-Plinto/cef19c88-5f4e-5c35-9d19-f9638d39a3cc/scratchpad/salvataggio-ok.json';
+const p = process.env.SALVATAGGIO ?? '/tmp/claude-0/-home-user-Plinto/a935bc19-39c1-5d5c-8c41-3624d0d2c64c/scratchpad/salvataggio-ok.json';
 writeFileSync(p, JSON.stringify(file(dati), null, 2));
 
 const { browser, page, errori } = await apri({ storage: { settings: { versione: 1, introVista: true } } });
