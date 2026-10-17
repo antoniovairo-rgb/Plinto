@@ -205,7 +205,21 @@ in quelle con la sfida, «Riprendi la sfida · Da giocare».
 
 ## Controlli eseguiti prima della consegna
 
-COMANDI
+Sul ramo, tutto acceso, server di sviluppo `localhost:5173` per gli e2e:
+
+| comando | esito |
+|---|---|
+| `npm test` | verde: 45 file, 648 test (compreso `tests/sfida-testi.test.js`) |
+| `npm run build` | verde |
+| `npm run correzioni` | verde: «Tutto a posto: le correzioni del collaudo tengono.» |
+| `npm run impaginazione` | verde: «La home entra su tutti i formati provati…» |
+| `npm run home-spiegazione` | verde: cinque stati, sei formati, it ed en |
+| `npm run comunicazioni` | verde: «Tutte le comunicazioni sono leggibili in entrambe le lingue.» |
+| `npm run e2e-po008` | verde: «Tutto a posto.» |
+
+`npm run verifica` completo non lanciato, come da mandato. Nota a margine: `CLAUDE.md`
+dice «28 file Vitest», `npm test` ne conta 45 già su `main` (44 + il nuovo); non
+corretto qui perché fuori dal mandato.
 
 ## Non verificato
 
@@ -225,4 +239,8 @@ COMANDI
 
 ## Commit
 
-COMMIT
+| hash | contenuto |
+|---|---|
+| `13a8ae3` | F1, F2, F3: `Home.jsx` (due interruttori), `it.js`/`en.js`, `tests/sfida-testi.test.js`, `tests/e2e/home-spiegazione.mjs`, `tests/e2e/impaginazione.mjs` |
+| `1ee8200` | questo rapporto (prima stesura), schermate in `docs/sviluppo/f1-f3/`, riga in `docs/TESTING.md` |
+| commit successivo a `1ee8200` | rapporto completato con gli esiti dei comandi finali |
