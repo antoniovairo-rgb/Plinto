@@ -41,6 +41,7 @@
     "itch": "node tools/itch.mjs",
     "indietro": "node tests/e2e/indietro.mjs",
     "impaginazione": "node tests/e2e/impaginazione.mjs",
+    "home-spiegazione": "node tests/e2e/home-spiegazione.mjs",
     "e2e-trionfo": "node tests/e2e/trionfo.mjs",
     "recensione": "node tests/e2e/recensione.mjs",
     "correzioni": "node tests/e2e/correzioni.mjs",

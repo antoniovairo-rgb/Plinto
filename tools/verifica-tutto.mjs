@@ -82,6 +82,9 @@ const VERIFICHE = [
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
   { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },
+  // PO-009: la riga che spiega Partita libera e Sfida del giorno c'e', si legge e non
+  // allunga la home.
+  { nome: 'home: riga che spiega le due modalita', comando: 'npm', argomenti: ['run', 'home-spiegazione'] },
   // La geometria del tavolo: dove sono le caselle e dove finisce un tocco. Costa dieci
   // secondi ed e' cio' che permette a una modifica di solo disegno di non pagarne
   // tremilaottocento: il giro completo registra questa firma, e la corsia veloce la
