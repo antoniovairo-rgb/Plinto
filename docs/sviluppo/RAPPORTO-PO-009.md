@@ -212,4 +212,4 @@ Non toccati: `Statistiche.jsx`, `App.jsx`, `useQuadro.js`, `ComeSiGioca.jsx`.
 | hash | messaggio |
 |---|---|
 | `b3fa4cd` | Home: una riga fissa spiega Partita libera e Sfida del giorno (PO-009) |
-| (questo) | Rapporto PO-009 con misure e schermate |
+| `96d7e6a` | Rapporto PO-009 con misure e schermate |
