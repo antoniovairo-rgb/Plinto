@@ -12,7 +12,12 @@
  *   1. da un livello si torna alla MAPPA, non si esce;
  *   2. dalla mappa si torna alla HOME;
  *   3. dalla home Indietro esce davvero, invece di restare bloccati dentro;
- *   4. con il menu aperto, il primo Indietro chiude il menu e lascia dov'eri.
+ *   4. con il menu aperto, il primo Indietro chiude il menu e lascia dov'eri;
+ *   5. G1 (collaudo 1.21.10): un collegamento `#/sfida/<giorno>` aperto con la scheda gia'
+ *      aperta, cioe' un cambio d'ancora, non e' un Indietro. Dalla home apre la sfida di
+ *      quel giorno (prima: restava la home e l'ancora spariva); dalla partita libera
+ *      apre la sfida invece di riportare alla home; poi Indietro torna alla home e un
+ *      altro Indietro esce. Rosso con ANCORA_NON_E_INDIETRO spento.
  *
  * Il punto 3 conta quanto il primo: un gioco da cui non si esce piu' e' peggio di uno
  * che si chiude troppo presto.
@@ -146,6 +151,55 @@ verifica(await page.locator('.pl-plancia').count() === 1, 'chiudere il menu non 
 await page.goBack();
 await page.waitForTimeout(400);
 verifica(await dove() === 'home', 'dalla partita si torna alla home');
+
+// 5. G1: un cambio d'ancora con il gioco gia' aperto.
+const g1 = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
+await g1.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await g1.evaluate(() => {
+  window.localStorage.clear();
+  window.localStorage.setItem('plinto:settings', JSON.stringify({
+    versione: 2, introVista: true, tema: 'scuro', lingua: 'it',
+    audio: false, vibrazione: false, animazioni: false, aiutoVisivo: true,
+  }));
+});
+await g1.reload({ waitUntil: 'networkidle' });
+await g1.waitForSelector('.pl-home__azioni');
+const doveG1 = () => g1.evaluate(() => ({
+  schermata: document.querySelector('.pl-home__azioni') ? 'home' : document.querySelector('.pl-plancia') ? 'gioco' : 'ignota',
+  ancora: window.location.hash,
+  domanda: document.querySelectorAll('[role=dialog]').length,
+  seme: JSON.parse(window.localStorage.getItem('plinto:partita-sfida') || 'null')?.seedLabel ?? null,
+}));
+const vociG1 = await g1.evaluate(() => window.history.length);
+await g1.evaluate(() => { window.location.hash = '#/sfida/2026-10-10'; });
+await g1.waitForTimeout(800);
+let g = await doveG1();
+console.log(`   G1 dalla home: ${JSON.stringify(g)}`);
+verifica(g.schermata === 'gioco' && g.ancora === '#/sfida/2026-10-10',
+  'G1: dalla home un collegamento alla sfida del 2026-10-10 apre quella sfida e tiene l ancora');
+await g1.goBack();
+await g1.waitForTimeout(400);
+g = await doveG1();
+verifica(g.schermata === 'home' && g.ancora === '', 'G1: da quella sfida Indietro torna alla home, senza ancora');
+// Dalla partita libera: il collegamento apre la sfida, non riporta alla home.
+await g1.getByRole('button', { name: /^Partita libera/ }).click();
+await g1.waitForSelector('.pl-plancia');
+await g1.evaluate(() => { window.location.hash = '#/sfida/2026-10-11'; });
+await g1.waitForTimeout(800);
+g = await doveG1();
+console.log(`   G1 dalla partita libera: ${JSON.stringify(g)}`);
+verifica(g.schermata === 'gioco' && g.ancora === '#/sfida/2026-10-11' && g.seme === '2026-10-11',
+  'G1: dalla partita libera un collegamento alla sfida del 2026-10-11 apre quella sfida');
+await g1.goBack();
+await g1.waitForTimeout(400);
+verifica((await doveG1()).schermata === 'home', 'G1: da li Indietro torna alla home');
+// E dalla home si esce ancora: le voci delle ancore non restano a bloccare l'uscita.
+const primaUscita = await g1.evaluate(() => window.history.length);
+await g1.goBack().catch(() => {});
+await g1.waitForTimeout(400);
+const resta = await g1.evaluate(() => document.querySelector('.pl-home__azioni') !== null).catch(() => false);
+console.log(`   G1 voci: all inizio ${vociG1}, prima dell uscita ${primaUscita}, ancora sulla home dopo Indietro: ${resta}`);
+await g1.close();
 
 await browser.close();
 if (server) server.kill();

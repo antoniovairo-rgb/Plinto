@@ -20,6 +20,37 @@ import { IconaCaffe, IconaIdea } from '../IconePie.jsx';
 const SPIEGAZIONE_MODI = true;
 
 /**
+ * Interruttore PO-010: le card hanno un NOME FISSO, e lo stato sta a destra.
+ *
+ * Il PO, dal telefono: «Non si capisce il riprendeli partita, che cosa riprende...
+ * confonde». Con una partita libera in corso la card verde cambiava nome e diventava
+ * «Riprendi la partita · Record 1836»: il nome della modalita' spariva proprio quando
+ * c'erano due cose da riprendere (la libera e un livello), e niente diceva quale. Lo
+ * stesso per la Sfida («Riprendi la sfida · In corso», F2 di PO-004). Decisione del PO
+ * (docs/DECISIONI.md, 2026-10-18, «Nome fisso + stato»): il nome resta «Partita libera»
+ * e «Sfida del giorno»; con una partita in corso a destra c'e' «Riprendi ›» al posto del
+ * record (che resta in Statistiche), e sotto la libera torna il collegamento, che si
+ * chiama «Nuova partita libera» perche' dica anche lui di quale partita parla.
+ * Spento, le card cambiano nome come nella 1.21.10 e il collegamento non c'e' (come F1):
+ * `npm run home-spiegazione` e' rosso.
+ */
+const NOME_FISSO_E_STATO = true;
+
+/**
+ * Interruttore PO-010, impaginazione: la home bassa si stringe per far posto a «Nuova
+ * partita libera».
+ *
+ * A 360x640 la home avanzava di 2 px (misura in docs/sviluppo/RAPPORTO-F1-F3.md): il
+ * collegamento, anche piccolo (28 px), la farebbe scorrere. I pixel si prendono dai
+ * respiri e dai pulsanti secondari, solo sotto i 680 px di altezza in verticale, e in
+ * TUTTI gli stati, non solo quando il collegamento c'e': una home che cambia ritmo a
+ * seconda di che cosa hai in corso era l'opzione scartata in F1. Le misure sono in
+ * docs/sviluppo/RAPPORTO-PO-010-G1.md. Spento, la home con la libera in corso scorre a
+ * 360x640 e 375x667: `npm run home-spiegazione` e `npm run impaginazione` sono rossi.
+ */
+const HOME_BASSA_COMPATTA = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -47,13 +78,23 @@ export function SchermoHome({
   const progressoTesto = t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
     .replace('{totale}', numero(quadriTotali));
-  const etichettaLibera = cePartitaSalvata ? t('home.riprendi') : t('home.partitaLibera');
   const recordTesto = record.best > 0 ? `${t('home.record')} ${numero(record.best)}` : '';
-  const etichettaSfida = sfidaInCorso ? t('sfida.riprendi') : t('sfida.breve');
   const sfidaTesto = sfidaOggi.partite > 0 ? `${t('home.record')} ${numero(sfidaOggi.best)}` : '';
+  // PO-010: il nome e' quello della modalita' in ogni stato; «Riprendi ›» e' lo stato.
+  // Il nome accessibile dice tutte e due le cose, in quest'ordine, in una frase.
+  const etichettaLibera = cePartitaSalvata && !NOME_FISSO_E_STATO ? t('home.riprendi') : t('home.partitaLibera');
+  const statoLibera = cePartitaSalvata && NOME_FISSO_E_STATO ? t('home.riprendiStato') : (recordTesto || t('home.maiGiocata'));
+  const nomeLibera = cePartitaSalvata && NOME_FISSO_E_STATO
+    ? `${etichettaLibera}, ${t('home.riprendiLibera')}`
+    : (recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera);
+  const etichettaSfida = sfidaInCorso && !NOME_FISSO_E_STATO ? t('sfida.riprendi') : t('sfida.breve');
+  const sfidaStato = sfidaInCorso && NOME_FISSO_E_STATO ? t('home.riprendiStato') : (sfidaTesto || t('home.daGiocare'));
+  const nomeSfida = sfidaInCorso && NOME_FISSO_E_STATO
+    ? `${etichettaSfida}, ${t('home.riprendiSfida')}`
+    : (sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida);
 
   return (
-    <div className="pl-screen pl-home">
+    <div className={`pl-screen pl-home${HOME_BASSA_COMPATTA ? ' pl-home--compatta' : ''}`}>
       <div className="pl-home__testata">
         <Logo />
         <p className="pl-home__claim">{t('gioco.claim')}</p>
@@ -89,7 +130,7 @@ export function SchermoHome({
           type="button"
           className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera"
           onClick={cePartitaSalvata ? onRiprendi : onGioca}
-          aria-label={recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera}
+          aria-label={nomeLibera}
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-libera' : undefined}
         >
           <span>{etichettaLibera}</span>
@@ -98,15 +139,19 @@ export function SchermoHome({
               menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
               niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
               impressione sbagliata. La parola lo dice e basta. */}
-          <span className="pl-sfida-avvio__esito">{recordTesto || t('home.maiGiocata')}</span>
+          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ' pl-sfida-avvio__esito--riprendi' : ''}`}>{statoLibera}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
           ) : null}
         </button>
 
-        {cePartitaSalvata ? (
-          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onGioca}>
-            {t('home.nuovaPartita')}
+        {/* PO-010: un collegamento e non un pulsante largo. Il pulsante di prima (52 px
+            piu' lo spazio) faceva scorrere la home di 60 px a 360x640 (F1); il
+            collegamento e' alto 28, sopra i 24 di B10, e sta attaccato alla card di cui
+            parla. Senza partita in corso non serve: la card stessa ne comincia una. */}
+        {cePartitaSalvata && NOME_FISSO_E_STATO ? (
+          <button type="button" className="pl-home__nuova-libera" onClick={onGioca}>
+            {t('home.nuovaLibera')}
           </button>
         ) : null}
 
@@ -114,11 +159,11 @@ export function SchermoHome({
           type="button"
           className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--sfida"
           onClick={onSfida}
-          aria-label={sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida}
+          aria-label={nomeSfida}
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className="pl-sfida-avvio__esito">{sfidaTesto || t('home.daGiocare')}</span>
+          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ' pl-sfida-avvio__esito--riprendi' : ''}`}>{sfidaStato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}
