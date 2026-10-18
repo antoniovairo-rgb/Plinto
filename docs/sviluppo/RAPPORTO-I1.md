@@ -70,7 +70,7 @@ Dopo la prova la build è stata rifatta con l'interruttore acceso; `git diff` co
 Nessuna prova rossa, quindi nessun confronto con `main` necessario.
 
 ## Scelte lasciate al PO / alla madre
-- Il caso O non è registrato come script nuovo in `tools/verifica-tutto.mjs`: vive dentro `ripresa-livello.mjs` (`npm run e2e-po008`), che il gate già esegue — **non ho verificato** la riga del gate; lo deduco dal fatto che i casi J–N sono nello stesso file.
+- Il caso O non è registrato come script nuovo in `tools/verifica-tutto.mjs`: vive dentro `ripresa-livello.mjs` (`npm run e2e-po008`), che il gate già esegue (`tools/verifica-tutto.mjs:51`, `npm run e2e-po008`): gira in CI senza righe nuove.
 - Dentro una sfida la domanda di H1 parla di «partita libera» e non nomina la sfida lasciata (osservazione già nel collaudo 1.21.12): non toccata, come deciso.
 
 ## Non verificato
@@ -80,6 +80,7 @@ Nessuna prova rossa, quindi nessun confronto con `main` necessario.
 - `npm run verifica` non lanciato (come richiesto).
 
 ## Commit
-- `I1: entrare nella libera ripulisce l'indirizzo della sfida` (correzione + caso O + sonda copiata)
-- `Collaudo 1.21.13: PO-011 riconfermato in produzione`
-- questo rapporto (hash finale nella risposta alla madre; `git log -1` sul ramo).
+- `e1be2b6` I1: entrare nella libera ripulisce l'indirizzo della sfida (correzione + caso O + sonda copiata)
+- `370ab41` Collaudo 1.21.13: PO-011 riconfermato in produzione
+- `30758ff` I1: rapporto di sviluppo con misure e prova rosso/verde
+- questo aggiornamento del rapporto: l'hash finale è quello di `git log -1` sul ramo `sviluppo/i1-1.21.14`.
