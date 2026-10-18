@@ -1,0 +1,4 @@
+1. in SFIDA         PUNTEGGIO 9 RECORD 0 | hash #/sfida/2026-10-18
+2. in LIBERA nuova  PUNTEGGIO 4 RECORD 0 | hash #/sfida/2026-10-18
+   salvate [libera, sfida]: ["LIBERA punti=4 mosse=2","2026-10-18 punti=9 mosse=3"]
+3. dopo RELOAD      PUNTEGGIO 9 RECORD 0 | hash #/sfida/2026-10-18

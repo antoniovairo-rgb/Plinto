@@ -1,0 +1,12 @@
+S1 in sfida | hash= #/sfida/2026-10-18 | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"sfida","quadro":null,"quando":1792314092545}
+S1 dopo Riprendi (libera da 3 mosse attesa) | hash= #/sfida/2026-10-18 | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"gioco","quadro":null,"quando":1792314092916}
+S1 HUD PUNTEGGIO 4 RECORD 0 | mosse a schermo (celle piene) 0
+S1 dopo reload | hash= #/sfida/2026-10-18 | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"sfida","quadro":null,"quando":1792314093595}
+S1 dove partita
+S2 dopo Nuova partita da sfida | hash= #/sfida/2026-10-18 | libera= libera:0mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"gioco","quadro":null,"quando":1792314096112}
+S2 dopo una mossa | hash= #/sfida/2026-10-18 | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"gioco","quadro":null,"quando":1792314096785}
+S2 dopo reload | hash= #/sfida/2026-10-18 | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= {"dove":"sfida","quadro":null,"quando":1792314097113}
+S2 dopo reload: hud PUNTEGGIO 4 RECORD 0
+S2 dopo Indietro | hash=  | libera= libera:1mosse | sfida= 2026-10-18:1mosse | ripresa= null
+S2 dove home
+S3 fine livello 320x700 {"esito":true,"sh":700,"ch":700,"scrollEsito":0,"fondoBottoni":680,"testo":"Livello superato!"}

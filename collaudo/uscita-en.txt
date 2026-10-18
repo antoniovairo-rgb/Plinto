@@ -1,0 +1,26 @@
+OK [en] R0 versione visibile: testi con versione in home: ["1.21.12"]
+OK [en] C home: domanda con libera a meta: Your free game is in progress. If you start a new game, you lose the moves you made in this one. Resume game New game | bottoni=["Resume game","New game"] fuoco="Resume game"
+OK [en] C home: Indietro chiude la domanda: dove=home
+OK [en] C home: primo bottone riporta alla partita: SCORE 3 BEST 0 / 0 piene vs SCORE 3 BEST 0 / 0 piene
+OK [en] C menu: domanda con libera a meta: Your free game is in progress. If you start a new game, you lose the moves you made in this one. Resume game New game | bottoni=["Resume game","New game"] fuoco="Resume game"
+OK [en] C menu: Indietro chiude la domanda: dove=partita
+OK [en] C profilo: domanda con libera a meta: Your free game is in progress. If you start a new game, you lose the moves you made in this one. Resume game New game | bottoni=["Resume game","New game"] fuoco="Resume game"
+OK [en] C profilo: Indietro chiude la domanda: dove=?:YOUR PLAY PROFILE
+OK [en] C statistiche: domanda con libera a meta: Your free game is in progress. If you start a new game, you lose the moves you made in this one. Resume game New game | bottoni=["Resume game","New game"] fuoco="Resume game"
+OK [en] C statistiche: Indietro chiude la domanda: dove=?:STATISTICS
+OK [en] D1 libera portata a fine: mosse giocate dal bot=17; dove=fine; salvataggio=null
+OK [en] D2 «Gioca ancora» presente a fine libera: bottoni: ["Share your result","PLAY AGAIN","Back to home"]
+OK [en] D3 «Gioca ancora» a fine libera: niente domanda e nuova partita: domanda=no dove=partita firma=SCORE 0 BEST 60 / 0 piene
+OK [en] D4 home dopo libera finita: dove=home link nuova libera=0 testo home="PLINTO ROW, COLUMN, QUADRANT. LEVEL 1 Level map 0 of 100 Free play Best 50 No levels: play until no piece fits Daily challenge Not played yet New every day, sam"
+OK [en] D5 0 mosse: nuova libera senza domanda: link=1 domanda=false dove=partita
+OK [en] E1 menu in sfida senza libera: cosa succede: menu=["Back to the game","New game","Back to home"] domanda=no dove=partita sfidaSalvata prima={"status":"playing","mosse":1,"seedLabel":"2026-10-18"} dopo={"status":"playing","mosse":1,"seedLabel":"2026-10-18"} libera={"status":"playing","mosse":0,"seedLabel":null} hud="SCORE 0 BEST 0 / 0 piene"
+OK [en] E2 menu in sfida con libera a meta: domanda: Your free game is in progress. If you start a new game, you lose the moves you made in this one. Resume game New game | ["Resume game","New game"]
+OK [en] E3 primo bottone dalla sfida: dove si finisce: dove=partita hud="SCORE 2 BEST 0 / 0 piene" (libera era "SCORE 2 BEST 0 / 0 piene", sfida era "SCORE 4 BEST 0 / 0 piene") sfidaSalvata={"status":"playing","mosse":1,"seedLabel":"2026-10-18"}
+OK [en] E4 home dopo E3: card sfida: PLINTO ROW, COLUMN, QUADRANT. LEVEL 1 Level map 0 of 100 Free play Resume › No levels: play until no piece fits New free game Daily challenge Resume › New every day, same start for everyone Challenge archive How to play Stats Your play profile Settings About Support the project · Ideas and feedback 
+OK [en] F1 reload in partita riprende: dove=partita SCORE 4 BEST 0 / 0 piene vs SCORE 4 BEST 0 / 0 piene
+OK [en] F2 background 3 s: la partita non riparte: SCORE 4 BEST 0 / 0 piene vs SCORE 4 BEST 0 / 0 piene
+OK [en] F3 Indietro dalla partita: dove=home url=https://antoniovairo-rgb.github.io/Plinto/
+OK [en] F4 home 320x700 senza scorrimento: {"sh":700,"ch":700,"sw":320,"cw":320}
+OK [en] F5 statistiche vuote 320x700: {"sh":700,"ch":700,"testo":"STATISTICS You have not played a game yet. PLAY A GAME"}
+
+RIEPILOGO [en]: 24 OK, 0 KO, errori di pagina: 0

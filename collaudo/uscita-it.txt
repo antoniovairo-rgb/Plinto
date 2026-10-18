@@ -1,0 +1,26 @@
+OK [it] R0 versione visibile: testi con versione in home: ["1.21.12"]
+OK [it] C home: domanda con libera a meta: La partita libera è a metà. Se inizi una nuova partita, perdi le mosse fatte in quella a metà. Riprendi la partita Nuova partita | bottoni=["Riprendi la partita","Nuova partita"] fuoco="Riprendi la partita"
+OK [it] C home: Indietro chiude la domanda: dove=home
+OK [it] C home: primo bottone riporta alla partita: PUNTEGGIO 4 RECORD 0 / 0 piene vs PUNTEGGIO 4 RECORD 0 / 0 piene
+OK [it] C menu: domanda con libera a meta: La partita libera è a metà. Se inizi una nuova partita, perdi le mosse fatte in quella a metà. Riprendi la partita Nuova partita | bottoni=["Riprendi la partita","Nuova partita"] fuoco="Riprendi la partita"
+OK [it] C menu: Indietro chiude la domanda: dove=partita
+OK [it] C profilo: domanda con libera a meta: La partita libera è a metà. Se inizi una nuova partita, perdi le mosse fatte in quella a metà. Riprendi la partita Nuova partita | bottoni=["Riprendi la partita","Nuova partita"] fuoco="Riprendi la partita"
+OK [it] C profilo: Indietro chiude la domanda: dove=?:IL TUO PROFILO DI GIOCO
+OK [it] C statistiche: domanda con libera a meta: La partita libera è a metà. Se inizi una nuova partita, perdi le mosse fatte in quella a metà. Riprendi la partita Nuova partita | bottoni=["Riprendi la partita","Nuova partita"] fuoco="Riprendi la partita"
+OK [it] C statistiche: Indietro chiude la domanda: dove=?:STATISTICHE
+OK [it] D1 libera portata a fine: mosse giocate dal bot=14; dove=fine; salvataggio=null
+OK [it] D2 «Gioca ancora» presente a fine libera: bottoni: ["Condividi il risultato","GIOCA ANCORA","Torna alla home"]
+OK [it] D3 «Gioca ancora» a fine libera: niente domanda e nuova partita: domanda=no dove=partita firma=PUNTEGGIO 0 RECORD 75 / 0 piene
+OK [it] D4 home dopo libera finita: dove=home link nuova libera=0 testo home="PLINTO RIGA, COLONNA, QUADRANTE. LIVELLO 1 Mappa dei livelli 0 di 100 Partita libera Record 38 Senza livelli: gioca finché i pezzi entrano Sfida del giorno Da g"
+OK [it] D5 0 mosse: nuova libera senza domanda: link=1 domanda=false dove=partita
+OK [it] E1 menu in sfida senza libera: cosa succede: menu=["Torna alla partita","Nuova partita","Torna alla home"] domanda=no dove=partita sfidaSalvata prima={"status":"playing","mosse":1,"seedLabel":"2026-10-18"} dopo={"status":"playing","mosse":1,"seedLabel":"2026-10-18"} libera={"status":"playing","mosse":0,"seedLabel":null} hud="PUNTEGGIO 0 RECORD 0 / 0 piene"
+OK [it] E2 menu in sfida con libera a meta: domanda: La partita libera è a metà. Se inizi una nuova partita, perdi le mosse fatte in quella a metà. Riprendi la partita Nuova partita | ["Riprendi la partita","Nuova partita"]
+OK [it] E3 primo bottone dalla sfida: dove si finisce: dove=partita hud="PUNTEGGIO 4 RECORD 0 / 0 piene" (libera era "PUNTEGGIO 4 RECORD 0 / 0 piene", sfida era "PUNTEGGIO 4 RECORD 0 / 0 piene") sfidaSalvata={"status":"playing","mosse":1,"seedLabel":"2026-10-18"}
+OK [it] E4 home dopo E3: card sfida: PLINTO RIGA, COLONNA, QUADRANTE. LIVELLO 1 Mappa dei livelli 0 di 100 Partita libera Riprendi › Senza livelli: gioca finché i pezzi entrano Nuova partita libera Sfida del giorno Riprendi › Nuova ogni giorno, parte uguale per tutti Archivio delle sfide Come si gioca Statistiche Il tuo profilo di gioc
+OK [it] F1 reload in partita riprende: dove=partita PUNTEGGIO 3 RECORD 0 / 0 piene vs PUNTEGGIO 3 RECORD 0 / 0 piene
+OK [it] F2 background 3 s: la partita non riparte: PUNTEGGIO 3 RECORD 0 / 0 piene vs PUNTEGGIO 3 RECORD 0 / 0 piene
+OK [it] F3 Indietro dalla partita: dove=home url=https://antoniovairo-rgb.github.io/Plinto/
+OK [it] F4 home 320x700 senza scorrimento: {"sh":700,"ch":700,"sw":320,"cw":320}
+OK [it] F5 statistiche vuote 320x700: {"sh":700,"ch":700,"testo":"STATISTICHE Non hai ancora giocato nessuna partita. GIOCA UNA PARTITA"}
+
+RIEPILOGO [it]: 24 OK, 0 KO, errori di pagina: 0
