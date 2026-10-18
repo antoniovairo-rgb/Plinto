@@ -20,7 +20,10 @@
  *   J  con il livello 2 a meta', «Gioca» sul livello 1 chiede conferma (collaudo 1.21.9, E1).
  *   K  «Riprova» nel menu del livello chiede conferma (collaudo 1.21.9, E2).
  *   L  con la sfida di ieri a meta', aprire quella di oggi chiede conferma.
- *   In J, K e L il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
+ *   N  con una partita libera a meta', iniziarne una nuova chiede conferma da ogni strada:
+ *      home, menu della partita, profilo, statistiche, festa finale (collaudo 1.21.11, H1).
+ *      A zero mosse non chiede niente.
+ *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
  * Stampa una tabella; esce con 1 se in almeno un caso si riparte da zero.
@@ -31,6 +34,8 @@ import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { FINESTRA_RIPRESA } from '../../src/persistence/ripresa.js';
+import { sequenzaVincente, posizioneMossa } from '../../tools/sequenza-vincente.mjs';
+import { quadroNumero, TOTALE_QUADRI } from '../../src/config/quadri.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -508,6 +513,167 @@ function fuocoSicuro(caso, d, atteso) {
   righe.push({ caso: 'M dall archivio, dopo la domanda, l indirizzo della sfida', primo: await dove(page), daZero: false, nota: `ancora: «${ancora}»` });
   if (ancora !== `#/sfida/${ieri}`) errori.push(`M: dopo la domanda dall archivio l indirizzo e «${ancora}», atteso «#/sfida/${ieri}»`);
   await contesto.close();
+}
+
+// ---------- N ----------
+// Una partita libera a meta' (due mosse) e una nuova libera chiesta da ogni strada che ne
+// comincia una. Per ogni punto di partenza: c'e' la domanda, il fuoco e' su «Riprendi la
+// partita», Indietro la chiude senza perdere niente, «Riprendi la partita» riporta dentro
+// quella di prima. Il pulsante che perde si prova una volta (dalla home).
+{
+  const finestra = (page) => page.locator('[role="dialog"]');
+  async function liberaAMeta(page) {
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.waitForTimeout(400);
+    return firma(page);
+  }
+  async function allaHome(page) {
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+  }
+  async function vaiDallaHome(page, voce, selettore) {
+    await page.locator('.pl-home__voce', { hasText: voce }).click();
+    await page.waitForTimeout(300);
+    await page.waitForSelector(selettore);
+  }
+  // Ogni punto: come ci si arriva (dalla home, con la libera gia' a meta') e quale
+  // pulsante comincia una nuova libera; `dove` e' la schermata su cui Indietro ci lascia.
+  const punti = [
+    { nome: 'home', arriva: async () => {}, tocca: (p) => p.locator('.pl-home__nuova-libera').click(), dove: 'home' },
+    { nome: 'menu della partita', arriva: async (p) => {
+      await p.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
+      await p.waitForSelector('.pl-plancia .pl-cella');
+      await p.locator('.pl-hud__menu').click();
+    }, tocca: (p) => p.locator('.pl-menu').getByRole('button', { name: /^Nuova partita$/ }).click(), dove: 'partita' },
+    { nome: 'profilo', arriva: (p) => vaiDallaHome(p, 'Il tuo profilo di gioco', '.pl-vuoto, .pl-schermo'),
+      tocca: (p) => p.getByRole('button', { name: /^Gioca una partita$/ }).click(), dove: 'profilo' },
+    { nome: 'statistiche', arriva: (p) => vaiDallaHome(p, 'Statistiche', '.pl-vuoto, .pl-schermo'),
+      tocca: (p) => p.getByRole('button', { name: /^Gioca una partita$/ }).click(), dove: 'statistiche' },
+  ];
+  const titoloSchermo = (page) => page.evaluate(() => document.querySelector('h1, h2')?.innerText.trim() ?? '');
+
+  for (const punto of punti) {
+    const { contesto, page } = await prepara();
+    const prima = await liberaAMeta(page);
+    await allaHome(page);
+    await punto.arriva(page);
+    const titolo = await titoloSchermo(page);
+    await punto.tocca(page);
+    await page.waitForTimeout(400);
+    const d = await domanda(page);
+    let dopo = await firma(page);
+    let nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
+    if (d) {
+      fuocoSicuro(`N ${punto.nome}`, d, /^Riprendi la partita$/);
+      await page.goBack();
+      await page.waitForTimeout(400);
+      const qui = await dove(page);
+      const restaQui = punto.dove === 'home' ? qui === 'home'
+        : punto.dove === 'partita' ? qui === 'partita'
+          : (await titoloSchermo(page)) === titolo;
+      if (await domanda(page) || !restaQui) errori.push(`N ${punto.nome}: Indietro non chiude la domanda restando dov'ero (sono su "${qui}")`);
+      // Dal menu, Indietro ha chiuso la domanda: il menu si riapre per toccare di nuovo.
+      if (punto.dove === 'partita' && !(await page.locator('.pl-menu').count())) await page.locator('.pl-hud__menu').click();
+      await punto.tocca(page);
+      await page.waitForTimeout(300);
+      await finestra(page).getByRole('button', { name: /^Riprendi la partita$/ }).click();
+      await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      dopo = await firma(page);
+      if (await dove(page) !== 'partita') errori.push(`N ${punto.nome}: «Riprendi la partita» non riporta nella partita`);
+    } else {
+      // Senza domanda la libera a meta' e' gia' stata coperta da una nuova.
+      await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+      dopo = await firma(page);
+    }
+    if (d && punto.nome === 'home') {
+      await allaHome(page);
+      await punto.tocca(page);
+      await page.waitForTimeout(300);
+      await finestra(page).getByRole('button', { name: /^Nuova partita$/ }).click();
+      await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      const nuova = await firma(page);
+      nota += `; dopo «Nuova partita»: ${nuova === prima ? 'la stessa partita' : 'una partita nuova'}`;
+      if (nuova === prima || await dove(page) !== 'partita') errori.push('N home: «Nuova partita» non comincia una partita nuova');
+    }
+    registra(`N libera a meta, nuova libera da ${punto.nome}`, { primo: d ? 'domanda' : await dove(page), prima, dopo, nota });
+    if (!d) errori.push(`N ${punto.nome}: una nuova partita libera cancella quella a meta senza chiedere`);
+    await contesto.close();
+  }
+
+  // Festa finale: novantanove livelli scritti come superati, la libera a meta', il
+  // livello 1 vinto davvero; «Gioca in partita libera» deve chiedere.
+  {
+    const { contesto, page } = await prepara();
+    const prima = await liberaAMeta(page);
+    await allaHome(page);
+    await page.evaluate((n) => {
+      const livelli = {};
+      for (let i = 2; i <= n; i += 1) livelli[i] = { mosse: 12, punteggio: 300, tentativi: 1 };
+      localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli }));
+    }, TOTALE_QUADRI);
+    await page.reload();
+    await page.waitForSelector('.pl-home__menu');
+    await apriLivello1DallaMappa(page);
+    for (const mossa of sequenzaVincente(quadroNumero(1)) ?? []) {
+      const punti = await posizioneMossa(page, mossa);
+      if (!punti) break;
+      await page.mouse.move(punti.px, punti.py);
+      await page.mouse.down();
+      await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+      await page.mouse.up();
+      await page.waitForTimeout(45);
+      if (await page.locator('.pl-quadro-esito, .pl-trionfo').count() > 0) break;
+    }
+    await page.waitForSelector('.pl-trionfo', { timeout: 5000 }).catch(() => {});
+    const festa = await page.locator('.pl-trionfo').count() > 0;
+    let d = null, dopo = '', nota = '';
+    if (!festa) {
+      errori.push('N festa finale: non ci si arriva, il caso non prova niente');
+      nota = 'festa finale non raggiunta';
+    } else {
+      await page.getByRole('button', { name: /^Gioca in partita libera$/ }).click();
+      await page.waitForTimeout(400);
+      d = await domanda(page);
+      nota = d ? `domanda: «${d.testo}»` : 'nessuna domanda';
+      if (d) {
+        fuocoSicuro('N festa finale', d, /^Riprendi la partita$/);
+        await page.goBack();
+        await page.waitForTimeout(400);
+        if (await domanda(page) || !(await page.locator('.pl-trionfo').count())) errori.push('N festa finale: Indietro non chiude la domanda restando sulla festa');
+        await page.getByRole('button', { name: /^Gioca in partita libera$/ }).click();
+        await page.waitForTimeout(300);
+        await finestra(page).getByRole('button', { name: /^Riprendi la partita$/ }).click();
+      }
+      await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      dopo = await firma(page);
+      if (!d) errori.push('N festa finale: «Gioca in partita libera» cancella quella a meta senza chiedere');
+    }
+    registra('N libera a meta, nuova libera dalla festa finale', { primo: d ? 'domanda' : await dove(page), prima, dopo: festa ? dopo : prima, nota });
+    await contesto.close();
+  }
+
+  // Zero mosse: niente da perdere, niente domanda.
+  {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    await allaHome(page);
+    const link = await page.locator('.pl-home__nuova-libera').count();
+    if (link) await page.locator('.pl-home__nuova-libera').click();
+    await page.waitForTimeout(400);
+    const d = await domanda(page);
+    const qui = await dove(page);
+    righe.push({ caso: 'N libera a zero mosse, nuova libera dalla home', primo: d ? 'domanda' : qui, daZero: false, nota: `collegamento: ${link ? 'si' : 'no'}` });
+    if (d) errori.push('N zero mosse: chiede conferma anche se non c e niente da perdere');
+    if (link && qui !== 'partita') errori.push(`N zero mosse: la nuova partita non parte (sono su "${qui}")`);
+    await contesto.close();
+  }
 }
 
 await browser.close();
