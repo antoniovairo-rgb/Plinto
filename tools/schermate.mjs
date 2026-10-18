@@ -231,7 +231,7 @@ const CATENA_ALTA = (x) => x.score >= 6000 && x.chain >= 6
 const inCorso = giocaFinche(1, (x) => CATENA_ALTA(x) && fillRatio(x.grid) >= 0.33 && fillRatio(x.grid) <= 0.46);
 if (!inCorso) throw new Error('Nessuno stato adatto alla schermata 5');
 await prepara({ record: RECORD, partita: serializeGame(inCorso) });
-await page.getByRole('button', { name: /riprendi la partita/i }).click();
+await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.waitForTimeout(250);
 await page.screenshot({ path: `${USCITA}5-partita.png` });
@@ -257,7 +257,7 @@ const pagina4 = await browser.newPage({
 });
 await pagina4.clock.install();
 await prepara({ record: RECORD, partita: serializeGame(primaDelColpo) }, pagina4);
-await pagina4.getByRole('button', { name: /riprendi la partita/i }).click();
+await pagina4.getByRole('button', { name: /Riprendi la partita/ }).click();
 await pagina4.waitForSelector('.pl-plancia');
 // `install` da solo non ferma niente: l'orologio finto va avanti in tempo reale finche'
 // non lo si mette in pausa. Da qui in poi i timer del gioco scattano solo con runFor.
@@ -321,7 +321,7 @@ const salvataggioFinale = {
   ultimaAttivitaAt: Date.now() - 2500,
 };
 await prepara({ record: { ...RECORD, best: Math.floor(ultima.stato.score * 0.9) }, partita: salvataggioFinale });
-await page.getByRole('button', { name: /riprendi la partita/i }).click();
+await page.getByRole('button', { name: /Riprendi la partita/ }).click();
 await page.waitForSelector('.pl-plancia');
 {
   const { handIndex, row, col } = ultima.mossa;

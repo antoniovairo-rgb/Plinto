@@ -21,12 +21,6 @@ import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { QUADRI } from '../../src/config/quadri.js';
-import { createGame, serializeGame } from '../../src/core/engine.js';
-import { giornoDiOggi } from '../../src/core/sfida.js';
-
-const PARTITA_LIBERA = serializeGame(createGame({ seed: 'impaginazione', now: 0 }));
-const PARTITA_SFIDA = serializeGame(createGame({ seed: giornoDiOggi(), now: 0 }));
-const PARTITA_LIVELLO = { numero: 11, partita: serializeGame(createGame({ seed: 'impaginazione-11', now: 0 })) };
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -81,7 +75,7 @@ console.log('\nLa home entra nello schermo?');
 for (const [larghezza, altezza, nome] of FORMATI) {
   const page = await browser.newPage({ viewport: { width: larghezza, height: altezza }, locale: 'it-IT' });
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate(([libera, sfida, livello]) => {
+  await page.evaluate(() => {
     window.localStorage.clear();
     window.localStorage.setItem('plinto:settings', JSON.stringify({
       introVista: true, tema: 'scuro', lingua: 'it',
@@ -94,15 +88,10 @@ for (const [larghezza, altezza, nome] of FORMATI) {
         Array.from({ length: 10 }, (_, i) => [i + 1, { mosse: 9, punteggio: 400, tentativi: 1 }]),
       ),
     }));
-    // Le partite in corso: e' la home piu' carica possibile. Partite VERE, non
-    // segnaposto: un `{ segnaposto: true }` non supera la lettura dell'archivio, la home
-    // lo ignorava e questo controllo provava la home di chi non ha niente in corso.
-    // Cosi' non vedeva che con una partita libera da riprendere la home scorreva di
-    // 60 px a 360x640 (F1, PO-004, docs/sviluppo/RAPPORTO-F1-F3.md).
-    window.localStorage.setItem('plinto:partita', JSON.stringify(libera));
-    window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(sfida));
-    window.localStorage.setItem('plinto:partita-quadro', JSON.stringify(livello));
-  }, [PARTITA_LIBERA, PARTITA_SFIDA, PARTITA_LIVELLO]);
+    // Le due partite in corso aggiungono due righe: e' la home piu' alta possibile.
+    window.localStorage.setItem('plinto:partita', JSON.stringify({ segnaposto: true }));
+    window.localStorage.setItem('plinto:partita-sfida', JSON.stringify({ segnaposto: true }));
+  });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.pl-home__azioni');
 

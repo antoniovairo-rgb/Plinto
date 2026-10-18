@@ -83,7 +83,7 @@ async function preparaPartita(idForme) {
     window.localStorage.removeItem('plinto:ripresa');
   }, serializeGame(stato));
   await page.reload({ waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /riprendi la partita/i }).click();
+  await page.getByRole('button', { name: /Riprendi la partita/ }).click();
   await page.waitForSelector('.pl-plancia');
 }
 

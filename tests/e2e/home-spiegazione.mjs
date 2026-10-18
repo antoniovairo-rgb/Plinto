@@ -10,28 +10,15 @@
  * Che cosa prova, in italiano e in inglese:
  *   1. la riga c'e', dice il testo del dizionario, si vede intera dentro la card ed e'
  *      la descrizione accessibile della card (`aria-describedby`);
- *   2. la home NON scorre a 360x640, 375x667, 390x844, 412x915 e su due desktop, in
- *      TUTTI gli stati (nessuna partita, libera in corso, sfida in corso, livello a
- *      meta', tutte insieme) e con un numero di versione lungo apposta, come
- *      `npm run impaginazione`. Fino alla 1.21.10 lo stato «libera» era escluso perche'
- *      scorreva gia' (F1, PO-004): adesso non lo e' piu';
+ *   2. la home NON scorre a 360x640, 375x667, 390x844, 412x915 e su due desktop, nello
+ *      stato piu' pieno (partita libera e sfida in corso, record, livelli) e con un
+ *      numero di versione lungo apposta, come `npm run impaginazione`;
  *   3. le card restano alte almeno 44 px e i collegamenti in fondo almeno 24 (B10);
  *   4. la riga ha un contrasto di almeno 4.5:1 sul punto PIU' CHIARO del fondo della
- *      card, che e' una sfumatura: misurare sul colore medio sarebbe barare;
- *   5. PO-010, «nome fisso + stato»: le card si chiamano «Partita libera» e «Sfida del
- *      giorno» in OGNI stato; con una partita in corso a destra c'e' «Riprendi ›» e il
- *      nome accessibile lo dice («Partita libera, riprendi la partita in corso»);
- *   6. con la libera in corso, sotto la sua card c'e' «Nuova partita libera», alto
- *      almeno 24 px e dentro lo schermo senza scorrere; senza, non c'e'.
- *
- * (Fino a PO-010 il punto 5 controllava «Riprendi la sfida · In corso», F2 di PO-004:
- * quella scritta non c'e' piu'.)
+ *      card, che e' una sfumatura: misurare sul colore medio sarebbe barare.
  *
  * Con l'interruttore SPIEGAZIONE_MODI spento (src/ui/schermate/Home.jsx) la home torna
  * quella della 1.21.9 e questo controllo deve essere ROSSO: e' la prova che sa fallire.
- * Lo stesso con NOME_FISSO_E_STATO spento (le card cambiano nome, niente «Riprendi ›» e
- * niente collegamento) e con HOME_BASSA_COMPATTA spento (il collegamento fa scorrere la
- * home negli stati «libera» e «tutte» a 360x640 e 375x667).
  *
  * Uso: npm run home-spiegazione   (PLINTO_E2E_OUT=cartella per le schermate)
  */
@@ -81,25 +68,25 @@ const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 // la home "piena" era alta quanto quella di un giocatore nuovo).
 const PARTITA_LIBERA = serializeGame(createGame({ seed: 'po009', now: 0 }));
 const PARTITA_SFIDA = serializeGame(createGame({ seed: giornoDiOggi(), now: 0 }));
-// Un livello lasciato a meta': il pulsante grande diventa «Riprendi il livello 11».
-const PARTITA_LIVELLO = { numero: 11, partita: serializeGame(createGame({ seed: 'po004-f1', now: 0 })) };
 
 /**
- * Gli stati della home (F1, PO-004: la promessa «la home non scorre» vale in tutti):
+ * Tre stati della home:
  *  - `nuova`: chi apre il gioco la prima volta;
- *  - `sfida`: record, dieci livelli, sfida di oggi in corso (era `piena` in PO-009);
- *  - `libera`: record, dieci livelli, una partita libera in corso. Fino alla 1.21.10
- *    aggiungeva «Nuova partita» e la home scorreva (60 px a 360x640);
- *  - `livello`: record, dieci livelli, il livello 11 lasciato a meta';
- *  - `tutte`: libera, sfida e livello in corso insieme, la home piu' carica possibile.
+ *  - `piena`: record, dieci livelli, sfida di oggi in corso. E' lo stato che
+ *    `npm run impaginazione` crede di provare con i suoi segnaposto;
+ *  - `libera`: come `piena` piu' una partita libera in corso, che aggiunge «Nuova
+ *    partita». SU MAIN QUESTA HOME SCORRE GIA' (60 px a 360x640, 35 a 375x667, 25 a
+ *    1366x768, misurato prima di PO-009 e scritto in docs/sviluppo/RAPPORTO-PO-009.md).
+ *    Qui non si pretende che entri -- non e' un difetto di questa riga -- ma che la riga
+ *    NON AGGIUNGA NEMMENO UN PIXEL: si misura con e senza.
  */
-const STATI = ['nuova', 'sfida', 'libera', 'livello', 'tutte'];
+const STATI = ['nuova', 'piena', 'libera'];
 
 async function apri(lingua, [larghezza, altezza], stato) {
   const page = await browser.newPage({ viewport: { width: larghezza, height: altezza }, locale: lingua });
   page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate(([l, p, libera, sfida, livello]) => {
+  await page.evaluate(([l, p, libera, sfida]) => {
     window.localStorage.clear();
     window.localStorage.setItem('plinto:settings', JSON.stringify({
       versione: 2, introVista: true, lingua: l,
@@ -113,10 +100,9 @@ async function apri(lingua, [larghezza, altezza], stato) {
         Array.from({ length: 10 }, (_, i) => [i + 1, { mosse: 9, punteggio: 400, tentativi: 1 }]),
       ),
     }));
-    if (p === 'libera' || p === 'tutte') window.localStorage.setItem('plinto:partita', JSON.stringify(libera));
-    if (p === 'sfida' || p === 'tutte') window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(sfida));
-    if (p === 'livello' || p === 'tutte') window.localStorage.setItem('plinto:partita-quadro', JSON.stringify(livello));
-  }, [lingua, stato, PARTITA_LIBERA, PARTITA_SFIDA, PARTITA_LIVELLO]);
+    if (p === 'libera') window.localStorage.setItem('plinto:partita', JSON.stringify(libera));
+    window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(sfida));
+  }, [lingua, stato, PARTITA_LIBERA, PARTITA_SFIDA]);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.pl-home__azioni');
   return page;
@@ -179,23 +165,8 @@ function misura() {
     }
     return {
       altezza: Math.round(r.height), nome: el.getAttribute('aria-label'), descrizione, riga: riga_,
-      esito: el.querySelector('.pl-sfida-avvio__esito')?.textContent ?? null,
-      // PO-010, «in evidenza»: la pillola ha un fondo pieno, il record no.
-      esitoFondo: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); return e ? getComputedStyle(e).backgroundColor : null; })(),
-      titolo: el.querySelector('span')?.textContent ?? null,
     };
   };
-  const nl = home.querySelector('.pl-home__nuova-libera');
-  const nuova = nl ? (() => {
-    const r = nl.getBoundingClientRect();
-    const c = home.querySelector('.pl-sfida-avvio--libera').getBoundingClientRect();
-    return {
-      testo: nl.textContent, altezza: Math.round(r.height),
-      // Subito sotto la card della libera, non da un'altra parte della home.
-      sotto: r.top >= c.bottom - 0.5 && r.top - c.bottom <= 12,
-      dentro: r.bottom <= window.innerHeight + 0.5,
-    };
-  })() : null;
   const collegamenti = [...home.querySelectorAll('.pl-home__pie .pl-home__sostieni')]
     .map((e) => Math.round(e.getBoundingClientRect().height));
   // Quanto spazio verticale avanza fra il primo e l'ultimo blocco: scrollHeight dice solo
@@ -213,8 +184,7 @@ function misura() {
   return {
     aggiunta, libero, eccesso, eccessoLungo, alta: home.scrollHeight, finestra: home.clientHeight,
     libera: card('.pl-sfida-avvio--libera'), sfida: card('.pl-sfida-avvio--sfida'),
-    mappa: card('.pl-sfida-avvio--mappa'), collegamenti, nuova,
-    azioni: home.querySelectorAll('.pl-home__azioni > *').length,
+    mappa: card('.pl-sfida-avvio--mappa'), collegamenti,
   };
 }
 
@@ -230,45 +200,14 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
       const peggio = Math.max(m.eccesso, m.eccessoLungo);
       tabella.push({
         dove, home: `${m.alta}/${m.finestra}`, libero: m.libero, scorre: peggio, riga: m.aggiunta,
-        azioni: m.azioni, statoLibera: m.libera?.esito, statoSfida: m.sfida?.esito,
-        nuova: m.nuova?.altezza ?? '-',
         libera: m.libera?.altezza, sfida: m.sfida?.altezza, mappa: m.mappa?.altezza,
         righe: [m.libera?.riga?.righe, m.sfida?.riga?.righe].join('+'),
         contrasto: [m.libera?.riga?.contrasto, m.sfida?.riga?.contrasto].join(' / '),
         pie: m.collegamenti.join(','),
       });
       if (m.aggiunta !== 0) errori.push(`${dove}: la riga di spiegazione allunga la home di ${m.aggiunta}px`);
-      if (m.eccesso > 0) errori.push(`${dove}: la home scorre di ${m.eccesso}px`);
-      if (m.eccessoLungo > m.eccesso) errori.push(`${dove}: con una versione lunga la home scorre di ${m.eccessoLungo}px`);
-      // PO-010: il nome della card e' fisso; «Riprendi ›» e' lo stato, a destra.
-      const conLibera = stato === 'libera' || stato === 'tutte';
-      const conSfida = stato === 'sfida' || stato === 'tutte';
-      if (m.libera?.titolo !== testi.home.partitaLibera) errori.push(`${dove}: la card della libera si chiama «${m.libera?.titolo}» invece di «${testi.home.partitaLibera}» (PO-010)`);
-      if (m.sfida?.titolo !== testi.sfida.breve) errori.push(`${dove}: la card della sfida si chiama «${m.sfida?.titolo}» invece di «${testi.sfida.breve}» (PO-010)`);
-      if (conLibera) {
-        if (m.libera?.esito !== testi.home.riprendiStato) errori.push(`${dove}: con la libera in corso lo stato e «${m.libera?.esito}» invece di «${testi.home.riprendiStato}» (PO-010)`);
-        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.libera?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della libera non e in evidenza (nessun fondo)`);
-        const atteso = `${testi.home.partitaLibera}, ${testi.home.riprendiLibera}`;
-        if (m.libera?.nome !== atteso) errori.push(`${dove}: il nome accessibile della libera e «${m.libera?.nome}» invece di «${atteso}»`);
-        if (!m.nuova) errori.push(`${dove}: con la libera in corso manca «${testi.home.nuovaLibera}» (PO-010)`);
-        else {
-          if (m.nuova.testo !== testi.home.nuovaLibera) errori.push(`${dove}: il collegamento dice «${m.nuova.testo}» invece di «${testi.home.nuovaLibera}»`);
-          if (m.nuova.altezza < 24) errori.push(`${dove}: «${testi.home.nuovaLibera}» e alto ${m.nuova.altezza}px (minimo 24)`);
-          if (!m.nuova.sotto) errori.push(`${dove}: «${testi.home.nuovaLibera}» non sta subito sotto la card della libera`);
-          if (!m.nuova.dentro) errori.push(`${dove}: «${testi.home.nuovaLibera}» esce dallo schermo`);
-        }
-      } else {
-        if (m.nuova) errori.push(`${dove}: senza libera in corso c'e «${m.nuova.testo}»`);
-        if (m.libera?.esito === testi.home.riprendiStato) errori.push(`${dove}: senza libera in corso la card dice «${m.libera.esito}»`);
-      }
-      if (conSfida) {
-        if (m.sfida?.esito !== testi.home.riprendiStato) errori.push(`${dove}: con la sfida in corso lo stato e «${m.sfida?.esito}» invece di «${testi.home.riprendiStato}» (PO-010)`);
-        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della sfida non e in evidenza (nessun fondo)`);
-        const atteso = `${testi.sfida.breve}, ${testi.home.riprendiSfida}`;
-        if (m.sfida?.nome !== atteso) errori.push(`${dove}: il nome accessibile della sfida e «${m.sfida?.nome}» invece di «${atteso}»`);
-      } else if (m.sfida?.esito !== testi.home.daGiocare) {
-        errori.push(`${dove}: senza sfida in corso la card dice «${m.sfida?.esito}» invece di «${testi.home.daGiocare}»`);
-      }
+      if (stato !== 'libera' && m.eccesso > 0) errori.push(`${dove}: la home scorre di ${m.eccesso}px`);
+      if (stato !== 'libera' && m.eccessoLungo > m.eccesso) errori.push(`${dove}: con una versione lunga la home scorre di ${m.eccessoLungo}px`);
       for (const h of m.collegamenti) if (h < 24) errori.push(`${dove}: un collegamento in fondo e alto ${h}px (B10 chiede 24)`);
       if (!m.collegamenti.length) errori.push(`${dove}: collegamenti in fondo non trovati`);
       for (const quale of ['libera', 'sfida']) {
@@ -283,8 +222,8 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (c.riga.contrasto < 4.5) errori.push(`${dove}: la riga della card ${quale} ha contrasto ${c.riga.contrasto}:1 (minimo 4.5)`);
         if (c.descrizione !== attese[quale]) errori.push(`${dove}: la descrizione accessibile della card ${quale} e «${c.descrizione}»`);
       }
-      if (OUT && ['libera', 'sfida', 'tutte'].includes(stato) && [[360, 640], [390, 844]].some(([l, a]) => l === formato[0] && a === formato[1])) {
-        await page.screenshot({ path: `${OUT}/home-${stato}-${lingua}-${formato.join('x')}.png` });
+      if (OUT && stato === 'piena' && [[360, 640], [390, 844]].some(([l, a]) => l === formato[0] && a === formato[1])) {
+        await page.screenshot({ path: `${OUT}/home-${lingua}-${formato.join('x')}.png` });
       }
       await page.close();
     }
@@ -294,12 +233,12 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
 await browser.close();
 if (server) server.kill();
 
-console.log('\nPO-009 e PO-010: riga di spiegazione, nome fisso e «Riprendi ›», «Nuova partita libera»');
+console.log('\nPO-009: riga di spiegazione sotto Partita libera e Sfida del giorno');
 console.table(tabella);
 if (errori.length) {
   console.error(`\n${errori.length} problemi:`);
   [...new Set(errori)].forEach((e) => console.error(`  - ${e}`));
   process.exit(1);
 }
-console.log('\nLa riga c\'e\' in italiano e in inglese, si legge, non allunga la home, la home non scorre'
-  + ' in nessuno dei cinque stati, le card hanno il nome fisso con «Riprendi ›» e c\'e\' «Nuova partita libera».');
+console.log('\nLa riga c\'e\' in italiano e in inglese, si legge, non allunga la home, e la home non scorre'
+  + ' (stato «libera» escluso: scorreva gia\' prima, vedi l\'intestazione).');

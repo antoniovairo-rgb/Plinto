@@ -25,13 +25,6 @@ export default {
     record: 'Record',
     maiGiocata: 'Mai giocata',
     daGiocare: 'Da giocare',
-    // PO-010: lo stato a destra di «Partita libera» e «Sfida del giorno» con una partita
-    // in corso; il nome della card non cambia. Le due frasi lunghe sono il nome
-    // accessibile, dopo il nome della card.
-    riprendiStato: 'Riprendi ›',
-    riprendiLibera: 'riprendi la partita in corso',
-    riprendiSfida: 'riprendi la sfida in corso',
-    nuovaLibera: 'Nuova partita libera',
     statistiche: 'Statistiche',
     impostazioni: 'Impostazioni',
     info: 'Info',
@@ -61,7 +54,7 @@ export default {
     sfidaOggi: 'Sfida di oggi, {giorno}',
     sfidaDelGiorno: 'Sfida del {giorno}',
     sfidaCosa: 'Oggi la partita parte uguale per tutti. Fai più punti che puoi.',
-    sfidaCosaPassata: 'Parte come quel giorno. Fai più punti che puoi.',
+    sfidaCosaPassata: 'La stessa partita di quel giorno. Fai più punti che puoi.',
   },
   gioca: {
     annulla: 'Rimetti a posto il pezzo',
@@ -528,7 +521,7 @@ export default {
   sfida: {
     titolo: 'Sfida del giorno',
     breve: 'Sfida del giorno',
-    spiegazione: 'Oggi la partita parte uguale per tutti: stessa griglia, stessi primi pezzi. Poi i pezzi cambiano secondo come giochi.',
+    spiegazione: 'Oggi la partita è la stessa per tutti: stessa griglia, stessi pezzi, nello stesso ordine.',
     tuoRecordOggi: 'Il tuo record di oggi',
     tentativi: 'Tentativi',
     nuovoRecordOggi: 'Nuovo record di giornata!',
@@ -556,7 +549,7 @@ export default {
     tintaTitolo: 'La Tinta',
     percorsoTitolo: 'Il percorso',
     percorso: 'Il gioco vero sono {n} livelli. Ognuno ha il suo obiettivo e un numero di mosse per riuscirci, e prima di cominciare ti spiega che cosa devi fare. Più avanti qualche livello ne chiede due insieme — tre righe e quattrocento punti, per dire — e allora servono tutti e due, con le stesse mosse. Ogni {attrezziOgni} livelli superati guadagni 1 gettone: con un gettone usi un attrezzo a tua scelta fra la carriola, il gessetto, il piccone e la mensola.',
-    altreModalita: 'Ci sono anche la partita libera, che va avanti finché entra un pezzo e serve solo a fare punti, e la Sfida del giorno: una al giorno, parte uguale per tutti.',
+    altreModalita: 'Ci sono anche la partita libera, che va avanti finché entra un pezzo e serve solo a fare punti, e la Sfida del giorno: la stessa identica partita per tutti, una al giorno.',
   },
   aiuto: {
     titolo: 'Come si gioca',
@@ -576,7 +569,7 @@ export default {
     bombeCatena: 'Due bombe che si toccano si innescano a vicenda: tre in fila portano via quindici caselle. Se fra l\'una e l\'altra c\'è una casella libera, non succede. Le caselle fatte saltare fanno punti e seguono la Catena.',
     bombeGrandi: 'Ogni casella fatta saltare vale {punti} punti. E le esplosioni grandi rendono di più: oltre le {soglia} caselle, ogni casella in più fa valere un {premio}% in più tutta l\'esplosione, non solo quella casella. Per questo a volte conviene aspettare il momento buono invece di usare la bomba appena arriva.',
     attrezzi: 'Gli attrezzi sono quattro: la carriola, il gessetto, il piccone e la mensola. Per usarli servono i gettoni: ne guadagni 1 ogni {ogni} livelli superati, e ne tieni al massimo {massimo}. Con ogni gettone usi un attrezzo, quello che scegli tu. Aprire il pannello per guardarli non costa niente: il gettone si spende solo quando l\'attrezzo fa davvero qualcosa.',
-    attrezziSfida: 'Nella Sfida del giorno gli attrezzi non ci sono, ed è voluto: la partita parte uguale per tutti, e due punteggi ottenuti usando gli attrezzi un numero diverso di volte non sarebbero più confrontabili.',
+    attrezziSfida: 'Nella Sfida del giorno gli attrezzi non ci sono, ed è voluto: è la stessa partita per tutti, e due punteggi ottenuti usando gli attrezzi un numero diverso di volte non sarebbero più confrontabili.',
     equitaTitolo: 'Nessuna difficoltà nascosta',
     equita: 'I pezzi che ricevi non dipendono da come stai andando: il gioco non ti manda pezzi scomodi perché stai vincendo, né pezzi comodi perché stai perdendo. Il moltiplicatore che leggi sulla barra è esattamente quello che ti verrà applicato, senza calcoli nascosti fra quello che leggi e quello che incassi. Le uniche regole che non vedi servono ad aiutarti: a inizio partita il gioco evita di darti tre pezzi che non entrano da nessuna parte, e con la griglia molto piena ti garantisce almeno un pezzo piccolo. Non ci sono vite, non c\'è tempo, non c\'è niente da comprare.',
   },

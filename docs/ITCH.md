@@ -75,7 +75,7 @@ A block puzzle where 3×3 quadrants clear too. 100 levels, a daily challenge, no
 PLINTO is a block puzzle with one extra rule: besides rows and columns, you also clear 3×3 quadrants. Three directions instead of two — and a move that closes more than one at once is worth far more.
 
 • 100 levels in seven acts, each with a stated goal and a move limit
-• A Daily Challenge: one a day, with the same start for everyone, no streaks to keep
+• A Daily Challenge: the same game for everyone, every day, no streaks to keep
 • Free play, for as long as the pieces fit
 • Four site tools, earned by playing — never bought
 • No ads, no purchases, no account, no data collected
