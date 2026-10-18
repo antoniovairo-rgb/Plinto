@@ -68,6 +68,14 @@ const FORMATI = [
   { nome: 'PC 1366x768', w: 1366, h: 768, tocco: false },
   { nome: 'PC 1920x1080', w: 1920, h: 1080, tocco: false },
   { nome: 'PC 1280x720', w: 1280, h: 720, tocco: false },
+  // Gli stessi PC con le barre del browser (schede, indirizzo, barra delle applicazioni):
+  // la pagina riceve circa 110 px in meno, come i telefoni "con barre" di
+  // impaginazione.mjs. Un 1366x768 vero da' una finestra di circa 1366x657, sotto i 720
+  // px: li' non c'e' la cornice ma la colonna da 430 px, un ramo che nessuna prova
+  // apriva. Le misure esatte dipendono dal browser e dal sistema: Non posso confermarle
+  // per ogni macchina, sono un ordine di grandezza.
+  { nome: 'PC 1366x768 con barre', w: 1366, h: 657, tocco: false },
+  { nome: 'PC 1920x1080 con barre', w: 1920, h: 969, tocco: false },
 ];
 
 /**
@@ -193,14 +201,38 @@ function misuraNellaPagina({ minimo }) {
     }
     return null;
   };
-  const sottoIlPunto = (el, r) => {
-    const x = Math.min(Math.max(r.left + r.width / 2, 0), vw - 1);
-    const y = Math.min(Math.max(r.top + r.height / 2, 0), vh - 1);
-    const sopra = document.elementFromPoint(x, y);
-    return sopra && (sopra === el || el.contains(sopra) || sopra.contains(el));
-  };
-
   const tutti = [...root.querySelectorAll('*')];
+  /*
+   * Lo strato in cima: un elemento fisso che copre la finestra e prende i tocchi (il velo
+   * del menu, una conferma). Se c'e', testi e bersagli si guardano solo li' dentro:
+   * quello che sta sotto e' coperto apposta.
+   *
+   * Prima si chiedeva a `elementFromPoint` se il testo era quello in vista nel suo
+   * punto. Sembrava piu' preciso ed era cieco proprio al difetto cercato: di due testi
+   * sovrapposti, quello sotto risultava "coperto" e si scartava, quindi la coppia non
+   * veniva mai confrontata. Il sabotaggio di prova (un pulsante spinto sopra l'altro)
+   * passava verde.
+   */
+  const strato = tutti.filter((el) => {
+    if (el.closest('[aria-hidden="true"]')) return false;
+    const s = getComputedStyle(el);
+    if (s.position !== 'fixed' || s.pointerEvents === 'none' || !visibile(el)) return false;
+    const r = el.getBoundingClientRect();
+    return r.width >= vw * 0.9 && r.height >= vh * 0.9;
+  }).at(-1) ?? null;
+  const inVista = (el) => !strato || strato.contains(el);
+  /** Il rettangolo entro cui un elemento si vede: i suoi antenati che ritagliano. */
+  const ritaglioDi = (el) => {
+    const q = { l: 0, t: 0, r: vw, b: vh };
+    for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+      const s = getComputedStyle(a);
+      if (s.overflowX === 'visible' && s.overflowY === 'visible') continue;
+      const r = a.getBoundingClientRect();
+      q.l = Math.max(q.l, r.left); q.t = Math.max(q.t, r.top);
+      q.r = Math.min(q.r, r.right); q.b = Math.min(q.b, r.bottom);
+    }
+    return q;
+  };
   // Nulla tagliato dalla cornice. Uno strato `position: fixed` (il velo del menu, le
   // finestre di conferma) non e' ritagliato dall'`overflow: hidden` di #root: si vede
   // anche fuori dalla cornice, quindi lo taglia solo la finestra. Il primo giro lo
@@ -257,8 +289,8 @@ function misuraNellaPagina({ minimo }) {
     };
   }
 
-  // Testi sovrapposti: i rettangoli veri delle righe di testo, solo dove il testo e'
-  // quello che si vede in quel punto (un velo sopra la partita copre legittimamente).
+  // Testi sovrapposti: i rettangoli veri delle righe di testo, non i box degli elementi
+  // (un paragrafo e' largo quanto la colonna anche se la sua riga e' corta).
   const righe = [];
   const giro = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let n = giro.nextNode(); n; n = giro.nextNode()) {
@@ -267,10 +299,19 @@ function misuraNellaPagina({ minimo }) {
     if (!el || !visibile(el) || el.closest('[aria-hidden="true"]') || el.closest('.pl-sr, .sr-only')) continue;
     const intervallo = document.createRange();
     intervallo.selectNodeContents(n);
-    for (const r of intervallo.getClientRects()) {
+    const ritaglio = ritaglioDi(el);
+    for (const q of intervallo.getClientRects()) {
+      // La parte che si vede davvero: una riga scorsa fuori dal suo contenitore non e'
+      // sovrapposta a niente. Senza, il paragrafo nascosto sotto «Come fare»
+      // nell'apertura del livello risultava "sotto" il pulsante Gioca.
+      const r = {
+        left: Math.max(q.left, ritaglio.l), top: Math.max(q.top, ritaglio.t),
+        right: Math.min(q.right, ritaglio.r), bottom: Math.min(q.bottom, ritaglio.b),
+      };
+      r.width = r.right - r.left; r.height = r.bottom - r.top;
       if (r.width < 2 || r.height < 2) continue;
       if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) continue;
-      if (!sottoIlPunto(el, r)) continue;
+      if (!inVista(el)) continue;
       righe.push({ el, r, testo: n.textContent.trim().slice(0, 24) });
     }
   }
@@ -292,7 +333,7 @@ function misuraNellaPagina({ minimo }) {
     const r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2 || !visibile(el)) continue;
     if (r.bottom < 0 || r.top > vh) continue;
-    if (!sottoIlPunto(el, r)) continue;
+    if (!inVista(el)) continue;
     const lato = Math.min(r.width, r.height);
     if (lato < minimo) piccoli.push({ chi: descrivi(el), lato: Math.round(lato) });
   }
@@ -405,124 +446,150 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
     return anteprima;
   }
 
+  /**
+   * Un passo che non riesce (un pulsante che non si trova, che non si puo' premere) e'
+   * un difetto di quella schermata, non la fine della prova: si scrive e si va avanti,
+   * cosi' il verdetto arriva sempre. Senza, il sabotaggio che spingeva una voce del menu
+   * sopra l'altra faceva cadere lo script a meta', senza tabella e senza elenco.
+   */
+  async function passo(schermata, fn) {
+    try { await fn(); }
+    catch (e) { difetto(schermata, `non ci si arriva: ${String(e.message).split('\n')[0].slice(0, 140)}`); }
+  }
+  page.setDefaultTimeout(8000);
+
   // --- home
-  await home();
-  await misura('home');
+  await passo('home', async () => {
+    await home();
+    await misura('home');
+  });
 
   // --- partita libera: un pezzo col puntatore, uno da tastiera
-  await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
-  await page.waitForSelector('.pl-plancia');
-  await misura('libera');
-  {
-    const g = await geometria();
-    const prima = await pezziInMano();
-    let anteprima;
-    if (formato.tocco) {
-      // Col dito il pezzo si disegna 1,35 caselle sopra il dito (useTrascinamento.js):
-      // per appoggiarlo al centro il dito va altrettanto piu' in basso.
-      anteprima = await trascinaColDito({ x: g.px, y: g.py }, { x: g.cx, y: g.cy + 1.35 * g.cella });
-    } else {
-      await page.mouse.move(g.px, g.py);
-      await page.mouse.down();
-      await page.mouse.move(g.cx, g.cy, { steps: 12 });
-      anteprima = await page.locator('.pl-cella--anteprima').count();
-      await page.mouse.up();
+  await passo('libera', async () => {
+    await page.getByRole('button', { name: /^(Partita libera|Riprendi la partita)(,|$)/ }).click();
+    await page.waitForSelector('.pl-plancia');
+    await misura('libera');
+    {
+      const g = await geometria();
+      const prima = await pezziInMano();
+      let anteprima;
+      if (formato.tocco) {
+        // Col dito il pezzo si disegna 1,35 caselle sopra il dito (useTrascinamento.js):
+        // per appoggiarlo al centro il dito va altrettanto piu' in basso.
+        anteprima = await trascinaColDito({ x: g.px, y: g.py }, { x: g.cx, y: g.cy + 1.35 * g.cella });
+      } else {
+        await page.mouse.move(g.px, g.py);
+        await page.mouse.down();
+        await page.mouse.move(g.cx, g.cy, { steps: 12 });
+        anteprima = await page.locator('.pl-cella--anteprima').count();
+        await page.mouse.up();
+      }
+      await page.waitForTimeout(200);
+      const dopo = await pezziInMano();
+      const come = formato.tocco ? 'col dito' : 'col mouse';
+      riga['trascina'] = dopo < prima && anteprima > 0 ? 'ok' : 'NO';
+      if (!eRiferimento && dopo >= prima) difetto('trascina', `${come}: il pezzo non si appoggia (pezzi in mano ${prima} -> ${dopo}, caselle in anteprima ${anteprima}, presa ${Math.round(g.px)},${Math.round(g.py)} -> ${Math.round(g.cx)},${Math.round(g.cy)})`);
+      if (!eRiferimento && anteprima === 0) difetto('trascina', `${come}: nessuna anteprima durante il trascinamento`);
+      if (eRiferimento && dopo >= prima) errori.push(`${formato.nome}: il trascinamento ${come} non funziona nemmeno sul telefono: la prova e' rotta`);
     }
-    await page.waitForTimeout(200);
-    const dopo = await pezziInMano();
-    const come = formato.tocco ? 'col dito' : 'col mouse';
-    riga['trascina'] = dopo < prima && anteprima > 0 ? 'ok' : 'NO';
-    if (!eRiferimento && dopo >= prima) difetto('trascina', `${come}: il pezzo non si appoggia (pezzi in mano ${prima} -> ${dopo}, caselle in anteprima ${anteprima}, presa ${Math.round(g.px)},${Math.round(g.py)} -> ${Math.round(g.cx)},${Math.round(g.cy)})`);
-    if (!eRiferimento && anteprima === 0) difetto('trascina', `${come}: nessuna anteprima durante il trascinamento`);
-    if (eRiferimento && dopo >= prima) errori.push(`${formato.nome}: il trascinamento ${come} non funziona nemmeno sul telefono: la prova e' rotta`);
-  }
-  {
-    const prima = await pezziInMano();
-    await page.locator('body').click({ position: { x: 1, y: 1 } }).catch(() => {});
-    let nelVassoio = false;
-    for (let i = 0; i < 40 && !nelVassoio; i += 1) {
-      await page.keyboard.press('Tab');
-      nelVassoio = await page.evaluate(() => !!document.activeElement?.closest('.pl-tray'));
+    {
+      const prima = await pezziInMano();
+      await page.locator('body').click({ position: { x: 1, y: 1 } }).catch(() => {});
+      let nelVassoio = false;
+      for (let i = 0; i < 40 && !nelVassoio; i += 1) {
+        await page.keyboard.press('Tab');
+        nelVassoio = await page.evaluate(() => !!document.activeElement?.closest('.pl-tray'));
+      }
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(80);
+      const cursore = await page.locator('.pl-cella--cursore').count();
+      // Nell'angolo in alto a sinistra: il centro e' occupato dal pezzo appena trascinato,
+      // e un Invio su caselle piene non appoggia niente per regola, non per difetto. Il
+      // primo giro lo ha scambiato per un difetto su quattro formati su dodici.
+      for (let i = 0; i < 4; i += 1) { await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowLeft'); }
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(200);
+      const dopo = await pezziInMano();
+      riga['tastiera'] = nelVassoio && cursore === 1 && dopo < prima ? 'ok' : 'NO';
+      if (!nelVassoio) difetto('tastiera', 'con Tab non si arriva ai pezzi');
+      else if (cursore !== 1) difetto('tastiera', 'il cursore non compare sulla griglia dopo aver preso il pezzo');
+      else if (dopo >= prima) difetto('tastiera', `Invio non appoggia il pezzo (pezzi in mano ${prima} -> ${dopo})`);
+      await misura('libera-dopo');
     }
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(80);
-    const cursore = await page.locator('.pl-cella--cursore').count();
-    // Nell'angolo in alto a sinistra: il centro e' occupato dal pezzo appena trascinato,
-    // e un Invio su caselle piene non appoggia niente per regola, non per difetto. Il
-    // primo giro lo ha scambiato per un difetto su quattro formati su dodici.
-    for (let i = 0; i < 4; i += 1) { await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowLeft'); }
-    await page.keyboard.press('Enter');
-    await page.waitForTimeout(200);
-    const dopo = await pezziInMano();
-    riga['tastiera'] = nelVassoio && cursore === 1 && dopo < prima ? 'ok' : 'NO';
-    if (!nelVassoio) difetto('tastiera', 'con Tab non si arriva ai pezzi');
-    else if (cursore !== 1) difetto('tastiera', 'il cursore non compare sulla griglia dopo aver preso il pezzo');
-    else if (dopo >= prima) difetto('tastiera', `Invio non appoggia il pezzo (pezzi in mano ${prima} -> ${dopo})`);
-    await misura('libera-dopo');
-  }
+  });
 
   // --- menu della partita
-  await page.locator('.pl-hud__menu').click();
-  await page.waitForSelector('.pl-menu');
-  await misura('menu');
+  await passo('menu', async () => {
+    await page.locator('.pl-hud__menu').click();
+    await page.waitForSelector('.pl-menu');
+    await misura('menu');
+  });
 
   // --- sfida del giorno
-  await home();
-  await page.getByRole('button', { name: /^(Sfida del giorno|Riprendi la sfida)/ }).click();
-  await page.waitForSelector('.pl-plancia');
-  await misura('sfida');
+  await passo('sfida', async () => {
+    await home();
+    await page.getByRole('button', { name: /^(Sfida del giorno|Riprendi la sfida)/ }).click();
+    await page.waitForSelector('.pl-plancia');
+    await misura('sfida');
+  });
 
   // --- mappa dei livelli
-  await home();
-  await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
-  await page.waitForSelector('.pl-tappe');
-  await misura('mappa');
+  await passo('mappa', async () => {
+    await home();
+    await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+    await page.waitForSelector('.pl-tappe');
+    await misura('mappa');
+  });
 
   // --- livello 1: apertura, partita, fine
-  await home();
-  await page.locator('.pl-home__azioni .pl-btn--primario').click();
-  await page.waitForSelector('.pl-apertura');
-  await misura('apertura');
-  await page.getByRole('button', { name: /^Gioca$/ }).click();
-  await page.waitForSelector('.pl-plancia');
-  await misura('livello');
-  if (SEQUENZA_1) {
-    for (const mossa of SEQUENZA_1) {
-      const punti = await page.evaluate(({ handIndex, row, col }) => {
-        const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex]?.querySelector('.pl-pezzo');
-        if (!pezzo) return null;
-        const rp = pezzo.getBoundingClientRect();
-        const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
-        const celle = document.querySelectorAll('.pl-plancia .pl-cella');
-        const c0 = celle[0].getBoundingClientRect();
-        const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
-        const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
-        const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
-        const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
-        return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
-      }, mossa);
-      if (!punti) { difetto('fine-livello', 'pezzo non trovato durante la partita'); break; }
-      await page.mouse.move(punti.px, punti.py);
-      await page.mouse.down();
-      await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
-      await page.mouse.up();
-      await page.waitForTimeout(60);
-      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+  await passo('livello', async () => {
+    await home();
+    await page.locator('.pl-home__azioni .pl-btn--primario').click();
+    await page.waitForSelector('.pl-apertura');
+    await misura('apertura');
+    await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForSelector('.pl-plancia');
+    await misura('livello');
+    if (SEQUENZA_1) {
+      for (const mossa of SEQUENZA_1) {
+        const punti = await page.evaluate(({ handIndex, row, col }) => {
+          const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex]?.querySelector('.pl-pezzo');
+          if (!pezzo) return null;
+          const rp = pezzo.getBoundingClientRect();
+          const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
+          const celle = document.querySelectorAll('.pl-plancia .pl-cella');
+          const c0 = celle[0].getBoundingClientRect();
+          const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
+          const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
+          const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
+          const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
+          return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
+        }, mossa);
+        if (!punti) { difetto('fine-livello', 'pezzo non trovato durante la partita'); break; }
+        await page.mouse.move(punti.px, punti.py);
+        await page.mouse.down();
+        await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(60);
+        if (await page.locator('.pl-quadro-esito').count() > 0) break;
+      }
+      const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
+      if (!/superato/i.test(esito)) difetto('fine-livello', `il livello 1 giocato non risulta superato (esito: «${esito.trim()}»)`);
+      else {
+        await page.waitForTimeout(1200);
+        await misura('fine-livello');
+      }
     }
-    const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
-    if (!/superato/i.test(esito)) difetto('fine-livello', `il livello 1 giocato non risulta superato (esito: «${esito.trim()}»)`);
-    else {
-      await page.waitForTimeout(1200);
-      await misura('fine-livello');
-    }
-  }
+  });
 
   // --- come si gioca, statistiche, archivio
   for (const [schermata, nome] of [['come-si-gioca', /^Come si gioca$/], ['statistiche', /^Statistiche$/], ['archivio', /^Archivio delle sfide$/]]) {
-    await home();
-    await page.getByRole('button', { name: nome }).first().click();
-    await page.waitForTimeout(300);
-    await misura(schermata);
+    await passo(schermata, async () => {
+      await home();
+      await page.getByRole('button', { name: nome }).first().click();
+      await page.waitForTimeout(300);
+      await misura(schermata);
+    });
   }
 
   if (erroriConsole.length) {

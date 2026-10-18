@@ -35,8 +35,9 @@ export const ATTO_CHIUSO_COMPATTO = true;
  * regola guarda l'altezza della FINESTRA. Su PC il gioco sta in una cornice alta il 92%
  * della finestra: a 1366x768 la cornice e' alta 706 px come un telefono basso, la finestra
  * 768, e il numero restava a 60. Misurato: 6 px da scorrere a 1366x768 e 1024x768, dove
- * un telefono 430x706 non scorre. La classe rimette il numero a 50 dentro la cornice
- * quando la cornice e' alta fino a 720 px; sotto i 720 px di finestra non cambia niente.
+ * un telefono 430x706 non scorre; 10 px in piu' di un telefono 430x657 a 1366x657 (un
+ * 1366x768 con le barre del browser, colonna senza cornice). La classe rimette il numero
+ * a 50 in quei due casi; sotto i 720 px di larghezza non cambia niente.
  * Spento, `npm run e2e-schermi` e' rosso su quei formati.
  */
 export const NUMERO_MISURA_LA_CORNICE = true;
