@@ -25,8 +25,13 @@ export default {
     record: 'Record',
     maiGiocata: 'Mai giocata',
     daGiocare: 'Da giocare',
-    // F2: lo stato della Sfida di oggi cominciata e non finita, accanto a «Riprendi la sfida».
-    inCorso: 'In corso',
+    // PO-010: lo stato a destra di «Partita libera» e «Sfida del giorno» con una partita
+    // in corso; il nome della card non cambia. Le due frasi lunghe sono il nome
+    // accessibile, dopo il nome della card.
+    riprendiStato: 'Riprendi ›',
+    riprendiLibera: 'riprendi la partita in corso',
+    riprendiSfida: 'riprendi la sfida in corso',
+    nuovaLibera: 'Nuova partita libera',
     statistiche: 'Statistiche',
     impostazioni: 'Impostazioni',
     info: 'Info',

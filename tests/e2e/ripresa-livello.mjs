@@ -292,7 +292,7 @@ function registra(caso, { primo, prima, dopo, nota = '' }) {
   const primo = await dove(page);
   if (primo === 'guida') await page.getByRole('button', { name: /Salta per ora/ }).click();
   if (await dove(page) === 'home') {
-    await page.getByRole('button', { name: /^Riprendi la partita/ }).click();
+    await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella');
     await page.waitForTimeout(500);
   }
