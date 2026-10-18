@@ -101,6 +101,10 @@ const VERIFICHE = [
   { nome: 'build servita da una sottocartella', comando: 'npm', argomenti: ['run', 'prova-pages'] },
   { nome: 'installabile, senza rete e aggiornabile', comando: 'npm', argomenti: ['run', 'installazione'] },
   { nome: 'aspetto su schermi grandi', comando: 'npm', argomenti: ['run', 'prova-desktop'] },
+  // PO-014: tablet e PC, col mouse e col tocco. Tutti gli altri scenari aprono il gioco
+  // da telefono; sopra i 720 px per lato il gioco sta in una cornice, e due difetti di
+  // quella cornice li aveva trovati il proprietario, non una prova.
+  { nome: 'tablet e PC: ogni schermata nella cornice', comando: 'npm', argomenti: ['run', 'e2e-schermi'] },
   // La prova di resistenza e' entrata in questo elenco dopo essersi rotta in silenzio:
   // cercava un pulsante della home che non esisteva piu' da due versioni, e nessuno
   // se n'era accorto perche' era l'unico controllo che restava fuori di qui. Un
