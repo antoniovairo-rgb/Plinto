@@ -174,6 +174,8 @@ export function usePartita() {
       const stato = partitaSalvata('sfida');
       return stato && stato.stats.moves > 0 ? stato.seedLabel : null;
     },
+    /** La partita libera in corso con almeno una mossa: prima di coprirla si chiede (H1). */
+    liberaAMeta: () => (partitaSalvata('libera')?.stats.moves ?? 0) > 0,
     /** Rilegge i record dall'archivio (dopo un'importazione o un azzeramento). */
     ricaricaRecord: () => {
       setRecord(loadRecords(modalita));

@@ -69,6 +69,15 @@ export const RIPRESA_SENZA_GUIDA = true;
 export const CONFERMA_ALTRO_LIVELLO = true;
 export const CONFERMA_RIPROVA = true;
 export const CONFERMA_ALTRA_SFIDA = true;
+/*
+ * CONFERMA_NUOVA_LIBERA (collaudo 1.21.11, H1; decisione del PO «Conferma come gli
+ * altri»): «Nuova partita libera» in home, a 14 px dalla card, cancellava in silenzio la
+ * libera in corso, che ha un salvataggio solo. Vale per ogni strada che ne comincia una
+ * (home, menu della partita, fine partita, trionfo, profilo, statistiche): la domanda sta
+ * in `iniziaNuova` e non nei pulsanti. Libera finita o a zero mosse: niente domanda.
+ * Caso N di `tests/e2e/ripresa-livello.mjs`.
+ */
+export const CONFERMA_NUOVA_LIBERA = true;
 // Dopo la domanda aperta dall'archivio la cronologia torna indietro di un gradino e
 // l'indirizzo perdeva `#/sfida/<giorno>` (misurato sulla build di produzione: ancora
 // vuota con la domanda, `#/sfida/2026-10-15` senza). Rimesso a ogni `popstate` nostro.
@@ -120,7 +129,7 @@ export function App() {
   const {
     partita, modalita, esitoSfida, record, recordLibera, nuoviRecord, pezziMorti, riepilogo,
     nuovaPartita, nuovaSfida, riprendi, abbandona, gioca, cePartitaSalvata,
-    siPuoAnnullare, annulla, sfidaInCorsoDi, sfidaAMeta, ricaricaRecord,
+    siPuoAnnullare, annulla, sfidaInCorsoDi, sfidaAMeta, liberaAMeta, ricaricaRecord,
   } = usePartita();
 
   const [salvataggioDisponibile, setSalvataggioDisponibile] = useState(() => cePartitaSalvata());
@@ -159,14 +168,39 @@ export function App() {
    */
   const rotta = usaRotta();
 
+  // Niente argomenti di proposito: e' passata come `onClick`, e l'evento del tocco non
+  // deve poter valere come «confermato».
   const iniziaNuova = useCallback(() => {
     sbloccaAudio();
     suonoBottone();
+    if (CONFERMA_NUOVA_LIBERA && liberaAMeta()) {
+      // Dal menu della libera stessa la partita e' gia' a schermo: «Riprendi» chiude e
+      // basta, cosi' non si perde nemmeno la mossa da annullare.
+      const giaDentro = schermata === 'gioco' && modalita === 'libera' && partita?.status === 'playing';
+      setConferma({
+        titolo: t('conferma.liberaTitolo'),
+        testo: t('conferma.liberaTesto'),
+        etichettaTorna: t('conferma.riprendiLibera'),
+        etichettaContinua: t('conferma.nuovaLibera'),
+        onTorna: () => {
+          setConferma(null);
+          setMenuAperto(false);
+          if (giaDentro || riprendi('libera')) setSchermata('gioco');
+        },
+        onContinua: () => { setConferma(null); avviaNuovaLibera(); },
+      });
+      return;
+    }
+    avviaNuovaLibera();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liberaAMeta, riprendi, schermata, modalita, partita?.status, t]);
+
+  function avviaNuovaLibera() {
     nuovaPartita();
     setSalvataggioDisponibile(false);
     setMenuAperto(false);
     setSchermata('gioco');
-  }, [nuovaPartita]);
+  }
 
   const riprendiPartita = useCallback(() => {
     if (riprendi()) setSchermata('gioco');
@@ -589,6 +623,7 @@ export function App() {
               onElenco={tornaAiQuadri}
               t={t}
             />
+            {finestraConferma}
           </div>
         );
       }

@@ -633,6 +633,11 @@ export default {
     apri: 'Apri {nuova}',
     sfidaOggi: 'la sfida di oggi',
     sfidaDel: 'la sfida del {giorno}',
+    // H1 (collaudo 1.21.11): «Nuova partita libera» con una libera a meta'.
+    liberaTitolo: 'La partita libera è a metà.',
+    liberaTesto: 'Se inizi una nuova partita, perdi le mosse fatte in quella a metà.',
+    riprendiLibera: 'Riprendi la partita',
+    nuovaLibera: 'Nuova partita',
   },
   comune: {
     /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.

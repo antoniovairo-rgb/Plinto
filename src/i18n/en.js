@@ -551,6 +551,10 @@ export default {
     apri: 'Open {nuova}',
     sfidaOggi: "today's challenge",
     sfidaDel: 'the {giorno} challenge',
+    liberaTitolo: 'Your free game is in progress.',
+    liberaTesto: 'If you start a new game, you lose the moves you made in this one.',
+    riprendiLibera: 'Resume game',
+    nuovaLibera: 'New game',
   },
   comune: {
     tornaAllaPartita: 'Back to the game',
