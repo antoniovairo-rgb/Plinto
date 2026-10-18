@@ -20,6 +20,15 @@ import { InvitoRecensione } from '../Recensisci.jsx';
  * manda al livello nuovo — che si apre spiegandosi. Fra un livello e l'altro non deve
  * esserci un vuoto: deve esserci un motivo per premere ancora.
  */
+/*
+ * ATTO_CHIUSO_COMPATTO (collaudo 1.21.11, H2): a 320x700, con il gettone e l'atto appena
+ * chiuso, la fine del livello andava scorsa di 1 px (anche nella 1.21.10: dipende dal
+ * font). La classe stringe di 6 px lo spazio sopra la fascia dell'atto, e la regola in
+ * app.css vale solo sotto i 340 px di larghezza e i 720 di altezza: altrove non cambia
+ * niente. Prova: `node tests/e2e/trionfo.mjs`, misura a 320x700.
+ */
+export const ATTO_CHIUSO_COMPATTO = true;
+
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
   animazioni = true, onRiprova, onProssimo, onElenco, t,
@@ -40,7 +49,7 @@ export function SchermoFineQuadro({
   const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
 
   return (
-    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}`}>
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 

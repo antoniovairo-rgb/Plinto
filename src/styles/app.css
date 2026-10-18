@@ -3043,6 +3043,11 @@ button {
   border: 1px solid var(--pl-brand-deep);
   text-align: center;
 }
+/* H2 (collaudo 1.21.11): a 320x700 la fine del livello con l'atto chiuso scorreva di
+   1 px. Solo sugli schermi piccoli, e solo con la fascia: 6 px in meno sopra di lei. */
+@media (max-width: 340px) and (max-height: 720px) {
+  .pl-fine--atto-chiuso .pl-atto-chiuso { margin-top: 8px; }
+}
 .pl-atto-chiuso__titolo {
   margin: 0;
   font-weight: 700;
