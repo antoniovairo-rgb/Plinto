@@ -17,7 +17,7 @@ un tablet o un PC veri i font possono essere diversi: vedi «Non posso confermar
 | difetti trovati | **uno**: la fine del livello scorre su PC e tablet bassi dove un telefono delle stesse misure non scorre | sotto, D1 |
 | correzione | numero delle mosse a 50 px anche nella cornice bassa e nella colonna senza cornice | interruttore `NUMERO_MISURA_LA_CORNICE`, `src/ui/schermate/FineQuadro.jsx:43`; regola in `src/styles/app.css:926-935` |
 | cambi di prodotto | nessuno fatto; cinque proposte per la madre | sotto, «Proposte» |
-| CLAUDE.md | «IL GATE: 30 controlli» → 34 (su `main` erano già 33; con questo 34) | `CLAUDE.md:24` |
+| CLAUDE.md | «IL GATE: 30 controlli» → 33 (su `main` erano già 32, contati dal gate stesso; con questo 33) | `CLAUDE.md:24` |
 
 ## Lo scenario
 
@@ -280,6 +280,31 @@ verticale.
 
 ## Gate
 
-`npm run build`: verde. `npm run verifica -- --veloce`: la corsia veloce è stata
-**negata** dallo strumento («non risulta nessun giro completo passato su questa
-macchina»), quindi è partito il giro completo. Esito: vedi la sezione seguente.
+`npm run build`: verde.
+
+`npm run verifica -- --veloce`: la corsia veloce è stata **negata** dallo strumento
+(«non risulta nessun giro completo passato su questa macchina»), quindi è girato il giro
+completo, 4935 s. Ultima riga del registro (`verifica.log`, non versionato):
+
+```
+2 controlli su 33 sono falliti. NON pubblicare.
+```
+
+31 verdi, compresi i cento livelli (3411 s) e il nuovo «tablet e PC: ogni schermata nella
+cornice» (441 s, sul server di sviluppo). I due rossi, verificati su `main`:
+
+| controllo | rosso sul ramo | stesso controllo su `main` (`cc90a3b`, build e preview separate in un worktree, stesso container) |
+|---|---|---|
+| `e2e-quadri` | fine del livello (vittoria) a **320x700**: 2 px da scorrere | 320x700: 2 px **e 1366x768: 6 px** |
+| `recensione` | a 360x640 l'invito finisce 10 px sotto la barra dei pulsanti | identico: 360x640, 10 px |
+
+- Entrambi sono su formati da telefono (sotto i 720 px di larghezza), dove la correzione di
+  questo ramo non può scattare: c'erano già su `main`. Dipendono dal font del container?
+  **Non posso confermarlo** qui: è l'ipotesi del mandato, coerente con il commento di
+  `ATTO_CHIUSO_COMPATTO` in `FineQuadro.jsx` («dipende dal font»), ma non l'ho misurato
+  con un altro font.
+- Su `main` `e2e-quadri` vede **anche** il 1366x768 a 6 px: è D1, trovato da una prova già
+  esistente e sparito su questo ramo. Il commento in `app.css:900` dice che a 1366x768 la
+  fine del livello entra, ma nel container su `main` non entra.
+- Il verdetto che conta è quello della CI (CLAUDE.md): questo ramo non l'ha avuta, perché non
+  è su `main`.
