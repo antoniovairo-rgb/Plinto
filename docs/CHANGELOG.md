@@ -7,6 +7,15 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.13] — 18 ottobre 2026
+
+### Corretto
+
+- **La pillola «Riprendi ›» è allineata agli altri stati** (PO-011, segnalazione del PO
+  dal telefono): senza l'alone di 3 px che la faceva sporgere a destra, il suo bordo cade
+  dove finiscono «Da giocare» e «Record …». Interruttore `PILLOLA_ALLINEATA`; controllo
+  in `npm run home-spiegazione`. Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.12] — 18 ottobre 2026
 
 Una partita libera a metà non si perde più con un tocco (H1, decisione del PO) e la fine
