@@ -923,6 +923,13 @@ button {
 @media (max-height: 720px) and (max-width: 719px) {
   .pl-fine__numero { font-size: 50px; }
 }
+/* La stessa misura dentro la cornice da PC e tablet, quando la cornice e' alta fino a
+   720 px: e' il 92% della finestra, quindi finestre fino a 782 px. La regola qui sopra
+   guarda la finestra e li' non scatta (PO-014, interruttore NUMERO_MISURA_LA_CORNICE in
+   FineQuadro.jsx). La fine affollata ha gia' il suo numero, piu' piccolo: non si tocca. */
+@media (min-width: 720px) and (min-height: 720px) and (max-height: 782px) {
+  .pl-fine--misura-cornice:not(.pl-fine--affollata) .pl-fine__numero { font-size: 50px; }
+}
 /* La fine del livello affollata (gettone guadagnato o atto appena chiuso): qualche
    pixel in meno a numero e margini, perche' tutto stia nello schermo senza scorrere. */
 .pl-fine--affollata .pl-fine__numero { font-size: 46px; }

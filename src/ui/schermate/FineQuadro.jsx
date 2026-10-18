@@ -29,6 +29,18 @@ import { InvitoRecensione } from '../Recensisci.jsx';
  */
 export const ATTO_CHIUSO_COMPATTO = true;
 
+/*
+ * NUMERO_MISURA_LA_CORNICE (collaudo tablet e PC, PO-014): sul telefono basso il numero
+ * delle mosse scende da 60 a 50 px perche' la fine del livello stia senza scorrere, ma la
+ * regola guarda l'altezza della FINESTRA. Su PC il gioco sta in una cornice alta il 92%
+ * della finestra: a 1366x768 la cornice e' alta 706 px come un telefono basso, la finestra
+ * 768, e il numero restava a 60. Misurato: 6 px da scorrere a 1366x768 e 1024x768, dove
+ * un telefono 430x706 non scorre. La classe rimette il numero a 50 dentro la cornice
+ * quando la cornice e' alta fino a 720 px; sotto i 720 px di finestra non cambia niente.
+ * Spento, `npm run e2e-schermi` e' rosso su quei formati.
+ */
+export const NUMERO_MISURA_LA_CORNICE = true;
+
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
   animazioni = true, onRiprova, onProssimo, onElenco, t,
@@ -49,7 +61,7 @@ export function SchermoFineQuadro({
   const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
 
   return (
-    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}`}>
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 

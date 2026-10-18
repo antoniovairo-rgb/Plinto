@@ -21,7 +21,7 @@ npm install
 npm run dev                    # http://localhost:5173, anche dal telefono in Wi-Fi
 npm run build                  # dist/ — inietta la versione e precarica il service worker
 npm test                       # 28 file Vitest, ~25 s
-npm run verifica               # IL GATE: 30 controlli, ~65 min (cento livelli rigiocati)
+npm run verifica               # IL GATE: 34 controlli, ~65 min (cento livelli rigiocati)
 npm run verifica -- --veloce   # ~10 min: salta i cento livelli SOLO se il diff lo permette
 ```
 Gli altri script di `package.json` sono singoli controlli o strumenti (`schermate`,
