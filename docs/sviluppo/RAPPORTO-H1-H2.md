@@ -102,7 +102,44 @@ diversa. In più: libera a zero mosse → nessuna domanda, la nuova partita part
 
 ## Controlli eseguiti
 
-<!-- ESITI -->
+Sul codice finale, in sviluppo (server Vite avviato dagli script), uscita del comando:
+
+| Comando | Esito |
+|---|---|
+| `npm test` | 45 file, 649 test, tutti verdi (prima dei commit di prova e2e: 648; il test in più non l'ho identificato) |
+| `npm run build` | ok |
+| `npm run e2e-po008` | 0 «Tutto a posto» (A–N) |
+| `node tests/e2e/trionfo.mjs` | 0 «Tutto a posto» |
+| `npm run e2e` (partita) | 0 |
+| `npm run e2e-scenografie` | 0 |
+| `npm run correzioni` | 0 |
+| `npm run indietro` | 0 |
+| `npm run home-spiegazione` | 0 |
+| `npm run impaginazione` | 0 |
+| `npm run comunicazioni` | 0 |
+| `npm run e2e-ripresa` | 0 |
+| `npm run e2e-salvataggio` | 0 |
+| `npm run e2e-attrezzi` | 0 |
+| `npm run annulla` | 0 |
+| `npm run incitamenti` | 0 |
+| `npm run condivisione` | 0 |
+| `npm run guida` | 0 |
+| `npm run anteprima` | 0 |
+| `npm run archivio` | 0 |
+| `npm run recensione` | **1** — «APP: a 360x640 l invito finisce 10px sotto la barra dei pulsanti» |
+| `npm run e2e-quadri` | **1** — «FINE LIVELLO (vittoria): a 320x700 bisogna scorrere di 2 px», «a 1366x768 … 6 px» |
+
+**I due rossi sono preesistenti:** rilanciati identici su un worktree di `main` a
+`dace2f9` (1.21.11, senza nessuna di queste modifiche) danno gli stessi messaggi e gli
+stessi pixel. Non li ho toccati: sono fuori da H1 e H2. Sono della stessa famiglia di H2
+(fine livello che scorre di pochi px, probabilmente legata al font del container, come
+dice il collaudo per H2), ma riguardano altre schermate (fine livello vinto senza atto
+chiuso; invito alla recensione nell'app). Da decidere a parte; non posso confermare se
+compaiano anche in CI.
+
+Non lanciati: `npm run verifica` completo (per istruzione), `e2e-sicurezza`,
+`versione-servita`, `contrasti`, `geometria` e i cento livelli: non toccano la partita
+libera.
 
 ## Scelte di dettaglio (con la consigliata, già applicata)
 
