@@ -7,6 +7,22 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.12] — 18 ottobre 2026
+
+Una partita libera a metà non si perde più con un tocco (H1, decisione del PO) e la fine
+livello con l'atto chiuso entra anche sui telefoni da 320x700 (H2). Ogni correzione ha un
+interruttore e una prova che con l'interruttore spento fallisce. Arriva anche nell'app
+Android: nessun pacchetto nuovo.
+
+### Corretto
+
+- **Conferma prima di una nuova partita libera** con una a metà (almeno una mossa), da
+  qualunque punto la si inizi: home, menu della partita, profilo, statistiche, festa
+  finale. «La partita libera è a metà.» → «Riprendi la partita» (evidenziato) o «Nuova
+  partita». Interruttore `CONFERMA_NUOVA_LIBERA`; caso N in `npm run e2e-po008`.
+- **Fine livello con l'atto chiuso a 320x700** senza scorrimento (6 px in meno sopra la
+  fascia, solo sotto 340x720). Interruttore `ATTO_CHIUSO_COMPATTO`.
+
 ## [1.21.11] — 18 ottobre 2026
 
 Le card della home dicono sempre quale modalità riprendi (PO-010), la home non scorre più
