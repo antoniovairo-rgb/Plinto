@@ -7,6 +7,23 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.14] — 18 ottobre 2026
+
+### Cambiato
+
+- **Il pulsante grande della home dice sempre «Livello N»** (PO-013, richiesta del PO),
+  anche con un livello lasciato a metà: il tocco lo riprende comunque da dove eri.
+  Interruttore `LIVELLO_SENZA_RIPRENDI`.
+
+### Corretto
+
+- **Una partita libera iniziata da dentro una sfida resta la libera dopo una ricarica**
+  (I1, collaudo della 1.21.12): l'indirizzo `#/sfida/<giorno>` si ripulisce quando parte o
+  si riprende la libera. Interruttore `ANCORA_VIA_DALLA_LIBERA`; caso O in
+  `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.13] — 18 ottobre 2026
 
 ### Corretto

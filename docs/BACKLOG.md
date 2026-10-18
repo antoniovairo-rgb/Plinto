@@ -18,5 +18,5 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | PO-009 | «Nella home del gioco non si capisce bene la distinzione tra partita libera e sfida del giorno, si confonde il player»; scelta: «Riga di spiegazione» | chiusa con la 1.21.10 | `docs/sviluppo/RAPPORTO-PO-009.md` |
 | PO-010 | «Non si capisce il riprendeli partita, che cosa riprende... confonde» (schermata della home nell'app, 1.21.10, partita libera in corso); scelta: «Nome fisso + stato» | chiusa con la 1.21.11 | `docs/sviluppo/RAPPORTO-PO-010-G1.md` |
 | PO-011 | «Il pulsante riprendi è un po' disallineato» (schermata dal telefono, 1.21.12) | chiusa con la 1.21.13 | `docs/sviluppo/po011/` |
-| PO-012 | «avvisami quando è pubblicata» (la 1.21.13) | in corso | notifica alla pubblicazione |
-| PO-013 | «Togli il riprendi livello 20 (esempio), lascia Livello 20 come prima» | in corso | 1.21.14 |
+| PO-012 | «avvisami quando è pubblicata» (la 1.21.13) | chiusa | notifica alla pubblicazione |
+| PO-013 | «Togli il riprendi livello 20 (esempio), lascia Livello 20 come prima» | chiusa con la 1.21.14 | `src/ui/schermate/Home.jsx` |
