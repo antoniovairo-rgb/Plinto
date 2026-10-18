@@ -220,5 +220,5 @@ Selettori aggiornati al nuovo nome accessibile (non fatti girare, salvo
 
 - `48a93ae` PO-010: card della home con nome fisso e «Riprendi ›», torna «Nuova partita libera»
 - `ceb7d4a` G1: un cambio d'ancora con la scheda aperta non e' un Indietro
-- commit di questo rapporto, ITCH e screenshot: vedi `git log` del ramo (hash finale
-  riportato nella consegna).
+- `e35db71` PO-010 e G1: rapporto, schermate prima/dopo a 360x640, ITCH sulla Sfida
+- l'ultimo commit del ramo aggiunge solo questo elenco al rapporto.
