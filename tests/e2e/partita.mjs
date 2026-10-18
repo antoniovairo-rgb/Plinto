@@ -196,7 +196,7 @@ await page.evaluate((s) => {
   window.localStorage.removeItem('plinto:ripresa');
 }, quasiRiga);
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Riprendi/ }).click();
+await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
 const bersaglioRiga = await page.evaluate(() => {
   const c = document.querySelectorAll('.pl-plancia .pl-cella')[8].getBoundingClientRect();
@@ -312,7 +312,7 @@ await page.reload({ waitUntil: 'networkidle' });
 // avvenuta. Si accettano tutte e due le strade e si misura quello che conta.
 await page.waitForTimeout(400);
 if (await page.locator('.pl-plancia').count() === 0) {
-  await page.getByRole('button', { name: /Riprendi/ }).click();
+  await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 }
 await page.waitForSelector('.pl-plancia');
 const punteggioDopo = await punteggio();
@@ -328,7 +328,7 @@ await page.evaluate((salvataggio) => {
   window.localStorage.removeItem('plinto:ripresa');
 }, quasiFinita);
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Riprendi/ }).click();
+await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.screenshot({ path: `${OUT}/05-quasi-finita.png` });
 console.log('   dopo la ripresa: blocchi sulla griglia', await contaBlocchi(), '| punteggio', await punteggio());
