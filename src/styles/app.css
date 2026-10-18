@@ -1782,6 +1782,9 @@ button {
   border-radius: 999px;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-brand) 25%, transparent);
 }
+/* PO-011: niente alone, cosi' il bordo della pillola cade esattamente dove finiscono gli
+   altri stati a destra; la riga e' centrata sul nome. */
+.pl-sfida-avvio__esito--evidenza.pl-sfida-avvio__esito--allineata { box-shadow: none; align-self: center; }
 
 /* --------------------------------------------------- schermi grandi (desktop) --- */
 /*

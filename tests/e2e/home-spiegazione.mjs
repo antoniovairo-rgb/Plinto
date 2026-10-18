@@ -182,6 +182,9 @@ function misura() {
       esito: el.querySelector('.pl-sfida-avvio__esito')?.textContent ?? null,
       // PO-010, «in evidenza»: la pillola ha un fondo pieno, il record no.
       esitoFondo: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); return e ? getComputedStyle(e).backgroundColor : null; })(),
+      // PO-011: la pillola non sporge (niente alone) e finisce dove finisce il contenuto.
+      esitoAlone: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); return e ? getComputedStyle(e).boxShadow : null; })(),
+      esitoDestra: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); if (!e) return null; const cs = getComputedStyle(el); return Math.round(el.getBoundingClientRect().right - parseFloat(cs.paddingRight) - e.getBoundingClientRect().right); })(),
       titolo: el.querySelector('span')?.textContent ?? null,
     };
   };
@@ -248,6 +251,8 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
       if (conLibera) {
         if (m.libera?.esito !== testi.home.riprendiStato) errori.push(`${dove}: con la libera in corso lo stato e «${m.libera?.esito}» invece di «${testi.home.riprendiStato}» (PO-010)`);
         if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.libera?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della libera non e in evidenza (nessun fondo)`);
+        if (m.libera?.esitoAlone && m.libera.esitoAlone !== 'none') errori.push(`${dove}: la pillola della libera ha un alone che la fa sporgere (PO-011)`);
+        if (Math.abs(m.libera?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola della libera non finisce sul bordo del contenuto (scarto ${m.libera?.esitoDestra}px)`);
         const atteso = `${testi.home.partitaLibera}, ${testi.home.riprendiLibera}`;
         if (m.libera?.nome !== atteso) errori.push(`${dove}: il nome accessibile della libera e «${m.libera?.nome}» invece di «${atteso}»`);
         if (!m.nuova) errori.push(`${dove}: con la libera in corso manca «${testi.home.nuovaLibera}» (PO-010)`);

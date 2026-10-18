@@ -58,6 +58,14 @@ const HOME_BASSA_COMPATTA = true;
 const RIPRENDI_IN_EVIDENZA = true;
 
 /**
+ * Interruttore PO-011: la pillola «Riprendi ›» senza alone. L'alone di 3 px la faceva
+ * sporgere oltre il bordo destro su cui si allineano gli altri stati («Da giocare»,
+ * «Record …») e la faceva sembrare spostata (schermata del PO dal telefono, 1.21.12).
+ * Spento, torna l'alone: `npm run home-spiegazione` e' rosso.
+ */
+const PILLOLA_ALLINEATA = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -146,7 +154,7 @@ export function SchermoHome({
               menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
               niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
               impressione sbagliata. La parola lo dice e basta. */}
-          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}` : ''}`}>{statoLibera}</span>
+          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{statoLibera}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
           ) : null}
@@ -170,7 +178,7 @@ export function SchermoHome({
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}` : ''}`}>{sfidaStato}</span>
+          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{sfidaStato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}
