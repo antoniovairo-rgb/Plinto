@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { giornoValido } from '../core/sfida.js';
+import { ANCORA_NON_E_INDIETRO } from './useTastoIndietro.js';
 
 /**
  * L'unico indirizzo che questo gioco riconosce: `#/sfida/AAAA-MM-GG`.
@@ -36,11 +37,18 @@ export function leggiRotta(ancora) {
   return giornoValido(m[1]) ? { nome: 'sfida', giorno: m[1] } : null;
 }
 
-/** Scrive l'indirizzo senza aggiungere una voce alla cronologia del browser. */
+/**
+ * Scrive l'indirizzo senza aggiungere una voce alla cronologia del browser.
+ *
+ * Lo stato della voce resta quello che c'era (G1, collaudo 1.21.10): e' il gradino del
+ * tasto Indietro (`useTastoIndietro.js`), e una voce senza gradino si riconosce come un
+ * cambio d'ancora fatto dal browser. Riscriverlo con `null` faceva sembrare tale ogni
+ * voce su cui il gioco aveva scritto l'ancora.
+ */
 export function scriviRotta(ancora) {
   try {
     const nuovo = `${window.location.pathname}${window.location.search}${ancora || ''}`;
-    window.history.replaceState(null, '', nuovo);
+    window.history.replaceState(ANCORA_NON_E_INDIETRO ? window.history.state : null, '', nuovo);
   } catch {
     // Un browser che non permette di riscrivere l'indirizzo non deve rompere il gioco:
     // la navigazione interna funziona lo stesso, si perde solo il collegamento diretto.
