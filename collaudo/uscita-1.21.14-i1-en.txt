@@ -1,0 +1,4 @@
+1. in SFIDA         SCORE 9 BEST 0 | hash #/sfida/2026-10-18
+2. in LIBERA nuova  SCORE 6 BEST 0 | hash 
+   salvate [libera, sfida]: ["LIBERA punti=6 mosse=1","2026-10-18 punti=9 mosse=3"]
+3. dopo RELOAD      SCORE 6 BEST 0 | hash 

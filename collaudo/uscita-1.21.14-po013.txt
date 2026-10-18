@@ -1,0 +1,14 @@
+{"nome":"it 390x844 L1","prima":"Livello 1","testo":"Livello 1","dopoTocco":"partita","f1":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","f2":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","scorre":false}
+{"nome":"it 390x844 L2corrente","prima":"Livello 2","testo":"Livello 2","dopoTocco":"partita","f1":"liv 2 / PUNTEGGIO 4 RECORD 0 / 0 piene","f2":"liv 2 / PUNTEGGIO 4 RECORD 0 / 0 piene","scorre":false}
+{"nome":"it 390x844 L1rigioco","prima":"Livello 2","testo":"Livello 1","dopoTocco":"partita","f1":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","f2":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","scorre":false}
+{"nome":"it 360x640 L1","prima":"Livello 1","testo":"Livello 1","dopoTocco":"partita","f1":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","f2":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","scorre":false}
+{"nome":"it 360x640 L2corrente","prima":"Livello 2","testo":"Livello 2","dopoTocco":"partita","f1":"liv 2 / PUNTEGGIO 4 RECORD 0 / 0 piene","f2":"liv 2 / PUNTEGGIO 4 RECORD 0 / 0 piene","scorre":false}
+{"nome":"it 360x640 L1rigioco","prima":"Livello 2","testo":"Livello 1","dopoTocco":"partita","f1":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","f2":"liv 1 / PUNTEGGIO 3 RECORD 0 / 0 piene","scorre":false}
+{"nome":"en 390x844 L1","prima":"Level 1","testo":"Level 1","dopoTocco":"partita","f1":"liv 1 / SCORE 3 BEST 0 / 0 piene","f2":"liv 1 / SCORE 3 BEST 0 / 0 piene","scorre":false}
+{"nome":"en 390x844 L2corrente","prima":"Level 2","testo":"Level 2","dopoTocco":"partita","f1":"liv 2 / SCORE 4 BEST 0 / 0 piene","f2":"liv 2 / SCORE 4 BEST 0 / 0 piene","scorre":false}
+{"nome":"en 390x844 L1rigioco","prima":"Level 2","testo":"Level 1","dopoTocco":"partita","f1":"liv 1 / SCORE 3 BEST 0 / 0 piene","f2":"liv 1 / SCORE 3 BEST 0 / 0 piene","scorre":false}
+{"nome":"en 360x640 L1","prima":"Level 1","testo":"Level 1","dopoTocco":"partita","f1":"liv 1 / SCORE 3 BEST 0 / 0 piene","f2":"liv 1 / SCORE 3 BEST 0 / 0 piene","scorre":false}
+{"nome":"en 360x640 L2corrente","prima":"Level 2","testo":"Level 2","dopoTocco":"partita","f1":"liv 2 / SCORE 4 BEST 0 / 0 piene","f2":"liv 2 / SCORE 4 BEST 0 / 0 piene","scorre":false}
+{"nome":"en 360x640 L1rigioco","prima":"Level 2","testo":"Level 1","dopoTocco":"partita","f1":"liv 1 / SCORE 3 BEST 0 / 0 piene","f2":"liv 1 / SCORE 3 BEST 0 / 0 piene","scorre":false}
+
+Tutto a posto.
