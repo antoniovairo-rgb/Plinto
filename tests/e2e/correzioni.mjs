@@ -333,7 +333,10 @@ console.log('C1. home a 360x640 con il pie di pagina a capo: non scorre, con qua
   // dal font, e il pie' forzato su due righe. Misurato con otto font (Inter, DejaVu Sans
   // e Serif, Liberation Sans, FreeSans, Carlito, Caladea): senza la correzione scorre di
   // 3 px con tutti, con la correzione di 0.
-  const { contesto, page } = await apri();
+  // PO-010: con una partita libera in corso, perche' e' la home piu' alta (c'e' «Nuova
+  // partita libera»). Su quella di chi non ha niente in corso, dopo PO-010 avanzano 32 px
+  // e il caso peggiore non scorre nemmeno senza la correzione: la prova non provava nulla.
+  const { contesto, page } = await apri({ dati: { partita: serializeGame(createGame({ seed: 'c1-po010', now: 0 })) } });
   const scorre = () => page.evaluate(() => { const el = document.querySelector('.pl-home'); return el.scrollHeight - el.clientHeight; });
   const reale = await scorre();
   if (reale > 0) errori.push(`C1: con il font di questo container la home scorre di ${reale} px a 360x640`);

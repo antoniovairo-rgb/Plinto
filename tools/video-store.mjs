@@ -434,7 +434,7 @@ await page.evaluate((stato) => {
   window.localStorage.setItem('plinto:partita', JSON.stringify(
     { ...stato, startedAt: Date.now(), ultimaAttivitaAt: Date.now() }));
 }, libera.iniziale);
-await page.getByRole('button', { name: /^Riprendi la partita/ }).click();
+await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
 await pausa(500);
 for (let i = 0; i < libera.mosse.length; i += 1) {

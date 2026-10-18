@@ -7,6 +7,33 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.11] — 18 ottobre 2026
+
+Le card della home dicono sempre quale modalità riprendi (PO-010), la home non scorre più
+con una partita libera in corso (F1), i testi sulla Sfida sono veri (F3) e un collegamento
+a una sfida si apre anche con il gioco già aperto (G1). Ogni correzione ha un interruttore
+e una prova che con l'interruttore spento fallisce, misurata anche sulla build di
+produzione. Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+### Cambiato
+
+- **Card della home con il nome fisso** (PO-010, decisione del PO): «Partita libera» e
+  «Sfida del giorno» restano tali anche con una partita in corso; a destra compare
+  «Riprendi ›» in una pillola d'ottone; il collegamento sotto la libera dice «Nuova
+  partita libera». Il record resta in Statistiche. Interruttori `NOME_FISSO_E_STATO`,
+  `RIPRENDI_IN_EVIDENZA` (`Home.jsx`).
+
+### Corretto
+
+- **La home non scorre con una partita libera in corso** (F1): era −60 px a 360x640.
+  Sotto i 680 px di altezza la home si compatta un poco in tutti gli stati. Interruttore
+  `HOME_BASSA_COMPATTA`; `npm run home-spiegazione` prova cinque stati in sei formati.
+- **I testi sulla Sfida dicono che parte uguale per tutti** (F3), non che è la stessa
+  partita: dopo sei mani i pezzi divergono (`docs/GAMEPLAY_RULES.md`). Anche
+  `docs/ITCH.md`.
+- **Un collegamento `#/sfida/<giorno>` aperto con il gioco già acceso apre la sfida**
+  (G1) invece di essere preso per un Indietro. Interruttore `ANCORA_NON_E_INDIETRO`.
+
 ## [1.21.10] — 18 ottobre 2026
 
 Una riga in home spiega le due modalità (PO-009), il gioco chiede conferma prima di far

@@ -8,6 +8,29 @@ import { useEffect, useRef } from 'react';
  */
 export const ADOTTA_VOCI_DOPO_RICARICA = true;
 
+/**
+ * Interruttore G1 (collaudo 1.21.10): un cambio d'ancora non e' un Indietro.
+ *
+ * Aprire `#/sfida/<giorno>` con la scheda gia' aperta non faceva niente: il browser mette
+ * una voce nuova di cronologia, SENZA il nostro `plinto`, e manda `popstate` prima di
+ * `hashchange`. `suIndietro` lo prendeva per un Indietro: riduceva `messe`, chiamava
+ * `normalizza` (che dalla home cancella l'ancora prima che `hashchange` la legga) e,
+ * dalla partita, risaliva alla home. Acceso:
+ *  - ogni voce nostra ha `plinto`, anche quella di partenza (`plinto: 0`) e anche dopo
+ *    `scriviRotta`, che prima la riscriveva con `null` (`rotta.js`): senza, il ritorno
+ *    alla home da una schermata qualunque sarebbe sembrato un cambio d'ancora;
+ *  - un `popstate` su una voce senza `plinto` si ignora: la voce prende il gradino in cui
+ *    si e', e decide `hashchange` / `usaRotta`.
+ * Spento, torna il difetto: `npm run indietro` (caso G1) e' rosso.
+ */
+export const ANCORA_NON_E_INDIETRO = true;
+
+/** Il gradino scritto su una voce di cronologia, o null se la voce non e' nostra. */
+function gradinoDi(stato) {
+  const n = stato?.plinto;
+  return Number.isInteger(n) && n >= 0 ? n : null;
+}
+
 /** Quante voci nostre stanno sotto quella corrente, lette dalla cronologia. */
 function vociGiaMesse() {
   try {
@@ -78,6 +101,10 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
 
   useEffect(() => {
     try {
+      // G1: anche la voce di partenza e' nostra, cosi' tornarci non sembra un'ancora.
+      if (ANCORA_NON_E_INDIETRO && primoGiro.current && gradinoDi(window.history.state) === null) {
+        window.history.replaceState({ ...(window.history.state ?? {}), plinto: messe.current }, '');
+      }
       if (profondita > messe.current) {
         for (let i = messe.current; i < profondita; i += 1) {
           window.history.pushState({ plinto: i + 1 }, '');
@@ -99,7 +126,18 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
   }, [profondita]);
 
   useEffect(() => {
-    const suIndietro = () => {
+    const suIndietro = (evento) => {
+      // G1: una voce senza `plinto` l'ha messa il browser per un'ancora nuova, non e' un
+      // ritorno su una voce nostra. Si adotta al gradino corrente e non si tocca niente:
+      // ne' la schermata, ne' l'ancora, ne' il conto delle voci.
+      if (ANCORA_NON_E_INDIETRO && daIgnorare.current === 0 && gradinoDi(evento?.state) === null) {
+        try {
+          window.history.replaceState({ plinto: messe.current }, '');
+        } catch {
+          // Senza cronologia scrivibile si perde solo l'adozione della voce.
+        }
+        return;
+      }
       if (daIgnorare.current > 0) {
         daIgnorare.current -= 1;
         rimetti.current?.();

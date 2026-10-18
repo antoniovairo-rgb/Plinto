@@ -1690,6 +1690,46 @@ button {
   :root.pl-home-stretta .pl-home__pie { margin-top: -4px; }
 }
 
+/*
+ * PO-010: «Nuova partita libera» sotto la card della libera in corso. Un collegamento,
+ * non un pulsante largo: alto 28 px (B10 chiede 24 per i collegamenti), con margini
+ * negativi che lo avvicinano alla card di cui parla invece di metterlo a meta' strada
+ * fra due card.
+ */
+.pl-home__nuova-libera {
+  justify-self: center;
+  min-height: 28px;
+  margin-block: -4px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--pl-text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pl-home__nuova-libera:hover { color: var(--pl-text); }
+
+/*
+ * PO-010, il posto per il collegamento sulla home bassa. A 360x640 la home avanzava di
+ * 2 px e il collegamento ne costa 28 (28 di altezza piu' 8 di spazio, meno gli 8 dei
+ * margini negativi): si prendono 2 px da ciascuno dei cinque spazi fra le azioni
+ * (10 -> 8), 8 dall'Archivio (52 -> 44, il minimo dei bersagli da dito), 2 da ciascuno
+ * dei due spazi fra le righe del menu (10 -> 8), 2 fra marchio e motto (8 -> 6) e un
+ * po' dai tre respiri fra i gruppi (2.4vh -> 2vh). Le voci del menu sono gia' a 44. Le misure prima e dopo sono in
+ * docs/sviluppo/RAPPORTO-PO-010-G1.md. La classe e' l'interruttore HOME_BASSA_COMPATTA
+ * in `src/ui/schermate/Home.jsx`; vale in tutti gli stati, perche' la home non cambi
+ * ritmo a seconda di che cosa c'e' in corso.
+ */
+@media (max-height: 680px) and (orientation: portrait) {
+  .pl-home--compatta { gap: clamp(8px, 2vh, 30px); }
+  .pl-home--compatta .pl-home__azioni { gap: 8px; }
+  .pl-home--compatta .pl-home__azioni > .pl-btn--fantasma { min-height: 44px; }
+  .pl-home--compatta .pl-home__testata { gap: 6px; }
+  .pl-home--compatta .pl-home__menu { gap: 8px; }
+}
+
 /* ------------------------------------------------------- sfida del giorno --- */
 /* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
    secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */
@@ -1729,6 +1769,18 @@ button {
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   color: var(--pl-brand);
+}
+/* PO-010: «Riprendi ›» e' una parola, non un numero: il carattere del testo, e lo
+   stesso ottone del record, che qui sostituisce. */
+.pl-sfida-avvio__esito--riprendi { font-family: inherit; letter-spacing: 0.02em; }
+/* «Riprendi ›» in evidenza (decisione del PO): pillola piena d'ottone col testo scuro.
+   Nessun padding verticale e line-height invariata: la card non cresce di un pixel. */
+.pl-sfida-avvio__esito--evidenza {
+  background: var(--pl-brand);
+  color: #14161c;
+  padding: 0 0.6em;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-brand) 25%, transparent);
 }
 
 /* --------------------------------------------------- schermi grandi (desktop) --- */
