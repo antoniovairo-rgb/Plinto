@@ -1,0 +1,25 @@
+
+La home entra nello schermo?
+  ok  Android di base    360x640  entra
+  ok  Xiaomi stretto     360x780  entra
+  ok  iPhone 12-15       390x844  entra
+  ok  Pixel 7            393x873  entra
+  ok  schermo basso      412x732  entra
+  ok  Redmi / Galaxy     412x915  entra
+
+Dentro un livello, DOPO una mossa: niente si copre a vicenda
+  ok  Android di base        360x640  tavolo entra | plancia 76% della larghezza, 0px d aria
+  ok  Xiaomi stretto         360x780  tavolo entra | plancia 99% della larghezza, 37px d aria
+  ok  iPhone 12-15           390x844  tavolo entra | plancia 99% della larghezza, 63px d aria
+  ok  Pixel 7                393x873  tavolo entra | plancia 99% della larghezza, 85px d aria
+  ok  schermo basso          412x732  tavolo entra | plancia 86% della larghezza, 0px d aria
+  ok  Redmi / Galaxy         412x915  tavolo entra | plancia 99% della larghezza, 103px d aria
+  ok  Android di base (con barre) 360x530  tavolo entra | plancia 48% della larghezza, 0px d aria
+  ok  Xiaomi stretto (con barre) 360x670  tavolo entra | plancia 83% della larghezza, 0px d aria
+  ok  iPhone 12-15 (con barre) 390x734  tavolo entra | plancia 91% della larghezza, 0px d aria
+  ok  Pixel 7 (con barre)    393x763  tavolo entra | plancia 96% della larghezza, 0px d aria
+  ok  schermo basso (con barre) 412x622  tavolo entra | plancia 63% della larghezza, 0px d aria
+  ok  Redmi / Galaxy (con barre) 412x805  tavolo entra | plancia 99% della larghezza, 7px d aria
+
+La home entra su tutti i formati provati, e nei livelli il tavolo non tocca i pezzi.
+exit=0

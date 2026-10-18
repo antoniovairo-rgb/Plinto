@@ -1,0 +1,20 @@
+
+Tasto Indietro:
+  ok  si entra nel livello 1
+  ok  da un livello si torna alla mappa, non si esce
+  ok  dalla mappa si torna alla home
+  ok  dalla home Indietro esce, invece di lasciare il gioco bloccato
+  ok  dopo un Indietro resta gia una voce in cronologia (nell app installata: non si chiude)
+  ok  Indietro chiude il menu
+  ok  chiudere il menu non esce dalla partita
+  ok  dalla partita si torna alla home
+   G1 dalla home: {"schermata":"gioco","ancora":"#/sfida/2026-10-10","domanda":0,"seme":"2026-10-10"}
+  ok  G1: dalla home un collegamento alla sfida del 2026-10-10 apre quella sfida e tiene l ancora
+  ok  G1: da quella sfida Indietro torna alla home, senza ancora
+   G1 dalla partita libera: {"schermata":"gioco","ancora":"#/sfida/2026-10-11","domanda":0,"seme":"2026-10-11"}
+  ok  G1: dalla partita libera un collegamento alla sfida del 2026-10-11 apre quella sfida
+  ok  G1: da li Indietro torna alla home
+   G1 voci: all inizio 2, prima dell uscita 5, ancora sulla home dopo Indietro: true
+
+Tutte le verifiche del tasto Indietro sono passate.
+exit=0

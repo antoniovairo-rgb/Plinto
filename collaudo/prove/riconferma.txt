@@ -1,0 +1,15 @@
+it pillola {"testo":"Riprendi ›","fondo":"rgb(242, 193, 78)","colore":"rgb(20, 22, 28)","corpo":"16px","peso":"800","w":100,"h":20,"cardH":52,"card":"pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera","nome":"Partita libera, riprendi la partita in corso"} contrasto 10.78
+it pillola {"testo":"Riprendi ›","fondo":"rgb(242, 193, 78)","colore":"rgb(20, 22, 28)","corpo":"16px","peso":"800","w":100,"h":20,"cardH":52,"card":"pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--sfida","nome":"Sfida del giorno, riprendi la sfida in corso"} contrasto 10.78
+en pillola {"testo":"Resume ›","fondo":"rgb(242, 193, 78)","colore":"rgb(20, 22, 28)","corpo":"16px","peso":"800","w":97.0625,"h":20,"cardH":52,"card":"pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera","nome":"Free play, resume the game in progress"} contrasto 10.78
+en pillola {"testo":"Resume ›","fondo":"rgb(242, 193, 78)","colore":"rgb(20, 22, 28)","corpo":"16px","peso":"800","w":97.0625,"h":20,"cardH":52,"card":"pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--sfida","nome":"Daily challenge, resume the challenge in progress"} contrasto 10.78
+it libera scroll 0
+it nuova scroll 0
+en libera scroll 0
+en nuova scroll 0
+dopo tocco card: hash  plancia 6 domanda 0
+partita salvata invariata (seed/stato): true uguale testo: true
+dopo Indietro: home? 1 pillola? 1 hash 
+Nuova partita libera: dialog 0 testo  hash 
+Invio su card EN: home ancora? 0 hash 
+G1: hash #/sfida/2026-10-18 titolo/sfida visibile: PUNTEGGIO 0 RECORD 0 SFIDA DI OGGI, 18 OTTOBRE Oggi la partita parte uguale per tutti. Fai più punti che puoi. CATENA ×1.00 sale a ogni eliminazione  Trascina u
+errori pagina/console: []

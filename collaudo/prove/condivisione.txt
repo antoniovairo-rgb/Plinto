@@ -1,0 +1,23 @@
+0. navigator.share presente: false
+1. partita finita: schermata di fine mostrata
+2. testo a schermo prima del tocco: 0
+3. senza navigator.share: conferma "Copiato negli appunti: incollalo dove vuoi.", testo a schermo dopo il tocco 0
+   negli appunti: 7 righe, 227 caratteri
+     PLINTO — Partita libera
+     12.346 punti · 41 mosse
+     Catena max 0 · Intreccio max 0
+     Righe 0 · Colonne 0 · Quadranti 0
+     Mossa migliore: 1
+     ▂▄▆█▂▄▆█▃▄▆█▃▄▆█
+     https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto
+4. copia impossibile: testo a schermo true, riga di blocchi nascosta ai lettori di schermo true
+5. mappa: pulsante del percorso presente true, anteprima prima del tocco 0
+     PLINTO — Il Ponte
+     7 livelli su 100
+     ■□□□□□□□□□□□□□□□
+     https://play.google.com/store/apps/details?id=io.github.antoniovairo_rgb.plinto
+6. senza nessun livello superato il pulsante non compare: true
+
+================ ESITO ================
+Scheda condivisibile: testo corretto, sotto il limite, e il ripiego sugli appunti funziona.
+exit=0

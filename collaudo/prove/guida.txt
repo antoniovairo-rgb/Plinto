@@ -1,0 +1,13 @@
+1. la guida ha 6 passi
+   passo della bomba: illustrata true, nominata true
+   ultimo passo: pulsante per giocare presente true
+2. dopo Indietro: "PASSO 5 DI 6"
+3. "Salta per ora" porta alla home
+   dopo un riavvio la guida ricompare: true
+4. "Non mostrarmela piu": dopo un riavvio la guida NON ricompare: true
+5. chi la finisce non se la ritrova: true
+6. "Come si gioca" resta raggiungibile dalla home: true
+
+================ ESITO ================
+Guida: 6 passi, si torna indietro, e i due modi di saltarla si comportano in modo diverso.
+exit=0

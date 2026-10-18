@@ -1,0 +1,19 @@
+1. tutti i livelli superati tranne il primo: lo vinco e mi aspetto la festa finale...
+   .pl-trionfo__titolo: contrasto peggiore sopra un blocco 13.3:1 (velo 0.88)
+   .pl-trionfo__sotto: contrasto peggiore sopra un blocco 6.01:1 (velo 0.88)
+   festa finale: mostrata, con i numeri del percorso e l annuncio.
+2. novantotto livelli su cento: vinco il primo e la festa NON deve comparire...
+3. tutto il primo atto ("Le fondamenta") tranne il primo livello: mi aspetto la fascia...
+   gettone guadagnato a schermo: si
+   fine del livello con l atto chiuso a 390x844: sta tutta nello schermo
+   fine del livello con l atto chiuso a 360x800: sta tutta nello schermo
+   fine del livello con l atto chiuso a 360x740: sta tutta nello schermo
+   fine del livello con l atto chiuso a 320x700: da scorrere 1 px
+   fine del livello con l atto chiuso a 1920x1080: sta tutta nello schermo
+   fine del livello con l atto chiuso a 1366x768: sta tutta nello schermo
+   fascia dell atto: "Le fondamenta: completo |  | Righe, colonne e quadranti: le mosse che reggono tutto il resto. |  | Tutti i livelli dal 1 al 10, superati. |  | 1 atto su 7 completato."
+4. rigioco il primo livello con l atto gia chiuso: la fascia NON deve tornare...
+
+1 problemi:
+ - ATTO: a 320x700 la fine del livello va scorsa di 1 px
+exit=1

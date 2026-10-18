@@ -1,0 +1,4 @@
+mosse fatte nel salvataggio: 1 punteggio 3
+dialog dopo «Nuova partita libera»: 0
+schermata: PUNTEGGIO 0 RECORD 18.740  PARTITA LIBERA  CATENA ×1.00 sale a ogni eliminazione  Trascina un pezzo sulla griglia  Usa T
+partita salvata cambiata: true | lunghezze 1115 1177

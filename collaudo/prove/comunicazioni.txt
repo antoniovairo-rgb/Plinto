@@ -1,0 +1,6 @@
+it: attraversati i 6 passi della guida, partita, home, 5 pagine, mappa, apertura, livello, archivio e sfida
+en: attraversati i 6 passi della guida, partita, home, 5 pagine, mappa, apertura, livello, archivio e sfida
+
+================ ESITO ================
+Tutte le comunicazioni sono leggibili in entrambe le lingue.
+exit=0

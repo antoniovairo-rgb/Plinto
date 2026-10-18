@@ -1,0 +1,15 @@
+  "Giusto"  livello 1  80x33px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Una in meno"  livello 1  136x35px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Pulita"  livello 1  77x35px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Via una"  livello 1  92x35px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Ci sta"  livello 1  60x27px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Tutto pulito!"  livello 4  162x68px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Buon posto"  livello 1  124x35px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+  "Mossa pulita"  livello 1  108x27px  dentro la plancia: true  tocco: none  velo: rgba(10, 13, 19, 0.88)
+
+frasi viste: 8  |  diverse fra loro: 8  |  livelli: 1, 4
+frasi sovrapposte al pulsante: 0
+pulsante fotografato, con il suo segno: true, frase a schermo: 0
+
+Ok: le frasi compaiono sulla plancia, non coprono il tocco e non si scontrano col pulsante.
+exit=0

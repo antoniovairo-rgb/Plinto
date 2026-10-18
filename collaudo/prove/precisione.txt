@@ -1,0 +1,6 @@
+
+PLINTO — precisione del trascinamento: 201 prove su 41 forme
+
+================ ESITO ================
+Nessuno scostamento: ogni pezzo e atterrato esattamente dove doveva.
+exit=0

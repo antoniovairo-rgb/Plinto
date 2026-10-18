@@ -1,0 +1,22 @@
+0. guida al primo avvio: regole mostrate al primo passo 4
+1. home caricata, titolo: PLINTO
+2. partita avviata. Blocchi sulla griglia: 0 | punteggio: 0
+3. trascinamento mouse: celle in anteprima 5 | blocchi 0 -> 5
+3b. eliminazione: celle preannunciate 9 | blocchi in esplosione 9 | punti volanti 1 | pixel di particelle 24172
+4a. scelto col dito, griglia spenta: anteprima 0, cursore 0
+4. due tocchi: slot selezionato 1 | blocchi 0 -> 2
+4b. tastiera: cursore 1 | anteprima 3 | blocchi 0 -> 3
+   annuncio per lettore di schermo: "più 3 punti."
+5. ripresa dopo ricarica: punteggio 3 -> 3 | blocchi 3 -> 3
+   dopo la ripresa: blocchi sulla griglia 63 | punteggio 4.321
+   dopo la mossa: blocchi 0 | pezzi in mano 0
+6. schermata di fine partita mostrata: true
+   punteggio finale mostrato: 4.322
+6b. sfida del giorno: partita libera 3 blocchi, sfida 0 blocchi
+   mano della sfida: "2x3,1x3,2x1" -> "2x3,1x3,2x1"
+7. schermate secondarie visitate
+7b. come si gioca: 4 regole, 7 sezioni
+
+================ ESITO ================
+Nessun problema rilevato.
+exit=0

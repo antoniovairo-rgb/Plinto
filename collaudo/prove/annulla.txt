@@ -1,0 +1,12 @@
+1. prima della prima mossa il pulsante non c'e': true
+2. dopo una mossa pulita: blocchi 0 -> 4, pulsante presente true
+3. dopo il ritorno: blocchi 0 (attesi 0), pezzi in mano 3 (attesi 3), punteggio "0" (atteso "0")
+4. dopo averlo usato sparisce: true
+5. nel livello: mosse "MOSSE
+14" -> "MOSSE
+13" -> "MOSSE
+14", pulsante presente true
+
+================ ESITO ================
+Il "rimetti a posto" compare quando deve, ripristina esattamente, e poi sparisce.
+exit=0
