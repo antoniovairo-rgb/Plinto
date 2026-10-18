@@ -176,4 +176,15 @@ libera.
 
 ## Commit
 
-<!-- COMMIT -->
+Su `sviluppo/h1-h2-1.21.12`, da `dace2f9`:
+
+| Hash | Commit |
+|---|---|
+| `eab32f8` | H1: chiedere conferma prima di una nuova partita libera con una a metà |
+| `8fd986c` | PO-008 caso N: nuova partita libera con una a metà, da cinque strade |
+| `9238f6b` | H2: la fine livello con l'atto chiuso sta nello schermo a 320x700 |
+| `1406915` | Rapporto H1 e H2 (bozza) e schermate del dialogo a 360x640 |
+| `548077a` | Rapporto H1 e H2: esiti delle prove, due rossi preesistenti su main |
+
+L'hash finale è quello del commit che aggiunge questa tabella (un file non può contenere
+l'hash del commit che lo contiene): è la punta del ramo, `git log -1 origin/sviluppo/h1-h2-1.21.12`.
