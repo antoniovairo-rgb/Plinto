@@ -82,6 +82,17 @@ export const CONFERMA_NUOVA_LIBERA = true;
 // l'indirizzo perdeva `#/sfida/<giorno>` (misurato sulla build di produzione: ancora
 // vuota con la domanda, `#/sfida/2026-10-15` senza). Rimesso a ogni `popstate` nostro.
 const ANCORA_SFIDA_DOPO_INDIETRO = true;
+/*
+ * ANCORA_VIA_DALLA_LIBERA (collaudo 1.21.12, I1): dentro una sfida, menu -> «Nuova
+ * partita» (o «Riprendi la partita» nella domanda) portava alla libera lasciando
+ * l'indirizzo `#/sfida/<giorno>`. Al ricaricamento, che nella TWA arriva da solo dopo un
+ * secondo piano, l'ancora vinceva sulla ripresa e si ritrovava la sfida al posto della
+ * libera che si stava giocando (misurato: libera a 3 punti, dopo la ricarica 9, quelli
+ * della sfida). Acceso, entrare in una libera ripulisce l'ancora, anche dopo un Indietro
+ * che torna su una voce di cronologia scritta quando si era nella sfida.
+ * Spento, torna il difetto: caso O di `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const ANCORA_VIA_DALLA_LIBERA = true;
 
 /**
  * Radice dell'applicazione.
@@ -185,7 +196,10 @@ export function App() {
         onTorna: () => {
           setConferma(null);
           setMenuAperto(false);
-          if (giaDentro || riprendi('libera')) setSchermata('gioco');
+          if (giaDentro || riprendi('libera')) {
+            if (ANCORA_VIA_DALLA_LIBERA) scriviRotta('');
+            setSchermata('gioco');
+          }
         },
         onContinua: () => { setConferma(null); avviaNuovaLibera(); },
       });
@@ -196,6 +210,7 @@ export function App() {
   }, [liberaAMeta, riprendi, schermata, modalita, partita?.status, t]);
 
   function avviaNuovaLibera() {
+    if (ANCORA_VIA_DALLA_LIBERA) scriviRotta('');
     nuovaPartita();
     setSalvataggioDisponibile(false);
     setMenuAperto(false);
@@ -496,6 +511,7 @@ export function App() {
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
     useCallback(() => {
       if (schermata === 'home') scriviRotta('');
+      else if (ANCORA_VIA_DALLA_LIBERA && schermata === 'gioco' && modalita === 'libera') scriviRotta('');
       else if (ANCORA_SFIDA_DOPO_INDIETRO && schermata === 'gioco' && modalita === 'sfida' && partita?.seedLabel) {
         scriviRotta(rottaSfida(partita.seedLabel));
       }

@@ -23,6 +23,9 @@
  *   N  con una partita libera a meta', iniziarne una nuova chiede conferma da ogni strada:
  *      home, menu della partita, profilo, statistiche, festa finale (collaudo 1.21.11, H1).
  *      A zero mosse non chiede niente.
+ *   O  dentro una sfida, menu -> «Nuova partita» (o «Riprendi la partita» nella domanda):
+ *      la libera che si gioca e' quella che si ritrova dopo una ricarica, non la sfida
+ *      (collaudo 1.21.12, I1). L'indirizzo non tiene piu' `#/sfida/<giorno>`.
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -674,6 +677,62 @@ function fuocoSicuro(caso, d, atteso) {
     if (link && qui !== 'partita') errori.push(`N zero mosse: la nuova partita non parte (sono su "${qui}")`);
     await contesto.close();
   }
+}
+
+// ---------- O ----------
+// Dentro una sfida, menu -> «Nuova partita»: si gioca la libera e si ricarica. Si deve
+// ritrovare la libera, non la sfida (collaudo 1.21.12, I1). Due strade: senza libera a
+// meta' (nessuna domanda) e con la libera a meta' («Riprendi la partita» nella domanda).
+// Poi Indietro: si torna alla home e la sfida non si riapre.
+// Il punteggio da solo non basta a distinguere le due partite (possono coincidere):
+// conta l'intestazione della sfida (`.pl-modalita--sfida`), che la libera non ha.
+const modo = (page) => page.evaluate(() => (!document.querySelector('.pl-plancia') ? 'fuori'
+  : document.querySelector('.pl-modalita--sfida') ? 'sfida' : 'libera'));
+for (const conLibera of [false, true]) {
+  const nome = conLibera ? 'O sfida, menu, Riprendi la partita (libera), ricarico' : 'O sfida, menu, Nuova partita, ricarico';
+  const { contesto, page } = await prepara();
+  if (conLibera) {
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+  }
+  await page.locator('.pl-sfida-avvio--sfida').click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 3; i += 1) await unaMossa(page);
+  await page.waitForTimeout(400);
+  await page.locator('.pl-hud__menu').click();
+  await page.locator('.pl-menu').getByRole('button', { name: /^Nuova partita$/ }).click();
+  await page.waitForTimeout(400);
+  if (conLibera) {
+    if (!(await domanda(page))) errori.push(`${nome}: manca la domanda`);
+    else await page.locator('[role="dialog"]').getByRole('button', { name: /^Riprendi la partita$/ }).click();
+    await page.waitForTimeout(400);
+  } else {
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+  }
+  await page.waitForTimeout(500);
+  const prima = await firma(page);
+  const modoPrima = await modo(page);
+  const ancoraPrima = await page.evaluate(() => location.hash);
+  if (modoPrima !== 'libera') errori.push(`${nome}: dopo «Nuova partita» si e' in "${modoPrima}", non nella libera`);
+  await page.reload();
+  await aspetta(page);
+  const dopo = await firma(page);
+  const modoDopo = await modo(page);
+  const ancoraDopo = await page.evaluate(() => location.hash);
+  await page.goBack();
+  await page.waitForTimeout(700);
+  const dopoIndietro = await dove(page);
+  const ancoraIndietro = await page.evaluate(() => location.hash);
+  registra(nome, { primo: modoDopo, prima, dopo,
+    nota: `ancora prima «${ancoraPrima}», dopo «${ancoraDopo}»; Indietro: ${dopoIndietro} «${ancoraIndietro}»` });
+  if (modoDopo !== 'libera') errori.push(`${nome}: dopo la ricarica si ritrova la SFIDA, non la libera`);
+  if (ancoraPrima !== '') errori.push(`${nome}: nella libera l'indirizzo e' «${ancoraPrima}»`);
+  if (dopoIndietro !== 'home' || ancoraIndietro !== '') errori.push(`${nome}: Indietro dopo la ricarica porta a "${dopoIndietro}" «${ancoraIndietro}»`);
+  await contesto.close();
 }
 
 await browser.close();
