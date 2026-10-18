@@ -195,6 +195,8 @@ function registra(caso, { primo, prima, dopo, nota = '' }) {
     ? (await page.locator('.pl-home__azioni .pl-btn--primario').innerText()).replace(/\s+/g, ' ') : '';
   const dopo = await tornaNelLivello(page);
   registra('B oltre 2 ore, poi pulsante grande della home', { primo, prima, dopo, nota: `pulsante: «${etichetta}»` });
+  // PO-013: il pulsante dice «Livello N», non «Riprendi il livello N» (il tocco riprende comunque).
+  if (primo === 'home' && !/^LIVELLO \d+$/i.test(etichetta.trim())) errori.push(`B: il pulsante grande dice «${etichetta}» invece di «Livello N» (PO-013)`);
   if (primo !== 'home') errori.push(`B: oltre la finestra il gioco non apre la home ma "${primo}"`);
   await contesto.close();
 }

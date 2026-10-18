@@ -66,6 +66,14 @@ const RIPRENDI_IN_EVIDENZA = true;
 const PILLOLA_ALLINEATA = true;
 
 /**
+ * Interruttore PO-013: il pulsante grande dice sempre «Livello N», anche con un livello
+ * lasciato a meta' (prima: «Riprendi il livello N»). Richiesta del PO: «Togli il riprendi
+ * livello 20 (esempio), lascia Livello 20 come prima». Il tocco riprende comunque il
+ * livello salvato: cambia solo la scritta. Spento, torna «Riprendi il livello N».
+ */
+const LIVELLO_SENZA_RIPRENDI = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -121,7 +129,7 @@ export function SchermoHome({
             stesso pulsante, nessuna riga in piu' (la home non deve scorrere a 360x640). */}
         <button type="button" className="pl-btn pl-btn--primario pl-btn--largo" onClick={onGiocaLivello}>
           {livelloInSospeso
-            ? t('quadri.riprendiLivello').replace('{n}', livelloInSospeso)
+            ? (LIVELLO_SENZA_RIPRENDI ? t('quadri.quadro') : t('quadri.riprendiLivello')).replace('{n}', livelloInSospeso)
             : t('quadri.quadro').replace('{n}', livelloCorrente)}
         </button>
 
