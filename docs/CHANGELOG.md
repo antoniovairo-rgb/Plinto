@@ -7,6 +7,24 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.15] — 18 ottobre 2026
+
+### Corretto
+
+- **La fine del livello non scorre più su PC e tablet bassi** (PO-014, collaudo tablet e
+  PC). Sopra i 720 px di larghezza la regola dei telefoni bassi non scattava: a 1366x768 e
+  1024x768 la schermata andava scorsa di 6 px, a 1280x720 e su un 1366x768 con le barre del
+  browser di qualche decina. Interruttori `NUMERO_MISURA_LA_CORNICE` e
+  `FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO` (`FineQuadro.jsx`). Sotto i 720 px di larghezza
+  non cambia nulla.
+
+### Aggiunto
+
+- **Controllo automatico di tablet e PC** (`npm run e2e-schermi`, nel gate): 13 formati,
+  col tocco e col mouse, ogni schermata principale giocata fino alla fine del livello.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.14] — 18 ottobre 2026
 
 ### Cambiato

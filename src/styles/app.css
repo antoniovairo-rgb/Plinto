@@ -933,6 +933,20 @@ button {
        (min-width: 720px) and (max-height: 720px) {
   .pl-fine--misura-cornice:not(.pl-fine--affollata) .pl-fine__numero { font-size: 50px; }
 }
+/* FINE DEL LIVELLO COMPATTA SU PC E TABLET BASSI (PO-014, P1; interruttore
+   FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO in FineQuadro.jsx). Con il solo numero a 50 px la
+   schermata scorreva ancora di 40 px a 1280x720 e di 44 px a 1366x657 (un 1366x768 con le
+   barre del browser), contro la richiesta del proprietario che arriva al portatile da
+   1366x768. Qui prende le misure della fine affollata, Plinto compreso. Solo sopra i 720 px
+   di larghezza: i telefoni non cambiano. */
+@media (min-width: 720px) and (min-height: 720px) and (max-height: 782px),
+       (min-width: 720px) and (max-height: 720px) {
+  .pl-fine--compatta-larga .pl-fine__numero { font-size: 46px; }
+  .pl-fine--compatta-larga .pl-scroll { padding-top: 4px; }
+  .pl-fine--compatta-larga .pl-fine__motivo { margin-bottom: 10px; }
+  .pl-fine--compatta-larga .pl-fine__punteggio { margin-bottom: 8px; }
+  .pl-fine--compatta-larga .pl-fine__plinto svg { width: 56px; height: 56px; }
+}
 /* La fine del livello affollata (gettone guadagnato o atto appena chiuso): qualche
    pixel in meno a numero e margini, perche' tutto stia nello schermo senza scorrere. */
 .pl-fine--affollata .pl-fine__numero { font-size: 46px; }

@@ -42,6 +42,15 @@ export const ATTO_CHIUSO_COMPATTO = true;
  */
 export const NUMERO_MISURA_LA_CORNICE = true;
 
+/*
+ * FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO (PO-014, P1): con il solo numero a 50 px la fine
+ * del livello scorreva ancora di 40 px a 1280x720 e di 44 px a 1366x657 (1366x768 con le
+ * barre del browser). Sopra i 720 px di larghezza e con il riquadro alto fino a 720 px
+ * prende le misure della fine affollata (`src/styles/app.css`). Spento,
+ * `npm run e2e-schermi` e' rosso su quei formati; sotto i 720 px non cambia niente.
+ */
+export const FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO = true;
+
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
   animazioni = true, onRiprova, onProssimo, onElenco, t,
@@ -62,7 +71,7 @@ export function SchermoFineQuadro({
   const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
 
   return (
-    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}`}>
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}${FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO ? ' pl-fine--compatta-larga' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 

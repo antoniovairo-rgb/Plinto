@@ -378,7 +378,10 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
     for (const t of m.tagliati.slice(0, 4)) difetto(schermata, `tagliato dalla cornice: ${t}`);
     if (m.tagliati.length > 4) difetto(schermata, `... e altri ${m.tagliati.length - 4} elementi tagliati`);
     for (const o of m.orizzontali) difetto(schermata, `scorrimento orizzontale: ${o}`);
-    const rif = riferimento[schermata]?.verticali ?? {};
+    // La fine del livello non scorre su nessun PC o tablet provato, a prescindere dal
+    // telefono di riferimento: la richiesta del proprietario arriva al portatile da
+    // 1366x768, e con le barre del browser quel portatile e' sotto i 720 px (PO-014, P1).
+    const rif = schermata === 'fine-livello' ? {} : (riferimento[schermata]?.verticali ?? {});
     for (const [dove, px] of Object.entries(m.verticali)) {
       // 1 px di tolleranza: la cornice e' alta 706,56 px, il telefono di prova 706.
       if (px > (rif[dove] ?? 0) + 1) {
