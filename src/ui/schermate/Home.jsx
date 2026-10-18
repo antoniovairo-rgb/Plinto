@@ -51,6 +51,13 @@ const NOME_FISSO_E_STATO = true;
 const HOME_BASSA_COMPATTA = true;
 
 /**
+ * Interruttore PO-010, evidenza: il PO ha scelto «Riprendi ›» IN EVIDENZA. Con lo stesso
+ * ottone del record si leggeva come uno stato qualunque (lettura della madre sulle
+ * schermate). Acceso, e' una pillola piena nello stesso spazio, senza altezza in piu'.
+ */
+const RIPRENDI_IN_EVIDENZA = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -139,7 +146,7 @@ export function SchermoHome({
               menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
               niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
               impressione sbagliata. La parola lo dice e basta. */}
-          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ' pl-sfida-avvio__esito--riprendi' : ''}`}>{statoLibera}</span>
+          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}` : ''}`}>{statoLibera}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
           ) : null}
@@ -163,7 +170,7 @@ export function SchermoHome({
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ' pl-sfida-avvio__esito--riprendi' : ''}`}>{sfidaStato}</span>
+          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}` : ''}`}>{sfidaStato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}

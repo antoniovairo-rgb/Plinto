@@ -1773,6 +1773,15 @@ button {
 /* PO-010: «Riprendi ›» e' una parola, non un numero: il carattere del testo, e lo
    stesso ottone del record, che qui sostituisce. */
 .pl-sfida-avvio__esito--riprendi { font-family: inherit; letter-spacing: 0.02em; }
+/* «Riprendi ›» in evidenza (decisione del PO): pillola piena d'ottone col testo scuro.
+   Nessun padding verticale e line-height invariata: la card non cresce di un pixel. */
+.pl-sfida-avvio__esito--evidenza {
+  background: var(--pl-brand);
+  color: #14161c;
+  padding: 0 0.6em;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-brand) 25%, transparent);
+}
 
 /* --------------------------------------------------- schermi grandi (desktop) --- */
 /*

@@ -180,6 +180,8 @@ function misura() {
     return {
       altezza: Math.round(r.height), nome: el.getAttribute('aria-label'), descrizione, riga: riga_,
       esito: el.querySelector('.pl-sfida-avvio__esito')?.textContent ?? null,
+      // PO-010, «in evidenza»: la pillola ha un fondo pieno, il record no.
+      esitoFondo: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); return e ? getComputedStyle(e).backgroundColor : null; })(),
       titolo: el.querySelector('span')?.textContent ?? null,
     };
   };
@@ -245,6 +247,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
       if (m.sfida?.titolo !== testi.sfida.breve) errori.push(`${dove}: la card della sfida si chiama «${m.sfida?.titolo}» invece di «${testi.sfida.breve}» (PO-010)`);
       if (conLibera) {
         if (m.libera?.esito !== testi.home.riprendiStato) errori.push(`${dove}: con la libera in corso lo stato e «${m.libera?.esito}» invece di «${testi.home.riprendiStato}» (PO-010)`);
+        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.libera?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della libera non e in evidenza (nessun fondo)`);
         const atteso = `${testi.home.partitaLibera}, ${testi.home.riprendiLibera}`;
         if (m.libera?.nome !== atteso) errori.push(`${dove}: il nome accessibile della libera e «${m.libera?.nome}» invece di «${atteso}»`);
         if (!m.nuova) errori.push(`${dove}: con la libera in corso manca «${testi.home.nuovaLibera}» (PO-010)`);
@@ -260,6 +263,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
       }
       if (conSfida) {
         if (m.sfida?.esito !== testi.home.riprendiStato) errori.push(`${dove}: con la sfida in corso lo stato e «${m.sfida?.esito}» invece di «${testi.home.riprendiStato}» (PO-010)`);
+        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della sfida non e in evidenza (nessun fondo)`);
         const atteso = `${testi.sfida.breve}, ${testi.home.riprendiSfida}`;
         if (m.sfida?.nome !== atteso) errori.push(`${dove}: il nome accessibile della sfida e «${m.sfida?.nome}» invece di «${atteso}»`);
       } else if (m.sfida?.esito !== testi.home.daGiocare) {
