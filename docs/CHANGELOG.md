@@ -7,6 +7,22 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.17] — 19 ottobre 2026
+
+### Corretto
+
+- **Il tasto Indietro dopo una ricarica non corre più contro la ripresa del livello**
+  (PO-019). Con il server di sviluppo React esegue due volte l'effetto del tasto
+  Indietro; il secondo giro chiamava `history.go` mentre la ripresa rimetteva le voci
+  della cronologia, e a volte il primo Indietro usciva dal gioco. Rendeva rossa la CI a
+  intermittenza (casi B6 di `npm run correzioni` e O di `npm run e2e-po008`). In
+  produzione il comportamento non cambia. Interruttore
+  `PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO` (`src/ui/useTastoIndietro.js`).
+
+### Android
+
+- Pacchetto `versionCode 11907` per il test chiuso su Google Play (PO-017).
+
 ## [1.21.16] — 19 ottobre 2026
 
 ### Cambiato
