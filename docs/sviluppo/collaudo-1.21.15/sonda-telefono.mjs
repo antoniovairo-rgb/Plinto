@@ -25,7 +25,7 @@ const ESEGUIBILE = process.env.PLINTO_CHROMIUM ?? '/opt/pw-browsers/chromium-119
 const A = process.env.SONDA_A, B = process.env.SONDA_B;
 const OUT = process.env.PLINTO_E2E_OUT ?? '/tmp/plinto-sonda-telefono';
 await mkdir(OUT, { recursive: true });
-const TELEFONI = [[360, 640], [390, 844], [412, 915]];
+const TELEFONI = (process.env.SONDA_TELEFONI ?? '360x640,390x844,412x915').split(',').map((s) => s.split('x').map(Number));
 
 function buchi(g) {
   let n = 0;
@@ -92,15 +92,19 @@ async function giro(url, etichetta, w, h) {
     try { await fn(); await page.waitForTimeout(500); foto[nome] = await fotografa(page); await page.screenshot({ path: `${OUT}/${etichetta}-${w}x${h}-${nome}.png` }); }
     catch (e) { foto[nome] = { errore: e.message.split('\n')[0] }; }
   };
-  await page.goto(url, { waitUntil: 'networkidle' });
-  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true, lingua: 'it', tema: 'scuro', animazioni: false, aiutoVisivo: true })); });
-  await page.reload({ waitUntil: 'networkidle' });
+  // Ogni tratto riparte da una home pulita: con una partita a meta' il gioco la riprende
+  // da solo all'apertura, e il tratto dopo non troverebbe la home.
+  const homePulita = async () => {
+    await page.goto(url, { waitUntil: 'networkidle' });
+    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('plinto:settings', JSON.stringify({ introVista: true, lingua: 'it', tema: 'scuro', animazioni: false, aiutoVisivo: true })); });
+    await page.reload({ waitUntil: 'networkidle' });
+  };
+  await homePulita();
   await passo('home', async () => {});
   await passo('libera', async () => { await page.getByRole('button', { name: /Partita libera/ }).first().click(); await page.waitForSelector('.pl-plancia'); });
   await passo('menu', async () => { await page.locator('.pl-hud__menu').click(); await page.waitForTimeout(300); });
-  await passo('home2', async () => { await page.keyboard.press('Escape'); await page.goto(url, { waitUntil: 'networkidle' }); });
-  await passo('sfida', async () => { await page.getByRole('button', { name: /Sfida del giorno/ }).first().click(); await page.waitForSelector('.pl-plancia'); });
-  await passo('mappa', async () => { await page.goto(url, { waitUntil: 'networkidle' }); await page.getByRole('button', { name: /^Mappa dei livelli/ }).click(); await page.waitForSelector('.pl-tappe'); });
+  await passo('sfida', async () => { await homePulita(); await page.getByRole('button', { name: /Sfida del giorno/ }).first().click(); await page.waitForSelector('.pl-plancia'); });
+  await passo('mappa', async () => { await homePulita(); await page.getByRole('button', { name: /^Mappa dei livelli/ }).click(); await page.waitForSelector('.pl-tappe'); });
   await passo('apertura', async () => { await page.locator('.pl-tappa').nth(0).click(); await page.waitForSelector('.pl-apertura'); });
   await passo('livello', async () => { await page.getByRole('button', { name: /^Gioca/ }).first().click(); await page.waitForSelector('.pl-plancia .pl-cella'); });
   await passo('fine', async () => {
@@ -124,7 +128,7 @@ async function giro(url, etichetta, w, h) {
     await page.waitForSelector('.pl-quadro-esito', { timeout: 5000 });
   });
   await passo('archivio', async () => {
-    await page.goto(url, { waitUntil: 'networkidle' });
+    await homePulita();
     await page.getByRole('button', { name: /Archivio|Sfide passate/ }).first().click();
     await page.waitForTimeout(400);
   });
