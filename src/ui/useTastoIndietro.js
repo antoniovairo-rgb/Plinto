@@ -25,6 +25,22 @@ export const ADOTTA_VOCI_DOPO_RICARICA = true;
  */
 export const ANCORA_NON_E_INDIETRO = true;
 
+/**
+ * Interruttore PO-019: il primo giro resta il primo anche se React rifa' l'effetto.
+ *
+ * Con `<React.StrictMode>` e il server di sviluppo (quello su cui gira `npm run
+ * correzioni`, anche in CI) React esegue ogni effetto due volte al montaggio. Il primo
+ * giro spegneva `primoGiro`, il secondo trovava la home con due voci adottate e faceva
+ * proprio quello che il commento di `primoGiro` vieta: `go(-2)`, mentre la ripresa del
+ * livello rimetteva due voci. Se le due `pushState` arrivano prima che il browser compia
+ * il `go(-2)`, la cronologia resta sulla voce di partenza con quattro voci sopra, e il
+ * primo Indietro esce dal gioco: la corsa 161 della CI (caso B6). Acceso, il primo giro
+ * finisce solo quando la profondita' cambia davvero; in produzione l'effetto gira una
+ * volta per profondita', e non cambia niente. Spento, `npm run correzioni` (caso B6,
+ * «go() dopo la ricarica») e' rosso. Rapporto: `docs/sviluppo/RAPPORTO-PO-019.md`.
+ */
+export const PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO = true;
+
 /** Il gradino scritto su una voce di cronologia, o null se la voce non e' nostra. */
 function gradinoDi(stato) {
   const n = stato?.plinto;
@@ -92,6 +108,8 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
   // conti salterebbero. Al primo giro quindi si aggiunge se serve, ma non si toglie: se
   // la ripresa non c'e', le voci in piu' si consumano alla prossima risalita.
   const primoGiro = useRef(true);
+  // La profondita' con cui si e' montato: finche' non cambia, si e' ancora al primo giro.
+  const profonditaIniziale = useRef(profondita);
   // Quanti `popstate` in arrivo sono provocati da noi e non dall'utente.
   const daIgnorare = useRef(0);
   const passo = useRef(passoIndietro);
@@ -122,7 +140,9 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
       // Un browser che non permette di scrivere la cronologia non deve rompere il gioco:
       // si perde solo il tasto Indietro, e i pulsanti sullo schermo restano.
     }
-    primoGiro.current = false;
+    if (!PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO || profondita !== profonditaIniziale.current) {
+      primoGiro.current = false;
+    }
   }, [profondita]);
 
   useEffect(() => {

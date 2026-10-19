@@ -207,9 +207,21 @@ console.log('B6. ricarico dentro un livello, poi Indietro: mappa, home, fuori...
   const gioca = page.getByRole('button', { name: /^Gioca/ });
   if (await gioca.count()) await gioca.first().click();
   await page.waitForSelector('.pl-plancia .pl-cella');
+  // PO-019: si contano i `history.go` del gioco dopo la ricarica. Devono essere zero: un
+  // `go(-2)` in viaggio mentre la ripresa rimette le sue due voci lascia la cronologia
+  // sulla voce di partenza, e il primo Indietro esce (CI, corsa 161). La corsa si vince
+  // quasi sempre, quindi la sola sequenza di Indietro non basta a vederlo: il `go` si'.
+  await page.addInitScript(() => {
+    window.__vaiDopoRicarica = [];
+    const vai = window.history.go.bind(window.history);
+    window.history.go = (n) => { window.__vaiDopoRicarica.push(n); return vai(n); };
+  });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
   const partenza = await dove();
+  const vai = await page.evaluate(() => window.__vaiDopoRicarica ?? null);
+  if (vai === null) errori.push('B6: lo spione di history.go non e\' stato installato: la prova non prova nulla');
+  else if (vai.length) errori.push(`B6: dopo la ricarica il gioco chiama history.go(${vai.join(', ')}): corre contro la ripresa del livello (PO-019)`);
   const passi = [];
   for (let i = 0; i < 6; i += 1) {
     await page.goBack({ timeout: 3000 }).catch(() => {});
