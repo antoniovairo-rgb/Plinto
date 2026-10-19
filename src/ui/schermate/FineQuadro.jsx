@@ -68,7 +68,7 @@ export const VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO = true;
  * 1280x720, 16 a 1366x768 e 1024x768, 23 a 320x700 (Inter nel container). E' il caso
  * piu' frequente fra le fini affollate: 17 volte nel percorso giocato in ordine, contro
  * le 3 di atto chiuso e gettone insieme. Acceso, l'avanzamento resta solo «N di 100» con
- * la barra; tutte le altre fini sono come prima. Spento, `npm run e2e-quadri` e
+ * la barra; tutte le altre fini sono come prima. Spento, `npm run e2e-trionfo` e
  * `npm run e2e-schermi` sono rossi sul caso «solo gettone».
  */
 export const MAPPA_RIDOTTA_COL_GETTONE = true;
