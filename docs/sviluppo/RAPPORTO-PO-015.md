@@ -110,4 +110,25 @@ quello del controllo corretto.
 
 ## Gate
 
-<!-- GATE -->
+`npm run build`: verde. `npm run verifica -- --veloce`: **corsia veloce NEGATA** («non
+risulta nessun giro completo passato su questa macchina»), quindi giro completo, 33
+controlli in 5057 s. Ultima riga del riassunto:
+
+> 2 controlli su 33 sono falliti. NON pubblicare.
+
+I due rossi sono esattamente quelli noti (E2), con gli stessi numeri:
+
+- «livelli nel browser (vittoria e sconfitta)» (`e2e-quadri`): «FINE LIVELLO (vittoria): a
+  320x700 bisogna scorrere di 2 px»;
+- «Play Store: invito a recensire» (`recensione`): «a 360x640 l invito finisce 10px sotto
+  la barra dei pulsanti».
+
+Gli altri 31 sono verdi, compresi «fine del percorso: festa finale e atti chiusi»
+(`e2e-trionfo`, col caso nuovo), «tablet e PC: ogni schermata nella cornice»
+(`e2e-schermi`, con le colonne nuove) e «tutti e cento i livelli, giocati nell app».
+
+**Controllato su `main`** nello stesso container (build di `origin/main` a `8528ac4`,
+`vite preview`): `e2e-quadri` rosso con lo stesso unico problema (320x700, 2 px) e
+`recensione` rosso con lo stesso unico problema (360x640, 10 px). Quindi non vengono da
+questo ramo. Il verdetto che conta resta quello della CI, che su questo ramo **Non posso
+confermarlo**.
