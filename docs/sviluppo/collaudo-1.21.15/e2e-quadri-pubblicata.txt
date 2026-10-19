@@ -1,0 +1,30 @@
+0b. pulsante principale "LIVELLO 1", versione v1.21.15
+1. mappa: 100 tappe, 1 aperte
+   atti mostrati: 7, Plinto sulla tappa corrente: true
+2. apertura: "Chiudi 2 righe" | spiegazioni 1 | consigli 1
+2c. quadro 1: obiettivo "Chiudi 2 righe", mosse 14
+3. sequenza vincente calcolata in Node: 14 mosse. La rigioco nel browser...
+   esito nel browser: "Livello superato!"
+3b. avanzamento: 4 tappe, "1 di 100", barra a 1
+   fine del livello (vittoria) a 390x844: sta tutta nello schermo
+   fine del livello (vittoria) a 360x800: sta tutta nello schermo
+   fine del livello (vittoria) a 360x740: sta tutta nello schermo
+   fine del livello (vittoria) a 320x700: da scorrere 2 px
+   fine del livello (vittoria) a 1920x1080: sta tutta nello schermo
+   fine del livello (vittoria) a 1366x768: sta tutta nello schermo
+3c. scheda del livello: 6 righe
+   fine del livello (sconfitta) a 390x844: sta tutta nello schermo
+   fine del livello (sconfitta) a 360x800: sta tutta nello schermo
+   fine del livello (sconfitta) a 360x740: sta tutta nello schermo
+   fine del livello (sconfitta) a 320x700: sta tutta nello schermo
+   fine del livello (sconfitta) a 1920x1080: sta tutta nello schermo
+   fine del livello (sconfitta) a 1366x768: sta tutta nello schermo
+3d. sconfitta: "Livello non superato", 1 righe di obiettivo
+4. dopo la vittoria: 1 superati, 2 aperti
+5. avanzamento conservato dopo la ricarica
+6. ricomincia: da 1 livelli superati a 0, 1 aperti
+7. dopo 8 tentativi falliti sul primo: 2 livelli aperti, 0 con la spunta
+
+================ ESITO ================
+PROBLEMA - FINE LIVELLO (vittoria): a 320x700 bisogna scorrere di 2 px
+uscita 1

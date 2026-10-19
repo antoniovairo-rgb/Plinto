@@ -1,0 +1,61 @@
+
+PLINTO su tablet e PC (https://antoniovairo-rgb.github.io/Plinto/)
+
+formato                          home    libera  trascin tastier libera- menu    sfida   mappa   apertur livello fine-li come-si statist archivi console
+telefono 430x920 (riferimento)   ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+telefono 430x706 (riferimento)   ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+telefono 430x662 (riferimento)   ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+telefono 430x657 (riferimento)   ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+telefono 430x891 (riferimento)   ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 768x1024                  ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 768x1024 tocco            ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1024x768                  ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1024x768 tocco            ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1024x1366                 ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1024x1366 tocco           ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1366x1024                 ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+tablet 1366x1024 tocco           ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+PC 1366x768                      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+PC 1920x1080                     ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+PC 1280x720                      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+PC 1366x768 con barre            ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+PC 1920x1080 con barre           ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok      ok     
+
+Bersagli sotto 44px anche sul telefono (non dipendono dalla cornice, non fanno fallire):
+  - home: button.pl-home__sostieni «Sostieni il progetto» misura 27px (identico sul telefono)
+  - home: a.pl-home__sostieni «Idee e segnalazioni» misura 27px (identico sul telefono)
+  - livello: button.pl-attrezzi__pastiglia.pl-attrezzi__pastiglia--vuota misura 38px (identico sul telefono)
+  - archivio: button.pl-giorno «1» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «2» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «3» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «4» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «5» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «6» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «7» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «8» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «9» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «10» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «11» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «12» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «13» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «14» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «15» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «16» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno «17» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--oggi «18» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «19» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «20» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «21» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «22» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «23» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «24» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «25» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «26» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «27» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «28» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «29» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «30» misura 43px (identico sul telefono)
+  - archivio: button.pl-giorno.pl-giorno--spento «31» misura 43px (identico sul telefono)
+
+Tutto a posto su 13 formati. Schermate in /tmp/claude-0/s/schermi
+uscita 0

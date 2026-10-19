@@ -32,7 +32,7 @@ Strumenti nuovi, solo misura (non sono nel gate e non falliscono):
   segnala la fine del livello (0 contro 6 px, tre pulsanti spostati di 28-35 px).
 
 Le misure grezze sono nella stessa cartella: `misure-1.21.15-pubblicata.jsonl`,
-`misure-1.21.14-locale.jsonl`, `telefono-confronto.jsonl` e i registri degli e2e.
+`misure-1.21.14-locale.jsonl`, `telefono-confronto.jsonl` e i registri degli e2e (`e2e-schermi-pubblicata.txt`, `e2e-quadri-pubblicata.txt`, `e2e-quadri-1.21.14.txt`, `recensione-pubblicata.txt`, `recensione-1.21.14.txt`).
 
 ## In breve
 
@@ -59,7 +59,7 @@ uscita 0, «Tutto a posto su 13 formati». Tutte le 15 colonne «ok» su tutti i
 compresi 1366x768, 1024x768 (mouse e tocco), 1280x720, 1366x657 e 1920x969. Elenca a parte,
 senza fallire, i bersagli sotto i 44 px che sono uguali sul telefono (già nel rapporto
 PO-014, P4): «Sostieni il progetto» e «Idee e segnalazioni» 27 px, la pastiglia vuota degli
-attrezzi 38 px, i giorni dell'archivio 43 px. Registro: `e2e-schermi-pubblicata.log`.
+attrezzi 38 px, i giorni dell'archivio 43 px. Registro: `collaudo-1.21.15/e2e-schermi-pubblicata.txt`.
 
 ## 2. Fine del livello: cinque casi, nove formati
 
