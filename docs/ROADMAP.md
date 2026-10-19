@@ -15,5 +15,5 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.14 | 2026-10-18 | I1 (libera iniziata da una sfida); pulsante «Livello N» (PO-013) | PO-004, PO-013 | pubblicata (`dfec9a5`); collaudata |
 | 1.21.15 | 2026-10-18 | Fine del livello su PC e tablet bassi (D1, P1); controllo automatico di tablet e PC | PO-014 | pubblicata (`e8dc0e8`); collaudata (nessun difetto nuovo) |
 | 1.21.16 | 2026-10-19 | Fine del livello col gettone, mappa ridotta (E1); sconfitta non compatta (O1) | PO-015 | pubblicata (`8fa1d3e`); collaudata (nessun difetto nuovo) |
-| 1.21.17 | 2026-10-19 | Tasto Indietro dopo una ricarica (PO-019); pacchetto Android 11907 per il test chiuso | PO-019, PO-017 | gate in corso |
+| 1.21.17 | 2026-10-19 | Tasto Indietro dopo una ricarica (PO-019); pacchetto Android 11907 per il test chiuso | PO-019, PO-017 | pubblicata (`b7bdf3b`); AAB 11907 da caricare nel test chiuso |
 | 1.22.0 | — | La Torre: livelli 101-200 e grafica nuova del sito | PO-002 | da pianificare |
