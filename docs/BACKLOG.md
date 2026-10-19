@@ -20,4 +20,5 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | PO-011 | «Il pulsante riprendi è un po' disallineato» (schermata dal telefono, 1.21.12) | chiusa con la 1.21.13 | `docs/sviluppo/po011/` |
 | PO-012 | «avvisami quando è pubblicata» (la 1.21.13) | chiusa | notifica alla pubblicazione |
 | PO-013 | «Togli il riprendi livello 20 (esempio), lascia Livello 20 come prima» | chiusa con la 1.21.14 | `src/ui/schermate/Home.jsx` |
-| PO-014 | «l'app è già ottimizza anche per Tablet e PC?»; scelta: «1» (collaudo tablet e PC senza cambiare il prodotto) | chiusa con la 1.21.15 (P4, bersagli piccoli, resta da fare) | ramo `collaudo-schermi`, `docs/sviluppo/RAPPORTO-PO-014.md` |
+| PO-014 | «l'app è già ottimizza anche per Tablet e PC?»; scelta: «1» (collaudo tablet e PC senza cambiare il prodotto) | chiusa con la 1.21.15, confermata dal PO nel questionario (P4, bersagli piccoli, resta da fare) | ramo `collaudo-schermi`, `docs/sviluppo/RAPPORTO-PO-014.md` |
+| PO-015 | Fine del livello col gettone che scorre (E1 del collaudo della 1.21.15); scelta del PO: «Mappa ridotta» | in corso | ramo `fine-gettone`, `docs/sviluppo/RAPPORTO-PO-015.md` |
