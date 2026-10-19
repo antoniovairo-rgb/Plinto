@@ -21,8 +21,13 @@ const INTORNO = 3;
  *
  * Chi ha chiesto meno movimento riceve lo stato di arrivo e basta: nessun ritardo,
  * nessuna animazione, la stessa informazione.
+ *
+ * `ridotto`: solo «N di 100» e la barra, senza il nome dell'atto e senza le tappe con
+ * Plinto. Lo chiede la fine del livello col gettone guadagnato, che altrimenti non sta
+ * nello schermo (MAPPA_RIDOTTA_COL_GETTONE in schermate/FineQuadro.jsx). La barra si
+ * allunga lo stesso: e' la parte che dice "sei andato avanti".
  */
-export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, t }) {
+export function AvanzamentoMappa({ superato, superatiTotali, ridotto = false, animazioni = true, t }) {
   const [mosso, setMosso] = useState(!animazioni);
 
   useEffect(() => {
@@ -49,10 +54,10 @@ export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, 
   const atto = attoDelQuadro(adesso);
 
   return (
-    <div className="pl-avanza">
-      <p className="pl-avanza__atto">{atto ? t(`atti.${atto.id}`) : ''}</p>
+    <div className={`pl-avanza${ridotto ? ' pl-avanza--ridotto' : ''}`}>
+      {ridotto ? null : <p className="pl-avanza__atto">{atto ? t(`atti.${atto.id}`) : ''}</p>}
 
-      <ol className="pl-avanza__strada" aria-hidden="true">
+      {ridotto ? null : <ol className="pl-avanza__strada" aria-hidden="true">
         {tappe.map((q) => {
           const fatta = q.numero <= superato;
           const qui = q.numero === attivo;
@@ -67,7 +72,7 @@ export function AvanzamentoMappa({ superato, superatiTotali, animazioni = true, 
             </li>
           );
         })}
-      </ol>
+      </ol>}
 
       {/* La riga leggibile a voce: l'elenco sopra e' decorativo, questa e' l'informazione. */}
       <p className="pl-avanza__conteggio">

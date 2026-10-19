@@ -161,8 +161,39 @@ function sequenzaVincente(quadro, tentativi = 40) {
   }
   return null;
 }
+/** Copia di tests/e2e/quadri.mjs: piazza sempre senza mai chiudere un gruppo. */
+function sequenzaPerdente(quadro) {
+  let partita = iniziaQuadro(quadro, { now: 0 });
+  const mosse = [];
+  for (let m = 0; m < (quadro.maxMosse ?? 40) + 2; m += 1) {
+    if (statoQuadro(quadro, partita).finito) break;
+    let scelta = null;
+    for (let i = 0; i < partita.hand.length && !scelta; i += 1) {
+      const pezzo = partita.hand[i];
+      if (!pezzo) continue;
+      for (const [row, col] of allPlacements(partita.grid, pezzo.shape)) {
+        const { grid } = placeShape(partita.grid, pezzo.shape, row, col, 1, pezzo.bombe);
+        if (findCompletedGroups(grid).length === 0) { scelta = { handIndex: i, row, col }; break; }
+      }
+    }
+    if (!scelta) break;
+    mosse.push(scelta);
+    partita = giocaNelQuadro(quadro, partita, scelta.handIndex, scelta.row, scelta.col, m * 1000);
+  }
+  return statoQuadro(quadro, partita).fallito ? mosse : null;
+}
 const SEQUENZA_1 = sequenzaVincente(quadroNumero(1));
 if (!SEQUENZA_1) errori.push('LIVELLO 1: il motore non trova una sequenza vincente, non si puo provare la fine del livello');
+const SEQUENZA_1_PERSA = sequenzaPerdente(quadroNumero(1));
+if (!SEQUENZA_1_PERSA) errori.push('LIVELLO 1: il motore non trova una sequenza perdente, non si puo provare la sconfitta');
+
+/*
+ * I formati "larghi e bassi": quelli dove scatta la fine compatta (stessa formula delle
+ * media query di `.pl-fine--compatta-larga` in app.css). Solo su questi si provano anche
+ * la fine col solo gettone e la sconfitta (PO-015): altrove quelle regole non valgono, e
+ * ogni caso in piu' e' un livello giocato in piu' per formato.
+ */
+const largoBasso = ({ w, h }) => w >= 720 && h <= 782;
 
 // ------------------------------------------------------------ la misura di una schermata ---
 /**
@@ -381,7 +412,7 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
     // La fine del livello non scorre su nessun PC o tablet provato, a prescindere dal
     // telefono di riferimento: la richiesta del proprietario arriva al portatile da
     // 1366x768, e con le barre del browser quel portatile e' sotto i 720 px (PO-014, P1).
-    const rif = schermata === 'fine-livello' ? {} : (riferimento[schermata]?.verticali ?? {});
+    const rif = schermata.startsWith('fine-') ? {} : (riferimento[schermata]?.verticali ?? {});
     for (const [dove, px] of Object.entries(m.verticali)) {
       // 1 px di tolleranza: la cornice e' alta 706,56 px, il telefono di prova 706.
       if (px > (rif[dove] ?? 0) + 1) {
@@ -460,6 +491,46 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
     catch (e) { difetto(schermata, `non ci si arriva: ${String(e.message).split('\n')[0].slice(0, 140)}`); }
   }
   page.setDefaultTimeout(8000);
+
+  /** Rigioca una sequenza calcolata in Node trascinando col mouse, fino all'esito. */
+  async function giocaSequenza(sequenza, schermata) {
+    for (const mossa of sequenza) {
+      const punti = await page.evaluate(({ handIndex, row, col }) => {
+        const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex]?.querySelector('.pl-pezzo');
+        if (!pezzo) return null;
+        const rp = pezzo.getBoundingClientRect();
+        const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
+        const celle = document.querySelectorAll('.pl-plancia .pl-cella');
+        const c0 = celle[0].getBoundingClientRect();
+        const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
+        const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
+        const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
+        const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
+        return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
+      }, mossa);
+      if (!punti) { difetto(schermata, 'pezzo non trovato durante la partita'); break; }
+      await page.mouse.move(punti.px, punti.py);
+      await page.mouse.down();
+      await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+      await page.mouse.up();
+      await page.waitForTimeout(60);
+      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+    }
+  }
+
+  /** Scrive i progressi (numero -> dati del livello) e apre il livello 1 dalla mappa. */
+  async function apriLivello1(livelli) {
+    const pieni = Object.fromEntries(Object.keys(livelli).map((n) => [n, { mosse: 12, punteggio: 300, tentativi: 1, ...livelli[n] }]));
+    await page.evaluate((liv) => {
+      window.localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: liv }));
+    }, pieni);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+    await page.waitForSelector('.pl-tappe');
+    await page.locator('.pl-tappa').nth(0).click();
+    await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+  }
 
   // --- home
   await passo('home', async () => {
@@ -554,28 +625,7 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
     await page.waitForSelector('.pl-plancia');
     await misura('livello');
     if (SEQUENZA_1) {
-      for (const mossa of SEQUENZA_1) {
-        const punti = await page.evaluate(({ handIndex, row, col }) => {
-          const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex]?.querySelector('.pl-pezzo');
-          if (!pezzo) return null;
-          const rp = pezzo.getBoundingClientRect();
-          const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
-          const celle = document.querySelectorAll('.pl-plancia .pl-cella');
-          const c0 = celle[0].getBoundingClientRect();
-          const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
-          const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
-          const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
-          const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
-          return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
-        }, mossa);
-        if (!punti) { difetto('fine-livello', 'pezzo non trovato durante la partita'); break; }
-        await page.mouse.move(punti.px, punti.py);
-        await page.mouse.down();
-        await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
-        await page.mouse.up();
-        await page.waitForTimeout(60);
-        if (await page.locator('.pl-quadro-esito').count() > 0) break;
-      }
+      await giocaSequenza(SEQUENZA_1, 'fine-livello');
       const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
       if (!/superato/i.test(esito)) difetto('fine-livello', `il livello 1 giocato non risulta superato (esito: «${esito.trim()}»)`);
       else {
@@ -584,6 +634,48 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
       }
     }
   });
+
+  // --- PO-015, solo sui formati larghi e bassi e non sul telefono di riferimento.
+  if (!eRiferimento && largoBasso(formato)) {
+    // La fine col solo gettone (livelli 2-5 gia' superati, si vince l'1: quinto livello
+    // superato, gettone, atto ancora aperto). Scorreva di 16 px a 1366x768 e 1024x768, 61
+    // a 1280x720, 66 a 1366x657 (collaudo 1.21.15, E1): la richiesta del proprietario
+    // arriva al portatile da 1366x768, e la stessa regola della fine normale vale qui.
+    await passo('fine-gettone', async () => {
+      await home();
+      await apriLivello1({ 2: {}, 3: {}, 4: {}, 5: {} });
+      if (!SEQUENZA_1) return;
+      await giocaSequenza(SEQUENZA_1, 'fine-gettone');
+      await page.waitForTimeout(1200);
+      if (await page.locator('.pl-fine__premio').count() !== 1) {
+        difetto('fine-gettone', 'il riquadro del gettone non compare: il caso provato e\' un altro');
+      } else {
+        await misura('fine-gettone');
+      }
+    });
+    // La sconfitta non scorreva neanche nella 1.21.14 e non deve farsi compatta: Plinto
+    // dispiaciuto resta grande come sul telefono (92 px, `dimensione` in FineQuadro.jsx).
+    // Nella 1.21.15 scendeva a 56 px su questi formati (collaudo 1.21.15, O1).
+    await passo('fine-sconfitta', async () => {
+      await home();
+      await apriLivello1({});
+      if (!SEQUENZA_1_PERSA) return;
+      await giocaSequenza(SEQUENZA_1_PERSA, 'fine-sconfitta');
+      await page.waitForTimeout(600);
+      const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
+      // «Livello non superato»: cercare solo "superato" lo scambia per una vittoria.
+      if (!/non superato/i.test(esito)) {
+        difetto('fine-sconfitta', `il livello 1 non risulta perso (esito: «${esito.trim()}»)`);
+        return;
+      }
+      await misura('fine-sconfitta');
+      const plinto = await page.evaluate(() => {
+        const svg = document.querySelector('.pl-fine__plinto svg');
+        return svg ? Math.round(svg.getBoundingClientRect().height) : 0;
+      });
+      if (plinto < 88) difetto('fine-sconfitta', `Plinto dispiaciuto misura ${plinto}px invece di 92: la fine compatta vale solo per la vittoria`);
+    });
+  }
 
   // --- come si gioca, statistiche, archivio
   for (const [schermata, nome] of [['come-si-gioca', /^Come si gioca$/], ['statistiche', /^Statistiche$/], ['archivio', /^Archivio delle sfide$/]]) {

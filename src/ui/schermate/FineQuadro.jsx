@@ -51,6 +51,28 @@ export const NUMERO_MISURA_LA_CORNICE = true;
  */
 export const FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO = true;
 
+/*
+ * VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO (PO-015, O1 del collaudo 1.21.15): la classe qui
+ * sopra valeva anche per la sconfitta, che non scorreva neanche nella 1.21.14 (0 px su
+ * tutti i formati), e su PC e tablet bassi faceva Plinto dispiaciuto di 56 px invece di
+ * 92 senza che servisse. Acceso, la fine compatta scatta solo dopo una vittoria e la
+ * sconfitta torna come nella 1.21.14. Spento, `npm run e2e-schermi` e' rosso: la
+ * sconfitta a 1366x768 ha di nuovo Plinto a 56 px.
+ */
+export const VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO = true;
+
+/*
+ * MAPPA_RIDOTTA_COL_GETTONE (PO-015, E1 del collaudo 1.21.15; decisione del proprietario
+ * «Mappa ridotta»): col gettone guadagnato e l'atto NON chiuso la fine del livello
+ * mostrava riquadro del gettone E tappe con Plinto, e scorreva: 66 px a 1366x657, 61 a
+ * 1280x720, 16 a 1366x768 e 1024x768, 23 a 320x700 (Inter nel container). E' il caso
+ * piu' frequente fra le fini affollate: 17 volte nel percorso giocato in ordine, contro
+ * le 3 di atto chiuso e gettone insieme. Acceso, l'avanzamento resta solo «N di 100» con
+ * la barra; tutte le altre fini sono come prima. Spento, `npm run e2e-quadri` e
+ * `npm run e2e-schermi` sono rossi sul caso «solo gettone».
+ */
+export const MAPPA_RIDOTTA_COL_GETTONE = true;
+
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
   animazioni = true, onRiprova, onProssimo, onElenco, t,
@@ -69,9 +91,10 @@ export function SchermoFineQuadro({
   // Con il gettone guadagnato o l'atto appena chiuso la schermata ha due blocchi in piu':
   // Plinto si fa piu' piccolo, perche' tutto deve stare nello schermo senza scorrere.
   const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
+  const compattaLarga = FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO && (vinto || !VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO);
 
   return (
-    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}${FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO ? ' pl-fine--compatta-larga' : ''}`}>
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}${compattaLarga ? ' pl-fine--compatta-larga' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 
@@ -179,11 +202,13 @@ export function SchermoFineQuadro({
         {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti".
             Quando l'atto si chiude ADESSO lascia il posto alla fascia dell'atto, che dice
             la stessa cosa in grande: insieme non stavano nello schermo, e la fine del
-            livello non deve scorrere (richiesta del proprietario, 8 ottobre 2026). */}
+            livello non deve scorrere (richiesta del proprietario, 8 ottobre 2026).
+            Col gettone guadagnato resta solo la barra: vedi MAPPA_RIDOTTA_COL_GETTONE. */}
         {vinto && !ultimo && !atto?.appenaChiuso ? (
           <AvanzamentoMappa
             superato={quadro.numero}
             superatiTotali={superatiTotali}
+            ridotto={MAPPA_RIDOTTA_COL_GETTONE && esito.attrezzoGuadagnato > 0}
             animazioni={animazioni}
             t={t}
           />
