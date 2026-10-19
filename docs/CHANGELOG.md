@@ -7,6 +7,24 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.16] — 19 ottobre 2026
+
+### Cambiato
+
+- **Fine del livello col gettone: la mappa diventa solo la barra «N di 100»** (PO-015,
+  scelta del PO «Mappa ridotta»), senza le tappe con Plinto, quando l'atto non si chiude.
+  Così la schermata entra senza scorrere da 320x700 al portatile, anche con le barre del
+  browser (prima: da 16 a 83 px da scorrere). Interruttore `MAPPA_RIDOTTA_COL_GETTONE`;
+  caso «solo gettone» in `npm run e2e-trionfo` e `npm run e2e-schermi`.
+
+### Corretto
+
+- **La sconfitta su PC e tablet bassi torna con Plinto grande** (O1, collaudo della
+  1.21.15): la fine compatta vale solo per la vittoria. Interruttore
+  `VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.15] — 18 ottobre 2026
 
 ### Corretto

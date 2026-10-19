@@ -22,3 +22,4 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | PO-013 | «Togli il riprendi livello 20 (esempio), lascia Livello 20 come prima» | chiusa con la 1.21.14 | `src/ui/schermate/Home.jsx` |
 | PO-014 | «l'app è già ottimizza anche per Tablet e PC?»; scelta: «1» (collaudo tablet e PC senza cambiare il prodotto) | chiusa con la 1.21.15, confermata dal PO nel questionario (P4, bersagli piccoli, resta da fare) | ramo `collaudo-schermi`, `docs/sviluppo/RAPPORTO-PO-014.md` |
 | PO-015 | Fine del livello col gettone che scorre (E1 del collaudo della 1.21.15); scelta del PO: «Mappa ridotta» | in corso | ramo `fine-gettone`, `docs/sviluppo/RAPPORTO-PO-015.md` |
+| PO-016 | (voce della madre) Fine del livello con atto chiuso e gettone che scorre su finestre basse da PC: 44 px a 1366x657, 39 a 1280x720 (proposta 2 del rapporto PO-015) | aperta | `docs/sviluppo/RAPPORTO-PO-015.md` |
