@@ -304,6 +304,22 @@ con codice 1):
 Nessuno di questi è un test unitario e nessuno gira in `npm test`: vanno lanciati a
 mano. `tests/script.test.js` garantisce almeno che siano sintatticamente validi.
 
+### Due rossi noti nei container delle sessioni figlie
+
+Nei container delle sessioni figlie (dove le pagine si disegnano con il font **Inter**)
+due prove al pixel possono essere rosse anche su `main`:
+
+- `e2e-quadri`: la fine del livello vinta a **320x700** va scorsa di **2 px**;
+- `recensione`: a **360x640** l'invito a recensire finisce **10 px** sotto la barra dei
+  pulsanti.
+
+Sono verdi nella CI e nel container della sessione madre, e lo stesso rosso c'era già
+sulla 1.21.14 (collaudo della 1.21.15, E2, ramo `collaudo-1.21.15`). Che la causa sia il
+font è coerente con le misure ma non è dimostrato. **Il verdetto è quello della CI**: un
+rosso di quelle due prove con quei numeri, solo nel container, non blocca; un numero
+diverso o un'altra prova rossa sì, finché non si è controllato su `main` nello stesso
+container.
+
 ## Gli strumenti di misura in `tools/`
 
 Non sono test: non dicono "giusto" o "sbagliato" su una regola. Sono strumenti che producono

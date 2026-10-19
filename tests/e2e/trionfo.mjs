@@ -21,6 +21,7 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { quadroNumero, TOTALE_QUADRI, ATTI } from '../../src/config/quadri.js';
 import { traduttore } from '../../src/i18n/index.js';
+import { OGNI_LIVELLI } from '../../src/persistence/attrezzi.js';
 import { sequenzaVincente, posizioneMossa } from '../../tools/sequenza-vincente.mjs';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
@@ -342,6 +343,44 @@ if (await vinciIlPrimo()) {
   if (await page.locator('.pl-trionfo').count() > 0) {
     errori.push('ATTO: chiudere un atto mostra la festa finale. Sono due traguardi diversi.');
   }
+}
+
+// ---------- 3 bis. Il gettone SENZA atto chiuso ----------
+// E' la fine affollata piu' frequente (giocando in ordine 17 volte su 100: al 5, 15,
+// 20, 25 ...) e nessuna prova la misurava: qui sopra c'e' solo atto + gettone, in
+// e2e-quadri solo la fine normale. Scorreva di 23 px a 320x700 e di 16 a 1366x768
+// (collaudo 1.21.15, E1). Con MAPPA_RIDOTTA_COL_GETTONE l'avanzamento resta solo la
+// barra «N di 100», senza le tappe con Plinto, e deve stare tutto nello schermo.
+console.log(`3 bis. superati 2..${OGNI_LIVELLI}, vinco il primo: gettone guadagnato, atto ancora aperto...`);
+await preparaEGioca(tutti.filter((n) => n > 1 && n <= OGNI_LIVELLI));
+if (await vinciIlPrimo()) {
+  // Si aspetta la barra che si allunga, come in e2e-quadri.
+  await page.waitForTimeout(1100);
+  await page.screenshot({ path: `${OUT}/3bis-solo-gettone.png` });
+  if (await page.locator('.pl-fine__premio').count() !== 1) {
+    errori.push(`GETTONE: superando il livello numero ${OGNI_LIVELLI} il riquadro del gettone non compare: il controllo non prova nulla`);
+  }
+  if (await page.locator('.pl-atto-chiuso').count() !== 0) {
+    errori.push('GETTONE: compare la fascia dell atto, ma l atto non e chiuso: il caso provato e un altro');
+  }
+  const tappe = await page.locator('.pl-avanza__tappa').count();
+  const conteggio = (await page.locator('.pl-avanza__conteggio').innerText().catch(() => '')).trim();
+  const barra = await page.locator('.pl-avanza__barra').getAttribute('aria-valuenow').catch(() => null);
+  console.log(`   avanzamento: ${tappe} tappe, "${conteggio}", barra a ${barra}`);
+  if (tappe !== 0) errori.push(`GETTONE: l avanzamento mostra ${tappe} tappe, col gettone deve restare solo la barra`);
+  if (barra !== String(OGNI_LIVELLI)) errori.push(`GETTONE: la barra dice ${barra} livelli superati invece di ${OGNI_LIVELLI}`);
+  for (const [w, h] of [[390, 844], [360, 800], [360, 740], [320, 700], [1920, 1080], [1366, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(150);
+    const eccesso = await page.evaluate(() => {
+      const s = document.querySelector('.pl-fine .pl-scroll');
+      return s ? s.scrollHeight - s.clientHeight : null;
+    });
+    console.log(`   fine del livello col solo gettone a ${w}x${h}: ${eccesso > 0 ? `da scorrere ${eccesso} px` : 'sta tutta nello schermo'}`);
+    if (eccesso > 0) errori.push(`GETTONE: a ${w}x${h} la fine del livello va scorsa di ${eccesso} px`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
 }
 
 // ---------- 4. Rigiocare dentro un atto gia chiuso non rifesteggia ----------
