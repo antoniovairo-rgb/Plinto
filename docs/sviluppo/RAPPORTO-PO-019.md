@@ -127,3 +127,20 @@ commento di `primoGiro` dichiara vietato. Il controllo vecchio resta tutto.
 - Che la corsa 161 sia andata esattamente così (vedi §3).
 - Il comportamento su telefono o nella TWA: non provato; in produzione però il `go` non
   c'è (misurato su `vite preview` in Chromium desktop).
+
+## Gate
+
+`npm run build`: «✓ built in 1.57s». `npm run verifica -- --veloce`: corsia veloce
+**negata** («non risulta nessun giro completo passato su questa macchina»), quindi giro
+completo. Ultima riga del riassunto: **«2 controlli su 33 sono falliti. NON pubblicare.»**
+(33 controlli in 5012 s; cento livelli verdi; `correzioni` verde).
+
+I due rossi sono quelli noti del container (`docs/TESTING.md`, «Due rossi noti»), con gli
+stessi numeri:
+- livelli nel browser (`e2e-quadri`): «a 320x700 bisogna scorrere di 2 px»;
+- `recensione`: «a 360x640 l invito finisce 10px sotto la barra dei pulsanti».
+
+Rieseguiti entrambi sul ramo e poi con `useTastoIndietro.js` e `correzioni.mjs` di `main`
+nello stesso container: rossi uguali, stessi numeri, nei due casi. Non dipendono da questa
+correzione. Il verdetto che conta resta quello della CI, che su questo ramo **non è
+partita** (`verifica.yml` gira su push a `main` e sulle pull request verso `main`).
