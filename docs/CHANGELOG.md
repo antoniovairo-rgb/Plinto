@@ -7,6 +7,20 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.18] — 20 ottobre 2026
+
+### Cambiato
+
+- **«Nuova» dentro la card della Partita libera** (PO-020, scelta del PO «Dentro la
+  card»): con una libera in corso la card mostra due pillole sulla stessa riga, «Nuova» e
+  «Riprendi ›»; sparisce il collegamento sottolineato sotto la card. «Nuova» chiede
+  conferma come prima. Interruttore `NUOVA_DENTRO_LA_CARD`.
+- **«Gioca ›» nella card della Sfida del giorno** (PO-021, scelta del PO): la sfida da
+  fare mostra una pillola piena, come «Riprendi ›», al posto del testo «Da giocare».
+  Interruttore `GIOCA_IN_PILLOLA`. Controllo per entrambe: `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.17] — 19 ottobre 2026
 
 ### Corretto
