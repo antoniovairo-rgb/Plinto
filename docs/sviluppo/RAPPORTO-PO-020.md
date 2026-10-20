@@ -102,3 +102,12 @@ il tocco sul nome riprende la partita.
 3. **Changelog**: la versione non è cambiata, quindi non c'è la voce. Testo proposto per
    la prossima: «Con una partita libera in corso, "Nuova" sta dentro la card accanto a
    "Riprendi ›", al posto del collegamento sottolineato sotto (PO-020).»
+
+## Effetto su C1 (`tests/e2e/correzioni.mjs`)
+
+C1 prova che i 4 px della correzione `pl-home-stretta` servono: «senza la correzione la
+home deve scorrere». Con i 28 px liberati da PO-020 il caso peggiore (pie' su due righe,
+libera in corso, 360x640) non scorre più nemmeno senza correzione, e la prova diventava
+rossa per «non prova nulla». Ora riempie apposta lo spazio che avanza (misurati 30 px)
+con un margine sotto le azioni, controlla che con la correzione resti 0, e poi senza
+correzione misura 4 px: verde, e sa ancora fallire.

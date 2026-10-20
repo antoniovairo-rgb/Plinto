@@ -361,10 +361,25 @@ console.log('C1. home a 360x640 con il pie di pagina a capo: non scorre, con qua
   const peggio = await scorre();
   const altezze = await page.locator('.pl-home__pie .pl-home__sostieni').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
   // La stessa pagina senza la classe dell'interruttore: deve scorrere, o la prova non prova nulla.
+  // PO-020: «Nuova» e' entrata nella card e la home con la libera in corso ha 28 px in
+  // piu' (docs/sviluppo/RAPPORTO-PO-020.md): il caso peggiore non scorre nemmeno senza la
+  // correzione. Per misurare che i suoi 4 px ci sono ancora, lo spazio che avanza si
+  // riempie apposta (margine sotto le azioni) fino al bordo, e solo allora si toglie la classe.
   const acceso = await page.evaluate(() => document.documentElement.classList.contains('pl-home-stretta'));
+  const riempito = await page.evaluate(() => {
+    const home = document.querySelector('.pl-home');
+    const st = getComputedStyle(home);
+    const figli = [...home.children].map((c) => c.getBoundingClientRect()).filter((r) => r.height > 0);
+    const libero = Math.floor(home.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom)
+      - (Math.max(...figli.map((r) => r.bottom)) - Math.min(...figli.map((r) => r.top))));
+    if (libero > 0) document.querySelector('.pl-home__azioni').style.marginBottom = `${libero}px`;
+    return libero;
+  });
+  const pieno = await scorre();
+  if (pieno > 0) errori.push(`C1: riempiti i ${riempito} px che avanzano, con la correzione la home scorre di ${pieno} px`);
   await page.evaluate(() => document.documentElement.classList.remove('pl-home-stretta'));
   const senza = await scorre();
-  console.log(`   reale ${reale} px; caso peggiore (pie su ${righe} righe): ${peggio} px; senza la correzione: ${senza} px; collegamenti ${altezze.join(', ')} px`);
+  console.log(`   reale ${reale} px; caso peggiore (pie su ${righe} righe): ${peggio} px; riempiti ${riempito} px, poi senza la correzione: ${senza} px; collegamenti ${altezze.join(', ')} px`);
   if (!acceso) errori.push('C1: la radice non ha la classe pl-home-stretta (interruttore HOME_STRETTA_COMPATTA spento?)');
   if (righe < 2) errori.push('C1: il pie di pagina non e andato a capo: la prova non prova nulla');
   if (peggio > 0) errori.push(`C1: con il pie di pagina a capo la home scorre di ${peggio} px a 360x640`);
