@@ -32,6 +32,9 @@ export default {
     riprendiStato: 'Riprendi ›',
     riprendiLibera: 'riprendi la partita in corso',
     riprendiSfida: 'riprendi la sfida in corso',
+    // PO-023 (collaudo 1.21.18, O2): con la sfida di oggi da fare il nome accessibile
+    // contiene la parola della pillola «Gioca ›», come gli altri due stati.
+    giocaSfida: 'gioca la sfida di oggi',
     nuovaLibera: 'Nuova partita libera',
     // PO-020: la scritta del pulsante dentro la card «Partita libera»: la card dice gia'
     // di quale partita si parla. Il nome accessibile resta «Nuova partita libera».

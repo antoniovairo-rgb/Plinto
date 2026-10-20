@@ -97,6 +97,24 @@ const NUOVA_DENTRO_LA_CARD = true;
  */
 const GIOCA_IN_PILLOLA = true;
 
+/*
+ * PO-023 (collaudo 1.21.18, O2): con la sfida di oggi da fare il nome accessibile della
+ * card era solo «Sfida del giorno», mentre a destra c'e' la pillola «Gioca ›»: chi usa il
+ * comando vocale e dice «tocca Gioca» non la trovava. Acceso, il nome e' «Sfida del
+ * giorno, gioca la sfida di oggi», nella stessa forma degli altri due stati. Spento torna
+ * il nome di prima: `npm run home-spiegazione` e' rosso.
+ */
+const NOME_SFIDA_CON_GIOCA = true;
+
+/*
+ * PO-023 (collaudo 1.21.18, O1): il bersaglio di «Nuova» scendeva di 21 px fissi. A
+ * 320x700 in italiano la card e' alta 68 (nome su due righe) e sotto «Nuova» la riga di
+ * spiegazione era meta' «Nuova» e meta' «Riprendi». Acceso, il bersaglio arriva al bordo
+ * basso della card in ogni formato: tutta la colonna sotto «Nuova» fa la stessa cosa.
+ * Il resto della card riprende come prima. Spento: `npm run home-spiegazione` e' rosso.
+ */
+const NUOVA_FINO_AL_BORDO = true;
+
 /**
  * La home.
  *
@@ -141,7 +159,8 @@ export function SchermoHome({
   const sfidaStatoMostrato = sfidaDaFare ? t('home.giocaStato') : sfidaStato;
   const nomeSfida = sfidaInCorso && NOME_FISSO_E_STATO
     ? `${etichettaSfida}, ${t('home.riprendiSfida')}`
-    : (sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida);
+    : sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}`
+      : (sfidaDaFare && NOME_SFIDA_CON_GIOCA ? `${etichettaSfida}, ${t('home.giocaSfida')}` : etichettaSfida);
 
   return (
     <div className={`pl-screen pl-home${HOME_BASSA_COMPATTA ? ' pl-home--compatta' : ''}`}>
@@ -179,7 +198,7 @@ export function SchermoHome({
         {cePartitaSalvata && NOME_FISSO_E_STATO && NUOVA_DENTRO_LA_CARD ? (
           // PO-020: un contenitore, non un pulsante. Il nome, la spiegazione e il fondo
           // sono gli stessi della card di sempre; i due pulsanti stanno sulla riga del nome.
-          <div className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera pl-sfida-avvio--doppia">
+          <div className={`pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera pl-sfida-avvio--doppia${NUOVA_FINO_AL_BORDO ? ' pl-sfida-avvio--nuova-al-bordo' : ''}`}>
             <span aria-hidden="true">{etichettaLibera}</span>
             <span className="pl-sfida-avvio__comandi">
               <button type="button" className="pl-sfida-avvio__nuova" onClick={onGioca} aria-label={t('home.nuovaLibera')}>

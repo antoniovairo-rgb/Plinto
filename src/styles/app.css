@@ -1872,6 +1872,21 @@ button {
   position: absolute;
   inset: -7px -3px -21px;
 }
+/* PO-023 (collaudo 1.21.18, O1): i 21 px fissi qui sopra non arrivavano in fondo alla
+   card alta 68 (it 320x700): meta' della riga sotto «Nuova» riprendeva. Il bersaglio
+   allora scende ben oltre, e la card lo taglia al suo bordo (overflow: clip taglia anche
+   il tocco, non solo il disegno), qualunque sia la sua altezza. Il taglio coprirebbe
+   l'anello del fuoco di «Riprendi ›», che sta 2 px fuori: l'anello passa alla card
+   stessa, che non taglia il proprio contorno. Stesso rettangolo (la card non ha bordo e
+   ::after era inset 0), stesso raggio, stessi 2 px: a schermo non cambia niente.
+   Interruttore NUOVA_FINO_AL_BORDO in `src/ui/schermate/Home.jsx`. */
+.pl-sfida-avvio--nuova-al-bordo { overflow: clip; }
+.pl-sfida-avvio--nuova-al-bordo .pl-sfida-avvio__nuova::before { bottom: -200px; }
+.pl-sfida-avvio--nuova-al-bordo .pl-sfida-avvio__riprendi:focus-visible::after { outline: none; }
+.pl-sfida-avvio--nuova-al-bordo:has(.pl-sfida-avvio__riprendi:focus-visible) {
+  outline: 2px solid var(--pl-brand);
+  outline-offset: 2px;
+}
 .pl-sfida-avvio__nuova:hover { background: rgba(255, 255, 255, 0.12); }
 .pl-sfida-avvio__nuova:active { transform: scale(0.95); }
 

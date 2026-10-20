@@ -27,6 +27,10 @@
  *      bersaglio di «Nuova» e' alto almeno 44 px; un tocco sul nome della card riprende
  *      (e' «Riprendi ›» a riceverlo) e «Nuova» apre la conferma H1 (PO-008).
  *      Senza libera in corso la card e' un pulsante solo, come prima.
+ *   7. PO-023 (collaudo 1.21.18): la colonna sotto «Nuova», fino al bordo basso della card,
+ *      va tutta a «Nuova» e non esce dalla card (O1, NUOVA_FINO_AL_BORDO); con la sfida
+ *      di oggi da fare il nome accessibile e' «Sfida del giorno, gioca la sfida di oggi»
+ *      (O2, NOME_SFIDA_CON_GIOCA). Spento uno dei due, il controllo e' rosso.
  *
  * (Fino a PO-010 il punto 5 controllava «Riprendi la sfida · In corso», F2 di PO-004:
  * quella scritta non c'e' piu'.)
@@ -222,12 +226,27 @@ function misura() {
     for (let y = Math.floor(c.top) - 20; y <= Math.ceil(c.bottom) + 20; y += 1) {
       if (document.elementFromPoint(x, y)?.closest('button') === dn) bersaglio += 1;
     }
+    // PO-023 (O1): la colonna sotto «Nuova», dal centro della pillola fino al bordo basso
+    // della card, deve andare TUTTA a «Nuova»; subito sotto la card, a niente di suo. Tre
+    // verticali (sinistra, centro, destra della pillola), un pixel alla volta.
+    const colonna = { punti: 0, altrove: [], fuori: 0 };
+    for (const cx of [r.left + 2, x, r.right - 2]) {
+      for (let y = Math.round((r.top + r.bottom) / 2); y <= Math.ceil(c.bottom) - 1; y += 1) {
+        colonna.punti += 1;
+        const b = document.elementFromPoint(cx, y)?.closest('button');
+        if (b !== dn) colonna.altrove.push(`${Math.round(cx - c.left)},${Math.round(y - c.top)}:${b?.className.includes('riprendi') ? 'riprendi' : (b?.className || 'niente')}`);
+      }
+      for (let y = Math.ceil(c.bottom) + 1; y <= Math.ceil(c.bottom) + 8; y += 1) {
+        if (document.elementFromPoint(cx, y)?.closest('button') === dn) colonna.fuori += 1;
+      }
+    }
     // Il tocco sul nome della card deve arrivare a «Riprendi ›».
     const nome = cardLibera.querySelector('span').getBoundingClientRect();
     const sulNome = document.elementFromPoint(nome.left + 4, nome.top + nome.height / 2)?.closest('button');
     const stile = getComputedStyle(dn);
     return {
       testo: dn.textContent, nome: dn.getAttribute('aria-label'), altezza: Math.round(r.height), bersaglio,
+      colonna, cardAlta: Math.round(c.height),
       dentro: entro(r), riprendiDentro: rr ? entro(rr) : false,
       stessaRiga: rr ? Math.abs((r.top + r.bottom) / 2 - (rr.top + rr.bottom) / 2) <= 1.5 : false,
       sinistra: rr ? r.right <= rr.left : false,
@@ -285,6 +304,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         dove, home: `${m.alta}/${m.finestra}`, libero: m.libero, scorre: peggio, riga: m.aggiunta,
         azioni: m.azioni, statoLibera: m.libera?.esito, statoSfida: m.sfida?.esito,
         nuova: m.dentroCard ? `${m.dentroCard.altezza}/${m.dentroCard.bersaglio}` : (m.nuova ? `sotto ${m.nuova.altezza}` : '-'),
+        colonna: m.dentroCard ? `${m.dentroCard.colonna.punti - m.dentroCard.colonna.altrove.length}/${m.dentroCard.colonna.punti}` : '-',
         libera: m.libera?.altezza, sfida: m.sfida?.altezza, mappa: m.mappa?.altezza,
         righe: [m.libera?.riga?.righe, m.sfida?.riga?.righe].join('+'),
         contrasto: [m.libera?.riga?.contrasto, m.sfida?.riga?.contrasto].join(' / '),
@@ -316,6 +336,8 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
           if (!d.stessaRiga || !d.sinistra) errori.push(`${dove}: «${d.testo}» non sta sulla riga di «${testi.home.riprendiStato}», alla sua sinistra`);
           if (d.sottolineato) errori.push(`${dove}: «${d.testo}» e sottolineato`);
           if (d.bersaglio < 44) errori.push(`${dove}: il bersaglio di «${d.testo}» e alto ${d.bersaglio}px (minimo 44)`);
+          if (d.colonna.altrove.length) errori.push(`${dove}: sotto «${d.testo}» (card alta ${d.cardAlta}) ${d.colonna.altrove.length} punti su ${d.colonna.punti} non vanno a «${d.testo}», per esempio ${d.colonna.altrove.slice(0, 3).join(' ')} (PO-023, O1)`);
+          if (d.colonna.fuori) errori.push(`${dove}: il bersaglio di «${d.testo}» esce di ${d.colonna.fuori} punti sotto la card (PO-023, O1)`);
           if (!d.tattoSulNome) errori.push(`${dove}: un tocco sul nome della card non arriva a «${testi.home.riprendiStato}»`);
         }
       } else {
@@ -333,6 +355,9 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.giocaStato}» della sfida non e una pillola (nessun fondo) (PO-021)`);
         if (m.sfida?.esitoAlone && m.sfida.esitoAlone !== 'none') errori.push(`${dove}: la pillola «${testi.home.giocaStato}» ha un alone che la fa sporgere`);
         if (Math.abs(m.sfida?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola «${testi.home.giocaStato}» non finisce sul bordo del contenuto (scarto ${m.sfida?.esitoDestra}px)`);
+        // PO-023 (O2): il nome accessibile contiene la parola della pillola, come negli altri stati.
+        const atteso = `${testi.sfida.breve}, ${testi.home.giocaSfida}`;
+        if (m.sfida?.nome !== atteso) errori.push(`${dove}: con la sfida da fare il nome accessibile della sfida e «${m.sfida?.nome}» invece di «${atteso}» (PO-023, O2)`);
       }
       if (m.annidati) errori.push(`${dove}: ${m.annidati} <button> dentro un altro <button>`);
       if (m.sottolineati.length) errori.push(`${dove}: pulsanti sottolineati fra le azioni: ${m.sottolineati.join(', ')}`);
