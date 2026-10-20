@@ -1810,6 +1810,71 @@ button {
    altri stati a destra; la riga e' centrata sul nome. */
 .pl-sfida-avvio__esito--evidenza.pl-sfida-avvio__esito--allineata { box-shadow: none; align-self: center; }
 
+/*
+ * PO-020: con la libera in corso la card e' un contenitore (un <div>) con due pulsanti
+ * fratelli sulla riga del nome, «Nuova» e «Riprendi ›». Un <button> dentro un <button>
+ * non e' HTML valido. Il tocco sulla card deve riprendere come prima: la superficie di
+ * «Riprendi ›» (::after) si stende su tutta la card, e «Nuova» le sta sopra. La card ha
+ * lo stesso disegno e la stessa altezza della card a pulsante unico (misure in
+ * docs/sviluppo/RAPPORTO-PO-020.md). L'interruttore e' NUOVA_DENTRO_LA_CARD in
+ * `src/ui/schermate/Home.jsx`.
+ */
+.pl-sfida-avvio--doppia { position: relative; cursor: pointer; }
+.pl-sfida-avvio--doppia:has(.pl-sfida-avvio__riprendi:active) { transform: scale(0.97); }
+/* Le due pillole a 14 px e non a 16: a 360 px la riga del nome ha 276 px, e nome
+   (110-115, secondo il font) + «Nuova» + «Riprendi ›» a 16 px ne chiedevano 304, cioe'
+   il nome andava a capo e la card cresceva di 16 px. A 14 px, con pillole e spazi un po'
+   piu' stretti, avanzano 9 px. A 320 px (236 px di riga) in italiano non bastano
+   comunque: li' il nome va su due righe e la card e' alta 68; la home non scorre lo
+   stesso (misure in docs/sviluppo/RAPPORTO-PO-020.md). */
+.pl-sfida-avvio--doppia:has(.pl-sfida-avvio__spiega) { column-gap: 8px; }
+.pl-sfida-avvio__comandi {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 6px;
+  font-size: 14px;
+}
+.pl-sfida-avvio--doppia .pl-sfida-avvio__esito--evidenza { padding: 0 0.5em; }
+.pl-sfida-avvio__riprendi,
+.pl-sfida-avvio__nuova {
+  border: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+.pl-sfida-avvio__riprendi::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+/* L'anello del fuoco va sulla card intera: e' la card che si riprende. */
+.pl-sfida-avvio__riprendi:focus-visible { outline: none; }
+.pl-sfida-avvio__riprendi:focus-visible::after { outline: 2px solid var(--pl-brand); outline-offset: 2px; border-radius: var(--pl-radius-md); }
+/* «Nuova»: la stessa pillola di «Riprendi ›» ma secondaria, cioe' senza fondo pieno:
+   un filo chiaro e il testo della card. Non sottolineata (il PO). Il suo bersaglio da
+   dito (::before) e' alto 45 px e non 17: va un po' sopra e soprattutto sotto la
+   pillola, sulla riga di spiegazione, restando dentro la card alta 52. Un tocco li'
+   comincia una nuova partita, ma con la libera a meta' c'e' prima la conferma H1. */
+.pl-sfida-avvio__nuova {
+  position: relative;
+  z-index: 1;
+  padding: 0 0.5em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-text) 35%, transparent);
+  color: var(--pl-text);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pl-sfida-avvio__nuova::before {
+  content: '';
+  position: absolute;
+  inset: -7px -3px -21px;
+}
+.pl-sfida-avvio__nuova:hover { background: rgba(255, 255, 255, 0.12); }
+.pl-sfida-avvio__nuova:active { transform: scale(0.95); }
+
 /* --------------------------------------------------- schermi grandi (desktop) --- */
 /*
  * PLINTO e' pensato per il telefono: una colonna sola, testata in alto, pezzi in

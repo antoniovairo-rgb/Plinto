@@ -32,6 +32,9 @@ export default {
     riprendiLibera: 'riprendi la partita in corso',
     riprendiSfida: 'riprendi la sfida in corso',
     nuovaLibera: 'Nuova partita libera',
+    // PO-020: la scritta del pulsante dentro la card «Partita libera»: la card dice gia'
+    // di quale partita si parla. Il nome accessibile resta «Nuova partita libera».
+    nuovaBreve: 'Nuova',
     statistiche: 'Statistiche',
     impostazioni: 'Impostazioni',
     info: 'Info',

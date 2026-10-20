@@ -547,7 +547,7 @@ function fuocoSicuro(caso, d, atteso) {
   // Ogni punto: come ci si arriva (dalla home, con la libera gia' a meta') e quale
   // pulsante comincia una nuova libera; `dove` e' la schermata su cui Indietro ci lascia.
   const punti = [
-    { nome: 'home', arriva: async () => {}, tocca: (p) => p.locator('.pl-home__nuova-libera').click(), dove: 'home' },
+    { nome: 'home', arriva: async () => {}, tocca: (p) => p.locator('.pl-sfida-avvio__nuova, .pl-home__nuova-libera').click(), dove: 'home' },
     { nome: 'menu della partita', arriva: async (p) => {
       await p.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
       await p.waitForSelector('.pl-plancia .pl-cella');
@@ -669,8 +669,9 @@ function fuocoSicuro(caso, d, atteso) {
     await page.getByRole('button', { name: /^Partita libera/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella');
     await allaHome(page);
-    const link = await page.locator('.pl-home__nuova-libera').count();
-    if (link) await page.locator('.pl-home__nuova-libera').click();
+    // PO-020: «Nuova» dentro la card; .pl-home__nuova-libera e' il collegamento di prima.
+    const link = await page.locator('.pl-sfida-avvio__nuova, .pl-home__nuova-libera').count();
+    if (link) await page.locator('.pl-sfida-avvio__nuova, .pl-home__nuova-libera').click();
     await page.waitForTimeout(400);
     const d = await domanda(page);
     const qui = await dove(page);
