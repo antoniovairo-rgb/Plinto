@@ -97,6 +97,15 @@ const NUOVA_DENTRO_LA_CARD = true;
  */
 const GIOCA_IN_PILLOLA = true;
 
+/*
+ * PILLOLE DELLA STESSA MISURA (riscontro del PO sulla 1.21.18, PO-020/PO-021): nella card
+ * della libera le due pillole sono a 14 px, perche' a 360 px non ci stavano a 16; la
+ * pillola della sfida («Gioca ›», «Riprendi ›») era rimasta a 16, con un padding diverso.
+ * Sul telefono si vedevano due misure. Acceso, ogni pillola d'azione della home ha la
+ * stessa misura di quelle della libera. Controllo: `npm run home-spiegazione`.
+ */
+const PILLOLE_STESSA_MISURA = true;
+
 /**
  * La home.
  *
@@ -144,7 +153,7 @@ export function SchermoHome({
     : (sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida);
 
   return (
-    <div className={`pl-screen pl-home${HOME_BASSA_COMPATTA ? ' pl-home--compatta' : ''}`}>
+    <div className={`pl-screen pl-home${HOME_BASSA_COMPATTA ? ' pl-home--compatta' : ''}${PILLOLE_STESSA_MISURA ? ' pl-home--pillole-uguali' : ''}`}>
       <div className="pl-home__testata">
         <Logo />
         <p className="pl-home__claim">{t('gioco.claim')}</p>

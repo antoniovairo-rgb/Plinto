@@ -268,6 +268,12 @@ function misura() {
     libera: card('.pl-sfida-avvio--libera'), sfida: card('.pl-sfida-avvio--sfida'),
     mappa: card('.pl-sfida-avvio--mappa'), collegamenti, nuova, dentroCard, annidati, sottolineati,
     azioni: home.querySelectorAll('.pl-home__azioni > *').length,
+    // Riscontro del PO sulla 1.21.18: tutte le pillole d'azione della home della stessa misura.
+    pillole: [...home.querySelectorAll('.pl-sfida-avvio__esito--evidenza, .pl-sfida-avvio__nuova')].map((p) => ({
+      testo: p.textContent.trim(),
+      corpo: parseFloat(getComputedStyle(p).fontSize),
+      alta: Math.round(p.getBoundingClientRect().height * 10) / 10,
+    })),
   };
 }
 
@@ -333,6 +339,13 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.giocaStato}» della sfida non e una pillola (nessun fondo) (PO-021)`);
         if (m.sfida?.esitoAlone && m.sfida.esitoAlone !== 'none') errori.push(`${dove}: la pillola «${testi.home.giocaStato}» ha un alone che la fa sporgere`);
         if (Math.abs(m.sfida?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola «${testi.home.giocaStato}» non finisce sul bordo del contenuto (scarto ${m.sfida?.esitoDestra}px)`);
+      }
+      if (m.pillole.length > 1) {
+        const corpi = new Set(m.pillole.map((p) => p.corpo));
+        const alte = m.pillole.map((p) => p.alta);
+        if (corpi.size > 1 || Math.max(...alte) - Math.min(...alte) > 1) {
+          errori.push(`${dove}: le pillole non hanno la stessa misura: ${m.pillole.map((p) => `«${p.testo}» ${p.corpo}px alta ${p.alta}`).join(', ')}`);
+        }
       }
       if (m.annidati) errori.push(`${dove}: ${m.annidati} <button> dentro un altro <button>`);
       if (m.sottolineati.length) errori.push(`${dove}: pulsanti sottolineati fra le azioni: ${m.sottolineati.join(', ')}`);

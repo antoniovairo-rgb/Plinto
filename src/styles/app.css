@@ -1836,6 +1836,9 @@ button {
   font-size: 14px;
 }
 .pl-sfida-avvio--doppia .pl-sfida-avvio__esito--evidenza { padding: 0 0.5em; }
+/* Riscontro del PO sulla 1.21.18: tutte le pillole d'azione della home con la misura di
+   quelle della libera, anche quella sola della sfida (PILLOLE_STESSA_MISURA, Home.jsx). */
+.pl-home--pillole-uguali .pl-sfida-avvio__esito--evidenza { font-size: 14px; padding: 0 0.5em; }
 .pl-sfida-avvio__riprendi,
 .pl-sfida-avvio__nuova {
   border: 0;
