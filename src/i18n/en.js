@@ -12,6 +12,7 @@ export default {
     record: 'Best',
     maiGiocata: 'Never played',
     daGiocare: 'Not played yet',
+    giocaStato: 'Play ›',
     riprendiStato: 'Resume ›',
     riprendiLibera: 'resume the game in progress',
     riprendiSfida: 'resume the challenge in progress',

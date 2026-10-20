@@ -327,8 +327,12 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della sfida non e in evidenza (nessun fondo)`);
         const atteso = `${testi.sfida.breve}, ${testi.home.riprendiSfida}`;
         if (m.sfida?.nome !== atteso) errori.push(`${dove}: il nome accessibile della sfida e «${m.sfida?.nome}» invece di «${atteso}»`);
-      } else if (m.sfida?.esito !== testi.home.daGiocare) {
-        errori.push(`${dove}: senza sfida in corso la card dice «${m.sfida?.esito}» invece di «${testi.home.daGiocare}»`);
+      } else {
+        // PO-021: la sfida da fare mostra la pillola «Gioca ›», disegnata come «Riprendi ›».
+        if (m.sfida?.esito !== testi.home.giocaStato) errori.push(`${dove}: senza sfida in corso la card dice «${m.sfida?.esito}» invece di «${testi.home.giocaStato}» (PO-021)`);
+        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.giocaStato}» della sfida non e una pillola (nessun fondo) (PO-021)`);
+        if (m.sfida?.esitoAlone && m.sfida.esitoAlone !== 'none') errori.push(`${dove}: la pillola «${testi.home.giocaStato}» ha un alone che la fa sporgere`);
+        if (Math.abs(m.sfida?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola «${testi.home.giocaStato}» non finisce sul bordo del contenuto (scarto ${m.sfida?.esitoDestra}px)`);
       }
       if (m.annidati) errori.push(`${dove}: ${m.annidati} <button> dentro un altro <button>`);
       if (m.sottolineati.length) errori.push(`${dove}: pulsanti sottolineati fra le azioni: ${m.sottolineati.join(', ')}`);

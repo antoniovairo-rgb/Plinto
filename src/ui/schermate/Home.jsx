@@ -87,6 +87,16 @@ const LIVELLO_SENZA_RIPRENDI = true;
  */
 const NUOVA_DENTRO_LA_CARD = true;
 
+/*
+ * PO-021 (scelta del PO, «Pillola Gioca ›»): con la sfida di oggi ancora da fare, a destra
+ * della card c'era «Da giocare» in testo dorato, mentre «Riprendi ›» e' una pillola piena:
+ * due azioni disegnate in due modi. Acceso, la sfida da fare mostra la pillola «Gioca ›»
+ * con lo stesso aspetto di «Riprendi ›». Gli stati che sono solo informazioni (il record
+ * della sfida fatta, «N di 100» della mappa) restano testo. Spento torna «Da giocare».
+ * Controllo: `npm run home-spiegazione`.
+ */
+const GIOCA_IN_PILLOLA = true;
+
 /**
  * La home.
  *
@@ -126,6 +136,9 @@ export function SchermoHome({
     : (recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera);
   const etichettaSfida = sfidaInCorso && !NOME_FISSO_E_STATO ? t('sfida.riprendi') : t('sfida.breve');
   const sfidaStato = sfidaInCorso && NOME_FISSO_E_STATO ? t('home.riprendiStato') : (sfidaTesto || t('home.daGiocare'));
+  const sfidaDaFare = GIOCA_IN_PILLOLA && !(sfidaInCorso && NOME_FISSO_E_STATO) && !sfidaTesto;
+  const sfidaPillola = (sfidaInCorso && NOME_FISSO_E_STATO) || sfidaDaFare;
+  const sfidaStatoMostrato = sfidaDaFare ? t('home.giocaStato') : sfidaStato;
   const nomeSfida = sfidaInCorso && NOME_FISSO_E_STATO
     ? `${etichettaSfida}, ${t('home.riprendiSfida')}`
     : (sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida);
@@ -227,7 +240,7 @@ export function SchermoHome({
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{sfidaStato}</span>
+          <span className={`pl-sfida-avvio__esito${sfidaPillola ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}${sfidaDaFare ? ' pl-sfida-avvio__esito--gioca' : ''}`}>{sfidaStatoMostrato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}
