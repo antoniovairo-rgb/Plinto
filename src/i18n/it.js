@@ -28,10 +28,14 @@ export default {
     // PO-010: lo stato a destra di «Partita libera» e «Sfida del giorno» con una partita
     // in corso; il nome della card non cambia. Le due frasi lunghe sono il nome
     // accessibile, dopo il nome della card.
+    giocaStato: 'Gioca ›',
     riprendiStato: 'Riprendi ›',
     riprendiLibera: 'riprendi la partita in corso',
     riprendiSfida: 'riprendi la sfida in corso',
     nuovaLibera: 'Nuova partita libera',
+    // PO-020: la scritta del pulsante dentro la card «Partita libera»: la card dice gia'
+    // di quale partita si parla. Il nome accessibile resta «Nuova partita libera».
+    nuovaBreve: 'Nuova',
     statistiche: 'Statistiche',
     impostazioni: 'Impostazioni',
     info: 'Info',

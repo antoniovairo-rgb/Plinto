@@ -21,8 +21,12 @@
  *   5. PO-010, «nome fisso + stato»: le card si chiamano «Partita libera» e «Sfida del
  *      giorno» in OGNI stato; con una partita in corso a destra c'e' «Riprendi ›» e il
  *      nome accessibile lo dice («Partita libera, riprendi la partita in corso»);
- *   6. con la libera in corso, sotto la sua card c'e' «Nuova partita libera», alto
- *      almeno 24 px e dentro lo schermo senza scorrere; senza, non c'e'.
+ *   6. PO-020, «Dentro la card»: con la libera in corso la card ha DUE pulsanti sulla
+ *      riga del nome, «Nuova» e «Riprendi ›», dentro i bordi della card; non c'e' piu'
+ *      il collegamento sottolineato sotto; nessun <button> dentro un <button>; il
+ *      bersaglio di «Nuova» e' alto almeno 44 px; un tocco sul nome della card riprende
+ *      (e' «Riprendi ›» a riceverlo) e «Nuova» apre la conferma H1 (PO-008).
+ *      Senza libera in corso la card e' un pulsante solo, come prima.
  *
  * (Fino a PO-010 il punto 5 controllava «Riprendi la sfida · In corso», F2 di PO-004:
  * quella scritta non c'e' piu'.)
@@ -31,7 +35,8 @@
  * quella della 1.21.9 e questo controllo deve essere ROSSO: e' la prova che sa fallire.
  * Lo stesso con NOME_FISSO_E_STATO spento (le card cambiano nome, niente «Riprendi ›» e
  * niente collegamento) e con HOME_BASSA_COMPATTA spento (il collegamento fa scorrere la
- * home negli stati «libera» e «tutte» a 360x640 e 375x667).
+ * home negli stati «libera» e «tutte» a 360x640 e 375x667), e con NUOVA_DENTRO_LA_CARD
+ * spento (torna il collegamento sottolineato sotto la card: PO-020 e' rosso).
  *
  * Uso: npm run home-spiegazione   (PLINTO_E2E_OUT=cartella per le schermate)
  */
@@ -41,7 +46,7 @@ import { chromium } from 'playwright';
 import { existsSync, mkdirSync } from 'node:fs';
 import testiIt from '../../src/i18n/it.js';
 import testiEn from '../../src/i18n/en.js';
-import { createGame, serializeGame } from '../../src/core/engine.js';
+import { createGame, serializeGame, canPlaceHandPiece, placePiece } from '../../src/core/engine.js';
 import { giornoDiOggi } from '../../src/core/sfida.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
@@ -52,7 +57,7 @@ const OUT = process.env.PLINTO_E2E_OUT ?? null;
 if (OUT) mkdirSync(OUT, { recursive: true });
 
 const FORMATI = [
-  [360, 640], [375, 667], [390, 844], [412, 915], [1280, 800], [1366, 768],
+  [320, 700], [360, 640], [360, 800], [375, 667], [390, 844], [412, 915], [1280, 800], [1366, 768],
 ];
 const LINGUE = { it: testiIt, en: testiEn };
 
@@ -80,6 +85,15 @@ const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 // home lo ignora e il pulsante «Nuova partita» non compare (misurato: con i segnaposto
 // la home "piena" era alta quanto quella di un giocatore nuovo).
 const PARTITA_LIBERA = serializeGame(createGame({ seed: 'po009', now: 0 }));
+// PO-020: la conferma H1 scatta solo con almeno una mossa (liberaAMeta in usePartita):
+// a zero mosse «Nuova» comincia e basta, e la prova del tocco non proverebbe niente.
+const PARTITA_LIBERA_META = (() => {
+  const s = createGame({ seed: 'po009', now: 0 });
+  for (let r = 0; r < 9; r += 1) for (let c = 0; c < 9; c += 1) {
+    if (canPlaceHandPiece(s, 0, r, c)) return serializeGame(placePiece(s, 0, r, c, 0));
+  }
+  throw new Error('nessuna mossa possibile per la partita di prova');
+})();
 const PARTITA_SFIDA = serializeGame(createGame({ seed: giornoDiOggi(), now: 0 }));
 // Un livello lasciato a meta': il pulsante grande diventa «Riprendi il livello 11».
 const PARTITA_LIVELLO = { numero: 11, partita: serializeGame(createGame({ seed: 'po004-f1', now: 0 })) };
@@ -99,7 +113,7 @@ async function apri(lingua, [larghezza, altezza], stato) {
   const page = await browser.newPage({ viewport: { width: larghezza, height: altezza }, locale: lingua });
   page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate(([l, p, libera, sfida, livello]) => {
+  await page.evaluate(([l, p, libera, sfida, livello, liberaMeta]) => {
     window.localStorage.clear();
     window.localStorage.setItem('plinto:settings', JSON.stringify({
       versione: 2, introVista: true, lingua: l,
@@ -114,9 +128,10 @@ async function apri(lingua, [larghezza, altezza], stato) {
       ),
     }));
     if (p === 'libera' || p === 'tutte') window.localStorage.setItem('plinto:partita', JSON.stringify(libera));
+    if (p === 'liberaMeta') window.localStorage.setItem('plinto:partita', JSON.stringify(liberaMeta));
     if (p === 'sfida' || p === 'tutte') window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(sfida));
     if (p === 'livello' || p === 'tutte') window.localStorage.setItem('plinto:partita-quadro', JSON.stringify(livello));
-  }, [lingua, stato, PARTITA_LIBERA, PARTITA_SFIDA, PARTITA_LIVELLO]);
+  }, [lingua, stato, PARTITA_LIBERA, PARTITA_SFIDA, PARTITA_LIVELLO, PARTITA_LIBERA_META]);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('.pl-home__azioni');
   return page;
@@ -155,7 +170,10 @@ function misura() {
     if (!el) return null;
     const r = el.getBoundingClientRect();
     const riga = el.querySelector('.pl-sfida-avvio__spiega');
-    const ids = (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+    // PO-020: con «Nuova» dentro, la card e' un contenitore e il nome accessibile e la
+    // spiegazione stanno su «Riprendi ›», il pulsante che riceve il tocco sulla card.
+    const voce = el.matches('button') ? el : el.querySelector('.pl-sfida-avvio__riprendi');
+    const ids = (voce?.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
     const descrizione = ids.map((id) => document.getElementById(id)?.textContent ?? '').join(' ').trim();
     let riga_ = null;
     if (riga) {
@@ -178,7 +196,7 @@ function misura() {
       };
     }
     return {
-      altezza: Math.round(r.height), nome: el.getAttribute('aria-label'), descrizione, riga: riga_,
+      altezza: Math.round(r.height), nome: voce?.getAttribute('aria-label') ?? null, descrizione, riga: riga_,
       esito: el.querySelector('.pl-sfida-avvio__esito')?.textContent ?? null,
       // PO-010, «in evidenza»: la pillola ha un fondo pieno, il record no.
       esitoFondo: (() => { const e = el.querySelector('.pl-sfida-avvio__esito'); return e ? getComputedStyle(e).backgroundColor : null; })(),
@@ -188,7 +206,39 @@ function misura() {
       titolo: el.querySelector('span')?.textContent ?? null,
     };
   };
-  const nl = home.querySelector('.pl-home__nuova-libera');
+  // PO-020: «Nuova» dentro la card della libera.
+  const cardLibera = home.querySelector('.pl-sfida-avvio--libera');
+  const dn = cardLibera?.querySelector('.pl-sfida-avvio__nuova') ?? null;
+  const dentroCard = dn ? (() => {
+    const c = cardLibera.getBoundingClientRect();
+    const r = dn.getBoundingClientRect();
+    const rip = cardLibera.querySelector('.pl-sfida-avvio__riprendi');
+    const rr = rip?.getBoundingClientRect();
+    const entro = (q) => q.left >= c.left - 0.5 && q.right <= c.right + 0.5 && q.top >= c.top - 0.5 && q.bottom <= c.bottom + 0.5;
+    // Il bersaglio vero si misura come lo misura un dito: elementFromPoint lungo la
+    // verticale al centro di «Nuova», pixel per pixel (il ::before non ha un rettangolo).
+    const x = r.left + r.width / 2;
+    let bersaglio = 0;
+    for (let y = Math.floor(c.top) - 20; y <= Math.ceil(c.bottom) + 20; y += 1) {
+      if (document.elementFromPoint(x, y)?.closest('button') === dn) bersaglio += 1;
+    }
+    // Il tocco sul nome della card deve arrivare a «Riprendi ›».
+    const nome = cardLibera.querySelector('span').getBoundingClientRect();
+    const sulNome = document.elementFromPoint(nome.left + 4, nome.top + nome.height / 2)?.closest('button');
+    const stile = getComputedStyle(dn);
+    return {
+      testo: dn.textContent, nome: dn.getAttribute('aria-label'), altezza: Math.round(r.height), bersaglio,
+      dentro: entro(r), riprendiDentro: rr ? entro(rr) : false,
+      stessaRiga: rr ? Math.abs((r.top + r.bottom) / 2 - (rr.top + rr.bottom) / 2) <= 1.5 : false,
+      sinistra: rr ? r.right <= rr.left : false,
+      sottolineato: stile.textDecorationLine.includes('underline'),
+      tattoSulNome: sulNome?.classList.contains('pl-sfida-avvio__riprendi') ?? false,
+    };
+  })() : null;
+  const annidati = home.querySelectorAll('button button').length;
+  const sottolineati = [...home.querySelectorAll('.pl-home__azioni button')]
+    .filter((b) => getComputedStyle(b).textDecorationLine.includes('underline')).map((b) => b.textContent);
+  const nl = [...home.querySelectorAll('.pl-home__nuova-libera')].find((e) => !cardLibera?.contains(e));
   const nuova = nl ? (() => {
     const r = nl.getBoundingClientRect();
     const c = home.querySelector('.pl-sfida-avvio--libera').getBoundingClientRect();
@@ -216,7 +266,7 @@ function misura() {
   return {
     aggiunta, libero, eccesso, eccessoLungo, alta: home.scrollHeight, finestra: home.clientHeight,
     libera: card('.pl-sfida-avvio--libera'), sfida: card('.pl-sfida-avvio--sfida'),
-    mappa: card('.pl-sfida-avvio--mappa'), collegamenti, nuova,
+    mappa: card('.pl-sfida-avvio--mappa'), collegamenti, nuova, dentroCard, annidati, sottolineati,
     azioni: home.querySelectorAll('.pl-home__azioni > *').length,
   };
 }
@@ -234,7 +284,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
       tabella.push({
         dove, home: `${m.alta}/${m.finestra}`, libero: m.libero, scorre: peggio, riga: m.aggiunta,
         azioni: m.azioni, statoLibera: m.libera?.esito, statoSfida: m.sfida?.esito,
-        nuova: m.nuova?.altezza ?? '-',
+        nuova: m.dentroCard ? `${m.dentroCard.altezza}/${m.dentroCard.bersaglio}` : (m.nuova ? `sotto ${m.nuova.altezza}` : '-'),
         libera: m.libera?.altezza, sfida: m.sfida?.altezza, mappa: m.mappa?.altezza,
         righe: [m.libera?.riga?.righe, m.sfida?.riga?.righe].join('+'),
         contrasto: [m.libera?.riga?.contrasto, m.sfida?.riga?.contrasto].join(' / '),
@@ -255,12 +305,18 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (Math.abs(m.libera?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola della libera non finisce sul bordo del contenuto (scarto ${m.libera?.esitoDestra}px)`);
         const atteso = `${testi.home.partitaLibera}, ${testi.home.riprendiLibera}`;
         if (m.libera?.nome !== atteso) errori.push(`${dove}: il nome accessibile della libera e «${m.libera?.nome}» invece di «${atteso}»`);
-        if (!m.nuova) errori.push(`${dove}: con la libera in corso manca «${testi.home.nuovaLibera}» (PO-010)`);
+        // PO-020: «Nuova» sta dentro la card; il collegamento sotto non c'e' piu'.
+        if (m.nuova) errori.push(`${dove}: sotto la card c'e ancora il collegamento «${m.nuova.testo}» (PO-020)`);
+        const d = m.dentroCard;
+        if (!d) errori.push(`${dove}: con la libera in corso la card non ha il pulsante «${testi.home.nuovaBreve}» (PO-020)`);
         else {
-          if (m.nuova.testo !== testi.home.nuovaLibera) errori.push(`${dove}: il collegamento dice «${m.nuova.testo}» invece di «${testi.home.nuovaLibera}»`);
-          if (m.nuova.altezza < 24) errori.push(`${dove}: «${testi.home.nuovaLibera}» e alto ${m.nuova.altezza}px (minimo 24)`);
-          if (!m.nuova.sotto) errori.push(`${dove}: «${testi.home.nuovaLibera}» non sta subito sotto la card della libera`);
-          if (!m.nuova.dentro) errori.push(`${dove}: «${testi.home.nuovaLibera}» esce dallo schermo`);
+          if (d.testo !== testi.home.nuovaBreve) errori.push(`${dove}: il pulsante dice «${d.testo}» invece di «${testi.home.nuovaBreve}»`);
+          if (d.nome !== testi.home.nuovaLibera) errori.push(`${dove}: il nome accessibile di «${d.testo}» e «${d.nome}» invece di «${testi.home.nuovaLibera}»`);
+          if (!d.dentro || !d.riprendiDentro) errori.push(`${dove}: «${d.testo}» o «${testi.home.riprendiStato}» escono dai bordi della card`);
+          if (!d.stessaRiga || !d.sinistra) errori.push(`${dove}: «${d.testo}» non sta sulla riga di «${testi.home.riprendiStato}», alla sua sinistra`);
+          if (d.sottolineato) errori.push(`${dove}: «${d.testo}» e sottolineato`);
+          if (d.bersaglio < 44) errori.push(`${dove}: il bersaglio di «${d.testo}» e alto ${d.bersaglio}px (minimo 44)`);
+          if (!d.tattoSulNome) errori.push(`${dove}: un tocco sul nome della card non arriva a «${testi.home.riprendiStato}»`);
         }
       } else {
         if (m.nuova) errori.push(`${dove}: senza libera in corso c'e «${m.nuova.testo}»`);
@@ -271,9 +327,15 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.riprendiStato}» della sfida non e in evidenza (nessun fondo)`);
         const atteso = `${testi.sfida.breve}, ${testi.home.riprendiSfida}`;
         if (m.sfida?.nome !== atteso) errori.push(`${dove}: il nome accessibile della sfida e «${m.sfida?.nome}» invece di «${atteso}»`);
-      } else if (m.sfida?.esito !== testi.home.daGiocare) {
-        errori.push(`${dove}: senza sfida in corso la card dice «${m.sfida?.esito}» invece di «${testi.home.daGiocare}»`);
+      } else {
+        // PO-021: la sfida da fare mostra la pillola «Gioca ›», disegnata come «Riprendi ›».
+        if (m.sfida?.esito !== testi.home.giocaStato) errori.push(`${dove}: senza sfida in corso la card dice «${m.sfida?.esito}» invece di «${testi.home.giocaStato}» (PO-021)`);
+        if (/rgba\(0, 0, 0, 0\)|transparent/.test(m.sfida?.esitoFondo ?? 'transparent')) errori.push(`${dove}: «${testi.home.giocaStato}» della sfida non e una pillola (nessun fondo) (PO-021)`);
+        if (m.sfida?.esitoAlone && m.sfida.esitoAlone !== 'none') errori.push(`${dove}: la pillola «${testi.home.giocaStato}» ha un alone che la fa sporgere`);
+        if (Math.abs(m.sfida?.esitoDestra ?? 0) > 1) errori.push(`${dove}: la pillola «${testi.home.giocaStato}» non finisce sul bordo del contenuto (scarto ${m.sfida?.esitoDestra}px)`);
       }
+      if (m.annidati) errori.push(`${dove}: ${m.annidati} <button> dentro un altro <button>`);
+      if (m.sottolineati.length) errori.push(`${dove}: pulsanti sottolineati fra le azioni: ${m.sottolineati.join(', ')}`);
       for (const h of m.collegamenti) if (h < 24) errori.push(`${dove}: un collegamento in fondo e alto ${h}px (B10 chiede 24)`);
       if (!m.collegamenti.length) errori.push(`${dove}: collegamenti in fondo non trovati`);
       for (const quale of ['libera', 'sfida']) {
@@ -288,6 +350,25 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         if (c.riga.contrasto < 4.5) errori.push(`${dove}: la riga della card ${quale} ha contrasto ${c.riga.contrasto}:1 (minimo 4.5)`);
         if (c.descrizione !== attese[quale]) errori.push(`${dove}: la descrizione accessibile della card ${quale} e «${c.descrizione}»`);
       }
+      // PO-020, i tocchi veri (una volta per lingua): «Nuova» apre la conferma H1 di
+      // PO-008, il nome della card riprende la partita.
+      if (stato === 'libera' && formato[0] === 360 && formato[1] === 640 && m.dentroCard) {
+        const aMeta = await apri(lingua, formato, 'liberaMeta');
+        await aMeta.locator('.pl-sfida-avvio--libera .pl-sfida-avvio__nuova').click();
+        await aMeta.waitForTimeout(300);
+        const conferma = await aMeta.getByText(testi.conferma.liberaTesto).count();
+        await aMeta.close();
+        if (!conferma) errori.push(`${dove}: «${testi.home.nuovaBreve}» non apre la conferma «${testi.conferma.liberaTesto.slice(0, 30)}…» (PO-008)`);
+        // Una pagina nuova: dopo la conferma la rotta non e' piu' la home.
+        const altra = await apri(lingua, formato, stato);
+        // A coordinate, come un dito: Playwright rifiuterebbe il click sullo <span>
+        // proprio perche' sopra c'e' la superficie di «Riprendi ›», che e' il disegno.
+        const sp = await altra.locator('.pl-sfida-avvio--libera > span').first().boundingBox();
+        await altra.mouse.click(sp.x + 4, sp.y + sp.height / 2);
+        const inGioco = await altra.waitForSelector('.pl-plancia .pl-cella', { timeout: 3000 }).then(() => true, () => false);
+        await altra.close();
+        if (!inGioco) errori.push(`${dove}: un tocco sul nome della card non riprende la partita`);
+      }
       if (OUT && ['libera', 'sfida', 'tutte'].includes(stato) && [[360, 640], [390, 844]].some(([l, a]) => l === formato[0] && a === formato[1])) {
         await page.screenshot({ path: `${OUT}/home-${stato}-${lingua}-${formato.join('x')}.png` });
       }
@@ -299,7 +380,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
 await browser.close();
 if (server) server.kill();
 
-console.log('\nPO-009 e PO-010: riga di spiegazione, nome fisso e «Riprendi ›», «Nuova partita libera»');
+console.log('\nPO-009, PO-010 e PO-020: riga di spiegazione, nome fisso e «Riprendi ›», «Nuova» dentro la card');
 console.table(tabella);
 if (errori.length) {
   console.error(`\n${errori.length} problemi:`);
@@ -307,4 +388,4 @@ if (errori.length) {
   process.exit(1);
 }
 console.log('\nLa riga c\'e\' in italiano e in inglese, si legge, non allunga la home, la home non scorre'
-  + ' in nessuno dei cinque stati, le card hanno il nome fisso con «Riprendi ›» e c\'e\' «Nuova partita libera».');
+  + ' in nessuno dei cinque stati, le card hanno il nome fisso con «Riprendi ›» e «Nuova» sta dentro la card della libera.');

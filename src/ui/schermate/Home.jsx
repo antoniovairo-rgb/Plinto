@@ -74,6 +74,30 @@ const PILLOLA_ALLINEATA = true;
 const LIVELLO_SENZA_RIPRENDI = true;
 
 /**
+ * Interruttore PO-020: con la libera in corso «Nuova» sta DENTRO la card, accanto a
+ * «Riprendi ›», invece che in un collegamento sottolineato sotto. Il PO trovava il
+ * collegamento «brutto e fuori stile» (decisione «Dentro la card»).
+ *
+ * Due pulsanti dentro un pulsante non sono HTML valido (e il tocco su «Nuova» finirebbe
+ * anche alla card): con la libera in corso la card diventa un contenitore con DUE
+ * pulsanti fratelli. «Riprendi ›» porta il nome accessibile e la spiegazione di prima e
+ * stende la sua superficie su tutta la card, cosi' un tocco sulla card riprende ancora;
+ * «Nuova» sta sopra quella superficie. Spento, torna il collegamento della PO-010:
+ * `npm run home-spiegazione` e' rosso.
+ */
+const NUOVA_DENTRO_LA_CARD = true;
+
+/*
+ * PO-021 (scelta del PO, «Pillola Gioca ›»): con la sfida di oggi ancora da fare, a destra
+ * della card c'era «Da giocare» in testo dorato, mentre «Riprendi ›» e' una pillola piena:
+ * due azioni disegnate in due modi. Acceso, la sfida da fare mostra la pillola «Gioca ›»
+ * con lo stesso aspetto di «Riprendi ›». Gli stati che sono solo informazioni (il record
+ * della sfida fatta, «N di 100» della mappa) restano testo. Spento torna «Da giocare».
+ * Controllo: `npm run home-spiegazione`.
+ */
+const GIOCA_IN_PILLOLA = true;
+
+/**
  * La home.
  *
  * L'ORDINE DI QUESTA SCHERMATA E' STATO SBAGLIATO, e vale la pena scrivere come.
@@ -112,6 +136,9 @@ export function SchermoHome({
     : (recordTesto ? `${etichettaLibera}, ${recordTesto}` : etichettaLibera);
   const etichettaSfida = sfidaInCorso && !NOME_FISSO_E_STATO ? t('sfida.riprendi') : t('sfida.breve');
   const sfidaStato = sfidaInCorso && NOME_FISSO_E_STATO ? t('home.riprendiStato') : (sfidaTesto || t('home.daGiocare'));
+  const sfidaDaFare = GIOCA_IN_PILLOLA && !(sfidaInCorso && NOME_FISSO_E_STATO) && !sfidaTesto;
+  const sfidaPillola = (sfidaInCorso && NOME_FISSO_E_STATO) || sfidaDaFare;
+  const sfidaStatoMostrato = sfidaDaFare ? t('home.giocaStato') : sfidaStato;
   const nomeSfida = sfidaInCorso && NOME_FISSO_E_STATO
     ? `${etichettaSfida}, ${t('home.riprendiSfida')}`
     : (sfidaTesto ? `${etichettaSfida}, ${sfidaTesto}` : etichettaSfida);
@@ -149,34 +176,61 @@ export function SchermoHome({
 
         {/* La partita libera e' un'ALTRA modalita', e adesso lo dice. Il record che le
             sta accanto e' il suo, non un record generale del gioco. */}
-        <button
-          type="button"
-          className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera"
-          onClick={cePartitaSalvata ? onRiprendi : onGioca}
-          aria-label={nomeLibera}
-          aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-libera' : undefined}
-        >
-          <span>{etichettaLibera}</span>
-          {/* Il numero da solo non direbbe di che cosa e' il record: la parola serve. */}
-          {/* IL TRATTINO SEMBRAVA UN VALORE MANCANTE. Un "—" a destra di una voce di
-              menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
-              niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
-              impressione sbagliata. La parola lo dice e basta. */}
-          <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{statoLibera}</span>
-          {SPIEGAZIONE_MODI ? (
-            <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
-          ) : null}
-        </button>
-
-        {/* PO-010: un collegamento e non un pulsante largo. Il pulsante di prima (52 px
-            piu' lo spazio) faceva scorrere la home di 60 px a 360x640 (F1); il
-            collegamento e' alto 28, sopra i 24 di B10, e sta attaccato alla card di cui
-            parla. Senza partita in corso non serve: la card stessa ne comincia una. */}
-        {cePartitaSalvata && NOME_FISSO_E_STATO ? (
-          <button type="button" className="pl-home__nuova-libera" onClick={onGioca}>
-            {t('home.nuovaLibera')}
+        {cePartitaSalvata && NOME_FISSO_E_STATO && NUOVA_DENTRO_LA_CARD ? (
+          // PO-020: un contenitore, non un pulsante. Il nome, la spiegazione e il fondo
+          // sono gli stessi della card di sempre; i due pulsanti stanno sulla riga del nome.
+          <div className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera pl-sfida-avvio--doppia">
+            <span aria-hidden="true">{etichettaLibera}</span>
+            <span className="pl-sfida-avvio__comandi">
+              <button type="button" className="pl-sfida-avvio__nuova" onClick={onGioca} aria-label={t('home.nuovaLibera')}>
+                {t('home.nuovaBreve')}
+              </button>
+              <button
+                type="button"
+                className={`pl-sfida-avvio__riprendi pl-sfida-avvio__esito pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}`}
+                onClick={onRiprendi}
+                aria-label={nomeLibera}
+                aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-libera' : undefined}
+              >
+                {statoLibera}
+              </button>
+            </span>
+            {SPIEGAZIONE_MODI ? (
+              <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
+            ) : null}
+          </div>
+        ) : (
+          <>
+          <button
+            type="button"
+            className="pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera"
+            onClick={cePartitaSalvata ? onRiprendi : onGioca}
+            aria-label={nomeLibera}
+            aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-libera' : undefined}
+          >
+            <span>{etichettaLibera}</span>
+            {/* Il numero da solo non direbbe di che cosa e' il record: la parola serve. */}
+            {/* IL TRATTINO SEMBRAVA UN VALORE MANCANTE. Un "—" a destra di una voce di
+                menu si legge come un dato che non e' arrivato, non come "non c'e' ancora
+                niente": per un giocatore nuovo, cioe' l'unico che lo vede, e' la prima
+                impressione sbagliata. La parola lo dice e basta. */}
+            <span className={`pl-sfida-avvio__esito${cePartitaSalvata && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{statoLibera}</span>
+            {SPIEGAZIONE_MODI ? (
+              <span id="pl-spiega-libera" className="pl-sfida-avvio__spiega">{t('home.spiegaLibera')}</span>
+            ) : null}
           </button>
-        ) : null}
+
+          {/* PO-010: un collegamento e non un pulsante largo. Il pulsante di prima (52 px
+              piu' lo spazio) faceva scorrere la home di 60 px a 360x640 (F1); il
+              collegamento e' alto 28, sopra i 24 di B10, e sta attaccato alla card di cui
+              parla. Senza partita in corso non serve: la card stessa ne comincia una. */}
+          {cePartitaSalvata && NOME_FISSO_E_STATO && !NUOVA_DENTRO_LA_CARD ? (
+            <button type="button" className="pl-home__nuova-libera" onClick={onGioca}>
+              {t('home.nuovaLibera')}
+            </button>
+          ) : null}
+          </>
+        )}
 
         <button
           type="button"
@@ -186,7 +240,7 @@ export function SchermoHome({
           aria-describedby={SPIEGAZIONE_MODI ? 'pl-spiega-sfida' : undefined}
         >
           <span>{etichettaSfida}</span>
-          <span className={`pl-sfida-avvio__esito${sfidaInCorso && NOME_FISSO_E_STATO ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}`}>{sfidaStato}</span>
+          <span className={`pl-sfida-avvio__esito${sfidaPillola ? ` pl-sfida-avvio__esito--riprendi${RIPRENDI_IN_EVIDENZA ? ' pl-sfida-avvio__esito--evidenza' : ''}${PILLOLA_ALLINEATA ? ' pl-sfida-avvio__esito--allineata' : ''}` : ''}${sfidaDaFare ? ' pl-sfida-avvio__esito--gioca' : ''}`}>{sfidaStatoMostrato}</span>
           {SPIEGAZIONE_MODI ? (
             <span id="pl-spiega-sfida" className="pl-sfida-avvio__spiega">{t('home.spiegaSfida')}</span>
           ) : null}
