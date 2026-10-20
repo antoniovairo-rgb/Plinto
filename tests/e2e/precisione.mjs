@@ -64,7 +64,11 @@ if (!(await serverRisponde())) {
 }
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
-const page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
+const page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT', serviceWorkers: 'block' });
+// Una pagina vuota della stessa origine, senza il gioco: da qui si scrive la memoria della
+// partita da preparare senza che il gioco, ancora aperto, la riscriva (vedi preparaPartita).
+const VUOTA = new URL('__prepara-precisione.html', INDIRIZZO).href;
+await page.route(VUOTA, (route) => route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>vuota</title>' }));
 page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
@@ -78,12 +82,35 @@ async function preparaPartita(idForme) {
     grid: createGrid(),
     hand: idForme.map((id, i) => ({ uid: `p${i}`, shapeId: id, shape: getShape(id), color: 1 })),
   };
+  // PRIMA SI ESCE DAL GIOCO, POI SI SCRIVE. Scrivendo con il gioco ancora aperto, un suo
+  // salvataggio in arrivo (la partita appena giocata e il posto in cui riprenderla,
+  // `segnaPosto` in src/state/usePartita.js) poteva arrivare dopo e vincere: alla ricarica
+  // il gioco riapriva la partita vecchia direttamente, senza passare dalla home, e il
+  // pulsante «Riprendi» non c'era. Rossa a intermittenza in CI dalla corsa 183 (19-20
+  // ottobre 2026, runner ubuntu-26.04), mai in locale.
+  await page.goto(VUOTA);
   await page.evaluate((s) => {
     window.localStorage.setItem('plinto:partita', JSON.stringify(s));
     window.localStorage.removeItem('plinto:ripresa');
   }, serializeGame(stato));
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /riprendi la partita/i }).click();
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  const riprendi = page.getByRole('button', { name: /riprendi la partita/i });
+  try {
+    await riprendi.waitFor({ timeout: 30000 });
+  } catch (e) {
+    // Se il pulsante non c'e', il registro deve dire che cosa c'era al suo posto: in CI
+    // non si vede lo schermo, e «Timeout» da solo non distingue una causa dall'altra.
+    const visto = await page.evaluate(() => ({
+      indirizzo: location.href,
+      plancia: Boolean(document.querySelector('.pl-plancia')),
+      dialogo: document.querySelector('[role="dialog"]')?.innerText?.slice(0, 160) ?? null,
+      testo: document.body.innerText.replace(/\s+/g, ' ').slice(0, 300),
+      chiavi: Object.keys(localStorage).sort(),
+    }));
+    console.error('PRECISIONE: «Riprendi la partita» non trovato dopo la ricarica.', JSON.stringify(visto));
+    throw e;
+  }
+  await riprendi.click();
   await page.waitForSelector('.pl-plancia');
 }
 
