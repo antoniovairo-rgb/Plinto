@@ -63,12 +63,16 @@ cursore con le frecce finché l'anteprima non è più vietata, poi Invio. Misure
 | N4 (PO-029) | libera con 2 mosse → home → sfida, 1 mossa, pezzo 2 scelto col clic / con la tastiera (cursore acceso) → menu → «Nuova partita» → «Riprendi la partita» | nella libera nessun pezzo scelto, nessun cursore, fuoco `<body>`; subito dopo una mossa con la tastiera riesce |
 | K | livello 13 solo tastiera: 3 mosse; gessetto (Tab alla pastiglia, Invio, Maiusc+Tab, Invio); mensola senza pezzo scelto (pannello, mensola, Tab al vassoio, Invio); Tab alla mensola, Invio (riprende); 3 mosse | 6 mosse su 6 posate; gessetto: 3 caselle segnate, gettone speso; mensola: pezzo messo da parte (mano 3 → 2), gettone speso; ripreso (mano 2 → 3) |
 | L | libera e sfida solo tastiera, 6 mosse ciascuna | 6 su 6 in entrambe |
-| M | mensola con un pezzo scelto (§ 3, D1): Tab al vassoio + Invio; «Lascia stare» con Invio; Escape; mensola piena + pezzo scelto, Invio sulla mensola | **Tab al vassoio + Invio: NO in 7 su 7 combinazioni lette** (D1); «Lascia stare»: attesa chiusa, pezzo ancora scelto, partita uguale; Escape: vedi O1; Invio sulla mensola con pezzo scelto: pezzo ripreso, pezzo scelto e cursore restano, partita uguale |
+| M | mensola con un pezzo scelto (§ 3, D1): Tab al vassoio + Invio; «Lascia stare» con Invio; Escape; mensola piena + pezzo scelto, Invio sulla mensola | **Tab al vassoio + Invio: NO in 8 su 8** (D1); «Lascia stare»: attesa chiusa, pezzo ancora scelto, partita uguale; Escape: vedi O1; Invio sulla mensola con pezzo scelto: pezzo ripreso, pezzo scelto e cursore restano, partita uguale |
 | R (PO-023/024/026) | menu con pezzo scelto: fuoco d'ingresso, Tab a «Nuova partita», Invio (domanda), Escape, Escape; «Riprendi la partita» con Invio; nel livello «Riprova», Escape | fuoco su «Torna alla partita»; domanda aperta con fuoco su «Riprendi la partita»; 1° Escape chiude solo la domanda (fuoco su «Nuova partita»), 2° chiude il menu (fuoco «Menu», pezzo scelto, partita uguale); «Riprendi la partita»: fuoco su «Menu»; «Riprova» + Escape: fuoco su «Menu» |
 
 Errori di pagina e di console: **zero** in tutte le corse.
 
-ESITO_320_IT
+Conteggio: **34 OK e 1 NO in ognuna delle 8 combinazioni**; il NO è sempre la prova M «Tab al
+vassoio + Invio» (D1). Nota sull'infrastruttura: la prima corsa a 320x700 it si è fermata dopo
+20 prove perché la home del sito non è comparsa entro 30 s in un contesto nuovo (timeout di
+`waitForSelector`, nessuna schermata presa in quel giro); rilanciata intera, 34 OK e 1 NO, senza
+nessun nuovo timeout. La causa del primo timeout (rete o altro): **non posso confermarla**.
 
 ## 3. Voci
 
