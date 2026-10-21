@@ -33,6 +33,12 @@
  *      su «Torna alla partita», chiuso senza scegliere (Escape, velo, «Torna alla
  *      partita», Indietro) il fuoco torna a «Menu»; con una domanda sopra il menu, Escape
  *      chiude solo la domanda (collaudo 1.21.20, O2; PO-024, MENU_COME_LE_DOMANDE).
+ *   R  con un pezzo scelto e il menu o una domanda aperti, i tasti della partita tacciono:
+ *      Invio e Spazio premono il pulsante che ha il fuoco e non posano il pezzo sotto il
+ *      velo, Escape chiude solo la finestra e il pezzo resta scelto (collaudo 1.21.21, D1;
+ *      PO-026, TASTI_TACCIONO_SOTTO_IL_VELO). «Riprendi la partita» nella domanda sopra il
+ *      menu, che lascia la stessa partita, riporta il fuoco su «Menu» (O1,
+ *      RIPRENDI_TORNA_A_MENU). A menu chiuso la partita si gioca con la tastiera come prima.
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -925,6 +931,144 @@ for (const conLibera of [false, true]) {
     await contesto.close();
   }
   righe.push({ caso: 'Q il menu della partita come le domande', primo: '-', daZero: false, nota: note.join('; ') });
+}
+
+// ---------- R ----------
+// I tasti della partita sotto il velo (collaudo 1.21.21, D1 e O1; PO-026). Il pezzo si
+// sceglie col clic e il cursore va in cima con le frecce, come nel collaudo. Il segno che
+// il tasto e' arrivato alla partita e' il pezzo che non e' piu' scelto: Invio lo posa (o lo
+// rifiuta, se li' non entra) e lo lascia comunque, Escape lo lascia. Accanto, la firma
+// della partita, che non deve cambiare.
+{
+  const stato = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    let fuoco = '<body>';
+    if (a && a !== document.body) {
+      const nome = (a.getAttribute('aria-label') || a.textContent || a.tagName).trim().replace(/\s+/g, ' ');
+      fuoco = a.closest('.pl-menu') ? `menu: ${nome}` : a.closest('.pl-azzera') ? `domanda: ${nome}` : nome;
+    }
+    return {
+      scelto: !!document.querySelector('.pl-tray__posto--selezionato'),
+      menu: !!document.querySelector('.pl-menu'),
+      domanda: !!document.querySelector('.pl-azzera[role="dialog"]'),
+      fuoco,
+    };
+  });
+  async function scegli(page) {
+    await page.locator('.pl-tray .pl-pezzo-presa').first().click();
+    for (let i = 0; i < 4; i += 1) await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(200);
+  }
+  const nome = { Enter: 'Invio', ' ': 'Spazio', Escape: 'Escape' };
+  const note = [];
+  // Controlla l'esito di un tasto: `atteso` dice dove deve stare il fuoco e che cosa resta
+  // aperto; il pezzo deve essere ancora scelto e la partita uguale.
+  async function prova(page, caso, tasto, atteso, prima) {
+    const s0 = await stato(page);
+    if (!s0.scelto) { errori.push(`R ${caso}: il pezzo non e' scelto prima del tasto, il caso non prova niente`); return; }
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    const dopo = await firma(page);
+    const tag = `R ${caso}, ${nome[tasto]}`;
+    if (!s.scelto) errori.push(`${tag}: il tasto e' arrivato alla partita sotto il velo, il pezzo non e' piu' scelto`);
+    if (dopo !== prima) errori.push(`${tag}: la partita e' cambiata sotto il velo ("${prima}" -> "${dopo}")`);
+    if (s.menu !== atteso.menu) errori.push(`${tag}: menu ${s.menu ? 'aperto' : 'chiuso'}, atteso ${atteso.menu ? 'aperto' : 'chiuso'}`);
+    if (s.domanda !== atteso.domanda) errori.push(`${tag}: domanda ${s.domanda ? 'aperta' : 'chiusa'}, attesa ${atteso.domanda ? 'aperta' : 'chiusa'}`);
+    if (s.fuoco !== atteso.fuoco) errori.push(`${tag}: il fuoco e' su «${s.fuoco}», non su «${atteso.fuoco}»`);
+    note.push(`${caso} ${nome[tasto]}: ${s.scelto ? 'pezzo scelto' : 'PEZZO LASCIATO'}, fuoco ${s.fuoco}`);
+  }
+  async function liberaAMeta() {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.waitForTimeout(300);
+    return { contesto, page };
+  }
+  const apriMenu = async (page) => { await page.locator('.pl-hud__menu').click(); await page.waitForTimeout(300); };
+  const nuovaPartita = async (page) => {
+    await page.locator('.pl-menu').getByRole('button', { name: /^Nuova partita$/ }).click();
+    await page.waitForTimeout(300);
+  };
+  const chiuso = { menu: false, domanda: false, fuoco: 'Menu' };
+
+  // Il menu: Invio e Spazio su «Torna alla partita», Escape.
+  for (const tasto of ['Enter', ' ', 'Escape']) {
+    const { contesto, page } = await liberaAMeta();
+    await scegli(page);
+    const prima = await firma(page);
+    await apriMenu(page);
+    await prova(page, 'menu', tasto, chiuso, prima);
+    // Chiuso il menu i tasti tornano alla partita: Escape lascia il pezzo.
+    if (tasto === 'Escape') {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(200);
+      if ((await stato(page)).scelto) errori.push('R menu: chiuso il menu, Escape non lascia piu\' il pezzo');
+    }
+    await contesto.close();
+  }
+
+  // La domanda sopra il menu: Escape chiude solo la domanda; Invio e Spazio su «Riprendi la
+  // partita» chiudono tutte e due e il fuoco va su «Menu» (O1).
+  for (const tasto of ['Escape', 'Enter', ' ']) {
+    const { contesto, page } = await liberaAMeta();
+    await scegli(page);
+    const prima = await firma(page);
+    await apriMenu(page);
+    await nuovaPartita(page);
+    if (!(await stato(page)).domanda) { errori.push('R domanda sopra il menu: «Nuova partita» non apre la domanda, il caso non prova niente'); await contesto.close(); continue; }
+    const atteso = tasto === 'Escape'
+      ? { menu: true, domanda: false, fuoco: 'menu: Nuova partita' }
+      : chiuso;
+    await prova(page, 'domanda sopra il menu', tasto, atteso, prima);
+    await contesto.close();
+  }
+
+  // «Riprova» del livello: la domanda sopra la partita, col menu gia' chiuso.
+  for (const tasto of ['Enter', 'Escape']) {
+    const { contesto, page } = await prepara();
+    await apriLivello1DallaMappa(page);
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.waitForTimeout(300);
+    await scegli(page);
+    const prima = await firma(page);
+    await apriMenu(page);
+    await page.locator('.pl-menu').getByRole('button', { name: /^Riprova$/ }).click();
+    await page.waitForTimeout(300);
+    if (!(await stato(page)).domanda) { errori.push('R Riprova: la domanda non si apre, il caso non prova niente'); await contesto.close(); continue; }
+    await prova(page, 'Riprova', tasto, chiuso, prima);
+    await contesto.close();
+  }
+
+  // A menu chiuso, solo tastiera, come prima: Tab fino al primo pezzo, Invio lo sceglie, Invio
+  // lo posa al centro (la griglia e' vuota: entra sempre); poi Escape lascia il secondo.
+  {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    const prima = await firma(page);
+    await page.locator('.pl-tray .pl-pezzo-presa').first().focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    const preso = (await stato(page)).scelto;
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(500);
+    const dopo = await firma(page);
+    if (!preso) errori.push('R tastiera: Invio sul pezzo non lo sceglie');
+    else if (dopo === prima) errori.push('R tastiera: a menu chiuso Invio non posa il pezzo');
+    await page.locator('.pl-tray .pl-pezzo-presa').first().focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    if ((await stato(page)).scelto) errori.push('R tastiera: a menu chiuso Escape non lascia il pezzo');
+    note.push(`tastiera a menu chiuso: ${dopo !== prima ? 'pezzo posato' : 'NON POSATO'}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'R i tasti della partita sotto il velo', primo: '-', daZero: false, nota: note.join('; ') });
 }
 
 await browser.close();

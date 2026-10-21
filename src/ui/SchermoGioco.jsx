@@ -64,6 +64,19 @@ function IntestazioneSfida({ giorno, t }) {
  */
 const MOSSE_CON_ISTRUZIONI = 3;
 
+/*
+ * TASTI_TACCIONO_SOTTO_IL_VELO (collaudo 1.21.21, D1; decisione PO-026): i tasti della
+ * partita ascoltano `window` e non sapevano del menu ne' delle domande. Con un pezzo scelto,
+ * Invio e Spazio sul menu aperto posavano il pezzo sotto il velo invece di premere il
+ * pulsante che ha il fuoco, ed Escape lasciava il pezzo e chiudeva anche il menu con un
+ * tasto solo. Misurato uguale con le domande sopra la partita («Riprova» del livello,
+ * «Nuova partita» sopra il menu della libera), e gia' nella 1.21.20. Acceso, mentre c'e'
+ * il velo i tasti della partita tacciono: Invio e Spazio vanno al pulsante, Escape chiude
+ * solo la finestra. A menu chiuso non cambia niente. Spento, torna il difetto: caso R di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const TASTI_TACCIONO_SOTTO_IL_VELO = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -99,7 +112,10 @@ export function SchermoGioco({
   // la pastiglia non compare.
   attrezzi = null, suggerimento = null, onCarriola = null, onGessetto = null,
   onPiccone = null, onMensola = null, onRiprendiMensola = null, t,
+  // Vero mentre sopra la partita c'e' il menu o una domanda: il velo copre la griglia.
+  coperto = false,
 }) {
+  const tastiAttivi = partita.status === 'playing' && !(TASTI_TACCIONO_SOTTO_IL_VELO && coperto);
   /*
    * I modi dell'attrezzo in corso:
    *   'chiuso'   si gioca normalmente
@@ -163,6 +179,8 @@ export function SchermoGioco({
    */
   useEffect(() => {
     if (partita.modalita !== MODALITA.ANTEPRIMA) return undefined;
+    // Sotto il velo il fuoco portato sull'anteprima uscirebbe dalla finestra aperta.
+    if (TASTI_TACCIONO_SOTTO_IL_VELO && coperto) return undefined;
     const ascolta = (evento) => {
       if (evento.key !== 'p' && evento.key !== 'P') return;
       if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
@@ -173,7 +191,7 @@ export function SchermoGioco({
     };
     window.addEventListener('keydown', ascolta);
     return () => window.removeEventListener('keydown', ascolta);
-  }, [partita.modalita]);
+  }, [partita.modalita, coperto]);
 
   const effetti = useEffettiMossa({
     lastMove: partita.lastMove,
@@ -205,7 +223,7 @@ export function SchermoGioco({
   });
 
   const tastiera = useTastiera({
-    attivo: partita.status === 'playing',
+    attivo: tastiAttivi,
     selezionato: drag.selezionato,
     conTastiera: drag.selezionatoDaTastiera,
     mano: partita.hand,
