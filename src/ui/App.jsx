@@ -94,6 +94,20 @@ const ANCORA_SFIDA_DOPO_INDIETRO = true;
  * Spento, torna il difetto: caso O di `tests/e2e/ripresa-livello.mjs` rosso.
  */
 export const ANCORA_VIA_DALLA_LIBERA = true;
+/*
+ * RIPRENDI_TORNA_A_MENU (collaudo 1.21.21, O1; decisione PO-026): libera a meta', menu,
+ * «Nuova partita», poi «Riprendi la partita» nella domanda. Menu e domanda si chiudono e
+ * si resta nella stessa partita, ma il fuoco finiva su <body> (8 casi su 8) e il Tab dopo
+ * ripartiva dall'inizio della pagina: per la domanda e per il menu «Riprendi» era una
+ * scelta, e dopo una scelta il fuoco non si sposta. Per chi gioca e' la stessa cosa di
+ * «Torna alla partita», che riporta il fuoco su «Menu». Acceso, anche qui il fuoco va su
+ * «Menu» (lo stesso ripiego di «Riprova»). Solo quando si resta nella stessa partita:
+ * dalla home o da una sfida «Riprendi» cambia partita. Vale anche per «Torna alla
+ * partita» nella domanda di «Riprova» del livello, che lasciava il fuoco su <body> allo
+ * stesso modo (trovato dal caso R). Spento, torna il difetto: caso R di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const RIPRENDI_TORNA_A_MENU = true;
 
 /**
  * Radice dell'applicazione.
@@ -201,6 +215,10 @@ export function App() {
           if (giaDentro || riprendi('libera')) {
             if (ANCORA_VIA_DALLA_LIBERA) scriviRotta('');
             setSchermata('gioco');
+          }
+          // Il pulsante «Menu» resta a schermo sotto il velo: si puo' dargli il fuoco subito.
+          if (RIPRENDI_TORNA_A_MENU && giaDentro) {
+            document.querySelector('.pl-hud__menu')?.focus({ preventScroll: true });
           }
         },
         onContinua: () => { setConferma(null); avviaNuovaLibera(); },
@@ -433,7 +451,11 @@ export function App() {
         testo: t('conferma.riprovaTesto'),
         etichettaTorna: t('comune.tornaAllaPartita'),
         etichettaContinua: t('conferma.riprovaSi'),
-        onTorna: () => setConferma(null),
+        onTorna: () => {
+          setConferma(null);
+          // Si resta nel livello com'era: come «Riprendi la partita» della libera (O1).
+          if (RIPRENDI_TORNA_A_MENU) document.querySelector('.pl-hud__menu')?.focus({ preventScroll: true });
+        },
         onContinua: () => { setConferma(null); quadri.riprova(); },
         // Il menu si e' chiuso con «Riprova»: il fuoco torna al pulsante che lo riapre.
         ripiego: () => document.querySelector('.pl-hud__menu'),
@@ -692,6 +714,7 @@ export function App() {
           pezziMorti={deadPiecesDi(quadri.partita)}
           onGioca={quadri.gioca}
           onMenu={() => setMenuAperto(true)}
+          coperto={menuAperto || !!conferma}
           animazioni={impostazioni.animazioni}
           quadro={quadri.quadro}
           statoQuadro={quadri.stato}
@@ -735,6 +758,7 @@ export function App() {
           pezziMorti={pezziMorti}
           onGioca={gioca}
           onMenu={() => setMenuAperto(true)}
+          coperto={menuAperto || !!conferma}
           animazioni={impostazioni.animazioni}
           modalita={modalita}
           t={t}
