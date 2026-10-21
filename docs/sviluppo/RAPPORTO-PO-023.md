@@ -130,9 +130,19 @@ confermarlo**; posso solo dire che il nome contiene la parola.
 
 - `npm run build`: riuscita (`dist/assets/index-BYTOEY_9.js` 368.71 kB, `index-C4005dNo.css`
   66.95 kB).
-- `npm run verifica -- --veloce`: vedi l'ultima riga riportata sotto.
+- `npm run verifica -- --veloce`: **corsia veloce negata** («non risulta nessun giro
+  completo passato su questa macchina»), quindi il gate ha fatto il **giro completo**,
+  cento livelli compresi (3402 s). Ultima riga:
 
-(in corso al momento di questo commit: l'ultima riga arriva nel commit successivo)
+  > `2 controlli su 33 sono falliti. NON pubblicare.`
+
+  I due rossi sono quelli noti dei container figli (`docs/TESTING.md`, «Due rossi noti»),
+  **con gli stessi numeri**: `e2e-quadri` «a 320x700 bisogna scorrere di 2 px» (fine del
+  livello vinta) e `recensione` «a 360x640 l'invito finisce 10px sotto la barra dei
+  pulsanti». Nessuno dei due tocca la home né le domande di conferma. Tutti gli altri 31
+  verdi, compresi `e2e-po008` (PO-008), `home-spiegazione`, impaginazione («la home entra
+  nello schermo»), sicurezza e Indietro di Android. Che quei due siano verdi qui
+  sulla CI **non posso confermarlo**: questo ramo non è su `main` e la CI non è girata.
 
 ## Scelte aperte (per il PO)
 
