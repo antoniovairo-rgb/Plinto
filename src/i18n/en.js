@@ -16,6 +16,7 @@ export default {
     riprendiStato: 'Resume ›',
     riprendiLibera: 'resume the game in progress',
     riprendiSfida: 'resume the challenge in progress',
+    giocaSfida: "play today's challenge",
     nuovaLibera: 'New free game',
     nuovaBreve: 'New',
     statistiche: 'Stats',

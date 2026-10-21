@@ -26,6 +26,9 @@
  *   O  dentro una sfida, menu -> «Nuova partita» (o «Riprendi la partita» nella domanda):
  *      la libera che si gioca e' quella che si ritrova dopo una ricarica, non la sfida
  *      (collaudo 1.21.12, I1). L'indirizzo non tiene piu' `#/sfida/<giorno>`.
+ *   P  chiusa la domanda senza scegliere (Escape o tocco sul velo) il fuoco torna al
+ *      pulsante che l'ha aperta: «Nuova» della home (tastiera), «Riprova» nel menu del
+ *      livello, «Gioca» sull'obiettivo (collaudo 1.21.18, D1; PO-023).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -736,6 +739,99 @@ for (const conLibera of [false, true]) {
   if (ancoraPrima !== '') errori.push(`${nome}: nella libera l'indirizzo e' «${ancoraPrima}»`);
   if (dopoIndietro !== 'home' || ancoraIndietro !== '') errori.push(`${nome}: Indietro dopo la ricarica porta a "${dopoIndietro}" «${ancoraIndietro}»`);
   await contesto.close();
+}
+
+// ---------- P ----------
+// Chiusa la domanda senza scegliere, il fuoco deve tornare al pulsante che l'ha aperta
+// (collaudo 1.21.18, D1: finiva su <body> e il Tab ripartiva da «Livello 1»). Tre domande
+// diverse, aperte da tre posti diversi, chiuse con Escape e col tocco sul velo.
+{
+  const fuocoOra = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    if (!a || a === document.body) return '<body>';
+    return (a.getAttribute('aria-label') || a.textContent || a.tagName).trim().replace(/\s+/g, ' ');
+  });
+  // Un angolo del velo, fuori dalla finestra: se li' non c'e' il velo il caso non prova niente.
+  async function toccaVelo(page) {
+    const ok = await page.evaluate(() => document.elementFromPoint(4, 4)?.classList.contains('pl-velo'));
+    if (!ok) return false;
+    await page.mouse.click(4, 4);
+    return true;
+  }
+  async function chiudiE(page, caso, come, atteso) {
+    const d = await domanda(page);
+    if (!d) { errori.push(`P ${caso}: la domanda non si apre, il caso non prova niente`); return ''; }
+    if (come === 'Escape') await page.keyboard.press('Escape');
+    else if (!(await toccaVelo(page))) { errori.push(`P ${caso}: nell'angolo non c'e' il velo`); return ''; }
+    await page.waitForTimeout(300);
+    if (await domanda(page)) { errori.push(`P ${caso}: ${come} non chiude la domanda`); return ''; }
+    const f = await fuocoOra(page);
+    if (!atteso.test(f)) errori.push(`P ${caso}, ${come}: il fuoco e' su «${f}», non sul pulsante che ha aperto la domanda`);
+    return f;
+  }
+  const note = [];
+
+  // Home, con la tastiera: fuoco su «Nuova», Invio, Escape; poi Invio, velo; poi Tab.
+  {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+    const nuova = page.locator('.pl-sfida-avvio__nuova, .pl-home__nuova-libera');
+    await nuova.focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    note.push(`home Esc: ${await chiudiE(page, 'home', 'Escape', /^Nuova partita libera$/)}`);
+    await nuova.focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    note.push(`home velo: ${await chiudiE(page, 'home', 'velo', /^Nuova partita libera$/)}`);
+    await page.keyboard.press('Tab');
+    const dopoTab = await fuocoOra(page);
+    note.push(`Tab dopo: ${dopoTab}`);
+    if (!/^Partita libera, riprendi/.test(dopoTab)) errori.push(`P home: il Tab dopo la chiusura va su «${dopoTab}», non sul pulsante dopo «Nuova»`);
+    await contesto.close();
+  }
+
+  // «Riprova» nel menu del livello, Escape. Il menu si chiude con lo stesso tocco, quindi
+  // «Riprova» non c'e' piu': il fuoco va al pulsante che riapre il menu.
+  {
+    const { contesto, page } = await prepara();
+    await apriLivello1DallaMappa(page);
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Riprova$/ }).click();
+    await page.waitForTimeout(400);
+    note.push(`Riprova Esc: ${await chiudiE(page, 'Riprova', 'Escape', /^Menu$/)}`);
+    await contesto.close();
+  }
+
+  // «Gioca» sul livello 1 con il livello 2 a meta', velo.
+  {
+    const { contesto, page } = await prepara();
+    await page.evaluate(() => localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: { 1: { mosse: 10, punteggio: 100, tentativi: 1 } } })));
+    await page.reload();
+    await page.waitForSelector('.pl-home__menu');
+    await page.getByRole('button', { name: /Mappa dei livelli/ }).click();
+    await page.waitForSelector('.pl-tappe');
+    await page.locator('.pl-tappa').nth(1).click();
+    await page.waitForTimeout(300);
+    if (await dove(page) === 'obiettivo') await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.goBack();
+    await page.waitForSelector('.pl-tappe');
+    await page.locator('.pl-tappa').first().click();
+    await page.waitForSelector('.pl-apertura');
+    await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForTimeout(400);
+    note.push(`Gioca velo: ${await chiudiE(page, 'Gioca', 'velo', /^Gioca$/)}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'P chiusa la domanda senza scegliere, dove va il fuoco', primo: '-', daZero: false, nota: note.join('; ') });
 }
 
 await browser.close();

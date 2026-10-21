@@ -433,6 +433,8 @@ export function App() {
         etichettaContinua: t('conferma.riprovaSi'),
         onTorna: () => setConferma(null),
         onContinua: () => { setConferma(null); quadri.riprova(); },
+        // Il menu si e' chiuso con «Riprova»: il fuoco torna al pulsante che lo riapre.
+        ripiego: () => document.querySelector('.pl-hud__menu'),
       });
       return;
     }
@@ -527,6 +529,7 @@ export function App() {
       onTorna={conferma.onTorna}
       onContinua={conferma.onContinua}
       onAnnulla={chiudiConferma}
+      ripiego={conferma.ripiego}
     />
   ) : null;
 
