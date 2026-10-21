@@ -7,6 +7,23 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.21] — 21 ottobre 2026
+
+### Corretto
+
+- **La card della partita libera risponde anche negli angoli** (PO-025, collaudo 1.21.20
+  O1): un tocco negli angoli della card non faceva niente, perché il bersaglio di
+  «Riprendi ›» era arrotondato come la pillola e non come la card. Ora ogni punto della
+  card va a «Nuova» o a «Riprendi ›»; a schermo non cambia niente. Interruttore
+  `RIPRENDI_ANGOLI_DELLA_CARD`; controllo in `npm run home-spiegazione` (pixel morti 0).
+- **Il menu della partita si usa come le domande** (PO-024, collaudo 1.21.20 O2): Escape
+  lo chiude; all'apertura il fuoco entra su «Torna alla partita»; chiuso senza scegliere
+  il fuoco torna al pulsante «Menu». Per i lettori di schermo il menu è una finestra
+  («Menu»). Con una domanda aperta sopra il menu, Escape chiude solo la domanda.
+  Interruttore `MENU_COME_LE_DOMANDE`; controllo caso Q di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.20] — 21 ottobre 2026
 
 ### Corretto
