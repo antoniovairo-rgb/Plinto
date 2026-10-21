@@ -7,6 +7,25 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.22] — 21 ottobre 2026
+
+### Corretto
+
+- **Con il menu o una domanda aperti, la tastiera non muove più la partita sotto**
+  (PO-026, collaudo 1.21.21 D1): con un pezzo scelto, Invio e Spazio posavano il pezzo
+  sotto il velo invece di premere il pulsante, ed Escape lasciava il pezzo e chiudeva
+  anche il menu con un tasto solo. Succedeva anche con le domande sopra la partita
+  («Riprova»). Ora, finché la finestra è aperta, Invio e Spazio premono il pulsante e
+  Escape chiude solo la finestra; il pezzo resta scelto. A menu chiuso la tastiera
+  funziona come prima. Interruttore `TASTI_TACCIONO_SOTTO_IL_VELO`.
+- **«Riprendi la partita» riporta il fuoco su «Menu»** (PO-026, collaudo 1.21.21 O1):
+  dalla domanda aperta con «Nuova partita» nel menu della libera, e da «Torna alla
+  partita» nella domanda di «Riprova», il fuoco finiva fuori dalla pagina. Ora torna su
+  «Menu», come «Torna alla partita» del menu. Interruttore `RIPRENDI_TORNA_A_MENU`.
+  Controllo: caso R di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.21] — 21 ottobre 2026
 
 ### Corretto
