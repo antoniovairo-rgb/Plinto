@@ -1890,6 +1890,11 @@ button {
   outline: 2px solid var(--pl-brand);
   outline-offset: 2px;
 }
+/* PO-025 (collaudo 1.21.20, O1): `inherit` qui sopra da' al bersaglio di «Riprendi ›» il
+   raggio della pillola (999px); la card ne ha 14. Gli angoli restavano alla card, che non
+   risponde: 364-744 pixel morti. Con il raggio della card il bersaglio la copre tutta.
+   Interruttore RIPRENDI_ANGOLI_DELLA_CARD in `src/ui/schermate/Home.jsx`. */
+.pl-sfida-avvio--riprendi-angoli .pl-sfida-avvio__riprendi::after { border-radius: var(--pl-radius-md); }
 .pl-sfida-avvio__nuova:hover { background: rgba(255, 255, 255, 0.12); }
 .pl-sfida-avvio__nuova:active { transform: scale(0.95); }
 

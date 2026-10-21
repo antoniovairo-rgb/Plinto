@@ -29,6 +29,10 @@
  *   P  chiusa la domanda senza scegliere (Escape o tocco sul velo) il fuoco torna al
  *      pulsante che l'ha aperta: «Nuova» della home (tastiera), «Riprova» nel menu del
  *      livello, «Gioca» sull'obiettivo (collaudo 1.21.18, D1; PO-023).
+ *   Q  il menu della partita come le domande: Escape lo chiude, all'apertura il fuoco entra
+ *      su «Torna alla partita», chiuso senza scegliere (Escape, velo, «Torna alla
+ *      partita», Indietro) il fuoco torna a «Menu»; con una domanda sopra il menu, Escape
+ *      chiude solo la domanda (collaudo 1.21.20, O2; PO-024, MENU_COME_LE_DOMANDE).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -345,7 +349,9 @@ function registra(caso, { primo, prima, dopo, nota = '' }) {
 // ---------- J, K, L: le tre strade che perdevano la partita con un tocco ----------
 /** La domanda di conferma, se e' a schermo: il testo e il pulsante che ha il fuoco. */
 const domanda = (page) => page.evaluate(() => {
-  const d = document.querySelector('[role="dialog"]');
+  // `.pl-azzera`: le domande. Anche il menu e' una finestra (PO-024), e con la libera a
+  // meta' «Nuova partita» apre la domanda SOPRA il menu ancora aperto.
+  const d = document.querySelector('.pl-azzera[role="dialog"]');
   if (!d) return null;
   return {
     testo: d.innerText.replace(/\s+/g, ' '),
@@ -529,7 +535,7 @@ function fuocoSicuro(caso, d, atteso) {
 // partita», Indietro la chiude senza perdere niente, «Riprendi la partita» riporta dentro
 // quella di prima. Il pulsante che perde si prova una volta (dalla home).
 {
-  const finestra = (page) => page.locator('[role="dialog"]');
+  const finestra = (page) => page.locator('.pl-azzera[role="dialog"]');
   async function liberaAMeta(page) {
     await page.getByRole('button', { name: /^Partita libera/ }).click();
     await page.waitForSelector('.pl-plancia .pl-cella');
@@ -714,7 +720,7 @@ for (const conLibera of [false, true]) {
   await page.waitForTimeout(400);
   if (conLibera) {
     if (!(await domanda(page))) errori.push(`${nome}: manca la domanda`);
-    else await page.locator('[role="dialog"]').getByRole('button', { name: /^Riprendi la partita$/ }).click();
+    else await page.locator('.pl-azzera[role="dialog"]').getByRole('button', { name: /^Riprendi la partita$/ }).click();
     await page.waitForTimeout(400);
   } else {
     for (let i = 0; i < 2; i += 1) await unaMossa(page);
@@ -832,6 +838,93 @@ for (const conLibera of [false, true]) {
     await contesto.close();
   }
   righe.push({ caso: 'P chiusa la domanda senza scegliere, dove va il fuoco', primo: '-', daZero: false, nota: note.join('; ') });
+}
+
+// ---------- Q ----------
+// Il menu della partita come le domande (collaudo 1.21.20, O2; PO-024): Escape non lo
+// chiudeva, all'apertura il fuoco restava su «Menu» dietro il velo, chiuso col velo o con
+// «Torna alla partita» il fuoco finiva su <body>. Aperto sempre con la tastiera (fuoco su
+// «Menu», Invio), come fa chi non usa il dito.
+{
+  const fuocoOra = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    if (!a || a === document.body) return '<body>';
+    const nome = (a.getAttribute('aria-label') || a.textContent || a.tagName).trim().replace(/\s+/g, ' ');
+    return a.closest('.pl-menu') ? `menu: ${nome}` : nome;
+  });
+  const menuAperto = (page) => page.evaluate(() => !!document.querySelector('.pl-menu'));
+  async function apriMenu(page, caso) {
+    await page.locator('.pl-hud__menu').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    if (!(await menuAperto(page))) { errori.push(`Q ${caso}: il menu non si apre, il caso non prova niente`); return false; }
+    const f = await fuocoOra(page);
+    if (f !== 'menu: Torna alla partita') errori.push(`Q ${caso}: aperto il menu il fuoco e' su «${f}», non su «Torna alla partita»`);
+    const ruolo = await page.evaluate(() => {
+      const m = document.querySelector('.pl-menu');
+      return `${m.getAttribute('role')}/${m.getAttribute('aria-modal')}/${m.getAttribute('aria-label')}`;
+    });
+    if (ruolo !== 'dialog/true/Menu') errori.push(`Q ${caso}: il menu non e' una finestra per chi legge lo schermo (${ruolo})`);
+    return true;
+  }
+  async function chiudi(page, caso, come) {
+    if (come === 'Escape') await page.keyboard.press('Escape');
+    else if (come === 'velo') {
+      const ok = await page.evaluate(() => document.elementFromPoint(4, 4)?.classList.contains('pl-velo'));
+      if (!ok) { errori.push(`Q ${caso}: nell'angolo non c'e' il velo`); return ''; }
+      await page.mouse.click(4, 4);
+    } else if (come === 'Torna alla partita') await page.locator('.pl-menu').getByRole('button', { name: /^Torna alla partita$/ }).click();
+    else await page.goBack();
+    await page.waitForTimeout(400);
+    if (await menuAperto(page)) { errori.push(`Q ${caso}: ${come} non chiude il menu`); return ''; }
+    if (await dove(page) !== 'partita') errori.push(`Q ${caso}: ${come} non lascia nella partita (${await dove(page)})`);
+    const f = await fuocoOra(page);
+    if (f !== 'Menu') errori.push(`Q ${caso}, ${come}: il fuoco e' su «${f}», non su «Menu»`);
+    return f;
+  }
+  const note = [];
+
+  // Partita libera a meta': le quattro chiusure senza scelta.
+  {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    for (const come of ['Escape', 'velo', 'Torna alla partita', 'Indietro']) {
+      if (await apriMenu(page, `libera ${come}`)) note.push(`libera ${come}: ${await chiudi(page, 'libera', come)}`);
+    }
+    // Una domanda sopra il menu: Escape chiude la domanda e il menu resta; il secondo
+    // Escape chiude il menu e il fuoco torna a «Menu».
+    if (await apriMenu(page, 'libera, domanda sopra')) {
+      await page.locator('.pl-menu').getByRole('button', { name: /^Nuova partita$/ }).click();
+      await page.waitForTimeout(400);
+      if (!(await domanda(page))) errori.push('Q libera: «Nuova partita» non apre la domanda, il caso non prova niente');
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      const restaMenu = await menuAperto(page);
+      if (await domanda(page)) errori.push('Q libera: Escape non chiude la domanda sopra il menu');
+      if (!restaMenu) errori.push('Q libera: un Escape sulla domanda ha chiuso anche il menu');
+      else note.push(`domanda sopra, poi Esc: ${await chiudi(page, 'libera dopo la domanda', 'Escape')}`);
+    }
+    // Una scelta che cambia schermata: si va alla home, come prima.
+    if (await apriMenu(page, 'libera, scelta')) {
+      await page.locator('.pl-menu').getByRole('button', { name: /^Torna alla home$/ }).click();
+      await page.waitForTimeout(400);
+      if (await dove(page) !== 'home') errori.push(`Q libera: «Torna alla home» porta a «${await dove(page)}»`);
+      note.push(`Torna alla home: ${await dove(page)}, fuoco ${await fuocoOra(page)}`);
+    }
+    await contesto.close();
+  }
+
+  // Livello: l'altro menu, Escape.
+  {
+    const { contesto, page } = await prepara();
+    await apriLivello1DallaMappa(page);
+    await unaMossa(page);
+    if (await apriMenu(page, 'livello')) note.push(`livello Escape: ${await chiudi(page, 'livello', 'Escape')}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'Q il menu della partita come le domande', primo: '-', daZero: false, nota: note.join('; ') });
 }
 
 await browser.close();

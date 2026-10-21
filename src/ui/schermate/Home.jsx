@@ -124,6 +124,16 @@ const NOME_SFIDA_CON_GIOCA = true;
  */
 const NUOVA_FINO_AL_BORDO = true;
 
+/*
+ * PO-025 (collaudo 1.21.20, O1): la superficie di «Riprendi ›» (::after) ereditava il
+ * raggio della pillola, 999px, dentro una card a 14px: uno stadio dentro un rettangolo
+ * arrotondato. Agli angoli restava la card, un <div> senza gestore: 364-744 pixel morti
+ * al tocco (misurati da `npm run home-spiegazione`). Acceso, la superficie prende il
+ * raggio della card e ogni pixel va a «Nuova» o a «Riprendi ›». Il ::after non ha fondo:
+ * a schermo non cambia niente. Spento: `npm run home-spiegazione` e' rosso.
+ */
+const RIPRENDI_ANGOLI_DELLA_CARD = true;
+
 /**
  * La home.
  *
@@ -207,7 +217,7 @@ export function SchermoHome({
         {cePartitaSalvata && NOME_FISSO_E_STATO && NUOVA_DENTRO_LA_CARD ? (
           // PO-020: un contenitore, non un pulsante. Il nome, la spiegazione e il fondo
           // sono gli stessi della card di sempre; i due pulsanti stanno sulla riga del nome.
-          <div className={`pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera pl-sfida-avvio--doppia${NUOVA_FINO_AL_BORDO ? ' pl-sfida-avvio--nuova-al-bordo' : ''}`}>
+          <div className={`pl-btn pl-btn--largo pl-sfida-avvio pl-sfida-avvio--libera pl-sfida-avvio--doppia${NUOVA_FINO_AL_BORDO ? ' pl-sfida-avvio--nuova-al-bordo' : ''}${RIPRENDI_ANGOLI_DELLA_CARD ? ' pl-sfida-avvio--riprendi-angoli' : ''}`}>
             <span aria-hidden="true">{etichettaLibera}</span>
             <span className="pl-sfida-avvio__comandi">
               <button type="button" className="pl-sfida-avvio__nuova" onClick={onGioca} aria-label={t('home.nuovaLibera')}>
