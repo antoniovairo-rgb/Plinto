@@ -21,5 +21,5 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.20 | 2026-10-21 | Accessibilità: fuoco dopo una domanda chiusa, colonna di «Nuova» fino al bordo, nome della sfida da fare | PO-023 | pubblicata (`b5fce01`); collaudata (nessun difetto nuovo) |
 | 1.21.21 | 2026-10-21 | Menu della partita come le domande; angoli della card libera che rispondono al tocco | PO-024, PO-025 | pubblicata (`d4cfba4`); collaudata (D1 già presente → PO-026) |
 | 1.21.22 | 2026-10-21 | La tastiera tace sotto il menu e le domande; fuoco su «Menu» dopo «Riprendi la partita» | PO-026 | pubblicata (`2d9e4ca`); collaudata (difetti già presenti → PO-028, PO-029, PO-030) |
-| 1.21.23 | 2026-10-21 | Invio preme i pulsanti fuori dal vassoio; tastiera muta e fuoco nel pannello degli attrezzi; scelta azzerata cambiando partita | PO-027, PO-028, PO-029 | pubblicata (`3f9798f`); collaudo in corso |
+| 1.21.23 | 2026-10-21 | Invio preme i pulsanti fuori dal vassoio; tastiera muta e fuoco nel pannello degli attrezzi; scelta azzerata cambiando partita | PO-027, PO-028, PO-029 | pubblicata (`3f9798f`); collaudata (difetto già presente → PO-032) |
 | 1.22.0 | — | La Torre: livelli 101-200 e grafica nuova del sito | PO-002 | da pianificare |
