@@ -168,7 +168,13 @@ Lessico: «casella» / «square», come vuole `tests/lessico.test.js`; `npm test
 
 - `npm run build`: riuscita.
 - `npm test`: 45 file, 650 prove, tutte verdi.
-- `npm run verifica -- --veloce`: GATE_DA_SCRIVERE
+- `npm run verifica -- --veloce`: la corsia veloce è stata **negata** («non risulta nessun giro
+  completo passato su questa macchina»), quindi è andato il giro completo: **31 su 33**, 5182 s,
+  «tutti e cento i livelli, giocati nell'app» verde. Rossi i due noti dei container delle
+  figlie (`docs/TESTING.md`), con gli stessi numeri: «livelli nel browser» (`e2e-quadri`,
+  «FINE LIVELLO (vittoria): a 320x700 bisogna scorrere di 2 px») e «Play Store» (`recensione`,
+  «a 360x640 l'invito finisce 10px sotto la barra dei pulsanti»). Nessun altro rosso. Il
+  verdetto che conta è quello della CI, che su questo ramo non ho.
 
 ## 7. Scelte aperte
 
@@ -184,7 +190,12 @@ Lessico: «casella» / «square», come vuole `tests/lessico.test.js`; `npm test
 3. **«Riprendi» dalla mensola con un pezzo già scelto e un posto libero**: non chiede un pezzo,
    quindi la scelta resta (come misurato nel collaudo 1.21.23, prova M). Con il fuoco portato
    sul pezzo ripreso, Invio posa il pezzo scelto prima (è la regola PO-027: fuoco sul vassoio
-   e pezzo scelto, Invio posa). RIPRENDI_DA_MISURARE
+   e pezzo scelto, Invio posa). **Misurato** (sonda sulla build di produzione, livello 13): pezzo
+   1 sulla mensola, pezzo scelto da tastiera, 4 frecce su, Invio sulla mensola → mano 3, pezzo
+   ancora scelto, cursore acceso, fuoco «Pezzo 1»; Invio → **MOSSE 18 → 17**, caselle 8 → 11.
+   Non nasce da `FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA`: prima il fuoco andava su `<body>`, dove
+   Invio posa lo stesso (regola PO-027); ma ora chi vede il fuoco sul pezzo ripreso si aspetta
+   di sceglierlo.
    - A **(consigliata)**: anche «riprendi» azzera la scelta, se la scelta era da tastiera.
    - B: lasciare com'è.
 4. **Il ritentativo di `unaMossa`** (§ 1): causa non trovata. A **(consigliata)**: tenerlo,
