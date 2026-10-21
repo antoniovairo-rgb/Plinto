@@ -93,7 +93,7 @@ Schermate: `collaudo-1.21.22/menu-pezzo-scelto-it-390x844.png`,
 | … poi Tab | fuoco sul primo pezzo («Pezzo 1, … caselle» / «Piece 1, … squares») |
 | … poi Escape | il pezzo viene lasciato |
 | Livello, domanda di «Riprova», Invio o Spazio su «Torna alla partita» | fuoco su «Menu» (vedi 2.1) |
-| Sfida, domanda sopra il menu, Invio su «Riprendi la partita» | si va nella libera, fuoco `<body>` (16 su 16 fra 2.1 e le prove a parte). È la scelta aperta 2 di PO-026, lasciata com'era: non è una voce. Vedi però O1 |
+| Sfida, domanda sopra il menu, Invio su «Riprendi la partita» | si va nella libera, fuoco `<body>` (8 su 8 nello script, 5 su 5 nelle prove a parte di O1). È la scelta aperta 2 di PO-026, lasciata com'era: non è una voce. Vedi però O1 |
 
 ### 2.3 Partita con la sola tastiera
 
@@ -170,7 +170,7 @@ l'altro.
 
 ### O1 — Dalla sfida a «Riprendi la partita»: nella libera c'è un pezzo già scelto
 
-**Misura** (390x844 it, prove a parte, 4 su 4 sul sito, 2 su 2 sulla build 1.21.21): libera
+**Misura** (390x844 it, prove a parte, 5 su 5 sul sito, 2 su 2 sulla build 1.21.21): libera
 con due mosse, poi sfida con una mossa, pezzo 3 della sfida scelto (col tocco o con la
 tastiera), menu → «Nuova partita» → domanda → «Riprendi la partita» (clic o Invio). Si apre la
 libera (griglia identica a prima: caselle 32.33.34.39.40.41.43.52), ma il **posto 3 del vassoio
@@ -178,7 +178,7 @@ libera (griglia identica a prima: caselle 32.33.34.39.40.41.43.52), ma il **post
 sfida era da 1 casella, nella libera da 4), che il giocatore non ha mai scelto in questa
 partita. Se il pezzo della sfida era stato scelto con la tastiera, nella libera compare anche
 il cursore al centro con l'anteprima del nuovo pezzo (6 caselle). Il fuoco è su `<body>`. Un
-Invio successivo lascia il pezzo (lì non entrava). Schermata:
+Invio successivo lascia il pezzo senza posarlo (caselle occupate invariate, 5 su 5). Schermata:
 `collaudo-1.21.22/libera-pezzo-ereditato-it-390x844.png`.
 
 Uguale nella 1.21.21 con il clic; con Invio, nella 1.21.21 il pezzo veniva posato nella
