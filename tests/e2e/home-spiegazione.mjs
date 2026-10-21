@@ -31,6 +31,8 @@
  *      va tutta a «Nuova» e non esce dalla card (O1, NUOVA_FINO_AL_BORDO); con la sfida
  *      di oggi da fare il nome accessibile e' «Sfida del giorno, gioca la sfida di oggi»
  *      (O2, NOME_SFIDA_CON_GIOCA). Spento uno dei due, il controllo e' rosso.
+ *   8. PO-025 (collaudo 1.21.20, O1): con la libera in corso ogni pixel della card va a
+ *      «Nuova» o a «Riprendi ›», angoli compresi: 0 pixel morti (RIPRENDI_ANGOLI_DELLA_CARD).
  *
  * (Fino a PO-010 il punto 5 controllava «Riprendi la sfida · In corso», F2 di PO-004:
  * quella scritta non c'e' piu'.)
@@ -240,13 +242,28 @@ function misura() {
         if (document.elementFromPoint(cx, y)?.closest('button') === dn) colonna.fuori += 1;
       }
     }
+    // PO-025 (collaudo 1.21.20, O1): ogni pixel della card va a «Nuova» o a «Riprendi ›».
+    // Il ::after di «Riprendi» ereditava il raggio della pillola (999px) dentro una card
+    // a 14px: gli angoli restavano alla card, un <div> senza gestore. Un punto e' della
+    // card se elementFromPoint cade dentro di essa: fuori dalla curva del suo angolo il
+    // browser restituisce gia' chi sta sotto, e quello non conta.
+    const tutta = { pixel: 0, morti: [] };
+    for (let py = Math.floor(c.top); py < Math.ceil(c.bottom); py += 1) {
+      for (let px = Math.floor(c.left); px < Math.ceil(c.right); px += 1) {
+        const e = document.elementFromPoint(px + 0.5, py + 0.5);
+        if (!e || !cardLibera.contains(e)) continue;
+        tutta.pixel += 1;
+        const b = e.closest('button');
+        if (b !== dn && b !== rip) tutta.morti.push(`${px - Math.floor(c.left)},${py - Math.floor(c.top)}`);
+      }
+    }
     // Il tocco sul nome della card deve arrivare a «Riprendi ›».
     const nome = cardLibera.querySelector('span').getBoundingClientRect();
     const sulNome = document.elementFromPoint(nome.left + 4, nome.top + nome.height / 2)?.closest('button');
     const stile = getComputedStyle(dn);
     return {
       testo: dn.textContent, nome: dn.getAttribute('aria-label'), altezza: Math.round(r.height), bersaglio,
-      colonna, cardAlta: Math.round(c.height),
+      colonna, cardAlta: Math.round(c.height), tutta,
       dentro: entro(r), riprendiDentro: rr ? entro(rr) : false,
       stessaRiga: rr ? Math.abs((r.top + r.bottom) / 2 - (rr.top + rr.bottom) / 2) <= 1.5 : false,
       sinistra: rr ? r.right <= rr.left : false,
@@ -311,6 +328,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
         azioni: m.azioni, statoLibera: m.libera?.esito, statoSfida: m.sfida?.esito,
         nuova: m.dentroCard ? `${m.dentroCard.altezza}/${m.dentroCard.bersaglio}` : (m.nuova ? `sotto ${m.nuova.altezza}` : '-'),
         colonna: m.dentroCard ? `${m.dentroCard.colonna.punti - m.dentroCard.colonna.altrove.length}/${m.dentroCard.colonna.punti}` : '-',
+        morti: m.dentroCard ? `${m.dentroCard.tutta.morti.length}/${m.dentroCard.tutta.pixel}` : '-',
         libera: m.libera?.altezza, sfida: m.sfida?.altezza, mappa: m.mappa?.altezza,
         righe: [m.libera?.riga?.righe, m.sfida?.riga?.righe].join('+'),
         contrasto: [m.libera?.riga?.contrasto, m.sfida?.riga?.contrasto].join(' / '),
@@ -344,6 +362,7 @@ for (const [lingua, testi] of Object.entries(LINGUE)) {
           if (d.bersaglio < 44) errori.push(`${dove}: il bersaglio di «${d.testo}» e alto ${d.bersaglio}px (minimo 44)`);
           if (d.colonna.altrove.length) errori.push(`${dove}: sotto «${d.testo}» (card alta ${d.cardAlta}) ${d.colonna.altrove.length} punti su ${d.colonna.punti} non vanno a «${d.testo}», per esempio ${d.colonna.altrove.slice(0, 3).join(' ')} (PO-023, O1)`);
           if (d.colonna.fuori) errori.push(`${dove}: il bersaglio di «${d.testo}» esce di ${d.colonna.fuori} punti sotto la card (PO-023, O1)`);
+          if (d.tutta.morti.length) errori.push(`${dove}: ${d.tutta.morti.length} pixel della card su ${d.tutta.pixel} non vanno ne' a «${d.testo}» ne' a «${testi.home.riprendiStato}», per esempio ${d.tutta.morti.slice(0, 3).join(' ')} (PO-025)`);
           if (!d.tattoSulNome) errori.push(`${dove}: un tocco sul nome della card non arriva a «${testi.home.riprendiStato}»`);
         }
       } else {
