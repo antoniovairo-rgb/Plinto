@@ -4,7 +4,7 @@
  */
 import { chromium } from 'playwright';
 const [URL0 = 'http://localhost:4173/', ETICHETTA = 'locale', FOTO] = process.argv.slice(2);
-const FORMATI = [[320, 640], [360, 640], [360, 800], [412, 915], [640, 360], [800, 360], [915, 412], [740, 360], [851, 393], [1024, 600], [960, 600], [1280, 620], [800, 1280], [1280, 800]];
+const FORMATI = process.env.PO017_FORMATI ? JSON.parse(process.env.PO017_FORMATI) : [[320, 640], [360, 640], [360, 800], [412, 915], [640, 360], [800, 360], [915, 412], [740, 360], [851, 393], [1024, 600], [960, 600], [1280, 620], [800, 1280], [1280, 800]];
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 for (const [w, h] of FORMATI) {
   const c = await b.newContext({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true, deviceScaleFactor: 2, locale: 'it-IT' });

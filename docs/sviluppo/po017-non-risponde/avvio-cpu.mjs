@@ -21,6 +21,12 @@ const INIT = () => {
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
 
 async function prova(cpu, formato) {
+  const stato = { fase: 'avvio' };
+  try { return await provaDentro(cpu, formato, stato); }
+  catch (e) { throw new Error(`fase «${stato.fase}»: ${String(e.message).split('\n')[0]}`); }
+}
+
+async function provaDentro(cpu, formato, stato) {
   const contesto = await browser.newContext({
     viewport: { width: formato.w, height: formato.h }, deviceScaleFactor: 3, hasTouch: true, isMobile: true, locale: 'it-IT',
   });
@@ -31,13 +37,18 @@ async function prova(cpu, formato) {
   const cdp = await contesto.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu });
   const fasi = {};
+  let fase = 'avvio';
   const lt = async () => page.evaluate(() => { const v = window.__lt; window.__lt = []; return v; });
   // Il tempo dal tocco alla schermata nuova, misurato fuori dalla pagina.
   const transizione = async (nome, sel, attesa) => {
+    fase = nome; stato.fase = nome;
     const t0 = Date.now();
+    // In orizzontale la home scorre: il bersaglio si porta in vista prima del tocco.
+    await page.locator(sel).first().scrollIntoViewIfNeeded();
     const box = await page.locator(sel).first().boundingBox();
     await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
-    await page.waitForSelector(attesa, { timeout: 30000 });
+    // 'attached': in orizzontale la griglia e' di 28 px e le caselle 0x0 (misura PO-017).
+    await page.waitForSelector(attesa, { timeout: 30000, state: 'attached' });
     fasi[nome] = { ms: Date.now() - t0, longTask: await lt() };
   };
 
@@ -75,7 +86,7 @@ async function prova(cpu, formato) {
     await page.waitForSelector('#root .pl-screen', { timeout: 30000 });
     offline = { ms: Date.now() - t0, schermata: await page.evaluate(() => document.querySelector('#root .pl-screen')?.className) };
     await page.touchscreen.tap(...(await page.locator('.pl-sfida-avvio--libera').boundingBox().then((b) => [b.x + b.width / 2, b.y + b.height / 2])));
-    await page.waitForSelector('.pl-plancia', { timeout: 10000 });
+    await page.waitForSelector('.pl-plancia', { timeout: 10000, state: 'attached' });
     offline.partitaSenzaRete = true;
   } catch (e) { offline = { errore: String(e.message).split('\n')[0] }; }
   await contesto.close();
@@ -83,7 +94,8 @@ async function prova(cpu, formato) {
 }
 
 for (const cpu of [1, 4, 6]) {
-  for (const formato of [{ nome: '360x640', w: 360, h: 640 }, { nome: '640x360', w: 640, h: 360 }]) {
+  const tutti = [{ nome: '360x640', w: 360, h: 640 }, { nome: '640x360', w: 640, h: 360 }];
+  for (const formato of tutti.filter((f) => !process.env.PO017_FORMATO || f.nome === process.env.PO017_FORMATO)) {
     try { console.log(JSON.stringify(await prova(cpu, formato))); }
     catch (e) { console.log(JSON.stringify({ etichetta: ETICHETTA, cpu, formato: formato.nome, errore: String(e.message).split('\n')[0] })); }
   }
