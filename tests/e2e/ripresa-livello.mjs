@@ -39,6 +39,17 @@
  *      PO-026, TASTI_TACCIONO_SOTTO_IL_VELO). «Riprendi la partita» nella domanda sopra il
  *      menu, che lascia la stessa partita, riporta il fuoco su «Menu» (O1,
  *      RIPRENDI_TORNA_A_MENU). A menu chiuso la partita si gioca con la tastiera come prima.
+ *   S  solo tastiera, con un pezzo scelto: Invio e Spazio su «Menu» o sulla pastiglia degli
+ *      attrezzi premono il pulsante e non posano il pezzo; con il fuoco sul pezzo del vassoio
+ *      o su <body> posano come prima (rapporto PO-026, scelta 4; PO-027,
+ *      INVIO_PREME_I_PULSANTI).
+ *   T  con un pezzo scelto e il pannello degli attrezzi aperto, i tasti della partita
+ *      tacciono (Invio, Spazio, frecce, P); il pannello come il menu: fuoco su «Torna alla
+ *      partita» all'apertura, alla pastiglia chiuso senza scelta (collaudo 1.21.22, D1 e O3;
+ *      PO-028, TASTI_TACCIONO_SOTTO_IL_PANNELLO e PANNELLO_COME_IL_MENU).
+ *   U  dalla sfida, menu -> «Nuova partita» -> «Riprendi la partita»: nella libera nessun
+ *      pezzo scelto e nessun cursore (collaudo 1.21.22, O1; PO-029,
+ *      SCELTA_AZZERATA_CAMBIANDO_PARTITA).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -1069,6 +1080,232 @@ for (const conLibera of [false, true]) {
     await contesto.close();
   }
   righe.push({ caso: 'R i tasti della partita sotto il velo', primo: '-', daZero: false, nota: note.join('; ') });
+}
+
+// ---------- S, T, U ----------
+// La tastiera fuori dal vassoio, il pannello degli attrezzi e il cambio di partita
+// (collaudo 1.21.22; PO-027, PO-028, PO-029). Il pezzo si sceglie con la tastiera (fuoco sul
+// pezzo, Invio), cosi' c'e' anche il cursore, che si porta in cima con quattro frecce.
+{
+  const stato = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    let fuoco = '<body>';
+    if (a && a !== document.body) {
+      const nome = (a.getAttribute('aria-label') || a.textContent || a.tagName).trim().replace(/\s+/g, ' ');
+      fuoco = a.closest('.pl-menu') ? `menu: ${nome}`
+        : a.closest('.pl-attrezzi__pannello') ? `pannello: ${nome}`
+          : a.classList.contains('pl-attrezzi__pastiglia') ? 'pastiglia' : nome;
+    }
+    return {
+      scelto: !!document.querySelector('.pl-tray__posto--selezionato'),
+      cursore: !!document.querySelector('.pl-plancia .pl-cella--cursore'),
+      menu: !!document.querySelector('.pl-menu'),
+      pannello: !!document.querySelector('.pl-attrezzi__pannello'),
+      sfida: !!document.querySelector('.pl-modalita--sfida'),
+      fuoco,
+    };
+  });
+  // La firma della partita con le caselle occupate contate dai blocchi (la `firma` di sopra
+  // conta una classe che le caselle non hanno: li' fa tutto il punteggio).
+  const firmaPiena = (page) => page.evaluate(() => {
+    const hud = document.querySelector('.pl-hud')?.innerText.replace(/\s+/g, ' ') ?? '';
+    const ob = document.querySelector('.pl-barra-obiettivo')?.innerText.replace(/\s+/g, ' ') ?? '';
+    const piene = [...document.querySelectorAll('.pl-plancia .pl-cella')]
+      .filter((c) => c.querySelector('.pl-blocco') && !c.className.includes('anteprima')).length;
+    return `${hud} / ${ob} / ${piene} occupate`;
+  });
+  async function scegliDaTastiera(page, posto = 0) {
+    await page.locator('.pl-tray .pl-pezzo-presa').nth(posto).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(150);
+    for (let i = 0; i < 4; i += 1) await page.keyboard.press('ArrowUp');
+    await page.waitForTimeout(150);
+  }
+  async function libera(mosse) {
+    const { contesto, page } = await prepara();
+    await page.getByRole('button', { name: /^Partita libera/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    for (let i = 0; i < mosse; i += 1) await unaMossa(page);
+    await page.waitForTimeout(300);
+    return { contesto, page };
+  }
+  // Il livello 13 con dodici livelli fatti e tre gettoni: la pastiglia c'e'.
+  async function livello13() {
+    const contesto = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
+    const page = await contesto.newPage();
+    page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
+    await page.goto(INDIRIZZO, { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => {
+      window.localStorage.clear();
+      window.localStorage.setItem('plinto:settings', JSON.stringify({ versione: 2, introVista: true, lingua: 'it', animazioni: false }));
+      const v = {};
+      for (let k = 1; k <= 12; k += 1) v[k] = { mosse: 12, punteggio: 300, tentativi: 1 };
+      window.localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: v }));
+      window.localStorage.setItem('plinto:attrezzi', JSON.stringify({ versione: 1, disponibili: 3, riscossi: 2 }));
+    });
+    await page.goto(INDIRIZZO, { waitUntil: 'domcontentloaded' });
+    await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
+    await page.waitForSelector('.pl-tappe');
+    const tappa = page.locator('.pl-tappa').nth(12);
+    await tappa.scrollIntoViewIfNeeded();
+    await tappa.click();
+    await page.waitForTimeout(300);
+    if (await dove(page) === 'obiettivo') await page.getByRole('button', { name: /^Gioca$/ }).click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    await page.waitForTimeout(300);
+    return { contesto, page };
+  }
+  const nome = { Enter: 'Invio', ' ': 'Spazio', ArrowRight: 'freccia destra', p: 'P', Escape: 'Escape' };
+  const note = [];
+
+  // S: Tab vero fino a «Menu» (dal pezzo scelto), poi Invio o Spazio: si apre il menu.
+  for (const tasto of ['Enter', ' ']) {
+    const { contesto, page } = await libera(2);
+    await scegliDaTastiera(page);
+    let tab = 0;
+    while (tab < 30 && !(await page.evaluate(() => document.activeElement?.classList.contains('pl-hud__menu')))) {
+      await page.keyboard.press('Tab');
+      tab += 1;
+    }
+    const prima = await firmaPiena(page);
+    const s0 = await stato(page);
+    const tag = `S «Menu», ${nome[tasto]}`;
+    if (s0.fuoco !== 'Menu' || !s0.scelto) {
+      errori.push(`${tag}: dopo ${tab} Tab il fuoco e' su «${s0.fuoco}», pezzo ${s0.scelto ? '' : 'non '}scelto: il caso non prova niente`);
+      await contesto.close();
+      continue;
+    }
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    const dopo = await firmaPiena(page);
+    if (dopo !== prima) errori.push(`${tag}: il pezzo e' stato posato invece di premere «Menu» ("${prima}" -> "${dopo}")`);
+    if (!s.menu) errori.push(`${tag}: il menu non si apre`);
+    if (!s.scelto) errori.push(`${tag}: il pezzo non e' piu' scelto`);
+    note.push(`${tag}: ${s.menu ? 'menu aperto' : 'MENU CHIUSO'}, ${dopo === prima ? 'partita uguale' : 'PEZZO POSATO'}`);
+    await contesto.close();
+  }
+  // S: la pastiglia degli attrezzi, nel livello: Invio apre il pannello e non spende una mossa.
+  {
+    const { contesto, page } = await livello13();
+    await scegliDaTastiera(page);
+    await page.locator('.pl-attrezzi__pastiglia').focus();
+    const prima = await firmaPiena(page);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    const dopo = await firmaPiena(page);
+    const tag = 'S pastiglia, Invio';
+    if (dopo !== prima) errori.push(`${tag}: il pezzo e' stato posato invece di aprire il pannello ("${prima}" -> "${dopo}")`);
+    if (!s.pannello) errori.push(`${tag}: il pannello non si apre`);
+    note.push(`${tag}: ${s.pannello ? 'pannello aperto' : 'PANNELLO CHIUSO'}, ${dopo === prima ? 'mosse uguali' : 'MOSSA SPESA'}`);
+    await contesto.close();
+  }
+  // S: posare come prima, con il fuoco sul pezzo del vassoio e con il fuoco su <body>.
+  for (const doveFuoco of ['vassoio', 'body']) {
+    const { contesto, page } = await libera(0);
+    await scegliDaTastiera(page);
+    if (doveFuoco === 'body') await page.evaluate(() => document.activeElement?.blur());
+    const prima = await firmaPiena(page);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(500);
+    const dopo = await firmaPiena(page);
+    const s = await stato(page);
+    // La griglia e' vuota e il cursore in cima: il pezzo entra sempre.
+    if (dopo === prima) errori.push(`S posare con il fuoco su ${doveFuoco}: Invio non posa il pezzo`);
+    if (s.menu || s.pannello) errori.push(`S posare con il fuoco su ${doveFuoco}: si e' aperta una finestra`);
+    note.push(`posa con fuoco su ${doveFuoco}: ${dopo !== prima ? 'pezzo posato' : 'NON POSATO'}`);
+    await contesto.close();
+  }
+
+  // T: pannello aperto col clic, pezzo scelto, poi un tasto. Il pezzo resta scelto, il
+  // cursore resta dove era, la partita non cambia.
+  const attesiPannello = {
+    Enter: { pannello: false, fuoco: 'pastiglia' }, // «Torna alla partita»
+    ' ': { pannello: false, fuoco: 'pastiglia' },
+    ArrowRight: { pannello: true, fuoco: 'pannello: Torna alla partita' },
+    p: { pannello: true, fuoco: 'pannello: Torna alla partita' },
+    Escape: { pannello: false, fuoco: 'pastiglia' },
+  };
+  for (const tasto of Object.keys(attesiPannello)) {
+    const { contesto, page } = await livello13();
+    await scegliDaTastiera(page);
+    const cursorePrima = await page.evaluate(() => [...document.querySelectorAll('.pl-plancia .pl-cella')].findIndex((c) => c.className.includes('cursore')));
+    await page.locator('.pl-attrezzi__pastiglia').click();
+    await page.waitForTimeout(300);
+    const s0 = await stato(page);
+    const tag = `T pannello, ${nome[tasto]}`;
+    if (!s0.pannello || !s0.scelto) { errori.push(`${tag}: pannello ${s0.pannello} pezzo ${s0.scelto}: il caso non prova niente`); await contesto.close(); continue; }
+    if (s0.fuoco !== 'pannello: Torna alla partita') errori.push(`T pannello aperto: il fuoco e' su «${s0.fuoco}», non su «Torna alla partita»`);
+    const prima = await firmaPiena(page);
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    const dopo = await firmaPiena(page);
+    const cursoreDopo = await page.evaluate(() => [...document.querySelectorAll('.pl-plancia .pl-cella')].findIndex((c) => c.className.includes('cursore')));
+    const atteso = attesiPannello[tasto];
+    if (!s.scelto) errori.push(`${tag}: il tasto e' arrivato alla partita sotto il pannello, il pezzo non e' piu' scelto`);
+    if (dopo !== prima) errori.push(`${tag}: la partita e' cambiata sotto il pannello ("${prima}" -> "${dopo}")`);
+    if (cursoreDopo !== cursorePrima) errori.push(`${tag}: il cursore si e' mosso sotto il pannello (${cursorePrima} -> ${cursoreDopo})`);
+    if (s.pannello !== atteso.pannello) errori.push(`${tag}: pannello ${s.pannello ? 'aperto' : 'chiuso'}, atteso ${atteso.pannello ? 'aperto' : 'chiuso'}`);
+    if (s.fuoco !== atteso.fuoco) errori.push(`${tag}: il fuoco e' su «${s.fuoco}», non su «${atteso.fuoco}»`);
+    note.push(`${tag}: ${s.scelto ? 'pezzo scelto' : 'PEZZO LASCIATO'}, fuoco ${s.fuoco}`);
+    await contesto.close();
+  }
+  // T: senza pezzo, aperto con la tastiera; chiuso col velo il fuoco torna alla pastiglia;
+  // dopo una scelta (gessetto) il fuoco non torna alla pastiglia, come prima.
+  for (const come of ['velo', 'gessetto']) {
+    const { contesto, page } = await livello13();
+    await page.locator('.pl-attrezzi__pastiglia').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    const s0 = await stato(page);
+    if (s0.fuoco !== 'pannello: Torna alla partita') errori.push(`T aperto con Invio: il fuoco e' su «${s0.fuoco}», non su «Torna alla partita»`);
+    if (come === 'velo') await page.mouse.click(5, 5);
+    else await page.locator('.pl-attrezzi__pannello').getByRole('button', { name: /gessetto/i }).click();
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    if (s.pannello) errori.push(`T ${come}: il pannello resta aperto`);
+    if (come === 'velo' && s.fuoco !== 'pastiglia') errori.push(`T velo: il fuoco e' su «${s.fuoco}», non sulla pastiglia`);
+    if (come === 'gessetto' && s.fuoco === 'pastiglia') errori.push('T gessetto: dopo una scelta il fuoco e\' andato sulla pastiglia');
+    note.push(`T ${come}: fuoco ${s.fuoco}`);
+    await contesto.close();
+  }
+
+  // U: libera a meta', sfida, un pezzo scelto (col clic e con la tastiera), menu -> «Nuova
+  // partita» -> «Riprendi la partita». Nella libera niente pezzo scelto e niente cursore.
+  for (const via of ['clic', 'tastiera']) {
+    const { contesto, page } = await libera(2);
+    await page.locator('.pl-hud__menu').click();
+    await page.getByRole('button', { name: /^Torna alla home$/ }).click();
+    await page.waitForSelector('.pl-home__menu');
+    await page.locator('.pl-sfida-avvio--sfida').click();
+    await page.waitForSelector('.pl-plancia .pl-cella');
+    await unaMossa(page);
+    if (via === 'clic') await page.locator('.pl-tray .pl-pezzo-presa').last().click();
+    else await scegliDaTastiera(page, 1);
+    await page.waitForTimeout(200);
+    const s0 = await stato(page);
+    const tag = `U sfida -> libera (${via})`;
+    if (!s0.sfida || !s0.scelto || (via === 'tastiera' && !s0.cursore)) {
+      errori.push(`${tag}: prima della prova sfida ${s0.sfida}, pezzo ${s0.scelto}, cursore ${s0.cursore}: il caso non prova niente`);
+      await contesto.close();
+      continue;
+    }
+    await page.locator('.pl-hud__menu').click();
+    await page.locator('.pl-menu').getByRole('button', { name: /^Nuova partita$/ }).click();
+    await page.waitForTimeout(300);
+    if (!(await domanda(page))) { errori.push(`${tag}: manca la domanda`); await contesto.close(); continue; }
+    await page.locator('.pl-azzera[role="dialog"]').getByRole('button', { name: /^Riprendi la partita$/ }).click();
+    await page.waitForTimeout(500);
+    const s = await stato(page);
+    if (s.sfida) errori.push(`${tag}: si e' ancora nella sfida`);
+    if (s.scelto) errori.push(`${tag}: nella libera c'e' un pezzo scelto che il giocatore non ha scelto`);
+    if (s.cursore) errori.push(`${tag}: nella libera c'e' il cursore della sfida`);
+    note.push(`${tag}: ${s.scelto ? 'PEZZO SCELTO' : 'nessun pezzo scelto'}, ${s.cursore ? 'CURSORE' : 'nessun cursore'}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'S, T, U tastiera fuori dal vassoio, pannello, cambio di partita', primo: '-', daZero: false, nota: note.join('; ') });
 }
 
 await browser.close();
