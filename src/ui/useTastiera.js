@@ -14,6 +14,8 @@ import { GRID_SIZE } from '../config/rules.js';
  *   Invio          appoggia il pezzo dove sei
  *   Esc            annulla la selezione
  *
+ * Col piccone (scavo) le frecce muovono il cursore e Invio o Spazio svuotano la casella.
+ *
  * Il cursore parte dal centro della griglia e non dall'angolo: e' il punto da cui si
  * raggiunge qualunque casella nel minor numero di pressioni.
  */
@@ -33,17 +35,27 @@ const CENTRO = { row: 4, col: 4 };
  */
 export const INVIO_PREME_I_PULSANTI = true;
 
+const COMANDI = 'button, a[href], input, select, textarea, summary, [role="button"]';
+
 /** Il fuoco e' su un comando che non e' un pezzo del vassoio ne' la griglia? */
 function suUnComandoFuori(elemento) {
   if (!elemento || typeof elemento.closest !== 'function') return false;
-  const comando = elemento.closest('button, a[href], input, select, textarea, summary, [role="button"]');
+  const comando = elemento.closest(COMANDI);
   return !!comando && !comando.closest('.pl-tray, .pl-plancia');
+}
+
+/** Il fuoco e' su un comando qualunque, pezzi del vassoio compresi? */
+function suUnComando(elemento) {
+  return !!elemento && typeof elemento.closest === 'function' && !!elemento.closest(COMANDI);
 }
 
 export function useTastiera({
   attivo, selezionato, onPosiziona, onAnnulla, mano, conTastiera = false,
   // Vero quando Escape e' di qualcun altro (l'attesa di un attrezzo): qui non lascia il pezzo.
   escapeAltrove = false,
+  // Lo scavo del piccone: le frecce muovono il cursore anche senza un pezzo, Invio e Spazio
+  // chiamano `onScava` sulla casella sotto il cursore invece di posare.
+  scavo = false, scavoDaTastiera = false, onScava = null,
 }) {
   const [cursore, setCursore] = useState(null);
 
@@ -62,9 +74,15 @@ export function useTastiera({
    * centro quando non c'e'.
    */
   useEffect(() => {
+    // Nello scavo il cursore e' del piccone: compare subito se il piccone e' stato scelto
+    // dalla tastiera, col tocco solo alla prima freccia, come per i pezzi.
+    if (scavo) {
+      if (scavoDaTastiera) setCursore((prec) => prec ?? { ...CENTRO });
+      return;
+    }
     if (selezionato === null) setCursore(null);
     else if (conTastiera) setCursore((prec) => prec ?? { ...CENTRO });
-  }, [selezionato, conTastiera]);
+  }, [selezionato, conTastiera, scavo, scavoDaTastiera]);
 
   const muovi = useCallback((dRiga, dColonna) => {
     setCursore((prec) => {
@@ -88,9 +106,9 @@ export function useTastiera({
         return;
       }
 
-      // Le frecce servono solo quando un pezzo e' in mano: altrimenti la pagina
-      // deve restare navigabile come qualunque altra.
-      if (selezionato === null) return;
+      // Le frecce servono solo quando un pezzo e' in mano (o il piccone): altrimenti la
+      // pagina deve restare navigabile come qualunque altra.
+      if (selezionato === null && !scavo) return;
 
       const passi = {
         ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
@@ -100,6 +118,17 @@ export function useTastiera({
       if (passo) {
         e.preventDefault();
         muovi(passo[0], passo[1]);
+        return;
+      }
+
+      if ((e.key === 'Enter' || e.key === ' ') && scavo) {
+        // Nello scavo ogni pulsante tiene il suo tasto, anche i pezzi del vassoio (col tocco
+        // si possono scegliere anche li'): si scava solo dalla griglia o da <body>.
+        if (suUnComando(e.target)) return;
+        e.preventDefault();
+        // Senza cursore non si scava alla cieca: il primo Invio lo fa comparire al centro.
+        if (!cursore) setCursore({ ...CENTRO });
+        else onScava?.(cursore.row, cursore.col);
         return;
       }
 
@@ -116,7 +145,7 @@ export function useTastiera({
 
     window.addEventListener('keydown', premuto);
     return () => window.removeEventListener('keydown', premuto);
-  }, [attivo, selezionato, cursore, muovi, onPosiziona, onAnnulla, mano, escapeAltrove]);
+  }, [attivo, selezionato, cursore, muovi, onPosiziona, onAnnulla, mano, escapeAltrove, scavo, onScava]);
 
   return { cursore, muovi };
 }

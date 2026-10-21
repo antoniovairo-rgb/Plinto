@@ -54,6 +54,9 @@
  *      lascia il pezzo, Invio sul vassoio fa l'attrezzo e non posa; Escape nell'attesa come
  *      «Lascia stare»; dopo la mensola il fuoco va sul vassoio (collaudo 1.21.23, D1, O1, O2;
  *      PO-032).
+ *   X  il piccone con la tastiera: nello scavo le frecce muovono il cursore, Invio e Spazio
+ *      svuotano la casella sotto il cursore; col tocco come prima (collaudo 1.21.22, O2;
+ *      PO-030).
  *   V  la firma vede una griglia diversa con lo stesso punteggio: si cambia solo la griglia
  *      salvata e si ricarica (PO-031, la firma contava una classe che non esiste).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
@@ -1543,6 +1546,109 @@ for (const conLibera of [false, true]) {
     await contesto.close();
   }
   righe.push({ caso: 'W mensola, carriola e scambio con la tastiera', primo: '-', daZero: false, nota: noteW.join('; ') });
+
+  // X: il piccone con la tastiera (collaudo 1.21.22, O2; PO-030). Pannello e «Il piccone» con
+  // Invio: il cursore compare al centro della griglia, le frecce lo portano sulla casella
+  // occupata piu' vicina, Invio (o Spazio) la svuota e spende un gettone (SCAVO_CON_LA_TASTIERA).
+  // Invio su una casella libera non spende niente e resta nello scavo. Col tocco come prima.
+  const cursoreX = (page) => page.evaluate(() => {
+    const c = document.querySelector('.pl-plancia .pl-cella--cursore');
+    return c ? { r: Number(c.dataset.riga), c: Number(c.dataset.colonna) } : null;
+  });
+  const occupataPiuVicina = (page, da) => page.evaluate(({ r0, c0 }) => {
+    let meglio = null;
+    document.querySelectorAll('.pl-plancia .pl-cella').forEach((cella) => {
+      if (!/, (occupata|filled)$/.test(cella.getAttribute('aria-label') ?? '')) return;
+      const r = Number(cella.dataset.riga); const c = Number(cella.dataset.colonna);
+      const d = Math.abs(r - r0) + Math.abs(c - c0);
+      if (!meglio || d < meglio.d) meglio = { r, c, d };
+    });
+    return meglio;
+  }, { r0: da.r, c0: da.c });
+  const liberaPiuVicina = (page, da) => page.evaluate(({ r0, c0 }) => {
+    let meglio = null;
+    document.querySelectorAll('.pl-plancia .pl-cella').forEach((cella) => {
+      if (!/, (libera|empty)$/.test(cella.getAttribute('aria-label') ?? '')) return;
+      const r = Number(cella.dataset.riga); const c = Number(cella.dataset.colonna);
+      const d = Math.abs(r - r0) + Math.abs(c - c0);
+      if (!meglio || d < meglio.d) meglio = { r, c, d };
+    });
+    return meglio;
+  }, { r0: da.r, c0: da.c });
+  async function portaCursore(page, da, a) {
+    for (let i = 0; i < Math.abs(a.r - da.r); i += 1) await page.keyboard.press(a.r > da.r ? 'ArrowDown' : 'ArrowUp');
+    for (let i = 0; i < Math.abs(a.c - da.c); i += 1) await page.keyboard.press(a.c > da.c ? 'ArrowRight' : 'ArrowLeft');
+    await page.waitForTimeout(150);
+  }
+  const noteX = [];
+  for (const tasto of ['Enter', ' ']) {
+    const { contesto, page } = await livello13();
+    const g0 = await gettoni(page);
+    await attrezzoDaTastiera(page, 'Il piccone');
+    const tag = `X piccone, ${nome[tasto]}`;
+    const s0 = await statoW(page);
+    if (!s0.invito?.startsWith('Quale casella svuoto?')) { errori.push(`${tag}: manca «Quale casella svuoto?», il caso non prova niente`); await contesto.close(); continue; }
+    const c0 = await cursoreX(page);
+    if (!c0) errori.push(`${tag}: entrati nello scavo dalla tastiera, sulla griglia non c'e' il cursore`);
+    const da = c0 ?? { r: 4, c: 4 };
+    // Prima una casella libera: Invio non spende niente e lo scavo resta.
+    const libera = await liberaPiuVicina(page, da);
+    await portaCursore(page, da, libera);
+    const c1 = await cursoreX(page);
+    if (!c1 || c1.r !== libera.r || c1.c !== libera.c) errori.push(`${tag}: le frecce non portano il cursore (atteso ${libera.r},${libera.c}, e' ${c1 ? `${c1.r},${c1.c}` : 'assente'})`);
+    const primaL = await occupate(page);
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(300);
+    const sL = await statoW(page);
+    if ((await occupate(page)) !== primaL) errori.push(`${tag}: su una casella libera la griglia e' cambiata`);
+    if (!sL.invito) errori.push(`${tag}: su una casella libera lo scavo si e' chiuso`);
+    // Poi la casella occupata piu' vicina.
+    const daL = c1 ?? libera;
+    const bersaglio = await occupataPiuVicina(page, daL);
+    await portaCursore(page, daL, bersaglio);
+    const c2 = await cursoreX(page);
+    const prima = await occupate(page);
+    const mossePrima = (await firma(page)).match(/MOSSE (\d+)/)?.[1];
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(400);
+    const s = await statoW(page);
+    const dopo = await occupate(page);
+    const mosseDopo = (await firma(page)).match(/MOSSE (\d+)/)?.[1];
+    const g = await gettoni(page);
+    if (dopo !== prima - 1) errori.push(`${tag} su ${bersaglio.r + 1},${bersaglio.c + 1} (cursore ${c2 ? `${c2.r + 1},${c2.c + 1}` : 'assente'}): caselle occupate ${prima} -> ${dopo}, attese ${prima - 1}`);
+    if (s.invito) errori.push(`${tag}: dopo lo scavo la domanda resta («${s.invito}»)`);
+    if (g !== null && g !== g0 - 1) errori.push(`${tag}: gettoni ${g0} -> ${g}, atteso ${g0 - 1}`);
+    if (mosseDopo !== mossePrima) errori.push(`${tag}: lo scavo ha speso una mossa (${mossePrima} -> ${mosseDopo})`);
+    if (s.cursore) errori.push(`${tag}: dopo lo scavo il cursore resta sulla griglia`);
+    noteX.push(`${tag}: occupate ${prima} -> ${dopo}, gettoni ${g0} -> ${g}, cursore all'ingresso ${c0 ? 'si' : 'NO'}`);
+    await contesto.close();
+  }
+  // X: col tocco come prima. Pannello e piccone col clic: nessun cursore; tocco su una casella
+  // occupata, svuotata.
+  {
+    const { contesto, page } = await livello13();
+    const g0 = await gettoni(page);
+    await page.locator('.pl-attrezzi__pastiglia').click();
+    await page.waitForTimeout(300);
+    await page.locator('.pl-attrezzi__pannello').getByRole('button', { name: /Il piccone/ }).click();
+    await page.waitForTimeout(300);
+    const c0 = await cursoreX(page);
+    const bersaglio = await occupataPiuVicina(page, { r: 4, c: 4 });
+    const prima = await occupate(page);
+    await page.locator(`.pl-plancia .pl-cella[data-riga="${bersaglio.r}"][data-colonna="${bersaglio.c}"]`).click();
+    await page.waitForTimeout(400);
+    const dopo = await occupate(page);
+    const s = await statoW(page);
+    const g = await gettoni(page);
+    const tag = 'X piccone col tocco';
+    if (c0) errori.push(`${tag}: scelto col clic, sulla griglia compare il cursore`);
+    if (dopo !== prima - 1) errori.push(`${tag}: caselle occupate ${prima} -> ${dopo}, attese ${prima - 1}`);
+    if (s.invito) errori.push(`${tag}: dopo lo scavo la domanda resta`);
+    if (g !== null && g !== g0 - 1) errori.push(`${tag}: gettoni ${g0} -> ${g}`);
+    noteX.push(`${tag}: occupate ${prima} -> ${dopo}, gettoni ${g0} -> ${g}, cursore ${c0 ? 'SI' : 'no'}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'X il piccone con la tastiera', primo: '-', daZero: false, nota: noteX.join('; ') });
 }
 
 // ---------- V ----------

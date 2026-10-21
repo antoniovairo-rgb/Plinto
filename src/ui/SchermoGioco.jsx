@@ -136,6 +136,19 @@ export const ESCAPE_LASCIA_STARE = true;
  */
 export const FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA = true;
 
+/*
+ * SCAVO_CON_LA_TASTIERA (collaudo 1.21.22, O2; decisione PO-030): il piccone era l'unica parte
+ * della partita che non si usava con la tastiera. Le caselle non prendono il fuoco e lo scavo
+ * ascoltava solo il tocco (`onPointerUp` della casella): scelto il piccone con Invio, nessun
+ * cursore, frecce e Invio non svuotavano niente (livello 13: caselle occupate 8 -> 8; col
+ * tocco 8 -> 7). Acceso, nello scavo le frecce muovono il cursore della griglia e Invio (o
+ * Spazio) svuota la casella sotto il cursore, come per posare un pezzo; Escape e' «Lascia
+ * stare» (ESCAPE_LASCIA_STARE). Scelto il piccone dalla tastiera il cursore compare al centro;
+ * col tocco non compare e il tocco scava come prima. Spento, torna il difetto: caso X di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCAVO_CON_LA_TASTIERA = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -186,6 +199,9 @@ export function SchermoGioco({
    * inventarne uno nuovo, che e' una cosa in meno che puo' rompersi.
    */
   const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
+  // Se il piccone e' stato scelto dalla tastiera: decide se il cursore compare subito.
+  const [scavoDaTastiera, setScavoDaTastiera] = useState(false);
+  const scavo = SCAVO_CON_LA_TASTIERA && modoAttrezzo === 'piccone';
   // Il velo che copre la griglia: menu e domande (da App) o il pannello degli attrezzi.
   const velato = (TASTI_TACCIONO_SOTTO_IL_VELO && coperto)
     || (TASTI_TACCIONO_SOTTO_IL_PANNELLO && modoAttrezzo === 'scelta');
@@ -336,6 +352,10 @@ export function SchermoGioco({
     attivo: tastiAttivi,
     // Escape nell'attesa e' dell'attrezzo: non deve lasciare anche il pezzo.
     escapeAltrove: ESCAPE_LASCIA_STARE && inAttesa,
+    scavo,
+    scavoDaTastiera,
+    // Come il tocco: il modo si chiude solo se una casella e' stata tolta davvero.
+    onScava: (row, col) => { if (onPiccone(idx(row, col))) setModoAttrezzo('chiuso'); },
     selezionato: drag.selezionato,
     conTastiera: drag.selezionatoDaTastiera,
     mano: partita.hand,
@@ -681,9 +701,10 @@ export function SchermoGioco({
              sola non ci stanno, e un pulsante che si preme e non fa niente e' peggio
              di un pulsante spento che dice perche'. */
           disabilitati={partita.mensola ? ['mensola'] : []}
-          onScegli={(quale) => {
+          onScegli={(quale, evento) => {
             if (quale === 'gessetto') { onGessetto(); setModoAttrezzo('chiuso'); return; }
             if (SCELTA_AZZERATA_CON_L_ATTREZZO) drag.annulla();
+            if (quale === 'piccone') setScavoDaTastiera(evento?.detail === 0);
             setModoAttrezzo(quale);
           }}
           t={t}
