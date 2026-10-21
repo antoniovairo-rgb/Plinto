@@ -1252,6 +1252,28 @@ for (const conLibera of [false, true]) {
     note.push(`${tag}: ${s.scelto ? 'pezzo scelto' : 'PEZZO LASCIATO'}, fuoco ${s.fuoco}`);
     await contesto.close();
   }
+  // T: come nel collaudo, il fuoco su <body> a pannello aperto (un clic sul pannello lo
+  // toglie dal pulsante): Invio e Spazio non devono arrivare alla partita. Senza questo
+  // sotto-caso il fuoco sta su «Torna alla partita», e il pulsante preso il tasto basta da
+  // solo a nascondere il difetto.
+  for (const tasto of ['Enter', ' ']) {
+    const { contesto, page } = await livello13();
+    await scegliDaTastiera(page);
+    await page.locator('.pl-attrezzi__pastiglia').click();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => document.activeElement?.blur());
+    const prima = await firmaPiena(page);
+    await page.keyboard.press(tasto);
+    await page.waitForTimeout(400);
+    const s = await stato(page);
+    const dopo = await firmaPiena(page);
+    const tag = `T pannello, fuoco <body>, ${nome[tasto]}`;
+    if (!s.scelto) errori.push(`${tag}: il tasto e' arrivato alla partita sotto il pannello, il pezzo non e' piu' scelto`);
+    if (dopo !== prima) errori.push(`${tag}: la partita e' cambiata sotto il pannello ("${prima}" -> "${dopo}")`);
+    if (!s.pannello) errori.push(`${tag}: il pannello si e' chiuso`);
+    note.push(`${tag}: ${dopo === prima ? 'partita uguale' : 'PEZZO POSATO'}`);
+    await contesto.close();
+  }
   // T: senza pezzo, aperto con la tastiera; chiuso col velo il fuoco torna alla pastiglia;
   // dopo una scelta (gessetto) il fuoco non torna alla pastiglia, come prima.
   for (const come of ['velo', 'gessetto']) {
