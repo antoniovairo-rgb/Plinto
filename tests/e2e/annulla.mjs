@@ -97,11 +97,39 @@ console.log(`1. prima della prima mossa il pulsante non c'e': ${primaDiGiocare =
 if (primaDiGiocare !== 0) errori.push('Il pulsante compare prima ancora di aver giocato');
 
 // ---------- 2. Dopo una mossa che non elimina niente, compare ----------
+await page.waitForSelector('.pl-tray .pl-pezzo', { state: 'visible' });
 const bloccchiPrima = await blocchi();
 const manoPrima = await pezziInMano();
 const puntiPrima = await punteggio();
 await posa(40);                                   // il centro: griglia vuota, non chiude niente
+// PO-033: in CI (corsa 206) una volta la mossa non ha appoggiato niente, in locale mai (0 su
+// 55, anche con la CPU rallentata 6x). Si aspetta che i blocchi compaiano invece di contarli
+// dopo 180 ms fissi; se non compaiono, la prova scrive che cosa c'era sullo schermo.
+await page.waitForFunction(
+  (n) => document.querySelectorAll('.pl-plancia .pl-blocco').length > n,
+  bloccchiPrima, { timeout: 3000 },
+).catch(() => {});
 const bloccchiDopo = await blocchi();
+if (bloccchiDopo <= bloccchiPrima) {
+  const stato = await page.evaluate(() => {
+    const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0]?.getBoundingClientRect();
+    const c = document.querySelectorAll('.pl-plancia .pl-cella')[40]?.getBoundingClientRect();
+    const sotto = (r) => {
+      if (!r) return 'nessun rettangolo';
+      const e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return e ? `${e.tagName.toLowerCase()}.${[...e.classList].join('.')}` : 'niente';
+    };
+    return {
+      indirizzo: location.href,
+      pezzi: document.querySelectorAll('.pl-tray .pl-pezzo').length,
+      sottoIlPezzo: sotto(p),
+      sottoLaCella: sotto(c),
+      finestre: [...document.querySelectorAll('[role="dialog"]')].map((d) => d.innerText.slice(0, 80)),
+      testo: document.body.innerText.replace(/\s+/g, ' ').slice(0, 300),
+    };
+  });
+  console.log(`ANNULLA: mossa non appoggiata. ${JSON.stringify(stato)}`);
+}
 const compare = await pulsante().count();
 console.log(`2. dopo una mossa pulita: blocchi ${bloccchiPrima} -> ${bloccchiDopo}, pulsante presente ${compare === 1}`);
 if (bloccchiDopo <= bloccchiPrima) errori.push('La mossa non ha appoggiato niente: lo scenario non prova quello che dice');
