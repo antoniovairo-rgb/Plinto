@@ -152,11 +152,22 @@ fuoco sulla pastiglia; freccia e P → niente; PO-029 → nessun pezzo scelto, n
 
 - `npm run build`: riuscita.
 - `npm test`: 45 file, 650 test, verdi.
-- `npm run verifica -- --veloce`: vedi § 6.1.
+- `npm run verifica -- --veloce`: 31/33, i due rossi noti dei container figli (§ 6.1).
 
 ### 6.1 Gate
 
-ESITO_GATE
+La corsia veloce è stata **negata** dal gate («non risulta nessun giro completo passato su
+questa macchina»), quindi è stato un giro completo: **31/33 in 5094 s**, uscita 1. I due rossi
+sono quelli noti dei container figli (`docs/TESTING.md:309-318`, font Inter):
+
+- «livelli nel browser» (`e2e-quadri`): «a 320x700 bisogna scorrere di 2 px» (`verifica.log:193`);
+- «Play Store» (`recensione`): «a 360x640 l invito finisce 10px sotto la barra dei pulsanti»
+  (`verifica.log:492`), 1 problema.
+
+Tutti gli altri verdi, compresi PO-008 (`e2e-po008` con i casi S, T, U, sul server di
+sviluppo, 179 s), attrezzi del cantiere, tasto Indietro di Android, correzioni e i cento
+livelli (3386 s). Il verdetto che conta è quello della CI: **non posso confermarlo** da qui
+(nessuna corsa sul ramo).
 
 ## 7. Testo proposto per il changelog
 
