@@ -177,7 +177,7 @@ libera (griglia identica a prima: caselle 32.33.34.39.40.41.43.52), ma il **post
 è scelto** e la riga dice «Tocca un pezzo, poi tocca dove metterlo»: è un altro pezzo (nella
 sfida era da 1 casella, nella libera da 4), che il giocatore non ha mai scelto in questa
 partita. Se il pezzo della sfida era stato scelto con la tastiera, nella libera compare anche
-il cursore al centro con l'anteprima del nuovo pezzo (6 caselle). Il fuoco è su `<body>`. Un
+il cursore al centro con l'anteprima del nuovo pezzo (4 e 6 caselle di anteprima nei due giri). Il fuoco è su `<body>`. Un
 Invio successivo lascia il pezzo senza posarlo (caselle occupate invariate, 5 su 5). Schermata:
 `collaudo-1.21.22/libera-pezzo-ereditato-it-390x844.png`.
 
