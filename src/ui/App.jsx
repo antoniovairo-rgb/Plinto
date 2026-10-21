@@ -25,6 +25,7 @@ import { SchermoFineQuadro } from './schermate/FineQuadro.jsx';
 import { SchermoTrionfo } from './schermate/Trionfo.jsx';
 import { AperturaQuadro } from './schermate/AperturaQuadro.jsx';
 import { ConfermaPerdita } from './ConfermaDoppia.jsx';
+import { MenuPartita } from './MenuPartita.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import { QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro } from '../config/quadri.js';
 import {
@@ -113,6 +114,7 @@ function deadPiecesDi(partita) {
 export function App() {
   const [schermata, setSchermata] = useState('home');
   const [menuAperto, setMenuAperto] = useState(false);
+  const chiudiMenu = useCallback(() => setMenuAperto(false), []);
   // "Sostieni" si apre da due posti, e il ritorno deve riportare a quello giusto: da
   // Info si torna a Info, dalla home alla home. Senza, il tasto Indietro dalla home
   // porterebbe dentro una schermata che il giocatore non ha mai aperto.
@@ -703,19 +705,19 @@ export function App() {
           t={t}
         />
         {menuAperto ? (
-          <div className="pl-velo" onClick={() => setMenuAperto(false)}>
-            <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
-              <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
-                {t('comune.tornaAllaPartita')}
-              </button>
-              <button type="button" className="pl-btn pl-btn--largo" onClick={riprovaLivello}>
-                {t('quadri.riprova')}
-              </button>
-              <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { setMenuAperto(false); tornaAiQuadri(); }}>
-                {t('quadri.elenco')}
-              </button>
-            </div>
-          </div>
+          <MenuPartita
+            etichetta={t('hud.menu')}
+            etichettaTorna={t('comune.tornaAllaPartita')}
+            onChiudi={chiudiMenu}
+            coperto={!!conferma}
+          >
+            <button type="button" className="pl-btn pl-btn--largo" onClick={riprovaLivello}>
+              {t('quadri.riprova')}
+            </button>
+            <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { setMenuAperto(false); tornaAiQuadri(); }}>
+              {t('quadri.elenco')}
+            </button>
+          </MenuPartita>
         ) : null}
         {finestraConferma}
       </div>
@@ -827,19 +829,19 @@ export function App() {
       ) : null}
 
       {menuAperto ? (
-        <div className="pl-velo" onClick={() => setMenuAperto(false)}>
-          <div className="pl-menu" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="pl-btn pl-btn--largo" onClick={() => setMenuAperto(false)}>
-              {t('comune.tornaAllaPartita')}
-            </button>
-            <button type="button" className="pl-btn pl-btn--largo" onClick={iniziaNuova}>
-              {t('home.nuovaPartita')}
-            </button>
-            <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={tornaAllaHome}>
-              {t('fine.home')}
-            </button>
-          </div>
-        </div>
+        <MenuPartita
+          etichetta={t('hud.menu')}
+          etichettaTorna={t('comune.tornaAllaPartita')}
+          onChiudi={chiudiMenu}
+          coperto={!!conferma}
+        >
+          <button type="button" className="pl-btn pl-btn--largo" onClick={iniziaNuova}>
+            {t('home.nuovaPartita')}
+          </button>
+          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={tornaAllaHome}>
+            {t('fine.home')}
+          </button>
+        </MenuPartita>
       ) : null}
       {finestraConferma}
     </div>
