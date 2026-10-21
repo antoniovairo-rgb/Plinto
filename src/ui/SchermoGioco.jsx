@@ -77,6 +77,30 @@ const MOSSE_CON_ISTRUZIONI = 3;
  */
 export const TASTI_TACCIONO_SOTTO_IL_VELO = true;
 
+/*
+ * TASTI_TACCIONO_SOTTO_IL_PANNELLO (collaudo 1.21.22, D1; decisione PO-028): il pannello
+ * degli attrezzi e' un velo anche lui, ma vive qui dentro (`modoAttrezzo === 'scelta'`) e
+ * non in `coperto`, che App calcola dal menu e dalle domande. Con un pezzo scelto, Invio e
+ * Spazio sul pannello aperto posavano il pezzo sotto il velo: nel livello 13 mosse 18 -> 17,
+ * il pannello restava aperto e il giocatore non vedeva niente. Le frecce muovevano il
+ * cursore dietro, P portava il fuoco sull'anteprima dietro. Acceso, vale la stessa regola
+ * di TASTI_TACCIONO_SOTTO_IL_VELO; il pezzo resta scelto. Spento, torna il difetto: caso T
+ * di `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const TASTI_TACCIONO_SOTTO_IL_PANNELLO = true;
+
+/*
+ * SCELTA_AZZERATA_CAMBIANDO_PARTITA (collaudo 1.21.22, O1; decisione PO-029): libera e sfida
+ * usano lo stesso SchermoGioco (App.jsx), quindi passando dall'una all'altra (sfida, menu,
+ * «Nuova partita», «Riprendi la partita») il pezzo scelto e il cursore restavano: nella
+ * libera compariva scelto il pezzo nello stesso posto del vassoio, un altro pezzo, mai
+ * scelto in quella partita (misurato: posto 3 scelto, e con la tastiera cursore e anteprima
+ * di 3 caselle). Acceso, quando cambia la partita a schermo (modo, livello o seme) la scelta
+ * e il cursore si azzerano. Spento, torna il difetto: caso U di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCELTA_AZZERATA_CAMBIANDO_PARTITA = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -115,7 +139,6 @@ export function SchermoGioco({
   // Vero mentre sopra la partita c'e' il menu o una domanda: il velo copre la griglia.
   coperto = false,
 }) {
-  const tastiAttivi = partita.status === 'playing' && !(TASTI_TACCIONO_SOTTO_IL_VELO && coperto);
   /*
    * I modi dell'attrezzo in corso:
    *   'chiuso'   si gioca normalmente
@@ -128,6 +151,10 @@ export function SchermoGioco({
    * inventarne uno nuovo, che e' una cosa in meno che puo' rompersi.
    */
   const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
+  // Il velo che copre la griglia: menu e domande (da App) o il pannello degli attrezzi.
+  const velato = (TASTI_TACCIONO_SOTTO_IL_VELO && coperto)
+    || (TASTI_TACCIONO_SOTTO_IL_PANNELLO && modoAttrezzo === 'scelta');
+  const tastiAttivi = partita.status === 'playing' && !velato;
   const conAttrezzi = attrezzi !== null && onCarriola && onGessetto && onPiccone && onMensola;
   /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
   const sceltaPezzo = modoAttrezzo === 'carriola' || modoAttrezzo === 'mensola'
@@ -180,7 +207,7 @@ export function SchermoGioco({
   useEffect(() => {
     if (partita.modalita !== MODALITA.ANTEPRIMA) return undefined;
     // Sotto il velo il fuoco portato sull'anteprima uscirebbe dalla finestra aperta.
-    if (TASTI_TACCIONO_SOTTO_IL_VELO && coperto) return undefined;
+    if (velato) return undefined;
     const ascolta = (evento) => {
       if (evento.key !== 'p' && evento.key !== 'P') return;
       if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
@@ -191,7 +218,7 @@ export function SchermoGioco({
     };
     window.addEventListener('keydown', ascolta);
     return () => window.removeEventListener('keydown', ascolta);
-  }, [partita.modalita, coperto]);
+  }, [partita.modalita, velato]);
 
   const effetti = useEffettiMossa({
     lastMove: partita.lastMove,
@@ -221,6 +248,14 @@ export function SchermoGioco({
     onPosiziona: posiziona,
     attivo: partita.status === 'playing',
   });
+
+  // Quale partita c'e' a schermo. Il seme da solo distingue libera e sfida, ma non dice
+  // niente di un livello rigiocato con un'altra modalita': ci vanno anche modo e livello.
+  const partitaASchermo = `${modalita}|${quadro?.numero ?? ''}|${partita.seed}`;
+  const azzeraScelta = drag.annulla;
+  useEffect(() => {
+    if (SCELTA_AZZERATA_CAMBIANDO_PARTITA) azzeraScelta();
+  }, [partitaASchermo, azzeraScelta]);
 
   const tastiera = useTastiera({
     attivo: tastiAttivi,

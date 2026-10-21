@@ -7,6 +7,27 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.23] — 21 ottobre 2026
+
+### Corretto
+
+- **Con un pezzo scelto, Invio su «Menu» apre il menu** (PO-027): giocando con la sola
+  tastiera, Invio e Spazio posavano il pezzo da qualunque punto della pagina, anche con il
+  fuoco su «Menu» o sulla pastiglia degli attrezzi (nel livello si perdeva una mossa). Ora
+  premono il pulsante che ha il fuoco; con il fuoco sul pezzo, Invio lo posa come prima.
+  Interruttore `INVIO_PREME_I_PULSANTI`.
+- **Con il pannello degli attrezzi aperto, la tastiera non muove più la partita sotto**
+  (PO-028, collaudo 1.21.22 D1 e O3): con un pezzo scelto, Invio e Spazio posavano il pezzo
+  sotto il pannello. Ora i tasti della partita tacciono e il pezzo resta scelto; il pannello
+  si comporta come il menu: all'apertura il fuoco va su «Torna alla partita», chiuso senza
+  scegliere torna alla pastiglia. Interruttori `TASTI_TACCIONO_SOTTO_IL_PANNELLO` e
+  `PANNELLO_COME_IL_MENU`.
+- **Passando dalla sfida alla libera non resta più scelto un pezzo** (PO-029, collaudo
+  1.21.22 O1): scelta e cursore si azzerano quando cambia la partita. Interruttore
+  `SCELTA_AZZERATA_CAMBIANDO_PARTITA`. Controllo: casi S, T e U di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.22] — 21 ottobre 2026
 
 ### Corretto
