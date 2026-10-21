@@ -7,6 +7,21 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.20] — 21 ottobre 2026
+
+### Corretto
+
+- **Accessibilità della home e delle domande** (collaudo 1.21.18, PO-023):
+  - chiusa una domanda senza scegliere (Escape, tocco fuori, Indietro), il fuoco torna al
+    pulsante che l'ha aperta; per «Riprova» del menu del livello va al pulsante «Menu».
+    Interruttore `FUOCO_TORNA_A_CHI_APRE`; controllo caso P in `npm run e2e-po008`;
+  - tutta la colonna sotto «Nuova» della Partita libera apre «Nuova», fino al bordo della
+    card. Interruttore `NUOVA_FINO_AL_BORDO`; controllo in `npm run home-spiegazione`;
+  - la card della sfida da fare si chiama «Sfida del giorno, gioca la sfida di oggi».
+    Interruttore `NOME_SFIDA_CON_GIOCA`; controllo in `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.19] — 21 ottobre 2026
 
 ### Corretto
