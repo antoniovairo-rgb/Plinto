@@ -101,6 +101,41 @@ export const TASTI_TACCIONO_SOTTO_IL_PANNELLO = true;
  */
 export const SCELTA_AZZERATA_CAMBIANDO_PARTITA = true;
 
+/*
+ * SCELTA_AZZERATA_CON_L_ATTREZZO (collaudo 1.21.23, D1; decisione PO-032): con un pezzo scelto
+ * dalla tastiera, scelti la mensola o la carriola, il vassoio NASCONDEVA la scelta ma il pezzo
+ * restava scelto, con il cursore e l'anteprima sulla griglia sotto «Quale pezzo metto da
+ * parte?». Invio sul pezzo 2 del vassoio posava allora il pezzo 1 dov'era il cursore: nel
+ * livello 13 mosse 18 -> 17, caselle occupate 8 -> 11, mensola vuota e la domanda ancora a
+ * schermo (misurato sulla build di produzione; uguale con la carriola e con lo scambio a
+ * mensola e mano piene). Acceso, scegliere un attrezzo che chiede un pezzo o una casella
+ * (mensola, carriola, piccone, e lo scambio dalla mensola) lascia il pezzo scelto: spariscono
+ * cursore e anteprima, e Invio sul vassoio torna al pulsante del pezzo. Il gessetto no: si
+ * applica subito e non chiede niente. Spento, torna il difetto: caso W di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCELTA_AZZERATA_CON_L_ATTREZZO = true;
+
+/*
+ * ESCAPE_LASCIA_STARE (collaudo 1.21.23, O1; decisione PO-032): durante l'attesa di un attrezzo
+ * («Quale pezzo metto da parte?», «Quale pezzo cambio?», lo scambio, il piccone) Escape non
+ * faceva niente, mentre l'aiuto dice «Esc per annullare» e il pannello si chiude con Escape.
+ * Acceso, Escape fa quello che fa «Lascia stare»: chiude l'attesa, non spende niente. Con il
+ * menu o una domanda sopra, Escape resta loro. Spento, torna il difetto: caso W rosso.
+ */
+export const ESCAPE_LASCIA_STARE = true;
+
+/*
+ * FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA (collaudo 1.21.23, O2; decisione PO-032): messo un pezzo da
+ * parte, o ripreso dalla mensola, con la tastiera, il pulsante premuto spariva e il fuoco
+ * finiva su <body>: il Tab seguente ripartiva dall'inizio della pagina. Acceso, dopo «metti da
+ * parte» il fuoco va sul pezzo del vassoio piu' vicino (prima quello dopo, poi quello prima,
+ * come quando si toglie una voce da un elenco); dopo «riprendi» e dopo lo scambio va sul pezzo
+ * ripreso. Solo se il pulsante e' stato premuto dalla tastiera (`detail === 0`): col tocco non
+ * cambia niente. Spento, torna il difetto: caso W rosso.
+ */
+export const FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -159,6 +194,8 @@ export function SchermoGioco({
   /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
   const sceltaPezzo = modoAttrezzo === 'carriola' || modoAttrezzo === 'mensola'
     || modoAttrezzo === 'scambio';
+  /** Un attrezzo aspetta una risposta: un pezzo o, col piccone, una casella. */
+  const inAttesa = sceltaPezzo || modoAttrezzo === 'piccone';
 
   /* Le caselle che il gesso ha segnato. Si ricavano dal suggerimento e dalla forma del
      pezzo consigliato: il motore dice "questo pezzo, li'", e qui si traduce in caselle. */
@@ -257,8 +294,48 @@ export function SchermoGioco({
     if (SCELTA_AZZERATA_CAMBIANDO_PARTITA) azzeraScelta();
   }, [partitaASchermo, azzeraScelta]);
 
+  // Escape durante l'attesa e' «Lascia stare». Il menu o una domanda sopra se lo tengono.
+  useEffect(() => {
+    if (!ESCAPE_LASCIA_STARE || !inAttesa || coperto || partita.status !== 'playing') return undefined;
+    const esci = (e) => {
+      if (e.key !== 'Escape' || e.altKey || e.ctrlKey || e.metaKey) return;
+      e.preventDefault();
+      setModoAttrezzo('chiuso');
+    };
+    window.addEventListener('keydown', esci);
+    return () => window.removeEventListener('keydown', esci);
+  }, [inAttesa, coperto, partita.status]);
+
+  /*
+   * Dove va il fuoco dopo la mensola: si decide al clic, si applica dopo il disegno, quando il
+   * vassoio mostra gia' la mano nuova. `{ posto }` e' il pezzo ripreso, `{ vicino }` il posto
+   * appena svuotato.
+   */
+  const fuocoDopo = useRef(null);
+  const ricordaFuoco = (evento, dove) => {
+    if (FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA && evento?.detail === 0) fuocoDopo.current = dove;
+  };
+  useEffect(() => {
+    const voluto = fuocoDopo.current;
+    if (!voluto) return;
+    fuocoDopo.current = null;
+    const pezzi = [...document.querySelectorAll('.pl-tray .pl-tray__posto')]
+      .map((posto) => posto.querySelector('.pl-pezzo-presa'));
+    let quale = null;
+    if (voluto.posto != null) quale = pezzi[voluto.posto];
+    else {
+      for (let d = 1; d < pezzi.length && !quale; d += 1) {
+        quale = pezzi[voluto.vicino + d] ?? pezzi[voluto.vicino - d] ?? null;
+      }
+      quale = quale ?? pezzi[voluto.vicino] ?? null;
+    }
+    quale?.focus({ preventScroll: true });
+  });
+
   const tastiera = useTastiera({
     attivo: tastiAttivi,
+    // Escape nell'attesa e' dell'attrezzo: non deve lasciare anche il pezzo.
+    escapeAltrove: ESCAPE_LASCIA_STARE && inAttesa,
     selezionato: drag.selezionato,
     conTastiera: drag.selezionatoDaTastiera,
     mano: partita.hand,
@@ -499,10 +576,14 @@ export function SchermoGioco({
             {conAttrezzi ? (
               <Mensola
                 pezzo={partita.mensola ?? null}
-                onRiprendi={() => {
+                onRiprendi={(evento) => {
                   const libero = partita.hand.findIndex((p) => p === null);
-                  if (libero >= 0) onRiprendiMensola(libero);
-                  else setModoAttrezzo('scambio');
+                  if (libero >= 0) {
+                    if (onRiprendiMensola(libero)) ricordaFuoco(evento, { posto: libero });
+                  } else {
+                    if (SCELTA_AZZERATA_CON_L_ATTREZZO) drag.annulla();
+                    setModoAttrezzo('scambio');
+                  }
                 }}
                 t={t}
               />
@@ -559,9 +640,10 @@ export function SchermoGioco({
           onPointerDownPezzo={sceltaPezzo ? () => {} : prendi}
           onTapPezzo={
             modoAttrezzo === 'carriola' ? (i) => { if (onCarriola(i)) setModoAttrezzo('chiuso'); }
-              : modoAttrezzo === 'mensola' ? (i) => { if (onMensola(i)) setModoAttrezzo('chiuso'); }
+              : modoAttrezzo === 'mensola'
+                ? (i, e) => { if (onMensola(i)) { setModoAttrezzo('chiuso'); ricordaFuoco(e, { vicino: i }); } }
                 : modoAttrezzo === 'scambio'
-                  ? (i) => { if (onRiprendiMensola(i)) setModoAttrezzo('chiuso'); }
+                  ? (i, e) => { if (onRiprendiMensola(i)) { setModoAttrezzo('chiuso'); ricordaFuoco(e, { posto: i }); } }
                   : drag.selezionaPezzo
           }
           t={t}
@@ -601,6 +683,7 @@ export function SchermoGioco({
           disabilitati={partita.mensola ? ['mensola'] : []}
           onScegli={(quale) => {
             if (quale === 'gessetto') { onGessetto(); setModoAttrezzo('chiuso'); return; }
+            if (SCELTA_AZZERATA_CON_L_ATTREZZO) drag.annulla();
             setModoAttrezzo(quale);
           }}
           t={t}

@@ -42,6 +42,8 @@ function suUnComandoFuori(elemento) {
 
 export function useTastiera({
   attivo, selezionato, onPosiziona, onAnnulla, mano, conTastiera = false,
+  // Vero quando Escape e' di qualcun altro (l'attesa di un attrezzo): qui non lascia il pezzo.
+  escapeAltrove = false,
 }) {
   const [cursore, setCursore] = useState(null);
 
@@ -81,6 +83,7 @@ export function useTastiera({
       if (e.altKey || e.ctrlKey || e.metaKey) return;
 
       if (e.key === 'Escape') {
+        if (escapeAltrove) return;
         if (selezionato !== null) { e.preventDefault(); onAnnulla(); }
         return;
       }
@@ -113,7 +116,7 @@ export function useTastiera({
 
     window.addEventListener('keydown', premuto);
     return () => window.removeEventListener('keydown', premuto);
-  }, [attivo, selezionato, cursore, muovi, onPosiziona, onAnnulla, mano]);
+  }, [attivo, selezionato, cursore, muovi, onPosiziona, onAnnulla, mano, escapeAltrove]);
 
   return { cursore, muovi };
 }

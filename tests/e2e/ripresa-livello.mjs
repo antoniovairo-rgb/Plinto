@@ -50,6 +50,10 @@
  *   U  dalla sfida, menu -> «Nuova partita» -> «Riprendi la partita»: nella libera nessun
  *      pezzo scelto e nessun cursore (collaudo 1.21.22, O1; PO-029,
  *      SCELTA_AZZERATA_CAMBIANDO_PARTITA).
+ *   W  mensola, carriola e scambio con un pezzo scelto dalla tastiera: scegliere l'attrezzo
+ *      lascia il pezzo, Invio sul vassoio fa l'attrezzo e non posa; Escape nell'attesa come
+ *      «Lascia stare»; dopo la mensola il fuoco va sul vassoio (collaudo 1.21.23, D1, O1, O2;
+ *      PO-032).
  *   V  la firma vede una griglia diversa con lo stesso punteggio: si cambia solo la griglia
  *      salvata e si ricarica (PO-031, la firma contava una classe che non esiste).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
@@ -1175,15 +1179,10 @@ for (const conLibera of [false, true]) {
       fuoco,
     };
   });
-  // La firma della partita con le caselle occupate contate dai blocchi (la `firma` di sopra
-  // conta una classe che le caselle non hanno: li' fa tutto il punteggio).
-  const firmaPiena = (page) => page.evaluate(() => {
-    const hud = document.querySelector('.pl-hud')?.innerText.replace(/\s+/g, ' ') ?? '';
-    const ob = document.querySelector('.pl-barra-obiettivo')?.innerText.replace(/\s+/g, ' ') ?? '';
-    const piene = [...document.querySelectorAll('.pl-plancia .pl-cella')]
-      .filter((c) => c.querySelector('.pl-blocco') && !c.className.includes('anteprima')).length;
-    return `${hud} / ${ob} / ${piene} occupate`;
-  });
+  // Questi casi avevano una firma loro, che contava i blocchi ma leggeva l'obiettivo da
+  // `.pl-barra-obiettivo`, una classe che non esiste (la barra e' `.pl-obiettivo`): le MOSSE
+  // non c'entravano (PO-031). Adesso e' la `firma` di sopra.
+  const firmaPiena = firma;
   async function scegliDaTastiera(page, posto = 0) {
     await page.locator('.pl-tray .pl-pezzo-presa').nth(posto).focus();
     await page.keyboard.press('Enter');
@@ -1398,6 +1397,152 @@ for (const conLibera of [false, true]) {
     await contesto.close();
   }
   righe.push({ caso: 'S, T, U tastiera fuori dal vassoio, pannello, cambio di partita', primo: '-', daZero: false, nota: note.join('; ') });
+
+  // W: mensola, carriola e scambio con un pezzo scelto con la tastiera (collaudo 1.21.23, D1,
+  // O1, O2; PO-032). Si sceglie il pezzo 1 (cursore in cima), si apre il pannello con Invio
+  // sulla pastiglia e si sceglie l'attrezzo con Invio: il pezzo non e' piu' scelto, sulla
+  // griglia ne' cursore ne' anteprima (SCELTA_AZZERATA_CON_L_ATTREZZO). Poi Invio sul pezzo 2
+  // del vassoio fa l'attrezzo e non posa il pezzo 1: mosse e caselle occupate uguali. Escape
+  // nell'attesa fa quello che fa «Lascia stare» (ESCAPE_LASCIA_STARE). Messo un pezzo da
+  // parte o ripreso, il fuoco va su un pezzo del vassoio (FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA).
+  const statoW = (page) => page.evaluate(() => {
+    const a = document.activeElement;
+    const posti = [...document.querySelectorAll('.pl-tray .pl-tray__posto')];
+    const presa = a?.closest?.('.pl-tray .pl-tray__posto');
+    return {
+      invito: document.querySelector('.pl-attrezzi__invito')?.innerText.replace(/\s+/g, ' ') ?? null,
+      mano: document.querySelectorAll('.pl-tray .pl-pezzo-presa').length,
+      vuoti: posti.map((p, i) => (p.querySelector('.pl-pezzo-presa') ? null : i)).filter((i) => i !== null),
+      mensola: !!document.querySelector('.pl-mensola'),
+      cursore: !!document.querySelector('.pl-plancia .pl-cella--cursore'),
+      anteprima: document.querySelectorAll('.pl-plancia .pl-cella--anteprima').length,
+      forme: posti.map((p) => p.querySelector('.pl-pezzo')?.innerHTML.length ?? 0).join(','),
+      fuocoPosto: presa ? posti.indexOf(presa) : null,
+      fuoco: a && a !== document.body ? (a.getAttribute('aria-label') || a.textContent || a.tagName).trim().replace(/\s+/g, ' ') : '<body>',
+    };
+  });
+  // La pastiglia c'e' solo fuori dall'attesa: senza, il numero non si legge (null).
+  const gettoni = async (page) => ((await page.locator('.pl-attrezzi__pastiglia').count())
+    ? page.locator('.pl-attrezzi__posto--pieno').count() : null);
+  // Pastiglia (Invio) e voce del pannello (Invio), tutto da tastiera.
+  async function attrezzoDaTastiera(page, voce) {
+    await page.locator('.pl-attrezzi__pastiglia').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    await page.locator('.pl-attrezzi__pannello').getByRole('button', { name: new RegExp(voce) }).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+  }
+  const noteW = [];
+  for (const [voce, invito] of [['La mensola', 'Quale pezzo metto da parte?'], ['La carriola', 'Quale pezzo cambio?']]) {
+    const { contesto, page } = await livello13();
+    const g0 = await gettoni(page);
+    await scegliDaTastiera(page);
+    await attrezzoDaTastiera(page, voce);
+    const s0 = await statoW(page);
+    const tag = `W ${voce}`;
+    if (!s0.invito?.startsWith(invito)) { errori.push(`${tag}: manca «${invito}» (${s0.invito}), il caso non prova niente`); await contesto.close(); continue; }
+    if (s0.cursore || s0.anteprima) errori.push(`${tag} in attesa: sulla griglia restano ${s0.cursore ? 'il cursore e ' : ''}${s0.anteprima} caselle di anteprima del pezzo scelto prima`);
+    const prima = await firmaPiena(page);
+    await page.locator('.pl-tray .pl-pezzo-presa').nth(1).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(500);
+    const s = await statoW(page);
+    const dopo = await firmaPiena(page);
+    const g = await gettoni(page);
+    if (dopo !== prima) errori.push(`${tag}, Invio sul pezzo 2: il pezzo scelto prima e' stato posato ("${prima}" -> "${dopo}")`);
+    if (s.invito) errori.push(`${tag}, Invio sul pezzo 2: la domanda resta («${s.invito}»)`);
+    if (g !== null && g !== g0 - 1) errori.push(`${tag}, Invio sul pezzo 2: gettoni ${g0} -> ${g}, atteso ${g0 - 1}`);
+    if (voce === 'La mensola') {
+      if (!s.mensola || s.mano !== 2) errori.push(`${tag}, Invio sul pezzo 2: mensola ${s.mensola ? 'piena' : 'vuota'}, mano ${s.mano}: il pezzo non e' stato messo da parte`);
+      // Il pezzo 2 e' andato via: i vicini sono il pezzo 1 e il pezzo 3, a un posto di
+      // distanza tutti e due; si va avanti (il 3), come quando si toglie una voce da un elenco.
+      if (s.fuocoPosto !== 2) errori.push(`${tag}, Invio sul pezzo 2: il fuoco e' su «${s.fuoco}», non sul pezzo 3 del vassoio`);
+    } else if (s.forme === s0.forme) errori.push(`${tag}, Invio sul pezzo 2: il pezzo non e' cambiato`);
+    noteW.push(`${tag}: ${dopo === prima ? 'mosse uguali' : 'PEZZO POSATO'}, gettoni ${g0} -> ${g}, fuoco ${s.fuoco}`);
+
+    await contesto.close();
+  }
+  // W: la mensola piena e la mano piena, lo scambio. Il pezzo 1 va sulla mensola SENZA un pezzo
+  // scelto (cosi' la preparazione non dipende dalla correzione), si posano i due che restano e
+  // la mano si riempie; poi pezzo 1 scelto con la tastiera, Invio sulla mensola, Invio sul 3.
+  {
+    const { contesto, page } = await livello13();
+    await attrezzoDaTastiera(page, 'La mensola');
+    await page.locator('.pl-tray .pl-pezzo-presa').nth(0).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    for (let i = 0; i < 2; i += 1) await unaMossa(page);
+    await page.waitForTimeout(300);
+    await scegliDaTastiera(page);
+    await page.locator('.pl-mensola').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(300);
+    const t0 = await statoW(page);
+    const tagS = 'W scambio (mensola e mano piene)';
+    if (!t0.invito?.startsWith('La mano è piena') || t0.mano !== 3) {
+      errori.push(`${tagS}: domanda «${t0.invito}», mano ${t0.mano}: il caso non prova niente`);
+    } else {
+      if (t0.cursore || t0.anteprima) errori.push(`${tagS} in attesa: sulla griglia restano ${t0.cursore ? 'il cursore e ' : ''}${t0.anteprima} caselle di anteprima`);
+      const primaS = await firmaPiena(page);
+      await page.locator('.pl-tray .pl-pezzo-presa').nth(2).focus();
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(500);
+      const t = await statoW(page);
+      const dopoS = await firmaPiena(page);
+      if (dopoS !== primaS) errori.push(`${tagS}, Invio sul pezzo 3: il pezzo scelto prima e' stato posato ("${primaS}" -> "${dopoS}")`);
+      if (t.invito) errori.push(`${tagS}, Invio sul pezzo 3: la domanda resta («${t.invito}»)`);
+      if (t.forme === t0.forme) errori.push(`${tagS}, Invio sul pezzo 3: niente scambio`);
+      // Lo scambio mette il pezzo della mensola nel posto 3: il fuoco va li'.
+      if (t.fuocoPosto !== 2) errori.push(`${tagS}, Invio sul pezzo 3: il fuoco e' su «${t.fuoco}», non sul pezzo ripreso (posto 3)`);
+      noteW.push(`${tagS}: ${dopoS === primaS ? 'mosse uguali' : 'PEZZO POSATO'}, fuoco ${t.fuoco}`);
+    }
+    await contesto.close();
+  }
+  // W: ripreso dalla mensola con un posto libero nella mano, il fuoco va sul pezzo ripreso.
+  {
+    const { contesto, page } = await livello13();
+    await attrezzoDaTastiera(page, 'La mensola');
+    await page.locator('.pl-tray .pl-pezzo-presa').nth(0).focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    const s0 = await statoW(page);
+    await page.locator('.pl-mensola').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(400);
+    const s = await statoW(page);
+    const tag = 'W riprendi dalla mensola';
+    if (!s0.mensola || s0.vuoti.length !== 1) errori.push(`${tag}: mensola ${s0.mensola}, posti vuoti ${s0.vuoti}: il caso non prova niente`);
+    else {
+      if (s.mensola || s.mano !== 3) errori.push(`${tag}: il pezzo non e' tornato nella mano`);
+      if (s.fuocoPosto !== s0.vuoti[0]) errori.push(`${tag}: il fuoco e' su «${s.fuoco}», non sul pezzo ripreso (posto ${s0.vuoti[0] + 1})`);
+    }
+    noteW.push(`${tag}: fuoco ${s.fuoco}`);
+    await contesto.close();
+  }
+  // W: Escape nell'attesa fa quello che fa «Lascia stare»: la domanda sparisce, la partita e i
+  // gettoni restano. Anche con un pezzo scelto prima (che l'attrezzo ha gia' lasciato).
+  for (const [voce, conPezzo] of [['La mensola', false], ['La carriola', false], ['La mensola', true], ['Il piccone', false]]) {
+    const { contesto, page } = await livello13();
+    const g0 = await gettoni(page);
+    if (conPezzo) await scegliDaTastiera(page);
+    await attrezzoDaTastiera(page, voce);
+    const s0 = await statoW(page);
+    const prima = await firmaPiena(page);
+    const tag = `W Escape nell'attesa (${voce}${conPezzo ? ', pezzo scelto prima' : ''})`;
+    if (!s0.invito) { errori.push(`${tag}: manca la domanda, il caso non prova niente`); await contesto.close(); continue; }
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    const s = await statoW(page);
+    const dopo = await firmaPiena(page);
+    const g = await gettoni(page);
+    if (s.invito) errori.push(`${tag}: la domanda resta («${s.invito}»)`);
+    if (dopo !== prima) errori.push(`${tag}: la partita e' cambiata ("${prima}" -> "${dopo}")`);
+    if (g !== null && g !== g0) errori.push(`${tag}: gettoni ${g0} -> ${g}`);
+    noteW.push(`${tag}: ${s.invito ? 'DOMANDA RESTA' : 'domanda chiusa'}, fuoco ${s.fuoco}`);
+    await contesto.close();
+  }
+  righe.push({ caso: 'W mensola, carriola e scambio con la tastiera', primo: '-', daZero: false, nota: noteW.join('; ') });
 }
 
 // ---------- V ----------
