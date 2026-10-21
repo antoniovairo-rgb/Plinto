@@ -20,4 +20,5 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.19 | 2026-10-21 | Pillole della home della stessa misura (riscontro del PO) | PO-020, PO-021 | pubblicata (`171cd6d`) |
 | 1.21.20 | 2026-10-21 | Accessibilità: fuoco dopo una domanda chiusa, colonna di «Nuova» fino al bordo, nome della sfida da fare | PO-023 | pubblicata (`b5fce01`); collaudata (nessun difetto nuovo) |
 | 1.21.21 | 2026-10-21 | Menu della partita come le domande; angoli della card libera che rispondono al tocco | PO-024, PO-025 | pubblicata (`d4cfba4`); collaudata (D1 già presente → PO-026) |
+| 1.21.22 | 2026-10-21 | La tastiera tace sotto il menu e le domande; fuoco su «Menu» dopo «Riprendi la partita» | PO-026 | pubblicata (`2d9e4ca`); collaudo in corso |
 | 1.22.0 | — | La Torre: livelli 101-200 e grafica nuova del sito | PO-002 | da pianificare |
