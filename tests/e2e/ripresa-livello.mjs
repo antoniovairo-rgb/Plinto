@@ -5,7 +5,7 @@
  * Ogni caso porta il giocatore dentro un livello (o una partita libera), lo fa giocare,
  * lo interrompe in un modo diverso e poi prova a TORNARE DENTRO come farebbe lui: da
  * solo, oppure toccando la mappa o il pulsante grande della home. Si confronta la
- * "firma" della partita (punteggio, obiettivo, caselle piene) prima e dopo: se cambia,
+ * "firma" della partita (punteggio, obiettivo, caselle occupate) prima e dopo: se cambia,
  * il livello e' ripartito da zero.
  *
  *   A  Indietro dal livello porta alla mappa; riaprire il livello lo riprende.
@@ -50,6 +50,8 @@
  *   U  dalla sfida, menu -> «Nuova partita» -> «Riprendi la partita»: nella libera nessun
  *      pezzo scelto e nessun cursore (collaudo 1.21.22, O1; PO-029,
  *      SCELTA_AZZERATA_CAMBIANDO_PARTITA).
+ *   V  la firma vede una griglia diversa con lo stesso punteggio: si cambia solo la griglia
+ *      salvata e si ricarica (PO-031, la firma contava una classe che non esiste).
  *   In J, K, L e N il tasto Indietro chiude la domanda e non perde niente; il pulsante sicuro
  *   riporta dentro la partita lasciata, l'altro fa davvero quello che si era chiesto.
  *
@@ -87,6 +89,11 @@ if (!(await serverRisponde())) {
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 const errori = [];
 const righe = [];
+// Le mosse che `unaMossa` ha tentato e la griglia non ha preso: un caso che crede di aver
+// giocato e non ha giocato non prova niente.
+const mosseMancate = [];
+let mosseTentate = 0;
+let mosseRitentate = 0;
 
 async function prepara({ introVista = true } = {}) {
   const contesto = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
@@ -112,30 +119,93 @@ const dove = (page) => page.evaluate(() => {
   return '?';
 });
 
-/** Punteggio, obiettivo e caselle piene: se cambia uno dei tre, e' un'altra partita. */
-const firma = (page) => page.evaluate(() => {
-  const hud = document.querySelector('.pl-hud')?.innerText.replace(/\s+/g, ' ') ?? '';
-  const ob = document.querySelector('.pl-obiettivo, .pl-barra-obiettivo')?.innerText.replace(/\s+/g, ' ') ?? '';
-  const piene = [...document.querySelectorAll('.pl-plancia .pl-cella')].filter((c) => c.className.includes('piena')).length;
-  return `${hud} / ${ob} / ${piene} piene`;
-});
+/**
+ * Le caselle occupate, lette dall'etichetta che la griglia scrive per i lettori di schermo:
+ * nasce da `grid[i] !== 0` (`Plancia.jsx`), quindi non conta l'anteprima ne' i blocchi che
+ * stanno sparendo. PRIMA SI CONTAVA LA CLASSE `piena`, che le caselle non hanno (la casella
+ * occupata ha dentro un `.pl-blocco`): il numero era sempre 0 e la firma reggeva solo sul
+ * punteggio e sull'obiettivo (rapporto PO-027/029, scelta 4; PO-031). Il caso V qui sotto
+ * fa fallire di proposito la firma con una griglia diversa e lo stesso punteggio.
+ */
+const OCCUPATA = /, (occupata|filled)$/;
+const occupate = (page) => page.evaluate((fonte) => {
+  const re = new RegExp(fonte);
+  return [...document.querySelectorAll('.pl-plancia .pl-cella')]
+    .filter((c) => re.test(c.getAttribute('aria-label') ?? '')).length;
+}, OCCUPATA.source);
 
-async function unaMossa(page) {
-  const p = await page.evaluate(() => {
+/** Punteggio, obiettivo e caselle occupate: se cambia uno dei tre, e' un'altra partita. */
+const firma = async (page) => {
+  const [hud, ob] = await page.evaluate(() => [
+    document.querySelector('.pl-hud')?.innerText.replace(/\s+/g, ' ') ?? '',
+    document.querySelector('.pl-obiettivo, .pl-barra-obiettivo')?.innerText.replace(/\s+/g, ' ') ?? '',
+  ]);
+  return `${hud} / ${ob} / ${await occupate(page)} occupate`;
+};
+
+/**
+ * Trascina il primo pezzo del vassoio dove ENTRA. Prima puntava la casella di mezzo fra
+ * quelle "vuote" secondo la stessa classe `piena` che non esiste, cioe' sempre la casella
+ * 40, e su una griglia ingombra il pezzo poteva essere rifiutato: la "mossa" non succedeva
+ * e il caso proseguiva lo stesso (PO-031). Adesso la forma si legge dal disegno del pezzo,
+ * le caselle libere dalla griglia, e si sceglie il posto libero piu' vicino al centro; il
+ * puntatore si porta dove il trascinamento (`useTrascinamento.js`, `rilascia`) fa cadere
+ * l'origine della forma su quel posto. Restituisce vero se la griglia e' cambiata.
+ */
+async function unaMossa(page, giro = 1) {
+  if (giro === 1) mosseTentate += 1;
+  const prima = await occupate(page);
+  const p = await page.evaluate((fonte) => {
+    const re = new RegExp(fonte);
     const pezzo = document.querySelector('.pl-tray .pl-pezzo');
     const celle = [...document.querySelectorAll('.pl-plancia .pl-cella')];
-    if (!pezzo || !celle.length) return null;
+    if (!pezzo || celle.length !== 81) return null;
+    const piena = celle.map((c) => re.test(c.getAttribute('aria-label') ?? ''));
+    const colonne = pezzo.style.gridTemplateColumns.match(/repeat\((\d+),\s*([\d.]+)px\)/);
+    if (!colonne) return null;
+    const larghe = Number(colonne[1]);
+    const cellaVassoio = Number(colonne[2]);
+    const forma = [...pezzo.children].map((c, i) => (c.querySelector('.pl-blocco') ? [Math.floor(i / larghe), i % larghe] : null)).filter(Boolean);
+    const alte = Math.max(...forma.map(([r]) => r)) + 1;
+    let meglio = null;
+    for (let r = 0; r + alte <= 9; r += 1) {
+      for (let c = 0; c + larghe <= 9; c += 1) {
+        if (forma.some(([dr, dc]) => piena[(r + dr) * 9 + c + dc])) continue;
+        const d = (r + (alte - 1) / 2 - 4) ** 2 + (c + (larghe - 1) / 2 - 4) ** 2;
+        if (!meglio || d < meglio.d) meglio = { r, c, d };
+      }
+    }
+    if (!meglio) return null;
+    // La presa al centro del disegno, in caselle del vassoio, come la calcola `iniziaTrascinamento`.
     const rp = pezzo.getBoundingClientRect();
-    const vuote = celle.filter((c) => !c.className.includes('piena'));
-    const rc = (vuote[Math.floor(vuote.length / 2)] ?? celle[40]).getBoundingClientRect();
-    return { px: rp.left + rp.width / 2, py: rp.top + rp.height / 2, cx: rc.left + rc.width / 2, cy: rc.top + rc.height / 2 };
-  });
-  if (!p) return;
+    const dentro = (v, m) => Math.max(0.5, Math.min(m - 0.5, v));
+    const presaX = dentro((rp.width / 2) / cellaVassoio, larghe);
+    const presaY = dentro((rp.height / 2) / cellaVassoio, alte);
+    const origine = celle[meglio.r * 9 + meglio.c].getBoundingClientRect();
+    return {
+      px: rp.left + rp.width / 2, py: rp.top + rp.height / 2,
+      cx: origine.left + presaX * origine.width, cy: origine.top + presaY * origine.height,
+    };
+  }, OCCUPATA.source);
+  if (!p) { mosseMancate.push('nessun posto libero per il primo pezzo'); return false; }
   await page.mouse.move(p.px, p.py);
   await page.mouse.down();
   await page.mouse.move(p.cx, p.cy, { steps: 5 });
   await page.mouse.up();
   await page.waitForTimeout(150);
+  // Con la macchina carica il disegno puo' arrivare dopo i 150 ms: si aspetta fino a 2 s
+  // prima di dire che la mossa non c'e' stata.
+  let fatta = (await occupate(page)) !== prima;
+  for (let i = 0; !fatta && i < 20; i += 1) {
+    await page.waitForTimeout(100);
+    fatta = (await occupate(page)) !== prima;
+  }
+  // Una volta su una dozzina di corse, e solo con tre corse insieme sulla stessa macchina, la
+  // prima mossa non e' arrivata (misurato una volta, causa non trovata): si ritenta una volta
+  // sola, e i ritentativi si contano e si stampano, cosi' un peggioramento si vede.
+  if (!fatta && giro === 1) { mosseRitentate += 1; return unaMossa(page, 2); }
+  if (!fatta) mosseMancate.push(`il pezzo non e' stato posato (${prima} occupate prima e dopo, ${await dove(page)})`);
+  return fatta;
 }
 
 async function aspetta(page) {
@@ -1330,12 +1400,48 @@ for (const conLibera of [false, true]) {
   righe.push({ caso: 'S, T, U tastiera fuori dal vassoio, pannello, cambio di partita', primo: '-', daZero: false, nota: note.join('; ') });
 }
 
+// ---------- V ----------
+// La firma deve saper fallire (PO-031). Una partita libera con due mosse; si cambia SOLO la
+// griglia salvata (una casella libera diventa occupata, punteggio e mosse uguali) e si
+// ricarica: la partita che riapre e' un'altra, e la firma lo deve dire. Con la firma di
+// prima, che contava la classe `piena`, le due firme erano uguali e il caso era rosso.
+{
+  const { contesto, page } = await prepara();
+  await page.getByRole('button', { name: /^Partita libera/ }).click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  for (let i = 0; i < 2; i += 1) await unaMossa(page);
+  await page.waitForTimeout(500);
+  const prima = await firma(page);
+  const cambiata = await page.evaluate(() => {
+    const salvata = JSON.parse(localStorage.getItem('plinto:partita') ?? 'null');
+    const libera = salvata?.grid?.findIndex((v) => v === 0) ?? -1;
+    if (libera < 0) return false;
+    salvata.grid[libera] = 2;
+    localStorage.setItem('plinto:partita', JSON.stringify(salvata));
+    return true;
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('.pl-plancia .pl-cella', { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(500);
+  const dopo = await firma(page);
+  const punti = (f) => f.split(' / ')[0];
+  if (!cambiata) errori.push('V: nessuna casella libera nella partita salvata, il caso non prova niente');
+  else if (punti(prima) !== punti(dopo)) errori.push(`V: e' cambiato anche il punteggio ("${prima}" -> "${dopo}"), il caso non prova la griglia`);
+  else if (prima === dopo) errori.push(`V: la firma non vede una griglia diversa con lo stesso punteggio ("${prima}")`);
+  righe.push({ caso: 'V la firma vede una griglia diversa con lo stesso punteggio', primo: await dove(page), daZero: false, nota: `"${prima}" -> "${dopo}"` });
+  await contesto.close();
+}
+
 await browser.close();
 if (server) server.kill();
 
 console.log('\n| Caso | Dove si riapre | Riparte da 0 | Nota |\n|---|---|---|---|');
 for (const r of righe) console.log(`| ${r.caso} | ${r.primo} | ${r.daZero ? 'SI' : 'no'} | ${r.nota} |`);
 
+console.log(`\nMosse di unaMossa: ${mosseTentate} tentate, ${mosseRitentate} ritentate, ${mosseMancate.length} non fatte.`);
+if (mosseMancate.length) {
+  errori.push(`unaMossa: ${mosseMancate.length} mosse non fatte (${[...new Set(mosseMancate)].join('; ')})`);
+}
 if (errori.length) {
   console.error(`\n${errori.length} problemi:`);
   errori.forEach((e) => console.error(` - ${e}`));
