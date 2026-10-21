@@ -20,6 +20,26 @@ import { GRID_SIZE } from '../config/rules.js';
 
 const CENTRO = { row: 4, col: 4 };
 
+/*
+ * INVIO_PREME_I_PULSANTI (rapporto PO-026, scelta 4; decisione PO-027): con un pezzo scelto,
+ * Invio e Spazio posavano il pezzo da qualunque punto della pagina, perche' questo hook
+ * ascolta `window` e chiama `preventDefault()`. Con la sola tastiera, Tab su «Menu» e Invio
+ * posava il pezzo invece di aprire il menu (misurato: 4 -> 8 punti, menu chiuso); sulla
+ * pastiglia degli attrezzi del livello posava e spendeva una mossa (18 -> 17). Acceso,
+ * Invio e Spazio posano solo se il fuoco NON e' su un comando fuori dal vassoio e dalla
+ * griglia: sul pezzo del vassoio (da cui si e' appena scelto) o con il fuoco su <body>
+ * posano come prima; su «Menu», sulla pastiglia, sulla mensola premono il pulsante. Spento,
+ * torna il difetto: caso S di `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const INVIO_PREME_I_PULSANTI = true;
+
+/** Il fuoco e' su un comando che non e' un pezzo del vassoio ne' la griglia? */
+function suUnComandoFuori(elemento) {
+  if (!elemento || typeof elemento.closest !== 'function') return false;
+  const comando = elemento.closest('button, a[href], input, select, textarea, summary, [role="button"]');
+  return !!comando && !comando.closest('.pl-tray, .pl-plancia');
+}
+
 export function useTastiera({
   attivo, selezionato, onPosiziona, onAnnulla, mano, conTastiera = false,
 }) {
@@ -81,6 +101,9 @@ export function useTastiera({
       }
 
       if (e.key === 'Enter' || e.key === ' ') {
+        // Il tasto e' del pulsante che ha il fuoco: niente preventDefault, cosi' il
+        // browser lo preme.
+        if (INVIO_PREME_I_PULSANTI && suUnComandoFuori(e.target)) return;
         e.preventDefault();
         const pezzo = mano[selezionato];
         const posizione = cursore ?? CENTRO;

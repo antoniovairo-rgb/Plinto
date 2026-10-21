@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { ATTREZZI } from '../persistence/attrezzi.js';
 import { Pezzo } from './Pezzo.jsx';
 
@@ -133,18 +133,47 @@ export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {
   );
 }
 
+/*
+ * PANNELLO_COME_IL_MENU (collaudo 1.21.22, O3; decisione PO-028): aperto con Tab+Invio o col
+ * clic sulla pastiglia, il fuoco restava su <body> (la pastiglia sparisce mentre il pannello
+ * e' aperto) e un Tab lo portava sui pezzi dietro il velo; chiuso senza scegliere, il fuoco
+ * restava su <body>. Il menu della partita fa gia' il contrario (MENU_COME_LE_DOMANDE).
+ * Acceso, il pannello si comporta come il menu: all'apertura il fuoco entra su «Torna alla
+ * partita», chiuso SENZA una scelta (Escape, velo, «Torna alla partita») torna alla
+ * pastiglia. Dopo una scelta il fuoco non si sposta, come prima. «Torna alla partita» e non
+ * il primo attrezzo: e' lo stesso pulsante su cui entra il menu, e un Invio di troppo non
+ * spende un gettone (il gessetto si applica subito). Spento, torna il difetto: caso T di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const PANNELLO_COME_IL_MENU = true;
+
 /** Il pannello di scelta. */
 export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, onChiudi, t }) {
+  const torna = useRef(null);
+  const scelto = useRef(false);
   useEffect(() => {
     const esci = (e) => { if (e.key === 'Escape') onChiudi(); };
     window.addEventListener('keydown', esci);
     return () => window.removeEventListener('keydown', esci);
   }, [onChiudi]);
+  useEffect(() => {
+    if (PANNELLO_COME_IL_MENU) torna.current?.focus();
+  }, []);
+  // Alla chiusura: la pastiglia torna a schermo nello stesso disegno che toglie il pannello,
+  // quindi qui c'e' gia'.
+  useEffect(() => () => {
+    if (!PANNELLO_COME_IL_MENU || scelto.current) return;
+    document.querySelector('.pl-attrezzi__pastiglia')?.focus({ preventScroll: true });
+  }, []);
 
   return (
     <div className="pl-velo" onClick={onChiudi}>
       <div className="pl-attrezzi__pannello" role="dialog" aria-modal="true"
-           aria-label={t('attrezzi.titolo')} onClick={(e) => e.stopPropagation()}>
+           aria-label={t('attrezzi.titolo')} onClick={(e) => e.stopPropagation()}
+           onClickCapture={(e) => {
+             const b = e.target.closest('button');
+             if (b && b !== torna.current) scelto.current = true;
+           }}>
         <p className="pl-attrezzi__intestazione">{t('attrezzi.titolo')}</p>
 
         {/* QUANTI NE HAI, SCRITTO. Il numero c'era solo nell'etichetta per i lettori di
@@ -197,7 +226,7 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
           })}
         </div>
 
-        <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onChiudi}>
+        <button ref={torna} type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={onChiudi}>
           {t('comune.tornaAllaPartita')}
         </button>
       </div>
