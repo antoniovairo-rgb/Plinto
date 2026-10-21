@@ -7,6 +7,17 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.19] — 21 ottobre 2026
+
+### Corretto
+
+- **Le pillole della home hanno tutte la stessa misura** (riscontro del PO sulla 1.21.18,
+  PO-020/PO-021): «Gioca ›» e «Riprendi ›» della Sfida del giorno erano più grandi di
+  «Nuova» e «Riprendi ›» della Partita libera. Interruttore `PILLOLE_STESSA_MISURA`;
+  controllo in `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.18] — 20 ottobre 2026
 
 ### Cambiato
