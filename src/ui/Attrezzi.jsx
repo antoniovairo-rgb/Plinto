@@ -219,7 +219,7 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
             ) : (
               <button key={nome} type="button" className="pl-attrezzi__scelta"
                       disabled={disabilitati?.includes(nome)}
-                      onClick={() => onScegli(nome)}>
+                      onClick={(e) => onScegli(nome, e)}>
                 {contenuto}
               </button>
             );
