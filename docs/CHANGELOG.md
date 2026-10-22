@@ -22,6 +22,12 @@ La versione è dichiarata in un solo posto — il campo `version` di `package.js
   «Torna alla partita» si raggiunge sempre; la guida e il livello non sporgono più di lato.
   Interruttori `VELI_CHE_SCORRONO`, `TESTO_GRANDE_VA_A_CAPO`.
 
+### Cambiato
+
+- **Col dito, dopo mensola, carriola o piccone nessun pezzo resta scelto** (già dalla
+  1.21.24, collaudo 1.21.24 O1, scelta del PO): se avevi toccato un pezzo prima di usare
+  l'attrezzo, va ritoccato; prima restava scelto e il tocco seguente sulla griglia lo posava.
+
 ### Android
 
 - Pacchetto 11915: l'app si dichiara gioco (`android:appCategory="game"`), l'eccezione di
