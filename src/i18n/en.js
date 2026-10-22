@@ -489,7 +489,7 @@ export default {
     muovereTitolo: 'Two ways to move',
     trascinare: 'Drag the piece where you want it. While you move it you see a preview of where it will land, and if it does not fit you are told before you let go.',
     dueTocchi: 'Or tap the piece once to pick it up, then tap the square to put it down. Handy one-handed.',
-    tastiera: 'You can also play from the keyboard: Tab to choose a piece, Enter to pick it up, arrows to move on the grid, Enter to drop it, Esc to cancel. Every move is announced to screen readers.',
+    tastiera: 'You can also play from the keyboard: Tab to choose a piece, Enter to pick it up, arrows to move on the grid, Enter to drop it, Esc to cancel. With the pickaxe, the arrows choose the square and Enter empties it. Every move is announced to screen readers.',
     rimetti: 'If you drop a piece where you did not mean to, "Put the piece back" appears under the grid and the game returns exactly as it was. It only works when that move cleared nothing and did not end the game: it is there to fix a wrong tap, not to change your mind.',
     punteggioTitolo: 'Interlace, Chain and Tint',
     intreccio: 'An Interlace is clearing two or more groups with a single move, and it multiplies that move: three groups at once are worth x{n}. The easiest place is where a row and a column cross: one piece can close both.',

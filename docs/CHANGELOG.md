@@ -7,6 +7,32 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.24] — 21 ottobre 2026
+
+### Corretto
+
+- **Gli attrezzi con la tastiera** (PO-030, PO-032; collaudo 1.21.22 O2 e 1.21.23 D1, O1,
+  O2):
+  - il piccone si usa anche con la tastiera: le frecce portano il cursore sulla casella e
+    Invio (o Spazio) la svuota; col tocco non cambia niente; l'aiuto lo dice in una frase.
+    Interruttore `SCAVO_CON_LA_TASTIERA`;
+  - con un pezzo scelto, scegliere la mensola, la carriola o il piccone (o lo scambio dalla
+    mensola) lascia il pezzo: Invio sul vassoio non posa più il pezzo di prima, e non si
+    perde una mossa. Interruttore `SCELTA_AZZERATA_CON_L_ATTREZZO`;
+  - Escape durante l'attesa di mensola, carriola, scambio e piccone fa quello che fa
+    «Lascia stare». Interruttore `ESCAPE_LASCIA_STARE`;
+  - messo un pezzo sulla mensola o ripreso con la tastiera, il fuoco resta sui pezzi.
+    Interruttore `FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA`.
+  Controllo: casi W e X di `npm run e2e-po008`.
+
+### Prove
+
+- La firma della partita in `e2e-po008` conta le caselle occupate davvero (PO-031, caso V).
+- «rimetti a posto il pezzo» aspetta i blocchi e scrive cosa c'era se la mossa non appoggia
+  (PO-033).
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
 ## [1.21.23] — 21 ottobre 2026
 
 ### Corretto

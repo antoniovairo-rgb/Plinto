@@ -572,7 +572,7 @@ export default {
     muovereTitolo: 'Due modi per muovere',
     trascinare: 'Trascina il pezzo dove vuoi metterlo. Mentre lo muovi vedi in anteprima dove finirà, e se non ci sta te lo dice prima che tu lo lasci.',
     dueTocchi: 'Oppure tocca il pezzo una volta per prenderlo, poi tocca la casella dove appoggiarlo. Comodo con una mano sola.',
-    tastiera: 'Si gioca anche da tastiera: Tab per scegliere il pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia, Invio per appoggiarlo, Esc per annullare. Ogni mossa viene descritta a voce ai lettori di schermo.',
+    tastiera: 'Si gioca anche da tastiera: Tab per scegliere il pezzo, Invio per prenderlo, le frecce per muoverti sulla griglia, Invio per appoggiarlo, Esc per annullare. Col piccone le frecce scelgono la casella e Invio la svuota. Ogni mossa viene descritta a voce ai lettori di schermo.',
     rimetti: 'Se lasci il pezzo dove non volevi, sotto la griglia compare "Rimetti a posto il pezzo": la partita torna esattamente com\'era. Funziona solo se quella mossa non ha eliminato niente e non ha chiuso la partita, e serve a correggere un tocco sbagliato, non a cambiare idea.',
     punteggioTitolo: 'Intreccio, Catena e Tinta',
     intreccio: 'Un Intreccio è chiudere due o più gruppi con una sola mossa, e moltiplica i punti di quella mossa: tre gruppi insieme valgono ×{n}. Il modo più semplice è il punto in cui una riga e una colonna si incrociano: un pezzo solo può chiuderle tutte e due.',
