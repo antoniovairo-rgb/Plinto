@@ -138,6 +138,15 @@ describe('orientamento', () => {
     )?.[1];
     expect(android).toBe(web);
   });
+
+  // PO-035: con targetSdk 36 Android 16 ignora l'orientamento chiesto sugli schermi da
+  // 600 dp in su, salvo per i giochi (developer.android.com, «Behavior changes: Apps
+  // targeting Android 16», «Exceptions»). Senza l'attributo il blocco in verticale qui
+  // sopra non vale sui tablet.
+  it('l\'app si dichiara gioco, eccezione di Android 16 all\'orientamento ignorato', () => {
+    const applicazione = manifest.match(/<application\b[^>]*>/)?.[0] ?? '';
+    expect(applicazione).toMatch(/android:appCategory="game"/);
+  });
 });
 
 describe('schermo intero', () => {

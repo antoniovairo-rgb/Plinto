@@ -5,7 +5,19 @@
     <!-- Nessun permesso. PLINTO non accede a rete, posizione, contatti o archivio: il
          contenuto lo carica il browser di sistema, che i suoi permessi ce li ha gia'. -->
 
+    <!-- android:appCategory="game" (PO-035, decisione del PO del 21 ottobre 2026). Con
+         targetSdk 36 Android 16 non applica piu' l'orientamento chiesto (qui portrait,
+         SCREEN_ORIENTATION della finestra di fiducia) sugli schermi con larghezza minima
+         di almeno 600 dp: tablet e pieghevoli aperti possono girare il gioco in
+         orizzontale. I giochi sono un'eccezione, riconosciuta da questo attributo. Fonte:
+         developer.android.com, "Behavior changes: Apps targeting Android 16", sezione
+         "Ignore orientation, resizability, and aspect ratio restrictions", sottosezione
+         "Exceptions" (letta il 22 ottobre 2026). La finestra del gioco e' un'Activity di
+         Chrome, non di questa app: se l'eccezione valga anche li' non posso confermarlo,
+         per questo il gioco e' giocabile anche in orizzontale (GIOCO_IN_ORIZZONTALE in
+         src/ui/SchermoGioco.jsx). Vale dal prossimo pacchetto caricato. -->
     <application
+        android:appCategory="game"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
