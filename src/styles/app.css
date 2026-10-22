@@ -1550,6 +1550,18 @@ button {
   width: 100%;
 }
 
+/* TESTO GRANDE: LE RIGHE VANNO A CAPO (PO-035, O1; interruttore TESTO_GRANDE_VA_A_CAPO in
+   src/main.jsx). Con i caratteri al 200% queste righe non ci stavano e la pagina sporgeva
+   di lato (guida +52 px, livello +35 a 360x800). Vanno a capo solo quando non ci stanno:
+   a caratteri normali ci stanno, e nessuna cambia. La scritta PLINTO e' una parola sola e
+   non puo' andare a capo: si limita in larghezza (13vw per lettera: a 360 px sono 47 px,
+   sopra i 34 normali, quindi a caratteri normali non cambia). */
+.pl-a-capo .pl-logo { flex-wrap: wrap; justify-content: center; }
+.pl-a-capo .pl-logo__testo { font-size: min(34px, 13vw); }
+.pl-a-capo .pl-intro__esempio { flex-wrap: wrap; }
+.pl-a-capo .pl-guida__navigazione { flex-wrap: wrap; }
+.pl-a-capo .pl-anteprima { flex-wrap: wrap; max-width: 100%; }
+
 /* ------------------------------------------------------------- guida a passi --- */
 /* Il conteggio dei passi: piccolo e spento, ma sempre presente. Chi apre un gioco per
    la prima volta deve sapere quanto dura la cosa che sta leggendo, altrimenti la salta
