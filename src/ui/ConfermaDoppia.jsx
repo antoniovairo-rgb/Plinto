@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { CLASSE_VELO } from './velo.js';
 
 /**
  * La conferma in due passi per le azioni che cancellano.
@@ -31,7 +32,7 @@ export function ConfermaDoppia({
   }, [onAnnulla]);
 
   return (
-    <div className="pl-velo" onClick={onAnnulla}>
+    <div className={CLASSE_VELO} onClick={onAnnulla}>
       <div
         className={`pl-azzera ${passo === 2 ? 'pl-azzera--ultimo' : ''}`}
         role="dialog"
@@ -125,7 +126,7 @@ export function ConfermaPerdita({
   }, [onAnnulla]);
 
   return (
-    <div className="pl-velo" onClick={onAnnulla}>
+    <div className={CLASSE_VELO} onClick={onAnnulla}>
       <div
         className="pl-azzera pl-azzera--perdita"
         role="dialog"

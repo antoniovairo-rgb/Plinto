@@ -149,6 +149,21 @@ export const FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA = true;
  */
 export const SCAVO_CON_LA_TASTIERA = true;
 
+/*
+ * GIOCO_IN_ORIZZONTALE (PO-035, E1 del rapporto PO-017; decisione del PO del 21 ottobre
+ * 2026): con lo schermo coricato e alto fino a 620 px la regola orizzontale di
+ * `src/styles/app.css` lasciava l'area della griglia alta quanto il suo contenuto, e la
+ * griglia, che si misura in altezza, collassava: 28x28 px nella partita libera e nella
+ * sfida, caselle 0x0 nei livelli, su 640x360, 800x360, 915x412, 1024x600, 1280x620 (dalla
+ * 1.19.1 a oggi). Si apriva, rispondeva, ma non si poteva giocare. Acceso, la schermata di
+ * gioco ha la classe `pl-screen--orizzontale`: la griglia prende tutta l'altezza a
+ * sinistra e punteggio, obiettivo, Catena, la riga degli attrezzi e i pezzi stanno nella
+ * colonna di destra; la colonna da 430 px dei PC bassi non vale per questa schermata. In
+ * verticale e sopra i 620 px di altezza la classe non cambia niente. Spento, torna il
+ * difetto: il caso «orizzontale» di `npm run e2e-schermi` e' rosso.
+ */
+export const GIOCO_IN_ORIZZONTALE = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -442,7 +457,7 @@ export function SchermoGioco({
     : null;
 
   return (
-    <div className="pl-screen pl-screen--gioco">
+    <div className={`pl-screen pl-screen--gioco${GIOCO_IN_ORIZZONTALE ? ' pl-screen--orizzontale' : ''}`}>
       <Hud
         punteggio={partita.score}
         record={record.best}
@@ -651,7 +666,7 @@ export function SchermoGioco({
         </div>
       </div>
 
-      <div className={sceltaPezzo ? 'pl-tray-scelta' : ''}>
+      <div className={`pl-tray-involucro${sceltaPezzo ? ' pl-tray-scelta' : ''}`}>
         <Tray
           mano={partita.hand}
           pezziMorti={pezziMorti}
