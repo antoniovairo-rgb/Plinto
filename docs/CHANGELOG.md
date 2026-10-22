@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.25] — 22 ottobre 2026
+
+### Corretto
+
+- **Si gioca anche col telefono coricato** (PO-035, PO-017 E1): con lo schermo in
+  orizzontale e alto fino a 620 px la griglia era di 28 px, nei livelli le caselle
+  sparivano e gli attrezzi non si raggiungevano. Adesso la griglia prende tutta l'altezza
+  (348 px a 640x360, 588 a 1024x600) e punteggio, obiettivo, Catena, attrezzi e pezzi stanno
+  a destra. In verticale, sui tablet e sui PC non cambia niente (impaginazione identica in
+  70 scene misurate). Interruttore `GIOCO_IN_ORIZZONTALE`.
+- **Con i caratteri molto grandi** (PO-017 D1, O1; misurato con una simulazione a 200%):
+  menu, domande e pannello degli attrezzi scorrono invece di uscire dallo schermo, e
+  «Torna alla partita» si raggiunge sempre; la guida e il livello non sporgono più di lato.
+  Interruttori `VELI_CHE_SCORRONO`, `TESTO_GRANDE_VA_A_CAPO`.
+
+### Android
+
+- Pacchetto 11915: l'app si dichiara gioco (`android:appCategory="game"`), l'eccezione di
+  Android 16 all'orientamento ignorato sui tablet.
+
+### Prove
+
+- `npm run e2e-schermi`: telefono coricato su cinque formati (griglia almeno all'85%
+  dell'altezza, un pezzo trascinato col dito) e testo x2; rossi sulla 1.21.24.
+
 ## [1.21.24] — 21 ottobre 2026
 
 ### Corretto
