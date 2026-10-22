@@ -169,9 +169,15 @@ Pixel (`pixel.mjs`): 40 schermate identiche byte per byte, 30 con differenze pic
 - `npm test`: 45 file, 651 test, tutti verdi.
 - `npm run e2e-schermi` con `PLINTO_SCHERMI=orizzontale,testo` sulla build di produzione
   (`vite preview --port 4173`, `PLINTO_E2E_URL=http://127.0.0.1:4173/`): verde.
-- `npm run verifica -- --veloce`: vedi sotto.
-
-ESITO_VERIFICA
+- `npm run verifica -- --veloce`: la corsia veloce è stata **negata dal gate** («non risulta
+  nessun giro completo passato su questa macchina»), quindi è girato il **gate completo**: 33
+  controlli in 5259 s. **31 verdi, 2 rossi, entrambi i rossi noti** di `docs/TESTING.md` per il
+  carattere dei contenitori figli, ciascuno con un solo problema:
+  - `e2e-quadri`: «a 320x700 bisogna scorrere di 2 px» (fine del livello vinta);
+  - `recensione`: «a 360x640 l'invito finisce 10px sotto la barra dei pulsanti».
+  Fra i verdi: cento livelli giocati nell'app 100/100, precisione del trascinamento, geometria
+  della plancia, «la home entra nello schermo», e `e2e-schermi` completo («Tutto a posto su 13
+  formati, 5 coricati e 2 col testo x2»). Il verdetto che conta resta quello della CI.
 
 ## Cose trovate, non corrette
 
