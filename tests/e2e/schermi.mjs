@@ -694,6 +694,348 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
   await contesto.close();
 }
 
+// ------------------------------------------------------- telefono coricato (PO-035) ---
+/*
+ * IN ORIZZONTALE SI DEVE POTER GIOCARE. Fino alla 1.21.24, con lo schermo coricato e alto
+ * fino a 620 px, la griglia della partita libera e della sfida era di 28x28 px e nei
+ * livelli le caselle erano 0x0 (rapporto PO-017, E1): il gioco si apriva e rispondeva, ma
+ * non si poteva giocare. Nessuna prova apriva il gioco in orizzontale sotto i 720 px di
+ * altezza. Qui: i cinque formati della decisione del PO, col tocco vero.
+ *
+ * LA SOGLIA: il lato della griglia almeno l'85% dell'altezza della finestra. Il disegno
+ * scelto ne da' il 97% a 640x360 (348 px su 360); un'impaginazione che lasciasse Catena e
+ * riga degli attrezzi sopra e sotto la griglia arriverebbe al massimo al 76% (348 - 23 -
+ * 44 - 8 = 273 px, calcolato dalle misure), il difetto all'8%. L'85% separa la griglia a
+ * tutta altezza dalle due cose che non lo sono, e lascia 12 punti di margine per i bordi e
+ * per le tacche dei telefoni.
+ */
+const ORIZZONTALI = [[640, 360], [800, 360], [915, 412], [1024, 600], [1280, 620]]
+  .map(([w, h]) => ({ nome: `orizzontale ${w}x${h}`, w, h }));
+const LATO_MINIMO = 0.85;
+
+/*
+ * CARATTERI AL 200% (PO-035, D1 e O1). Simulazione dichiarata, la stessa del rapporto
+ * PO-017: ogni `font-size` dei fogli di stile per due. Come Chrome dentro la TWA applichi la
+ * dimensione dei caratteri di Android non posso confermarlo. Con quella simulazione il
+ * pannello degli attrezzi superava lo schermo e «Torna alla partita» non si raggiungeva
+ * (D1), e la guida e il livello sporgevano di lato (O1, +52 e +35 px a 360x800).
+ */
+const TESTO_DOPPIO = [[360, 800], [412, 915]].map(([w, h]) => ({ nome: `testo x2 ${w}x${h}`, w, h }));
+function scalaTesto(f) {
+  const molt = (v) => v.replace(/(-?\d*\.?\d+)px/g, (_, n) => `${(Number(n) * f).toFixed(2)}px`);
+  const giro = (regole) => {
+    for (const r of regole) {
+      if (r.style && r.style.fontSize) r.style.fontSize = molt(r.style.fontSize);
+      if (r.style && r.style.font) r.style.font = molt(r.style.font);
+      if (r.cssRules) giro(r.cssRules);
+    }
+  };
+  for (const s of document.styleSheets) { try { giro(s.cssRules); } catch { /* foglio di un altro dominio */ } }
+  const st = document.createElement('style');
+  st.textContent = `html{font-size:${16 * f}px}`;
+  document.head.appendChild(st);
+}
+
+/** Un contesto col tocco, con il giro di prova gia' pronto: stato noto e misure comuni. */
+async function telefono(formato, { testo = 1 } = {}) {
+  const contesto = await browser.newContext({
+    viewport: { width: formato.w, height: formato.h },
+    deviceScaleFactor: 2, hasTouch: true, isMobile: true, locale: 'it-IT',
+  });
+  const page = await contesto.newPage();
+  page.setDefaultTimeout(8000);
+  const erroriConsole = [];
+  page.on('console', (m) => { if (m.type() === 'error') erroriConsole.push(m.text()); });
+  page.on('pageerror', (e) => erroriConsole.push(e.message));
+  const riga = (tabella[formato.nome] = {});
+  const difetto = (schermata, t) => { errori.push(`${formato.nome} / ${schermata}: ${t}`); riga[schermata] = 'NO'; };
+  const bene = (schermata) => { riga[schermata] = riga[schermata] ?? 'ok'; };
+  const passo = async (schermata, fn) => {
+    try { await fn(); bene(schermata); }
+    catch (e) {
+      difetto(schermata, `non ci si arriva: ${String(e.message).split('\n')[0].slice(0, 140)}`);
+      await page.screenshot({ path: `${OUT}/${formato.nome.replace(/[^a-z0-9]+/gi, '-')}-${schermata}-errore.png` }).catch(() => {});
+    }
+  };
+  /** Stato noto; `guida` lascia la guida al primo avvio, `livelli` e `attrezzi` i progressi. */
+  async function apri({ guida = false, livelli = 0, attrezzi = 0 } = {}) {
+    await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+    await page.evaluate(({ guida, livelli, attrezzi }) => {
+      window.localStorage.clear();
+      if (!guida) {
+        window.localStorage.setItem('plinto:settings', JSON.stringify({
+          introVista: true, tema: 'scuro', lingua: 'it',
+          audio: false, vibrazione: false, animazioni: false, aiutoVisivo: true,
+        }));
+      }
+      const v = {};
+      for (let k = 1; k <= livelli; k += 1) v[k] = { mosse: 12, punteggio: 300, tentativi: 1 };
+      if (livelli) window.localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: v }));
+      if (attrezzi) window.localStorage.setItem('plinto:attrezzi', JSON.stringify({ versione: 1, disponibili: attrezzi, riscossi: 2 }));
+    }, { guida, livelli, attrezzi });
+    await page.reload({ waitUntil: 'networkidle' });
+    if (testo !== 1) await page.evaluate(scalaTesto, testo);
+    await page.waitForSelector(guida ? '.pl-guida__navigazione' : '.pl-home__azioni');
+  }
+  /** Il livello 13 (ha l'obiettivo, i prossimi tre pezzi e, con i gettoni, gli attrezzi). */
+  async function livello13() {
+    await apri({ livelli: 12, attrezzi: 2 });
+    await page.getByRole('button', { name: /^Mappa dei livelli/ }).tap();
+    await page.waitForSelector('.pl-tappe');
+    const tappa = page.locator('.pl-tappa').nth(12);
+    await tappa.scrollIntoViewIfNeeded();
+    await tappa.tap();
+    await page.getByRole('button', { name: /^Gioca$/ }).first().tap();
+    // `attached` e non `visible`: con il difetto le caselle sono 0x0, Playwright le conta
+    // invisibili e l'attesa scadrebbe senza dire quanto e' grande la griglia.
+    await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+    await page.waitForTimeout(250);
+  }
+  /** Quanto sporge la pagina, in orizzontale e in verticale. */
+  const sporge = () => page.evaluate(() => {
+    const d = document.scrollingElement;
+    let lato = d.scrollWidth - window.innerWidth;
+    // Anche un contenitore che scorre di lato senza che il gioco lo preveda.
+    for (const el of document.querySelectorAll('#root *')) {
+      const s = getComputedStyle(el);
+      if (/(auto|scroll)/.test(s.overflowX) && el.clientWidth > 0) lato = Math.max(lato, el.scrollWidth - el.clientWidth);
+    }
+    return { x: lato, y: d.scrollHeight - window.innerHeight };
+  });
+  /**
+   * Si raggiunge col dito? Portato in vista (come farebbe chi scorre), deve stare dentro
+   * la finestra e il punto al suo centro deve essere suo: non coperto, non ritagliato.
+   */
+  const raggiungibile = (locator) => locator.evaluate((el) => {
+    el.scrollIntoView({ block: 'center', inline: 'center' });
+    const r = el.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    if (r.width < 2 || r.height < 2 || x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) return false;
+    const chi = document.elementFromPoint(x, y);
+    return !!chi && (chi === el || el.contains(chi));
+  });
+  async function trascinaColDito(da, a) {
+    const cdp = await contesto.newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: da.x, y: da.y }] });
+    for (let i = 1; i <= 12; i += 1) {
+      const x = da.x + ((a.x - da.x) * i) / 12, y = da.y + ((a.y - da.y) * i) / 12;
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
+    }
+    const anteprima = await page.locator('.pl-cella--anteprima').count();
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await cdp.detach();
+    return anteprima;
+  }
+  /**
+   * Un pezzo preso col dito e appoggiato su una casella vuota della griglia. Si riconosce
+   * dal vassoio, che ne ha uno in meno (vedi `pezziInMano` in provaFormato).
+   */
+  async function appoggiaColDito(schermata) {
+    const g = await page.evaluate(() => {
+      const pezzi = [...document.querySelectorAll('.pl-tray .pl-tray__posto')];
+      const celle = [...document.querySelectorAll('.pl-plancia .pl-cella')];
+      const libera = (i) => celle[i] && !celle[i].querySelector('.pl-blocco');
+      for (const posto of pezzi) {
+        const pezzo = posto.querySelector('.pl-pezzo');
+        if (!pezzo) continue;
+        // Le caselle del pezzo sono in ordine di riga (Pezzo.jsx): la larghezza sta nella
+        // griglia del pezzo, `repeat(<colonne>, <lato>px)`.
+        const colonne = Number(/repeat\((\d+)/.exec(pezzo.style.gridTemplateColumns)?.[1] ?? 1);
+        const forma = [...pezzo.children]
+          .map((c, i) => ({ r: Math.floor(i / colonne), c: i % colonne, piena: c.querySelector('.pl-blocco') !== null }))
+          .filter((x) => x.piena);
+        // Il primo posto dove il pezzo intero cade su caselle vuote.
+        for (let r0 = 0; r0 < 9; r0 += 1) for (let c0 = 0; c0 < 9; c0 += 1) {
+          if (!forma.every(({ r, c }) => r0 + r < 9 && c0 + c < 9 && libera((r0 + r) * 9 + c0 + c))) continue;
+          const rp = pezzo.getBoundingClientRect();
+          const primo = pezzo.children[0].getBoundingClientRect();
+          const c00 = celle[0].getBoundingClientRect();
+          const passo = (celle[8].getBoundingClientRect().left - c00.left) / 8;
+          const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
+          const presaX = (px - rp.left) / primo.width, presaY = (py - rp.top) / primo.height;
+          return { px, py, cx: c00.left + c0 * passo + presaX * c00.width, cy: c00.top + r0 * passo + presaY * c00.height, cella: c00.width };
+        }
+      }
+      return null;
+    });
+    if (!g) { difetto(schermata, 'nessun pezzo del vassoio entra nella griglia: la prova non sa dove appoggiarlo'); return; }
+    const prima = await page.locator('.pl-tray .pl-pezzo').count();
+    // Col dito il pezzo si disegna 1,35 caselle sopra il dito (useTrascinamento.js).
+    const anteprima = await trascinaColDito({ x: g.px, y: g.py }, { x: g.cx, y: g.cy + 1.35 * g.cella });
+    await page.waitForTimeout(200);
+    const dopo = await page.locator('.pl-tray .pl-pezzo').count();
+    if (anteprima === 0) difetto(schermata, 'col dito: nessuna anteprima sulla griglia durante il trascinamento');
+    if (dopo >= prima) difetto(schermata, `col dito: il pezzo non si appoggia (pezzi in mano ${prima} -> ${dopo}, casella di ${Math.round(g.cella)} px)`);
+    // UN SECONDO PRIMA DEL TOCCO SEGUENTE. Nel Chromium di prova un tocco che arriva entro
+    // ~200 ms dalla fine di un trascinamento col dito a volte non produce il `click`
+    // (pointerdown e pointerup si', click no): 3 volte su 4 a 200 ms, 0 su 4 a 1500 ms,
+    // uguale sulla 1.21.24 e in verticale (rapporto PO-035). Non e' di questa prova; se
+    // succeda su un telefono vero non posso confermarlo.
+    await page.waitForTimeout(1000);
+  }
+  async function chiudi() {
+    if (erroriConsole.length) for (const e of erroriConsole.slice(0, 3)) difetto('console', e.slice(0, 160));
+    else riga.console = 'ok';
+    await contesto.close();
+  }
+  return { page, apri, livello13, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi };
+}
+
+async function provaOrizzontale(formato) {
+  const { page, apri, livello13, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi } = await telefono(formato);
+  const sigla = formato.nome.replace(/[^a-z0-9]+/gi, '-');
+  /** La griglia a tutta altezza, intera, e niente fuori dallo schermo. */
+  async function misuraGioco(schermata) {
+    await page.waitForTimeout(250);
+    const m = await page.evaluate(() => {
+      const p = document.querySelector('.pl-plancia').getBoundingClientRect();
+      const celle = [...document.querySelectorAll('.pl-plancia .pl-cella')];
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const fuori = (r) => r.left < -1 || r.top < -1 || r.right > vw + 1 || r.bottom > vh + 1;
+      const celleFuori = celle.filter((c) => fuori(c.getBoundingClientRect())).length;
+      const cellaMin = Math.min(...celle.map((c) => c.getBoundingClientRect().width));
+      // Ogni comando della schermata di gioco dentro lo schermo: punteggio e menu,
+      // obiettivo, attrezzi, «Rimetti a posto il pezzo», i pezzi.
+      const comandi = [...document.querySelectorAll('.pl-screen--gioco button, .pl-screen--gioco .pl-tray__posto, .pl-obiettivo')]
+        .filter((el) => { const r = el.getBoundingClientRect(); return r.width > 1 && r.height > 1 && fuori(r); })
+        .map((el) => `${el.className.split(' ')[0]} «${(el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 20)}»`);
+      return { w: p.width, h: p.height, vh, celle: celle.length, celleFuori, cellaMin, comandi };
+    });
+    await page.screenshot({ path: `${OUT}/${sigla}-${schermata}.png` });
+    const lato = Math.min(m.w, m.h);
+    if (lato < LATO_MINIMO * m.vh) difetto(schermata, `griglia di ${Math.round(m.w)}x${Math.round(m.h)} px su ${m.vh} di altezza (${Math.round((100 * lato) / m.vh)}%, minimo ${LATO_MINIMO * 100}%), caselle di ${Math.round(m.cellaMin)} px`);
+    if (Math.abs(m.w - m.h) > 1) difetto(schermata, `griglia non quadrata: ${Math.round(m.w)}x${Math.round(m.h)}`);
+    if (m.celle !== 81 || m.celleFuori > 0) difetto(schermata, `griglia non intera: ${m.celle} caselle, ${m.celleFuori} fuori dallo schermo`);
+    for (const c of m.comandi) difetto(schermata, `fuori dallo schermo: ${c}`);
+    const s = await sporge();
+    if (s.x > 1) difetto(schermata, `la pagina sporge di lato di ${s.x}px`);
+    if (s.y > 1) difetto(schermata, `la schermata di gioco scorre di ${s.y}px`);
+  }
+
+  await passo('libera', async () => {
+    await apri();
+    await page.getByRole('button', { name: /^Partita libera/ }).tap();
+    await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+    await misuraGioco('libera');
+    await appoggiaColDito('libera');
+  });
+  await passo('menu', async () => {
+    await page.locator('.pl-hud__menu').tap();
+    await page.waitForSelector('.pl-menu');
+    for (const b of await page.locator('.pl-menu button').all()) {
+      if (!(await raggiungibile(b))) difetto('menu', `«${(await b.innerText()).trim()}» non si raggiunge`);
+    }
+    await page.getByRole('button', { name: /^Torna alla partita$/ }).tap();
+    await page.waitForSelector('.pl-menu', { state: 'detached' });
+  });
+  await passo('sfida', async () => {
+    await apri();
+    await page.getByRole('button', { name: /^Sfida del giorno/ }).tap();
+    await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+    await misuraGioco('sfida');
+    await appoggiaColDito('sfida');
+  });
+  await passo('livello', async () => {
+    await livello13();
+    await misuraGioco('livello');
+    await appoggiaColDito('livello');
+  });
+  await passo('attrezzi', async () => {
+    const pastiglia = page.locator('.pl-attrezzi__pastiglia');
+    if (!(await raggiungibile(pastiglia))) { difetto('attrezzi', 'la pastiglia degli attrezzi non si raggiunge'); return; }
+    await pastiglia.tap();
+    await page.waitForSelector('.pl-attrezzi__pannello');
+    const torna = page.getByRole('button', { name: /^Torna alla partita$/ });
+    if (!(await raggiungibile(torna))) { difetto('attrezzi', '«Torna alla partita» del pannello non si raggiunge'); return; }
+    await torna.tap();
+    await page.waitForSelector('.pl-attrezzi__pannello', { state: 'detached' });
+  });
+  await passo('fine-livello', async () => {
+    if (!SEQUENZA_1) return;
+    await apri();
+    await page.locator('.pl-home__azioni .pl-btn--primario').tap();
+    await page.getByRole('button', { name: /^Gioca$/ }).tap();
+    await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+    for (const mossa of SEQUENZA_1) {
+      const punti = await page.evaluate(({ handIndex, row, col }) => {
+        const pezzo = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex]?.querySelector('.pl-pezzo');
+        if (!pezzo) return null;
+        const rp = pezzo.getBoundingClientRect();
+        const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
+        const celle = document.querySelectorAll('.pl-plancia .pl-cella');
+        const c0 = celle[0].getBoundingClientRect();
+        const passo = (celle[8].getBoundingClientRect().left - c0.left) / 8;
+        const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
+        const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
+        return { px, py, cx: c0.left + col * passo + presaX * c0.width, cy: c0.top + row * passo + presaY * c0.height };
+      }, mossa);
+      if (!punti) break;
+      await page.mouse.move(punti.px, punti.py);
+      await page.mouse.down();
+      await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+      await page.mouse.up();
+      await page.waitForTimeout(60);
+      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+    }
+    const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
+    if (!/superato/i.test(esito)) { difetto('fine-livello', `il livello 1 giocato non risulta superato (esito: «${esito.trim()}»)`); return; }
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${OUT}/${sigla}-fine-livello.png` });
+    for (const b of await page.locator('.pl-fine button, .pl-screen button').all()) {
+      if (!(await b.isVisible())) continue;
+      if (!(await raggiungibile(b))) difetto('fine-livello', `«${(await b.innerText()).trim().slice(0, 30)}» non si raggiunge`);
+    }
+    const s = await sporge();
+    if (s.x > 1) difetto('fine-livello', `la pagina sporge di lato di ${s.x}px`);
+  });
+  await chiudi();
+}
+
+async function provaTestoDoppio(formato) {
+  const { page, apri, livello13, sporge, raggiungibile, passo, difetto, chiudi } = await telefono(formato, { testo: 2 });
+  const sigla = formato.nome.replace(/[^a-z0-9]+/gi, '-');
+  await passo('guida', async () => {
+    await apri({ guida: true });
+    for (let n = 1; n <= 8; n += 1) {
+      await page.waitForTimeout(150);
+      const s = await sporge();
+      if (s.x > 1) difetto('guida', `passo ${n}: la pagina sporge di lato di ${s.x}px`);
+      if (n === 1) await page.screenshot({ path: `${OUT}/${sigla}-guida.png` });
+      const avanti = page.locator('.pl-guida__navigazione .pl-btn--primario');
+      if (!(await raggiungibile(avanti))) { difetto('guida', `passo ${n}: «${(await avanti.innerText()).trim()}» non si raggiunge`); return; }
+      if (/^(Gioca|Inizia)/i.test((await avanti.innerText()).trim())) break;
+      await avanti.tap();
+    }
+  });
+  await passo('livello', async () => {
+    await livello13();
+    await page.screenshot({ path: `${OUT}/${sigla}-livello.png` });
+    const s = await sporge();
+    if (s.x > 1) difetto('livello', `la pagina sporge di lato di ${s.x}px`);
+  });
+  await passo('attrezzi', async () => {
+    await page.locator('.pl-attrezzi__pastiglia').tap();
+    await page.waitForSelector('.pl-attrezzi__pannello');
+    const torna = page.getByRole('button', { name: /^Torna alla partita$/ });
+    if (!(await raggiungibile(torna))) {
+      const r = await page.locator('.pl-attrezzi__pannello').boundingBox();
+      difetto('attrezzi', `«Torna alla partita» del pannello non si raggiunge (pannello da ${Math.round(r.y)} a ${Math.round(r.y + r.height)} px su ${formato.h})`);
+      return;
+    }
+    await page.screenshot({ path: `${OUT}/${sigla}-attrezzi.png` });
+    await torna.tap();
+    await page.waitForSelector('.pl-attrezzi__pannello', { state: 'detached' });
+  });
+  await passo('menu', async () => {
+    await page.locator('.pl-hud__menu').tap();
+    await page.waitForSelector('.pl-menu');
+    for (const b of await page.locator('.pl-menu button').all()) {
+      if (!(await raggiungibile(b))) difetto('menu', `«${(await b.innerText()).trim()}» non si raggiunge`);
+    }
+  });
+  await chiudi();
+}
+
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 console.log(`\nPLINTO su tablet e PC (${INDIRIZZO})`);
 const misureCornici = [...new Set(DA_PROVARE.map((f) => { const c = corniceDi(f); return `${c.w}x${c.h}`; }))];
@@ -702,6 +1044,9 @@ for (const misura of misureCornici) {
   await provaFormato({ nome: `telefono ${misura} (riferimento)`, w, h, tocco: true }, { eRiferimento: true });
 }
 for (const formato of DA_PROVARE) await provaFormato(formato);
+const filtra = (lista) => (FILTRO ? lista.filter((f) => FILTRO.some((x) => f.nome.includes(x))) : lista);
+for (const formato of filtra(ORIZZONTALI)) await provaOrizzontale(formato);
+for (const formato of filtra(TESTO_DOPPIO)) await provaTestoDoppio(formato);
 await browser.close();
 
 // ------------------------------------------------------------------------- il verdetto ---
@@ -720,4 +1065,4 @@ if (errori.length) {
   console.log(`\nSchermate in ${OUT}`);
   process.exit(1);
 }
-console.log(`\nTutto a posto su ${DA_PROVARE.length} formati. Schermate in ${OUT}`);
+console.log(`\nTutto a posto su ${DA_PROVARE.length} formati, ${filtra(ORIZZONTALI).length} coricati e ${filtra(TESTO_DOPPIO).length} col testo x2. Schermate in ${OUT}`);

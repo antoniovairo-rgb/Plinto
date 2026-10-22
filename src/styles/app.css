@@ -1705,9 +1705,10 @@ button {
    Qui la griglia e' la colonna di sinistra, alta quanto lo schermo: la colonna si misura
    sulla griglia (`auto`), che e' quadrata e prende il 100% dell'altezza. Area e tavolo
    diventano `display: contents`, cosi' Catena e riga degli attrezzi salgono nella colonna
-   di destra senza cambiare un componente: ogni pixel che restava sopra o sotto la griglia
-   era un pixel di griglia in meno, e in un'altezza di 360 la Catena e la riga ne
-   prendevano 70 (griglia all'80%: misurato). A destra, dall'alto: punteggio e menu,
+   di destra senza cambiare un componente: ogni pixel che resta sopra o sotto la griglia
+   e' un pixel di griglia in meno. Con Catena (23 px) e riga (44) sopra e sotto, a 640x360
+   la griglia avrebbe al massimo 348 - 23 - 44 - 8 = 273 px, il 76% dell'altezza
+   (calcolato dalle misure); cosi' ne ha 348, il 97% (misurato). A destra, dall'alto: punteggio e menu,
    obiettivo o nome della modalita', Catena, poi lo spazio che avanza, e in fondo la riga
    (mensola, «Rimetti a posto il pezzo», attrezzi) e i pezzi, dove arriva il pollice.
    Il tetto della griglia in larghezza lascia almeno 240 px alla colonna di destra: sotto,
