@@ -193,3 +193,87 @@ describe('un file modificato a mano (collaudo 1.21.6, B9)', () => {
     });
   }
 });
+
+describe('gli attrezzi unendo (collaudo 1.21.6, B11)', () => {
+  // Il percorso del rapporto, con le funzioni vere: esporto con 3 gettoni, li spendo,
+  // reimporto lo stesso file con «Unisci». Prima della correzione tornavano tutti e tre.
+  it('i gettoni spesi dopo l esportazione non tornano reimportando', async () => {
+    const { riscuoti, usaAttrezzo, caricaAttrezzi } = await import('../src/persistence/attrezzi.js');
+    const vinti = {};
+    for (let n = 1; n <= 15; n += 1) vinti[n] = { mosse: 10, tentativi: 1 };
+    scrivi('progress', livelli(vinti));
+    riscuoti(15);
+    expect(caricaAttrezzi().disponibili).toBe(3);
+    const file = leggiSalvataggio(serializza(componiSalvataggio()));
+    usaAttrezzo(); usaAttrezzo(); usaAttrezzo();
+    applicaSalvataggio(file.salvataggio);
+    riscuoti(15);   // come fa il gioco quando riapre la mappa
+    expect(caricaAttrezzi().disponibili).toBe(0);
+  });
+
+  it('un file da un telefono che ha convertito piu livelli porta i suoi gettoni', () => {
+    scrivi('attrezzi', { versione: 1, disponibili: 0, riscossi: 1 });
+    applicaSalvataggio({ formato: 1, dati: { attrezzi: { versione: 1, disponibili: 2, riscossi: 3 } } });
+    expect(leggi('attrezzi')).toMatchObject({ disponibili: 2, riscossi: 3 });
+  });
+
+  it('un file vecchio, che ha riscosso meno, non cambia il saldo di qui', () => {
+    scrivi('attrezzi', { versione: 1, disponibili: 1, riscossi: 4 });
+    applicaSalvataggio({ formato: 1, dati: { attrezzi: { versione: 1, disponibili: 3, riscossi: 3 } } });
+    expect(leggi('attrezzi')).toMatchObject({ disponibili: 1, riscossi: 4 });
+  });
+});
+
+describe('sfide e attrezzi guasti in un file importato (collaudo 1.21.7, C2)', () => {
+  // Il caso «sfide strane» di collaudo/import-fuzz.mjs: un giorno con `best` e `partite`
+  // non numerici entrava come `{regole: null}` e Statistiche scriveva «NaN (undefined)».
+  const busta = (dati) => ({ gioco: 'plinto', formato: FORMATO, impronta: impronta(dati), dati });
+  const sfide = {
+    versione: 2,
+    giorni: {
+      '2026-10-09': { best: 120, partite: 2, regole: null },
+      '2026-10-10': { best: '99', partite: 'a' },
+      '2026-10-11': { best: 50 },
+      '2026-10-12': { best: -1, partite: 1 },
+      '2099-01-01': { best: 1, partite: 1 },
+    },
+  };
+
+  for (const sostituisci of [false, true]) {
+    it(`${sostituisci ? 'Sostituisci' : 'Unisci'}: restano solo i giorni con best e partite numerici`, () => {
+      applicaSalvataggio(busta({ sfide }), { sostituisci });
+      const giorni = leggi('sfide').giorni;
+      // I giorni futuri NON si scartano: e' una scelta di prodotto non presa.
+      expect(Object.keys(giorni).sort()).toEqual(['2026-10-09', '2099-01-01']);
+      for (const voce of Object.values(giorni)) {
+        expect(Number.isFinite(voce.best)).toBe(true);
+        expect(Number.isFinite(voce.partite)).toBe(true);
+      }
+    });
+  }
+
+  it('unendo, una voce guasta del file non rovina quella buona di qui', () => {
+    scrivi('sfide', { versione: 2, giorni: { '2026-10-10': { best: 300, partite: 4, regole: null } } });
+    applicaSalvataggio(busta({ sfide }));
+    expect(leggi('sfide').giorni['2026-10-10']).toEqual({ best: 300, partite: 4, regole: null });
+  });
+
+  it('registraSfida non scrive NaN partendo da una voce gia guasta', async () => {
+    const { registraSfida } = await import('../src/persistence/sfide.js');
+    scrivi('sfide', { versione: 2, giorni: { '2026-10-10': { regole: null } } });
+    const esito = registraSfida(80, '2026-10-10');
+    expect(esito.best).toBe(80);
+    expect(esito.partite).toBe(1);
+    expect(leggi('sfide').giorni['2026-10-10']).toMatchObject({ best: 80, partite: 1 });
+  });
+
+  it('degli attrezzi entrano solo interi non negativi', () => {
+    applicaSalvataggio(busta({ attrezzi: { versione: 1, disponibili: '2', riscossi: -3 } }), { sostituisci: true });
+    expect(leggi('attrezzi')).toBeNull();
+    applicaSalvataggio(busta({ attrezzi: { versione: 1, disponibili: 1.5, riscossi: 4 } }), { sostituisci: true });
+    expect(leggi('attrezzi')).toEqual({ versione: 1, riscossi: 4 });
+    scrivi('attrezzi', { versione: 1, disponibili: 1, riscossi: 4 });
+    applicaSalvataggio(busta({ attrezzi: { versione: 1, disponibili: 'x', riscossi: NaN } }));
+    expect(leggi('attrezzi')).toEqual({ versione: 1, disponibili: 1, riscossi: 4 });
+  });
+});

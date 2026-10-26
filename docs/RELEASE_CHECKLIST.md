@@ -1,12 +1,16 @@
 # Gate di rilascio — PLINTO
 
-Stato al **24 settembre 2026**. Il gioco **è pubblicato in test chiuso** sul Google Play
-Store (canale Alpha, pacchetto 10305). Il 24 settembre la Play Console ha segnato completati
-i tre requisiti per la produzione (release di test chiuso, almeno 12 tester, 14 giorni), e
-**la domanda di accesso alla produzione è stata inviata** lo stesso giorno: Google indica fino
-a sette giorni di revisione, a volte di più. Nello stesso giorno sono andate in revisione le
-modifiche alla scheda (descrizione completa, schermate). Le voci aperte restano elencate per
-prime, senza addolcirle.
+Stato al **6 ottobre 2026**. **PLINTO è pubblico sul Google Play Store dal 5 ottobre
+2026**: la pagina pubblica risponde dalle 17:54 UTC di quel giorno, con titolo «PLINTO -
+puzzle a blocchi» e sviluppatore korward.devteam (verificato scaricandola senza account).
+Prima release di produzione in 177 paesi. L'accesso alla produzione era stato concesso il
+25 settembre; dopo oltre sette giorni di attesa l'assistenza di Google Play ha passato la
+revisione al team con priorità. Il test chiuso è stato messo in pausa il 5 ottobre. Le voci
+aperte restano elencate per prime, senza addolcirle.
+
+Storia: il 24 settembre la Play Console aveva segnato completati i tre requisiti per la
+produzione (release di test chiuso, almeno 12 tester, 14 giorni) e la domanda di accesso
+era stata inviata lo stesso giorno.
 
 **Il questionario inviato**: sei risposte libere da **300 caratteri al massimo** ciascuna (il
 limite si scopre solo nel modulo: la guida di Google non lo dice) e due a scelta multipla. Le
@@ -78,13 +82,25 @@ Legenda: **FATTO** verificato eseguendo qualcosa · **FATTO, in parte** / **FATT
 | --- | --- | --- |
 | Icona | **FATTO** | SVG originale, coerente con il marchio |
 | Manifest PWA | **FATTO** | Nome, colori, icone (192, 512, maskable, SVG), `display: standalone`, `orientation: portrait` come nell'app Android: `tests/android.test.js` impone che i due manifest blocchino lo stesso orientamento, `tests/e2e/installazione.mjs` verifica che con questo manifest il gioco si installi e si apra senza rete |
-| Schermate per gli store | **FATTO, in parte** | Generate da `npm run schermate`, dal gioco vero, e rigenerate a ogni versione. **Quelle in linea sulla scheda del Play Store sono però più vecchie**: mostrano una home senza «Sostieni il progetto» e «Idee e segnalazioni» (arrivate con la 1.7.x) e nessuna frase di incitamento (1.9.0). Vanno ricaricate, vedi «Da fare dopo i 14 giorni» |
+| Schermate per gli store | **FATTO** | Generate da `npm run schermate`, dal gioco vero, e rigenerate a ogni versione: otto da 1236×2196 in `store/`. Il proprietario ha confermato il 5 ottobre che la scheda era già aggiornata; quali schermate siano in linea non si legge dalla pagina pubblica, quindi questa conferma è sua |
 | Icona in PNG alle dimensioni richieste dagli store | **FATTO** | `npm run icone` le genera tutte dall'SVG, compresi il primo piano adattivo, l'icona classica e quella di avvio per Android, copiate nel progetto Android dallo stesso comando |
 | Schermata di avvio | **FATTO** | Generata da `npm run icone` e dichiarata nel manifest Android; sta in una cartella qualificata per densità, altrimenti Android la moltiplica per la densità dello schermo e la mostra gigante |
-| Descrizione del prodotto | **FATTO** | Scritta e pubblicata sulla scheda del Play Store, insieme alle schermate e all'immagine in evidenza 1024×500 (`npm run immagine-store`) |
+| Descrizione del prodotto | **FATTO, in revisione** (5 ottobre) | Scritta e pubblicata sulla scheda del Play Store, insieme alle schermate e all'immagine in evidenza 1024×500 (`npm run immagine-store`). Il 5 ottobre la pagina pubblica mostrava ancora due testi vecchi: il paragrafo italiano sugli attrezzi (prima dei gettoni) e la descrizione completa inglese (ferma a prima della 1.17). Sostituiti con quelli della 1.19.4 di `android/SCHEDA-PLAY-STORE.md` e inviati in revisione lo stesso giorno. Da ricontrollare sulla pagina pubblica quando Google li approva |
+| Classificazione dei contenuti (IARC) | **FATTO** (5 ottobre) | Avviso IARC «Live Rating Notice» del 5 ottobre: classificazioni attive su Google Play, PEGI 3 in Europa. Global Rating ID `9c349c8f-a9f6-8818-8ef0-3fa31370d3ac`, utile solo per pubblicare su un altro store che usa IARC. Va rifatto il questionario solo se l'app aggiunge pubblicità, acquisti, interazione fra giocatori o raccolta di dati: massi e mattoni rinforzati non lo richiedono |
 | Account sviluppatore sugli store | **FATTO** | Account Google Play attivo e verificato, nome del pacchetto registrato, firma dell'app gestita da Play |
 
-## Da fare dopo i 14 giorni di test chiuso
+## Dopo l'uscita (5 ottobre 2026)
+
+| Voce | Stato | Nota |
+| --- | --- | --- |
+| Pagina pubblica sul Play Store | **FATTO** (5 ottobre) | Controllata ogni tre ore dal 4 ottobre: risponde dalle 17:54 UTC del 5 ottobre. Chi era tester vede «(beta)» accanto al nome finché non esce dal programma beta (Play Store → profilo → Gestisci app e dispositivo → Beta); il pubblico vede il nome normale |
+| Mettere in pausa il test chiuso | **FATTO** (5 ottobre) | Play Console → Test chiusi → Gestisci canale → Metti in pausa il canale. I tester tengono l'app e ricevono gli aggiornamenti di produzione |
+| Annuncio del lancio | **FATTO, in corso** | Testi e grafiche preparati per gruppo dei tester, WhatsApp, Facebook, Instagram, LinkedIn, reel e volantino con QR code. Verificato dal proprietario: nello stato di WhatsApp il link nella didascalia di un'immagine si tocca. Su Instagram i link in didascalia non sono cliccabili: link nella bio e adesivo «Link» nelle storie |
+| Prima correzione dopo l'uscita | **FATTO** (6 ottobre) | 1.19.5: «Livello successivo» dopo un livello recuperato portava su uno già superato. Pubblicata sul sito, quindi anche nell'app del Play Store senza un pacchetto nuovo |
+| Caricare un AAB nuovo | **APERTO, senza fretta** | Il repository è a versionCode 11904, versionName 1.19.5. Serve solo per l'icona del launcher dentro il pacchetto e per il numero mostrato in «Informazioni app»: il gioco è quello del sito. Google aveva chiesto di non inviare versioni nuove durante la revisione, che ora è conclusa |
+| La Torre (livelli 101-200) | **APERTO** | Pronta sul branch `opera-torre`. Il proprietario ha deciso di pubblicarla circa un mese dopo l'uscita, intorno al 5 novembre 2026; l'Arena (`opera-arena`) uno o due mesi dopo la Torre |
+
+## Da fare dopo i 14 giorni di test chiuso (storico)
 
 Queste due cose sono pronte nel repository e **volutamente non ancora caricate**. Il
 motivo è uno solo: finché il conteggio dei 14 giorni consecutivi con 12 tester non è
@@ -95,8 +111,8 @@ di estetica, se ne perdono settimane di attesa.
 
 | Voce | Stato | Nota |
 | --- | --- | --- |
-| Caricare l'AAB con l'icona corretta | **FATTO, in revisione** (25 settembre): prima release di produzione, pacchetto **11901 (1.19.1)**, implementazione al 100%, compilato in Android Studio con la chiave di caricamento di sempre. | Il repository è già a 11902 (1.19.2), pronto per il prossimo caricamento: Play mostrerà «1.19.1» nelle informazioni dell'app finché non lo si carica, ma il gioco è quello del sito. Non c'è fretta: il 11902 non cambia niente nel pacchetto, solo il numero. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
-| Attualizzare le schermate sulla scheda | **IN REVISIONE** (24 settembre) | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, rigenerate alla 1.19.0: **otto** immagini da 1236×2196 (9:16). Le versioni precedenti dello strumento ne producevano nove da 1170×2532, e la Play Console non le avrebbe accettate: la sua guida ammette al massimo otto schermate per tipo di dispositivo e un lato lungo non oltre il doppio del corto (2532/1170 = 2,16). Adesso lo strumento controlla i file prodotti e si ferma se non sono caricabili. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
+| Caricare l'AAB con l'icona corretta | **FATTO** (in linea dal 5 ottobre): prima release di produzione, pacchetto **11901 (1.19.1)**, implementazione al 100%, compilato in Android Studio con la chiave di caricamento di sempre. | Il repository è già a 11902 (1.19.2), pronto per il prossimo caricamento: Play mostrerà «1.19.1» nelle informazioni dell'app finché non lo si carica, ma il gioco è quello del sito. Non c'è fretta: il 11902 non cambia niente nel pacchetto, solo il numero. L'icona del launcher sta dentro l'app bundle: chi ha installato dal Play Store continua a vedere quella vecchia finché non si ricompila e ricarica. Per chi usa il sito o l'ha installata dal browser la correzione è già in linea dalla 1.9.1 |
+| Attualizzare le schermate sulla scheda | **FATTO** (confermato dal proprietario il 5 ottobre) | Quelle in linea precedono la 1.7.x. Le nuove si generano con `npm run schermate` e stanno in `store/`, rigenerate alla 1.19.0: **otto** immagini da 1236×2196 (9:16). Le versioni precedenti dello strumento ne producevano nove da 1170×2532, e la Play Console non le avrebbe accettate: la sua guida ammette al massimo otto schermate per tipo di dispositivo e un lato lungo non oltre il doppio del corto (2532/1170 = 2,16). Adesso lo strumento controlla i file prodotti e si ferma se non sono caricabili. Da rifare **dopo** aver caricato l'AAB, così mostrano l'app che si scarica davvero |
 
 Nota su cosa richiede cosa: il caricamento delle schermate è una modifica alla **scheda**,
 non un rilascio, quindi non ha bisogno di un AAB nuovo. Si fanno comunque in

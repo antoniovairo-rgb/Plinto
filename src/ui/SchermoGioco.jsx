@@ -66,6 +66,106 @@ function IntestazioneSfida({ giorno, t }) {
  */
 const MOSSE_CON_ISTRUZIONI = 3;
 
+/*
+ * TASTI_TACCIONO_SOTTO_IL_VELO (collaudo 1.21.21, D1; decisione PO-026): i tasti della
+ * partita ascoltano `window` e non sapevano del menu ne' delle domande. Con un pezzo scelto,
+ * Invio e Spazio sul menu aperto posavano il pezzo sotto il velo invece di premere il
+ * pulsante che ha il fuoco, ed Escape lasciava il pezzo e chiudeva anche il menu con un
+ * tasto solo. Misurato uguale con le domande sopra la partita («Riprova» del livello,
+ * «Nuova partita» sopra il menu della libera), e gia' nella 1.21.20. Acceso, mentre c'e'
+ * il velo i tasti della partita tacciono: Invio e Spazio vanno al pulsante, Escape chiude
+ * solo la finestra. A menu chiuso non cambia niente. Spento, torna il difetto: caso R di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const TASTI_TACCIONO_SOTTO_IL_VELO = true;
+
+/*
+ * TASTI_TACCIONO_SOTTO_IL_PANNELLO (collaudo 1.21.22, D1; decisione PO-028): il pannello
+ * degli attrezzi e' un velo anche lui, ma vive qui dentro (`modoAttrezzo === 'scelta'`) e
+ * non in `coperto`, che App calcola dal menu e dalle domande. Con un pezzo scelto, Invio e
+ * Spazio sul pannello aperto posavano il pezzo sotto il velo: nel livello 13 mosse 18 -> 17,
+ * il pannello restava aperto e il giocatore non vedeva niente. Le frecce muovevano il
+ * cursore dietro, P portava il fuoco sull'anteprima dietro. Acceso, vale la stessa regola
+ * di TASTI_TACCIONO_SOTTO_IL_VELO; il pezzo resta scelto. Spento, torna il difetto: caso T
+ * di `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const TASTI_TACCIONO_SOTTO_IL_PANNELLO = true;
+
+/*
+ * SCELTA_AZZERATA_CAMBIANDO_PARTITA (collaudo 1.21.22, O1; decisione PO-029): libera e sfida
+ * usano lo stesso SchermoGioco (App.jsx), quindi passando dall'una all'altra (sfida, menu,
+ * «Nuova partita», «Riprendi la partita») il pezzo scelto e il cursore restavano: nella
+ * libera compariva scelto il pezzo nello stesso posto del vassoio, un altro pezzo, mai
+ * scelto in quella partita (misurato: posto 3 scelto, e con la tastiera cursore e anteprima
+ * di 3 caselle). Acceso, quando cambia la partita a schermo (modo, livello o seme) la scelta
+ * e il cursore si azzerano. Spento, torna il difetto: caso U di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCELTA_AZZERATA_CAMBIANDO_PARTITA = true;
+
+/*
+ * SCELTA_AZZERATA_CON_L_ATTREZZO (collaudo 1.21.23, D1; decisione PO-032): con un pezzo scelto
+ * dalla tastiera, scelti la mensola o la carriola, il vassoio NASCONDEVA la scelta ma il pezzo
+ * restava scelto, con il cursore e l'anteprima sulla griglia sotto «Quale pezzo metto da
+ * parte?». Invio sul pezzo 2 del vassoio posava allora il pezzo 1 dov'era il cursore: nel
+ * livello 13 mosse 18 -> 17, caselle occupate 8 -> 11, mensola vuota e la domanda ancora a
+ * schermo (misurato sulla build di produzione; uguale con la carriola e con lo scambio a
+ * mensola e mano piene). Acceso, scegliere un attrezzo che chiede un pezzo o una casella
+ * (mensola, carriola, piccone, e lo scambio dalla mensola) lascia il pezzo scelto: spariscono
+ * cursore e anteprima, e Invio sul vassoio torna al pulsante del pezzo. Il gessetto no: si
+ * applica subito e non chiede niente. Spento, torna il difetto: caso W di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCELTA_AZZERATA_CON_L_ATTREZZO = true;
+
+/*
+ * ESCAPE_LASCIA_STARE (collaudo 1.21.23, O1; decisione PO-032): durante l'attesa di un attrezzo
+ * («Quale pezzo metto da parte?», «Quale pezzo cambio?», lo scambio, il piccone) Escape non
+ * faceva niente, mentre l'aiuto dice «Esc per annullare» e il pannello si chiude con Escape.
+ * Acceso, Escape fa quello che fa «Lascia stare»: chiude l'attesa, non spende niente. Con il
+ * menu o una domanda sopra, Escape resta loro. Spento, torna il difetto: caso W rosso.
+ */
+export const ESCAPE_LASCIA_STARE = true;
+
+/*
+ * FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA (collaudo 1.21.23, O2; decisione PO-032): messo un pezzo da
+ * parte, o ripreso dalla mensola, con la tastiera, il pulsante premuto spariva e il fuoco
+ * finiva su <body>: il Tab seguente ripartiva dall'inizio della pagina. Acceso, dopo «metti da
+ * parte» il fuoco va sul pezzo del vassoio piu' vicino (prima quello dopo, poi quello prima,
+ * come quando si toglie una voce da un elenco); dopo «riprendi» e dopo lo scambio va sul pezzo
+ * ripreso. Solo se il pulsante e' stato premuto dalla tastiera (`detail === 0`): col tocco non
+ * cambia niente. Spento, torna il difetto: caso W rosso.
+ */
+export const FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA = true;
+
+/*
+ * SCAVO_CON_LA_TASTIERA (collaudo 1.21.22, O2; decisione PO-030): il piccone era l'unica parte
+ * della partita che non si usava con la tastiera. Le caselle non prendono il fuoco e lo scavo
+ * ascoltava solo il tocco (`onPointerUp` della casella): scelto il piccone con Invio, nessun
+ * cursore, frecce e Invio non svuotavano niente (livello 13: caselle occupate 8 -> 8; col
+ * tocco 8 -> 7). Acceso, nello scavo le frecce muovono il cursore della griglia e Invio (o
+ * Spazio) svuota la casella sotto il cursore, come per posare un pezzo; Escape e' «Lascia
+ * stare» (ESCAPE_LASCIA_STARE). Scelto il piccone dalla tastiera il cursore compare al centro;
+ * col tocco non compare e il tocco scava come prima. Spento, torna il difetto: caso X di
+ * `tests/e2e/ripresa-livello.mjs` rosso.
+ */
+export const SCAVO_CON_LA_TASTIERA = true;
+
+/*
+ * GIOCO_IN_ORIZZONTALE (PO-035, E1 del rapporto PO-017; decisione del PO del 21 ottobre
+ * 2026): con lo schermo coricato e alto fino a 620 px la regola orizzontale di
+ * `src/styles/app.css` lasciava l'area della griglia alta quanto il suo contenuto, e la
+ * griglia, che si misura in altezza, collassava: 28x28 px nella partita libera e nella
+ * sfida, caselle 0x0 nei livelli, su 640x360, 800x360, 915x412, 1024x600, 1280x620 (dalla
+ * 1.19.1 a oggi). Si apriva, rispondeva, ma non si poteva giocare. Acceso, la schermata di
+ * gioco ha la classe `pl-screen--orizzontale`: la griglia prende tutta l'altezza a
+ * sinistra e punteggio, obiettivo, Catena, la riga degli attrezzi e i pezzi stanno nella
+ * colonna di destra; la colonna da 430 px dei PC bassi non vale per questa schermata. In
+ * verticale e sopra i 620 px di altezza la classe non cambia niente. Spento, torna il
+ * difetto: il caso «orizzontale» di `npm run e2e-schermi` e' rosso.
+ */
+export const GIOCO_IN_ORIZZONTALE = true;
+
 /**
  * La freccia che torna indietro, disegnata sul posto.
  *
@@ -101,6 +201,8 @@ export function SchermoGioco({
   // la pastiglia non compare.
   attrezzi = null, suggerimento = null, onCarriola = null, onGessetto = null,
   onPiccone = null, onMensola = null, onRiprendiMensola = null, t,
+  // Vero mentre sopra la partita c'e' il menu o una domanda: il velo copre la griglia.
+  coperto = false,
 }) {
   /*
    * I modi dell'attrezzo in corso:
@@ -114,10 +216,19 @@ export function SchermoGioco({
    * inventarne uno nuovo, che e' una cosa in meno che puo' rompersi.
    */
   const [modoAttrezzo, setModoAttrezzo] = useState('chiuso');
+  // Se il piccone e' stato scelto dalla tastiera: decide se il cursore compare subito.
+  const [scavoDaTastiera, setScavoDaTastiera] = useState(false);
+  const scavo = SCAVO_CON_LA_TASTIERA && modoAttrezzo === 'piccone';
+  // Il velo che copre la griglia: menu e domande (da App) o il pannello degli attrezzi.
+  const velato = (TASTI_TACCIONO_SOTTO_IL_VELO && coperto)
+    || (TASTI_TACCIONO_SOTTO_IL_PANNELLO && modoAttrezzo === 'scelta');
+  const tastiAttivi = partita.status === 'playing' && !velato;
   const conAttrezzi = attrezzi !== null && onCarriola && onGessetto && onPiccone && onMensola;
   /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
   const sceltaPezzo = modoAttrezzo === 'carriola' || modoAttrezzo === 'mensola'
     || modoAttrezzo === 'scambio';
+  /** Un attrezzo aspetta una risposta: un pezzo o, col piccone, una casella. */
+  const inAttesa = sceltaPezzo || modoAttrezzo === 'piccone';
 
   /* Le caselle che il gesso ha segnato. Si ricavano dal suggerimento e dalla forma del
      pezzo consigliato: il motore dice "questo pezzo, li'", e qui si traduce in caselle. */
@@ -165,6 +276,8 @@ export function SchermoGioco({
    */
   useEffect(() => {
     if (partita.modalita !== MODALITA.ANTEPRIMA) return undefined;
+    // Sotto il velo il fuoco portato sull'anteprima uscirebbe dalla finestra aperta.
+    if (velato) return undefined;
     const ascolta = (evento) => {
       if (evento.key !== 'p' && evento.key !== 'P') return;
       if (evento.metaKey || evento.ctrlKey || evento.altKey) return;
@@ -175,7 +288,7 @@ export function SchermoGioco({
     };
     window.addEventListener('keydown', ascolta);
     return () => window.removeEventListener('keydown', ascolta);
-  }, [partita.modalita]);
+  }, [partita.modalita, velato]);
 
   const effetti = useEffettiMossa({
     lastMove: partita.lastMove,
@@ -206,8 +319,60 @@ export function SchermoGioco({
     attivo: partita.status === 'playing',
   });
 
+  // Quale partita c'e' a schermo. Il seme da solo distingue libera e sfida, ma non dice
+  // niente di un livello rigiocato con un'altra modalita': ci vanno anche modo e livello.
+  const partitaASchermo = `${modalita}|${quadro?.numero ?? ''}|${partita.seed}`;
+  const azzeraScelta = drag.annulla;
+  useEffect(() => {
+    if (SCELTA_AZZERATA_CAMBIANDO_PARTITA) azzeraScelta();
+  }, [partitaASchermo, azzeraScelta]);
+
+  // Escape durante l'attesa e' «Lascia stare». Il menu o una domanda sopra se lo tengono.
+  useEffect(() => {
+    if (!ESCAPE_LASCIA_STARE || !inAttesa || coperto || partita.status !== 'playing') return undefined;
+    const esci = (e) => {
+      if (e.key !== 'Escape' || e.altKey || e.ctrlKey || e.metaKey) return;
+      e.preventDefault();
+      setModoAttrezzo('chiuso');
+    };
+    window.addEventListener('keydown', esci);
+    return () => window.removeEventListener('keydown', esci);
+  }, [inAttesa, coperto, partita.status]);
+
+  /*
+   * Dove va il fuoco dopo la mensola: si decide al clic, si applica dopo il disegno, quando il
+   * vassoio mostra gia' la mano nuova. `{ posto }` e' il pezzo ripreso, `{ vicino }` il posto
+   * appena svuotato.
+   */
+  const fuocoDopo = useRef(null);
+  const ricordaFuoco = (evento, dove) => {
+    if (FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA && evento?.detail === 0) fuocoDopo.current = dove;
+  };
+  useEffect(() => {
+    const voluto = fuocoDopo.current;
+    if (!voluto) return;
+    fuocoDopo.current = null;
+    const pezzi = [...document.querySelectorAll('.pl-tray .pl-tray__posto')]
+      .map((posto) => posto.querySelector('.pl-pezzo-presa'));
+    let quale = null;
+    if (voluto.posto != null) quale = pezzi[voluto.posto];
+    else {
+      for (let d = 1; d < pezzi.length && !quale; d += 1) {
+        quale = pezzi[voluto.vicino + d] ?? pezzi[voluto.vicino - d] ?? null;
+      }
+      quale = quale ?? pezzi[voluto.vicino] ?? null;
+    }
+    quale?.focus({ preventScroll: true });
+  });
+
   const tastiera = useTastiera({
-    attivo: partita.status === 'playing',
+    attivo: tastiAttivi,
+    // Escape nell'attesa e' dell'attrezzo: non deve lasciare anche il pezzo.
+    escapeAltrove: ESCAPE_LASCIA_STARE && inAttesa,
+    scavo,
+    scavoDaTastiera,
+    // Come il tocco: il modo si chiude solo se una casella e' stata tolta davvero.
+    onScava: (row, col) => { if (onPiccone(idx(row, col))) setModoAttrezzo('chiuso'); },
     selezionato: drag.selezionato,
     conTastiera: drag.selezionatoDaTastiera,
     mano: partita.hand,
@@ -296,7 +461,7 @@ export function SchermoGioco({
     : null;
 
   return (
-    <div className="pl-screen pl-screen--gioco">
+    <div className={`pl-screen pl-screen--gioco${GIOCO_IN_ORIZZONTALE ? ' pl-screen--orizzontale' : ''}`}>
       <Hud
         punteggio={partita.score}
         record={record.best}
@@ -450,10 +615,14 @@ export function SchermoGioco({
             {conAttrezzi ? (
               <Mensola
                 pezzo={partita.mensola ?? null}
-                onRiprendi={() => {
+                onRiprendi={(evento) => {
                   const libero = partita.hand.findIndex((p) => p === null);
-                  if (libero >= 0) onRiprendiMensola(libero);
-                  else setModoAttrezzo('scambio');
+                  if (libero >= 0) {
+                    if (onRiprendiMensola(libero)) ricordaFuoco(evento, { posto: libero });
+                  } else {
+                    if (SCELTA_AZZERATA_CON_L_ATTREZZO) drag.annulla();
+                    setModoAttrezzo('scambio');
+                  }
                 }}
                 t={t}
               />
@@ -505,7 +674,7 @@ export function SchermoGioco({
         </div>
       </div>
 
-      <div className={sceltaPezzo ? 'pl-tray-scelta' : ''}>
+      <div className={`pl-tray-involucro${sceltaPezzo ? ' pl-tray-scelta' : ''}`}>
         <Tray
           mano={partita.hand}
           pezziMorti={pezziMorti}
@@ -514,9 +683,10 @@ export function SchermoGioco({
           onPointerDownPezzo={sceltaPezzo ? () => {} : prendi}
           onTapPezzo={
             modoAttrezzo === 'carriola' ? (i) => { if (onCarriola(i)) setModoAttrezzo('chiuso'); }
-              : modoAttrezzo === 'mensola' ? (i) => { if (onMensola(i)) setModoAttrezzo('chiuso'); }
+              : modoAttrezzo === 'mensola'
+                ? (i, e) => { if (onMensola(i)) { setModoAttrezzo('chiuso'); ricordaFuoco(e, { vicino: i }); } }
                 : modoAttrezzo === 'scambio'
-                  ? (i) => { if (onRiprendiMensola(i)) setModoAttrezzo('chiuso'); }
+                  ? (i, e) => { if (onRiprendiMensola(i)) { setModoAttrezzo('chiuso'); ricordaFuoco(e, { posto: i }); } }
                   : drag.selezionaPezzo
           }
           t={t}
@@ -554,8 +724,10 @@ export function SchermoGioco({
              sola non ci stanno, e un pulsante che si preme e non fa niente e' peggio
              di un pulsante spento che dice perche'. */
           disabilitati={partita.mensola ? ['mensola'] : []}
-          onScegli={(quale) => {
+          onScegli={(quale, evento) => {
             if (quale === 'gessetto') { onGessetto(); setModoAttrezzo('chiuso'); return; }
+            if (SCELTA_AZZERATA_CON_L_ATTREZZO) drag.annulla();
+            if (quale === 'piccone') setScavoDaTastiera(evento?.detail === 0);
             setModoAttrezzo(quale);
           }}
           t={t}

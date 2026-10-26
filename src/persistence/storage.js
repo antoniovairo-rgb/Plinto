@@ -11,6 +11,16 @@
 
 const PREFIX = 'plinto:';
 
+/**
+ * Interruttore della correzione B7 (collaudo 1.21.6): la Partita libera e la Sfida del
+ * giorno hanno ciascuna il proprio record. Prima lo condividevano, e la home presentava
+ * come «Record» della Partita libera il punteggio di una Sfida (395 a chi non aveva mai
+ * giocato una partita libera). Decisione del PO in docs/DECISIONI.md: «Separo i due
+ * record», e quello esistente resta alla Partita libera. Con `false` si torna al record
+ * condiviso: la chiave della Sfida non viene piu' ne' letta ne' scritta, e niente si perde.
+ */
+export const RECORD_SEPARATI = true;
+
 /** true se lo storage e' utilizzabile in questo contesto. */
 export function storageAvailable() {
   try {
@@ -71,6 +81,8 @@ export function clearAll() {
 
 export const KEYS = {
   RECORDS: 'records',
+  // Il record della Sfida del giorno, separato da quello della partita libera (B7).
+  RECORDS_SFIDA: 'records-sfida',
   SETTINGS: 'settings',
   CURRENT_GAME: 'partita',
   CURRENT_CHALLENGE: 'partita-sfida',
@@ -101,12 +113,12 @@ export function chiavePartita(modalita) {
 /**
  * Chiave dei record, per modalita'.
  *
- * Per ora ce n'e' una sola: la partita libera e la Sfida del Giorno condividono i
- * record, e i Quadri non ne hanno (si superano o no). La funzione resta perche' la
- * separazione per modalita' e' una decisione che va presa in un posto, non sparsa fra
- * i chiamanti.
+ * La partita libera tiene la chiave di sempre, `records`, cosi' il record di chi gioca
+ * gia' resta suo senza migrare niente. La Sfida del giorno ha la sua (vedi
+ * RECORD_SEPARATI). I Quadri non ne hanno: si superano o no.
  */
-export function chiaveRecord() {
+export function chiaveRecord(modalita = 'libera') {
+  if (RECORD_SEPARATI && modalita === 'sfida') return KEYS.RECORDS_SFIDA;
   return KEYS.RECORDS;
 }
 

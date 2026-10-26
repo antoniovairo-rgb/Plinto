@@ -30,6 +30,7 @@ import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 import { IMPRONTA_REGOLE } from '../core/impronta.js';
 import { giornoDiOggi } from '../core/sfida.js';
+import { LETTURA_RIPULITA, VOCI_GUASTE_SCARTATE, numeroBuono } from './salvataggio.js';
 
 const CHIAVE = KEYS.CHALLENGES;
 
@@ -64,7 +65,17 @@ function documento() {
 /** @returns {Record<string, {best:number, partite:number, regole:string|null}>} */
 export function caricaSfide() {
   const giorni = documento().giorni;
-  return giorni && typeof giorni === 'object' ? giorni : {};
+  if (!giorni || typeof giorni !== 'object') return {};
+  if (!LETTURA_RIPULITA) return giorni;
+  // Le stesse voci che l'importazione scarterebbe (C2), qui gia' in localStorage (D3):
+  // senza, Statistiche scriveva «10 ott 99 (undefined)». Il nome del giorno NON si
+  // controlla: `tests/sfide.test.js` scrive 80 giorni con date finte, e un giorno guasto
+  // in localStorage non e' fra i casi misurati dal collaudo.
+  const buoni = {};
+  for (const [giorno, voce] of Object.entries(giorni)) {
+    if (voce && numeroBuono(voce.best) && numeroBuono(voce.partite)) buoni[giorno] = voce;
+  }
+  return buoni;
 }
 
 /** Risultato del giocatore per un giorno. */
@@ -84,7 +95,13 @@ export function sfidaDelGiorno(giorno = giornoDiOggi()) {
  */
 export function registraSfida(punteggio, giorno = giornoDiOggi()) {
   const tutte = caricaSfide();
-  const precedente = tutte[giorno] ?? { best: 0, partite: 0, regole: null };
+  const voce = tutte[giorno] ?? { best: 0, partite: 0, regole: null };
+  // Una voce gia' guasta (importata prima della 1.21.8, collaudo 1.21.7, C2) riparte da
+  // zero invece di dare Math.max(undefined, punteggio) = NaN.
+  const numero = (v) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : 0);
+  const precedente = VOCI_GUASTE_SCARTATE
+    ? { ...voce, best: numero(voce.best), partite: numero(voce.partite) }
+    : voce;
   const nuovoRecordDiGiornata = punteggio > precedente.best;
 
   tutte[giorno] = {

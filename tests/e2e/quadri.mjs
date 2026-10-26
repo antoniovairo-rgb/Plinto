@@ -188,6 +188,9 @@ await page.reload({ waitUntil: 'networkidle' });
     errori.push('HOME: il pulsante principale non apre la presentazione di un livello');
   }
   console.log(`0b. pulsante principale "${testoPrincipale}", versione ${versione}`);
+  // Si esce dalla presentazione con il suo pulsante: dalla PO-008 il livello e' salvato
+  // gia' li', e ricaricando senza uscire la ripresa automatica riporterebbe dentro.
+  await page.locator('.pl-apertura .pl-btn--fantasma').click();
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 }
 

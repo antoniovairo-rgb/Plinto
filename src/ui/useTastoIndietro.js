@@ -1,6 +1,63 @@
 import { useEffect, useRef } from 'react';
 
 /**
+ * Dopo una ricarica, riprendersi le voci di cronologia messe prima (collaudo 1.21.6, B6).
+ * Spento, l'hook riparte da zero voci e la ripresa del livello ne aggiunge altre due
+ * sopra quelle rimaste: `mappa > home > home > home > uscito`. Interruttore per la prova
+ * rosso/verde in `tests/e2e/correzioni.mjs`.
+ */
+export const ADOTTA_VOCI_DOPO_RICARICA = true;
+
+/**
+ * Interruttore G1 (collaudo 1.21.10): un cambio d'ancora non e' un Indietro.
+ *
+ * Aprire `#/sfida/<giorno>` con la scheda gia' aperta non faceva niente: il browser mette
+ * una voce nuova di cronologia, SENZA il nostro `plinto`, e manda `popstate` prima di
+ * `hashchange`. `suIndietro` lo prendeva per un Indietro: riduceva `messe`, chiamava
+ * `normalizza` (che dalla home cancella l'ancora prima che `hashchange` la legga) e,
+ * dalla partita, risaliva alla home. Acceso:
+ *  - ogni voce nostra ha `plinto`, anche quella di partenza (`plinto: 0`) e anche dopo
+ *    `scriviRotta`, che prima la riscriveva con `null` (`rotta.js`): senza, il ritorno
+ *    alla home da una schermata qualunque sarebbe sembrato un cambio d'ancora;
+ *  - un `popstate` su una voce senza `plinto` si ignora: la voce prende il gradino in cui
+ *    si e', e decide `hashchange` / `usaRotta`.
+ * Spento, torna il difetto: `npm run indietro` (caso G1) e' rosso.
+ */
+export const ANCORA_NON_E_INDIETRO = true;
+
+/**
+ * Interruttore PO-019: il primo giro resta il primo anche se React rifa' l'effetto.
+ *
+ * Con `<React.StrictMode>` e il server di sviluppo (quello su cui gira `npm run
+ * correzioni`, anche in CI) React esegue ogni effetto due volte al montaggio. Il primo
+ * giro spegneva `primoGiro`, il secondo trovava la home con due voci adottate e faceva
+ * proprio quello che il commento di `primoGiro` vieta: `go(-2)`, mentre la ripresa del
+ * livello rimetteva due voci. Se le due `pushState` arrivano prima che il browser compia
+ * il `go(-2)`, la cronologia resta sulla voce di partenza con quattro voci sopra, e il
+ * primo Indietro esce dal gioco: la corsa 161 della CI (caso B6). Acceso, il primo giro
+ * finisce solo quando la profondita' cambia davvero; in produzione l'effetto gira una
+ * volta per profondita', e non cambia niente. Spento, `npm run correzioni` (caso B6,
+ * «go() dopo la ricarica») e' rosso. Rapporto: `docs/sviluppo/RAPPORTO-PO-019.md`.
+ */
+export const PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO = true;
+
+/** Il gradino scritto su una voce di cronologia, o null se la voce non e' nostra. */
+function gradinoDi(stato) {
+  const n = stato?.plinto;
+  return Number.isInteger(n) && n >= 0 ? n : null;
+}
+
+/** Quante voci nostre stanno sotto quella corrente, lette dalla cronologia. */
+function vociGiaMesse() {
+  try {
+    const n = window.history.state?.plinto;
+    return Number.isInteger(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * Il tasto Indietro di Android, dentro un gioco che non ha un router.
  *
  * PERCHE' ESISTE. PLINTO cambia schermata con lo stato di React: la cronologia del
@@ -38,7 +95,21 @@ import { useEffect, useRef } from 'react';
 export function useTastoIndietro(profondita, passoIndietro, normalizza) {
   // Quante voci abbiamo messo noi. Riferimento e non stato: cambia dentro il gestore di
   // un evento, e deve essere gia' aggiornato quando l'effetto lo rilegge.
-  const messe = useRef(0);
+  //
+  // DOPO UNA RICARICA la cronologia NON riparte: le voci messe prima ci sono ancora, e
+  // ognuna si ricorda il suo gradino (`{ plinto: n }`). Ripartire da zero le lasciava li'
+  // a vuoto e ne aggiungeva altre: due Indietro che non facevano niente per ogni
+  // ricarica dentro un livello (collaudo 1.21.6, B6). Quindi si parte da quelle.
+  const messe = useRef(null);
+  if (messe.current === null) messe.current = ADOTTA_VOCI_DOPO_RICARICA ? vociGiaMesse() : 0;
+  // Il primo giro dell'effetto avviene con la home, PRIMA che la ripresa riporti dentro
+  // il livello (`App.jsx`, effetto della ripresa): se qui si tornasse indietro delle voci
+  // adottate, la ripresa ne rimetterebbe due mentre `go()` e' ancora in viaggio, e i
+  // conti salterebbero. Al primo giro quindi si aggiunge se serve, ma non si toglie: se
+  // la ripresa non c'e', le voci in piu' si consumano alla prossima risalita.
+  const primoGiro = useRef(true);
+  // La profondita' con cui si e' montato: finche' non cambia, si e' ancora al primo giro.
+  const profonditaIniziale = useRef(profondita);
   // Quanti `popstate` in arrivo sono provocati da noi e non dall'utente.
   const daIgnorare = useRef(0);
   const passo = useRef(passoIndietro);
@@ -48,12 +119,16 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
 
   useEffect(() => {
     try {
+      // G1: anche la voce di partenza e' nostra, cosi' tornarci non sembra un'ancora.
+      if (ANCORA_NON_E_INDIETRO && primoGiro.current && gradinoDi(window.history.state) === null) {
+        window.history.replaceState({ ...(window.history.state ?? {}), plinto: messe.current }, '');
+      }
       if (profondita > messe.current) {
         for (let i = messe.current; i < profondita; i += 1) {
           window.history.pushState({ plinto: i + 1 }, '');
         }
         messe.current = profondita;
-      } else if (profondita < messe.current) {
+      } else if (profondita < messe.current && !primoGiro.current) {
         // Si e' risaliti con un pulsante: le voci in piu' vanno consumate, altrimenti
         // il prossimo Indietro le troverebbe e sembrerebbe non fare niente.
         const gradini = messe.current - profondita;
@@ -65,10 +140,24 @@ export function useTastoIndietro(profondita, passoIndietro, normalizza) {
       // Un browser che non permette di scrivere la cronologia non deve rompere il gioco:
       // si perde solo il tasto Indietro, e i pulsanti sullo schermo restano.
     }
+    if (!PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO || profondita !== profonditaIniziale.current) {
+      primoGiro.current = false;
+    }
   }, [profondita]);
 
   useEffect(() => {
-    const suIndietro = () => {
+    const suIndietro = (evento) => {
+      // G1: una voce senza `plinto` l'ha messa il browser per un'ancora nuova, non e' un
+      // ritorno su una voce nostra. Si adotta al gradino corrente e non si tocca niente:
+      // ne' la schermata, ne' l'ancora, ne' il conto delle voci.
+      if (ANCORA_NON_E_INDIETRO && daIgnorare.current === 0 && gradinoDi(evento?.state) === null) {
+        try {
+          window.history.replaceState({ plinto: messe.current }, '');
+        } catch {
+          // Senza cronologia scrivibile si perde solo l'adozione della voce.
+        }
+        return;
+      }
       if (daIgnorare.current > 0) {
         daIgnorare.current -= 1;
         rimetti.current?.();

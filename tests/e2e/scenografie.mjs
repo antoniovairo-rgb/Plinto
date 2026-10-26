@@ -88,7 +88,7 @@ async function scena(nome, stato, bersaglio) {
     window.localStorage.removeItem('plinto:ripresa');
   }, serializeGame(stato));
   await page.reload({ waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /Riprendi/ }).click();
+  await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
   await page.waitForSelector('.pl-plancia');
   const b = await page.evaluate((i) => {
     const c = document.querySelectorAll('.pl-plancia .pl-cella')[i].getBoundingClientRect();

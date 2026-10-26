@@ -20,6 +20,59 @@ import { InvitoRecensione } from '../Recensisci.jsx';
  * manda al livello nuovo — che si apre spiegandosi. Fra un livello e l'altro non deve
  * esserci un vuoto: deve esserci un motivo per premere ancora.
  */
+/*
+ * ATTO_CHIUSO_COMPATTO (collaudo 1.21.11, H2): a 320x700, con il gettone e l'atto appena
+ * chiuso, la fine del livello andava scorsa di 1 px (anche nella 1.21.10: dipende dal
+ * font). La classe stringe di 6 px lo spazio sopra la fascia dell'atto, e la regola in
+ * app.css vale solo sotto i 340 px di larghezza e i 720 di altezza: altrove non cambia
+ * niente. Prova: `node tests/e2e/trionfo.mjs`, misura a 320x700.
+ */
+export const ATTO_CHIUSO_COMPATTO = true;
+
+/*
+ * NUMERO_MISURA_LA_CORNICE (collaudo tablet e PC, PO-014): sul telefono basso il numero
+ * delle mosse scende da 60 a 50 px perche' la fine del livello stia senza scorrere, ma la
+ * regola guarda l'altezza della FINESTRA. Su PC il gioco sta in una cornice alta il 92%
+ * della finestra: a 1366x768 la cornice e' alta 706 px come un telefono basso, la finestra
+ * 768, e il numero restava a 60. Misurato: 6 px da scorrere a 1366x768 e 1024x768, dove
+ * un telefono 430x706 non scorre; 10 px in piu' di un telefono 430x657 a 1366x657 (un
+ * 1366x768 con le barre del browser, colonna senza cornice). La classe rimette il numero
+ * a 50 in quei due casi; sotto i 720 px di larghezza non cambia niente.
+ * Spento, `npm run e2e-schermi` e' rosso su quei formati.
+ */
+export const NUMERO_MISURA_LA_CORNICE = true;
+
+/*
+ * FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO (PO-014, P1): con il solo numero a 50 px la fine
+ * del livello scorreva ancora di 40 px a 1280x720 e di 44 px a 1366x657 (1366x768 con le
+ * barre del browser). Sopra i 720 px di larghezza e con il riquadro alto fino a 720 px
+ * prende le misure della fine affollata (`src/styles/app.css`). Spento,
+ * `npm run e2e-schermi` e' rosso su quei formati; sotto i 720 px non cambia niente.
+ */
+export const FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO = true;
+
+/*
+ * VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO (PO-015, O1 del collaudo 1.21.15): la classe qui
+ * sopra valeva anche per la sconfitta, che non scorreva neanche nella 1.21.14 (0 px su
+ * tutti i formati), e su PC e tablet bassi faceva Plinto dispiaciuto di 56 px invece di
+ * 92 senza che servisse. Acceso, la fine compatta scatta solo dopo una vittoria e la
+ * sconfitta torna come nella 1.21.14. Spento, `npm run e2e-schermi` e' rosso: la
+ * sconfitta a 1366x768 ha di nuovo Plinto a 56 px.
+ */
+export const VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO = true;
+
+/*
+ * MAPPA_RIDOTTA_COL_GETTONE (PO-015, E1 del collaudo 1.21.15; decisione del proprietario
+ * «Mappa ridotta»): col gettone guadagnato e l'atto NON chiuso la fine del livello
+ * mostrava riquadro del gettone E tappe con Plinto, e scorreva: 66 px a 1366x657, 61 a
+ * 1280x720, 16 a 1366x768 e 1024x768, 23 a 320x700 (Inter nel container). E' il caso
+ * piu' frequente fra le fini affollate: 17 volte nel percorso giocato in ordine, contro
+ * le 3 di atto chiuso e gettone insieme. Acceso, l'avanzamento resta solo «N di 100» con
+ * la barra; tutte le altre fini sono come prima. Spento, `npm run e2e-trionfo` e
+ * `npm run e2e-schermi` sono rossi sul caso «solo gettone».
+ */
+export const MAPPA_RIDOTTA_COL_GETTONE = true;
+
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
   opera = OPERE[0], animazioni = true, onRiprova, onProssimo, onElenco, t,
@@ -40,9 +93,10 @@ export function SchermoFineQuadro({
   // Con il gettone guadagnato o l'atto appena chiuso la schermata ha due blocchi in piu':
   // Plinto si fa piu' piccolo, perche' tutto deve stare nello schermo senza scorrere.
   const affollata = vinto && (esito.attrezzoGuadagnato > 0 || Boolean(atto?.appenaChiuso));
+  const compattaLarga = FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO && (vinto || !VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO);
 
   return (
-    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}`}>
+    <div className={`pl-screen pl-fine${affollata ? ' pl-fine--affollata' : ''}${ATTO_CHIUSO_COMPATTO && vinto && atto?.appenaChiuso ? ' pl-fine--atto-chiuso' : ''}${NUMERO_MISURA_LA_CORNICE ? ' pl-fine--misura-cornice' : ''}${compattaLarga ? ' pl-fine--compatta-larga' : ''}`}>
       <div className="pl-scroll">
         <p className="pl-fine__titolo">{t('quadri.quadro').replace('{n}', quadro.numero)}</p>
 
@@ -150,11 +204,13 @@ export function SchermoFineQuadro({
         {/* L'avanzamento sul percorso: il pezzo che dice "sei andato avanti".
             Quando l'atto si chiude ADESSO lascia il posto alla fascia dell'atto, che dice
             la stessa cosa in grande: insieme non stavano nello schermo, e la fine del
-            livello non deve scorrere (richiesta del proprietario, 8 ottobre 2026). */}
+            livello non deve scorrere (richiesta del proprietario, 8 ottobre 2026).
+            Col gettone guadagnato resta solo la barra: vedi MAPPA_RIDOTTA_COL_GETTONE. */}
         {vinto && !ultimo && !atto?.appenaChiuso ? (
           <AvanzamentoMappa
             superato={quadro.numero}
             superatiTotali={superatiTotali}
+            ridotto={MAPPA_RIDOTTA_COL_GETTONE && esito.attrezzoGuadagnato > 0}
             animazioni={animazioni}
             t={t}
           />

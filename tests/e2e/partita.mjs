@@ -196,7 +196,7 @@ await page.evaluate((s) => {
   window.localStorage.removeItem('plinto:ripresa');
 }, quasiRiga);
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Riprendi/ }).click();
+await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
 const bersaglioRiga = await page.evaluate(() => {
   const c = document.querySelectorAll('.pl-plancia .pl-cella')[8].getBoundingClientRect();
@@ -312,7 +312,7 @@ await page.reload({ waitUntil: 'networkidle' });
 // avvenuta. Si accettano tutte e due le strade e si misura quello che conta.
 await page.waitForTimeout(400);
 if (await page.locator('.pl-plancia').count() === 0) {
-  await page.getByRole('button', { name: /Riprendi/ }).click();
+  await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 }
 await page.waitForSelector('.pl-plancia');
 const punteggioDopo = await punteggio();
@@ -328,7 +328,7 @@ await page.evaluate((salvataggio) => {
   window.localStorage.removeItem('plinto:ripresa');
 }, quasiFinita);
 await page.reload({ waitUntil: 'networkidle' });
-await page.getByRole('button', { name: /Riprendi/ }).click();
+await page.getByRole('button', { name: /^Partita libera, riprendi/ }).click();
 await page.waitForSelector('.pl-plancia');
 await page.screenshot({ path: `${OUT}/05-quasi-finita.png` });
 console.log('   dopo la ripresa: blocchi sulla griglia', await contaBlocchi(), '| punteggio', await punteggio());
@@ -402,11 +402,11 @@ await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForTimeout(150);
 
 // La partita libera lasciata a meta' deve essere ancora li': slot separati.
-const riprendiVisibile = await page.getByRole('button', { name: /Riprendi la partita/ }).count();
+const riprendiVisibile = await page.getByRole('button', { name: /riprendi la partita/i }).count();
 if (riprendiVisibile === 0) {
   errori.push('SFIDA: aprire la sfida ha cancellato la partita libera in corso');
 } else {
-  await page.getByRole('button', { name: /Riprendi la partita/ }).click();
+  await page.getByRole('button', { name: /riprendi la partita/i }).click();
   await page.waitForSelector('.pl-plancia');
   // I blocchi si contano quando ci SONO, non appena esiste la plancia. `.pl-plancia`
   // compare un istante prima dei blocchi che ci stanno sopra, e contarli in quell'
@@ -442,7 +442,7 @@ if (riprendiVisibile === 0) {
 }
 
 // Riaprendo la sfida nello stesso giorno la si RIPRENDE, non se ne comincia un'altra.
-await page.getByRole('button', { name: /Sfida del giorno|Riprendi la sfida/ }).click();
+await page.getByRole('button', { name: /^Sfida del giorno/ }).click();
 await page.waitForSelector('.pl-plancia');
 const manoSfidaDopo = await page.evaluate(() =>
   [...document.querySelectorAll('.pl-tray .pl-pezzo')].map((p) => {

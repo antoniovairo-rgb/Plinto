@@ -48,6 +48,7 @@ const VERIFICHE = [
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
   { nome: 'fine del percorso: festa finale e atti chiusi', comando: 'npm', argomenti: ['run', 'e2e-trionfo'] },
   { nome: 'ripresa dopo l interruzione (partita e livello)', comando: 'npm', argomenti: ['run', 'e2e-ripresa'] },
+  { nome: 'un livello lasciato a meta non riparte da zero (PO-008)', comando: 'npm', argomenti: ['run', 'e2e-po008'] },
   { nome: 'salvataggio: esce, rientra e non cancella niente', comando: 'npm', argomenti: ['run', 'e2e-salvataggio'] },
   { nome: 'politica di sicurezza attiva, e non rompe niente', comando: 'npm', argomenti: ['run', 'e2e-sicurezza'] },
   { nome: 'attrezzi del cantiere: tutti e quattro nel gioco', comando: 'npm', argomenti: ['run', 'e2e-attrezzi'] },
@@ -81,6 +82,9 @@ const VERIFICHE = [
   { nome: 'anteprima della terna nel browser', comando: 'npm', argomenti: ['run', 'anteprima'] },
   { nome: 'tasto Indietro di Android', comando: 'npm', argomenti: ['run', 'indietro'] },
   { nome: 'la home entra nello schermo', comando: 'npm', argomenti: ['run', 'impaginazione'] },
+  // PO-009: la riga che spiega Partita libera e Sfida del giorno c'e', si legge e non
+  // allunga la home.
+  { nome: 'home: riga che spiega le due modalita', comando: 'npm', argomenti: ['run', 'home-spiegazione'] },
   // La geometria del tavolo: dove sono le caselle e dove finisce un tocco. Costa dieci
   // secondi ed e' cio' che permette a una modifica di solo disegno di non pagarne
   // tremilaottocento: il giro completo registra questa firma, e la corsia veloce la
@@ -97,6 +101,10 @@ const VERIFICHE = [
   { nome: 'build servita da una sottocartella', comando: 'npm', argomenti: ['run', 'prova-pages'] },
   { nome: 'installabile, senza rete e aggiornabile', comando: 'npm', argomenti: ['run', 'installazione'] },
   { nome: 'aspetto su schermi grandi', comando: 'npm', argomenti: ['run', 'prova-desktop'] },
+  // PO-014: tablet e PC, col mouse e col tocco. Tutti gli altri scenari aprono il gioco
+  // da telefono; sopra i 720 px per lato il gioco sta in una cornice, e due difetti di
+  // quella cornice li aveva trovati il proprietario, non una prova.
+  { nome: 'tablet e PC: ogni schermata nella cornice', comando: 'npm', argomenti: ['run', 'e2e-schermi'] },
   // La prova di resistenza e' entrata in questo elenco dopo essersi rotta in silenzio:
   // cercava un pulsante della home che non esisteva piu' da due versioni, e nessuno
   // se n'era accorto perche' era l'unico controllo che restava fuori di qui. Un

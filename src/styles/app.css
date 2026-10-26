@@ -944,6 +944,30 @@ button {
 @media (max-height: 720px) and (max-width: 719px) {
   .pl-fine__numero { font-size: 50px; }
 }
+/* La stessa misura su PC e tablet, dove la regola qui sopra non scatta perche' la
+   finestra e' larga (PO-014, interruttore NUMERO_MISURA_LA_CORNICE in FineQuadro.jsx):
+   - dentro la cornice alta fino a 720 px, cioe' il 92% di finestre fino a 782 px;
+   - nella colonna da 430 px delle finestre larghe ma basse (un 1366x768 con le barre del
+     browser da' circa 1366x657).
+   La fine affollata ha gia' il suo numero, piu' piccolo: non si tocca. */
+@media (min-width: 720px) and (min-height: 720px) and (max-height: 782px),
+       (min-width: 720px) and (max-height: 720px) {
+  .pl-fine--misura-cornice:not(.pl-fine--affollata) .pl-fine__numero { font-size: 50px; }
+}
+/* FINE DEL LIVELLO COMPATTA SU PC E TABLET BASSI (PO-014, P1; interruttore
+   FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO in FineQuadro.jsx). Con il solo numero a 50 px la
+   schermata scorreva ancora di 40 px a 1280x720 e di 44 px a 1366x657 (un 1366x768 con le
+   barre del browser), contro la richiesta del proprietario che arriva al portatile da
+   1366x768. Qui prende le misure della fine affollata, Plinto compreso. Solo sopra i 720 px
+   di larghezza: i telefoni non cambiano. */
+@media (min-width: 720px) and (min-height: 720px) and (max-height: 782px),
+       (min-width: 720px) and (max-height: 720px) {
+  .pl-fine--compatta-larga .pl-fine__numero { font-size: 46px; }
+  .pl-fine--compatta-larga .pl-scroll { padding-top: 4px; }
+  .pl-fine--compatta-larga .pl-fine__motivo { margin-bottom: 10px; }
+  .pl-fine--compatta-larga .pl-fine__punteggio { margin-bottom: 8px; }
+  .pl-fine--compatta-larga .pl-fine__plinto svg { width: 56px; height: 56px; }
+}
 /* La fine del livello affollata (gettone guadagnato o atto appena chiuso): qualche
    pixel in meno a numero e margini, perche' tutto stia nello schermo senza scorrere. */
 .pl-fine--affollata .pl-fine__numero { font-size: 46px; }
@@ -1176,6 +1200,19 @@ button {
   display: grid;
   place-items: center;
   padding: 24px;
+}
+/* LA FINESTRA NON SUPERA IL VELO (PO-035, D1; interruttore VELI_CHE_SCORRONO in
+   src/ui/velo.js). Con i caratteri al 200% il pannello degli attrezzi era alto 1129 px su
+   915 e «Torna alla partita» restava sotto lo schermo, senza modo di scorrere. La riga
+   unica del velo e' alta quanto il velo (meno il suo padding), la finestra non la supera
+   e scorre dentro di se'. Centrata come prima: a caratteri normali entra e non cambia
+   niente. `overscroll-behavior` tiene lo scorrimento nella finestra, non nella partita. */
+.pl-velo--scorre { grid-template-rows: minmax(0, 1fr); }
+.pl-velo--scorre > * {
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .pl-menu {
   width: 100%;
@@ -1534,6 +1571,18 @@ button {
   width: 100%;
 }
 
+/* TESTO GRANDE: LE RIGHE VANNO A CAPO (PO-035, O1; interruttore TESTO_GRANDE_VA_A_CAPO in
+   src/main.jsx). Con i caratteri al 200% queste righe non ci stavano e la pagina sporgeva
+   di lato (guida +52 px, livello +35 a 360x800). Vanno a capo solo quando non ci stanno:
+   a caratteri normali ci stanno, e nessuna cambia. La scritta PLINTO e' una parola sola e
+   non puo' andare a capo: si limita in larghezza (13vw per lettera: a 360 px sono 47 px,
+   sopra i 34 normali, quindi a caratteri normali non cambia). */
+.pl-a-capo .pl-logo { flex-wrap: wrap; justify-content: center; }
+.pl-a-capo .pl-logo__testo { font-size: min(34px, 13vw); }
+.pl-a-capo .pl-intro__esempio { flex-wrap: wrap; }
+.pl-a-capo .pl-guida__navigazione { flex-wrap: wrap; }
+.pl-a-capo .pl-anteprima { flex-wrap: wrap; max-width: 100%; }
+
 /* ------------------------------------------------------------- guida a passi --- */
 /* Il conteggio dei passi: piccolo e spento, ma sempre presente. Chi apre un gioco per
    la prima volta deve sapere quanto dura la cosa che sta leggendo, altrimenti la salta
@@ -1667,6 +1716,88 @@ button {
   .pl-tavolo .pl-catena { max-width: min(92vh, 46vw); }
 }
 
+/* LA GRIGLIA PRENDE TUTTA L'ALTEZZA (PO-035, interruttore GIOCO_IN_ORIZZONTALE in
+   SchermoGioco.jsx). La regola qui sopra metteva la schermata in due colonne con
+   `align-items: center`: l'area della griglia restava alta quanto il suo contenuto (182x77
+   misurati a 640x360) e la griglia, che si misura in altezza, scendeva a 28x28 px; nei
+   livelli le caselle erano 0x0. In piu' il vassoio e' dentro un involucro, quindi le sue
+   regole non lo raggiungevano, e la riga degli attrezzi era nascosta. Rapporto PO-017, E1.
+
+   Qui la griglia e' la colonna di sinistra, alta quanto lo schermo: la colonna si misura
+   sulla griglia (`auto`), che e' quadrata e prende il 100% dell'altezza. Area e tavolo
+   diventano `display: contents`, cosi' Catena e riga degli attrezzi salgono nella colonna
+   di destra senza cambiare un componente: ogni pixel che resta sopra o sotto la griglia
+   e' un pixel di griglia in meno. Con Catena (23 px) e riga (44) sopra e sotto, a 640x360
+   la griglia avrebbe al massimo 348 - 23 - 44 - 8 = 273 px, il 76% dell'altezza
+   (calcolato dalle misure); cosi' ne ha 348, il 97% (misurato). A destra, dall'alto: punteggio e menu,
+   obiettivo o nome della modalita', Catena, poi lo spazio che avanza, e in fondo la riga
+   (mensola, «Rimetti a posto il pezzo», attrezzi) e i pezzi, dove arriva il pollice.
+   Il tetto della griglia in larghezza lascia almeno 240 px alla colonna di destra: sotto,
+   i tre pezzi non hanno spazio per essere presi. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .pl-app:has(> .pl-screen--orizzontale) {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale {
+    --pl-plancia-max: calc(100vw - 260px);
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      'plancia hud'
+      'plancia titolo'
+      'plancia catena'
+      'plancia .'
+      'plancia riga'
+      'plancia vassoio'
+      'plancia anteprima';
+    align-items: stretch;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 6px 10px;
+  }
+  .pl-screen--orizzontale .pl-plancia-area,
+  .pl-screen--orizzontale .pl-tavolo { display: contents; }
+  .pl-screen--orizzontale .pl-plancia-involucro { grid-area: plancia; width: auto; height: 100%; }
+  .pl-screen--orizzontale .pl-plancia { height: min(100%, var(--pl-plancia-max)); max-width: 100%; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-hud {
+    grid-area: hud;
+    align-self: start;
+    grid-template-columns: 1fr auto 1fr;
+    padding: 2px 4px 0;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-hud__record { display: block; }
+  .pl-screen--orizzontale .pl-obiettivo,
+  .pl-screen--orizzontale .pl-modalita { grid-area: titolo; max-width: none; }
+  .pl-screen--orizzontale .pl-tavolo .pl-catena { grid-area: catena; max-width: none; padding: 2px 4px; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-suggerimento {
+    grid-area: riga;
+    display: flex;
+    max-width: none;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-suggerimento--conattrezzi { display: grid; }
+  .pl-screen--orizzontale .pl-tray-involucro { grid-area: vassoio; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-tray { padding: 0 0 4px; }
+  /* 21vh: a 640x360 nel livello piu' affollato (obiettivo, Catena su due righe, attrezzi e
+     «Prossimi tre pezzi») con 24vh la colonna superava l'altezza di 9 px e la pagina
+     scorreva di 3. 76 px restano piu' del doppio dei 44 raccomandati per il dito. */
+  .pl-screen--gioco.pl-screen--orizzontale .pl-tray__posto { height: clamp(68px, 21vh, 124px); }
+  /* «Prossimi tre pezzi» e i tre disegni non stanno in una riga da 260 px (sporgevano di
+     15 a 640x360): vanno a capo invece di uscire dallo schermo. */
+  .pl-screen--orizzontale .pl-anteprima {
+    grid-area: anteprima;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 4px;
+    max-width: 100%;
+    margin: 0;
+  }
+}
+
 /* Schermi molto piccoli: si stringe tutto invece di far sparire pezzi di plancia. */
 @media (max-height: 700px) and (orientation: portrait) {
   .pl-hud { padding: 8px 16px 4px; }
@@ -1697,6 +1828,60 @@ button {
   .pl-home__azioni { gap: 10px; }
 }
 
+/*
+ * SCHERMI STRETTI E BASSI (360x640): il pie' di pagina si avvicina al menu di 4 px.
+ * A 360 px la riga del pie' va a capo e diventa alta 32 px invece di 17 (misurato con
+ * Inter, il font di ripiego dei container di prova): la home arrivava a 642 px su 640
+ * e scorreva di 2 (collaudo 1.21.7, C1, residuo di B10). Con altri font la stessa riga
+ * a capo e' alta 30 e non scorre: per questo il difetto si vedeva in un container si'
+ * e in un altro no. I 4 px si tolgono dal respiro sopra il pie', non dai collegamenti:
+ * il loro bersaglio da dito resta di 24 px o piu' (B10). La classe sulla radice e'
+ * l'interruttore, comandato da HOME_STRETTA_COMPATTA in `src/main.jsx`.
+ */
+@media (max-width: 380px) and (max-height: 680px) and (orientation: portrait) {
+  :root.pl-home-stretta .pl-home__pie { margin-top: -4px; }
+}
+
+/*
+ * PO-010: «Nuova partita libera» sotto la card della libera in corso. Un collegamento,
+ * non un pulsante largo: alto 28 px (B10 chiede 24 per i collegamenti), con margini
+ * negativi che lo avvicinano alla card di cui parla invece di metterlo a meta' strada
+ * fra due card.
+ */
+.pl-home__nuova-libera {
+  justify-self: center;
+  min-height: 28px;
+  margin-block: -4px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--pl-text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.pl-home__nuova-libera:hover { color: var(--pl-text); }
+
+/*
+ * PO-010, il posto per il collegamento sulla home bassa. A 360x640 la home avanzava di
+ * 2 px e il collegamento ne costa 28 (28 di altezza piu' 8 di spazio, meno gli 8 dei
+ * margini negativi): si prendono 2 px da ciascuno dei cinque spazi fra le azioni
+ * (10 -> 8), 8 dall'Archivio (52 -> 44, il minimo dei bersagli da dito), 2 da ciascuno
+ * dei due spazi fra le righe del menu (10 -> 8), 2 fra marchio e motto (8 -> 6) e un
+ * po' dai tre respiri fra i gruppi (2.4vh -> 2vh). Le voci del menu sono gia' a 44. Le misure prima e dopo sono in
+ * docs/sviluppo/RAPPORTO-PO-010-G1.md. La classe e' l'interruttore HOME_BASSA_COMPATTA
+ * in `src/ui/schermate/Home.jsx`; vale in tutti gli stati, perche' la home non cambi
+ * ritmo a seconda di che cosa c'e' in corso.
+ */
+@media (max-height: 680px) and (orientation: portrait) {
+  .pl-home--compatta { gap: clamp(8px, 2vh, 30px); }
+  .pl-home--compatta .pl-home__azioni { gap: 8px; }
+  .pl-home--compatta .pl-home__azioni > .pl-btn--fantasma { min-height: 44px; }
+  .pl-home--compatta .pl-home__testata { gap: 6px; }
+  .pl-home--compatta .pl-home__menu { gap: 8px; }
+}
+
 /* ------------------------------------------------------- sfida del giorno --- */
 /* Un secondo pulsante, non un richiamo: stesso peso visivo degli altri comandi
    secondari, nessuna animazione che attiri l'occhio, nessun contatore alla rovescia. */
@@ -1704,12 +1889,142 @@ button {
   justify-content: space-between;
   padding: 0 18px;
 }
+/* PO-009: la card con la riga di spiegazione e' una griglia, nome e stato sulla prima
+   riga e la spiegazione sotto, LARGA QUANTO LA CARD. Messa sotto il solo nome, a 360 px
+   avrebbe avuto meno di 160 px e sarebbe andata a capo due volte, allungando la card;
+   cosi' sta su una riga e la card resta alta 52 px come prima (misurato da
+   `npm run home-spiegazione`). Senza la riga, `:has()` non scatta e la card e' quella
+   di sempre. */
+.pl-sfida-avvio:has(.pl-sfida-avvio__spiega) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  column-gap: 10px;
+  row-gap: 1px;
+  text-align: left;
+  padding-block: 6px;
+}
+.pl-sfida-avvio__spiega {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  white-space: normal;
+  /* NON --pl-text-dim: sul punto piu' chiaro del fondo verde della Partita libera da'
+     4.497:1, cioe' sotto il 4.5 di WCAG AA per un soffio. Un 40% di --pl-text lo porta
+     a 6.35 (verde) e 8.10 (viola della Sfida), restando piu' tenue del nome. */
+  color: color-mix(in srgb, var(--pl-text) 40%, var(--pl-text-dim));
+}
 .pl-sfida-avvio__esito {
   font-family: var(--pl-font-num);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   color: var(--pl-brand);
 }
+/* PO-010: «Riprendi ›» e' una parola, non un numero: il carattere del testo, e lo
+   stesso ottone del record, che qui sostituisce. */
+.pl-sfida-avvio__esito--riprendi { font-family: inherit; letter-spacing: 0.02em; }
+/* «Riprendi ›» in evidenza (decisione del PO): pillola piena d'ottone col testo scuro.
+   Nessun padding verticale e line-height invariata: la card non cresce di un pixel. */
+.pl-sfida-avvio__esito--evidenza {
+  background: var(--pl-brand);
+  color: #14161c;
+  padding: 0 0.6em;
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pl-brand) 25%, transparent);
+}
+/* PO-011: niente alone, cosi' il bordo della pillola cade esattamente dove finiscono gli
+   altri stati a destra; la riga e' centrata sul nome. */
+.pl-sfida-avvio__esito--evidenza.pl-sfida-avvio__esito--allineata { box-shadow: none; align-self: center; }
+
+/*
+ * PO-020: con la libera in corso la card e' un contenitore (un <div>) con due pulsanti
+ * fratelli sulla riga del nome, «Nuova» e «Riprendi ›». Un <button> dentro un <button>
+ * non e' HTML valido. Il tocco sulla card deve riprendere come prima: la superficie di
+ * «Riprendi ›» (::after) si stende su tutta la card, e «Nuova» le sta sopra. La card ha
+ * lo stesso disegno e la stessa altezza della card a pulsante unico (misure in
+ * docs/sviluppo/RAPPORTO-PO-020.md). L'interruttore e' NUOVA_DENTRO_LA_CARD in
+ * `src/ui/schermate/Home.jsx`.
+ */
+.pl-sfida-avvio--doppia { position: relative; cursor: pointer; }
+.pl-sfida-avvio--doppia:has(.pl-sfida-avvio__riprendi:active) { transform: scale(0.97); }
+/* Le due pillole a 14 px e non a 16: a 360 px la riga del nome ha 276 px, e nome
+   (110-115, secondo il font) + «Nuova» + «Riprendi ›» a 16 px ne chiedevano 304, cioe'
+   il nome andava a capo e la card cresceva di 16 px. A 14 px, con pillole e spazi un po'
+   piu' stretti, avanzano 9 px. A 320 px (236 px di riga) in italiano non bastano
+   comunque: li' il nome va su due righe e la card e' alta 68; la home non scorre lo
+   stesso (misure in docs/sviluppo/RAPPORTO-PO-020.md). */
+.pl-sfida-avvio--doppia:has(.pl-sfida-avvio__spiega) { column-gap: 8px; }
+.pl-sfida-avvio__comandi {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 6px;
+  font-size: 14px;
+}
+.pl-sfida-avvio--doppia .pl-sfida-avvio__esito--evidenza { padding: 0 0.5em; }
+/* Riscontro del PO sulla 1.21.18: tutte le pillole d'azione della home con la misura di
+   quelle della libera, anche quella sola della sfida (PILLOLE_STESSA_MISURA, Home.jsx). */
+.pl-home--pillole-uguali .pl-sfida-avvio__esito--evidenza { font-size: 14px; padding: 0 0.5em; }
+.pl-sfida-avvio__riprendi,
+.pl-sfida-avvio__nuova {
+  border: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+.pl-sfida-avvio__riprendi::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+/* L'anello del fuoco va sulla card intera: e' la card che si riprende. */
+.pl-sfida-avvio__riprendi:focus-visible { outline: none; }
+.pl-sfida-avvio__riprendi:focus-visible::after { outline: 2px solid var(--pl-brand); outline-offset: 2px; border-radius: var(--pl-radius-md); }
+/* «Nuova»: la stessa pillola di «Riprendi ›» ma secondaria, cioe' senza fondo pieno:
+   un filo chiaro e il testo della card. Non sottolineata (il PO). Il suo bersaglio da
+   dito (::before) e' alto 45 px e non 17: va un po' sopra e soprattutto sotto la
+   pillola, sulla riga di spiegazione, restando dentro la card alta 52. Un tocco li'
+   comincia una nuova partita, ma con la libera a meta' c'e' prima la conferma H1. */
+.pl-sfida-avvio__nuova {
+  position: relative;
+  z-index: 1;
+  padding: 0 0.5em;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pl-text) 35%, transparent);
+  color: var(--pl-text);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pl-sfida-avvio__nuova::before {
+  content: '';
+  position: absolute;
+  inset: -7px -3px -21px;
+}
+/* PO-023 (collaudo 1.21.18, O1): i 21 px fissi qui sopra non arrivavano in fondo alla
+   card alta 68 (it 320x700): meta' della riga sotto «Nuova» riprendeva. Il bersaglio
+   allora scende ben oltre, e la card lo taglia al suo bordo (overflow: clip taglia anche
+   il tocco, non solo il disegno), qualunque sia la sua altezza. Il taglio coprirebbe
+   l'anello del fuoco di «Riprendi ›», che sta 2 px fuori: l'anello passa alla card
+   stessa, che non taglia il proprio contorno. Stesso rettangolo (la card non ha bordo e
+   ::after era inset 0), stesso raggio, stessi 2 px: a schermo non cambia niente.
+   Interruttore NUOVA_FINO_AL_BORDO in `src/ui/schermate/Home.jsx`. */
+.pl-sfida-avvio--nuova-al-bordo { overflow: clip; }
+.pl-sfida-avvio--nuova-al-bordo .pl-sfida-avvio__nuova::before { bottom: -200px; }
+.pl-sfida-avvio--nuova-al-bordo .pl-sfida-avvio__riprendi:focus-visible::after { outline: none; }
+.pl-sfida-avvio--nuova-al-bordo:has(.pl-sfida-avvio__riprendi:focus-visible) {
+  outline: 2px solid var(--pl-brand);
+  outline-offset: 2px;
+}
+/* PO-025 (collaudo 1.21.20, O1): `inherit` qui sopra da' al bersaglio di «Riprendi ›» il
+   raggio della pillola (999px); la card ne ha 14. Gli angoli restavano alla card, che non
+   risponde: 364-744 pixel morti. Con il raggio della card il bersaglio la copre tutta.
+   Interruttore RIPRENDI_ANGOLI_DELLA_CARD in `src/ui/schermate/Home.jsx`. */
+.pl-sfida-avvio--riprendi-angoli .pl-sfida-avvio__riprendi::after { border-radius: var(--pl-radius-md); }
+.pl-sfida-avvio__nuova:hover { background: rgba(255, 255, 255, 0.12); }
+.pl-sfida-avvio__nuova:active { transform: scale(0.95); }
 
 /* --------------------------------------------------- schermi grandi (desktop) --- */
 /*
@@ -2688,6 +3003,10 @@ button {
    leggerla bene. */
 .pl-azzera .pl-segmenti .pl-btn { flex: 1; padding: 0 12px; }
 .pl-velo .pl-azzera { width: 100%; max-width: 360px; box-shadow: var(--pl-shadow-lift); }
+/* La domanda prima di perdere una partita a meta' (PO-008). I pulsanti uno sopra l'altro
+   e non affiancati: le etichette dicono dove si torna e sono lunghe. Anche cosi', a 360 px
+   «Torna alla sfida del 16 ottobre» va su due righe (schermata in docs/sviluppo). */
+.pl-azzera__scelte { display: grid; gap: 8px; }
 
 /* Il salvataggio: due pulsanti per riga, con il respiro laterale stretto. Con quello di
    un pulsante normale "Scarica il file" andava a capo, e un'etichetta spezzata in due su
@@ -3021,6 +3340,11 @@ button {
      una cosa da premere -- e una cosa da premere che non fa niente e' un difetto. */
   border: 1px solid var(--pl-brand-deep);
   text-align: center;
+}
+/* H2 (collaudo 1.21.11): a 320x700 la fine del livello con l'atto chiuso scorreva di
+   1 px. Solo sugli schermi piccoli, e solo con la fascia: 6 px in meno sopra di lei. */
+@media (max-width: 340px) and (max-height: 720px) {
+  .pl-fine--atto-chiuso .pl-atto-chiuso { margin-top: 8px; }
 }
 .pl-atto-chiuso__titolo {
   margin: 0;

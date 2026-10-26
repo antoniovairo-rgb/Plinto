@@ -7,6 +7,425 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [Non pubblicato] — La Torre (branch `opera-torre`)
+
+Non ancora in produzione: va online solo dopo l'esito della revisione Google del pacchetto
+11915 (decisione del PO, 26 ottobre 2026), come 1.22.0. La grafica e le animazioni nate qui
+sono gia' uscite sul Ponte con la 1.21.0, l'icona di avvio di Android con il pacchetto 11905;
+restano l'icona e il logo a gemme del sito e la Torre. Il ramo contiene tutto `main` fino
+alla 1.21.25 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo normale).
+
+### Cambiato
+
+- **Pezzi in mano più nitidi** (richiesta del proprietario, 15 ottobre 2026): sui blocchi
+  piccoli le righe di luce e d'ombra sono più sottili e non li fanno più sembrare a
+  strisce. La plancia e l'alone restano come prima.
+
+### Aggiunto
+
+- **La Torre: cento livelli nuovi, dal 101 al 200, con una regola nuova, i massi.** Un
+  masso conta come pieno ma non sparisce mai: aiuta a chiudere la riga, la colonna e il
+  quadrante in cui si trova, e resta li' quando il gruppo se ne va. Le bombe non lo
+  portano via, il piccone non lo toglie, non conta per la Tinta; se sulla griglia restano
+  solo massi, la griglia conta come svuotata.
+- **Sette atti:** il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
+  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 51%,
+  47%, 40%, 35%. Tutti i cento livelli stanno nella banda di difficolta' del loro atto.
+- **La Torre si apre solo finendo tutto il Ponte**, ogni livello con la spunta. La mappa
+  ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
+- **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
+  fine della Torre.
+- **Icona e logo con le stesse finiture**: blocchi come gemme, filo e tratteggio d'ottone,
+  luce calda in alto. Stessa geometria di prima, quindi si riconosce subito. Le icone per
+  Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
+  margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
+  la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
+- **Testi della scheda e schermate per l'uscita della Torre**: duecento livelli, i massi,
+  l'ultimo livello di ogni opera, note di rilascio in italiano e inglese
+  (`android/SCHEDA-PLAY-STORE.md`). Le schermate mostrano la Torre; quella
+  dell'eliminazione si scatta a orologio fermo, perche' la scritta dell'Intreccio dura
+  meno della cattura. Da rigenerare il giorno dell'uscita, per il numero di versione.
+- **Immagine in evidenza dello store** con il marchio a gemme (letto da `public/icon.svg`),
+  la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
+
+### Corretto
+
+- **I massi quasi non si vedevano con la grafica nuova**, e i blocchi che esplodono
+  perdevano il loro colore: la regola delle gemme valeva per ogni blocco, anche per
+  quelli senza colore, e per loro il fondo diventava trasparente. Ora vale solo per i sei
+  colori. Visto nelle schermate per lo store; `npm run e2e-scenografie` controlla adesso
+  il fondo del masso e quello del blocco che esplode.
+- Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
+  Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
+
+### Interno
+
+- I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
+  senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
+  cambiano, e nemmeno i record di chi li ha gia' giocati.
+
+## [1.21.25] — 22 ottobre 2026
+
+### Corretto
+
+- **Si gioca anche col telefono coricato** (PO-035, PO-017 E1): con lo schermo in
+  orizzontale e alto fino a 620 px la griglia era di 28 px, nei livelli le caselle
+  sparivano e gli attrezzi non si raggiungevano. Adesso la griglia prende tutta l'altezza
+  (348 px a 640x360, 588 a 1024x600) e punteggio, obiettivo, Catena, attrezzi e pezzi stanno
+  a destra. In verticale, sui tablet e sui PC non cambia niente (impaginazione identica in
+  70 scene misurate). Interruttore `GIOCO_IN_ORIZZONTALE`.
+- **Con i caratteri molto grandi** (PO-017 D1, O1; misurato con una simulazione a 200%):
+  menu, domande e pannello degli attrezzi scorrono invece di uscire dallo schermo, e
+  «Torna alla partita» si raggiunge sempre; la guida e il livello non sporgono più di lato.
+  Interruttori `VELI_CHE_SCORRONO`, `TESTO_GRANDE_VA_A_CAPO`.
+
+### Cambiato
+
+- **Col dito, dopo mensola, carriola o piccone nessun pezzo resta scelto** (già dalla
+  1.21.24, collaudo 1.21.24 O1, scelta del PO): se avevi toccato un pezzo prima di usare
+  l'attrezzo, va ritoccato; prima restava scelto e il tocco seguente sulla griglia lo posava.
+
+### Android
+
+- Pacchetto 11915: l'app si dichiara gioco (`android:appCategory="game"`), l'eccezione di
+  Android 16 all'orientamento ignorato sui tablet.
+- Pacchetto 11915: torna lo schermo normale (`DISPLAY_MODE` `default`, ora in alto e
+  pulsanti di Android visibili) al posto dello schermo intero «sticky-immersive», per la
+  revisione di Google (PO-017, scelta del PO). L'immersiva tornerà in un pacchetto
+  successivo, da sola.
+
+### Prove
+
+- `npm run e2e-schermi`: telefono coricato su cinque formati (griglia almeno all'85%
+  dell'altezza, un pezzo trascinato col dito) e testo x2; rossi sulla 1.21.24.
+
+## [1.21.24] — 21 ottobre 2026
+
+### Corretto
+
+- **Gli attrezzi con la tastiera** (PO-030, PO-032; collaudo 1.21.22 O2 e 1.21.23 D1, O1,
+  O2):
+  - il piccone si usa anche con la tastiera: le frecce portano il cursore sulla casella e
+    Invio (o Spazio) la svuota; col tocco non cambia niente; l'aiuto lo dice in una frase.
+    Interruttore `SCAVO_CON_LA_TASTIERA`;
+  - con un pezzo scelto, scegliere la mensola, la carriola o il piccone (o lo scambio dalla
+    mensola) lascia il pezzo: Invio sul vassoio non posa più il pezzo di prima, e non si
+    perde una mossa. Interruttore `SCELTA_AZZERATA_CON_L_ATTREZZO`;
+  - Escape durante l'attesa di mensola, carriola, scambio e piccone fa quello che fa
+    «Lascia stare». Interruttore `ESCAPE_LASCIA_STARE`;
+  - messo un pezzo sulla mensola o ripreso con la tastiera, il fuoco resta sui pezzi.
+    Interruttore `FUOCO_SUL_VASSOIO_DOPO_LA_MENSOLA`.
+  Controllo: casi W e X di `npm run e2e-po008`.
+
+### Prove
+
+- La firma della partita in `e2e-po008` conta le caselle occupate davvero (PO-031, caso V).
+- «rimetti a posto il pezzo» aspetta i blocchi e scrive cosa c'era se la mossa non appoggia
+  (PO-033).
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.23] — 21 ottobre 2026
+
+### Corretto
+
+- **Con un pezzo scelto, Invio su «Menu» apre il menu** (PO-027): giocando con la sola
+  tastiera, Invio e Spazio posavano il pezzo da qualunque punto della pagina, anche con il
+  fuoco su «Menu» o sulla pastiglia degli attrezzi (nel livello si perdeva una mossa). Ora
+  premono il pulsante che ha il fuoco; con il fuoco sul pezzo, Invio lo posa come prima.
+  Interruttore `INVIO_PREME_I_PULSANTI`.
+- **Con il pannello degli attrezzi aperto, la tastiera non muove più la partita sotto**
+  (PO-028, collaudo 1.21.22 D1 e O3): con un pezzo scelto, Invio e Spazio posavano il pezzo
+  sotto il pannello. Ora i tasti della partita tacciono e il pezzo resta scelto; il pannello
+  si comporta come il menu: all'apertura il fuoco va su «Torna alla partita», chiuso senza
+  scegliere torna alla pastiglia. Interruttori `TASTI_TACCIONO_SOTTO_IL_PANNELLO` e
+  `PANNELLO_COME_IL_MENU`.
+- **Passando dalla sfida alla libera non resta più scelto un pezzo** (PO-029, collaudo
+  1.21.22 O1): scelta e cursore si azzerano quando cambia la partita. Interruttore
+  `SCELTA_AZZERATA_CAMBIANDO_PARTITA`. Controllo: casi S, T e U di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.22] — 21 ottobre 2026
+
+### Corretto
+
+- **Con il menu o una domanda aperti, la tastiera non muove più la partita sotto**
+  (PO-026, collaudo 1.21.21 D1): con un pezzo scelto, Invio e Spazio posavano il pezzo
+  sotto il velo invece di premere il pulsante, ed Escape lasciava il pezzo e chiudeva
+  anche il menu con un tasto solo. Succedeva anche con le domande sopra la partita
+  («Riprova»). Ora, finché la finestra è aperta, Invio e Spazio premono il pulsante e
+  Escape chiude solo la finestra; il pezzo resta scelto. A menu chiuso la tastiera
+  funziona come prima. Interruttore `TASTI_TACCIONO_SOTTO_IL_VELO`.
+- **«Riprendi la partita» riporta il fuoco su «Menu»** (PO-026, collaudo 1.21.21 O1):
+  dalla domanda aperta con «Nuova partita» nel menu della libera, e da «Torna alla
+  partita» nella domanda di «Riprova», il fuoco finiva fuori dalla pagina. Ora torna su
+  «Menu», come «Torna alla partita» del menu. Interruttore `RIPRENDI_TORNA_A_MENU`.
+  Controllo: caso R di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.21] — 21 ottobre 2026
+
+### Corretto
+
+- **La card della partita libera risponde anche negli angoli** (PO-025, collaudo 1.21.20
+  O1): un tocco negli angoli della card non faceva niente, perché il bersaglio di
+  «Riprendi ›» era arrotondato come la pillola e non come la card. Ora ogni punto della
+  card va a «Nuova» o a «Riprendi ›»; a schermo non cambia niente. Interruttore
+  `RIPRENDI_ANGOLI_DELLA_CARD`; controllo in `npm run home-spiegazione` (pixel morti 0).
+- **Il menu della partita si usa come le domande** (PO-024, collaudo 1.21.20 O2): Escape
+  lo chiude; all'apertura il fuoco entra su «Torna alla partita»; chiuso senza scegliere
+  il fuoco torna al pulsante «Menu». Per i lettori di schermo il menu è una finestra
+  («Menu»). Con una domanda aperta sopra il menu, Escape chiude solo la domanda.
+  Interruttore `MENU_COME_LE_DOMANDE`; controllo caso Q di `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.20] — 21 ottobre 2026
+
+### Corretto
+
+- **Accessibilità della home e delle domande** (collaudo 1.21.18, PO-023):
+  - chiusa una domanda senza scegliere (Escape, tocco fuori, Indietro), il fuoco torna al
+    pulsante che l'ha aperta; per «Riprova» del menu del livello va al pulsante «Menu».
+    Interruttore `FUOCO_TORNA_A_CHI_APRE`; controllo caso P in `npm run e2e-po008`;
+  - tutta la colonna sotto «Nuova» della Partita libera apre «Nuova», fino al bordo della
+    card. Interruttore `NUOVA_FINO_AL_BORDO`; controllo in `npm run home-spiegazione`;
+  - la card della sfida da fare si chiama «Sfida del giorno, gioca la sfida di oggi».
+    Interruttore `NOME_SFIDA_CON_GIOCA`; controllo in `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.19] — 21 ottobre 2026
+
+### Corretto
+
+- **Le pillole della home hanno tutte la stessa misura** (riscontro del PO sulla 1.21.18,
+  PO-020/PO-021): «Gioca ›» e «Riprendi ›» della Sfida del giorno erano più grandi di
+  «Nuova» e «Riprendi ›» della Partita libera. Interruttore `PILLOLE_STESSA_MISURA`;
+  controllo in `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.18] — 20 ottobre 2026
+
+### Cambiato
+
+- **«Nuova» dentro la card della Partita libera** (PO-020, scelta del PO «Dentro la
+  card»): con una libera in corso la card mostra due pillole sulla stessa riga, «Nuova» e
+  «Riprendi ›»; sparisce il collegamento sottolineato sotto la card. «Nuova» chiede
+  conferma come prima. Interruttore `NUOVA_DENTRO_LA_CARD`.
+- **«Gioca ›» nella card della Sfida del giorno** (PO-021, scelta del PO): la sfida da
+  fare mostra una pillola piena, come «Riprendi ›», al posto del testo «Da giocare».
+  Interruttore `GIOCA_IN_PILLOLA`. Controllo per entrambe: `npm run home-spiegazione`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.17] — 19 ottobre 2026
+
+### Corretto
+
+- **Il tasto Indietro dopo una ricarica non corre più contro la ripresa del livello**
+  (PO-019). Con il server di sviluppo React esegue due volte l'effetto del tasto
+  Indietro; il secondo giro chiamava `history.go` mentre la ripresa rimetteva le voci
+  della cronologia, e a volte il primo Indietro usciva dal gioco. Rendeva rossa la CI a
+  intermittenza (casi B6 di `npm run correzioni` e O di `npm run e2e-po008`). In
+  produzione il comportamento non cambia. Interruttore
+  `PRIMO_GIRO_REGGE_IL_DOPPIO_EFFETTO` (`src/ui/useTastoIndietro.js`).
+
+### Android
+
+- Pacchetto `versionCode 11907` per il test chiuso su Google Play (PO-017).
+
+## [1.21.16] — 19 ottobre 2026
+
+### Cambiato
+
+- **Fine del livello col gettone: la mappa diventa solo la barra «N di 100»** (PO-015,
+  scelta del PO «Mappa ridotta»), senza le tappe con Plinto, quando l'atto non si chiude.
+  Così la schermata entra senza scorrere da 320x700 al portatile, anche con le barre del
+  browser (prima: da 16 a 83 px da scorrere). Interruttore `MAPPA_RIDOTTA_COL_GETTONE`;
+  caso «solo gettone» in `npm run e2e-trionfo` e `npm run e2e-schermi`.
+
+### Corretto
+
+- **La sconfitta su PC e tablet bassi torna con Plinto grande** (O1, collaudo della
+  1.21.15): la fine compatta vale solo per la vittoria. Interruttore
+  `VITTORIA_SOLA_COMPATTA_SU_SCHERMO_LARGO`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.15] — 18 ottobre 2026
+
+### Corretto
+
+- **La fine del livello non scorre più su PC e tablet bassi** (PO-014, collaudo tablet e
+  PC). Sopra i 720 px di larghezza la regola dei telefoni bassi non scattava: a 1366x768 e
+  1024x768 la schermata andava scorsa di 6 px, a 1280x720 e su un 1366x768 con le barre del
+  browser di qualche decina. Interruttori `NUMERO_MISURA_LA_CORNICE` e
+  `FINE_COMPATTA_SU_SCHERMO_LARGO_BASSO` (`FineQuadro.jsx`). Sotto i 720 px di larghezza
+  non cambia nulla.
+
+### Aggiunto
+
+- **Controllo automatico di tablet e PC** (`npm run e2e-schermi`, nel gate): 13 formati,
+  col tocco e col mouse, ogni schermata principale giocata fino alla fine del livello.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.14] — 18 ottobre 2026
+
+### Cambiato
+
+- **Il pulsante grande della home dice sempre «Livello N»** (PO-013, richiesta del PO),
+  anche con un livello lasciato a metà: il tocco lo riprende comunque da dove eri.
+  Interruttore `LIVELLO_SENZA_RIPRENDI`.
+
+### Corretto
+
+- **Una partita libera iniziata da dentro una sfida resta la libera dopo una ricarica**
+  (I1, collaudo della 1.21.12): l'indirizzo `#/sfida/<giorno>` si ripulisce quando parte o
+  si riprende la libera. Interruttore `ANCORA_VIA_DALLA_LIBERA`; caso O in
+  `npm run e2e-po008`.
+
+Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.13] — 18 ottobre 2026
+
+### Corretto
+
+- **La pillola «Riprendi ›» è allineata agli altri stati** (PO-011, segnalazione del PO
+  dal telefono): senza l'alone di 3 px che la faceva sporgere a destra, il suo bordo cade
+  dove finiscono «Da giocare» e «Record …». Interruttore `PILLOLA_ALLINEATA`; controllo
+  in `npm run home-spiegazione`. Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+## [1.21.12] — 18 ottobre 2026
+
+Una partita libera a metà non si perde più con un tocco (H1, decisione del PO) e la fine
+livello con l'atto chiuso entra anche sui telefoni da 320x700 (H2). Ogni correzione ha un
+interruttore e una prova che con l'interruttore spento fallisce. Arriva anche nell'app
+Android: nessun pacchetto nuovo.
+
+### Corretto
+
+- **Conferma prima di una nuova partita libera** con una a metà (almeno una mossa), da
+  qualunque punto la si inizi: home, menu della partita, profilo, statistiche, festa
+  finale. «La partita libera è a metà.» → «Riprendi la partita» (evidenziato) o «Nuova
+  partita». Interruttore `CONFERMA_NUOVA_LIBERA`; caso N in `npm run e2e-po008`.
+- **Fine livello con l'atto chiuso a 320x700** senza scorrimento (6 px in meno sopra la
+  fascia, solo sotto 340x720). Interruttore `ATTO_CHIUSO_COMPATTO`.
+
+## [1.21.11] — 18 ottobre 2026
+
+Le card della home dicono sempre quale modalità riprendi (PO-010), la home non scorre più
+con una partita libera in corso (F1), i testi sulla Sfida sono veri (F3) e un collegamento
+a una sfida si apre anche con il gioco già aperto (G1). Ogni correzione ha un interruttore
+e una prova che con l'interruttore spento fallisce, misurata anche sulla build di
+produzione. Arriva anche nell'app Android: nessun pacchetto nuovo.
+
+### Cambiato
+
+- **Card della home con il nome fisso** (PO-010, decisione del PO): «Partita libera» e
+  «Sfida del giorno» restano tali anche con una partita in corso; a destra compare
+  «Riprendi ›» in una pillola d'ottone; il collegamento sotto la libera dice «Nuova
+  partita libera». Il record resta in Statistiche. Interruttori `NOME_FISSO_E_STATO`,
+  `RIPRENDI_IN_EVIDENZA` (`Home.jsx`).
+
+### Corretto
+
+- **La home non scorre con una partita libera in corso** (F1): era −60 px a 360x640.
+  Sotto i 680 px di altezza la home si compatta un poco in tutti gli stati. Interruttore
+  `HOME_BASSA_COMPATTA`; `npm run home-spiegazione` prova cinque stati in sei formati.
+- **I testi sulla Sfida dicono che parte uguale per tutti** (F3), non che è la stessa
+  partita: dopo sei mani i pezzi divergono (`docs/GAMEPLAY_RULES.md`). Anche
+  `docs/ITCH.md`.
+- **Un collegamento `#/sfida/<giorno>` aperto con il gioco già acceso apre la sfida**
+  (G1) invece di essere preso per un Indietro. Interruttore `ANCORA_NON_E_INDIETRO`.
+
+## [1.21.10] — 18 ottobre 2026
+
+Una riga in home spiega le due modalità (PO-009), il gioco chiede conferma prima di far
+perdere una partita a metà (PO-008), e la media dei punteggi in Statistiche è giusta (D4).
+Ogni correzione ha un interruttore e una prova che con l'interruttore spento fallisce,
+misurata anche sulla build di produzione. Arriva anche nell'app Android: nessun pacchetto
+nuovo.
+
+### Aggiunto
+
+- **In home una riga fissa spiega le due modalità** (PO-009): «Senza livelli: gioca
+  finché i pezzi entrano» sotto «Partita libera», «Nuova ogni giorno, parte uguale per
+  tutti» sotto «Sfida del giorno» (in inglese: «No levels: play until no piece fits» /
+  «New every day, same start for everyone»). La home non diventa più alta. Interruttore
+  `SPIEGAZIONE_MODI`; nuova prova nel gate: `npm run home-spiegazione`.
+- **Conferma prima di perdere una partita a metà** (PO-008, decisione del PO): prima di
+  giocare un altro livello, di «Riprova» e di aprire dall'archivio la sfida di un altro
+  giorno. La domanda compare solo se c'è almeno una mossa da perdere; il pulsante
+  evidenziato riprende. Interruttori `CONFERMA_ALTRO_LIVELLO`, `CONFERMA_RIPROVA`,
+  `CONFERMA_ALTRA_SFIDA`, `ANCORA_SFIDA_DOPO_INDIETRO`; casi J-M in `npm run e2e-po008`.
+
+### Corretto
+
+- **Il punteggio medio in Statistiche** è il totale diviso per le partite (D4): con molte
+  partite mostrava 5.000.000 in italiano e «NaN» in inglese. Interruttore `MEDIA_VERA`.
+
+## [1.21.9] — 17 ottobre 2026
+
+La partita o il livello non ripartono più da zero (PO-008) e i tre difetti del collaudo
+della 1.21.8 (D1-D3, rapporto sul ramo `collaudo-1.21.8`). Ogni correzione ha un
+interruttore e una prova che con l'interruttore spento fallisce, misurata anche sulla build
+di produzione. Arriva anche nell'app Android, che mostra il sito: nessun pacchetto nuovo.
+
+### Corretto
+
+- **Un livello lasciato a metà non riparte da zero** (PO-008): Indietro porta alla mappa
+  ma il livello resta salvato; in home il pulsante grande dice «Riprendi il livello N»
+  anche dopo più di due ore; uscendo mentre si legge l'obiettivo si torna lì; la ripresa
+  vale anche con la guida rimandata; guardare solo l'obiettivo di un altro livello non
+  cancella quello a metà. Interruttori: `CONSERVA_ALL_USCITA`, `SALVA_IN_PRESENTAZIONE`,
+  `NON_COPRE_UN_ALTRO_LIVELLO` (`useQuadro.js`), `RIPRENDI_LIVELLO_A_MANO`,
+  `RIPRESA_SENZA_GUIDA` (`App.jsx`). Nuova prova nel gate: `npm run e2e-po008`.
+- **Unendo un salvataggio il record della Sfida non scende sotto il massimo
+  dell'archivio** (D1, `RECORD_SFIDA_DALL_ARCHIVIO`).
+- **«Sostituisci tutto» toglie i dati di gioco assenti dal file**, come promette la
+  conferma (D2, `SOSTITUISCI_TOGLIE_ASSENTI`); impostazioni e partite in corso restano.
+- **Niente «NaN» in Statistiche da dati già guasti nel telefono** (D3, `LETTURA_RIPULITA`).
+
+### Android
+
+- Il pacchetto caricato su Play Console il 17 ottobre è il **11905 (1.21.8)**. Il
+  repository è già pronto per il prossimo caricamento: 11906, versionName 1.21.9.
+
+## [1.21.8] — 17 ottobre 2026
+
+Le ultime correzioni del collaudo della 1.21.6 (B6, B7, B11) e i due difetti trovati dal
+collaudo della 1.21.7 (C1, C2; rapporto sul ramo `collaudo-1.21.7`). Ogni correzione ha un
+interruttore per spegnerla e una prova che con l'interruttore spento fallisce, misurata
+anche sulla build di produzione.
+
+### Cambiato
+
+- **Due record separati** (B7, decisione del PO): la Partita libera e la Sfida del giorno
+  hanno ciascuna il suo record. Il record che c'era resta alla Partita libera; quello della
+  Sfida parte dal punteggio migliore già nell'archivio delle sfide. In Statistiche compare
+  la riga «Record della Sfida del giorno». Interruttore: `RECORD_SEPARATI`.
+
+### Corretto
+
+- **Tasto Indietro dopo una ricarica a metà livello** (B6): ora fa mappa › home › uscita,
+  senza Indietro «a vuoto». Interruttore: `ADOTTA_VOCI_DOPO_RICARICA`.
+- **Unendo un salvataggio, i gettoni degli attrezzi spesi non tornano** (B11): vince il
+  documento che ha riscosso più gettoni, a parità quello con meno disponibili.
+  Interruttore: `GETTONI_SPESI_NON_TORNANO`.
+- **La home non scorre di 2 px sui telefoni da 360x640** (C1), quando il piè di pagina va a
+  capo: si avvicina al menu di 4 px fino a 380x680. Interruttore: `HOME_STRETTA_COMPATTA`.
+- **Niente «NaN» da un salvataggio guasto** (C2): si scartano le sfide senza punteggi
+  numerici e gli attrezzi con numeri non validi. Interruttore: `VOCI_GUASTE_SCARTATE`.
+- **App Android, pacchetto 11905** (da caricare su Play Console): nuova icona di avvio e
+  schermata d'apertura a gemme, schermo intero vero (`sticky-immersive`: niente ora in alto
+  né pulsanti in basso), avvio con `?origine=play` perché il gioco sappia di essere
+  nell'app e mostri «Recensisci». I livelli e la grafica della Torre restano per la 1.22.0.
+
 ## [1.21.7] — 15 ottobre 2026
 
 Le correzioni del **collaudo approfondito** della 1.21.6 (rapporto completo sul ramo
@@ -110,64 +529,19 @@ falliva.
   le TWA), e lo ricorda nel dispositivo. Informativa privacy aggiornata.
 - Nuova prova nel gate, `npm run recensione`: 29 controlli.
 
-## [Non pubblicato] — La Torre (branch `opera-torre`)
-
-Non ancora in produzione: aspetta il via del proprietario. La grafica e le animazioni nate
-qui sono gia' uscite sul Ponte con la 1.21.0; restano l'icona, il logo a gemme e la Torre.
+## [1.21.1] — 10 ottobre 2026
 
 ### Cambiato
 
-- **Pezzi in mano più nitidi** (richiesta del proprietario, 15 ottobre 2026): sui blocchi
-  piccoli le righe di luce e d'ombra sono più sottili e non li fanno più sembrare a
-  strisce. La plancia e l'alone restano come prima.
-
-### Aggiunto
-
-- **L'app Android a schermo intero vero** (pacchetto nuovo della Torre): niente ora in alto
-  e niente pulsanti di Android in basso, come ogni gioco. Modalità «sticky-immersive» della
-  libreria di Google: le barre riappaiono solo scorrendo dal bordo. Richiesta del
-  proprietario, 14 ottobre 2026.
-
-- **La Torre: cento livelli nuovi, dal 101 al 200, con una regola nuova, i massi.** Un
-  masso conta come pieno ma non sparisce mai: aiuta a chiudere la riga, la colonna e il
-  quadrante in cui si trova, e resta li' quando il gruppo se ne va. Le bombe non lo
-  portano via, il piccone non lo toglie, non conta per la Tinta; se sulla griglia restano
-  solo massi, la griglia conta come svuotata.
-- **Sette atti:** il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
-  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 51%,
-  47%, 40%, 35%. Tutti i cento livelli stanno nella banda di difficolta' del loro atto.
-- **La Torre si apre solo finendo tutto il Ponte**, ogni livello con la spunta. La mappa
-  ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
-- **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
-  fine della Torre.
-- **Icona e logo con le stesse finiture**: blocchi come gemme, filo e tratteggio d'ottone,
-  luce calda in alto. Stessa geometria di prima, quindi si riconosce subito. Le icone per
-  Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
-  margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
-  la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
-- **Testi della scheda e schermate per l'uscita della Torre**: duecento livelli, i massi,
-  l'ultimo livello di ogni opera, note di rilascio in italiano e inglese
-  (`android/SCHEDA-PLAY-STORE.md`). Le schermate mostrano la Torre; quella
-  dell'eliminazione si scatta a orologio fermo, perche' la scritta dell'Intreccio dura
-  meno della cattura. Da rigenerare il giorno dell'uscita, per il numero di versione.
-- **Immagine in evidenza dello store** con il marchio a gemme (letto da `public/icon.svg`),
-  la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
-
-### Corretto
-
-- **I massi quasi non si vedevano con la grafica nuova**, e i blocchi che esplodono
-  perdevano il loro colore: la regola delle gemme valeva per ogni blocco, anche per
-  quelli senza colore, e per loro il fondo diventava trasparente. Ora vale solo per i sei
-  colori. Visto nelle schermate per lo store; `npm run e2e-scenografie` controlla adesso
-  il fondo del masso e quello del blocco che esplode.
-- Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
-  Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
-
-### Interno
-
-- I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
-  senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
-  cambiano, e nemmeno i record di chi li ha gia' giocati.
+- **La veste nuova anche fuori dalla partita** (richiesta del proprietario): la guida
+  del primo avvio, «Come si gioca», le pagine, le finestre (menu, attrezzi, conferme),
+  la fine del livello, la festa finale e l'archivio. Riquadri e finestre con un filo
+  d'ottone e un velo di luce, i pulsanti secondari come le voci della home (quelli
+  discreti, come «Torna ai livelli», restano discreti), i titoletti delle sezioni in
+  ottone, i numeri della guida come piccole targhe, le mini-plance con la cornice
+  d'ottone, i giorni giocati dell'archivio con il loro filo. Solo fondi, bordi, ombre e
+  colore dei titoletti: nessuna misura e nessun testo cambiati.
+- Schermate e video per la scheda del Play Store rigenerati con la grafica nuova.
 
 ## [1.21.0] — 9 ottobre 2026
 

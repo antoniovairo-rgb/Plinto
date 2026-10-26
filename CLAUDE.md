@@ -6,8 +6,8 @@ il codice non concordano, vince il codice: correggi questo file.
 ## Cos'e'
 Puzzle a blocchi su griglia 9x9 (righe, colonne E quadranti 3x3), gratuito, senza
 pubblicita', senza account, senza rete. Web app installabile (PWA) e, su Google Play,
-una **Trusted Web Activity** senza codice nativo. E' **in test chiuso su Google Play**:
-la stabilita' viene prima di qualunque funzionalita' nuova.
+una **Trusted Web Activity** senza codice nativo. E' **pubblico su Google Play dal 5 ottobre
+2026**: la stabilita' viene prima di qualunque funzionalita' nuova.
 
 ## Stack
 - React 18 + Vite 5, JSX puro, ESM (`"type": "module"`). **Niente TypeScript.**
@@ -21,7 +21,7 @@ npm install
 npm run dev                    # http://localhost:5173, anche dal telefono in Wi-Fi
 npm run build                  # dist/ — inietta la versione e precarica il service worker
 npm test                       # 28 file Vitest, ~25 s
-npm run verifica               # IL GATE: 30 controlli, ~65 min (cento livelli rigiocati)
+npm run verifica               # IL GATE: 33 controlli, ~65 min (cento livelli rigiocati)
 npm run verifica -- --veloce   # ~10 min: salta i cento livelli SOLO se il diff lo permette
 ```
 Gli altri script di `package.json` sono singoli controlli o strumenti (`schermate`,
@@ -31,9 +31,8 @@ Gli altri script di `package.json` sono singoli controlli o strumenti (`schermat
 ```
 src/core/         motore PURO: niente DOM, niente React, niente timer. Riduttore
                   (stato, azione) -> stato; seed riproducibile; lastMove verso il feel
-src/config/       rules.js (costanti di regolamento), opere/ponte.js e opere/torre.js
-                  (100 livelli ciascuno, GENERATI da tools/genera-quadri.mjs), quadri.js
-                  (NON generato: mette in fila le opere), progetto.js (link e contatti)
+src/config/       rules.js (costanti di regolamento), quadri.js (100 livelli, GENERATO
+                  da tools/genera-quadri.mjs), progetto.js (link e contatti)
 src/state/        hook che avvolgono motore e persistenza (usePartita, useQuadro...)
 src/persistence/  localStorage con prefisso `plinto:` (storage.js e' l'unico accesso)
 src/ui/           componenti e schermate (ui/schermate/), App.jsx e' la radice
@@ -148,17 +147,11 @@ Il dettaglio dei layer e di chi puo' importare chi e' in `docs/ARCHITECTURE.md`.
   dentro un testo si prende dalle regole, non si scrive a mano. Prima di scrivere un
   testo nuovo chiediti: chi lo legge per la prima volta, senza sapere niente del codice,
   capisce che cosa fare?
-- **I livelli non si modificano a mano.** Ogni opera ha il suo file generato in
-  `src/config/opere/` (il Ponte 1-100, la Torre 101-200); si cambia la ricetta in
-  `tools/genera-quadri.mjs` (atti, tipi, motivi, percentili, margini, bande di riuscita) e
-  si rigenera UN'OPERA: `QUADRI_OPERA=torre node tools/genera-quadri.mjs 16`. Una
-  generazione intera dura ore, quindi si prova prima a vuoto su un tratto:
-  `QUADRI_OPERA=torre QUADRI_PROVA=101-110 node tools/genera-quadri.mjs 8` non scrive
-  niente. **Il Ponte e' pubblicato e non si rigenera**: il generatore si rifiuta, e
-  `tests/opere.test.js` ne controlla l'impronta. La Torre si apre solo con tutti i 100
-  livelli del Ponte superati (`quadroSbloccato` in persistence/progressi.js). I massi
-  (`MASSO` in core/grid.js, non in rules.js: vedi il commento li') esistono solo nella
-  Torre. La difficolta' non e' una speranza: ogni atto ha una BANDA di riuscite del
+- **I cento livelli non si modificano a mano.** `src/config/quadri.js` e' generato: si
+  cambia la ricetta in `tools/genera-quadri.mjs` (atti, tipi, motivi, percentili, margini,
+  bande di riuscita) e si rigenera. Una generazione intera dura ore, quindi si prova prima
+  a vuoto su un tratto: `QUADRI_PROVA=41-58 node tools/genera-quadri.mjs 8` non scrive
+  niente. La difficolta' non e' una speranza: ogni atto ha una BANDA di riuscite del
   giocatore artificiale (pavimento e soffitto), il generatore ce lo porta dentro togliendo
   o restituendo mosse, e alla fine stampa la curva che e' uscita davvero. Se la curva
   risale in un atto, il generatore lo dice: non pubblicare senza averlo guardato.

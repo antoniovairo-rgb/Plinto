@@ -186,8 +186,13 @@ const uscito = await page.evaluate(() => ({
   salvato: window.localStorage.getItem('plinto:partita-quadro') !== null,
   posto: window.localStorage.getItem('plinto:ripresa') !== null,
 }));
-if (uscito.salvato || uscito.posto) {
-  errori.push(`RIPRESA: uscendo dal livello resta qualcosa da riprendere (salvato: ${uscito.salvato}, posto: ${uscito.posto})`);
+// Il POSTO sparisce (al prossimo avvio la home, non il livello); il SALVATAGGIO resta,
+// e il livello si riprende a mano dalla mappa o dalla home (PO-008).
+if (uscito.posto) {
+  errori.push('RIPRESA: uscendo dal livello resta il posto: al prossimo avvio si tornerebbe dentro da soli');
+}
+if (!uscito.salvato) {
+  errori.push('RIPRESA: uscendo dal livello il salvataggio sparisce, e riaprendolo si riparte da zero (PO-008)');
 }
 await ricarica();
 const dopoUscita = await istantanea();

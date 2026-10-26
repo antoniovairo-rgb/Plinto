@@ -19,6 +19,30 @@ import './styles/animazioni.css';
 const t = traduttore(linguaDelBrowser());
 
 /**
+ * Interruttore della correzione C1 (collaudo 1.21.7): a 360x640 la home scorreva di 2 px
+ * perche' il pie' di pagina, andato a capo, e' piu' alto. La regola CSS che lo avvicina
+ * al menu vale solo con questa classe sulla radice (`src/styles/app.css`, cerca
+ * `pl-home-stretta`). Spento, torna la misura della 1.21.7; `npm run correzioni` lo
+ * prova nei due sensi togliendo la classe dalla pagina.
+ */
+const HOME_STRETTA_COMPATTA = true;
+if (HOME_STRETTA_COMPATTA) document.documentElement.classList.add('pl-home-stretta');
+
+/**
+ * TESTO_GRANDE_VA_A_CAPO (PO-035, O1 del rapporto PO-017; decisione della madre del 21
+ * ottobre 2026): con i caratteri al 200% (simulazione: ogni `font-size` per due) a 360x800
+ * la guida sporgeva in orizzontale di 52 px e il livello di 35: si poteva scorrere di lato
+ * un gioco che non lo prevede. Colpevoli, misurati: la scritta PLINTO del marchio, la riga
+ * dell'esempio («+ = Quadrante chiuso»), «Indietro» e «Avanti» affiancati e la striscia
+ * «Prossimi tre pezzi». Acceso, la radice ha la classe `pl-a-capo`: quelle righe vanno a
+ * capo quando non ci stanno, e la scritta del marchio non supera il 13% della larghezza
+ * dello schermo per lettera. A caratteri normali ci stanno e non cambia niente. Spento,
+ * torna il difetto: il caso «testo x2» di `npm run e2e-schermi` e' rosso.
+ */
+const TESTO_GRANDE_VA_A_CAPO = true;
+if (TESTO_GRANDE_VA_A_CAPO) document.documentElement.classList.add('pl-a-capo');
+
+/**
  * Registrazione del service worker.
  *
  * L'indirizzo porta la VERSIONE: `sw.js?v=<versione>`. Cambiando versione cambia

@@ -30,8 +30,54 @@
  * giocato davvero, i totali non si sommano.
  */
 
-import { KEYS, chiaveRecord, read, write } from './storage.js';
+import { KEYS, RECORD_SEPARATI, chiaveRecord, read, remove, write } from './storage.js';
 import { giornoValido } from '../core/sfida.js';
+import { loadRecords, recordSfidaIniziale } from './records.js';
+
+/**
+ * Unendo, il record della Sfida non scende sotto il massimo dell'archivio delle sfide
+ * (collaudo 1.21.8, D1). Spento, chi non ha ancora il documento `records-sfida` (era
+ * sulla 1.21.7 e non ha chiuso una Sfida con la 1.21.8) fondeva con `null`, quindi
+ * vinceva il file: archivio con 900, file con record 100, e Statistiche passava da 900 a
+ * 100. Regola B7: il record della Sfida parte dal massimo dell'archivio. Interruttore
+ * per la prova rosso/verde in `tests/correzioni-d1-d3.test.js` e `npm run correzioni`.
+ */
+export const RECORD_SFIDA_DALL_ARCHIVIO = true;
+
+/**
+ * «Sostituisci tutto» toglie i documenti locali che il file non contiene (collaudo
+ * 1.21.8, D2). Spento, un file della 1.21.7 (senza `records-sfida`) lasciava il record
+ * della Sfida, l'archivio e le statistiche di questo telefono mescolati a quelli del
+ * file, mentre la conferma prometteva «resta solo quello che c'e' nel salvataggio».
+ * Si tocca solo l'elenco DOCUMENTI, e non le impostazioni: partite a meta', ripresa,
+ * origine e recensione restano. Interruttore per la prova rosso/verde come sopra.
+ */
+export const SOSTITUISCI_TOGLIE_ASSENTI = true;
+
+/**
+ * Record, statistiche e sfide gia' guasti in localStorage si ripuliscono in LETTURA
+ * (collaudo 1.21.8, D3). C2 ripulisce solo all'importazione: chi aveva importato un file
+ * guasto con la 1.21.7 o prima continuava a leggere «NaN» e «10 ott 99 (undefined)» in
+ * Statistiche. Lo usano `records.js` e `sfide.js`. Interruttore come sopra.
+ */
+export const LETTURA_RIPULITA = true;
+
+/**
+ * Unendo, i gettoni degli attrezzi spesi non tornano (collaudo 1.21.6, B11). Spento, il
+ * documento degli attrezzi si fonde come gli altri numeri, e `disponibili` prende il piu'
+ * alto: esporti con 3 gettoni, li spendi, reimporti, e sono di nuovo 3. Interruttore per
+ * la prova rosso/verde in `tests/salvataggio.test.js`.
+ */
+export const GETTONI_SPESI_NON_TORNANO = true;
+
+/**
+ * Una voce delle sfide senza `best` e `partite` numerici, o un attrezzo che non e' un
+ * intero non negativo, si scarta importando (collaudo 1.21.7, C2). Spento, un giorno con
+ * `best: '99'` entrava come `{regole: null}` e Statistiche scriveva «NaN (undefined)»;
+ * `registraSfida` (in `sfide.js`) partiva da quella voce e salvava NaN. Interruttore per
+ * la prova rosso/verde in `tests/salvataggio.test.js` e `npm run correzioni`.
+ */
+export const VOCI_GUASTE_SCARTATE = true;
 
 /** Versione del FORMATO del file, non del gioco. Cambia solo se cambia la busta. */
 export const FORMATO = 1;
@@ -41,6 +87,7 @@ export const DOCUMENTI = [
   KEYS.PROGRESS,
   KEYS.ATTREZZI,
   chiaveRecord(),
+  KEYS.RECORDS_SFIDA,
   KEYS.STATS,
   KEYS.PROFILO,
   KEYS.CHALLENGES,
@@ -153,6 +200,25 @@ function fondiNumeri(locale, entrante) {
 }
 
 /**
+ * Gli attrezzi: `disponibili` e' un saldo, non un traguardo, e scende a ogni gettone
+ * speso. Il "piu' alto vince" degli altri numeri qui restituisce i gettoni spesi dopo
+ * l'esportazione (B11). Si tiene invece il documento che ha RISCOSSO di piu', cioe' quello
+ * che ha convertito piu' livelli: e' l'unico confronto che dice chi e' andato piu' avanti.
+ * A pari riscossione i due hanno guadagnato gli stessi gettoni, e quello con meno in mano
+ * li ha spesi: vince il piu' basso. Cosi' un file vecchio non regala niente, e un file
+ * da un telefono che ha convertito piu' livelli porta i suoi gettoni.
+ */
+function fondiAttrezzi(locale, entrante) {
+  const unione = fondiNumeri(locale, entrante);
+  const rL = Number.isFinite(locale?.riscossi) ? locale.riscossi : 0;
+  const rE = Number.isFinite(entrante?.riscossi) ? entrante.riscossi : 0;
+  const dL = Number.isFinite(locale?.disponibili) ? locale.disponibili : 0;
+  const dE = Number.isFinite(entrante?.disponibili) ? entrante.disponibili : 0;
+  const disponibili = rE > rL ? dE : rL > rE ? dL : Math.min(dL, dE);
+  return { ...unione, disponibili, riscossi: Math.max(rL, rE) };
+}
+
+/**
  * Fonde un documento entrante sopra quello locale.
  *
  * Si parte SEMPRE dal locale: cosi' un campo che questa versione del gioco non conosce,
@@ -180,11 +246,15 @@ function fondiDocumento(chiave, locale, entrante) {
     return { ...locale, ...(versione ? { versione } : {}), giorni };
   }
 
+  if (chiave === KEYS.ATTREZZI && GETTONI_SPESI_NON_TORNANO) {
+    return { ...fondiAttrezzi(locale, entrante), ...(versione ? { versione } : {}) };
+  }
+
   return { ...fondiNumeri(locale, entrante), ...(versione ? { versione } : {}) };
 }
 
 const vuoto = (x) => !x || typeof x !== 'object' || Array.isArray(x);
-const numeroBuono = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+export const numeroBuono = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 
 /** Solo i campi numerici sensati (piu' la versione del documento). */
 function soloNumeri(documento) {
@@ -206,17 +276,28 @@ function soloNumeri(documento) {
  */
 function ripulisci(chiave, documento) {
   if (vuoto(documento)) return null;
-  if (chiave === KEYS.STATS || chiave === chiaveRecord()) return soloNumeri(documento);
+  if (chiave === KEYS.STATS || chiave === chiaveRecord() || chiave === KEYS.RECORDS_SFIDA) return soloNumeri(documento);
   if (chiave === KEYS.CHALLENGES) {
     const giorni = {};
     for (const [giorno, voce] of Object.entries(vuoto(documento.giorni) ? {} : documento.giorni)) {
       if (!giornoValido(giorno) || vuoto(voce)) continue;
+      if (VOCI_GUASTE_SCARTATE && !(numeroBuono(voce.best) && numeroBuono(voce.partite))) continue;
       giorni[giorno] = {
         ...soloNumeri(voce),
         regole: typeof voce.regole === 'string' ? voce.regole : null,
       };
     }
     return { ...documento, giorni };
+  }
+  if (chiave === KEYS.ATTREZZI && VOCI_GUASTE_SCARTATE) {
+    // Sono gettoni: si contano a uno a uno. Un campo che non e' un intero non negativo
+    // si scarta; se non ne resta nessuno, si scarta il documento.
+    const uscita = {};
+    for (const campo of ['disponibili', 'riscossi']) {
+      if (Number.isInteger(documento[campo]) && documento[campo] >= 0) uscita[campo] = documento[campo];
+    }
+    if (!Object.keys(uscita).length) return null;
+    return { ...(documento.versione !== undefined ? { versione: documento.versione } : {}), ...uscita };
   }
   return documento;
 }
@@ -231,17 +312,40 @@ function ripulisci(chiave, documento) {
 export function applicaSalvataggio(salvataggio, { sostituisci = false } = {}) {
   const livelliPrima = quantiLivelli(read(KEYS.PROGRESS, null));
   const scritti = [];
+  const rimossi = [];
 
   for (const chiave of DOCUMENTI) {
     const entrante = ripulisci(chiave, salvataggio.dati?.[chiave]);
-    if (!entrante) continue;
+    if (!entrante) {
+      // Le impostazioni sono del telefono: senza le loro nel file, restano quelle di qui.
+      if (sostituisci && SOSTITUISCI_TOGLIE_ASSENTI && !SOLO_SE_SOSTITUISCI.has(chiave)
+        && read(chiave, null) !== null && remove(chiave)) rimossi.push(chiave);
+      continue;
+    }
     if (!sostituisci && SOLO_SE_SOSTITUISCI.has(chiave)) continue;
 
-    const daScrivere = sostituisci ? entrante : fondiDocumento(chiave, read(chiave, null), entrante);
+    // Senza documento, il record della Sfida locale e' quello che Statistiche mostra: il
+    // massimo dell'archivio (B7), non null. Con l'archivio vuoto resta null, e il
+    // documento entra com'e' (lo vuole `tests/record-separati.test.js`).
+    let locale = read(chiave, null);
+    if (locale === null && RECORD_SFIDA_DALL_ARCHIVIO && RECORD_SEPARATI && chiave === KEYS.RECORDS_SFIDA
+      && recordSfidaIniziale().best > 0) locale = loadRecords('sfida');
+    const daScrivere = sostituisci ? entrante : fondiDocumento(chiave, locale, entrante);
     if (write(chiave, daScrivere)) scritti.push(chiave);
   }
 
-  return { scritti, livelliPrima, livelliDopo: quantiLivelli(read(KEYS.PROGRESS, null)) };
+  // L'archivio si fonde DOPO il record (ordine di DOCUMENTI): un giorno importato piu'
+  // alto del record lo rialza. Solo se il documento c'e': senza, la lettura lo deriva.
+  if (RECORD_SFIDA_DALL_ARCHIVIO && RECORD_SEPARATI) {
+    const record = read(KEYS.RECORDS_SFIDA, null);
+    const massimo = recordSfidaIniziale().best;
+    if (record && typeof record === 'object' && massimo > 0 && !(numeroBuono(record.best) && record.best >= massimo)
+      && write(KEYS.RECORDS_SFIDA, { ...record, best: massimo }) && !scritti.includes(KEYS.RECORDS_SFIDA)) {
+      scritti.push(KEYS.RECORDS_SFIDA);
+    }
+  }
+
+  return { scritti, rimossi, livelliPrima, livelliDopo: quantiLivelli(read(KEYS.PROGRESS, null)) };
 }
 
 /** Quanti livelli risultano superati in un documento dei progressi. */

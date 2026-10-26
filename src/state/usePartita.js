@@ -26,7 +26,11 @@ export function usePartita() {
   // del risultato. Le regole sono identiche, ed e' importante che restino tali.
   const [modalita, setModalita] = useState('libera');
   const [esitoSfida, setEsitoSfida] = useState(null);
-  const [record, setRecord] = useState(() => loadRecords());
+  // `record` e' quello della modalita' in gioco (la testata, la fine partita);
+  // `recordLibera` e' quello che la home mette accanto a «Partita libera». Sono due
+  // perche' dopo una sfida `record` e' quello della sfida (collaudo 1.21.6, B7).
+  const [record, setRecord] = useState(() => loadRecords('libera'));
+  const [recordLibera, setRecordLibera] = useState(() => loadRecords('libera'));
   const [nuoviRecord, setNuoviRecord] = useState([]);
   const registrata = useRef(false);
 
@@ -46,7 +50,7 @@ export function usePartita() {
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
-    setRecord(loadRecords());
+    setRecord(loadRecords(quale));
     const stato = createGame(opzioni);
     setPartita(stato);
     write(chiavePartita(quale), serializeGame(stato));
@@ -74,7 +78,7 @@ export function usePartita() {
     setNuoviRecord([]);
     setEsitoSfida(null);
     setModalita(quale);
-    setRecord(loadRecords());
+    setRecord(loadRecords(quale));
     setPartita(stato);
     return stato;
   }, [partitaSalvata]);
@@ -115,12 +119,13 @@ export function usePartita() {
     // Partita finita: non c'e' piu' un posto in cui tornare.
     dimenticaPosto();
     const riepilogo = summarize(partita);
-    const esito = recordGame(riepilogo);
+    const esito = recordGame(riepilogo, modalita);
     // Il profilo di gioco: entrano partita libera e sfida, non i livelli. I livelli
     // partono da griglie costruite a mano e falserebbero la mappa degli appoggi
     // facendola somigliare al loro disegno invece che al modo di giocare di chi guarda.
     registraPartita(riepilogo);
     setRecord(esito.records);
+    setRecordLibera(loadRecords('libera'));
     setNuoviRecord(esito.nuoviRecord);
     // Il giorno della sfida e' quello della partita giocata, non quello di oggi: con
     // l'archivio le due cose non coincidono piu'. `seedLabel` conserva la data usata
@@ -144,6 +149,7 @@ export function usePartita() {
     modalita,
     esitoSfida,
     record,
+    recordLibera,
     nuoviRecord,
     pezziMorti: partita ? deadPieces(partita) : [],
     riepilogo: partita ? summarize(partita) : null,
@@ -159,7 +165,21 @@ export function usePartita() {
      * 1.21.6, B4: la home diceva «Riprendi la sfida» e poi ne partiva una nuova).
      */
     sfidaInCorsoDi: (giorno) => partitaSalvata('sfida')?.seedLabel === giorno,
+    /**
+     * La sfida lasciata a meta' con almeno una mossa, senza caricarla: serve a chiedere
+     * conferma prima di coprirla con quella di un altro giorno (PO-008). Una sfida aperta
+     * e mai toccata non ha niente da perdere, e non merita la domanda.
+     */
+    sfidaAMeta: () => {
+      const stato = partitaSalvata('sfida');
+      return stato && stato.stats.moves > 0 ? stato.seedLabel : null;
+    },
+    /** La partita libera in corso con almeno una mossa: prima di coprirla si chiede (H1). */
+    liberaAMeta: () => (partitaSalvata('libera')?.stats.moves ?? 0) > 0,
     /** Rilegge i record dall'archivio (dopo un'importazione o un azzeramento). */
-    ricaricaRecord: () => setRecord(loadRecords()),
+    ricaricaRecord: () => {
+      setRecord(loadRecords(modalita));
+      setRecordLibera(loadRecords('libera'));
+    },
   };
 }

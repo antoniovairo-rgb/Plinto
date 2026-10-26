@@ -21,9 +21,8 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { quadroNumero, ATTI, OPERE, livelliDellOpera, attiDellOpera } from '../../src/config/quadri.js';
 import { traduttore } from '../../src/i18n/index.js';
-import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
-import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
-import { createRng } from '../../src/core/rng.js';
+import { OGNI_LIVELLI } from '../../src/persistence/attrezzi.js';
+import { sequenzaVincente, posizioneMossa } from '../../tools/sequenza-vincente.mjs';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -49,69 +48,10 @@ if (!(await serverRisponde())) {
   while (Date.now() < scadenza && !(await serverRisponde())) await new Promise((r) => setTimeout(r, 400));
 }
 
-/** Le celle vuote senza vicine vuote: un pezzo non ci entrera' mai. */
-function buchi(grid) {
-  let n = 0;
-  for (let r = 0; r < 9; r += 1) for (let c = 0; c < 9; c += 1) {
-    if (grid[idx(r, c)] !== 0) continue;
-    const vicine = [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]]
-      .filter(([y, x]) => y >= 0 && y < 9 && x >= 0 && x < 9);
-    if (vicine.every(([y, x]) => grid[idx(y, x)] !== 0)) n += 1;
-  }
-  return n;
-}
-
-/** La sequenza che supera il Quadro, calcolata con il motore vero. */
-function sequenzaVincente(quadro, tentativi = 40) {
-  for (let prova = 0; prova < tentativi; prova += 1) {
-    const rng = createRng(1000 + prova);
-    let partita = iniziaQuadro(quadro, { now: 0 });
-    const mosse = [];
-    let guardia = 0;
-    while (guardia < (quadro.maxMosse ?? 60)) {
-      if (statoQuadro(quadro, partita).finito) break;
-      let migliore = null, valore = -1e9;
-      partita.hand.forEach((pezzo, i) => {
-        if (!pezzo) return;
-        for (const [r, c] of allPlacements(partita.grid, pezzo.shape)) {
-          const { grid: dopo } = placeShape(partita.grid, pezzo.shape, r, c, 1);
-          const gruppi = findCompletedGroups(dopo);
-          const v = gruppi.length * 400 + (gruppi.length ? 200 : 0)
-            - buchi(dopo) * 16 - fillRatio(dopo) * 60 + rng.float() * 40;
-          if (v > valore) { valore = v; migliore = { handIndex: i, row: r, col: c }; }
-        }
-      });
-      if (!migliore) break;
-      mosse.push(migliore);
-      partita = giocaNelQuadro(quadro, partita, migliore.handIndex, migliore.row, migliore.col, guardia * 1000);
-      guardia += 1;
-    }
-    if (statoQuadro(quadro, partita).completato) return mosse;
-  }
-  return null;
-}
-
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: 'it-IT' });
 page.on('pageerror', (e) => errori.push(`errore di pagina: ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
-
-async function posizioneMossa(mossa) {
-  return page.evaluate(({ handIndex, row, col }) => {
-    const posto = document.querySelectorAll('.pl-tray .pl-tray__posto')[handIndex];
-    const pezzo = posto?.querySelector('.pl-pezzo');
-    if (!pezzo) return null;
-    const rp = pezzo.getBoundingClientRect();
-    const cellaTray = pezzo.firstElementChild.getBoundingClientRect();
-    const celle = document.querySelectorAll('.pl-plancia .pl-cella');
-    const c0 = celle[0].getBoundingClientRect();
-    const passoX = (celle[8].getBoundingClientRect().left - c0.left) / 8;
-    const passoY = (celle[72].getBoundingClientRect().top - c0.top) / 8;
-    const px = rp.left + rp.width / 2, py = rp.top + rp.height / 2;
-    const presaX = (px - rp.left) / cellaTray.width, presaY = (py - rp.top) / cellaTray.height;
-    return { px, py, cx: c0.left + col * passoX + presaX * c0.width, cy: c0.top + row * passoY + presaY * c0.height };
-  }, mossa);
-}
 
 /**
  * Prepara i progressi e apre il livello 1 gia' in gioco.
@@ -149,7 +89,7 @@ async function vinciIlPrimo(numero = 1) {
   const sequenza = sequenzaVincente(quadro);
   if (!sequenza) { errori.push(`il motore non riesce a superare il livello ${numero}: il controllo non prova nulla`); return false; }
   for (const mossa of sequenza) {
-    const punti = await posizioneMossa(mossa);
+    const punti = await posizioneMossa(page, mossa);
     if (!punti) break;
     await page.mouse.move(punti.px, punti.py);
     await page.mouse.down();
@@ -425,6 +365,44 @@ if (await vinciIlPrimo()) {
   if (await page.locator('.pl-trionfo').count() > 0) {
     errori.push('ATTO: chiudere un atto mostra la festa finale. Sono due traguardi diversi.');
   }
+}
+
+// ---------- 3 bis. Il gettone SENZA atto chiuso ----------
+// E' la fine affollata piu' frequente (giocando in ordine 17 volte su 100: al 5, 15,
+// 20, 25 ...) e nessuna prova la misurava: qui sopra c'e' solo atto + gettone, in
+// e2e-quadri solo la fine normale. Scorreva di 23 px a 320x700 e di 16 a 1366x768
+// (collaudo 1.21.15, E1). Con MAPPA_RIDOTTA_COL_GETTONE l'avanzamento resta solo la
+// barra «N di 100», senza le tappe con Plinto, e deve stare tutto nello schermo.
+console.log(`3 bis. superati 2..${OGNI_LIVELLI}, vinco il primo: gettone guadagnato, atto ancora aperto...`);
+await preparaEGioca(tutti.filter((n) => n > 1 && n <= OGNI_LIVELLI));
+if (await vinciIlPrimo()) {
+  // Si aspetta la barra che si allunga, come in e2e-quadri.
+  await page.waitForTimeout(1100);
+  await page.screenshot({ path: `${OUT}/3bis-solo-gettone.png` });
+  if (await page.locator('.pl-fine__premio').count() !== 1) {
+    errori.push(`GETTONE: superando il livello numero ${OGNI_LIVELLI} il riquadro del gettone non compare: il controllo non prova nulla`);
+  }
+  if (await page.locator('.pl-atto-chiuso').count() !== 0) {
+    errori.push('GETTONE: compare la fascia dell atto, ma l atto non e chiuso: il caso provato e un altro');
+  }
+  const tappe = await page.locator('.pl-avanza__tappa').count();
+  const conteggio = (await page.locator('.pl-avanza__conteggio').innerText().catch(() => '')).trim();
+  const barra = await page.locator('.pl-avanza__barra').getAttribute('aria-valuenow').catch(() => null);
+  console.log(`   avanzamento: ${tappe} tappe, "${conteggio}", barra a ${barra}`);
+  if (tappe !== 0) errori.push(`GETTONE: l avanzamento mostra ${tappe} tappe, col gettone deve restare solo la barra`);
+  if (barra !== String(OGNI_LIVELLI)) errori.push(`GETTONE: la barra dice ${barra} livelli superati invece di ${OGNI_LIVELLI}`);
+  for (const [w, h] of [[390, 844], [360, 800], [360, 740], [320, 700], [1920, 1080], [1366, 768]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(150);
+    const eccesso = await page.evaluate(() => {
+      const s = document.querySelector('.pl-fine .pl-scroll');
+      return s ? s.scrollHeight - s.clientHeight : null;
+    });
+    console.log(`   fine del livello col solo gettone a ${w}x${h}: ${eccesso > 0 ? `da scorrere ${eccesso} px` : 'sta tutta nello schermo'}`);
+    if (eccesso > 0) errori.push(`GETTONE: a ${w}x${h} la fine del livello va scorsa di ${eccesso} px`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
 }
 
 // ---------- 4. Rigiocare dentro un atto gia chiuso non rifesteggia ----------

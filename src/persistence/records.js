@@ -6,6 +6,8 @@
 
 import { KEYS, chiaveRecord } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
+import { caricaSfide } from './sfide.js';
+import { LETTURA_RIPULITA, numeroBuono } from './salvataggio.js';
 
 /**
  * Versione dei due documenti di questo modulo.
@@ -30,25 +32,63 @@ const STATISTICHE_PREDEFINITE = {
   tempoTotaleMs: 0,
 };
 
-/** @returns {{best:number, bestChain:number, bestMove:number, bestGroupsInOneMove:number}} */
-export function loadRecords() {
-  return leggiDocumento(chiaveRecord(), {
-    versione: VERSIONE, predefiniti: RECORD_PREDEFINITI,
-  });
+/**
+ * Il punto di partenza del record della Sfida, per chi ha giocato sfide prima che il
+ * record fosse separato (B7): il punteggio migliore fra i giorni dell'archivio delle
+ * sfide. L'archivio conserva solo il punteggio di ogni giorno, quindi catena, mossa e
+ * Intreccio partono da zero: non si possono ricostruire, e inventarli sarebbe peggio.
+ * Non si scrive niente finche' non si chiude una sfida: tornare indietro resta gratis.
+ */
+export function recordSfidaIniziale() {
+  let best = 0;
+  for (const voce of Object.values(caricaSfide())) {
+    const punti = voce?.best;
+    if (typeof punti === 'number' && Number.isFinite(punti) && punti > best) best = punti;
+  }
+  return { ...RECORD_PREDEFINITI, best };
+}
+
+/**
+ * @param {'libera'|'sfida'} [modalita]
+ * @returns {{best:number, bestChain:number, bestMove:number, bestGroupsInOneMove:number}}
+ */
+export function loadRecords(modalita = 'libera') {
+  const chiave = chiaveRecord(modalita);
+  const predefiniti = chiave === KEYS.RECORDS_SFIDA ? recordSfidaIniziale() : RECORD_PREDEFINITI;
+  return ripulito(leggiDocumento(chiave, { versione: VERSIONE, predefiniti }), predefiniti);
+}
+
+/**
+ * Un campo che non e' un numero sensato torna al suo valore iniziale (collaudo 1.21.8,
+ * D3): un dato importato guasto prima della 1.21.8 faceva scrivere «NaN» a Statistiche.
+ * I campi sconosciuti restano, come vuole `leggiDocumento` per le versioni future.
+ */
+function ripulito(documento, predefiniti) {
+  if (!LETTURA_RIPULITA) return documento;
+  const uscita = { ...documento };
+  for (const [campo, iniziale] of Object.entries(predefiniti)) {
+    if (!numeroBuono(uscita[campo])) uscita[campo] = iniziale;
+  }
+  return uscita;
 }
 
 /** @returns {{partite:number, punteggioTotale:number, mosseTotali:number, gruppiTotali:number, griglieSvuotate:number, tempoTotaleMs:number}} */
 export function loadStats() {
-  return leggiDocumento(KEYS.STATS, { versione: VERSIONE, predefiniti: STATISTICHE_PREDEFINITE });
+  return ripulito(
+    leggiDocumento(KEYS.STATS, { versione: VERSIONE, predefiniti: STATISTICHE_PREDEFINITE }),
+    STATISTICHE_PREDEFINITE,
+  );
 }
 
 /**
  * Registra una partita conclusa.
+ * I record sono della modalita' giocata; le statistiche restano una sola, per tutte e due.
  * @param {object} summary output di summarize() del motore
+ * @param {'libera'|'sfida'} [modalita]
  * @returns {{records:object, stats:object, nuoviRecord:string[]}}
  */
-export function recordGame(summary) {
-  const records = loadRecords();
+export function recordGame(summary, modalita = 'libera') {
+  const records = loadRecords(modalita);
   const stats = loadStats();
   const nuoviRecord = [];
 
@@ -67,7 +107,7 @@ export function recordGame(summary) {
   stats.griglieSvuotate += summary.boardClears;
   stats.tempoTotaleMs += summary.durationMs;
 
-  scriviDocumento(chiaveRecord(), VERSIONE, records);
+  scriviDocumento(chiaveRecord(modalita), VERSIONE, records);
   scriviDocumento(KEYS.STATS, VERSIONE, stats);
 
   return { records, stats, nuoviRecord };
