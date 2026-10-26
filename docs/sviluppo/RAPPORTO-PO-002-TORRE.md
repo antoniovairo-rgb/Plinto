@@ -57,7 +57,26 @@ server, come in CI.
 
 ### Gate completo (`npm run verifica`, 33 controlli), a pezzi
 
-GATE_QUI
+Eseguito il 26 ottobre su `opera-torre` (`fa3f4bd`, codice del gioco uguale a `feb3de3`),
+gli stessi 33 comandi di `tools/verifica-tutto.mjs`, in sequenza, a pezzi sotto i 60 minuti
+(limite dei comandi in background); il controllo dei livelli diviso in quattro tratti con
+`node tests/e2e/tutti-i-livelli.mjs DA A`. Tempo totale 8.727 s (circa 2 ore e 25 minuti).
+**30 verdi su 33.**
+
+| Controllo | Esito | Tempo |
+|---|---|---|
+| versione servita, test unitari, contrasti, build, comunicazioni, e2e | verdi | 73 s |
+| `e2e-quadri` | **rosso noto**: fine del livello vinta a 320x700 da scorrere di 2 px (font del container, `docs/TESTING.md:312`) | 18 s |
+| `e2e-trionfo`, `e2e-ripresa`, `e2e-po008`, `e2e-salvataggio`, `e2e-sicurezza`, `e2e-attrezzi`, `e2e-scenografie`, guida, annulla, incitamenti, archivio, condivisione | verdi | 489 s |
+| `recensione` | **rosso noto**: a 360x640 l'invito finisce 10 px sotto la barra (`docs/TESTING.md:313`) | 33 s |
+| correzioni, anteprima, indietro, impaginazione, `home-spiegazione`, geometria | verdi | 269 s |
+| **tutti i livelli, giocati nell'app** | **200 su 200 vinti**: 1-50 (1.671 s), 51-100 (1.757 s), 101-150 (1.676 s), 151-200 (1.733 s) | 6.837 s |
+| precisione, prova da sottocartella, installazione, desktop, resistenza | verdi | 379 s |
+| `e2e-schermi` | **rosso, non noto**: «orizzontale 1024x600 / menu: non ci si arriva». Tutto il resto verde, compreso il caso «torre». Vedi D2 | 639 s |
+
+Il gate non e' stato lanciato come `npm run verifica` in un colpo solo, quindi non ha
+scritto l'impronta del giro completo (`verifica-livelli.json`): la corsia veloce su questa
+macchina resta negata, come deve.
 
 ## 3. Cose trovate
 
@@ -75,6 +94,37 @@ Torre. Opzioni:
    resto superato: prova la festa finale vera. Commit `feb3de3`.
 2. Provare anche la festa del Ponte: non ha «Gioca in partita libera», quindi non c'e'
    niente da confermare; non serve.
+
+### D2 — `e2e-schermi`: a 1024x600 coricato il tocco su «Menu» a volte non apre il menu (non della Torre, non corretto)
+
+Nel gate, caso «menu» dei formati coricati: il pezzo e' appoggiato col dito, si aspetta
+1 s, si tocca «Menu» e il menu non si apre (`tests/e2e/schermi.mjs`, passo «menu»).
+Misure del 26 ottobre:
+
+- `opera-torre`, server di sviluppo, solo «orizzontale 1024x600»: rosso 2 giri su 5;
+- **`rilascio/1.21.25` senza la Torre**, stesso comando: rosso 1 giro su 6. Quindi non nasce
+  dall'unione: c'e' gia' nella 1.21.25;
+- sonda sulla build di produzione (`vite preview`), 1024x600 col tocco, pezzo trascinato
+  col dito, 1,2 s di attesa, tocco su «Menu»: menu non aperto 2 volte su 15. Sul pulsante
+  arrivano `pointerdown`, `touchstart`, `pointerup`, `touchend`, ma **nessun `click`**;
+- la stessa sonda **senza** il trascinamento prima: 0 su 15.
+
+Il gioco non sopprime click dopo un trascinamento (`src/ui/useTrascinamento.js:158-160`
+ascolta solo `pointermove`, `pointerup`, `pointercancel` sulla finestra). Somiglia al «tocco
+perso dopo un trascinamento» della scelta 4 di PO-035 (li' entro ~200 ms; qui anche dopo
+1,2 s). La causa non posso confermarla: Chromium di prova o gioco. Sul telefono del PO, in
+verticale, il tocco su «Menu» subito dopo un pezzo appoggiato funziona (DECISIONI, 22
+ottobre); in orizzontale non e' stato provato. La 1.21.25 e' gia' in revisione con questo
+codice. Opzioni:
+
+1. **(consigliata)** la madre lo indaga sulla 1.21.25 / `main` (e' li' che nasce, e il gate
+   della 1.21.25 puo' trovarlo rosso allo stesso modo), con la sonda di questo rapporto; poi
+   si riporta sulla Torre con la prossima unione. Insieme: prova del PO col telefono coricato.
+2. Rendere la prova robusta qui (ritoccare «Menu» se il click non arriva): la renderebbe
+   verde nascondendo un tocco perso che potrebbe essere vero. Non fatta.
+3. Lasciarlo come rosso noto: non consigliato, finche' la causa non e' nota.
+
+Non l'ho corretto sul ramo: senza la causa, una correzione sarebbe un tentativo.
 
 ### Scelta 1 — Schermo intero (Torre) contro schermo normale (`main`)
 
@@ -128,5 +178,6 @@ Decide il PO.
 - `docs/USCITA-TORRE.md`, parte B: versione 1.22.0 e versionCode 11916, schermate
   rigenerate dopo il cambio di versione, `opera-torre` su `main`, CI letta.
 - Prova del PO sul telefono, anche coricato su un livello della Torre; a schermo normale.
+- D2 (tocco su «Menu» perso dopo un trascinamento, telefono coricato) da chiudere su `main`.
 - Non verificabili da qui: TalkBack sulle schede della mappa e sui massi, telefono di fascia
   bassa, iPhone.

@@ -20,8 +20,11 @@ Android Studio (Claude non ha accesso a nessuno dei due).
       Torre (una 1.21.26, l'esito della 11915), va unito di nuovo** e il gate rifatto.
 - [ ] **[C]** Portare poi la Torre sull'Arena (`opera-arena`).
 - [ ] **[C]** Gate completo sulla Torre: `npm run verifica`, 33 controlli, tutti i 200
-      livelli rigiocati nell'app. Supera le 2 ore: si fa a pezzi, come il 9 ottobre (esito
-      del 26 ottobre nel rapporto qui sopra). Va rifatto dopo ogni nuova unione di `main`.
+      livelli rigiocati nell'app. Supera le 2 ore: si fa a pezzi, come il 9 ottobre.
+      Giro del 26 ottobre: 30 su 33, **200 livelli su 200 vinti**; rossi `e2e-quadri` e
+      `recensione` (noti, font del container) e `e2e-schermi` (D2 del rapporto: tocco su
+      «Menu» perso dopo un trascinamento, c'e' gia' nella 1.21.25). Resta aperto finche' D2
+      non e' chiuso. Va rifatto dopo ogni nuova unione di `main`.
 - [x] **[C]** Testi della scheda (`android/SCHEDA-PLAY-STORE.md`), italiano e inglese:
       «cento livelli» diventa 200 (il Ponte e la Torre), si spiegano i massi e la regola
       dell'ultimo livello di ogni opera, si toglie o si riscrive la frase degli «otto
