@@ -16,7 +16,10 @@ import { existsSync, mkdirSync } from 'node:fs';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
+// Prima il collegamento stabile delle macchine di sviluppo (collaudo 1.21.25, O6: il
+// percorso con il numero di versione cambia a ogni Playwright), poi quello vecchio; se
+// nessuno c'e' (CI), decide Playwright.
+const ESEGUIBILE = [process.env.PLINTO_CHROMIUM, '/opt/pw-browsers/chromium', PERCORSO_NOTO].find((p) => p && existsSync(p));
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const RITRATTI = new URL('../../store/prove/', import.meta.url).pathname;
 
