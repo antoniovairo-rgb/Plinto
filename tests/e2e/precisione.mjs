@@ -178,7 +178,8 @@ async function grigliaAttuale() {
 // di mezza cella si trasforma in una mossa rifiutata o in una casella sbagliata.
 const POSIZIONI = [[0, 0], [0, 4], [4, 0], [3, 3], [6, 6]];
 
-for (const forma of SHAPES) {
+// PLINTO_PRECISIONE_SOLO_VELOCE=1 salta le prove col mouse mentre si indaga il rilascio.
+for (const forma of process.env.PLINTO_PRECISIONE_SOLO_VELOCE ? [] : SHAPES) {
   for (const [riga, colonna] of POSIZIONI) {
     if (shapeCellsAt(forma, riga, colonna) === null) continue;  // la forma non ci sta li'
 
@@ -219,9 +220,9 @@ for (const forma of SHAPES) {
  * ha sempre il tempo di essere disegnato nel punto d'arrivo prima del rilascio. Un dito che
  * si stacca in fretta su un telefono lento no: il `pointerup` arriva prima che React abbia
  * disegnato l'ultimo movimento. Qui: 360x640 col tocco, CPU rallentata 4 volte, livello 1
- * giocato col dito con la sequenza vincente del motore (12 movimenti senza pausa e subito
- * il distacco), e dopo OGNI mossa le caselle piene a schermo confrontate con quelle del
- * motore. Lo stesso con il dito che si ferma prima di staccarsi (6 movimenti fermi a 50 ms):
+ * giocato col dito con la sequenza vincente del motore (12 movimenti senza pausa; l'ultimo
+ * e il distacco mandati insieme, nello stesso fotogramma), e dopo OGNI mossa le caselle
+ * piene a schermo confrontate con quelle del motore. Lo stesso con il dito che si ferma prima di staccarsi (6 movimenti fermi a 50 ms):
  * quello deve andare bene comunque, e dice che la prova misura il rilascio, non altro.
  * Misurato il 26 ottobre 2026 con l'interruttore spento: vedi docs/sviluppo/RAPPORTO-PO-036.md.
  */
@@ -250,7 +251,7 @@ async function livello1ColDito({ pausa }) {
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   const quadro = quadroNumero(1);
   let partita = iniziaQuadro(quadro, { now: 0 });
-  const pieneMotore = () => partita.grid.flatMap((v, i) => (v !== 0 ? [i] : [])).join(',');
+  const pieneMotore = () => Array.from(partita.grid).flatMap((v, i) => (v !== 0 ? [i] : [])).join(',');
   const pieneSchermo = () => p.evaluate(() => [...document.querySelectorAll('.pl-plancia .pl-cella')]
     .flatMap((c, i) => (/occupata$/.test(c.getAttribute('aria-label') ?? '') ? [i] : [])).join(','));
   let esito = { mossa: null, giocate: 0 };
@@ -261,16 +262,34 @@ async function livello1ColDito({ pausa }) {
     const lato = await p.evaluate(() => document.querySelector('.pl-plancia .pl-cella').getBoundingClientRect().width);
     const a = { x: punti.cx, y: punti.cy + 1.35 * lato };
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: punti.px, y: punti.py }] });
-    for (let i = 1; i <= 12; i += 1) {
+    for (let i = 1; i <= 11; i += 1) {
       const x = punti.px + ((a.x - punti.px) * i) / 12, y = punti.py + ((a.y - punti.py) * i) / 12;
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
     }
-    if (pausa) for (let i = 0; i < 6; i += 1) {
-      await p.waitForTimeout(50);
+    if (pausa) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a] });
+      for (let i = 0; i < 6; i += 1) {
+        await p.waitForTimeout(50);
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a] });
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    } else {
+      // L'ultimo movimento e il distacco partono insieme, senza aspettare la risposta del
+      // primo: il dito arriva e si stacca nello stesso fotogramma.
+      await Promise.all([
+        cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [a] }),
+        cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }),
+      ]);
     }
-    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     partita = giocaNelQuadro(quadro, partita, mossa.handIndex, mossa.row, mossa.col, n * 1000);
+    // L'ultima mossa chiude il livello e la griglia lascia il posto alla fine del livello:
+    // li' si guarda che sia vinto.
+    if (n === SEQUENZA_1.length - 1) {
+      const vinto = await p.waitForSelector('.pl-quadro-esito--vinto', { timeout: 5000 }).then(() => true, () => false);
+      if (!vinto) esito = { mossa: n + 1, giocate: n + 1, motivo: 'il livello non risulta vinto' };
+      else esito.giocate = n + 1;
+      break;
+    }
     // Si aspetta che lo schermo arrivi alla griglia del motore; se non ci arriva in 3 s
     // (CPU lenta), la mossa e' finita altrove.
     const atteso = pieneMotore();
