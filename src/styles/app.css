@@ -1180,6 +1180,19 @@ button {
   place-items: center;
   padding: 24px;
 }
+/* LA FINESTRA NON SUPERA IL VELO (PO-035, D1; interruttore VELI_CHE_SCORRONO in
+   src/ui/velo.js). Con i caratteri al 200% il pannello degli attrezzi era alto 1129 px su
+   915 e «Torna alla partita» restava sotto lo schermo, senza modo di scorrere. La riga
+   unica del velo e' alta quanto il velo (meno il suo padding), la finestra non la supera
+   e scorre dentro di se'. Centrata come prima: a caratteri normali entra e non cambia
+   niente. `overscroll-behavior` tiene lo scorrimento nella finestra, non nella partita. */
+.pl-velo--scorre { grid-template-rows: minmax(0, 1fr); }
+.pl-velo--scorre > * {
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .pl-menu {
   width: 100%;
   max-width: 340px;
@@ -1537,6 +1550,18 @@ button {
   width: 100%;
 }
 
+/* TESTO GRANDE: LE RIGHE VANNO A CAPO (PO-035, O1; interruttore TESTO_GRANDE_VA_A_CAPO in
+   src/main.jsx). Con i caratteri al 200% queste righe non ci stavano e la pagina sporgeva
+   di lato (guida +52 px, livello +35 a 360x800). Vanno a capo solo quando non ci stanno:
+   a caratteri normali ci stanno, e nessuna cambia. La scritta PLINTO e' una parola sola e
+   non puo' andare a capo: si limita in larghezza (13vw per lettera: a 360 px sono 47 px,
+   sopra i 34 normali, quindi a caratteri normali non cambia). */
+.pl-a-capo .pl-logo { flex-wrap: wrap; justify-content: center; }
+.pl-a-capo .pl-logo__testo { font-size: min(34px, 13vw); }
+.pl-a-capo .pl-intro__esempio { flex-wrap: wrap; }
+.pl-a-capo .pl-guida__navigazione { flex-wrap: wrap; }
+.pl-a-capo .pl-anteprima { flex-wrap: wrap; max-width: 100%; }
+
 /* ------------------------------------------------------------- guida a passi --- */
 /* Il conteggio dei passi: piccolo e spento, ma sempre presente. Chi apre un gioco per
    la prima volta deve sapere quanto dura la cosa che sta leggendo, altrimenti la salta
@@ -1668,6 +1693,88 @@ button {
   .pl-screen--gioco .pl-suggerimento { display: none; }
   .pl-plancia { max-width: min(92vh, 46vw); }
   .pl-tavolo .pl-catena { max-width: min(92vh, 46vw); }
+}
+
+/* LA GRIGLIA PRENDE TUTTA L'ALTEZZA (PO-035, interruttore GIOCO_IN_ORIZZONTALE in
+   SchermoGioco.jsx). La regola qui sopra metteva la schermata in due colonne con
+   `align-items: center`: l'area della griglia restava alta quanto il suo contenuto (182x77
+   misurati a 640x360) e la griglia, che si misura in altezza, scendeva a 28x28 px; nei
+   livelli le caselle erano 0x0. In piu' il vassoio e' dentro un involucro, quindi le sue
+   regole non lo raggiungevano, e la riga degli attrezzi era nascosta. Rapporto PO-017, E1.
+
+   Qui la griglia e' la colonna di sinistra, alta quanto lo schermo: la colonna si misura
+   sulla griglia (`auto`), che e' quadrata e prende il 100% dell'altezza. Area e tavolo
+   diventano `display: contents`, cosi' Catena e riga degli attrezzi salgono nella colonna
+   di destra senza cambiare un componente: ogni pixel che resta sopra o sotto la griglia
+   e' un pixel di griglia in meno. Con Catena (23 px) e riga (44) sopra e sotto, a 640x360
+   la griglia avrebbe al massimo 348 - 23 - 44 - 8 = 273 px, il 76% dell'altezza
+   (calcolato dalle misure); cosi' ne ha 348, il 97% (misurato). A destra, dall'alto: punteggio e menu,
+   obiettivo o nome della modalita', Catena, poi lo spazio che avanza, e in fondo la riga
+   (mensola, «Rimetti a posto il pezzo», attrezzi) e i pezzi, dove arriva il pollice.
+   Il tetto della griglia in larghezza lascia almeno 240 px alla colonna di destra: sotto,
+   i tre pezzi non hanno spazio per essere presi. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .pl-app:has(> .pl-screen--orizzontale) {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale {
+    --pl-plancia-max: calc(100vw - 260px);
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      'plancia hud'
+      'plancia titolo'
+      'plancia catena'
+      'plancia .'
+      'plancia riga'
+      'plancia vassoio'
+      'plancia anteprima';
+    align-items: stretch;
+    column-gap: 14px;
+    row-gap: 2px;
+    padding: 6px 10px;
+  }
+  .pl-screen--orizzontale .pl-plancia-area,
+  .pl-screen--orizzontale .pl-tavolo { display: contents; }
+  .pl-screen--orizzontale .pl-plancia-involucro { grid-area: plancia; width: auto; height: 100%; }
+  .pl-screen--orizzontale .pl-plancia { height: min(100%, var(--pl-plancia-max)); max-width: 100%; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-hud {
+    grid-area: hud;
+    align-self: start;
+    grid-template-columns: 1fr auto 1fr;
+    padding: 2px 4px 0;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-hud__record { display: block; }
+  .pl-screen--orizzontale .pl-obiettivo,
+  .pl-screen--orizzontale .pl-modalita { grid-area: titolo; max-width: none; }
+  .pl-screen--orizzontale .pl-tavolo .pl-catena { grid-area: catena; max-width: none; padding: 2px 4px; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-suggerimento {
+    grid-area: riga;
+    display: flex;
+    max-width: none;
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-suggerimento--conattrezzi { display: grid; }
+  .pl-screen--orizzontale .pl-tray-involucro { grid-area: vassoio; }
+  .pl-screen--gioco.pl-screen--orizzontale .pl-tray { padding: 0 0 4px; }
+  /* 21vh: a 640x360 nel livello piu' affollato (obiettivo, Catena su due righe, attrezzi e
+     «Prossimi tre pezzi») con 24vh la colonna superava l'altezza di 9 px e la pagina
+     scorreva di 3. 76 px restano piu' del doppio dei 44 raccomandati per il dito. */
+  .pl-screen--gioco.pl-screen--orizzontale .pl-tray__posto { height: clamp(68px, 21vh, 124px); }
+  /* «Prossimi tre pezzi» e i tre disegni non stanno in una riga da 260 px (sporgevano di
+     15 a 640x360): vanno a capo invece di uscire dallo schermo. */
+  .pl-screen--orizzontale .pl-anteprima {
+    grid-area: anteprima;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 4px;
+    max-width: 100%;
+    margin: 0;
+  }
 }
 
 /* Schermi molto piccoli: si stringe tutto invece di far sparire pezzi di plancia. */

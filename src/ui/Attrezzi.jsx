@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { CLASSE_VELO } from './velo.js';
 import { ATTREZZI } from '../persistence/attrezzi.js';
 import { Pezzo } from './Pezzo.jsx';
 
@@ -167,7 +168,7 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
   }, []);
 
   return (
-    <div className="pl-velo" onClick={onChiudi}>
+    <div className={CLASSE_VELO} onClick={onChiudi}>
       <div className="pl-attrezzi__pannello" role="dialog" aria-modal="true"
            aria-label={t('attrezzi.titolo')} onClick={(e) => e.stopPropagation()}
            onClickCapture={(e) => {

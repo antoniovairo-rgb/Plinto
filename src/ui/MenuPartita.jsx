@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { CLASSE_VELO } from './velo.js';
 
 /*
  * MENU_COME_LE_DOMANDE (collaudo 1.21.20, O2; decisione PO-024): il menu della partita non
@@ -57,7 +58,7 @@ export function MenuPartita({ etichetta, etichettaTorna, onChiudi, coperto, chil
     ? { role: 'dialog', 'aria-modal': 'true', 'aria-label': etichetta }
     : {};
   return (
-    <div className="pl-velo" onClick={onChiudi}>
+    <div className={CLASSE_VELO} onClick={onChiudi}>
       <div
         className="pl-menu"
         {...finestra}
