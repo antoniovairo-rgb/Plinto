@@ -791,6 +791,30 @@ async function telefono(formato, { testo = 1 } = {}) {
     await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
     await page.waitForTimeout(250);
   }
+  /**
+   * Il livello 113, il tredicesimo della Torre (PO-002): i massi, che hanno un disegno loro
+   * (Masso.jsx) e un fondo loro (finiture.css). L'orizzontale e il testo grande sono nati
+   * sul Ponte, senza massi: qui si prova che valgono anche sull'opera nuova. Tutto il Ponte
+   * superato, perche' la Torre si apre solo cosi'; la mappa si apre da sola sulla Torre.
+   */
+  async function livelloTorre() {
+    await apri({ livelli: 112, attrezzi: 2 });
+    await page.getByRole('button', { name: /^Mappa dei livelli/ }).tap();
+    await page.waitForSelector('.pl-tappe');
+    const tappa = page.locator('.pl-tappa').nth(12);
+    await tappa.scrollIntoViewIfNeeded();
+    await tappa.tap();
+    await page.getByRole('button', { name: /^Gioca$/ }).first().tap();
+    await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+    await page.waitForTimeout(250);
+    const titolo = await page.locator('.pl-screen--gioco').innerText();
+    if (!/113/.test(titolo)) difetto('torre', `non si e' aperto il livello 113: «${titolo.trim().slice(0, 60)}»`);
+  }
+  /** I massi della griglia: quanti, e il piu' piccolo (un masso di 0 px non si vede). */
+  const massi = () => page.evaluate(() => {
+    const m = [...document.querySelectorAll('.pl-plancia .pl-blocco--masso')].map((el) => el.getBoundingClientRect());
+    return { quanti: m.length, lato: m.length ? Math.round(Math.min(...m.map((r) => Math.min(r.width, r.height)))) : 0 };
+  });
   /** Quanto sporge la pagina, in orizzontale e in verticale. */
   const sporge = () => page.evaluate(() => {
     const d = document.scrollingElement;
@@ -878,11 +902,11 @@ async function telefono(formato, { testo = 1 } = {}) {
     else riga.console = 'ok';
     await contesto.close();
   }
-  return { page, apri, livello13, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi };
+  return { page, apri, livello13, livelloTorre, massi, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi };
 }
 
 async function provaOrizzontale(formato) {
-  const { page, apri, livello13, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi } = await telefono(formato);
+  const { page, apri, livello13, livelloTorre, massi, sporge, raggiungibile, appoggiaColDito, passo, difetto, chiudi } = await telefono(formato);
   const sigla = formato.nome.replace(/[^a-z0-9]+/gi, '-');
   /** La griglia a tutta altezza, intera, e niente fuori dallo schermo. */
   async function misuraGioco(schermata) {
@@ -950,6 +974,14 @@ async function provaOrizzontale(formato) {
     await torna.tap();
     await page.waitForSelector('.pl-attrezzi__pannello', { state: 'detached' });
   });
+  await passo('torre', async () => {
+    await livelloTorre();
+    await misuraGioco('torre');
+    const m = await massi();
+    if (m.quanti === 0) difetto('torre', 'nessun masso sulla griglia del livello 113: la prova non prova nulla');
+    else if (m.lato < 0.85 * 9) difetto('torre', `un masso e' di ${m.lato} px`);
+    await appoggiaColDito('torre');
+  });
   await passo('fine-livello', async () => {
     if (!SEQUENZA_1) return;
     await apri();
@@ -992,7 +1024,7 @@ async function provaOrizzontale(formato) {
 }
 
 async function provaTestoDoppio(formato) {
-  const { page, apri, livello13, sporge, raggiungibile, passo, difetto, chiudi } = await telefono(formato, { testo: 2 });
+  const { page, apri, livello13, livelloTorre, massi, sporge, raggiungibile, passo, difetto, chiudi } = await telefono(formato, { testo: 2 });
   const sigla = formato.nome.replace(/[^a-z0-9]+/gi, '-');
   await passo('guida', async () => {
     await apri({ guida: true });
@@ -1032,6 +1064,19 @@ async function provaTestoDoppio(formato) {
     for (const b of await page.locator('.pl-menu button').all()) {
       if (!(await raggiungibile(b))) difetto('menu', `«${(await b.innerText()).trim()}» non si raggiunge`);
     }
+  });
+  // Il livello 113 col testo grande. NON e' la prova rosso/verde di TESTO_GRANDE_VA_A_CAPO:
+  // quello che sporgeva era la fila dei prossimi tre pezzi, quindi dipende dai pezzi
+  // estratti; misurato il 26 ottobre 2026 con l'interruttore spento, il livello 13 sporge
+  // di 47 px a 360x800 e il 113 di 0. La prova rosso/verde resta il caso «livello». Qui si
+  // controlla che i massi si vedano e che la pagina non sporga sulla grafica della Torre.
+  await passo('torre', async () => {
+    await livelloTorre();
+    await page.screenshot({ path: `${OUT}/${sigla}-torre.png` });
+    const s = await sporge();
+    if (s.x > 1) difetto('torre', `la pagina sporge di lato di ${s.x}px`);
+    const m = await massi();
+    if (m.quanti === 0) difetto('torre', 'nessun masso sulla griglia del livello 113: la prova non prova nulla');
   });
   await chiudi();
 }
