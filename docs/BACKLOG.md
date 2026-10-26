@@ -8,7 +8,7 @@ Stati: **aperta** · **in corso** · **in attesa del PO** · **chiusa**.
 | Voce | Richiesta | Stato | Dove |
 |------|-----------|-------|------|
 | PO-001 | Regole di lavoro della sessione madre: verità e misura, registri, sessioni figlie, chi decide, rilasci (messaggio del 17 ottobre 2026) | in corso (regole in vigore) | questo file, `docs/DECISIONI.md`, `docs/ROADMAP.md` |
-| PO-002 | Uscita della Torre (1.22.0) sul Play Store: «rilasciamo con la torre!» | aperta: il pacchetto Android esce con la 1.21.8 (PO-006); i livelli della Torre restano per la 1.22.0 | ramo `opera-torre`, `docs/USCITA-TORRE.md` |
+| PO-002 | Uscita della Torre (1.22.0) sul Play Store: «rilasciamo con la torre!» | in corso: allineamento di `opera-torre` a `main` e gate dei 200 livelli; online solo dopo l'esito della revisione della 11915 | ramo `opera-torre`, `docs/USCITA-TORRE.md` |
 | PO-003 | Quarta opera, La Piazza: «Sempre 100 livelli, solo dopo l'arena, valuta tu i casi particolari, ok qualche masso e mattone» | aperta (progetto scritto, sviluppo non avviato) | ramo `opera-quarta`, `docs/OPERA-QUARTA.md` |
 | PO-004 | «affida una sessione ramo con sonnet 5.5 o haiku 5.5 un collaudo approfondito per verificare che in produzione non ci siano bug» | chiusa con la 1.21.8: B6, B7, B11 e i difetti C1, C2 del collaudo della 1.21.7 | ramo `collaudo-produzione`, `collaudo/RAPPORTO.md` |
 | PO-005 | «avvisami quando è pubblicata» (la 1.21.8) | chiusa (notifica del 17 ottobre) | notifica alla pubblicazione |
