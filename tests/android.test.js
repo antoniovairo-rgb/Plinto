@@ -150,9 +150,11 @@ describe('orientamento', () => {
 });
 
 describe('schermo intero', () => {
-  it('l\'app si apre a schermo intero vero (sticky-immersive)', () => {
-    // Senza, restano visibili l'ora in alto e i pulsanti di Android in basso.
-    expect(manifest).toMatch(/trusted\.DISPLAY_MODE"\s+android:value="sticky-immersive"/);
+  // PO-017, decisione del PO del 22 ottobre 2026: il pacchetto 11915 torna allo schermo
+  // normale per la revisione di Google (la 11901 approvata non aveva l'immersiva, la 11905 e
+  // la 11907 rifiutate si'). L'immersiva tornera' in un pacchetto successivo, da sola.
+  it('per la revisione l\'app si apre a schermo normale (default)', () => {
+    expect(manifest).toMatch(/trusted\.DISPLAY_MODE"\s+android:value="default"/);
   });
 });
 

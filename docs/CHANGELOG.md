@@ -32,6 +32,10 @@ La versione è dichiarata in un solo posto — il campo `version` di `package.js
 
 - Pacchetto 11915: l'app si dichiara gioco (`android:appCategory="game"`), l'eccezione di
   Android 16 all'orientamento ignorato sui tablet.
+- Pacchetto 11915: torna lo schermo normale (`DISPLAY_MODE` `default`, ora in alto e
+  pulsanti di Android visibili) al posto dello schermo intero «sticky-immersive», per la
+  revisione di Google (PO-017, scelta del PO). L'immersiva tornerà in un pacchetto
+  successivo, da sola.
 
 ### Prove
 

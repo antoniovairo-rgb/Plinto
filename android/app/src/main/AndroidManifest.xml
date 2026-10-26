@@ -79,15 +79,18 @@
                 android:name="android.support.customtabs.trusted.SCREEN_ORIENTATION"
                 android:value="portrait" />
 
-            <!-- SCHERMO INTERO VERO: niente ora in alto, niente pulsanti in basso, come
-                 ogni gioco (richiesta del proprietario, 14 ottobre 2026). «sticky-immersive»
-                 e' la modalita' della libreria per i giochi: scorrendo dal bordo le barre
-                 ricompaiono per un attimo e poi si nascondono da sole. Valori ammessi dalla
+            <!-- SCHERMO NORMALE PER LA REVISIONE (PO-017, decisione del PO del 22 ottobre
+                 2026). Dal 14 ottobre qui c'era «sticky-immersive» (schermo intero vero,
+                 richiesta del proprietario). La 11901 approvata non l'aveva; la 11905 e la
+                 11907 rifiutate da Google per «non si apre» e «non risponde» si'. Il pacchetto
+                 11915 torna a «default» (ora in alto e pulsanti di Android visibili) insieme
+                 alla correzione dell'orizzontale; superata la revisione, l'immersiva torna in
+                 un pacchetto successivo, da sola, per sapere se era lei. Valori ammessi dalla
                  libreria (LauncherActivityMetadata): default, immersive, sticky-immersive,
                  minimal-ui, browser. Come l'orientamento, lo decide questo file e non il sito. -->
             <meta-data
                 android:name="android.support.customtabs.trusted.DISPLAY_MODE"
-                android:value="sticky-immersive" />
+                android:value="default" />
 
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
