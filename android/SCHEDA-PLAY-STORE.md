@@ -162,15 +162,16 @@ letta il 9 ottobre 2026).
 
 ```
 <it-IT>
-Arriva la Torre: cento livelli nuovi, dal 101 al 200, che si aprono quando hai finito il Ponte. Con una regola nuova, i massi: caselle che contano come piene ma non spariscono mai. E il gioco ha una veste nuova: blocchi lucidi, la plancia d'ottone e nuove animazioni quando chiudi più gruppi insieme.
+Arriva la Torre: cento livelli nuovi, dal 101 al 200, che si aprono quando hai superato tutto il Ponte. Con una regola nuova, i massi: caselle grigie che contano come piene ma non spariscono mai.
 </it-IT>
 <en-US>
-The Tower is here: a hundred new levels, 101 to 200, opening once you finish the Bridge. With a new rule, boulders: squares that count as filled but never disappear. And the game has a new look: glossy blocks, a brass board and new animations when you close several groups at once.
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
 </en-US>
 ```
-*Italiano 300 caratteri, inglese 281. I tag `<it-IT>` e `<en-US>` sono il formato con cui la
-console accetta piu' lingue in un solo campo; se la console mostra un campo per lingua,
-si incolla solo il testo.*
+*Italiano 195 caratteri, inglese 185. Riscritte il 26 ottobre 2026: la stesura del 9
+ottobre diceva anche «il gioco ha una veste nuova», ma blocchi lucidi, plancia d'ottone e
+animazioni sono usciti sul Ponte con la 1.21.0. La scheda ha 8 lingue: il blocco completo,
+con le sette varianti dell'inglese, e' in `android/NOTE-DI-RILASCIO.md` (11916).*
 
 ## Categoria
 

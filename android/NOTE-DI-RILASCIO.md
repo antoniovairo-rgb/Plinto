@@ -3,6 +3,38 @@
 La scheda ha 8 lingue (schermata del PO, 17 ottobre 2026): `it-IT` predefinita e sette
 varianti dell'inglese. Le note vanno date per tutte e 8, ognuna entro 500 caratteri.
 
+## 11916 (1.22.0, la Torre) — da caricare il giorno dell'uscita, dopo l'esito della 11915
+
+Il pacchetto cambia solo il numero di versione (vedi `docs/USCITA-TORRE.md`, B6): la Torre
+arriva dal sito. Italiano 195 caratteri, inglese 185.
+
+```
+<it-IT>
+Arriva la Torre: cento livelli nuovi, dal 101 al 200, che si aprono quando hai superato tutto il Ponte. Con una regola nuova, i massi: caselle grigie che contano come piene ma non spariscono mai.
+</it-IT>
+<en-AU>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-AU>
+<en-CA>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-CA>
+<en-GB>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-GB>
+<en-US>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-US>
+<en-IN>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-IN>
+<en-SG>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-SG>
+<en-ZA>
+The Tower is here: a hundred new levels, 101 to 200, which open once you have cleared the whole Bridge. With a new rule, boulders: grey squares that count as filled but never disappear.
+</en-ZA>
+```
+
 ## 11905 (1.21.8) — caricato il 17 ottobre 2026
 
 ```
