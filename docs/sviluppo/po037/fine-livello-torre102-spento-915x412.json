@@ -1,0 +1,878 @@
+[
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 0,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 539,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 539,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 554,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 554,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 554,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 554,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 557,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 569,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 12,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 1,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 545,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 559,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 560,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 560,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 560,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 563,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 580,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 14,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 2,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 533,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 533,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 553,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 575,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 12,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 3,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 542,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 567,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 11,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 4,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 555,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 555,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 555,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 555,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 561,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 584,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 11,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 500,
+  "giro": 5,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 528,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 558,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 10,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1072,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 14,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1020,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1020,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1036,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1036,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1036,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1040,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1052,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 11,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1054,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1057,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1073,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 12,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1060,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 13,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 4,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1025,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1025,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1059,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 12,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 5,
+  "andato": true,
+  "mosse": 18,
+  "scrollTop": 0,
+  "scorre": 234,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1061,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1062,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1062,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1062,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1066,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "scroll",
+    "ora": 1089,
+    "su": "div.pl-scroll",
+    "testo": "Il PonteLa Torre2 di 100",
+    "annullabile": false
+   }
+  ],
+  "gesti": {
+   "avvii": 14,
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ }
+]
