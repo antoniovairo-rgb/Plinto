@@ -989,9 +989,14 @@ async function provaOrizzontale(formato) {
     await misuraGioco('livello');
     await appoggiaColDito('livello');
   });
-  await passo('attrezzi', async () => {
+  /**
+   * Il pannello degli attrezzi: si raggiunge, si apre dall'alto col fuoco su «Torna alla
+   * partita», si chiude. In una funzione perche' gira sul Ponte (livello 13) e sulla Torre
+   * (livello 113, PO-002): la correzione D2 e' nata sul Ponte.
+   */
+  async function provaPannello(schermata) {
     const pastiglia = page.locator('.pl-attrezzi__pastiglia');
-    if (!(await raggiungibile(pastiglia))) { difetto('attrezzi', 'la pastiglia degli attrezzi non si raggiunge'); return; }
+    if (!(await raggiungibile(pastiglia))) { difetto(schermata, 'la pastiglia degli attrezzi non si raggiunge'); return; }
     await pastiglia.tap();
     await page.waitForSelector('.pl-attrezzi__pannello');
     // Il pannello si apre dall'alto, col fuoco su «Torna alla partita» (PANNELLO_DALL_ALTO
@@ -1001,13 +1006,14 @@ async function provaOrizzontale(formato) {
       const p = document.querySelector('.pl-attrezzi__pannello');
       return { su: p.scrollTop, corsa: p.scrollHeight - p.clientHeight, fuoco: document.activeElement?.innerText?.trim() ?? '' };
     });
-    if (aperto.su > 1) difetto('attrezzi', `il pannello si apre gia' scorso di ${Math.round(aperto.su)} px (corsa ${aperto.corsa} px)`);
-    if (aperto.fuoco !== 'Torna alla partita') difetto('attrezzi', `all'apertura il fuoco e' su «${aperto.fuoco.slice(0, 30)}», non su «Torna alla partita»`);
+    if (aperto.su > 1) difetto(schermata, `il pannello si apre gia' scorso di ${Math.round(aperto.su)} px (corsa ${aperto.corsa} px)`);
+    if (aperto.fuoco !== 'Torna alla partita') difetto(schermata, `all'apertura il fuoco e' su «${aperto.fuoco.slice(0, 30)}», non su «Torna alla partita»`);
     const torna = page.getByRole('button', { name: /^Torna alla partita$/ });
-    if (!(await raggiungibile(torna))) { difetto('attrezzi', '«Torna alla partita» del pannello non si raggiunge'); return; }
+    if (!(await raggiungibile(torna))) { difetto(schermata, '«Torna alla partita» del pannello non si raggiunge'); return; }
     await torna.tap();
     await page.waitForSelector('.pl-attrezzi__pannello', { state: 'detached' });
-  });
+  }
+  await passo('attrezzi', () => provaPannello('attrezzi'));
   await passo('torre', async () => {
     await livelloTorre();
     await misuraGioco('torre');
@@ -1016,6 +1022,7 @@ async function provaOrizzontale(formato) {
     else if (m.lato < 0.85 * 9) difetto('torre', `un masso e' di ${m.lato} px`);
     await appoggiaColDito('torre');
   });
+  await passo('attrezzi-torre', () => provaPannello('attrezzi-torre'));
   await passo('fine-livello', async () => {
     if (!SEQUENZA_1) return;
     await apri();
