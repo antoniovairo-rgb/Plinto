@@ -102,12 +102,27 @@ Prove del gate già esistenti, con la correzione accesa:
 - `npm run precisione`: verde («Nessuno scostamento»);
 - `npm run e2e-attrezzi` (piccone, mensola, carriola, scambio): verde;
 - `npm run e2e-po008`: verde;
-- `npm run e2e-schermi` (completo, con i lanci): ESITO_SCHERMI;
+- `npm run e2e-schermi` (completo, con i lanci): verde («Tutto a posto su 13 formati, 5 coricati e 2 col testo x2 e 2 coi lanci»);
 - tastiera: coperta da `e2e-schermi` («un pezzo da tastiera») e dal gate (vedi sotto).
 
 ## Gate finale
 
-`npm run build`, `npm test`, `npm run verifica -- --veloce`: ESITO_GATE
+- `npm run build`: bundle `index-BTGELjjy.js`.
+- `npm test`: 45 file, 655 test, tutti verdi.
+- `npm run verifica -- --veloce`: **corsia veloce NEGATA** dal gate stesso («non risulta nessun
+  giro completo passato su questa macchina»), quindi avrebbe fatto il giro intero (~63 min),
+  oltre il limite di 60 min dei comandi in background di questo container. Fermato e rifatto **a
+  pezzi**, con gli stessi comandi di `tools/verifica-tutto.mjs` uno per uno (senza pipe,
+  codice d'uscita di ciascuno):
+  - 31 controlli su 33 senza i cento livelli: **29 verdi, 2 rossi**: `e2e-quadri` («a 320x700
+    bisogna scorrere di 2 px») e `recensione` («a 360x640 l'invito finisce 10px sotto la
+    barra»), cioè esattamente i due rossi del font dei container figli in
+    `docs/TESTING.md:313-314`; non toccano il trascinamento. Che siano verdi sulla CI **non posso
+    confermarlo** finché la CI non gira.
+  - `npm run livelli` (i cento livelli col dito): ESITO_LIVELLI
+  - la misura `geometria` serve solo a decidere la corsia veloce e non è stata eseguita.
+- Il verdetto che conta è quello della CI su `main` (CLAUDE.md): **da leggere prima di dire
+  «pubblicata»**.
 
 ## Testo per il changelog (1.21.27)
 
