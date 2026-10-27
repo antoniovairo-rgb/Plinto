@@ -23,5 +23,6 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.22 | 2026-10-21 | La tastiera tace sotto il menu e le domande; fuoco su «Menu» dopo «Riprendi la partita» | PO-026 | pubblicata (`2d9e4ca`); collaudata (difetti già presenti → PO-028, PO-029, PO-030) |
 | 1.21.23 | 2026-10-21 | Invio preme i pulsanti fuori dal vassoio; tastiera muta e fuoco nel pannello degli attrezzi; scelta azzerata cambiando partita | PO-027, PO-028, PO-029 | pubblicata (`3f9798f`); collaudata (difetto già presente → PO-032) |
 | 1.21.24 | 2026-10-21 | Gli attrezzi con la tastiera (piccone, mensola, carriola, scambio); prove più fedeli | PO-030, PO-031, PO-032, PO-033 | pubblicata (`d290480`); collaudata (O1 al PO, O2 → PO-034) |
-| 1.21.25 | 2026-10-26 | Si gioca in orizzontale; caratteri grandi; pacchetto 11915 «gioco» a schermo normale | PO-035, PO-017 | pubblicata (`49c5d77`); AAB 11915 da caricare in produzione |
+| 1.21.25 | 2026-10-26 | Si gioca in orizzontale; caratteri grandi; pacchetto 11915 «gioco» a schermo normale | PO-035, PO-017 | pubblicata (`49c5d77`); AAB 11915 caricato in produzione (26 ottobre) |
+| 1.21.26 | 2026-10-27 | Pezzo dove il dito si stacca; pannello degli attrezzi dall'alto in orizzontale; «Salta per ora» comodo; prova del dito nella CI | PO-036 | pubblicata (`b8204b5`), CI 240 verde; collaudo in corso |
 | 1.22.0 | — | La Torre: livelli 101-200 e grafica nuova del sito | PO-002 | da pianificare |
