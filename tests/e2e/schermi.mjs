@@ -1070,6 +1070,57 @@ async function provaTestoDoppio(formato) {
   await chiudi();
 }
 
+// ------------------------------------------------- lanci e tocco subito (PO-037) ---
+/*
+ * Collaudo 1.21.26, O1; decisione PO-037. Dopo trascinamenti staccati col dito ancora in
+ * corsa Chromium avviava un fling che si sommava di lancio in lancio fino a ~2 s, e il primo
+ * tocco che lo fermava veniva soppresso: niente `click` (docs/sviluppo/RAPPORTO-PO-037.md).
+ * Qui il dito NON si ferma (niente `fermaIlDito`): 14 lanci di fila dal vassoio verso il
+ * centro della griglia, 150 ms fra l'uno e l'altro, e subito un tocco su «Menu». Il menu deve
+ * aprirsi al primo tocco in ognuno dei giri. Con NIENTE_LANCIO_DOPO_LA_PRESA spento
+ * (src/ui/useTrascinamento.js) e' rosso; piu' giri perche' un giro solo puo' capitare su un
+ * fling gia' finito.
+ */
+const LANCI = [[360, 640], [915, 412]].map(([w, h]) => ({ nome: `lanci ${w}x${h}`, w, h }));
+const GIRI_LANCI = 3;
+async function provaLanci(formato) {
+  const { page, apri, passo, difetto, chiudi } = await telefono(formato);
+  const dito = (cdp, type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  for (let giro = 1; giro <= GIRI_LANCI; giro += 1) {
+    await passo('lanci', async () => {
+      await apri();
+      await page.getByRole('button', { name: /^Partita libera/ }).tap();
+      await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+      await page.waitForTimeout(250);
+      const cdp = await page.context().newCDPSession(page);
+      // Col dito il pezzo si disegna 1,35 caselle sopra il dito (useTrascinamento.js).
+      const a = await page.evaluate(() => {
+        const c = document.querySelectorAll('.pl-plancia .pl-cella')[40].getBoundingClientRect();
+        return { x: c.left + c.width / 2, y: c.top + c.height / 2 + 1.35 * c.height };
+      });
+      let lanci = 0;
+      for (let i = 0; i < 14; i += 1) {
+        const r = await page.evaluate(() => document.querySelector('.pl-tray .pl-pezzo')?.getBoundingClientRect().toJSON());
+        if (!r) break;
+        const da = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        await dito(cdp, 'touchStart', da.x, da.y);
+        for (let k = 1; k <= 12; k += 1) await dito(cdp, 'touchMove', da.x + ((a.x - da.x) * k) / 12, da.y + ((a.y - da.y) * k) / 12);
+        await dito(cdp, 'touchEnd');
+        lanci += 1;
+        await page.waitForTimeout(150);
+      }
+      if (lanci < 14) { difetto('lanci', `giro ${giro}: solo ${lanci} lanci su 14, il vassoio e' vuoto: la prova e' rotta`); return; }
+      const b = await page.locator('.pl-hud__menu').boundingBox();
+      await dito(cdp, 'touchStart', b.x + b.width / 2, b.y + b.height / 2);
+      await dito(cdp, 'touchEnd');
+      const aperto = await page.waitForSelector('.pl-menu', { timeout: 1000 }).then(() => true, () => false);
+      await cdp.detach();
+      if (!aperto) difetto('lanci', `giro ${giro}: dopo 14 lanci il primo tocco su «Menu» non apre il menu (click perso; PO-037)`);
+    });
+  }
+  await chiudi();
+}
+
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 console.log(`\nPLINTO su tablet e PC (${INDIRIZZO})`);
 const misureCornici = [...new Set(DA_PROVARE.map((f) => { const c = corniceDi(f); return `${c.w}x${c.h}`; }))];
@@ -1081,6 +1132,7 @@ for (const formato of DA_PROVARE) await provaFormato(formato);
 const filtra = (lista) => (FILTRO ? lista.filter((f) => FILTRO.some((x) => f.nome.includes(x))) : lista);
 for (const formato of filtra(ORIZZONTALI)) await provaOrizzontale(formato);
 for (const formato of filtra(TESTO_DOPPIO)) await provaTestoDoppio(formato);
+for (const formato of filtra(LANCI)) await provaLanci(formato);
 await browser.close();
 
 // ------------------------------------------------------------------------- il verdetto ---
@@ -1099,4 +1151,4 @@ if (errori.length) {
   console.log(`\nSchermate in ${OUT}`);
   process.exit(1);
 }
-console.log(`\nTutto a posto su ${DA_PROVARE.length} formati, ${filtra(ORIZZONTALI).length} coricati e ${filtra(TESTO_DOPPIO).length} col testo x2. Schermate in ${OUT}`);
+console.log(`\nTutto a posto su ${DA_PROVARE.length} formati, ${filtra(ORIZZONTALI).length} coricati e ${filtra(TESTO_DOPPIO).length} col testo x2 e ${filtra(LANCI).length} coi lanci. Schermate in ${OUT}`);
