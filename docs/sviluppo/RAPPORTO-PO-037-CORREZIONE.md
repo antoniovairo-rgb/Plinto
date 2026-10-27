@@ -119,7 +119,7 @@ Prove del gate già esistenti, con la correzione accesa:
     barra»), cioè esattamente i due rossi del font dei container figli in
     `docs/TESTING.md:313-314`; non toccano il trascinamento. Che siano verdi sulla CI **non posso
     confermarlo** finché la CI non gira.
-  - `npm run livelli` (i cento livelli col dito): ESITO_LIVELLI
+  - `npm run livelli` (i cento livelli col dito, da solo): **verde**, «vinti nell'app: 100/100», 3.449 s.
   - la misura `geometria` serve solo a decidere la corsia veloce e non è stata eseguita.
 - Il verdetto che conta è quello della CI su `main` (CLAUDE.md): **da leggere prima di dire
   «pubblicata»**.
