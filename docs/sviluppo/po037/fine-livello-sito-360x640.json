@@ -1,0 +1,2162 @@
+[
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 0,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1022,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1022,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 9,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -7475,
+   "durata": 1063,
+   "passi": 63,
+   "vivo": true,
+   "toccoDopo": 1077,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 1,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 6,
+   "nonSpinte": [
+    "NoActiveFling",
+    "NewVelocity",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -6584,
+   "durata": 1080,
+   "passi": 64,
+   "vivo": true,
+   "toccoDopo": 1089,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1027,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1027,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1000,
+  "giro": 3,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1025,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1025,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1041,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 9,
+   "nonSpinte": [
+    "NoActiveFling",
+    "NewVelocity"
+   ],
+   "vx": 0,
+   "vy": -7515,
+   "durata": 1064,
+   "passi": 63,
+   "vivo": true,
+   "toccoDopo": 1071,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1500,
+  "giro": 0,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1543,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 9,
+   "nonSpinte": [
+    "NoActiveFling"
+   ],
+   "vx": 0,
+   "vy": -6980,
+   "durata": 1564,
+   "passi": 93,
+   "vivo": true,
+   "toccoDopo": 1576,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1500,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1528,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1528,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1500,
+  "giro": 2,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1524,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1524,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1541,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 5,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -7490,
+   "durata": 1563,
+   "passi": 93,
+   "vivo": true,
+   "toccoDopo": 1574,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 1500,
+  "giro": 3,
+  "andato": false,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1522,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1522,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1538,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1538,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1538,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1538,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 6,
+   "nonSpinte": [
+    "NoActiveFling",
+    "NewVelocity"
+   ],
+   "vx": 0,
+   "vy": -6916,
+   "durata": 1563,
+   "passi": 93,
+   "vivo": true,
+   "toccoDopo": 1575,
+   "soppresso": true,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 2000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 2000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2053,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2054,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2057,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 8,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -7805,
+   "durata": 2013,
+   "passi": 120,
+   "vivo": false,
+   "toccoDopo": 2080,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 2000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2024,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2024,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2040,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2040,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2040,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2040,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 5,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -5623,
+   "durata": 2013,
+   "passi": 120,
+   "vivo": false,
+   "toccoDopo": 2076,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 2000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2049,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 3000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3043,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 6,
+   "nonSpinte": [
+    "NoActiveFling",
+    "NewVelocity",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -6546,
+   "durata": 2012,
+   "passi": 120,
+   "vivo": false,
+   "toccoDopo": 3069,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 3000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 8,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -7205,
+   "durata": 2013,
+   "passi": 120,
+   "vivo": false,
+   "toccoDopo": 3084,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 3000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3022,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3022,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3038,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3039,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": true,
+   "spinte": 8,
+   "nonSpinte": [
+    "NoActiveFling",
+    "CurrentVelocity"
+   ],
+   "vx": 0,
+   "vy": -7682,
+   "durata": 2014,
+   "passi": 120,
+   "vivo": false,
+   "toccoDopo": 3078,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "frettoloso",
+  "attesa": 3000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3026,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3026,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3042,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1029,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1049,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1500,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1527,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1544,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1500,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1530,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1530,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1546,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1546,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1546,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1546,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1500,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1531,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1531,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1548,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1548,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1548,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1550,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 1500,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 1531,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 1531,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 1547,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 1549,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 2000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2045,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 2000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2032,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2032,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 2000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2050,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 2000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 2019,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 2019,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 2034,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 2034,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 2034,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 2035,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 2037,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 3000,
+  "giro": 0,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3032,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3032,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3048,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 3000,
+  "giro": 1,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3031,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3051,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 3000,
+  "giro": 2,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3028,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3044,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ },
+ {
+  "dito": "fermo-ultima",
+  "attesa": 3000,
+  "giro": 3,
+  "andato": true,
+  "mosse": 14,
+  "scrollTop": 0,
+  "scorre": 61,
+  "eventi": [
+   {
+    "t": "pointerdown",
+    "ora": 3030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "touchstart",
+    "ora": 3030,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "gotpointercapture",
+    "ora": 3046,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "pointerup",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "lostpointercapture",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": false
+   },
+   {
+    "t": "touchend",
+    "ora": 3047,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   },
+   {
+    "t": "click",
+    "ora": 3049,
+    "su": "button.pl-btn",
+    "testo": "Torna ai livelli",
+    "annullabile": true
+   }
+  ],
+  "gesti": {
+   "fling": false,
+   "soppresso": false,
+   "tap": true
+  }
+ }
+]

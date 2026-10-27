@@ -18,6 +18,10 @@
  *   m3      + animazioni d'ingresso (salto, coriandoli, barra che si riempie)
  *   m4      + l'area della fine scorre davvero (contenuto piu' alto dello schermo)
  *   m5      m2 ma il pezzo si trascina con 14 mosse a 150 ms come il livello 1
+ *   m6      m5 + `preventDefault()` sui touchmove del trascinamento (ascoltatore non passivo):
+ *           prova di una correzione, non il gioco
+ *   m7      m5 + `preventDefault()` sul solo touchend del trascinamento
+ *   m8      m0 (niente fine, niente radice come PLINTO) con 14 trascinamenti a 150 ms
  *
  * Per ogni giro: click arrivato o no, e il riassunto dei gesti (tools/po037-gesti.mjs).
  * Strumento di misura, non un controllo del gate.
@@ -51,8 +55,8 @@ if (SCENE.some((s) => s.startsWith('libera')) && !(await risponde())) {
 /** La pagina minima, con i pezzi accesi dalla scena. */
 function paginaMinima(scena) {
   const n = Number(scena.slice(1));
-  const radice = n >= 2 ? 'touch-action:manipulation;overscroll-behavior:none;' : '';
-  const anim = n >= 3 && n !== 5;
+  const radice = n >= 2 && n !== 8 ? 'touch-action:manipulation;overscroll-behavior:none;' : '';
+  const anim = n >= 3 && n < 5;
   const lunga = n === 4;
   return `<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -74,10 +78,12 @@ html,body{margin:0;height:100%;background:#112;color:#eee;font:16px sans-serif;$
 <div id="radice"><div id="area"></div><div id="pezzo"></div><button id="menu">Menu</button></div>
 <script>
 window.__click = false;
-const fine = ${n >= 1 && n !== 0 ? 'true' : 'false'};
+const fine = ${n >= 1 && n !== 8 ? 'true' : 'false'};
 const pezzo = document.getElementById('pezzo');
 let trascinamenti = 0;
-const daFare = ${n === 5 ? 14 : 1};
+const daFare = ${n >= 5 ? 14 : 1};
+${n === 6 ? "document.getElementById('area').addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });" : ''}
+${n === 7 ? "document.getElementById('area').addEventListener('touchend', (e) => e.preventDefault(), { passive: false });" : ''}
 document.addEventListener('pointermove', (e) => {
   if (!document.getElementById('pezzo')) return;
   pezzo.style.transform = 'translate(' + (e.clientX - 30) + 'px,' + (e.clientY - 30) + 'px)';
@@ -141,12 +147,12 @@ async function giro(browser, scena, attesa) {
     await page.setContent(paginaMinima(scena));
     // Stessa geometria del livello 1 a 360x640: dal vassoio in basso verso la griglia.
     da = { x: 0.5 * W, y: 0.82 * H }; a = { x: 0.5 * W, y: 0.45 * H };
-    selettore = Number(scena.slice(1)) >= 1 ? '#bottone' : '#menu';
+    selettore = Number(scena.slice(1)) >= 1 && scena !== 'm8' ? '#bottone' : '#menu';
     riuscito = () => page.evaluate(() => window.__click);
   }
   const cdp = await contesto.newCDPSession(page);
   const ferma = await registraGesti(cdp);
-  const volte = scena === 'm5' || scena === 'libera14' ? 14 : 1;
+  const volte = Number(scena.slice(1)) >= 5 || scena === 'libera14' ? 14 : 1;
   for (let i = 0; i < volte; i += 1) {
     if (scena === 'libera14' && i > 0) {
       const r = await page.evaluate(() => document.querySelector('.pl-tray .pl-pezzo')?.getBoundingClientRect().toJSON());
