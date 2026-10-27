@@ -10,4 +10,9 @@ Rapporto in scrittura: le sezioni si riempiono man mano.
 | prova | esito |
 |---|---|
 | `npm run precisione` | verde, 205 prove, «Nessuno scostamento» (rilascio veloce CPU 4x: 3 su 3 uguali al motore) |
-| `npm run guida` | verde |
+| `npm run guida` | verde: 6 passi; «Salta per ora» e «Non mostrarmela più» alti 45 px, bordi suoi, a 360x640, 390x844, 640x360 |
+| `npm run e2e-schermi` | verde: «Tutto a posto su 13 formati, 5 coricati e 2 col testo x2» (550 s) |
+| `npm run e2e` | verde: «Nessun problema rilevato» |
+| `npm run e2e-attrezzi` | verde: «Nessun problema rilevato» |
+| `npm run e2e-po008` | verde: «Tutto a posto»; «Mosse di unaMossa: 94 tentate, 2 ritentate, 0 non fatte» |
+| `npm run indietro` | verde: «Tutte le verifiche del tasto Indietro sono passate» |
