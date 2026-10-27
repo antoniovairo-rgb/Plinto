@@ -1,0 +1,128 @@
+[
+ {
+  "scena": "libera14",
+  "attesa": 500,
+  "giri": [
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   }
+  ]
+ },
+ {
+  "scena": "libera14",
+  "attesa": 1000,
+  "giri": [
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   }
+  ]
+ },
+ {
+  "scena": "libera14",
+  "attesa": 1500,
+  "giri": [
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "avvii": 0,
+     "fling": false,
+     "soppresso": false,
+     "tap": true
+    }
+   }
+  ]
+ }
+]
