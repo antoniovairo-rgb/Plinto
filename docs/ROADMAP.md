@@ -25,5 +25,5 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.24 | 2026-10-21 | Gli attrezzi con la tastiera (piccone, mensola, carriola, scambio); prove più fedeli | PO-030, PO-031, PO-032, PO-033 | pubblicata (`d290480`); collaudata (O1 al PO, O2 → PO-034) |
 | 1.21.25 | 2026-10-26 | Si gioca in orizzontale; caratteri grandi; pacchetto 11915 «gioco» a schermo normale | PO-035, PO-017 | pubblicata (`49c5d77`); AAB 11915 caricato in produzione (26 ottobre) |
 | 1.21.26 | 2026-10-27 | Pezzo dove il dito si stacca; pannello degli attrezzi dall'alto in orizzontale; «Salta per ora» comodo; prova del dito nella CI | PO-036 | pubblicata (`b8204b5`), CI 240 verde; collaudata (nessuna E né D; O1 → PO-037) |
-| 1.21.27 | 2026-10-27 | Il primo tocco dopo i lanci non va più a vuoto (fling di Chromium) | PO-037 | pubblicata (`160ab59`), CI 247 verde; collaudo in corso |
+| 1.21.27 | 2026-10-27 | Il primo tocco dopo i lanci non va più a vuoto (fling di Chromium) | PO-037 | pubblicata (`160ab59`), CI 247 verde; collaudata (nessuna E né D) |
 | 1.22.0 | — | La Torre: livelli 101-200 e grafica nuova del sito | PO-002 | da pianificare |
