@@ -181,3 +181,117 @@ Decide il PO.
 - D2 (tocco su «Menu» perso dopo un trascinamento, telefono coricato) da chiudere su `main`.
 - Non verificabili da qui: TalkBack sulle schede della mappa e sui massi, telefono di fascia
   bassa, iPhone.
+
+## 5. Riallineamento alla 1.21.27 (27 ottobre 2026)
+
+Decisione: `docs/DECISIONI.md` su `main`, 27 ottobre, PO-002 («ok» del PO: la Torre si
+riallinea a `main` con la 1.21.27 e rifà il gate dei 200 livelli, fuori dal sito fino
+all'esito della revisione della 11915). Nessun cambio di versione: il ramo dice 1.21.27 e
+versionCode 11915, come `main`.
+
+### L'unione
+
+| Commit | Che cosa |
+|---|---|
+| `720c96f` | unito `origin/main` (`b28d0ac`, 1.21.27), 46 commit dopo `b59836e` |
+| `7804416` | `tools/sonda-fine-livello.mjs`: `SONDA_LIVELLO` e misure sul livello 102 |
+| `6ebdabc` | `tests/e2e/schermi.mjs`: caso «attrezzi-torre» |
+
+Un solo conflitto: `docs/CHANGELOG.md`. Il blocco «Non pubblicato — La Torre» resta in
+cima, con la frase «il ramo contiene tutto `main` fino alla 1.21.27»; sotto, le voci 1.21.27
+e 1.21.26 di `main`. Tutto il resto si è unito da solo, e ho controllato che ci fosse:
+`RILASCIO_DOVE_SI_STACCA` e `NIENTE_LANCIO_DOPO_LA_PRESA` (`src/ui/useTrascinamento.js:50`,
+`:68`), `PANNELLO_DALL_ALTO` (`src/ui/Attrezzi.jsx:161`), `SALTA_COMODO`
+(`src/ui/schermate/PrimoAvvio.jsx:55`), `DITO_CHE_SI_FERMA` e `provaLanci` in
+`tests/e2e/schermi.mjs`, `tools/sonda-fine-livello.mjs`, `tools/sonda-tocco.mjs`,
+`tools/po037-*.mjs`; il caso «torre» di `e2e-schermi` c'è ancora. `DISPLAY_MODE` resta
+`default` (`android/app/src/main/AndroidManifest.xml:93`).
+Lockfile: `package-lock.json` è quello di `main`, senza conflitti. `npm install
+--package-lock-only` lo riscrive cambiando solo `"name": "quadra"` in `"plinto"`: la stessa
+differenza c'è già su `main`, quindi non l'ho portata qui (non è della Torre).
+Contraddizioni fra una correzione e la Torre: nessuna trovata.
+
+### Le correzioni nuove provate sulla Torre
+
+Build di produzione (`vite preview`) per la sonda; server di sviluppo per `e2e-schermi`,
+come in CI. Chromium `/opt/pw-browsers/chromium` 153.0.8010.12.
+
+**Primo tocco dopo i lanci, livello della Torre.** `tools/sonda-fine-livello.mjs` ha una
+variabile nuova, `SONDA_LIVELLO` (predefinito 1, come prima): oltre il primo segna superati
+tutti i livelli precedenti e apre la tappa giusta nella scheda dell'opera; controlla che si
+sia aperto proprio quel livello e conta i massi. Livello **102** (4 massi, 18 mosse del
+motore), dito «frettoloso» (12 movimenti e distacco subito, 150 ms fra le mosse), tocco su
+«Torna ai livelli», 6 giri per attesa, traccia dei gesti accesa
+(`docs/sviluppo/po037/fine-livello-torre102-{spento,acceso}-{360x640,915x412}.json`):
+
+| `NIENTE_LANCIO_DOPO_LA_PRESA` | formato | giri | `GestureFlingStart` per giro | fling all'ultimo distacco | click persi |
+|---|---|---|---|---|---|
+| spento | 360x640 | 12 | 12–16 | 3 | 0 |
+| spento | 915x412 | 12 | 10–14 | 0 | 0 |
+| acceso | 360x640 | 12 | **0** | 0 | 0 |
+| acceso | 915x412 | 12 | **0** | 0 | 0 |
+
+Più, senza traccia: acceso 0 persi su 24 (500/1000/1500 ms, due formati); spento 0 su 16;
+spento con traccia, 2 giri a 360x640: **1 click perso** con il fling dell'ultimo distacco
+vivo al tocco (564 ms di fling, tocco a 578 ms, `FilterTapSuppression`). Al livello 1,
+spento, in questo contenitore: 1 perso su 8.
+
+Lettura: sulla Torre la correzione fa quello che fa sul Ponte (nessun fling avviato durante
+la presa). Il click perso, invece, in questo contenitore è raro anche spento (il rapporto
+PO-037 misurava 44 su 48 al livello 1): sul 102 l'ultima mossa raramente lascia un fling
+vivo. Quindi la prova rosso/verde forte qui è il **conteggio dei fling** (10–16 contro 0),
+non i click persi. Perché questo contenitore perda meno click di quello di PO-037 **non
+posso confermarlo**.
+
+**Pannello degli attrezzi coricato su un livello della Torre.** `e2e-schermi` lo provava
+solo sul livello 13. Il controllo è ora una funzione (`provaPannello`) chiamata anche dopo
+il caso «torre» (livello 113), colonna nuova «attrezzi-torre». Fatto fallire:
+
+| `PANNELLO_DALL_ALTO` | 640x360 | 800x360 | 915x412 | 1024x600, 1280x620 |
+|---|---|---|---|---|
+| spento | **rosso** 232 px (Ponte e Torre) | **rosso** 232 | **rosso** 180 | verdi |
+| acceso | verde | verde | verde | verde |
+
+(Sul ramo di PO-036 le corse erano 216/216/164 px; qui 232/232/180: il pannello è più lungo
+di 16 px. Da che cosa venga **non l'ho misurato**.)
+
+**Prove mirate, tutto acceso:**
+
+| comando | esito |
+|---|---|
+| `npm run e2e-schermi` completo (con «torre», «attrezzi-torre», «lanci») | verde: «Tutto a posto su 13 formati, 5 coricati e 2 col testo x2 e 2 coi lanci» |
+| `npm run precisione` (compreso il rilascio veloce su CPU 4x) | verde: «Nessuno scostamento», 205 prove |
+| `npm run e2e-po008` | verde, «94 tentate, 0 ritentate, 0 non fatte» |
+| `npm run e2e-attrezzi` | verde |
+| `npm run guida` | verde, «Salta per ora» e «Non mostrarmela più» a 45 px |
+
+### Gate completo, a pezzi
+
+Su `opera-torre` a `6ebdabc`, gli stessi 33 comandi di `tools/verifica-tutto.mjs`, uno per
+uno, codice d'uscita di ciascuno senza pipe; i livelli in quattro tratti con
+`node tests/e2e/tutti-i-livelli.mjs DA A`, uno per comando (ogni tratto ~29 minuti, due
+insieme sarebbero arrivati al limite di 60). Un primo avvio di 1-50 l'ho fermato io dopo un
+minuto per dividerlo; non conta. Tempo totale 9.473 s (circa 2 ore e 38 minuti).
+**31 verdi su 33.**
+
+| Controllo | Esito | Tempo |
+|---|---|---|
+| versione servita, test unitari (684), contrasti, build, comunicazioni, e2e | verdi | 88 s |
+| `e2e-quadri` | **rosso noto**: «a 320x700 bisogna scorrere di 2 px» (font del container, `docs/TESTING.md`) | 21 s |
+| `e2e-trionfo` … `condivisione` (12 controlli) | verdi | 557 s |
+| `recensione` | **rosso noto**: «a 360x640 l'invito finisce 10px sotto la barra» (font del container) | 38 s |
+| correzioni, anteprima, indietro, impaginazione, `home-spiegazione`, geometria | verdi | 369 s |
+| **tutti i livelli, giocati nell'app** | **200 su 200**: 1-50 (1.725 s), 51-100 (1.820 s), 101-150 (1.703 s), 151-200 (1.792 s) | 7.040 s |
+| precisione, sottocartella, installazione, desktop | verdi | 463 s |
+| `e2e-schermi` | **verde** (il D2 del 26 ottobre non si è ripresentato) | 820 s |
+| resistenza | verde | 77 s |
+
+Che `e2e-quadri` e `recensione` siano verdi sulla CI **non posso confermarlo**: la CI parte
+solo su `main` o su una pull request, e questo ramo non va su `main` adesso.
+
+### Che cosa cambia rispetto al § 3
+
+- **D2 chiuso su `main`**: era il tocco perso dopo un trascinamento sintetico (PO-036 E1,
+  `DITO_CHE_SI_FERMA`) e il fling di Chromium (PO-037, `NIENTE_LANCIO_DOPO_LA_PRESA`).
+  Unite qui, `e2e-schermi` è verde nel gate e da solo.
+- O1, O2, O3: invariati.

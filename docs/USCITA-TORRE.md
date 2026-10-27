@@ -1,9 +1,9 @@
 # Uscita della Torre — checklist
 
-Preparata il 9 ottobre 2026, aggiornata il 26 ottobre 2026. **La Torre va online solo dopo
+Preparata il 9 ottobre 2026, aggiornata il 27 ottobre 2026. **La Torre va online solo dopo
 l'esito della revisione Google del pacchetto 11915** (decisione del PO del 26 ottobre,
 `docs/DECISIONI.md`): l'app del Play Store carica il sito pubblicato, e il revisore deve
-vedere il gioco della 1.21.25, quello misurato. Fino ad allora niente su `main`. Il ramo `opera-torre` ha gia': 100 livelli nuovi (101-200) con i massi, la
+vedere il gioco misurato di `main` (la 11915 e' la 1.21.25). Fino ad allora niente su `main`. Il ramo `opera-torre` ha gia': 100 livelli nuovi (101-200) con i massi, la
 grafica «cantiere di notte», l'icona e il logo a gemme, le animazioni (onda, scie,
 Intreccio, atterraggio), l'immagine in evidenza nuova.
 
@@ -16,15 +16,18 @@ Android Studio (Claude non ha accesso a nessuno dei due).
       26 ottobre, unito `rilascio/1.21.25` (main fino alla 1.21.25: orizzontale PO-035,
       testo grande, `appCategory="game"`, `DISPLAY_MODE` `default`, accessibilita' e
       tastiera PO-023...PO-034) e poi `main` (solo documenti). Conflitti e prove in
-      `docs/sviluppo/RAPPORTO-PO-002-TORRE.md`. **Se su `main` esce altro prima della
-      Torre (una 1.21.26, l'esito della 11915), va unito di nuovo** e il gate rifatto.
+      `docs/sviluppo/RAPPORTO-PO-002-TORRE.md`. Il 27 ottobre unito di nuovo `main` con la
+      1.21.27 (1.21.26 e 1.21.27: rilascio dove il dito si stacca, pannello dall'alto,
+      «Salta per ora» comodo, niente lancio dopo la presa), rapporto § 5. **Se su `main`
+      esce altro prima della Torre, va unito di nuovo** e il gate rifatto.
 - [ ] **[C]** Portare poi la Torre sull'Arena (`opera-arena`).
 - [ ] **[C]** Gate completo sulla Torre: `npm run verifica`, 33 controlli, tutti i 200
       livelli rigiocati nell'app. Supera le 2 ore: si fa a pezzi, come il 9 ottobre.
-      Giro del 26 ottobre: 30 su 33, **200 livelli su 200 vinti**; rossi `e2e-quadri` e
-      `recensione` (noti, font del container) e `e2e-schermi` (D2 del rapporto: tocco su
-      «Menu» perso dopo un trascinamento, c'e' gia' nella 1.21.25). Resta aperto finche' D2
-      non e' chiuso. Va rifatto dopo ogni nuova unione di `main`.
+      Giro del 26 ottobre: 30 su 33. Giro del 27 ottobre, dopo l'unione della 1.21.27:
+      **31 su 33, 200 livelli su 200 vinti**; rossi solo `e2e-quadri` (2 px) e `recensione`
+      (10 px), i due noti del font del container; `e2e-schermi` verde (D2 chiuso su `main`).
+      Va rifatto dopo ogni nuova unione di `main`; il verdetto della CI arriva solo con
+      `opera-torre` su `main` (parte B).
 - [x] **[C]** Testi della scheda (`android/SCHEDA-PLAY-STORE.md`), italiano e inglese:
       «cento livelli» diventa 200 (il Ponte e la Torre), si spiegano i massi e la regola
       dell'ultimo livello di ogni opera, si toglie o si riscrive la frase degli «otto
