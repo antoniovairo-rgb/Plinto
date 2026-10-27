@@ -7,6 +7,21 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.27] — 27 ottobre 2026
+
+### Corretto
+
+- **Dopo aver lanciato i pezzi in fretta, il primo tocco non va più a vuoto** (PO-037,
+  collaudo 1.21.26 O1). Trascinando i pezzi e staccando il dito mentre si muove ancora, il
+  motore di Chrome avviava uno scorrimento inerziale invisibile; il tocco successivo serviva
+  solo a fermarlo e Chrome lo scartava (niente click: «Torna ai livelli», «Menu» sembravano
+  non rispondere, il secondo tocco funzionava). Ora, durante la presa di un pezzo col dito,
+  quello scorrimento non parte. Misurato sulla build di produzione: tocchi persi da 44 su 48
+  a 0 su 48. Interruttore `NIENTE_LANCIO_DOPO_LA_PRESA`; controllo «lanci» in
+  `npm run e2e-schermi`.
+
+Solo sito: il pacchetto Android resta il 11915 (in revisione); qui cambia solo `versionName`.
+
 ## [1.21.26] — 27 ottobre 2026
 
 ### Corretto
