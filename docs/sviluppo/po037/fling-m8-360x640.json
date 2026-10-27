@@ -1,0 +1,314 @@
+[
+ {
+  "scena": "m8",
+  "attesa": 500,
+  "giri": [
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16466,
+     "durata": 579,
+     "passi": 35,
+     "vivo": true,
+     "toccoDopo": 581,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16606,
+     "durata": 563,
+     "passi": 34,
+     "vivo": true,
+     "toccoDopo": 570,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16605,
+     "durata": 562,
+     "passi": 34,
+     "vivo": true,
+     "toccoDopo": 573,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16628,
+     "durata": 562,
+     "passi": 34,
+     "vivo": true,
+     "toccoDopo": 565,
+     "soppresso": true,
+     "tap": true
+    }
+   }
+  ]
+ },
+ {
+  "scena": "m8",
+  "attesa": 1000,
+  "giri": [
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16469,
+     "durata": 1079,
+     "passi": 65,
+     "vivo": true,
+     "toccoDopo": 1088,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16629,
+     "durata": 1062,
+     "passi": 64,
+     "vivo": true,
+     "toccoDopo": 1066,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16575,
+     "durata": 1063,
+     "passi": 64,
+     "vivo": true,
+     "toccoDopo": 1064,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 12,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -5919,
+     "durata": 1063,
+     "passi": 64,
+     "vivo": true,
+     "toccoDopo": 1074,
+     "soppresso": true,
+     "tap": true
+    }
+   }
+  ]
+ },
+ {
+  "scena": "m8",
+  "attesa": 1500,
+  "giri": [
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16631,
+     "durata": 1563,
+     "passi": 94,
+     "vivo": true,
+     "toccoDopo": 1566,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16418,
+     "durata": 1563,
+     "passi": 94,
+     "vivo": true,
+     "toccoDopo": 1566,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16612,
+     "durata": 1563,
+     "passi": 94,
+     "vivo": true,
+     "toccoDopo": 1569,
+     "soppresso": true,
+     "tap": true
+    }
+   },
+   {
+    "ok": false,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16296,
+     "durata": 1543,
+     "passi": 93,
+     "vivo": true,
+     "toccoDopo": 1558,
+     "soppresso": true,
+     "tap": true
+    }
+   }
+  ]
+ },
+ {
+  "scena": "m8",
+  "attesa": 2500,
+  "giri": [
+   {
+    "ok": true,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16452,
+     "durata": 1979,
+     "passi": 119,
+     "vivo": false,
+     "toccoDopo": 2570,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16600,
+     "durata": 1979,
+     "passi": 119,
+     "vivo": false,
+     "toccoDopo": 2564,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16648,
+     "durata": 1978,
+     "passi": 119,
+     "vivo": false,
+     "toccoDopo": 2570,
+     "soppresso": false,
+     "tap": true
+    }
+   },
+   {
+    "ok": true,
+    "gesti": {
+     "fling": true,
+     "spinte": 13,
+     "nonSpinte": [
+      "NoActiveFling"
+     ],
+     "vx": 0,
+     "vy": -16275,
+     "durata": 1994,
+     "passi": 120,
+     "vivo": false,
+     "toccoDopo": 2564,
+     "soppresso": false,
+     "tap": true
+    }
+   }
+  ]
+ }
+]
