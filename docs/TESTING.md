@@ -271,9 +271,10 @@ Le schermate vengono salvate in `/tmp/plinto-e2e` (o in `PLINTO_E2E_OUT`).
 - **Usa il mouse, non il tocco.** `page.mouse` produce eventi `pointerType: 'mouse'`, quindi
   il ramo che solleva il pezzo di 1.35 celle sopra il dito — cioè proprio il comportamento
   studiato per il telefono — **non viene mai eseguito**.
-- **Il percorso di Chromium è scritto nel file**
-  (`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`). Su una macchina diversa lo scenario
-  non parte finché quel percorso non viene corretto o reso configurabile.
+- **Il percorso di Chromium**: le prove provano nell'ordine `PLINTO_CHROMIUM`,
+  `/opt/pw-browsers/chromium` (il collegamento che non cambia con la versione di Playwright) e
+  `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`; se nessuno esiste, decide Playwright
+  (è il caso della CI).
 - **Non verifica l'audio.** Nessuna asserzione tocca la Web Audio API.
 - **Non verifica i contrasti né il tema chiaro.** Per i contrasti c'è `npm run contrasti`,
   che però misura i token e non quello che il browser disegna davvero.

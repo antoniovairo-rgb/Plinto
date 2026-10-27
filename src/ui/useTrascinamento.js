@@ -36,6 +36,19 @@ export function origineDaCella(shape, row, col) {
   };
 }
 
+/*
+ * RILASCIO_DOVE_SI_STACCA (collaudo 1.21.25, D1; decisione PO-036): al `pointerup` la
+ * casella si calcolava da `presoRef.current`, che si aggiorna solo quando React ridisegna
+ * dopo l'ultimo `pointermove`. Rilasciando in fretta su una CPU lenta l'ultimo movimento
+ * non era ancora disegnato e il pezzo andava dove il dito era un movimento prima: livello 1
+ * a 360x640 col dito, CPU 4x, griglia diversa dal motore in 3 partite su 4 (alla mossa 8,
+ * 11, 9). Acceso, riga e colonna si calcolano dalle coordinate dello stesso `pointerup`,
+ * con la formula di `muovi`; col dito che rallenta e col mouse le coordinate sono le
+ * stesse di prima e non cambia niente. Spento, torna il difetto: caso «rilascio veloce»
+ * di `npm run precisione` rosso.
+ */
+export const RILASCIO_DOVE_SI_STACCA = true;
+
 /** Di quante celle il pezzo viene sollevato sopra il dito (solo su touch). */
 const SOLLEVAMENTO_TOCCO = 1.35;
 
@@ -140,8 +153,10 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       const g = geometria.current;
       setPreso(null);
       if (!g) return;
-      const row = Math.round((p.y - g.top) / g.passoY);
-      const col = Math.round((p.x - g.left) / g.passoX);
+      const x = RILASCIO_DOVE_SI_STACCA ? e.clientX - p.presaX * g.cella : p.x;
+      const y = RILASCIO_DOVE_SI_STACCA ? e.clientY - p.presaY * g.cella - p.sollevamento : p.y;
+      const row = Math.round((y - g.top) / g.passoY);
+      const col = Math.round((x - g.left) / g.passoX);
       onPosiziona(p.handIndex, row, col);
     };
 

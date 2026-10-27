@@ -7,6 +7,27 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.21.26] — 27 ottobre 2026
+
+### Corretto
+
+- **Il pezzo va dove il dito si stacca** (PO-036, collaudo 1.21.25 D1): rilasciando in fretta
+  su un telefono lento, il pezzo poteva finire nel posto di un movimento prima. Interruttore
+  `RILASCIO_DOVE_SI_STACCA`; controllo in `npm run precisione` (rilascio veloce su CPU 4x).
+- **In orizzontale il pannello degli attrezzi si apre dall'alto** (D2): prima si apriva già
+  scorso in fondo. Interruttore `PANNELLO_DALL_ALTO`.
+- **«Salta per ora» e «Non mostrarmela più» si toccano meglio** (O4): l'area da toccare passa
+  da 15 a 45 px, il disegno non cambia. Interruttore `SALTA_COMODO`.
+
+### Prove
+
+- `e2e-schermi`: il dito simulato si ferma prima di staccarsi (`DITO_CHE_SI_FERMA`). Il
+  Chromium di prova perdeva a volte il tocco su «Menu» dopo un trascinamento sintetico veloce,
+  anche su una pagina senza PLINTO (CI 230 rossa). Le prove cercano prima
+  `/opt/pw-browsers/chromium`.
+
+Solo sito: il pacchetto Android resta il 11915 (in revisione); qui cambia solo `versionName`.
+
 ## [1.21.25] — 22 ottobre 2026
 
 ### Corretto
