@@ -13,7 +13,8 @@ Non ancora in produzione: va online solo dopo l'esito della revisione Google del
 11915 (decisione del PO, 26 ottobre 2026), come 1.22.0. La grafica e le animazioni nate qui
 sono gia' uscite sul Ponte con la 1.21.0, l'icona di avvio di Android con il pacchetto 11905;
 restano l'icona e il logo a gemme del sito e la Torre. Il ramo contiene tutto `main` fino
-alla 1.21.25 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo normale).
+alla 1.21.27 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo normale,
+rilascio dove il dito si stacca, pannello dall'alto, niente lancio dopo la presa).
 
 ### Cambiato
 
@@ -63,6 +64,42 @@ alla 1.21.25 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo 
 - I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
   senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
   cambiano, e nemmeno i record di chi li ha gia' giocati.
+
+## [1.21.27] — 27 ottobre 2026
+
+### Corretto
+
+- **Dopo aver lanciato i pezzi in fretta, il primo tocco non va più a vuoto** (PO-037,
+  collaudo 1.21.26 O1). Trascinando i pezzi e staccando il dito mentre si muove ancora, il
+  motore di Chrome avviava uno scorrimento inerziale invisibile; il tocco successivo serviva
+  solo a fermarlo e Chrome lo scartava (niente click: «Torna ai livelli», «Menu» sembravano
+  non rispondere, il secondo tocco funzionava). Ora, durante la presa di un pezzo col dito,
+  quello scorrimento non parte. Misurato sulla build di produzione: tocchi persi da 44 su 48
+  a 0 su 48. Interruttore `NIENTE_LANCIO_DOPO_LA_PRESA`; controllo «lanci» in
+  `npm run e2e-schermi`.
+
+Solo sito: il pacchetto Android resta il 11915 (in revisione); qui cambia solo `versionName`.
+
+## [1.21.26] — 27 ottobre 2026
+
+### Corretto
+
+- **Il pezzo va dove il dito si stacca** (PO-036, collaudo 1.21.25 D1): rilasciando in fretta
+  su un telefono lento, il pezzo poteva finire nel posto di un movimento prima. Interruttore
+  `RILASCIO_DOVE_SI_STACCA`; controllo in `npm run precisione` (rilascio veloce su CPU 4x).
+- **In orizzontale il pannello degli attrezzi si apre dall'alto** (D2): prima si apriva già
+  scorso in fondo. Interruttore `PANNELLO_DALL_ALTO`.
+- **«Salta per ora» e «Non mostrarmela più» si toccano meglio** (O4): l'area da toccare passa
+  da 15 a 45 px, il disegno non cambia. Interruttore `SALTA_COMODO`.
+
+### Prove
+
+- `e2e-schermi`: il dito simulato si ferma prima di staccarsi (`DITO_CHE_SI_FERMA`). Il
+  Chromium di prova perdeva a volte il tocco su «Menu» dopo un trascinamento sintetico veloce,
+  anche su una pagina senza PLINTO (CI 230 rossa). Le prove cercano prima
+  `/opt/pw-browsers/chromium`.
+
+Solo sito: il pacchetto Android resta il 11915 (in revisione); qui cambia solo `versionName`.
 
 ## [1.21.25] — 22 ottobre 2026
 

@@ -22,7 +22,10 @@ import { PASSI_GUIDA, REGOLE_INTRO } from '../../src/config/intro.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
+// Prima il collegamento stabile delle macchine di sviluppo (collaudo 1.21.25, O6: il
+// percorso con il numero di versione cambia a ogni Playwright), poi quello vecchio; se
+// nessuno c'e' (CI), decide Playwright.
+const ESEGUIBILE = [process.env.PLINTO_CHROMIUM, '/opt/pw-browsers/chromium', PERCORSO_NOTO].find((p) => p && existsSync(p));
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const OUT = process.env.PLINTO_E2E_OUT ?? '/tmp/plinto-guida';
 
@@ -167,6 +170,41 @@ await page.waitForSelector('.pl-pagina__titolo');
 const aiuto = (await page.locator('.pl-scroll').innerText()).trim();
 console.log(`6. "Come si gioca" resta raggiungibile dalla home: ${aiuto.length > 200}`);
 if (aiuto.length < 200) errori.push('AIUTO: la pagina delle regole non e raggiungibile o e vuota');
+
+// ---------- 7. I due modi di saltarla si prendono col dito ----------
+// Erano alti 15 px su ogni formato (collaudo 1.21.25, O4; SALTA_COMODO in PrimoAvvio.jsx):
+// sotto i 44 che il gate chiede a un bersaglio per il dito, sulla prima schermata che
+// vede chi installa. Si misura il pulsante e si controlla che i suoi bordi siano DAVVERO
+// suoi (elementFromPoint), e che «Avanti», sopra, resti intero: un'area di tocco che
+// ruba il tocco al pulsante vicino sarebbe un difetto nuovo.
+for (const [w, h] of [[360, 640], [390, 844], [640, 360]]) {
+  const contesto = await browser.newContext({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true, deviceScaleFactor: 2, locale: 'it-IT' });
+  const p = await contesto.newPage();
+  await p.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await p.evaluate(() => window.localStorage.clear());
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.waitForSelector('.pl-guida__salta');
+  const m = await p.evaluate(() => {
+    const avanti = document.querySelector('.pl-guida__navigazione .pl-btn--primario');
+    const dentro = (el, x, y) => { const chi = document.elementFromPoint(x, y); return !!chi && (chi === el || el.contains(chi)); };
+    const pulsanti = [...document.querySelectorAll('.pl-guida__salta button')].map((b) => {
+      b.scrollIntoView({ block: 'center' });
+      const r = b.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      return { nome: b.innerText.trim(), alto: r.height, bordi: dentro(b, x, r.top + 1) && dentro(b, x, r.bottom - 1) };
+    });
+    avanti.scrollIntoView({ block: 'center' });
+    const rb = avanti.getBoundingClientRect();
+    return { pulsanti, avantiIntero: dentro(avanti, rb.left + rb.width / 2, rb.bottom - 1) };
+  });
+  for (const b of m.pulsanti) {
+    console.log(`7. ${w}x${h}: «${b.nome}» alto ${Math.round(b.alto)} px, bordi suoi ${b.bordi}`);
+    if (b.alto < 44) errori.push(`SALTA: a ${w}x${h} «${b.nome}» e alto ${Math.round(b.alto)} px, sotto i 44 per il dito`);
+    if (!b.bordi) errori.push(`SALTA: a ${w}x${h} i bordi di «${b.nome}» sono coperti da altro`);
+  }
+  if (!m.avantiIntero) errori.push(`SALTA: a ${w}x${h} il fondo di «Avanti» non e piu suo`);
+  await contesto.close();
+}
 
 await browser.close();
 if (server) server.kill();

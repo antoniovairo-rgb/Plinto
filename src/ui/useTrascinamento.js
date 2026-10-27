@@ -36,6 +36,42 @@ export function origineDaCella(shape, row, col) {
   };
 }
 
+/*
+ * RILASCIO_DOVE_SI_STACCA (collaudo 1.21.25, D1; decisione PO-036): al `pointerup` la
+ * casella si calcolava da `presoRef.current`, che si aggiorna solo quando React ridisegna
+ * dopo l'ultimo `pointermove`. Rilasciando in fretta su una CPU lenta l'ultimo movimento
+ * non era ancora disegnato e il pezzo andava dove il dito era un movimento prima: livello 1
+ * a 360x640 col dito, CPU 4x, griglia diversa dal motore in 3 partite su 4 (alla mossa 8,
+ * 11, 9). Acceso, riga e colonna si calcolano dalle coordinate dello stesso `pointerup`,
+ * con la formula di `muovi`; col dito che rallenta e col mouse le coordinate sono le
+ * stesse di prima e non cambia niente. Spento, torna il difetto: caso «rilascio veloce»
+ * di `npm run precisione` rosso.
+ */
+export const RILASCIO_DOVE_SI_STACCA = true;
+
+/*
+ * NIENTE_LANCIO_DOPO_LA_PRESA (collaudo 1.21.26, O1; decisione PO-037, 27 ottobre 2026): dopo
+ * trascinamenti staccati col dito ancora in corsa Chromium avvia un fling (lancio inerziale)
+ * anche sopra `touch-action: none`, perche' ogni gesto passa dal controllore del fling PRIMA
+ * del filtro del `touch-action` (components/input/input_router_impl.cc:170-184); i fling nella
+ * stessa direzione si sommano (ui/events/blink/fling_booster.cc) fino a ~2 s; e il primo
+ * tocco che ferma un fling vivo viene soppresso di proposito come tap
+ * (components/input/fling_controller.cc:61-114, components/input/tap_suppression_controller.cc):
+ * niente `click`. Livello 1 vinto con 14 trascinamenti frettolosi, primo tocco su «Torna ai
+ * livelli» entro 1,5 s: click perso 11 volte su 12 (docs/sviluppo/RAPPORTO-PO-037.md; righe
+ * del sorgente di Chromium al commit 8a78e97). Acceso, per la sola durata della presa i
+ * `touchmove` sono annullati: per Chromium il dito non ha mai scorso niente e al distacco
+ * non nasce nessun fling. L'ascoltatore sta sul nodo dove il tocco e' cominciato (i
+ * `touchmove` vanno a quello anche quando il dito esce dal vassoio), non su `document`.
+ * Spento, torna il difetto: caso «lanci e tocco subito» di `npm run e2e-schermi` rosso.
+ */
+export const NIENTE_LANCIO_DOPO_LA_PRESA = true;
+
+/** Annulla un `touchmove`: per Chromium il dito non ha scorso niente, quindi niente fling. */
+function fermaLoScorrimento(e) {
+  if (e.cancelable) e.preventDefault();
+}
+
 /** Di quante celle il pezzo viene sollevato sopra il dito (solo su touch). */
 const SOLLEVAMENTO_TOCCO = 1.35;
 
@@ -69,8 +105,15 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
   const [daTastiera, setDaTastiera] = useState(false);
   const geometria = useRef(null);
   const presoRef = useRef(null);
+  // Il nodo su cui e' cominciato il tocco della presa (NIENTE_LANCIO_DOPO_LA_PRESA).
+  const nodoDelTocco = useRef(null);
 
   presoRef.current = preso;
+
+  const sganciaDalTocco = useCallback(() => {
+    nodoDelTocco.current?.removeEventListener('touchmove', fermaLoScorrimento);
+    nodoDelTocco.current = null;
+  }, []);
 
   const annulla = useCallback(() => {
     setPreso(null);
@@ -102,6 +145,14 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       const presaY = dentro((evento.clientY - rect.top) / cellaTray, forma.height);
       const sollevamento = evento.pointerType === 'mouse' ? 0 : SOLLEVAMENTO_TOCCO * g.cella;
 
+      // Agganciato qui, nel `pointerdown`, e non in un effetto: il primo `touchmove` puo'
+      // arrivare prima che React abbia ridisegnato.
+      sganciaDalTocco();
+      if (NIENTE_LANCIO_DOPO_LA_PRESA && evento.pointerType === 'touch') {
+        evento.currentTarget.addEventListener('touchmove', fermaLoScorrimento, { passive: false });
+        nodoDelTocco.current = evento.currentTarget;
+      }
+
       setSelezionato(null);
       setPreso({
         handIndex,
@@ -114,7 +165,7 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
         cella: g.cella,
       });
     },
-    [attivo, mano, cellRefs],
+    [attivo, mano, cellRefs, sganciaDalTocco],
   );
 
   // Movimento e rilascio si ascoltano sulla finestra: il dito esce spesso dal pezzo.
@@ -138,10 +189,13 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       const p = presoRef.current;
       if (!p || e.pointerId !== p.pointerId) return;
       const g = geometria.current;
+      sganciaDalTocco();
       setPreso(null);
       if (!g) return;
-      const row = Math.round((p.y - g.top) / g.passoY);
-      const col = Math.round((p.x - g.left) / g.passoX);
+      const x = RILASCIO_DOVE_SI_STACCA ? e.clientX - p.presaX * g.cella : p.x;
+      const y = RILASCIO_DOVE_SI_STACCA ? e.clientY - p.presaY * g.cella - p.sollevamento : p.y;
+      const row = Math.round((y - g.top) / g.passoY);
+      const col = Math.round((x - g.left) / g.passoX);
       onPosiziona(p.handIndex, row, col);
     };
 
@@ -152,6 +206,7 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
     const annulla = (e) => {
       const p = presoRef.current;
       if (!p || e.pointerId !== p.pointerId) return;
+      sganciaDalTocco();
       setPreso(null);
     };
 
@@ -164,6 +219,14 @@ export function useTrascinamento({ mano, cellRefs, onPosiziona, attivo = true })
       window.removeEventListener('pointercancel', annulla);
     };
   }, [preso !== null, onPosiziona]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Rilascio e `pointercancel` sganciano subito, qui sopra; questo copre le altre strade
+  // con cui la presa finisce (`annulla`, la schermata che si chiude).
+  useEffect(() => {
+    if (!preso) sganciaDalTocco();
+    return undefined;
+  }, [preso !== null, sganciaDalTocco]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => sganciaDalTocco, [sganciaDalTocco]);
 
   /** Cella di destinazione attuale del pezzo trascinato. */
   const destinazione = (() => {

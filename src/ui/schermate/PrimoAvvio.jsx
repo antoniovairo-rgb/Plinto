@@ -44,6 +44,17 @@ import { OPERE, livelliDellOpera } from '../../config/quadri.js';
  */
 const GRADINO_MOSTRATO = 5;
 
+/*
+ * SALTA_COMODO (collaudo 1.21.25, O4; decisione PO-036): «Salta per ora» e «Non
+ * mostrarmela piu'» erano alti 15 px su tutti i formati, sotto i 44 px che il gate chiede
+ * a un bersaglio per il dito, ed e' la prima schermata che vede chi installa. Acceso, i due
+ * pulsanti hanno la classe `pl-guida__link--comodo`: un'imbottitura sopra e sotto,
+ * compensata da un margine negativo, li porta a 45 px senza spostare niente a schermo.
+ * Spento, torna il difetto: `npm run guida` rosso.
+ */
+export const SALTA_COMODO = true;
+const CLASSE_LINK = SALTA_COMODO ? 'pl-guida__link pl-guida__link--comodo' : 'pl-guida__link';
+
 export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
   const [passo, setPasso] = useState(0);
   const nome = PASSI_GUIDA[passo];
@@ -225,11 +236,11 @@ export function PrimoAvvio({ onInizia, onSaltaPerOra, t }) {
             ha deciso. Un solo "Salta" costringerebbe a scegliere fra rileggere la guida
             per sempre e rinunciarci per sempre, che non e' la domanda giusta. */}
         <p className="pl-guida__salta">
-          <button type="button" className="pl-guida__link" onClick={onSaltaPerOra}>
+          <button type="button" className={CLASSE_LINK} onClick={onSaltaPerOra}>
             {t('guida.saltaPerOra')}
           </button>
           <span aria-hidden="true"> · </span>
-          <button type="button" className="pl-guida__link" onClick={onInizia}>
+          <button type="button" className={CLASSE_LINK} onClick={onInizia}>
             {t('guida.nonMostrare')}
           </button>
         </p>

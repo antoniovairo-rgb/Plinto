@@ -43,7 +43,10 @@ import { createRng } from '../../src/core/rng.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const ESEGUIBILE = existsSync(PERCORSO_NOTO) ? PERCORSO_NOTO : undefined;
+// Prima il collegamento stabile delle macchine di sviluppo (collaudo 1.21.25, O6: il
+// percorso con il numero di versione cambia a ogni Playwright), poi quello vecchio; se
+// nessuno c'e' (CI), decide Playwright.
+const ESEGUIBILE = [process.env.PLINTO_CHROMIUM, '/opt/pw-browsers/chromium', PERCORSO_NOTO].find((p) => p && existsSync(p));
 const INDIRIZZO = process.env.PLINTO_E2E_URL ?? 'http://localhost:5173/';
 const OUT = process.env.PLINTO_E2E_OUT ?? '/tmp/plinto-schermi';
 await mkdir(OUT, { recursive: true });
@@ -99,6 +102,26 @@ const DA_PROVARE = FILTRO ? FORMATI.filter((f) => FILTRO.some((x) => f.nome.incl
 
 const errori = [];
 const avvisi = [];
+
+/*
+ * DITO_CHE_SI_FERMA (collaudo 1.21.25, E1; decisione PO-036). Nel Chromium di prova un
+ * tocco dato dopo un trascinamento col dito che si stacca ancora in corsa a volte non
+ * produce il `click` (arrivano pointerdown, touchstart, pointerup, touchend; il click no),
+ * anche 1,2 s dopo: CI «verifica» 230, «orizzontale 1280x620 / menu: non ci si arriva».
+ * Succede uguale su una pagina minima senza PLINTO e sparisce se il dito si ferma prima di
+ * staccarsi (`node tools/sonda-tocco.mjs`, misure in
+ * docs/sviluppo/RAPPORTO-PO-036.md): e' la prova, non il gioco. Acceso, il dito resta fermo
+ * sul punto d'arrivo per 6 movimenti a 50 ms prima del `touchEnd`, come fa un dito vero
+ * che appoggia un pezzo. Spento, torna il rosso della CI 230 (intermittente).
+ */
+const DITO_CHE_SI_FERMA = true;
+async function fermaIlDito(cdp, punto) {
+  if (!DITO_CHE_SI_FERMA) return;
+  for (let i = 0; i < 6; i += 1) {
+    await new Promise((r) => setTimeout(r, 50));
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: punto.x, y: punto.y }] });
+  }
+}
 
 async function serverRisponde() {
   try { return (await fetch(INDIRIZZO, { signal: AbortSignal.timeout(1500) })).ok; }
@@ -475,6 +498,7 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
     }
     const anteprima = await page.locator('.pl-cella--anteprima').count();
+    await fermaIlDito(cdp, a);
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await cdp.detach();
     return anteprima;
@@ -846,6 +870,7 @@ async function telefono(formato, { testo = 1 } = {}) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y }] });
     }
     const anteprima = await page.locator('.pl-cella--anteprima').count();
+    await fermaIlDito(cdp, a);
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await cdp.detach();
     return anteprima;
@@ -890,11 +915,11 @@ async function telefono(formato, { testo = 1 } = {}) {
     const dopo = await page.locator('.pl-tray .pl-pezzo').count();
     if (anteprima === 0) difetto(schermata, 'col dito: nessuna anteprima sulla griglia durante il trascinamento');
     if (dopo >= prima) difetto(schermata, `col dito: il pezzo non si appoggia (pezzi in mano ${prima} -> ${dopo}, casella di ${Math.round(g.cella)} px)`);
-    // UN SECONDO PRIMA DEL TOCCO SEGUENTE. Nel Chromium di prova un tocco che arriva entro
-    // ~200 ms dalla fine di un trascinamento col dito a volte non produce il `click`
-    // (pointerdown e pointerup si', click no): 3 volte su 4 a 200 ms, 0 su 4 a 1500 ms,
-    // uguale sulla 1.21.24 e in verticale (rapporto PO-035). Non e' di questa prova; se
-    // succeda su un telefono vero non posso confermarlo.
+    // UN SECONDO PRIMA DEL TOCCO SEGUENTE. Nel Chromium di prova un tocco che arriva dopo
+    // un trascinamento col dito a volte non produce il `click` (pointerdown e pointerup si',
+    // click no; rapporto PO-035). Il secondo da solo non bastava (CI 230, 1280x620): la
+    // cura e' il dito che si ferma prima di staccarsi (DITO_CHE_SI_FERMA); l'attesa resta
+    // per l'anteprima e le animazioni. Se succeda su un telefono vero non posso confermarlo.
     await page.waitForTimeout(1000);
   }
   async function chiudi() {
@@ -969,6 +994,15 @@ async function provaOrizzontale(formato) {
     if (!(await raggiungibile(pastiglia))) { difetto('attrezzi', 'la pastiglia degli attrezzi non si raggiunge'); return; }
     await pastiglia.tap();
     await page.waitForSelector('.pl-attrezzi__pannello');
+    // Il pannello si apre dall'alto, col fuoco su «Torna alla partita» (PANNELLO_DALL_ALTO
+    // in src/ui/Attrezzi.jsx): prima, coricato, si apriva gia' scorso in fondo.
+    await page.waitForTimeout(150);
+    const aperto = await page.evaluate(() => {
+      const p = document.querySelector('.pl-attrezzi__pannello');
+      return { su: p.scrollTop, corsa: p.scrollHeight - p.clientHeight, fuoco: document.activeElement?.innerText?.trim() ?? '' };
+    });
+    if (aperto.su > 1) difetto('attrezzi', `il pannello si apre gia' scorso di ${Math.round(aperto.su)} px (corsa ${aperto.corsa} px)`);
+    if (aperto.fuoco !== 'Torna alla partita') difetto('attrezzi', `all'apertura il fuoco e' su «${aperto.fuoco.slice(0, 30)}», non su «Torna alla partita»`);
     const torna = page.getByRole('button', { name: /^Torna alla partita$/ });
     if (!(await raggiungibile(torna))) { difetto('attrezzi', '«Torna alla partita» del pannello non si raggiunge'); return; }
     await torna.tap();
@@ -1081,6 +1115,57 @@ async function provaTestoDoppio(formato) {
   await chiudi();
 }
 
+// ------------------------------------------------- lanci e tocco subito (PO-037) ---
+/*
+ * Collaudo 1.21.26, O1; decisione PO-037. Dopo trascinamenti staccati col dito ancora in
+ * corsa Chromium avviava un fling che si sommava di lancio in lancio fino a ~2 s, e il primo
+ * tocco che lo fermava veniva soppresso: niente `click` (docs/sviluppo/RAPPORTO-PO-037.md).
+ * Qui il dito NON si ferma (niente `fermaIlDito`): 14 lanci di fila dal vassoio verso il
+ * centro della griglia, 150 ms fra l'uno e l'altro, e subito un tocco su «Menu». Il menu deve
+ * aprirsi al primo tocco in ognuno dei giri. Con NIENTE_LANCIO_DOPO_LA_PRESA spento
+ * (src/ui/useTrascinamento.js) e' rosso; piu' giri perche' un giro solo puo' capitare su un
+ * fling gia' finito.
+ */
+const LANCI = [[360, 640], [915, 412]].map(([w, h]) => ({ nome: `lanci ${w}x${h}`, w, h }));
+const GIRI_LANCI = 3;
+async function provaLanci(formato) {
+  const { page, apri, passo, difetto, chiudi } = await telefono(formato);
+  const dito = (cdp, type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+  for (let giro = 1; giro <= GIRI_LANCI; giro += 1) {
+    await passo('lanci', async () => {
+      await apri();
+      await page.getByRole('button', { name: /^Partita libera/ }).tap();
+      await page.waitForSelector('.pl-plancia .pl-cella', { state: 'attached' });
+      await page.waitForTimeout(250);
+      const cdp = await page.context().newCDPSession(page);
+      // Col dito il pezzo si disegna 1,35 caselle sopra il dito (useTrascinamento.js).
+      const a = await page.evaluate(() => {
+        const c = document.querySelectorAll('.pl-plancia .pl-cella')[40].getBoundingClientRect();
+        return { x: c.left + c.width / 2, y: c.top + c.height / 2 + 1.35 * c.height };
+      });
+      let lanci = 0;
+      for (let i = 0; i < 14; i += 1) {
+        const r = await page.evaluate(() => document.querySelector('.pl-tray .pl-pezzo')?.getBoundingClientRect().toJSON());
+        if (!r) break;
+        const da = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        await dito(cdp, 'touchStart', da.x, da.y);
+        for (let k = 1; k <= 12; k += 1) await dito(cdp, 'touchMove', da.x + ((a.x - da.x) * k) / 12, da.y + ((a.y - da.y) * k) / 12);
+        await dito(cdp, 'touchEnd');
+        lanci += 1;
+        await page.waitForTimeout(150);
+      }
+      if (lanci < 14) { difetto('lanci', `giro ${giro}: solo ${lanci} lanci su 14, il vassoio e' vuoto: la prova e' rotta`); return; }
+      const b = await page.locator('.pl-hud__menu').boundingBox();
+      await dito(cdp, 'touchStart', b.x + b.width / 2, b.y + b.height / 2);
+      await dito(cdp, 'touchEnd');
+      const aperto = await page.waitForSelector('.pl-menu', { timeout: 1000 }).then(() => true, () => false);
+      await cdp.detach();
+      if (!aperto) difetto('lanci', `giro ${giro}: dopo 14 lanci il primo tocco su «Menu» non apre il menu (click perso; PO-037)`);
+    });
+  }
+  await chiudi();
+}
+
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 console.log(`\nPLINTO su tablet e PC (${INDIRIZZO})`);
 const misureCornici = [...new Set(DA_PROVARE.map((f) => { const c = corniceDi(f); return `${c.w}x${c.h}`; }))];
@@ -1092,6 +1177,7 @@ for (const formato of DA_PROVARE) await provaFormato(formato);
 const filtra = (lista) => (FILTRO ? lista.filter((f) => FILTRO.some((x) => f.nome.includes(x))) : lista);
 for (const formato of filtra(ORIZZONTALI)) await provaOrizzontale(formato);
 for (const formato of filtra(TESTO_DOPPIO)) await provaTestoDoppio(formato);
+for (const formato of filtra(LANCI)) await provaLanci(formato);
 await browser.close();
 
 // ------------------------------------------------------------------------- il verdetto ---
@@ -1110,4 +1196,4 @@ if (errori.length) {
   console.log(`\nSchermate in ${OUT}`);
   process.exit(1);
 }
-console.log(`\nTutto a posto su ${DA_PROVARE.length} formati, ${filtra(ORIZZONTALI).length} coricati e ${filtra(TESTO_DOPPIO).length} col testo x2. Schermate in ${OUT}`);
+console.log(`\nTutto a posto su ${DA_PROVARE.length} formati, ${filtra(ORIZZONTALI).length} coricati e ${filtra(TESTO_DOPPIO).length} col testo x2 e ${filtra(LANCI).length} coi lanci. Schermate in ${OUT}`);

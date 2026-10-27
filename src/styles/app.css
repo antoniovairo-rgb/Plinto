@@ -1624,6 +1624,14 @@ button {
   cursor: pointer;
 }
 .pl-guida__link:hover { color: var(--pl-text-dim); }
+/* Area di tocco di 45 px senza cambiare il disegno (interruttore SALTA_COMODO in
+   PrimoAvvio.jsx, collaudo 1.21.25 O4): l'imbottitura allarga il pulsante, il margine
+   negativo uguale lo toglie all'impaginazione. Sopra 12 px, quanti ne separano la riga da
+   «Avanti», per non rubargli il tocco; sotto 18, dentro i 20 di `.pl-intro__azioni`. */
+.pl-guida__link--comodo {
+  padding: 12px 0 18px;
+  margin: -12px 0 -18px;
+}
 
 /* La barra della Catena disegnata ferma: serve a farla RICONOSCERE durante la partita,
    non a spiegarla una seconda volta. */

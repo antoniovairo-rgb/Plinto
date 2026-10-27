@@ -148,6 +148,18 @@ export function MagazzinoAttrezzi({ quanti, massimo, onApri, t }) {
  */
 export const PANNELLO_COME_IL_MENU = true;
 
+/*
+ * PANNELLO_DALL_ALTO (collaudo 1.21.25, D2; decisione PO-036): in orizzontale il pannello e'
+ * piu' alto dello schermo e scorre (VELI_CHE_SCORRONO). Dando il fuoco a «Torna alla
+ * partita», l'ultimo pulsante, il browser lo portava in vista: il pannello si apriva gia'
+ * scorso in fondo (640x360: 216 px; 915x412: 164 px), con titolo, gettoni e la carriola
+ * fuori vista. Acceso, il fuoco entra sullo stesso pulsante (per la tastiera non cambia
+ * quale) ma senza scorrere, e il pannello si apre dall'alto. In verticale il pannello non
+ * scorre e non cambia niente. Spento, torna il difetto: caso «attrezzi» dei formati
+ * coricati di `npm run e2e-schermi` rosso.
+ */
+export const PANNELLO_DALL_ALTO = true;
+
 /** Il pannello di scelta. */
 export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, onChiudi, t }) {
   const torna = useRef(null);
@@ -158,7 +170,9 @@ export function PannelloAttrezzi({ quanti, ogniLivelli, disabilitati, onScegli, 
     return () => window.removeEventListener('keydown', esci);
   }, [onChiudi]);
   useEffect(() => {
-    if (PANNELLO_COME_IL_MENU) torna.current?.focus();
+    if (!PANNELLO_COME_IL_MENU) return;
+    if (PANNELLO_DALL_ALTO) torna.current?.focus({ preventScroll: true });
+    else torna.current?.focus();
   }, []);
   // Alla chiusura: la pastiglia torna a schermo nello stesso disegno che toglie il pannello,
   // quindi qui c'e' gia'.
