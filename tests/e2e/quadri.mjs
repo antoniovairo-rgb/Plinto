@@ -18,6 +18,9 @@ import { quadroNumero, TOTALE_QUADRI } from '../../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { allPlacements, placeShape, findCompletedGroups, fillRatio, idx } from '../../src/core/grid.js';
 import { createRng } from '../../src/core/rng.js';
+import { serializeGame } from '../../src/core/engine.js';
+import { gridFromString } from '../../src/core/grid.js';
+import { getShape } from '../../src/core/shapes.js';
 import { TENTATIVI_PER_APRIRE } from '../../src/persistence/progressi.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
@@ -86,6 +89,40 @@ function sequenzaPerdente(quadro) {
     partita = giocaNelQuadro(quadro, partita, scelta.handIndex, scelta.row, scelta.col, m * 1000);
   }
   return statoQuadro(quadro, partita).fallito ? mosse : null;
+}
+
+/** Perche' finisce il livello dopo queste mosse: 'mosse', 'bloccato' o null (PO-038). */
+function motivoDopo(quadro, mosse) {
+  let partita = iniziaQuadro(quadro, { now: 0 });
+  mosse.forEach((m, i) => { partita = giocaNelQuadro(quadro, partita, m.handIndex, m.row, m.col, i * 1000); });
+  return statoQuadro(quadro, partita).motivo;
+}
+
+/*
+ * PO-038: finito il livello, la plancia finale resta circa 1,5 s prima dell'esito (vinto e
+ * perso), con «Nessun pezzo entra» solo se e' finito perche' nessun pezzo entra. Si guarda
+ * 250 ms dopo l'ultima mossa e si misura quando arriva l'esito. Con PAUSA_SULLA_PLANCIA
+ * spento (src/ui/App.jsx) l'esito c'e' gia' e questi controlli sono rossi.
+ */
+async function pausaDelLivello(quale, t0, attesaScritta) {
+  await page.waitForTimeout(Math.max(0, 250 - (Date.now() - t0)));
+  const foto = await page.evaluate(() => ({
+    esito: document.querySelectorAll('.pl-quadro-esito, .pl-trionfo').length,
+    plancia: document.querySelectorAll('.pl-plancia').length,
+    scritta: [...document.querySelectorAll('.pl-screen--gioco *')]
+      .filter((e) => e.children.length === 0 && !e.closest('.pl-sr') && /Nessun pezzo entra/.test(e.textContent)).length,
+    annuncio: [...document.querySelectorAll('[role="status"]')].map((e) => e.textContent).join(' | '),
+  }));
+  await page.screenshot({ path: `${OUT}/3-pausa-${quale}.png` });
+  const visto = await page.waitForSelector('.pl-quadro-esito, .pl-trionfo', { timeout: 6000 }).then(() => true).catch(() => false);
+  const durata = Date.now() - t0;
+  console.log(`   PO-038 ${quale}: dopo 250 ms esito ${foto.esito}, plancia ${foto.plancia}, «Nessun pezzo entra» ${foto.scritta} (attesa ${attesaScritta}) | esito dopo ${durata} ms`);
+  console.log(`   annuncio: "${foto.annuncio.trim()}"`);
+  if (foto.esito !== 0 || foto.plancia !== 1) errori.push(`PO-038 (${quale}): finito il livello si salta subito all'esito, la plancia finale non si vede`);
+  if (foto.scritta !== attesaScritta) errori.push(`PO-038 (${quale}): «Nessun pezzo entra» ${foto.scritta} volte invece di ${attesaScritta}`);
+  if (!/Punteggio/.test(foto.annuncio)) errori.push(`PO-038 (${quale}): il lettore di schermo non sente il punteggio finale`);
+  if (!visto) errori.push(`PO-038 (${quale}): l'esito non arriva da solo`);
+  else if (durata < 1200 || durata > 2500) errori.push(`PO-038 (${quale}): l'esito arriva dopo ${durata} ms, fuori da 1200-2500`);
 }
 
 function sequenzaVincente(quadro, tentativi = 40) {
@@ -271,16 +308,19 @@ if (!sequenza) {
   errori.push('QUADRO 1: nemmeno il motore riesce a superarlo, il quadro e impossibile');
 } else {
   console.log(`3. sequenza vincente calcolata in Node: ${sequenza.length} mosse. La rigioco nel browser...`);
+  let ultima = 0;
   for (const mossa of sequenza) {
     const punti = await posizioneMossa(mossa);
     if (!punti) { errori.push('QUADRO: pezzo non trovato durante la riproduzione'); break; }
     await page.mouse.move(punti.px, punti.py);
     await page.mouse.down();
     await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+    ultima = Date.now();
     await page.mouse.up();
     await page.waitForTimeout(45);
-    if (await page.locator('.pl-quadro-esito').count() > 0) break;
+    if (await page.locator('.pl-quadro-esito, .pl-pausa-fine').count() > 0) break;
   }
+  await pausaDelLivello('vinto', ultima, 0);
 
   await page.waitForTimeout(200);
   const esito = await page.locator('.pl-quadro-esito').innerText().catch(() => '');
@@ -386,16 +426,20 @@ if (!sequenza) {
   if (!perdente) {
     errori.push('LIVELLO 2: non si riesce a costruire una sequenza perdente, il controllo non prova nulla');
   } else {
+    let ultima = 0;
     for (const mossa of perdente) {
       const punti = await posizioneMossa(mossa);
       if (!punti) break;
       await page.mouse.move(punti.px, punti.py);
       await page.mouse.down();
       await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+      ultima = Date.now();
       await page.mouse.up();
       await page.waitForTimeout(45);
-      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+      if (await page.locator('.pl-quadro-esito, .pl-pausa-fine').count() > 0) break;
     }
+    const motivo = motivoDopo(daPerdere, perdente);
+    await pausaDelLivello(`perso (${motivo})`, ultima, motivo === 'bloccato' ? 1 : 0);
     await page.waitForTimeout(400);
 
     const esitoPerso = (await page.locator('.pl-quadro-esito').innerText().catch(() => '')).trim();
@@ -555,6 +599,52 @@ await page.locator('.pl-tappa').nth(1).click();
 await page.waitForSelector('.pl-apertura', { timeout: 4000 }).catch(() => {
   errori.push('INSISTENZA: il secondo livello sembra aperto ma non si apre');
 });
+
+// ---------- 8. PO-038: livello perso perche' nessun pezzo entra ----------
+/*
+ * La sconfitta del passaggio 3d finisce per le mosse: qui si prova l'altra, quella per cui
+ * la scritta esiste. Il livello 1 a una mossa dalla fine, scritto in memoria come una
+ * partita lasciata a meta' e ripreso: la griglia di `npm run e2e` (due caselle vuote per
+ * riga, colonna e quadrante), un punto e due pezzi che non entrano da nessuna parte.
+ */
+{
+  const livello = quadroNumero(1);
+  const base = iniziaQuadro(livello, { now: 0 });
+  const vuote = [
+    [0, 0], [1, 3], [2, 6], [3, 1], [4, 4], [5, 7], [6, 2], [7, 5], [8, 8],
+    [0, 4], [1, 7], [2, 1], [3, 5], [4, 8], [5, 2], [6, 6], [7, 0], [8, 3],
+  ];
+  const righe = Array.from({ length: 9 }, () => Array(9).fill('#'));
+  vuote.forEach(([r, c]) => { righe[r][c] = '.'; });
+  const bloccata = serializeGame({
+    ...base,
+    grid: gridFromString(righe.map((r) => r.join('')).join('\n')),
+    hand: [
+      { uid: 'z1', shapeId: 'p1', shape: getShape('p1'), color: 1 },
+      { uid: 'z2', shapeId: 'b33', shape: getShape('b33'), color: 2 },
+      { uid: 'z3', shapeId: 'h5', shape: getShape('h5'), color: 3 },
+    ],
+  });
+  await page.evaluate((partita) => {
+    window.localStorage.setItem('plinto:partita-quadro', JSON.stringify({ numero: 1, partita, presentazione: false }));
+    window.localStorage.setItem('plinto:ripresa', JSON.stringify({ dove: 'quadro', quadro: 1, quando: Date.now() }));
+  }, bloccata);
+  await page.reload({ waitUntil: 'networkidle' });
+  const ripreso = await page.waitForSelector('.pl-plancia', { timeout: 4000 }).then(() => true).catch(() => false);
+  if (!ripreso) {
+    errori.push('PO-038 (perso, bloccato): il livello scritto in memoria non si riprende, il controllo non prova niente');
+  } else {
+    const punti = await posizioneMossa({ handIndex: 0, row: 0, col: 0 });
+    await page.mouse.move(punti.px, punti.py);
+    await page.mouse.down();
+    await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+    const t0 = Date.now();
+    await page.mouse.up();
+    await pausaDelLivello('perso (bloccato)', t0, 1);
+    const esito = (await page.locator('.pl-quadro-esito').innerText().catch(() => '')).trim();
+    if (!/non superato/i.test(esito)) errori.push(`PO-038 (perso, bloccato): dopo la pausa l'esito dice "${esito}"`);
+  }
+}
 
 await browser.close();
 if (server) server.kill();

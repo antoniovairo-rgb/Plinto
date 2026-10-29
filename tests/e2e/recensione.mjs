@@ -156,8 +156,10 @@ async function vinciIlPrimo() {
     await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
     await page.mouse.up();
     await page.waitForTimeout(45);
-    if (await page.locator('.pl-quadro-esito, .pl-trionfo').count() > 0) break;
+    if (await page.locator('.pl-quadro-esito, .pl-trionfo, .pl-pausa-fine').count() > 0) break;
   }
+  // PO-038: l'esito arriva dopo la pausa sulla plancia finale: si aspetta l'elemento.
+  await page.waitForSelector('.pl-quadro-esito, .pl-trionfo', { timeout: 6000 }).catch(() => {});
   await page.waitForTimeout(1200);
   return true;
 }

@@ -538,8 +538,10 @@ async function provaFormato(formato, { eRiferimento = false } = {}) {
       await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
       await page.mouse.up();
       await page.waitForTimeout(60);
-      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+      if (await page.locator('.pl-quadro-esito, .pl-pausa-fine').count() > 0) break;
     }
+    // PO-038: l'esito arriva dopo la pausa sulla plancia finale: si aspetta l'elemento.
+    await page.waitForSelector('.pl-quadro-esito', { timeout: 6000 }).catch(() => {});
   }
 
   /** Scrive i progressi (numero -> dati del livello) e apre il livello 1 dalla mappa. */
@@ -1009,8 +1011,10 @@ async function provaOrizzontale(formato) {
       await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
       await page.mouse.up();
       await page.waitForTimeout(60);
-      if (await page.locator('.pl-quadro-esito').count() > 0) break;
+      if (await page.locator('.pl-quadro-esito, .pl-pausa-fine').count() > 0) break;
     }
+    // PO-038: l'esito arriva dopo la pausa sulla plancia finale: si aspetta l'elemento.
+    await page.waitForSelector('.pl-quadro-esito', { timeout: 6000 }).catch(() => {});
     const esito = await page.locator('.pl-quadro-esito').innerText({ timeout: 3000 }).catch(() => '');
     if (!/superato/i.test(esito)) { difetto('fine-livello', `il livello 1 giocato non risulta superato (esito: «${esito.trim()}»)`); return; }
     await page.waitForTimeout(1200);

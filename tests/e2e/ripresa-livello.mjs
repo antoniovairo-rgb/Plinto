@@ -738,9 +738,10 @@ function fuocoSicuro(caso, d, atteso) {
       await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
       await page.mouse.up();
       await page.waitForTimeout(45);
-      if (await page.locator('.pl-quadro-esito, .pl-trionfo').count() > 0) break;
+      if (await page.locator('.pl-quadro-esito, .pl-trionfo, .pl-pausa-fine').count() > 0) break;
     }
-    await page.waitForSelector('.pl-trionfo', { timeout: 5000 }).catch(() => {});
+    // PO-038: la festa arriva dopo la pausa sulla plancia finale (1,5 s): si aspetta l'elemento.
+    await page.waitForSelector('.pl-trionfo', { timeout: 6000 }).catch(() => {});
     const festa = await page.locator('.pl-trionfo').count() > 0;
     let d = null, dopo = '', nota = '';
     if (!festa) {

@@ -115,6 +115,9 @@ export function SchermoComeSiGioca({ onIndietro, t }) {
         <span className="pl-intro__piu">=</span>
         <span className="pl-intro__risultato">{t('intro.esempio')}</span>
       </div>
+      {/* PO-038: la pausa sulla plancia a fine partita. La scritta e' la stessa del gioco,
+          presa dalla sua chiave: se cambiasse li', qui non resterebbe quella vecchia. */}
+      <p className="pl-testo">{t('aiuto.fine').replace('{scritta}', t('fine.nessunoEntra'))}</p>
 
       <h2 className="pl-sezione">{t('aiuto.muovereTitolo')}</h2>
       <p className="pl-testo">{t('aiuto.trascinare')}</p>

@@ -491,6 +491,8 @@ export default {
     muovereTitolo: 'Two ways to move',
     trascinare: 'Drag the piece where you want it. While you move it you see a preview of where it will land, and if it does not fit you are told before you let go.',
     dueTocchi: 'Or tap the piece once to pick it up, then tap the square to put it down. Handy one-handed.',
+    // PO-038: la pausa sulla plancia finale, prima del risultato.
+    fine: 'When the game ends, the grid stays still for a moment, so you can see your score. If no piece fits, below the grid you read “{scritta}”. Then the result comes. To skip the wait, tap the screen.',
     tastiera: 'You can also play from the keyboard: Tab to choose a piece, Enter to pick it up, arrows to move on the grid, Enter to drop it, Esc to cancel. With the pickaxe, the arrows choose the square and Enter empties it. Every move is announced to screen readers.',
     rimetti: 'If you drop a piece where you did not mean to, "Put the piece back" appears under the grid and the game returns exactly as it was. It only works when that move cleared nothing and did not end the game: it is there to fix a wrong tap, not to change your mind.',
     punteggioTitolo: 'Interlace, Chain and Tint',

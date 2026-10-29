@@ -205,7 +205,8 @@ for (let n = DA; n <= A; n += 1) {
     }
     await page.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
     await page.waitForTimeout(15);
-    const finita = (await page.locator('.pl-fine').count()) > 0;
+    // PO-038: finito il livello, la plancia resta in pausa prima dell'esito.
+    const finita = (await page.locator('.pl-fine, .pl-pausa-fine').count()) > 0;
     const dopo = await mosseRimaste();
     if (!finita && prima !== null && dopo !== null && dopo >= prima) {
       rifiutata = `${applicate + 1}: l app non ha accettato il pezzo ${mossa.handIndex} in riga ${mossa.row} colonna ${mossa.col}`;
@@ -215,6 +216,8 @@ for (let n = DA; n <= A; n += 1) {
     if (finita) break;
   }
 
+  // PO-038: l'esito arriva dopo la pausa sulla plancia finale (1,5 s): si aspetta l'elemento.
+  await page.waitForSelector('.pl-fine', { timeout: 6000 }).catch(() => {});
   await page.waitForTimeout(60);
   const vinto = await page.locator('.pl-quadro-esito--vinto').count() > 0;
   const finito = await page.locator('.pl-fine').count() > 0;
