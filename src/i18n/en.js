@@ -102,6 +102,8 @@ export default {
   fine: {
     titolo: 'Game over',
     motivo: 'None of the remaining pieces fits on the grid.',
+    // Sotto la griglia, nella pausa prima del risultato (PO-038).
+    nessunoEntra: 'No piece fits',
     punteggio: 'Score',
     nuovoRecord: 'New best score!',
     recordCatena: 'New Chain record!',

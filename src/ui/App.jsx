@@ -108,6 +108,30 @@ export const ANCORA_VIA_DALLA_LIBERA = true;
  * `tests/e2e/ripresa-livello.mjs` rosso.
  */
 export const RIPRENDI_TORNA_A_MENU = true;
+/*
+ * PAUSA_SULLA_PLANCIA (PO-038; riscontro di un giocatore e decisione del PO del 29 ottobre
+ * 2026, docs/DECISIONI.md): finita la partita si saltava al risultato nello stesso disegno
+ * in cui diventava `over` (libera e sfida) o arrivava `quadri.esito` (livelli). «Quando
+ * piazzi l'ultimo pezzo e finisce, va direttamente alla pagina del risultato e sfugge il
+ * numero raggiunto»; e non si capiva perche' era finita. Misurato sulla 1.21.27: 250 ms
+ * dopo l'ultima mossa il risultato era gia' a schermo, plancia 0, pezzi in mano 0.
+ * Acceso, la plancia finale resta per DURATA_PAUSA_FINE: si vedono l'ultima mossa, le
+ * eliminazioni e i punti; se nessun pezzo entra i pezzi in mano sono spenti (lo erano gia',
+ * ma non si vedevano) e sotto la griglia c'e' «Nessun pezzo entra». Poi il risultato da
+ * solo. Un tocco, Invio, Spazio, Esc o Indietro ci vanno subito; mosse, menu e attrezzi
+ * no. Il salvataggio non cambia: la partita e' registrata e tolta dalla ripresa quando
+ * finisce, non quando finisce la pausa, quindi ricaricando non si ritrova viva.
+ * Spento, torna il difetto: il passaggio 8 di `npm run e2e` e il 3/3d di
+ * `npm run e2e-quadri` sono rossi.
+ */
+export const PAUSA_SULLA_PLANCIA = true;
+/*
+ * Quanto resta la plancia finale. 1,5 s e' la decisione del PO («circa 1,5 s»), non una
+ * misura. Basta ai punti volanti (DURATA_PUNTI, 950 ms) e all'esplosione (420 ms); la frase
+ * di incitamento (480 + 1250 ms, src/feel/durate.js) resta tagliata degli ultimi 230 ms.
+ * Uguale con le animazioni spente: la pausa serve a leggere, non agli effetti.
+ */
+export const DURATA_PAUSA_FINE = 1500;
 
 /**
  * Radice dell'applicazione.
@@ -181,6 +205,27 @@ export function App() {
    */
   const [conferma, setConferma] = useState(null);
   const chiudiConferma = useCallback(() => setConferma(null), []);
+
+  /*
+   * La pausa sulla plancia finale (PO-038). La fine "in corso" e' la partita finita (libera
+   * e sfida: lo stato del motore, che a partita finita non cambia piu') o l'esito del
+   * livello; `fineMostrata` e' quella di cui si e' gia' passati al risultato. Finche' le
+   * due non coincidono si resta sulla plancia. Confrontare gli oggetti, e non un booleano,
+   * fa ripartire la pausa da sola alla partita dopo, senza doverla azzerare in ogni strada
+   * che ne comincia una (Riprova, Gioca ancora, Prossimo livello...).
+   */
+  const [fineMostrata, setFineMostrata] = useState(null);
+  const finita = partita && partita.status === 'over';
+  const fineInCorso = schermata === 'gioco' && finita ? partita
+    : schermata === 'quadro' && quadri.partita && quadri.esito ? quadri.esito
+      : null;
+  const inPausa = PAUSA_SULLA_PLANCIA && fineInCorso !== null && fineMostrata !== fineInCorso;
+  const vaiAlRisultato = useCallback(() => setFineMostrata(fineInCorso), [fineInCorso]);
+  useEffect(() => {
+    if (!inPausa) return undefined;
+    const timer = window.setTimeout(vaiAlRisultato, DURATA_PAUSA_FINE);
+    return () => window.clearTimeout(timer);
+  }, [inPausa, vaiAlRisultato]);
 
   /**
    * Un collegamento del tipo `#/sfida/2026-09-12` apre quella sfida all'avvio.
@@ -516,6 +561,9 @@ export function App() {
   // si chiude il menu se e' aperto, poi si risale di una schermata. Dalla home non si
   // fa niente, e il tasto torna a fare il suo mestiere: uscire dall'app.
   const passoIndietro = useCallback(() => {
+    // Durante la pausa di fine partita Indietro porta al risultato, come un tocco: uscire
+    // alla home salterebbe proprio il numero che la pausa vuole far leggere (PO-038).
+    if (inPausa) { vaiAlRisultato(); return; }
     // La domanda di conferma per prima: Indietro la chiude e non perde niente.
     if (conferma) { setConferma(null); return; }
     if (menuAperto) { setMenuAperto(false); return; }
@@ -523,7 +571,7 @@ export function App() {
     if (schermata === 'gioco') { tornaAllaHome(); return; }
     if (schermata === 'sostieni') { setSchermata(sostieniDa); return; }
     setSchermata(GENITORE[schermata] ?? 'home');
-  }, [conferma, menuAperto, schermata, sostieniDa, tornaAiQuadri, tornaAllaHome]);
+  }, [inPausa, vaiAlRisultato, conferma, menuAperto, schermata, sostieniDa, tornaAiQuadri, tornaAllaHome]);
 
   useTastoIndietro(
     // Il menu conta come un gradino: si chiude col tasto Indietro senza uscire dalla
@@ -531,7 +579,9 @@ export function App() {
     // "Sostieni" sta a due gradini se ci si e' arrivati da Info, a uno se dalla home:
     // la profondita' non e' una proprieta' della schermata, e' del percorso fatto.
     (schermata === 'sostieni' ? (sostieniDa === 'home' ? 1 : 2) : (PROFONDITA[schermata] ?? 1))
-      + (menuAperto ? 1 : 0) + (conferma ? 1 : 0),
+      + (menuAperto ? 1 : 0) + (conferma ? 1 : 0)
+      // La pausa conta come il menu: un gradino che Indietro consuma senza uscire.
+      + (inPausa ? 1 : 0),
     passoIndietro,
     // L'ancora della sfida sopravvive nelle voci di cronologia lasciate indietro:
     // qui si ripulisce, prima che qualcuno la rilegga e riapra la sfida.
@@ -557,11 +607,16 @@ export function App() {
     />
   ) : null;
 
-  // Partita finita: si passa automaticamente al riepilogo.
+  // Partita finita: dopo la pausa sulla plancia si passa da soli al riepilogo.
   const inGioco = partita && partita.status === 'playing';
-  const finita = partita && partita.status === 'over';
+  // Che cosa sa la plancia della fine, finche' resta a schermo (PO-038).
+  const fineSullaPlancia = inPausa ? {
+    // Libera e sfida finiscono solo cosi'; un livello anche per le mosse finite o vinto.
+    nessunoEntra: schermata === 'gioco' ? true : quadri.esito?.motivo === 'bloccato',
+    onAvanti: vaiAlRisultato,
+  } : null;
 
-  if (schermata === 'gioco' && finita) {
+  if (schermata === 'gioco' && finita && !inPausa) {
     return (
       <div className="pl-app">
         <SchermoFine
@@ -639,7 +694,7 @@ export function App() {
 
   // --- Quadro in corso, oppure il suo esito --------------------------------
   if (schermata === 'quadro' && quadri.quadro && quadri.partita) {
-    if (quadri.esito) {
+    if (quadri.esito && !inPausa) {
       // I progressi si leggono DAI PROGRESSI SALVATI, non da `quadriFatti`: quel numero
       // e' uno stato di React aggiornato dopo, e alla prima resa dell'esito racconta
       // ancora il percorso di un istante fa. La festa finale che arriva un livello in
@@ -725,6 +780,7 @@ export function App() {
           onPiccone={quadri.usaPiccone}
           onMensola={quadri.usaMensola}
           onRiprendiMensola={quadri.riprendiMensola}
+          fine={fineSullaPlancia}
           t={t}
         />
         {menuAperto ? (
@@ -749,7 +805,7 @@ export function App() {
 
   return (
     <div className="pl-app">
-      {schermata === 'gioco' && inGioco ? (
+      {schermata === 'gioco' && (inGioco || inPausa) ? (
         <SchermoGioco
           partita={partita}
           siPuoAnnullare={siPuoAnnullare}
@@ -761,6 +817,7 @@ export function App() {
           coperto={menuAperto || !!conferma}
           animazioni={impostazioni.animazioni}
           modalita={modalita}
+          fine={fineSullaPlancia}
           t={t}
         />
       ) : null}

@@ -18,7 +18,7 @@ import { canPlace, placeShape, findCompletedGroups, shapeCellsAt, rowOf, colOf }
 import { AnteprimaTerna } from './AnteprimaTerna.jsx';
 import { MODALITA , TINTA_SOGLIA } from '../config/rules.js';
 import { giornoDiOggi } from '../core/sfida.js';
-import { dataDistesa } from '../i18n/formato.js';
+import { dataDistesa, numero } from '../i18n/formato.js';
 
 /**
  * La schermata di gioco: e' l'unica che conta davvero.
@@ -201,6 +201,8 @@ export function SchermoGioco({
   onPiccone = null, onMensola = null, onRiprendiMensola = null, t,
   // Vero mentre sopra la partita c'e' il menu o una domanda: il velo copre la griglia.
   coperto = false,
+  // La pausa sulla plancia a partita finita (PO-038, App.jsx): `{ nessunoEntra, onAvanti }`.
+  fine = null,
 }) {
   /*
    * I modi dell'attrezzo in corso:
@@ -219,7 +221,11 @@ export function SchermoGioco({
   const scavo = SCAVO_CON_LA_TASTIERA && modoAttrezzo === 'piccone';
   // Il velo che copre la griglia: menu e domande (da App) o il pannello degli attrezzi.
   const velato = (TASTI_TACCIONO_SOTTO_IL_VELO && coperto)
-    || (TASTI_TACCIONO_SOTTO_IL_PANNELLO && modoAttrezzo === 'scelta');
+    || (TASTI_TACCIONO_SOTTO_IL_PANNELLO && modoAttrezzo === 'scelta')
+    // Nella pausa di fine partita i tasti vanno al risultato, non alla partita. Serve anche
+    // al livello vinto, che resta `playing` per il motore.
+    || fine !== null;
+  const inPausaFine = fine !== null;
   const tastiAttivi = partita.status === 'playing' && !velato;
   const conAttrezzi = attrezzi !== null && onCarriola && onGessetto && onPiccone && onMensola;
   /** In questi modi si sceglie un pezzo dalla mano, e il tray smette di essere il tray. */
@@ -314,7 +320,7 @@ export function SchermoGioco({
     mano: partita.hand,
     cellRefs,
     onPosiziona: posiziona,
-    attivo: partita.status === 'playing',
+    attivo: partita.status === 'playing' && fine === null,
   });
 
   // Quale partita c'e' a schermo. Il seme da solo distingue libera e sfida, ma non dice
@@ -327,7 +333,7 @@ export function SchermoGioco({
 
   // Escape durante l'attesa e' «Lascia stare». Il menu o una domanda sopra se lo tengono.
   useEffect(() => {
-    if (!ESCAPE_LASCIA_STARE || !inAttesa || coperto || partita.status !== 'playing') return undefined;
+    if (!ESCAPE_LASCIA_STARE || !inAttesa || coperto || inPausaFine || partita.status !== 'playing') return undefined;
     const esci = (e) => {
       if (e.key !== 'Escape' || e.altKey || e.ctrlKey || e.metaKey) return;
       e.preventDefault();
@@ -335,7 +341,31 @@ export function SchermoGioco({
     };
     window.addEventListener('keydown', esci);
     return () => window.removeEventListener('keydown', esci);
-  }, [inAttesa, coperto, partita.status]);
+  }, [inAttesa, coperto, inPausaFine, partita.status]);
+
+  /*
+   * Nella pausa di fine partita Invio, Spazio ed Esc portano al risultato (PO-038). In
+   * cattura e con preventDefault: il pulsante che ha il fuoco (di solito il pezzo appena
+   * posato) non deve ricevere il clic. La ripetizione di un tasto tenuto premuto non conta,
+   * altrimenti l'Invio che ha posato l'ultimo pezzo salterebbe anche la pausa.
+   */
+  const avanti = fine?.onAvanti;
+  // Il tocco che salta la pausa deve COMINCIARE sulla pausa: il dito che ha appena posato
+  // l'ultimo pezzo si alza dopo che la pausa e' comparsa, e non deve valere come salto.
+  const toccoSullaPausa = useRef(false);
+  useEffect(() => {
+    toccoSullaPausa.current = false;
+    if (!avanti) return undefined;
+    const tasto = (e) => {
+      if (e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      avanti();
+    };
+    window.addEventListener('keydown', tasto, true);
+    return () => window.removeEventListener('keydown', tasto, true);
+  }, [avanti]);
 
   /*
    * Dove va il fuoco dopo la mensola: si decide al clic, si applica dopo il disegno, quando il
@@ -624,7 +654,16 @@ export function SchermoGioco({
               />
             ) : null}
             <span className="pl-suggerimento__testo">
-            {modoAttrezzo === 'scambio' ? (
+            {fine ? (
+              /* La partita e' finita: la riga dice perche', se e' perche' nessun pezzo
+                 entra, e nient'altro. Sta qui, fra la griglia e i pezzi spenti di cui
+                 parla, senza coprire nessuno dei due. */
+              fine.nessunoEntra ? (
+                <span className={`pl-nessuno-entra${animazioni ? '' : ' pl-nessuno-entra--fermo'}`}>
+                  {t('fine.nessunoEntra')}
+                </span>
+              ) : null
+            ) : modoAttrezzo === 'scambio' ? (
               <span className="pl-attrezzi__invito">
                 {t('attrezzi.mensolaScambia')}
                 <button type="button" className="pl-attrezzi__annulla"
@@ -726,7 +765,29 @@ export function SchermoGioco({
         />
       ) : null}
 
-      <Annunci testo={frasePerMossa(partita.lastMove, t)} />
+      {fine ? (
+        /* Un velo trasparente su tutta la schermata: nessuna mossa, nessun menu, nessun
+           attrezzo, e un tocco ovunque porta al risultato. `aria-hidden` perche' chi usa
+           un lettore di schermo sente la fine da `Annunci` e ha gli stessi tasti. */
+        <div
+          className="pl-pausa-fine"
+          aria-hidden="true"
+          onPointerDown={() => { toccoSullaPausa.current = true; }}
+          onPointerUp={() => { if (toccoSullaPausa.current) fine.onAvanti(); }}
+        />
+      ) : null}
+
+      <Annunci
+        testo={fine
+          // La fine si annuncia con la mossa, in un annuncio solo: il perche' e il
+          // punteggio finale, che e' il numero che la pausa vuole far leggere.
+          ? [
+            frasePerMossa(partita.lastMove, t),
+            fine.nessunoEntra ? `${t('fine.nessunoEntra')}.` : '',
+            `${t('fine.punteggio')} ${numero(partita.score)}.`,
+          ].filter(Boolean).join(' ')
+          : frasePerMossa(partita.lastMove, t)}
+      />
     </div>
   );
 }

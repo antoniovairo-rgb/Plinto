@@ -137,6 +137,8 @@ export default {
   fine: {
     titolo: 'Partita finita',
     motivo: 'Nessuno dei pezzi rimasti entra più sulla griglia.',
+    // Sotto la griglia, nella pausa prima del risultato (PO-038).
+    nessunoEntra: 'Nessun pezzo entra',
     punteggio: 'Punteggio',
     nuovoRecord: 'Nuovo record!',
     recordCatena: 'Nuovo record di Catena!',

@@ -347,6 +347,9 @@ await page.mouse.move(cellaLibera.cx, cellaLibera.cy, { steps: 10 });
 await page.mouse.up();
 await page.waitForTimeout(300);
 console.log('   dopo la mossa: blocchi', await contaBlocchi(), '| pezzi in mano', await page.locator('.pl-tray .pl-pezzo').count());
+// PO-038: il risultato arriva dopo la pausa sulla plancia. Si aspetta l'elemento, non un
+// tempo fisso; la pausa stessa e' provata al passaggio 8.
+await page.waitForSelector('.pl-fine__numero', { timeout: 6000 }).catch(() => {});
 const fineVisibile = await page.locator('.pl-fine__numero').count();
 await page.screenshot({ path: `${OUT}/06-fine.png` });
 console.log('6. schermata di fine partita mostrata:', fineVisibile === 1);
@@ -506,6 +509,161 @@ if (/\{(n|max|tolleranza)\}/.test(testoAiuto)) {
 }
 await page.locator('.pl-pagina__testata .pl-hud__menu').click();
 await page.waitForTimeout(120);
+
+// ---------- 8. PO-038: pausa sulla plancia a fine partita ----------
+/*
+ * Riscontro di un giocatore (docs/DECISIONI.md, 29 ottobre): «quando piazzi l'ultimo
+ * pezzo e finisce, va direttamente alla pagina del risultato e sfugge il numero
+ * raggiunto». Decisione del PO: circa 1,5 s sulla plancia finale, con «Nessun pezzo
+ * entra» se e' finita cosi', poi il risultato da solo; un tocco, Invio, Spazio, Esc o
+ * Indietro ci vanno subito. Con PAUSA_SULLA_PLANCIA spento (src/ui/App.jsx) questi
+ * controlli sono rossi: il risultato arriva subito e la scritta non c'e'.
+ */
+const PAUSA_MIN = 1200;
+const PAUSA_MAX = 2500;
+const SALTO_MAX = 600;
+
+/** Riprende la partita a una mossa dalla fine e fa l'ultima mossa. Restituisce l'istante. */
+async function ultimaMossa({ quale = 'libera', animazioni = true } = {}) {
+  await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  await page.evaluate(({ s, quale, animazioni }) => {
+    const ora = new Date();
+    const oggi = `${ora.getFullYear()}-${String(ora.getMonth() + 1).padStart(2, '0')}-${String(ora.getDate()).padStart(2, '0')}`;
+    const imp = JSON.parse(window.localStorage.getItem('plinto:settings') || '{}');
+    window.localStorage.setItem('plinto:settings', JSON.stringify({ ...imp, introVista: true, animazioni }));
+    window.localStorage.removeItem('plinto:ripresa');
+    if (quale === 'sfida') {
+      window.localStorage.setItem('plinto:partita-sfida', JSON.stringify({ ...s, seedLabel: oggi }));
+    } else {
+      window.localStorage.setItem('plinto:partita', JSON.stringify(s));
+    }
+  }, { s: quasiFinita, quale, animazioni });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByRole('button', {
+    name: quale === 'sfida' ? /^Riprendi la sfida|^Sfida del giorno/ : /^Partita libera, riprendi/,
+  }).first().click();
+  await page.waitForSelector('.pl-plancia');
+  const g = await page.evaluate(() => {
+    const c = document.querySelectorAll('.pl-plancia .pl-cella')[0].getBoundingClientRect();
+    const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+    return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
+  });
+  await page.mouse.move(g.px, g.py);
+  await page.mouse.down();
+  await page.mouse.move(g.cx, g.cy, { steps: 10 });
+  const t0 = Date.now();
+  await page.mouse.up();
+  return t0;
+}
+
+/** Quello che si vede subito dopo l'ultima mossa. */
+async function fotoPausa() {
+  return page.evaluate(() => ({
+    fine: document.querySelectorAll('.pl-fine').length,
+    plancia: document.querySelectorAll('.pl-plancia').length,
+    scritta: [...document.querySelectorAll('.pl-screen--gioco *')]
+      .filter((e) => e.children.length === 0 && !e.closest('.pl-sr') && /Nessun pezzo entra/.test(e.textContent)).length,
+    spenti: document.querySelectorAll('.pl-tray__posto--morto').length,
+    pezzi: document.querySelectorAll('.pl-tray .pl-pezzo').length,
+    punteggio: document.querySelector('.pl-hud__punteggio .pl-hud__valore')?.textContent ?? null,
+    annuncio: [...document.querySelectorAll('[role="status"]')].map((e) => e.textContent).join(' | '),
+    menu: document.querySelectorAll('.pl-menu').length,
+  }));
+}
+
+const durate = {};
+for (const [quale, animazioni] of [['libera', true], ['libera', false], ['sfida', true]]) {
+  const nome = `${quale}${animazioni ? '' : ' senza animazioni'}`;
+  const t0 = await ultimaMossa({ quale, animazioni });
+  await page.waitForTimeout(250);
+  const foto = await fotoPausa();
+  if (quale === 'libera' && animazioni) {
+    await page.screenshot({ path: `${OUT}/08-pausa-fine.png` });
+  }
+  const visto = await page.waitForSelector('.pl-fine__numero', { timeout: 6000 }).then(() => true).catch(() => false);
+  const durata = Date.now() - t0;
+  durate[nome] = durata;
+  const finale = visto ? (await page.locator('.pl-fine__numero').innerText()).trim() : null;
+  console.log(`8. ${nome}: dopo 250 ms risultato ${foto.fine}, plancia ${foto.plancia}, «Nessun pezzo entra» ${foto.scritta}, `
+    + `pezzi spenti ${foto.spenti}/${foto.pezzi}, punteggio ${foto.punteggio} | risultato dopo ${durata} ms (${finale})`);
+  console.log(`   annuncio: "${foto.annuncio.trim()}"`);
+  if (foto.fine !== 0 || foto.plancia !== 1) errori.push(`PO-038 (${nome}): dopo l'ultima mossa si salta subito al risultato, la plancia finale non si vede`);
+  if (foto.scritta !== 1) errori.push(`PO-038 (${nome}): manca «Nessun pezzo entra» sulla partita finita perche' nessun pezzo entra`);
+  if (foto.pezzi === 0 || foto.spenti !== foto.pezzi) errori.push(`PO-038 (${nome}): pezzi in mano spenti ${foto.spenti} su ${foto.pezzi}`);
+  if (!/Nessun pezzo entra/.test(foto.annuncio) || !/Punteggio/.test(foto.annuncio)) {
+    errori.push(`PO-038 (${nome}): il lettore di schermo non sente la scritta e il punteggio finale: "${foto.annuncio.trim()}"`);
+  }
+  if (!visto) errori.push(`PO-038 (${nome}): il risultato non arriva da solo`);
+  else if (durata < PAUSA_MIN || durata > PAUSA_MAX) errori.push(`PO-038 (${nome}): il risultato arriva dopo ${durata} ms, fuori da ${PAUSA_MIN}-${PAUSA_MAX}`);
+  if (visto && foto.punteggio !== finale) errori.push(`PO-038 (${nome}): la plancia mostra ${foto.punteggio}, il risultato ${finale}`);
+}
+// Senza animazioni la pausa resta (serve a leggere) ma non deve allungarsi.
+if (durate['libera senza animazioni'] > durate.libera + 200) {
+  errori.push(`PO-038: senza animazioni la pausa dura ${durate['libera senza animazioni']} ms, con ${durate.libera} ms`);
+}
+
+// I modi di saltare la pausa: tocco sulla plancia, tocco su «Menu» (che non deve aprirsi),
+// Invio, Spazio, Esc, Indietro.
+const salti = [
+  ['tocco sulla plancia', async () => {
+    const r = await page.locator('.pl-plancia').boundingBox();
+    await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
+  }],
+  ['tocco su Menu', async () => {
+    const r = await page.locator('.pl-hud__menu').first().boundingBox();
+    await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
+  }],
+  ['Invio', () => page.keyboard.press('Enter')],
+  ['Spazio', () => page.keyboard.press(' ')],
+  ['Esc', () => page.keyboard.press('Escape')],
+  ['Indietro', () => page.goBack().catch(() => {})],
+];
+for (const [nome, salta] of salti) {
+  await ultimaMossa();
+  await page.waitForTimeout(200);
+  const prima = await fotoPausa();
+  const t1 = Date.now();
+  // Senza pausa (interruttore spento) non c'e' niente da toccare: si registra e si va avanti.
+  if (prima.fine === 0) await salta();
+  const visto = await page.waitForSelector('.pl-fine__numero', { timeout: SALTO_MAX }).then(() => true).catch(() => false);
+  const dopo = Date.now() - t1;
+  const menu = await page.locator('.pl-menu').count();
+  console.log(`8. salto con ${nome}: in pausa ${prima.fine === 0 && prima.plancia === 1}, risultato ${visto ? `dopo ${dopo} ms` : 'non arrivato'}, menu aperti ${menu}`);
+  if (prima.fine !== 0) errori.push(`PO-038 (${nome}): non c'era nessuna pausa da saltare`);
+  if (!visto) errori.push(`PO-038 (${nome}): non porta subito al risultato (atteso entro ${SALTO_MAX} ms)`);
+  if (menu !== 0) errori.push(`PO-038 (${nome}): durante la pausa si e' aperto il menu`);
+  if (nome === 'Indietro' && (await page.locator('.pl-home').count()) !== 0) errori.push('PO-038 (Indietro): porta alla home e salta il risultato');
+}
+// Dal risultato, Indietro torna alla home come prima della pausa.
+await page.goBack().catch(() => {});
+await page.waitForSelector('.pl-home', { timeout: 2000 }).catch(() => errori.push('PO-038: dal risultato Indietro non torna piu\' alla home'));
+
+// Ricaricare durante la pausa: la partita e' gia' finita e registrata, non deve tornare viva.
+for (const quale of ['libera', 'sfida']) {
+  await ultimaMossa({ quale });
+  await page.waitForTimeout(200);
+  const prima = await fotoPausa();
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  const dopo = await page.evaluate((q) => ({
+    plancia: document.querySelectorAll('.pl-plancia').length,
+    fine: document.querySelectorAll('.pl-fine').length,
+    home: document.querySelectorAll('.pl-home').length,
+    salvata: window.localStorage.getItem(q === 'sfida' ? 'plinto:partita-sfida' : 'plinto:partita'),
+    ripresa: window.localStorage.getItem('plinto:ripresa'),
+    indirizzo: window.location.hash,
+  }), quale);
+  console.log(`8. ricarica durante la pausa (${quale}): in pausa ${prima.fine === 0 && prima.plancia === 1} -> plancia ${dopo.plancia}, risultato ${dopo.fine}, home ${dopo.home}, `
+    + `salvataggio ${dopo.salvata === null ? 'assente' : `presente (punteggio ${JSON.parse(dopo.salvata).score}, mosse ${JSON.parse(dopo.salvata).stats?.moves})`}, posto ${dopo.ripresa === null ? 'assente' : 'presente'}, ancora "${dopo.indirizzo}"`);
+  if (quale === 'libera' && dopo.plancia !== 0) errori.push('PO-038 (ricarica): durante la pausa la partita finita torna viva');
+  // La sfida ha l'ancora `#/sfida/<giorno>`, e ricaricando ne comincia una nuova dello
+  // stesso giorno, da zero: succede uguale sul risultato da prima della pausa (misurato
+  // sulla 1.21.27, docs/sviluppo/RAPPORTO-PO-038.md). Qui si controlla solo che non torni
+  // viva la partita finita.
+  if (dopo.salvata !== null && JSON.parse(dopo.salvata).score >= quasiFinita.score) {
+    errori.push(`PO-038 (ricarica, ${quale}): la partita finita e' ancora salvata come partita in corso`);
+  }
+}
 
 await browser.close();
 if (server) server.kill();

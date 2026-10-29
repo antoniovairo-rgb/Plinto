@@ -486,6 +486,38 @@ button {
   /* Senza questo, un pulsante largo si rifiuta di stringersi e sfonda la colonna. */
   min-width: 0;
 }
+/* PO-038, la pausa sulla plancia a partita finita (PAUSA_SULLA_PLANCIA in App.jsx).
+   La scritta sta nella riga sotto la griglia, che ha gia' la sua altezza riservata: non
+   copre ne' la griglia ne' i pezzi spenti di cui parla, e non sposta niente. Piu' grande
+   e piu' chiara della didascalia solita (11,5 px, --pl-text-faint): e' la risposta a
+   «perche' e' finita?», e deve leggersi in un secondo e mezzo. */
+.pl-nessuno-entra {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--pl-text);
+  animation: pl-nessuno-entra var(--pl-t-base) var(--pl-ease-out) both;
+}
+/* Con le animazioni spente (impostazioni o sistema) la scritta c'e' subito, ferma. */
+.pl-nessuno-entra--fermo { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .pl-nessuno-entra { animation: none; }
+}
+@keyframes pl-nessuno-entra {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+/* Il velo trasparente della pausa: prende ogni tocco, sopra tutto quello della partita
+   (il menu e il suo velo stanno a 50, e nella pausa non si aprono). */
+.pl-pausa-fine {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;
+}
+
 .pl-attrezzi__pastiglia {
   grid-column: 3;
   justify-self: end;
