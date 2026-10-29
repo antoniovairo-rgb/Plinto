@@ -76,7 +76,12 @@ e il passo 6 di `partita`. Gli strumenti fuori dal gate (`tools/schermate.mjs`,
 
 ## Gate
 
-GATE_QUI
+`npm run verifica -- --veloce` (qui **negata** dal gate stesso: nessun giro completo registrato su
+questa macchina e cambiati file che decidono il gioco, quindi giro completo): **33 controlli in
+2680 s, 31 verdi, 2 rossi**. Cento livelli giocati nell'app: **100/100 vinti** (551 s). Rossi:
+`livelli nel browser (vittoria e sconfitta)` («FINE LIVELLO (vittoria): a 320x700 bisogna scorrere
+di 2 px») e `Play Store: invito a recensire` («a 360x640 l invito finisce 10px sotto la barra»).
+Prima anche `npm run build` e `npm test` (45 file, 655 test) verdi, dentro il gate e da soli.
 
 I due rossi «del font» (`docs/TESTING.md`): verificati **anche sulla base** `origin/main`, build di
 produzione servita a parte: `e2e-quadri` «a 320x700 bisogna scorrere di 2 px», `recensione` «a
@@ -84,7 +89,15 @@ produzione servita a parte: `e2e-quadri` «a 320x700 bisogna scorrere di 2 px»,
 
 ## Il tocco e il fling di PO-037
 
-TOCCO_QUI
+PO-037: dopo trascinamenti veloci Chromium può sopprimere il `click` del primo tocco. Il velo
+della pausa non usa `click` ma `pointerdown`/`pointerup`. Misurato col tocco emulato (CDP,
+`isMobile`, 360x640), livello 1 vinto col dito «frettoloso» come in `tools/sonda-fine-livello.mjs`,
+tocco al centro della griglia: pausa saltata **4 su 4** a 300, 700 e 1100 ms dall'ultimo distacco
+(12 su 12; sonda in `scratchpad`, non versionata).
+`tools/sonda-fine-livello.mjs` (primo tocco su «Torna ai livelli», 500/1000/1500 ms dopo l'esito,
+4 giri): **0 persi su 12 sia sulla base sia sul ramo**. Oggi il difetto di PO-037 qui non si
+riproduce nemmeno sulla base, quindi non posso dire se la pausa lo attenua: «Non posso
+confermarlo».
 
 ## Schermate
 
