@@ -361,6 +361,34 @@ await page.waitForSelector('.pl-fine__numero', { timeout: 5000 });
 const esitoDopo7 = await page.evaluate((giorno) => JSON.parse(window.localStorage.getItem('plinto:sfide') ?? 'null')?.giorni?.[giorno] ?? null, GIORNO);
 await ricaricaSuSfidaFinita('7. ricarica dal risultato', esitoDopo7);
 
+// ---------- 7b. «Gioca ancora» dal risultato rimette l'ancora ----------
+// La sfida nuova chiesta dal giocatore e' una partita viva: l'ancora torna, e ricaricando
+// la si riprende. Senza, togliere l'ancora a fine sfida l'avrebbe tolta anche a questa.
+await apriQuasiFinitaDallArchivio();
+await ultimaMossa();
+await page.waitForSelector('.pl-fine__numero', { timeout: 5000 });
+await page.getByRole('button', { name: 'Gioca ancora' }).click();
+await page.waitForSelector('.pl-plancia');
+const ancoraRigioca = await page.evaluate(() => window.location.hash);
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => {});
+const rigioca = await page.evaluate(() => ({
+  plancia: document.querySelectorAll('.pl-plancia').length,
+  salvata: JSON.parse(window.localStorage.getItem('plinto:partita-sfida') ?? 'null'),
+}));
+console.log(`7b. «Gioca ancora»: ancora "${ancoraRigioca}", dopo la ricarica plancia ${rigioca.plancia}, `
+  + `sfida salvata ${rigioca.salvata ? `del ${rigioca.salvata.seedLabel}` : 'assente'}`);
+if (ancoraRigioca !== `#/sfida/${GIORNO}`) errori.push(`PO-039 7b: dopo «Gioca ancora» l'ancora e' "${ancoraRigioca}", attesa #/sfida/${GIORNO}`);
+if (rigioca.plancia !== 1 || rigioca.salvata?.seedLabel !== GIORNO) {
+  errori.push(`PO-039 7b: la sfida ricominciata con «Gioca ancora» non si riprende dopo la ricarica`);
+}
+await page.evaluate(() => {
+  window.localStorage.removeItem('plinto:partita-sfida');
+  window.localStorage.removeItem('plinto:ripresa');
+});
+await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+await page.reload({ waitUntil: 'networkidle' });
+
 // ---------- 8. Ricarica su una sfida a meta': si riprende ----------
 await apriQuasiFinitaDallArchivio();
 const ancoraAMeta = await page.evaluate(() => window.location.hash);
