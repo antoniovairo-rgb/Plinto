@@ -656,10 +656,12 @@ for (const quale of ['libera', 'sfida']) {
   console.log(`8. ricarica durante la pausa (${quale}): in pausa ${prima.fine === 0 && prima.plancia === 1} -> plancia ${dopo.plancia}, risultato ${dopo.fine}, home ${dopo.home}, `
     + `salvataggio ${dopo.salvata === null ? 'assente' : `presente (punteggio ${JSON.parse(dopo.salvata).score}, mosse ${JSON.parse(dopo.salvata).stats?.moves})`}, posto ${dopo.ripresa === null ? 'assente' : 'presente'}, ancora "${dopo.indirizzo}"`);
   if (quale === 'libera' && dopo.plancia !== 0) errori.push('PO-038 (ricarica): durante la pausa la partita finita torna viva');
-  // La sfida ha l'ancora `#/sfida/<giorno>`, e ricaricando ne comincia una nuova dello
-  // stesso giorno, da zero: succede uguale sul risultato da prima della pausa (misurato
-  // sulla 1.21.27, docs/sviluppo/RAPPORTO-PO-038.md). Qui si controlla solo che non torni
-  // viva la partita finita.
+  // La sfida aveva l'ancora `#/sfida/<giorno>`, e ricaricando ne cominciava una nuova dello
+  // stesso giorno, da zero (misurato sulla 1.21.27, docs/sviluppo/RAPPORTO-PO-038.md, E1).
+  // Con ANCORA_VIA_A_SFIDA_FINITA (PO-039) si torna alla home come per la libera.
+  if (quale === 'sfida' && (dopo.plancia !== 0 || dopo.home !== 1 || dopo.salvata !== null)) {
+    errori.push(`PO-039 (ricarica nella pausa, sfida): non si torna alla home (plancia ${dopo.plancia}, home ${dopo.home}, ancora "${dopo.indirizzo}", salvataggio ${dopo.salvata === null ? 'assente' : 'presente'})`);
+  }
   if (dopo.salvata !== null && JSON.parse(dopo.salvata).score >= quasiFinita.score) {
     errori.push(`PO-038 (ricarica, ${quale}): la partita finita e' ancora salvata come partita in corso`);
   }
