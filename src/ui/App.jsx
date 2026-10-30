@@ -132,6 +132,19 @@ export const PAUSA_SULLA_PLANCIA = true;
  * Uguale con le animazioni spente: la pausa serve a leggere, non agli effetti.
  */
 export const DURATA_PAUSA_FINE = 1500;
+/*
+ * ANCORA_VIA_A_SFIDA_FINITA (PO-039; scelta 3 B del rapporto PO-038, decisione della madre):
+ * a sfida finita l'indirizzo teneva `#/sfida/<giorno>`. Ricaricando (nella TWA succede da
+ * solo dopo un secondo piano), nella pausa sulla plancia o dal risultato, l'ancora apriva
+ * una sfida NUOVA da zero dello stesso giorno, con un salvataggio vivo a 0 punti e 0 mosse
+ * (misurato sulla build di produzione, gia' sulla 1.21.27). Acceso, quando la sfida finisce
+ * l'ancora si toglie, e il ritorno sulla voce di cronologia di prima (Indietro, o la fine
+ * della pausa che consuma il suo gradino) non la rimette: ricaricando si torna alla home,
+ * come per la partita libera. «Gioca ancora» la riscrive, perche' apre la sfida di nuovo;
+ * la scheda condivisibile prende il giorno dalla partita, non dall'indirizzo.
+ * Spento, torna il difetto: passi 5b e 7 di `npm run archivio` rossi.
+ */
+export const ANCORA_VIA_A_SFIDA_FINITA = true;
 
 /**
  * Radice dell'applicazione.
@@ -221,6 +234,11 @@ export function App() {
       : null;
   const inPausa = PAUSA_SULLA_PLANCIA && fineInCorso !== null && fineMostrata !== fineInCorso;
   const vaiAlRisultato = useCallback(() => setFineMostrata(fineInCorso), [fineInCorso]);
+  // La sfida finita non lascia l'ancora: ricaricando aprirebbe una sfida nuova (PO-039).
+  const sfidaFinita = schermata === 'gioco' && modalita === 'sfida' && Boolean(finita);
+  useEffect(() => {
+    if (ANCORA_VIA_A_SFIDA_FINITA && sfidaFinita) scriviRotta('');
+  }, [sfidaFinita]);
   useEffect(() => {
     if (!inPausa) return undefined;
     const timer = window.setTimeout(vaiAlRisultato, DURATA_PAUSA_FINE);
@@ -588,10 +606,11 @@ export function App() {
     useCallback(() => {
       if (schermata === 'home') scriviRotta('');
       else if (ANCORA_VIA_DALLA_LIBERA && schermata === 'gioco' && modalita === 'libera') scriviRotta('');
+      else if (ANCORA_VIA_A_SFIDA_FINITA && sfidaFinita) scriviRotta('');
       else if (ANCORA_SFIDA_DOPO_INDIETRO && schermata === 'gioco' && modalita === 'sfida' && partita?.seedLabel) {
         scriviRotta(rottaSfida(partita.seedLabel));
       }
-    }, [schermata, modalita, partita?.seedLabel]),
+    }, [schermata, modalita, partita?.seedLabel, sfidaFinita]),
   );
 
   const finestraConferma = conferma ? (

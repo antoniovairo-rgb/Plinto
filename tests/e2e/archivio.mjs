@@ -7,7 +7,11 @@
  *   3. si naviga da tastiera: frecce fra i giorni, PagSu/PagGiu fra i mesi;
  *   4. aprendo un giorno passato parte la sfida DI QUEL GIORNO;
  *   5. finendo quella partita il punteggio finisce nel giorno giusto -- non in oggi;
- *   6. tornando nell'archivio, quel giorno mostra il punteggio.
+ *   6. tornando nell'archivio, quel giorno mostra il punteggio;
+ *   5b, 7. ricaricando su una sfida FINITA (nella pausa sulla plancia e dal risultato) si
+ *      torna alla home, senza una sfida nuova salvata e con l'esito del giorno intatto
+ *      (PO-039, interruttore ANCORA_VIA_A_SFIDA_FINITA in src/ui/App.jsx);
+ *   8. ricaricando su una sfida A META' la si riprende com'era.
  *
  * Il passo 5 e' quello che conta di piu' e non si vede giocando: prima dell'archivio il
  * risultato veniva sempre registrato sulla data di oggi, perche' non esisteva altro
@@ -243,9 +247,90 @@ if (salvate?.giorni?.[GIORNO] && !salvate.giorni[GIORNO].regole) {
   errori.push('ARCHIVIO: il risultato non porta l impronta delle regole');
 }
 
+/**
+ * Ricaricare la pagina su una sfida finita (PO-039).
+ *
+ * L'ancora `#/sfida/<giorno>` restava nell'indirizzo anche a sfida finita, e ricaricando
+ * (nella TWA succede da solo, dopo un secondo piano) apriva una sfida NUOVA da zero dello
+ * stesso giorno, con un salvataggio vivo a punteggio 0: misurato sulla 1.21.27 e sul ramo
+ * di PO-038. Come per la partita libera, ricaricando su una partita finita si torna alla
+ * home; l'esito gia' registrato nell'archivio non deve cambiare.
+ */
+async function ricaricaSuSfidaFinita(quando, puntiAttesi) {
+  const ancora = await page.evaluate(() => window.location.hash);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  const dopo = await page.evaluate((giorno) => ({
+    home: document.querySelectorAll('.pl-home').length,
+    plancia: document.querySelectorAll('.pl-plancia').length,
+    ancora: window.location.hash,
+    salvata: window.localStorage.getItem('plinto:partita-sfida'),
+    esito: JSON.parse(window.localStorage.getItem('plinto:sfide') ?? 'null')?.giorni?.[giorno] ?? null,
+  }), GIORNO);
+  const salvata = dopo.salvata ? JSON.parse(dopo.salvata) : null;
+  console.log(`${quando}: ancora prima "${ancora}", dopo "${dopo.ancora}" | home ${dopo.home}, plancia ${dopo.plancia} | `
+    + `salvataggio della sfida ${salvata ? `PRESENTE (punti ${salvata.score}, mosse ${salvata.stats?.moves})` : 'assente'} | `
+    + `esito del ${GIORNO}: ${dopo.esito ? JSON.stringify({ best: dopo.esito.best, partite: dopo.esito.partite }) : 'nessuno'}`);
+  if (dopo.home !== 1 || dopo.plancia !== 0) {
+    errori.push(`PO-039 ${quando}: dopo la ricarica non si torna alla home (home ${dopo.home}, plancia ${dopo.plancia}, ancora "${dopo.ancora}")`);
+  }
+  if (salvata) {
+    errori.push(`PO-039 ${quando}: dopo la ricarica c'e' una sfida salvata viva (punti ${salvata.score}): e' ripartita da zero`);
+  }
+  if (!dopo.esito) errori.push(`PO-039 ${quando}: dopo la ricarica l'archivio non ha piu' l'esito del ${GIORNO}`);
+  else if (JSON.stringify(dopo.esito) !== JSON.stringify(puntiAttesi)) {
+    errori.push(`PO-039 ${quando}: la ricarica ha cambiato l'esito del ${GIORNO}: ${JSON.stringify(puntiAttesi)} -> ${JSON.stringify(dopo.esito)}`);
+  }
+  // Da rossa la prova deve poter proseguire: si toglie la sfida ripartita e si torna alla
+  // home a mano, senza ancora e senza posto da riprendere.
+  if (dopo.home !== 1 || salvata) {
+    await page.evaluate(() => {
+      window.localStorage.removeItem('plinto:partita-sfida');
+      window.localStorage.removeItem('plinto:ripresa');
+    });
+    await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'networkidle' });
+  }
+}
+
+/** Rimette la partita a una mossa dalla fine e la apre dall'archivio. */
+async function apriQuasiFinitaDallArchivio() {
+  await page.evaluate((dati) => {
+    window.localStorage.setItem('plinto:partita-sfida', JSON.stringify(dati));
+  }, quasiFinita);
+  if (await page.locator('.pl-home').count() === 0) {
+    await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
+  }
+  await page.getByRole('button', { name: /Archivio delle sfide/ }).click();
+  await page.waitForSelector('.pl-calendario');
+  await page.locator(`button.pl-giorno[aria-label^="${Number(GIORNO.slice(8))} "]`).first().click();
+  await page.waitForSelector('.pl-plancia');
+}
+
+async function ultimaMossa() {
+  const b = await page.evaluate(() => {
+    const c = document.querySelectorAll('.pl-plancia .pl-cella')[0].getBoundingClientRect();
+    const p = document.querySelectorAll('.pl-tray .pl-pezzo')[0].getBoundingClientRect();
+    return { cx: c.left + c.width / 2, cy: c.top + c.height / 2, px: p.left + p.width / 2, py: p.top + p.height / 2 };
+  });
+  await page.mouse.move(b.px, b.py);
+  await page.mouse.down();
+  await page.mouse.move(b.cx, b.cy, { steps: 10 });
+  await page.mouse.up();
+}
+
+// ---------- 5b. Ricarica nella pausa sulla plancia (PO-038) ----------
+// Siamo a 900 ms dall'ultima mossa del passo 5: la pausa dura 1500 ms.
+const esitoRegistrato = await page.evaluate((giorno) => JSON.parse(window.localStorage.getItem('plinto:sfide') ?? 'null')?.giorni?.[giorno] ?? null, GIORNO);
+const nellaPausa = await page.evaluate(() => document.querySelectorAll('.pl-plancia').length === 1 && !document.querySelector('.pl-fine__numero'));
+if (!nellaPausa) errori.push('PO-039 5b: non si e\' piu\' nella pausa sulla plancia: la prova non prova la ricarica nella pausa');
+await ricaricaSuSfidaFinita('5b. ricarica nella pausa', esitoRegistrato);
+
 // ---------- 6. Il calendario mostra quel punteggio ----------
-await page.getByRole('button', { name: /Torna|Home|Chiudi/ }).first().click().catch(() => {});
-await page.waitForTimeout(200);
+if (await page.locator('.pl-home').count() === 0) {
+  await page.getByRole('button', { name: /Torna|Home|Chiudi/ }).first().click().catch(() => {});
+  await page.waitForTimeout(200);
+}
 if (await page.locator('.pl-home').count() === 0) {
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
 }
@@ -267,6 +352,31 @@ if (!cella.punti) errori.push('ARCHIVIO: il giorno giocato non mostra il puntegg
 if (!cella.segno) errori.push('ARCHIVIO: il giorno giocato non ha il segno geometrico (il colore da solo non basta)');
 if (!/record/i.test(cella.etichetta)) {
   errori.push(`ARCHIVIO: l etichetta del giorno giocato non nomina il record: "${cella.etichetta}"`);
+}
+
+// ---------- 7. Ricarica dal risultato della sfida ----------
+await apriQuasiFinitaDallArchivio();
+await ultimaMossa();
+await page.waitForSelector('.pl-fine__numero', { timeout: 5000 });
+const esitoDopo7 = await page.evaluate((giorno) => JSON.parse(window.localStorage.getItem('plinto:sfide') ?? 'null')?.giorni?.[giorno] ?? null, GIORNO);
+await ricaricaSuSfidaFinita('7. ricarica dal risultato', esitoDopo7);
+
+// ---------- 8. Ricarica su una sfida a meta': si riprende ----------
+await apriQuasiFinitaDallArchivio();
+const ancoraAMeta = await page.evaluate(() => window.location.hash);
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForSelector('.pl-plancia', { timeout: 5000 }).catch(() => {});
+const aMeta = await page.evaluate(() => ({
+  blocchi: document.querySelectorAll('.pl-plancia .pl-blocco').length,
+  ancora: window.location.hash,
+  punti: JSON.parse(window.localStorage.getItem('plinto:partita-sfida') ?? 'null')?.score ?? null,
+}));
+console.log(`8. sfida a meta' ricaricata: ancora "${ancoraAMeta}" -> "${aMeta.ancora}", ${aMeta.blocchi} blocchi, punti salvati ${aMeta.punti}`);
+if (aMeta.blocchi !== 63 || aMeta.punti !== 1234) {
+  errori.push(`PO-039 8: la sfida a meta' non si riprende dopo la ricarica (${aMeta.blocchi} blocchi invece di 63, punti ${aMeta.punti} invece di 1234)`);
+}
+if (aMeta.ancora !== `#/sfida/${GIORNO}`) {
+  errori.push(`PO-039 8: nella sfida a meta' ripresa l'ancora e' "${aMeta.ancora}", attesa #/sfida/${GIORNO}`);
 }
 
 await browser.close();
