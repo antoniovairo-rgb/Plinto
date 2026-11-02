@@ -81,9 +81,9 @@ Android Studio (Claude non ha accesso a nessuno dei due).
        `?origine=play`); toccandola deve aprirsi la scheda di PLINTO nell'app Play Store.
        Se la voce manca, l'avvio non passa il parametro: dirlo a Claude.
        Lo **schermo intero e' stato tolto** per la revisione della 11915 (decisione del PO
-       del 22 ottobre): l'app si apre a schermo normale, con l'ora in alto e i pulsanti di
-       Android in basso, ed e' giusto cosi'. Torna in un pacchetto successivo, da solo, per
-       sapere se era lui la causa dei rifiuti; non insieme alla Torre.
+       del 22 ottobre) e **non torna** (scelta del PO del 2 novembre, «niente immersiva, mai
+       piu'»): l'app si apre a schermo normale, con l'ora in alto e i pulsanti di Android in
+       basso, ed e' giusto cosi'.
 
 ## C. Dopo
 
