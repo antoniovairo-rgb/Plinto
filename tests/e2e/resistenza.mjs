@@ -195,6 +195,10 @@ for (let i = 0; i < MOSSE; i += 1) {
   }
 
   // Se la partita e' finita si ricomincia: una sessione vera e' fatta di piu' partite.
+  // PO-038: prima del risultato c'e' la pausa sulla plancia finale, e lo si aspetta.
+  if (await page.locator('.pl-pausa-fine').count() > 0) {
+    await page.waitForSelector('.pl-fine__numero', { timeout: 6000 }).catch(() => {});
+  }
   if (await page.locator('.pl-fine__numero').count() > 0) {
     await page.getByRole('button', { name: /Gioca ancora/ }).click();
     await page.waitForSelector('.pl-plancia');
