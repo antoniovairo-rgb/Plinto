@@ -7,14 +7,12 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
-## [Non pubblicato] — La Torre (branch `opera-torre`)
+## [1.22.0] — 2 novembre 2026 — La Torre
 
-Non ancora in produzione: va online solo dopo l'esito della revisione Google del pacchetto
-11915 (decisione del PO, 26 ottobre 2026), come 1.22.0. La grafica e le animazioni nate qui
-sono gia' uscite sul Ponte con la 1.21.0, l'icona di avvio di Android con il pacchetto 11905;
-restano l'icona e il logo a gemme del sito e la Torre. Il ramo contiene tutto `main` fino
-alla 1.21.27 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo normale,
-rilascio dove il dito si stacca, pannello dall'alto, niente lancio dopo la presa).
+Esce dopo l'approvazione di Google del pacchetto 11915 (decisione del PO, 26 ottobre 2026).
+Pacchetto Android 11916: cambia solo il numero di versione. La grafica e le animazioni nate
+con la Torre sono gia' uscite sul Ponte con la 1.21.0, l'icona di avvio di Android con il
+pacchetto 11905; restano l'icona e il logo a gemme del sito e la Torre.
 
 ### Cambiato
 
@@ -50,6 +48,19 @@ rilascio dove il dito si stacca, pannello dall'alto, niente lancio dopo la presa
   la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
 
 ### Corretto
+
+- **Fine partita: un momento sulla griglia prima del risultato** (PO-038, riscontro di un
+  giocatore). Finita la partita si saltava subito al risultato: «sfugge il numero
+  raggiunto», e non si capiva perché fosse finita. Adesso la griglia resta ferma circa un
+  secondo e mezzo: si vedono l'ultima mossa e i punti; se nessun pezzo entra, i pezzi in
+  mano si spengono e sotto la griglia compare «Nessun pezzo entra». Poi il risultato arriva
+  da solo; un tocco, Invio, Esc o Indietro ci portano subito. Vale per partita libera, sfida
+  e livelli. Tornano anche le vibrazioni dell'ultima mossa e di fine partita, che si
+  perdevano. Interruttore `PAUSA_SULLA_PLANCIA`.
+- **Ricaricando su una Sfida del giorno finita si torna alla home** (PO-039): prima si
+  apriva una sfida nuova da zero dello stesso giorno, salvata a 0 punti, e la home proponeva
+  «Riprendi la sfida». Il risultato del giorno nell'archivio non cambia; una sfida lasciata
+  a metà si riprende come prima. Interruttore `ANCORA_VIA_A_SFIDA_FINITA`.
 
 - **I massi quasi non si vedevano con la grafica nuova**, e i blocchi che esplodono
   perdevano il loro colore: la regola delle gemme valeva per ogni blocco, anche per
