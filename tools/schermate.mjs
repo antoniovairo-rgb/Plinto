@@ -163,10 +163,13 @@ function cellaDaToccare(shape, row, col) {
 
 /**
  * Avanzamento finto: i primi `quanti` livelli superati, per mostrare la mappa viva.
- * Ventitre' livelli: abbastanza per due atti chiusi e una cassetta in uso. Il conto degli
- * attrezzi segue: chi ne ha superati 23 li ha gia' riscossi tutti, e ne tiene due.
+ *
+ * DALLA TORRE le schermate raccontano chi ci e' arrivato: tutto il Ponte superato (100)
+ * e i primi dodici livelli della Torre. La Torre e' la novita' da mostrare, e la mappa
+ * si apre da sola sull'opera del livello corrente. Il conto degli attrezzi segue: chi ha
+ * superato 112 livelli li ha gia' riscossi tutti, e ne tiene due.
  */
-const SUPERATI = 23;
+const SUPERATI = 112;
 const ATTREZZI_MOSTRATI = { disponibili: 2, riscossi: Math.floor(SUPERATI / 5), versione: 1 };
 function progressiFinoA(quanti) {
   const livelli = {};
@@ -390,8 +393,9 @@ if (mozzato.sopra.length) {
 await page.screenshot({ path: `${USCITA}1-mappa-livelli.png` });
 
 // --- 2. L'apertura di un livello: l'obiettivo detto prima di giocare ----------
-// La tappa numero SUPERATI e' il primo livello non ancora superato.
-await page.locator('.pl-tappa').nth(SUPERATI).click();
+// La scheda della Torre mostra i suoi cento livelli: la tappa numero SUPERATI - 100 e'
+// il primo non ancora superato, il 113.
+await page.locator('.pl-tappa').nth(SUPERATI - 100).click();
 await page.waitForSelector('.pl-apertura');
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${USCITA}2-apertura-livello.png` });

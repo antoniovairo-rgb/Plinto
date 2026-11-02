@@ -20,7 +20,9 @@ import {
   riprendiDallaMensola, serializeGame, deserializeGame, restaUnaMossa, annullabile,
   canPlaceHandPiece, summarize, PAUSA_MASSIMA_MS,
 } from '../src/core/engine.js';
-import { findCompletedGroups, filledCount, canPlace, allPlacements, CELL_COUNT } from '../src/core/grid.js';
+import {
+  findCompletedGroups, filledCount, canPlace, allPlacements, CELL_COUNT, MASSO,
+} from '../src/core/grid.js';
 import { getShape } from '../src/core/shapes.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../src/core/quadro.js';
 import { suggerisciMossa } from '../src/core/suggerimento.js';
@@ -82,12 +84,18 @@ function pezzoValido(p) {
 }
 
 /** Tutte le invarianti di uno stato, qualunque strada lo abbia prodotto. */
-function controllaStato(s, dove, celleIniziali, scavate) {
+function controllaStato(s, dove, celleIniziali, scavate, massiIniziali = 0) {
   const g = s.grid;
+  // I massi della Torre non spariscono mai: ne' chiudendo un gruppo, ne' con le bombe,
+  // ne' col piccone. Quanti erano all'inizio, tanti devono restare.
+  let massi = 0;
+  for (let i = 0; i < g.length; i += 1) if (g[i] === MASSO) massi += 1;
+  if (massi !== massiIniziali) difetto('masso-sparito', dove, { massi, massiIniziali });
   if (!(g instanceof Uint8Array) || g.length !== CELL_COUNT) difetto('griglia-forma', dove, g?.length);
   for (let i = 0; i < g.length; i += 1) {
     const v = g[i];
-    const ok = v === 0 || (v >= 1 && v <= COLOR_COUNT) || (v > VALORE_BOMBA && v <= VALORE_BOMBA + COLOR_COUNT);
+    const ok = v === 0 || v === MASSO
+      || (v >= 1 && v <= COLOR_COUNT) || (v > VALORE_BOMBA && v <= VALORE_BOMBA + COLOR_COUNT);
     if (!ok) { difetto('griglia-valore', dove, { i, v }); break; }
   }
   if (!Array.isArray(s.hand) || s.hand.length !== HAND_SIZE) difetto('mano-lunghezza', dove, s.hand?.length);
@@ -174,10 +182,11 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
     ? iniziaQuadro(quadro, { now: ORA })
     : createGame({ seed: seme, modalita, now: ORA });
   const celleIniziali = filledCount(s.grid);
+  const massiIniziali = s.grid.filter((v) => v === MASSO).length;
   let scavate = 0;
   let prevStato = quadro ? statoQuadro(quadro, s) : null;
   const etichetta = quadro ? `livello ${quadro.numero}` : `${modalita} seme ${seme}`;
-  controllaStato(s, { etichetta, passo: 0, azione: 'inizio' }, celleIniziali, 0);
+  controllaStato(s, { etichetta, passo: 0, azione: 'inizio' }, celleIniziali, 0, massiIniziali);
 
   for (let passo = 1; passo <= PASSI_MAX; passo += 1) {
     const prima = s;
@@ -221,7 +230,11 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
       if (x) {
         dopo = x; scavate += 1;
         if (finita) difetto('piccone-a-partita-finita', { etichetta, passo }, null);
-      } else if (!finita && s.grid[bersaglio] > 0) difetto('piccone-rifiutato', { etichetta, passo }, bersaglio);
+        if (s.grid[bersaglio] === MASSO) difetto('piccone-su-masso', { etichetta, passo }, bersaglio);
+      } else if (!finita && s.grid[bersaglio] > 0 && s.grid[bersaglio] !== MASSO) {
+        // Un masso il piccone NON deve toglierlo: rifiutarsi li' e' la regola, non un difetto.
+        difetto('piccone-rifiutato', { etichetta, passo }, bersaglio);
+      }
     } else if (r < 0.86) {
       azione = 'mensola-appoggia';
       const x = appoggiaSullaMensola(s, Math.floor(rnd() * HAND_SIZE));
@@ -252,7 +265,7 @@ function giocaUna({ modalita, seme, quadro }, rnd, contatori) {
     tentate[azione] = (tentate[azione] ?? 0) + 1;
 
     const dove = { etichetta, passo, azione };
-    controllaStato(dopo, dove, celleIniziali, scavate);
+    controllaStato(dopo, dove, celleIniziali, scavate, massiIniziali);
 
     // Regole di cio' che ogni azione PUO' toccare.
     const pa = prima.stats; const da = dopo.stats;
@@ -360,8 +373,28 @@ export function caccia(partite, seme) {
       giocate += 1;
     }
   }
+  // I massi della Torre: livelli di prova con i massi sulla griglia, finche' i livelli
+  // veri della Torre non esistono. Obiettivi e semi presi dal Ponte, griglia sostituita.
+  for (const [n, griglia] of GRIGLIE_CON_MASSI.entries()) {
+    const quadro = { ...QUADRI[(n * 17) % QUADRI.length], numero: 1001 + n, griglia };
+    for (let k = 0; k < giriLivello; k += 1) {
+      passi += giocaUna({ quadro }, mulberry(quadro.numero * 7919 + k + seme), contatori);
+      giocate += 1;
+    }
+  }
   return { difetti, giocate, passi, giriLivello, tentate, contatori };
 }
+
+/**
+ * Griglie di prova per i massi: sparsi, in diagonale, attorno al centro, accanto a
+ * caselle gia' occupate. Nessun gruppo e' fatto di soli massi, come nei livelli veri.
+ */
+const GRIGLIE_CON_MASSI = [
+  ['M.......M', '.........', '..M...M..', '.........', '....M....', '.........', '..M...M..', '.........', 'M.......M'],
+  ['M........', '.M.......', '..M......', '...M.....', '....M....', '.....M...', '......M..', '.......M.', '........M'],
+  ['.........', '.........', '...MMM...', '...M.M...', '...MMM...', '.........', '.........', '.........', '.........'],
+  ['##M......', '#........', 'M........', '.........', '....M#...', '....##...', '.........', '........#', '......M##'],
+].map((righe) => righe.join('\n'));
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const partite = Number(process.argv[2] ?? 300);

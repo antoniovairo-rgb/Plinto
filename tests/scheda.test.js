@@ -350,9 +350,14 @@ describe('le schede nominano l opera', () => {
   });
 
   it('tutte e due le schede chiedono il nome a OPERE invece di scriverlo', () => {
-    // Due chiamate: una per la scheda di fine livello, una per quella dalla mappa.
+    // La scheda di fine livello ricava l'opera dal numero del livello. Quella dalla mappa
+    // la riceve dalla mappa, che sa quale opera si sta guardando: con la Torre i conteggi
+    // sono per opera, e ricavarla da "superati + 1" dava il Ponte a chi era alla Torre.
     const chiamate = sorgente.match(/operaDelQuadro\(/g) ?? [];
-    expect(chiamate).toHaveLength(2);
+    expect(chiamate).toHaveLength(1);
+    expect(sorgente).toMatch(/function CondividiPercorso\(\{ opera,/);
+    // In tutte e due il nome arriva dalle traduzioni dell'opera.
+    expect((sorgente.match(/opere\.\$\{opera/g) ?? []).length).toBeGreaterThanOrEqual(2);
     // E nessuna delle due deve avere il nome scritto a mano: quando arrivera' la Torre,
     // le schede lo devono dire da sole.
     expect(sorgente).not.toMatch(/'Il Ponte'|"Il Ponte"/);

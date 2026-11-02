@@ -23,6 +23,7 @@ import {
   canPlace,
   hasAnyPlacement,
   isEmpty,
+  eMasso,
   fillRatio,
   filledCount,
 } from './grid.js';
@@ -452,6 +453,8 @@ export function scavaCella(state, index) {
   if (state.status !== 'playing') return null;
   if (!Number.isInteger(index) || index < 0 || index >= state.grid.length) return null;
   if (state.grid[index] === 0) return null;
+  // Il masso non si scava: con un gettone si annullerebbe la meccanica della Torre.
+  if (eMasso(state.grid[index])) return null;
   const grid = Uint8Array.from(state.grid);
   grid[index] = 0;
   return { ...state, grid };

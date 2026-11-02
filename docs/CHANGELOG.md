@@ -7,6 +7,64 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [Non pubblicato] — La Torre (branch `opera-torre`)
+
+Non ancora in produzione: va online solo dopo l'esito della revisione Google del pacchetto
+11915 (decisione del PO, 26 ottobre 2026), come 1.22.0. La grafica e le animazioni nate qui
+sono gia' uscite sul Ponte con la 1.21.0, l'icona di avvio di Android con il pacchetto 11905;
+restano l'icona e il logo a gemme del sito e la Torre. Il ramo contiene tutto `main` fino
+alla 1.21.27 (gioco in orizzontale, testo grande, `appCategory="game"`, schermo normale,
+rilascio dove il dito si stacca, pannello dall'alto, niente lancio dopo la presa).
+
+### Cambiato
+
+- **Pezzi in mano più nitidi** (richiesta del proprietario, 15 ottobre 2026): sui blocchi
+  piccoli le righe di luce e d'ombra sono più sottili e non li fanno più sembrare a
+  strisce. La plancia e l'alone restano come prima.
+
+### Aggiunto
+
+- **La Torre: cento livelli nuovi, dal 101 al 200, con una regola nuova, i massi.** Un
+  masso conta come pieno ma non sparisce mai: aiuta a chiudere la riga, la colonna e il
+  quadrante in cui si trova, e resta li' quando il gruppo se ne va. Le bombe non lo
+  portano via, il piccone non lo toglie, non conta per la Tinta; se sulla griglia restano
+  solo massi, la griglia conta come svuotata.
+- **Sette atti:** il basamento, le mura, la scala a chiocciola, le feritoie, la loggia, i
+  merli, la vetta. Riuscite del giocatore artificiale, atto per atto: 87%, 76%, 63%, 51%,
+  47%, 40%, 35%. Tutti i cento livelli stanno nella banda di difficolta' del loro atto.
+- **La Torre si apre solo finendo tutto il Ponte**, ogni livello con la spunta. La mappa
+  ha due schede; quella della Torre, finche' e' chiusa, dice quanti livelli mancano.
+- **La festa del Ponte apre la Torre** («Entra nella Torre»); la festa finale arriva alla
+  fine della Torre.
+- **Icona e logo con le stesse finiture**: blocchi come gemme, filo e tratteggio d'ottone,
+  luce calda in alto. Stessa geometria di prima, quindi si riconosce subito. Le icone per
+  Android, iOS, sito e store sono rigenerate da `public/icon.svg` (`npm run icone`); il
+  margine dell'icona classica di Android sale da 0,28 a 0,29 perche' l'alone dei blocchi
+  la faceva sporgere di un pixel dalla zona sicura. Nuovo token `--pl-ottone`.
+- **Testi della scheda e schermate per l'uscita della Torre**: duecento livelli, i massi,
+  l'ultimo livello di ogni opera, note di rilascio in italiano e inglese
+  (`android/SCHEDA-PLAY-STORE.md`). Le schermate mostrano la Torre; quella
+  dell'eliminazione si scatta a orologio fermo, perche' la scritta dell'Intreccio dura
+  meno della cattura. Da rigenerare il giorno dell'uscita, per il numero di versione.
+- **Immagine in evidenza dello store** con il marchio a gemme (letto da `public/icon.svg`),
+  la plancia d'ottone e due massi; «200 livelli». Da caricare in Play Console all'uscita.
+
+### Corretto
+
+- **I massi quasi non si vedevano con la grafica nuova**, e i blocchi che esplodono
+  perdevano il loro colore: la regola delle gemme valeva per ogni blocco, anche per
+  quelli senza colore, e per loro il fondo diventava trasparente. Ora vale solo per i sei
+  colori. Visto nelle schermate per lo store; `npm run e2e-scenografie` controlla adesso
+  il fondo del masso e quello del blocco che esplode.
+- Il titolo della festa diceva «{opera} è finito»: con la Torre sarebbe diventato «La
+  Torre è finito». Adesso ogni opera ha il suo titolo scritto per intero.
+
+### Interno
+
+- I livelli stanno in un file per opera (`src/config/opere/`). Il Ponte e' stato copiato
+  senza rigenerarlo e una prova ne controlla l'impronta: i cento livelli pubblicati non
+  cambiano, e nemmeno i record di chi li ha gia' giocati.
+
 ## [1.21.27] — 27 ottobre 2026
 
 ### Corretto

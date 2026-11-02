@@ -12,6 +12,10 @@
  *   PLINTO_E2E_URL=https://antoniovairo-rgb.github.io/Plinto/ node tools/sonda-fine-livello.mjs
  *   SONDA_ATTESE=500,1000,1500,2000,3000 SONDA_GIRI=4 SONDA_DITO=frettoloso,fermo \
  *   SONDA_TRACCIA=si SONDA_FORMATO=360x640 node tools/sonda-fine-livello.mjs
+ *   SONDA_LIVELLO=102 node tools/sonda-fine-livello.mjs   (un livello della Torre, coi massi)
+ *
+ * SONDA_LIVELLO oltre il primo segna superati tutti i livelli prima (PO-002): la Torre si
+ * apre solo col Ponte finito, e la mappa si apre da sola sull'opera del livello.
  *
  * SONDA_TRACCIA=si registra i gesti di Chromium (tools/po037-gesti.mjs), stampa per ogni
  * giro se il fling dell'ultimo distacco era vivo al tocco e scrive in docs/sviluppo/po037/
@@ -23,7 +27,7 @@ import { chromium } from 'playwright';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { chiudiAllUscita } from './server-di-prova.mjs';
-import { quadroNumero } from '../src/config/quadri.js';
+import { quadroNumero, operaDelQuadro } from '../src/config/quadri.js';
 import { sequenzaVincente, posizioneMossa } from './sequenza-vincente.mjs';
 import { registraGesti, riassumi, rigaRiassunto } from './po037-gesti.mjs';
 
@@ -52,8 +56,11 @@ if (!(await risponde())) {
   if (!(await risponde())) { console.error('Nessun server su', INDIRIZZO, '(manca npm run build?)'); process.exit(1); }
 }
 
-const SEQUENZA = sequenzaVincente(quadroNumero(1));
-if (!SEQUENZA) { console.error('il motore non supera il livello 1: la sonda non misura niente'); process.exit(1); }
+const LIVELLO = Number(process.env.SONDA_LIVELLO ?? 1);
+// Posizione della tappa nella scheda della sua opera (la mappa mostra un'opera per volta).
+const TAPPA = LIVELLO - (operaDelQuadro(LIVELLO)?.da ?? Infinity);
+const SEQUENZA = sequenzaVincente(quadroNumero(LIVELLO));
+if (!SEQUENZA || TAPPA < 0) { console.error(`il motore non supera il livello ${LIVELLO}: la sonda non misura niente`); process.exit(1); }
 
 /**
  * Registra, con l'ora, ogni evento d'ingresso della pagina (dove e' finito) e ogni
@@ -99,21 +106,29 @@ async function giro(browser, attesa, dito, conTraccia) {
   const page = await contesto.newPage();
   page.setDefaultTimeout(10000);
   await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-  await page.evaluate((anim) => {
+  await page.evaluate(({ anim, livello }) => {
     localStorage.clear();
     localStorage.setItem('plinto:settings', JSON.stringify({
       introVista: true, lingua: 'it', tema: 'scuro', audio: false, vibrazione: false, animazioni: anim, aiutoVisivo: true,
     }));
-  }, ANIMAZIONI);
+    const v = {};
+    for (let k = 1; k < livello; k += 1) v[k] = { mosse: 12, punteggio: 300, tentativi: 1 };
+    if (livello > 1) localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli: v }));
+  }, { anim: ANIMAZIONI, livello: LIVELLO });
   await page.reload({ waitUntil: 'networkidle' });
   await page.getByRole('button', { name: /^Mappa dei livelli/ }).tap();
   await page.waitForSelector('.pl-tappe');
-  await page.locator('.pl-tappa').nth(0).tap();
+  const tappa = page.locator('.pl-tappa').nth(TAPPA);
+  await tappa.scrollIntoViewIfNeeded();
+  await tappa.tap();
   const gioca = page.getByRole('button', { name: /^Gioca/ });
   await gioca.first().waitFor();
   await gioca.first().tap();
   await page.waitForSelector('.pl-plancia .pl-cella');
   await page.waitForTimeout(400);
+  const titolo = await page.locator('.pl-screen--gioco').innerText();
+  if (!new RegExp(`\\b${LIVELLO}\\b`).test(titolo)) throw new Error(`non si e' aperto il livello ${LIVELLO}: «${titolo.trim().slice(0, 60)}»`);
+  const massi = await page.locator('.pl-plancia .pl-blocco--masso').count();
 
   const cdp = await contesto.newCDPSession(page);
   const fermaGesti = conTraccia ? await registraGesti(cdp) : null;
@@ -148,19 +163,20 @@ async function giro(browser, attesa, dito, conTraccia) {
   const gesti = fermaGesti ? riassumi(await fermaGesti()) : null;
   await contesto.close();
   const dopoVittoria = eventi.filter((e) => e.ora >= oraVittoria - 5);
-  return { vinto, mosse, andato, oraVittoria, ...prima, dopoVittoria, gesti };
+  return { vinto, mosse, andato, oraVittoria, ...prima, dopoVittoria, gesti, massi };
 }
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
-console.log(`Chromium ${browser.version()} (${ESEGUIBILE ?? 'Playwright'}); ${INDIRIZZO}; ${W}x${H}; passo ${PASSO} ms; `
+console.log(`Chromium ${browser.version()} (${ESEGUIBILE ?? 'Playwright'}); ${INDIRIZZO}; livello ${LIVELLO}; ${W}x${H}; passo ${PASSO} ms; `
   + `animazioni ${ANIMAZIONI ? 'si' : 'no'}; ${GIRI} giri per riga`);
 if (TRACCIA) mkdirSync(CARTELLA, { recursive: true });
 const rapporto = [];
 for (const dito of DITI) for (const attesa of ATTESE) {
-  let persi = 0, nonVinti = 0;
+  let persi = 0, nonVinti = 0, massi = new Set();
   const firme = new Map();
   for (let i = 0; i < GIRI; i += 1) {
     const r = await giro(browser, attesa, dito, TRACCIA);
+    massi.add(r.massi);
     if (!r.vinto) { nonVinti += 1; continue; }
     if (!r.andato) {
       persi += 1;
@@ -174,6 +190,7 @@ for (const dito of DITI) for (const attesa of ATTESE) {
   }
   console.log(`dito ${dito.padEnd(12)} attesa ${String(attesa).padStart(5)} ms: click persi ${persi} su ${GIRI - nonVinti}`
     + (nonVinti ? `  (NON VINTO in ${nonVinti} giri)` : '')
+    + (LIVELLO > 100 ? `  massi a inizio livello: ${[...massi].join('/')}` : '')
     + (persi ? `  eventi dal tocco nei persi: ${[...firme].map(([f, n]) => `«${f}» x${n}`).join(', ')}` : ''));
 }
 if (TRACCIA) {

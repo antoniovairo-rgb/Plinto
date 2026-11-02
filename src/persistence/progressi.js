@@ -24,7 +24,9 @@
  * strada che non si chiude.
  */
 
-import { ATTI, TOTALE_QUADRI } from '../config/quadri.js';
+import {
+  ATTI, OPERE, operaDelQuadro, operaPrecedente, livelliDellOpera,
+} from '../config/quadri.js';
 import { KEYS } from './storage.js';
 import { leggiDocumento, scriviDocumento } from './documenti.js';
 
@@ -85,9 +87,21 @@ export function tentativiDi(numero, progressi = caricaProgressi()) {
   return progressi[numero]?.tentativi ?? 0;
 }
 
+/** Quanti livelli di un'opera sono stati superati davvero. */
+export function superatiNellOpera(opera, progressi = caricaProgressi()) {
+  let superati = 0;
+  for (let n = opera.da; n <= opera.a; n += 1) if (quadroSuperato(n, progressi)) superati += 1;
+  return superati;
+}
+
+/** Tutti i livelli di un'opera superati davvero, con la spunta? */
+export function operaCompletata(opera, progressi = caricaProgressi()) {
+  return superatiNellOpera(opera, progressi) >= livelliDellOpera(opera);
+}
+
 /**
  * L'ULTIMO LIVELLO SI GUADAGNA PER INTERO. Regola del proprietario (9 ottobre 2026):
- * l'ultimo livello di un'opera -- il 100 per il Ponte -- si apre solo quando TUTTI i
+ * l'ultimo livello di un'opera -- 100, 200, 300 -- si apre solo quando TUTTI i
  * livelli prima di lui sono superati. La via d'uscita degli otto tentativi vale per gli
  * altri, non per lui: chiudere l'opera vuol dire averla fatta tutta.
  *
@@ -95,16 +109,23 @@ export function tentativiDi(numero, progressi = caricaProgressi()) {
  * non manca niente.
  */
 export function mancantiPerUltimo(numero, progressi = caricaProgressi()) {
-  if (numero !== TOTALE_QUADRI) return [];
+  const opera = operaDelQuadro(numero);
+  if (numero !== opera.a) return [];
   const mancanti = [];
-  for (let n = 1; n < numero; n += 1) if (!quadroSuperato(n, progressi)) mancanti.push(n);
+  for (let n = opera.da; n < numero; n += 1) if (!quadroSuperato(n, progressi)) mancanti.push(n);
   return mancanti;
 }
 
 /**
  * Il Quadro e' giocabile? Il primo lo e' sempre; gli altri dopo aver superato il
- * precedente, oppure dopo averci provato abbastanza volte. L'ultimo solo con tutti i
- * precedenti superati (vedi `mancantiPerUltimo`).
+ * precedente, oppure dopo averci provato abbastanza volte. L'ultimo di un'opera solo con
+ * tutti i precedenti di quell'opera superati (vedi `mancantiPerUltimo`).
+ *
+ * IL PRIMO LIVELLO DI UN'OPERA E' L'ECCEZIONE: si apre solo quando l'opera precedente e'
+ * finita TUTTA, ogni livello con la spunta. Deciso il 3 ottobre 2026 per la Torre: e' il
+ * premio di chi ha costruito il Ponte, e la via dell'insistenza qui non vale. Quella
+ * esiste perche' un muro non chiuda tutti i livelli dopo; ma i livelli lasciati indietro
+ * restano li', aperti, e finirli e' sempre possibile.
  *
  * Un livello GIA' SUPERATO resta giocabile sempre: chi aveva vinto il 100 prima che
  * esistesse la regola dell'ultimo livello lo tiene, e puo' rigiocarlo (decisione del
@@ -113,6 +134,11 @@ export function mancantiPerUltimo(numero, progressi = caricaProgressi()) {
 export function quadroSbloccato(numero, progressi = caricaProgressi()) {
   if (numero === 1) return true;
   if (quadroSuperato(numero, progressi)) return true;
+  const opera = operaDelQuadro(numero);
+  if (numero === opera.da) {
+    const prima = operaPrecedente(opera);
+    return !prima || operaCompletata(prima, progressi);
+  }
   if (mancantiPerUltimo(numero, progressi).length > 0) return false;
   return quadroSuperato(numero - 1, progressi)
     || tentativiDi(numero - 1, progressi) >= TENTATIVI_PER_APRIRE;
@@ -121,6 +147,7 @@ export function quadroSbloccato(numero, progressi = caricaProgressi()) {
 /** Il Quadro e' aperto SOLO perche' ci si e' provati tanto, senza averlo superato? */
 export function apertoPerInsistenza(numero, progressi = caricaProgressi()) {
   return numero > 1
+    && numero !== operaDelQuadro(numero).da
     && !quadroSuperato(numero - 1, progressi)
     && tentativiDi(numero - 1, progressi) >= TENTATIVI_PER_APRIRE;
 }
@@ -146,14 +173,16 @@ export function apertoPerInsistenza(numero, progressi = caricaProgressi()) {
 export function prossimoQuadro(totale, progressi = caricaProgressi()) {
   let ultimoSuperato = 0;
   for (let n = 1; n <= totale; n += 1) if (quadroSuperato(n, progressi)) ultimoSuperato = n;
+  let candidato = totale;   // percorso finito: si torna sull'ultimo
   for (let n = ultimoSuperato + 1; n <= totale; n += 1) {
-    if (quadroSuperato(n, progressi)) continue;
-    // L'ultimo livello chiuso dalla sua regola: si riparte dal primo lasciato indietro,
-    // che e' quello che lo apre, invece di puntare a un livello che non si puo' giocare.
-    const mancanti = mancantiPerUltimo(n, progressi);
-    return mancanti.length > 0 ? mancanti[0] : n;
+    if (!quadroSuperato(n, progressi)) { candidato = n; break; }
   }
-  return totale;   // percorso finito: si torna sull'ultimo
+  // Il primo livello di un'opera puo' essere ancora chiuso anche dopo aver vinto l'ultimo
+  // di quella prima, se dietro ne sono rimasti alcuni senza spunta. Allora il punto in
+  // cui si riprende e' il primo di quelli: e' l'unica strada che apre l'opera nuova.
+  if (quadroSbloccato(candidato, progressi)) return candidato;
+  for (let n = 1; n < candidato; n += 1) if (!quadroSuperato(n, progressi)) return n;
+  return candidato;
 }
 
 /**
@@ -258,7 +287,7 @@ export function azzeraProgressi() {
  * anche quelli andati male. Un riepilogo che contasse solo le riuscite racconterebbe un
  * percorso che non e' stato fatto da nessuno.
  */
-export function riepilogoPercorso(progressi = caricaProgressi(), totale = 0) {
+export function riepilogoPercorso(progressi = caricaProgressi(), totale = 0, da = 1) {
   const superati = [];
   let tentativiTotali = 0;
   let piuOstinato = null;
@@ -266,6 +295,9 @@ export function riepilogoPercorso(progressi = caricaProgressi(), totale = 0) {
   for (const [chiave, voce] of Object.entries(progressi)) {
     const numero = Number(chiave);
     if (!Number.isFinite(numero)) continue;
+    // Un'opera alla volta: la festa del Ponte racconta il Ponte, non i primi livelli
+    // della Torre giocati nel frattempo.
+    if (totale > 0 && (numero < da || numero > da + totale - 1)) continue;
     const tentativi = voce?.tentativi ?? 0;
     tentativiTotali += tentativi;
     if (!quadroSuperato(numero, progressi)) continue;
@@ -325,28 +357,32 @@ export function riepilogoAtto(atto, appenaVinto = null, progressi = caricaProgre
   // Chiudere "Le basi" e chiudere "La vetta" sono due cose diverse, e una fascia identica
   // per tutti e sette lo nega. La scala sta qui e non nel componente perche' e' una
   // regola sui progressi, e una regola si puo' interrogare in un test; una classe CSS no.
-  const posizione = ATTI.findIndex((a) => a.da === atto.da);
+  // Gli atti si contano DENTRO la loro opera: "La vetta" e' il settimo atto della Torre,
+  // non il quattordicesimo del gioco, e "L'ultima pietra" resta l'ultimo del Ponte.
+  const opera = OPERE.find((o) => o.id === atto.opera) ?? operaDelQuadro(atto.da);
+  const attiOpera = ATTI.filter((a) => a.opera === opera.id);
+  const posizione = attiOpera.findIndex((a) => a.da === atto.da);
   const indice = posizione >= 0 ? posizione + 1 : 1;
-  const totaleAtti = ATTI.length;
+  const totaleAtti = attiOpera.length;
   // Tre gradini, ricavati dalla posizione e non scritti a mano: l'ultimo atto sta a se',
   // la seconda meta' del percorso pesa piu' della prima. Se un giorno gli atti fossero
   // sei o otto, la scala si adatta da sola invece di puntare a un atto che non c'e' piu'.
   const intensita = indice === totaleAtti ? 3 : (indice > totaleAtti / 2 ? 2 : 1);
 
   let attiChiusi = 0;
-  for (const a of ATTI) {
+  for (const a of attiOpera) {
     let fatti = 0;
     for (let n = a.da; n <= a.a; n += 1) if (quadroSuperato(n, progressi)) fatti += 1;
     if (fatti >= a.a - a.da + 1) attiChiusi += 1;
   }
-  // I livelli lasciati indietro nell'INTERO percorso. Serve solo all'ultimo atto: chi
-  // chiude "La vetta" senza aver finito il percorso ha dei buchi dietro, e dirglielo qui
+  // I livelli lasciati indietro nell'INTERA opera. Serve solo all'ultimo atto: chi
+  // chiude l'ultimo atto senza aver finito l'opera ha dei buchi dietro, e dirglielo qui
   // e' l'unico modo onesto di festeggiare senza far credere che sia finita.
-  let mancanti = 0;
-  for (let n = 1; n <= TOTALE_QUADRI; n += 1) if (!quadroSuperato(n, progressi)) mancanti += 1;
+  const mancanti = livelliDellOpera(opera) - superatiNellOpera(opera, progressi);
 
   return {
     id: atto.id,
+    opera: opera.id,
     da: atto.da,
     a: atto.a,
     superati,

@@ -52,6 +52,10 @@ const VIETATE = {
     [/\buso\b|\busi (degli|disponibili|appena|da parte)\b|\bmassimo di \d+ usi\b/i, 'uso/usi (il conto)', 'gettone/gettoni'],
     [/\bancorat/i, 'ancorato', 'appoggiato'],
     [/Sfida del Giorno/, 'Sfida del Giorno', 'Sfida del giorno'],
+    // La casella grigia della Torre si chiama masso e basta. "Roccia" e "pietra" sono
+    // nomi di atti del Ponte ("La roccia", "L'ultima pietra"), e "sasso" o "macigno"
+    // farebbero pensare a una cosa diversa.
+    [/\bsass[oi]\b|\bmacign[oi]\b|\bmacerie\b/i, 'sasso/macigno', 'masso'],
   ],
   en: [
     [/\bcells?\b/i, 'cell/cells', 'square/squares'],
@@ -61,6 +65,8 @@ const VIETATE = {
     [/\buses\b|\btool use\b|\ba use\b/i, 'use/uses (the count)', 'token/tokens'],
     [/\banchor/i, 'anchored', 'placed'],
     [/Daily Challenge/, 'Daily Challenge', 'Daily challenge'],
+    // The grey Tower square is a boulder. "The Rock" and "The Last Stone" are Bridge acts.
+    [/\brocks\b|\bstones\b|\bpebbles?\b/i, 'rocks/stones', 'boulders'],
   ],
 };
 

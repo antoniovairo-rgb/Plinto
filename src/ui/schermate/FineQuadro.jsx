@@ -4,7 +4,7 @@ import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
 import { CondividiQuadro } from '../Condividi.jsx';
 import { quadroSbloccato } from '../../persistence/progressi.js';
 import { IconaCassetta } from '../Attrezzi.jsx';
-import { TOTALE_QUADRI } from '../../config/quadri.js';
+import { OPERE, livelliDellOpera, operaSuccessiva } from '../../config/quadri.js';
 import { InvitoRecensione } from '../Recensisci.jsx';
 
 
@@ -75,18 +75,20 @@ export const MAPPA_RIDOTTA_COL_GETTONE = true;
 
 export function SchermoFineQuadro({
   quadro, esito, ultimo, superatiTotali, atto = null, percorsoCompleto = false,
-  animazioni = true, onRiprova, onProssimo, onElenco, t,
+  opera = OPERE[0], animazioni = true, onRiprova, onProssimo, onElenco, t,
 }) {
+  const successiva = operaSuccessiva(opera);
   const vinto = esito.completato;
   const motivo = esito.motivo === 'mosse' ? t('quadri.persoMosse') : t('quadri.persoBloccato');
   // Il livello successivo si e' aperto lo stesso, per quante volte ci si e' provati.
   const sbloccaIlProssimo = !vinto && !ultimo && quadroSbloccato(quadro.numero + 1);
   // La frase dell'atto. La chiave si compone qui in forma letterale perche' il controllo
   // delle traduzioni riconosce i prefissi dinamici solo scritti cosi': spezzarla in una
-  // variabile farebbe risultare orfane tutte e sette le frasi. Se un giorno gli atti
-  // fossero piu' delle frasi, t() restituisce la chiave stessa: in quel caso non si
-  // scrive niente invece di mostrare "quadri.attoFrasi.7" a chi ha appena finito un atto.
-  const dettaAtto = t(`quadri.attoFrasi.${(atto?.indice ?? 1) - 1}`);
+  // variabile farebbe risultare orfane tutte le frasi. Si cerca per NOME dell'atto e non
+  // per posizione: con due opere "il primo atto" sono due atti diversi. Se una frase
+  // manca, t() restituisce la chiave stessa: in quel caso non si scrive niente invece di
+  // mostrare "quadri.attoFrasi.vetta" a chi ha appena finito un atto.
+  const dettaAtto = t(`quadri.attoFrasi.${atto?.id ?? ''}`);
   const fraseAtto = dettaAtto.startsWith('quadri.') ? null : dettaAtto;
   // Con il gettone guadagnato o l'atto appena chiuso la schermata ha due blocchi in piu':
   // Plinto si fa piu' piccolo, perche' tutto deve stare nello schermo senza scorrere.
@@ -272,7 +274,11 @@ export function SchermoFineQuadro({
         {/* In fondo al percorso, ma solo se ci sono buchi indietro: chi li ha superati
             tutti non vede questa schermata, vede la festa finale. */}
         {vinto && ultimo && !percorsoCompleto ? (
-          <p className="pl-fine__extra">{t('quadri.finitoConBuchi')}</p>
+          <p className="pl-fine__extra">
+            {successiva
+              ? t('quadri.finitoConBuchiApre').replace('{opera}', t(`opere.${successiva.id}`))
+              : t('quadri.finitoConBuchi')}
+          </p>
         ) : null}
 
         {/* La condivisione sta in FONDO all'area che scorre, sotto l'avanzamento, e solo
@@ -293,7 +299,7 @@ export function SchermoFineQuadro({
             mosse={esito.riepilogo.moves}
             record={Boolean(esito.primaVolta || esito.miglioramento)}
             superati={superatiTotali}
-            totale={TOTALE_QUADRI}
+            totale={livelliDellOpera(opera)}
             serie={esito.riepilogo.serieCatena}
             t={t}
           />
