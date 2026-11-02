@@ -198,6 +198,10 @@ async function riparti() {
   // gioco non ha mai avuto: a partita finita lo scenario non ripartiva e girava a vuoto
   // fino all'ultimo giro. Passava solo se la partita, con un seme a caso, durava abbastanza
   // -- ed e' fallito cosi' nel gate della 1.19.1 ("il pulsante non e mai comparso").
+  // PO-038: prima del risultato c'e' la pausa sulla plancia finale, e lo si aspetta.
+  if (await page.locator('.pl-pausa-fine').count()) {
+    await page.waitForSelector('.pl-fine', { timeout: 6000 }).catch(() => {});
+  }
   if (!(await page.locator('.pl-fine').count())) return false;
   await page.locator('.pl-fine__azioni button').first().click();
   await page.waitForSelector('.pl-plancia');

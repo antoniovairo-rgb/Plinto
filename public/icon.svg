@@ -1,12 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
-  <!-- Stessa geometria e stessi colori di src/ui/Logo.jsx (riquadri da 19, raggio 5,
-       tratteggio 4 3). I colori sono ripetuti in esadecimale perche' un file in
-       public/ non vede i token CSS; l'allineamento con i token del tema scuro e'
-       verificato da tests/icona.test.js, cosi' la palette non puo' piu' divergere
-       in silenzio come e' gia' successo. -->
-  <rect width="48" height="48" rx="11" fill="#0e1118"/>
-  <rect x="3" y="3" width="19" height="19" rx="5" fill="#ffc212"/>
-  <rect x="26" y="3" width="19" height="19" rx="5" fill="#12e1b0"/>
-  <rect x="3" y="26" width="19" height="19" rx="5" fill="#9b4dff"/>
-  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#55618a" stroke-width="2" stroke-dasharray="4 3"/>
+  <!-- Stessa geometria di src/ui/Logo.jsx (riquadri da 19, raggio 5, tratteggio 4 3), con le
+       finiture della Torre: blocchi come gemme, tratteggio e filo d'ottone, luce calda in alto.
+       I colori pieni sono ripetuti in esadecimale perche' un file in public/ non vede i token
+       CSS; tests/icona.test.js li confronta con i token del tema scuro. Le sfumature delle
+       gemme sono ricavate dagli stessi colori (piu' chiaro in alto, piu' scuro in basso).
+       Il fondo sta in un gruppo a se': tools/icone.mjs lo toglie per il primo piano di
+       Android, dove il colore lo mette il livello di sotto. -->
+  <defs>
+    <radialGradient id="luce" cx="0.5" cy="0" r="0.9">
+      <stop offset="0" stop-color="#f2c14e" stop-opacity="0.35"/>
+      <stop offset="0.7" stop-color="#f2c14e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gemma4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe07a"/><stop offset="0.45" stop-color="#ffc212"/><stop offset="1" stop-color="#c9920b"/>
+    </linearGradient>
+    <linearGradient id="gemma2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cf3d6"/><stop offset="0.45" stop-color="#12e1b0"/><stop offset="1" stop-color="#0b9c7a"/>
+    </linearGradient>
+    <linearGradient id="gemma3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c99bff"/><stop offset="0.45" stop-color="#9b4dff"/><stop offset="1" stop-color="#6a2fc0"/>
+    </linearGradient>
+    <linearGradient id="riflesso" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="alone" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.6"/></filter>
+  </defs>
+  <g id="fondo">
+    <rect width="48" height="48" rx="11" fill="#0e1118"/>
+    <rect width="48" height="48" rx="11" fill="url(#luce)"/>
+    <rect x="0.75" y="0.75" width="46.5" height="46.5" rx="10.3" fill="none" stroke="#e3b04a" stroke-opacity="0.55" stroke-width="1.5"/>
+  </g>
+  <rect x="3" y="3" width="19" height="19" rx="5" fill="#ffc212" opacity="0.55" filter="url(#alone)"/>
+  <rect x="26" y="3" width="19" height="19" rx="5" fill="#12e1b0" opacity="0.55" filter="url(#alone)"/>
+  <rect x="3" y="26" width="19" height="19" rx="5" fill="#9b4dff" opacity="0.55" filter="url(#alone)"/>
+  <rect x="3" y="3" width="19" height="19" rx="5" fill="url(#gemma4)"/>
+  <rect x="26" y="3" width="19" height="19" rx="5" fill="url(#gemma2)"/>
+  <rect x="3" y="26" width="19" height="19" rx="5" fill="url(#gemma3)"/>
+  <g fill="url(#riflesso)">
+    <rect x="5.5" y="4.5" width="14" height="6" rx="3"/>
+    <rect x="28.5" y="4.5" width="14" height="6" rx="3"/>
+    <rect x="5.5" y="27.5" width="14" height="6" rx="3"/>
+  </g>
+  <g fill="none" stroke-opacity="0.28" stroke-width="1.2">
+    <rect x="3.6" y="3.6" width="17.8" height="17.8" rx="4.4" stroke="white"/>
+    <rect x="26.6" y="3.6" width="17.8" height="17.8" rx="4.4" stroke="white"/>
+    <rect x="3.6" y="26.6" width="17.8" height="17.8" rx="4.4" stroke="white"/>
+  </g>
+  <rect x="26" y="26" width="19" height="19" rx="5" fill="none" stroke="#e3b04a" stroke-width="2" stroke-dasharray="4 3"/>
 </svg>

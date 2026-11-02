@@ -156,12 +156,14 @@ const RIPRENDI_ANGOLI_DELLA_CARD = true;
  */
 export function SchermoHome({
   record, cePartitaSalvata, sfidaOggi, sfidaInCorso, quadriFatti, quadriTotali,
-  livelloCorrente, livelloInSospeso = null, versione,
+  livelloCorrente, operaCorrente = 'ponte', livelloInSospeso = null, versione,
   onGioca, onRiprendi, onSfida, onArchivio, onQuadri, onGiocaLivello, onVai, onSostieni, t,
 }) {
-  const progressoTesto = t('quadri.avanzamento')
+  // Con piu' di un'opera il numero da solo non dice di che cosa: "12 di 100" puo' essere
+  // il Ponte o la Torre. Il nome dell'opera viene prima.
+  const progressoTesto = `${t(`opere.${operaCorrente}`)}: ${t('quadri.avanzamento')
     .replace('{fatti}', numero(quadriFatti))
-    .replace('{totale}', numero(quadriTotali));
+    .replace('{totale}', numero(quadriTotali))}`;
   const recordTesto = record.best > 0 ? `${t('home.record')} ${numero(record.best)}` : '';
   const sfidaTesto = sfidaOggi.partite > 0 ? `${t('home.record')} ${numero(sfidaOggi.best)}` : '';
   // PO-010: il nome e' quello della modalita' in ogni stato; «Riprendi ›» e' lo stato.

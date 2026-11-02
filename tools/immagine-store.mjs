@@ -47,22 +47,38 @@ const C = {
   marchio: token('pl-brand'),
   marchioScuro: token('pl-brand-deep'),
   ottone: token('pl-ottone'),
+  masso: token('pl-masso'),
+  massoOmbra: token('pl-masso-ombra'),
   b: [1, 2, 3, 4, 5, 6].map((n) => token(`pl-block-${n}`)),
 };
 
 // La plancia: la riga 4 e il quadrante centrale sono pieni, cioe' la mossa che chiude
 // due gruppi insieme -- l'Intreccio. Il resto e' sparso, come una partita vera.
+// Nella Torre ci sono anche due massi (M): grigi, scolpiti, e restano li' anche quando
+// il gruppo se ne va. Uno sta proprio nella riga che si chiude, come nel gioco.
 const PIENE = `
 .5..4....
-..3...6..
+..3...6.M
 .1..2..5.
-444444444
+4444M4444
 ...444...
 ...444...
 .2..1..3.
-..6...2..
+M.6...2..
 .4..5....
 `.trim().split('\n');
+
+// Il marchio e' QUELLO dell'icona, letto da public/icon.svg e ritagliato come fa
+// tools/icone.mjs per Android: senza la piastrella di fondo. Disegnarlo di nuovo qui
+// vorrebbe dire avere due marchi che prima o poi divergono.
+const icona = await readFile(`${RADICE}public/icon.svg`, 'utf8');
+const marchio = icona
+  .replace(/<!--[\s\S]*?-->/, '')
+  .replace(/<g id="fondo">[\s\S]*?<\/g>/, '')
+  .replace('viewBox="0 0 48 48" width="48" height="48"', 'viewBox="3 3 42 42" width="76" height="76"');
+if (marchio === icona || !marchio.includes('viewBox="3 3 42 42"')) {
+  throw new Error('public/icon.svg e\' cambiato: il ritaglio del marchio va rifatto');
+}
 
 const pagina = `
 <!doctype html><meta charset="utf-8">
@@ -129,18 +145,12 @@ const pagina = `
 </style>
 <div class="sinistra">
   <div class="marchio">
-    <svg width="72" height="72" viewBox="0 0 48 48">
-      <rect x="3" y="3" width="19" height="19" rx="5" fill="${C.b[3]}"/>
-      <rect x="26" y="3" width="19" height="19" rx="5" fill="${C.b[1]}"/>
-      <rect x="3" y="26" width="19" height="19" rx="5" fill="${C.b[2]}"/>
-      <rect x="26" y="26" width="19" height="19" rx="5" fill="none"
-            stroke="${C.lineaForte}" stroke-width="2" stroke-dasharray="4 3"/>
-    </svg>
+    ${marchio}
     <div class="nome">PLINTO</div>
   </div>
   <div class="claim">Riga, colonna, quadrante.</div>
   <div class="punti">
-    <div class="punto"><span class="pallino" style="background:${C.b[3]}"></span>100 livelli e una sfida ogni giorno</div>
+    <div class="punto"><span class="pallino" style="background:${C.b[3]}"></span>200 livelli e una sfida ogni giorno</div>
     <div class="punto"><span class="pallino" style="background:${C.b[1]}"></span>Nessuna pubblicità, nessun acquisto</div>
     <div class="punto"><span class="pallino" style="background:${C.b[5]}"></span>Funziona senza connessione</div>
   </div>

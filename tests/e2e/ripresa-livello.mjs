@@ -71,7 +71,7 @@ import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { FINESTRA_RIPRESA } from '../../src/persistence/ripresa.js';
 import { sequenzaVincente, posizioneMossa } from '../../tools/sequenza-vincente.mjs';
-import { quadroNumero, TOTALE_QUADRI } from '../../src/config/quadri.js';
+import { quadroNumero, TOTALE_QUADRI, OPERE } from '../../src/config/quadri.js';
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -716,21 +716,31 @@ function fuocoSicuro(caso, d, atteso) {
     await contesto.close();
   }
 
-  // Festa finale: novantanove livelli scritti come superati, la libera a meta', il
-  // livello 1 vinto davvero; «Gioca in partita libera» deve chiedere.
+  // Festa finale: tutti i livelli scritti come superati tranne il primo dell'ULTIMA opera,
+  // la libera a meta', quel livello vinto davvero; «Gioca in partita libera» deve chiedere.
+  // Con la Torre la festa finale e' quella della Torre: la festa del Ponte ha «Entra nella
+  // Torre» al posto di «Gioca in partita libera» (Trionfo.jsx). Prima si vinceva il livello
+  // 1 con il 2-100 superati; con il 2-200 la mappa si apre sulla Torre e la sua prima
+  // tappa e' il 101, quindi il caso non arrivava piu' a nessuna festa.
   {
+    const ultimaOpera = OPERE[OPERE.length - 1];
+    const daVincere = ultimaOpera.da;
     const { contesto, page } = await prepara();
     const prima = await liberaAMeta(page);
     await allaHome(page);
-    await page.evaluate((n) => {
+    await page.evaluate(({ n, salta }) => {
       const livelli = {};
-      for (let i = 2; i <= n; i += 1) livelli[i] = { mosse: 12, punteggio: 300, tentativi: 1 };
+      for (let i = 1; i <= n; i += 1) if (i !== salta) livelli[i] = { mosse: 12, punteggio: 300, tentativi: 1 };
       localStorage.setItem('plinto:quadri', JSON.stringify({ versione: 1, livelli }));
-    }, TOTALE_QUADRI);
+    }, { n: TOTALE_QUADRI, salta: daVincere });
     await page.reload();
     await page.waitForSelector('.pl-home__menu');
+    await page.getByRole('button', { name: /Mappa dei livelli/ }).click();
+    await page.waitForSelector('.pl-tappe');
+    // La scheda dell'ultima opera, se la mappa ne ha piu' d'una.
+    if (await page.getByRole('tab').count()) await page.getByRole('tab').last().click();
     await apriLivello1DallaMappa(page);
-    for (const mossa of sequenzaVincente(quadroNumero(1)) ?? []) {
+    for (const mossa of sequenzaVincente(quadroNumero(daVincere)) ?? []) {
       const punti = await posizioneMossa(page, mossa);
       if (!punti) break;
       await page.mouse.move(punti.px, punti.py);
@@ -738,9 +748,10 @@ function fuocoSicuro(caso, d, atteso) {
       await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
       await page.mouse.up();
       await page.waitForTimeout(45);
-      if (await page.locator('.pl-quadro-esito, .pl-trionfo').count() > 0) break;
+      if (await page.locator('.pl-quadro-esito, .pl-trionfo, .pl-pausa-fine').count() > 0) break;
     }
-    await page.waitForSelector('.pl-trionfo', { timeout: 5000 }).catch(() => {});
+    // PO-038: la festa arriva dopo la pausa sulla plancia finale (1,5 s): si aspetta l'elemento.
+    await page.waitForSelector('.pl-trionfo', { timeout: 6000 }).catch(() => {});
     const festa = await page.locator('.pl-trionfo').count() > 0;
     let d = null, dopo = '', nota = '';
     if (!festa) {

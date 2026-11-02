@@ -65,7 +65,9 @@ export const MISURE = [
   {
     nome: 'icona-android-classica-432.png',
     lato: 432,
-    margine: 0.28,
+    // 0,29 e non 0,28: nella Torre i blocchi hanno un alone, e su fondo dipinto l'alone
+    // conta come marchio. A 0,28 arrivava a 133 pixel su 132.
+    margine: 0.29,
     zonaSicura: ZONA_SICURA_ANDROID,
     soloMarchio: true,
     uso: 'Android, icona classica',

@@ -37,13 +37,13 @@ describe('riepilogo del percorso', () => {
     // Il caso che questa funzione esiste per non sbagliare: si e' arrivati al centesimo
     // per insistenza, lasciandone indietro cinque. Il percorso NON e' completo.
     const conBuchi = superati(daA(1, 100).filter((n) => ![7, 23, 41, 66, 89].includes(n)));
-    const r = riepilogoPercorso(conBuchi, TOTALE_QUADRI);
+    const r = riepilogoPercorso(conBuchi, OPERE[0].a - OPERE[0].da + 1);
     expect(r.superati).toBe(95);
     expect(r.completo).toBe(false);
   });
 
   it('e completo solo con tutti e cento', () => {
-    expect(riepilogoPercorso(superati(daA(1, 100)), TOTALE_QUADRI).completo).toBe(true);
+    expect(riepilogoPercorso(superati(daA(1, 100)), 100).completo).toBe(true);
   });
 
   it('non e mai completo se non gli si dice quanti sono i livelli', () => {
@@ -101,23 +101,29 @@ describe('chiusura di un atto', () => {
   });
 
   it('l importanza della chiusura segue la posizione, non un elenco scritto a mano', () => {
-    const gradini = ATTI.map((a) => riepilogoAtto(a, null, superati([])).intensita);
-    // I sette atti di oggi. Se un giorno fossero otto questa riga fallisce, ed e' voluto:
-    // cambiare il percorso vuol dire ricontrollare anche le frasi, non solo i numeri.
-    expect(gradini).toEqual([1, 1, 1, 2, 2, 2, 3]);
-    // Una scala che scende non e' una scala: l'atto dopo non puo' pesare meno di quello
-    // prima, altrimenti chiudere "La maestria" varrebbe meno che chiudere "Le basi".
-    for (let i = 1; i < gradini.length; i += 1) {
-      expect(gradini[i], `atto ${i + 1}`).toBeGreaterThanOrEqual(gradini[i - 1]);
+    // Opera per opera: la vetta e' l'ultimo atto della Torre, l'ultima pietra l'ultimo
+    // del Ponte, e tutti e due valgono la festa piu' grande della loro opera.
+    for (const opera of OPERE) {
+      const atti = ATTI.filter((a) => a.opera === opera.id);
+      const gradini = atti.map((a) => riepilogoAtto(a, null, superati([])).intensita);
+      // I sette atti di oggi. Se un giorno fossero otto questa riga fallisce, ed e' voluto:
+      // cambiare il percorso vuol dire ricontrollare anche le frasi, non solo i numeri.
+      expect(gradini, opera.id).toEqual([1, 1, 1, 2, 2, 2, 3]);
+      // Una scala che scende non e' una scala: l'atto dopo non puo' pesare meno di quello
+      // prima, altrimenti chiudere "La maestria" varrebbe meno che chiudere "Le basi".
+      for (let i = 1; i < gradini.length; i += 1) {
+        expect(gradini[i], `${opera.id}, atto ${i + 1}`).toBeGreaterThanOrEqual(gradini[i - 1]);
+      }
+      expect(riepilogoAtto(atti[0], null, superati([])).indice).toBe(1);
+      expect(riepilogoAtto(atti[atti.length - 1], null, superati([])).indice).toBe(atti.length);
     }
-    expect(riepilogoAtto(ATTI[0], null, superati([])).indice).toBe(1);
-    expect(riepilogoAtto(ATTI[ATTI.length - 1], null, superati([])).indice).toBe(ATTI.length);
   });
 
   it('conta gli atti gia chiusi e i livelli lasciati indietro', () => {
     const r = riepilogoAtto(ATTI[1], { numero: ATTI[1].a, primaVolta: true }, superati(daA(1, ATTI[1].a)));
     expect(r.attiChiusi).toBe(2);
-    expect(r.mancanti).toBe(TOTALE_QUADRI - ATTI[1].a);
+    // I livelli lasciati indietro si contano dentro l'opera: il Ponte, non i duecento.
+    expect(r.mancanti).toBe(OPERE[0].a - ATTI[1].a);
     // Un buco dentro il primo atto lo riapre. I pallini accesi devono dire il vero: se
     // contassero gli atti "raggiunti" invece che chiusi, mostrerebbero un traguardo mai
     // fatto proprio a chi un livello lo ha saltato.
@@ -138,8 +144,18 @@ describe('chiusura di un atto', () => {
       for (const opera of OPERE) {
         expect(typeof dizionario.opere?.[opera.id], `${lingua}: opere.${opera.id}`).toBe('string');
       }
-      // La Torre non ha livelli, ma il suo nome si vede nella festa finale.
-      expect(typeof dizionario.opere?.torre).toBe('string');
+      // Ogni opera ha il suo titolo di festa e la sua scheda, scritti per intero: con un
+      // segnaposto la Torre diventava "La Torre è finito".
+      for (const opera of OPERE) {
+        expect(typeof dizionario.trionfo?.titoli?.[opera.id], `${lingua}: trionfo.titoli.${opera.id}`).toBe('string');
+        expect(typeof dizionario.scheda?.trionfoOpera?.[opera.id], `${lingua}: scheda.trionfoOpera.${opera.id}`).toBe('string');
+      }
+      // E ogni opera che ne ha una prima dice come si apre, e come ci si entra.
+      for (const opera of OPERE.slice(1)) {
+        expect(typeof dizionario.quadri?.operaChiusa?.[opera.id], `${lingua}: quadri.operaChiusa.${opera.id}`).toBe('string');
+        expect(typeof dizionario.trionfo?.aperta?.[opera.id], `${lingua}: trionfo.aperta.${opera.id}`).toBe('string');
+        expect(typeof dizionario.trionfo?.vai?.[opera.id], `${lingua}: trionfo.vai.${opera.id}`).toBe('string');
+      }
     }
   });
 
@@ -154,9 +170,10 @@ describe('chiusura di un atto', () => {
 
   it('ogni atto ha la sua frase in tutte e due le lingue', () => {
     for (const lingua of Object.keys(LINGUE)) {
+      // Per nome dell'atto, non per posizione: con due opere "il primo atto" sono due.
       const frasi = LINGUE[lingua].strings.quadri.attoFrasi;
-      expect(frasi.length, lingua).toBe(ATTI.length);
-      for (const f of frasi) expect(f.trim().length, `${lingua}: "${f}"`).toBeGreaterThan(10);
+      expect(Object.keys(frasi).sort(), lingua).toEqual(ATTI.map((a) => a.id).sort());
+      for (const f of Object.values(frasi)) expect(f.trim().length, `${lingua}: "${f}"`).toBeGreaterThan(10);
     }
   });
 
@@ -210,11 +227,12 @@ describe('i testi della fine del percorso', () => {
     for (const lingua of Object.keys(LINGUE)) {
       const t = traduttore(lingua);
       for (const chiave of [
-        'trionfo.titolo', 'trionfo.sotto', 'trionfo.livelli', 'trionfo.mosse',
+        'trionfo.titoli.ponte', 'trionfo.titoli.torre', 'trionfo.sotto', 'trionfo.livelli', 'trionfo.mosse',
         'trionfo.primoColpo', 'trionfo.ostinato', 'trionfo.prossimiTitolo',
         'trionfo.prossimiTesto', 'trionfo.libera',
         'quadri.attoChiuso', 'quadri.attoFatti', 'quadri.finitoConBuchi',
-        'scheda.condividiTrionfo', 'scheda.trionfoTitolo', 'scheda.tuttiILivelli',
+        'scheda.condividiTrionfo', 'scheda.trionfoOpera.ponte', 'scheda.trionfoOpera.torre', 'scheda.tuttiILivelli',
+        'quadri.finitoConBuchiApre',
         'scheda.mosseInTutto', 'scheda.alPrimoColpo',
       ]) {
         const testo = t(chiave);

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { QUADRI, quadroNumero, TOTALE_QUADRI } from '../src/config/quadri.js';
+import { QUADRI, quadroNumero, TOTALE_QUADRI, OPERE } from '../src/config/quadri.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro, semeDelQuadro, OBIETTIVI, MODALITA_QUADRI } from '../src/core/quadro.js';
 import { gridFromString, findCompletedGroups, filledCount, allPlacements, placeShape } from '../src/core/grid.js';
 import { createGame } from '../src/core/engine.js';
@@ -274,7 +274,7 @@ describe('la strada non si chiude mai', () => {
     // Regola del proprietario (9 ottobre 2026): la via d'uscita degli otto tentativi non
     // apre l'ultimo livello. Basta un solo buco per tenerlo chiuso.
     const vinci = (n) => progressi.registraTentativo(n, { superato: true, mosse: 9, punteggio: 400 });
-    const ultimo = TOTALE_QUADRI;
+    const ultimo = OPERE[0].a;   // l'ultimo livello del Ponte
     for (let n = 1; n < ultimo - 1; n += 1) if (n !== 55) vinci(n);
     fallisci(ultimo - 1, progressi.TENTATIVI_PER_APRIRE);
     expect(progressi.quadroSbloccato(ultimo), 'otto tentativi sul penultimo non bastano').toBe(false);
@@ -290,8 +290,18 @@ describe('la strada non si chiude mai', () => {
     expect(progressi.prossimoQuadro(TOTALE_QUADRI)).toBe(ultimo);
   });
 
+  it('vale per l ultimo livello di ogni opera, contando solo i livelli di quell opera', () => {
+    const vinci = (n) => progressi.registraTentativo(n, { superato: true, mosse: 9, punteggio: 400 });
+    const seconda = OPERE[1];
+    for (let n = 1; n < seconda.a; n += 1) if (n !== seconda.da + 4) vinci(n);
+    expect(progressi.quadroSbloccato(seconda.a)).toBe(false);
+    expect(progressi.mancantiPerUltimo(seconda.a)).toEqual([seconda.da + 4]);
+    vinci(seconda.da + 4);
+    expect(progressi.quadroSbloccato(seconda.a)).toBe(true);
+  });
+
   it('chi aveva gia superato l ultimo livello lo tiene, anche con dei buchi', () => {
-    const ultimo = TOTALE_QUADRI;
+    const ultimo = OPERE[0].a;
     progressi.registraTentativo(ultimo, { superato: true, mosse: 20, punteggio: 900 });
     expect(progressi.quadroSuperato(ultimo)).toBe(true);
     expect(progressi.quadroSbloccato(ultimo), 'resta rigiocabile').toBe(true);

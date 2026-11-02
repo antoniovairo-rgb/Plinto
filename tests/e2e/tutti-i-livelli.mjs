@@ -37,7 +37,8 @@
 import { chiudiAllUscita } from '../../tools/server-di-prova.mjs';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
-import { QUADRI } from '../../src/config/quadri.js';
+import { QUADRI, operaDelQuadro } from '../../src/config/quadri.js';
+import { traduttore } from '../../src/i18n/index.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
 import { createRng, seedFromString } from '../../src/core/rng.js';
 import { preferenze, scegliMossa } from '../../src/sim/giocatore-quadri.mjs';
@@ -163,7 +164,12 @@ for (let n = DA; n <= A; n += 1) {
   await page.goto(INDIRIZZO, { waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
   await page.waitForSelector('.pl-tappe');
-  const tappa = page.locator('.pl-tappa').nth(n - 1);
+  // La mappa mostra un'opera alla volta: prima la scheda dell'opera del livello, poi la
+  // tappa contata dall'inizio di quell'opera. Con tutti i livelli superati la mappa si
+  // apre sulla Torre, e contare dal livello 1 apriva il 101 al posto dell'1.
+  const opera = operaDelQuadro(n);
+  await page.getByRole('tab', { name: traduttore('it')(`opere.${opera.id}`) }).click();
+  const tappa = page.locator('.pl-tappa').nth(n - opera.da);
   await tappa.scrollIntoViewIfNeeded();
   await tappa.click();
   await page.waitForSelector('.pl-apertura');
@@ -205,7 +211,8 @@ for (let n = DA; n <= A; n += 1) {
     }
     await page.locator('.pl-plancia .pl-cella').nth(tocco.row * 9 + tocco.col).click();
     await page.waitForTimeout(15);
-    const finita = (await page.locator('.pl-fine').count()) > 0;
+    // PO-038: finito il livello, la plancia resta in pausa prima dell'esito.
+    const finita = (await page.locator('.pl-fine, .pl-pausa-fine').count()) > 0;
     const dopo = await mosseRimaste();
     if (!finita && prima !== null && dopo !== null && dopo >= prima) {
       rifiutata = `${applicate + 1}: l app non ha accettato il pezzo ${mossa.handIndex} in riga ${mossa.row} colonna ${mossa.col}`;
@@ -215,6 +222,8 @@ for (let n = DA; n <= A; n += 1) {
     if (finita) break;
   }
 
+  // PO-038: l'esito arriva dopo la pausa sulla plancia finale (1,5 s): si aspetta l'elemento.
+  await page.waitForSelector('.pl-fine', { timeout: 6000 }).catch(() => {});
   await page.waitForTimeout(60);
   const vinto = await page.locator('.pl-quadro-esito--vinto').count() > 0;
   const finito = await page.locator('.pl-fine').count() > 0;

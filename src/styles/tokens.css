@@ -49,8 +49,8 @@
   /* --- Colore identitario ------------------------------------------------- */
   --pl-brand: #f2c14e;        /* ottone: punteggio, accenti, logo */
   --pl-brand-deep: #c9922a;
-  /* L'ottone del «cantiere di notte»: cornice della plancia (src/styles/finiture.css).
-     Nella Torre lo usano anche il tratteggio del marchio e il filo dell'icona. */
+  /* L'ottone della Torre: cornice della plancia, tratteggio del marchio, filo dell'icona.
+     Un token solo perche' icon.svg lo ripete in esadecimale e tests/icona.test.js lo confronta. */
   --pl-ottone: #e3b04a;
   --pl-danger: #ec6d8e;        /* 5.21 su --pl-surface-2 */
   /* Fondo dei comandi distruttivi: il testo bianco sopra --pl-danger stava a 2.94:1,
@@ -81,6 +81,15 @@
   --pl-block-4: #ffc212;      /* oro       11.06:1 */
   --pl-block-5: #ff3d71;      /* rosa       5.25:1 */
   --pl-block-6: #2e97ff;      /* azzurro    5.95:1 */
+
+  /* --- Il masso della Torre -------------------------------------------------
+     Grigio pietra, l'unico blocco senza colore: il masso non ha colore anche per le
+     regole (non conta per la Tinta). Chiaro abbastanza da stare sopra 3:1 sul fondo
+     della plancia, spento abbastanza da non sembrare un settimo colore. I segni scolpiti
+     lo distinguono dai pezzi anche per forma, non solo per tinta. */
+  --pl-masso: #9aa1ae;
+  --pl-masso-ombra: #6b7280;
+  --pl-masso-segno: rgba(20, 22, 31, 0.55);
 
   /* --- Geometria ---------------------------------------------------------- */
   --pl-radius-cell: 22%;      /* raggio del blocco, in percentuale del lato */
