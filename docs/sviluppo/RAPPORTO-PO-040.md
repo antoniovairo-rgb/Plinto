@@ -198,7 +198,26 @@ aggiornano quando decidono loro: **non posso confermarlo**.
 
 ## Gate a pezzi
 
-GATE_PLACEHOLDER
+Gli stessi comandi di `tools/verifica-tutto.mjs`, uno per uno, in quattro pezzi (ognuno sotto
+i 60 minuti di un comando in background), sul codice di `21b48c8`; nessun `vite` acceso prima
+(spenti per PID). Ogni script ha avviato il suo server; `build` e `prova-pages` costruiscono la
+build di produzione.
+
+| pezzo | controlli | esito |
+|---|---|---|
+| A | versione-servita 0 s, test 39 s, contrasti 1 s, build 2 s, comunicazioni 10 s, e2e 49 s, **e2e-quadri 24 s**, e2e-trionfo 52 s, e2e-torre-aperta 61 s, e2e-ripresa 16 s, e2e-po008 223 s, e2e-salvataggio 17 s, e2e-sicurezza 29 s, e2e-attrezzi 47 s, e2e-scenografie 17 s | 14 verdi, 1 rosso noto |
+| B | guida 18 s, annulla 7 s, incitamenti 54 s, archivio 19 s, condivisione 10 s, **recensione 40 s**, correzioni 44 s, anteprima 39 s, indietro 14 s, impaginazione 57 s, home-spiegazione 161 s, geometria 7 s, precisione 302 s, prova-pages 4 s, installazione 36 s, prova-desktop 38 s | 15 verdi, 1 rosso noto |
+| C | e2e-schermi 770 s («Tutto a posto su 13 formati, 5 coricati e 2 col testo x2 e 2 coi lanci»), soak 79 s | 2 verdi |
+| livelli | 1-100: 555 s, 101-200: 542 s | 100 su 100 e 100 su 100 |
+
+**33 controlli + i livelli: 31 verdi, 2 rossi, entrambi quelli noti dei container figli**
+(`docs/TESTING.md`, «Due rossi noti»): `e2e-quadri` «FINE LIVELLO (vittoria): a 320x700 bisogna
+scorrere di 2 px» (lo stesso del collaudo sul sito pubblicato) e `recensione` «a 360x640 l invito
+finisce 10px sotto la barra dei pulsanti». Nessuno dei due tocca file cambiati qui (le mie regole
+della festa valgono solo coricato). Il verdetto che conta resta quello della CI.
+
+Dopo il gate `npm test` rilanciato con l'ultimo test aggiunto (`tests/avviso-torre.test.js`):
+51 file, 703 test, tutti verdi. `npm run build` verde (pezzo A).
 
 ## Testo per il changelog (proposta, non scritto in `docs/CHANGELOG.md`)
 
