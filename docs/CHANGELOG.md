@@ -26,6 +26,11 @@ Correzioni dal collaudo della 1.22.0 (`docs/sviluppo/COLLAUDO-1.22.0.md`, rappor
 - **Gettoni** guadagnati e persi nella stessa vittoria (salvataggio importato): una frase sola (O6).
 - **Anteprima dei collegamenti**: «200 livelli», come l'immagine (D1); la descrizione
   dell'immagine dice «griglia» e non «tabellone».
+- **Il pulsante grande della home porta al livello a cui sei arrivato** (PO-041, segnalazione
+  del PO): chi aveva finito il Ponte e poi riaperto il livello 100 vedeva «Livello 100» invece
+  di «Livello 101», come se la Torre non fosse aperta. Un livello già superato lasciato a metà
+  non prende più il pulsante; si riprende riaprendolo dalla mappa. Interruttore
+  `SOSPESO_SOLO_SE_DA_SUPERARE`, prova `npm run e2e-po041`.
 
 ## [1.22.0] — 2 novembre 2026 — La Torre
 

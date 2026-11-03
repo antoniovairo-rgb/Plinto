@@ -33,7 +33,7 @@ import {
 } from '../config/quadri.js';
 import {
   quantiSuperati, prossimoQuadro, quadroDopo, riepilogoPercorso, riepilogoAtto, quadroSbloccato,
-  superatiNellOpera,
+  superatiNellOpera, quadroSuperato,
 } from '../persistence/progressi.js';
 import { leggiRipresa } from '../persistence/ripresa.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
@@ -54,6 +54,17 @@ import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
  * Un posto da riprendere esiste solo se si e' gia' giocato, quindi la guida non serve.
  */
 export const RIPRENDI_LIVELLO_A_MANO = true;
+
+/**
+ * Interruttore PO-041: il pulsante grande della home riprende il livello lasciato a meta'
+ * solo se quel livello NON e' gia' superato. Segnalazione del PO dal telefono (1.22.0):
+ * Ponte finito, Torre aperta, ma il pulsante diceva «Livello 100» perche' il 100, gia'
+ * vinto, era stato riaperto e lasciato; con PO-013 non c'e' scritto «Riprendi», e
+ * sembrava che il Ponte non fosse finito. Acceso, il pulsante dice il livello corrente;
+ * la partita del livello vecchio resta e si riprende riaprendolo dalla mappa (PO-008).
+ * Spento, torna il livello salvato: `npm run e2e-po041` e' rosso.
+ */
+export const SOSPESO_SOLO_SE_DA_SUPERARE = true;
 export const RIPRESA_SENZA_GUIDA = true;
 /*
  * PO-008, seconda parte: le tre strade con cui il collaudo 1.21.9 perdeva una partita a
@@ -584,9 +595,15 @@ export function App() {
    * importando un salvataggio o azzerando i dati, e tutte queste strade passano da li'.
    */
   const livelloInSospeso = useMemo(
-    () => (RIPRENDI_LIVELLO_A_MANO && schermata === 'home' ? quadri.numeroSalvato() : null),
+    () => {
+      if (!RIPRENDI_LIVELLO_A_MANO || schermata !== 'home') return null;
+      const salvato = quadri.numeroSalvato();
+      if (salvato !== null && SOSPESO_SOLO_SE_DA_SUPERARE
+        && salvato !== livelloCorrente && quadroSuperato(salvato)) return null;
+      return salvato;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [schermata, quadri.quadro, quadri.esito],
+    [schermata, quadri.quadro, quadri.esito, livelloCorrente],
   );
 
   /**
