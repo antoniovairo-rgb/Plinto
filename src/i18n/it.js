@@ -393,6 +393,10 @@ export default {
     oraNeHaiUno: 'Adesso hai 1 gettone.',
     perso: 'Avevi già il massimo di 3 gettoni, quindi quello appena guadagnato è andato perso. Usa un attrezzo per fare posto.',
     persiTanti: 'Avevi già il massimo di 3 gettoni, quindi {n} gettoni appena guadagnati sono andati persi. Usa un attrezzo per fare posto.',
+    // O6 (collaudo 1.22.0): quando nella stessa vittoria se ne guadagnano e se ne perdono.
+    // «Avevi gia' il massimo» li' era falso: subito sopra c'e' «Hai guadagnato N gettoni».
+    persoOltre: 'Puoi tenerne al massimo {max}: l\'altro è andato perso.',
+    persiOltre: 'Puoi tenerne al massimo {max}: gli altri {n} sono andati persi.',
   },
 
   atti: {

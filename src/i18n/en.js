@@ -326,6 +326,8 @@ export default {
     oraNeHaiUno: 'You now have 1 token.',
     perso: 'You already had the maximum of 3 tokens, so the one you just earned was lost. Use a tool to make room.',
     persiTanti: 'You already had the maximum of 3 tokens, so {n} tokens you just earned were lost. Use a tool to make room.',
+    persoOltre: 'You can keep at most {max}: the other one was lost.',
+    persiOltre: 'You can keep at most {max}: the other {n} were lost.',
   },
 
   atti: {
