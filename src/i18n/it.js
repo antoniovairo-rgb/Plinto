@@ -464,6 +464,10 @@ export default {
     },
     operaMancano: 'Te ne mancano {n}.',
     operaMancaUno: 'Te ne manca uno.',
+    // O2 (collaudo 1.22.0): sotto il nome della scheda chiusa, in piccolo. Senza punto: e'
+    // un'etichetta, non una frase.
+    schedaMancano: 'mancano {n} livelli',
+    schedaMancaUno: 'manca 1 livello',
     massiRegola: 'Le caselle grigie sono massi: contano come piene, ma non spariscono mai.',
     ultimoChiuso: 'Il livello {n} si apre quando hai superato tutti gli altri. Ti mancano: {elenco}.',
     ultimoChiusoUno: 'Il livello {n} si apre quando hai superato tutti gli altri. Ti manca il livello {m}.',
@@ -652,8 +656,11 @@ export default {
     riga: 'riga', righe: 'righe',
     colonna: 'colonna', colonne: 'colonne',
     quadrante: 'quadrante', quadranti: 'quadranti',
-    eliminate: 'eliminate',
+    // O5 (collaudo 1.22.0): il participio si accorda con cio' che si e' eliminato.
+    eliminata: 'eliminata', eliminato: 'eliminato',
+    eliminate: 'eliminate', eliminati: 'eliminati',
     piu: 'più',
+    punto: 'punto',
     punti: 'punti',
     grigliaVuota: 'Griglia completamente svuotata',
     cella: 'Casella riga {r} colonna {c}',
@@ -702,6 +709,15 @@ export default {
     liberaTesto: 'Se inizi una nuova partita, perdi le mosse fatte in quella a metà.',
     riprendiLibera: 'Riprendi la partita',
     nuovaLibera: 'Nuova partita',
+  },
+  // O1 (collaudo 1.22.0, decisione del PO del 3 novembre 2026): a chi aveva gia' finito il
+  // Ponte prima della 1.22.0 la Torre non l'ha annunciata nessuno. Una volta sola. Il titolo
+  // e' il nome dell'opera (opere.torre); il pulsante e' quello della festa del Ponte
+  // (trionfo.vai.torre). «cento» e' scritto in lettere come in trionfo.aperta.torre: lo
+  // tiene allineato al numero vero dei livelli della Torre tests/avviso-torre.test.js.
+  avvisoTorre: {
+    testo: 'La Torre è aperta: altri cento livelli e una regola nuova, i massi.',
+    nonOra: 'Non ora',
   },
   comune: {
     /* «Chiudi» non diceva CHE COSA chiude: il menu o il gioco? Segnalato da un tester.
