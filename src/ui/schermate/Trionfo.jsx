@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Plinto } from '../Plinto.jsx';
 import { OPERE } from '../../config/quadri.js';
 import { CondividiTrionfo } from '../Condividi.jsx';
@@ -54,8 +55,10 @@ const PIOGGIA = Array.from({ length: BLOCCHI_PIOGGIA }, (_, i) => ({
 
 export function SchermoTrionfo({
   riepilogo, opera = OPERE[0], successiva = null, animazioni = true,
-  onElenco, onLibera, onSuccessiva, t,
+  onElenco, onLibera, onSuccessiva, onMostrata, t,
 }) {
+  // Chi la vede ha gia' saputo che l'opera dopo e' aperta (App.jsx, AVVISO_TORRE).
+  useEffect(() => { onMostrata?.(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="pl-screen pl-trionfo">
       {animazioni ? (

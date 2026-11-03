@@ -47,6 +47,9 @@ const VERIFICHE = [
   { nome: 'partita completa nel browser', comando: 'npm', argomenti: ['run', 'e2e'] },
   { nome: 'livelli nel browser (vittoria e sconfitta)', comando: 'npm', argomenti: ['run', 'e2e-quadri'] },
   { nome: 'fine del percorso: festa finale e atti chiusi', comando: 'npm', argomenti: ['run', 'e2e-trionfo'] },
+  // PO-040 (collaudo 1.22.0, O1-O3): avviso della Torre una volta sola, schede della mappa
+  // ferme in cima in tutti i formati, opera chiusa senza la riga sotto gli atti.
+  { nome: 'la Torre per chi ci e arrivato: avviso, schede in vista, opera chiusa', comando: 'npm', argomenti: ['run', 'e2e-torre-aperta'] },
   { nome: 'ripresa dopo l interruzione (partita e livello)', comando: 'npm', argomenti: ['run', 'e2e-ripresa'] },
   { nome: 'un livello lasciato a meta non riparte da zero (PO-008)', comando: 'npm', argomenti: ['run', 'e2e-po008'] },
   { nome: 'salvataggio: esce, rientra e non cancella niente', comando: 'npm', argomenti: ['run', 'e2e-salvataggio'] },
