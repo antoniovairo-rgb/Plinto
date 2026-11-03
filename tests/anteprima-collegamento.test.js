@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { PLAY_URL, SITO } from '../src/config/progetto.js';
+import { TOTALE_QUADRI } from '../src/config/quadri.js';
 
 /**
  * L'anteprima che si vede quando qualcuno incolla il link del gioco in una chat.
@@ -70,5 +71,32 @@ describe('il collegamento del Play Store', () => {
     // Il nome del pacchetto scritto due volte e' il nome del pacchetto che prima o poi
     // diverge: qui si controlla che il link porti alla scheda di QUESTA applicazione.
     expect(PLAY_URL).toContain(pacchetto);
+  });
+});
+
+/*
+ * D1 del collaudo 1.22.0: con la Torre i livelli sono 200, l'immagine dell'anteprima dice
+ * «200 livelli» e le due descrizioni dicevano ancora «Cento livelli». Chi incollava il link
+ * leggeva due numeri diversi nello stesso riquadro. Un numero di livelli nelle descrizioni,
+ * in cifre o in lettere, deve essere il totale vero dei livelli del gioco.
+ */
+describe('anteprima dei collegamenti: il numero dei livelli (D1)', () => {
+  const LETTERE = { cento: 100, duecento: 200, trecento: 300, quattrocento: 400 };
+  /** I numeri che precedono la parola «livelli» in una descrizione. */
+  function numeriDeiLivelli(testo) {
+    return [...testo.matchAll(/(\d[\d.\s]*|[A-Za-zàèé]+)\s+livelli/gi)]
+      .map(([, n]) => (/^\d/.test(n) ? Number(n.replace(/\D/g, '')) : LETTERE[n.toLowerCase()]))
+      .filter((n) => n !== undefined);
+  }
+  for (const chiave of ['og:description', 'twitter:description']) {
+    it(`${chiave}: se dice quanti livelli, dice ${TOTALE_QUADRI}`, () => {
+      const testo = meta(chiave) ?? '';
+      expect(testo).not.toBe('');
+      for (const n of numeriDeiLivelli(testo)) expect(n, testo).toBe(TOTALE_QUADRI);
+    });
+  }
+  it('il controllo riconosce i numeri scritti in lettere (sa fallire)', () => {
+    expect(numeriDeiLivelli('Cento livelli, ognuno con il suo obiettivo.')).toEqual([100]);
+    expect(numeriDeiLivelli('200 livelli e una sfida')).toEqual([200]);
   });
 });
