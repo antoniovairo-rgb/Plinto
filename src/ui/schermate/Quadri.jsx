@@ -119,6 +119,22 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, operaIniziale = 
     tappaCorrente.current?.scrollIntoView({ block: 'center' });
   }, []);
 
+  // CAMBIANDO SCHEDA si riparte dal posto giusto dell'altra opera. Con le schede ferme in
+  // cima (SCHEDE_FISSE) la scheda si tocca anche dal fondo della mappa, e la nuova opera
+  // restava scorsa a meta': toccando «La Torre» dal livello 58 non si vedeva il riquadro
+  // «Te ne mancano 43», che e' la ragione per cui la si tocca. Si va al livello corrente se
+  // sta in quest'opera, altrimenti in cima. Al primo disegno no: ci pensa l'effetto sopra.
+  const primoDisegno = useRef(true);
+  useEffect(() => {
+    if (primoDisegno.current) { primoDisegno.current = false; return; }
+    if (!SCHEDE_FISSE) return;
+    if (tappaCorrente.current) tappaCorrente.current.scrollIntoView({ block: 'center' });
+    else {
+      const scorre = schede.current[0]?.closest('.pl-scroll');
+      if (scorre) scorre.scrollTop = 0;
+    }
+  }, [operaVista]);
+
   // Il titolo e' il nome dell'opera che si sta guardando, non la parola "Livelli": i
   // cento livelli del Ponte sono UNA cosa, e i cento della Torre un'altra.
   return (

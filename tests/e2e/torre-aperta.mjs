@@ -383,6 +383,12 @@ console.log('O3. Torre chiusa: nessun atto dice «Si apre quando arrivi al livel
   await page.waitForTimeout(150);
   const righe = await page.locator('.pl-atto__obiettivo').allInnerTexts();
   const riquadro = await page.locator('.pl-opera-chiusa').innerText().catch(() => '');
+  // Toccata dal livello 58, la Torre si apre dall'alto: il riquadro deve vedersi subito.
+  const vista = await page.evaluate(() => {
+    const r = document.querySelector('.pl-opera-chiusa')?.getBoundingClientRect();
+    return r ? { top: Math.round(r.top), bottom: Math.round(r.bottom), h: window.innerHeight } : null;
+  });
+  if (!vista || vista.top < 0 || vista.bottom > vista.h) errori.push(`O2: toccando «La Torre» dal livello 58 il riquadro «Te ne mancano» non si vede (${JSON.stringify(vista)})`);
   await page.screenshot({ path: `${OUT}/o3-torre-chiusa-360x640.png`, fullPage: false });
   if (!/Te ne mancano 43/.test(riquadro)) errori.push(`O3: il riquadro della Torre chiusa non dice «Te ne mancano 43»: «${riquadro}»`);
   const doppie = righe.filter((r) => /Si apre quando arrivi/.test(r));
