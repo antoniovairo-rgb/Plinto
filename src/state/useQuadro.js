@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAnnulla } from './useAnnulla.js';
 import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../core/quadro.js';
 import { summarize, serializeGame, deserializeGame } from '../core/engine.js';
-import { registraTentativo, quantiSuperati } from '../persistence/progressi.js';
+import { registraTentativo, quantiSuperati, quadroSbloccato } from '../persistence/progressi.js';
 import { riscuoti, usaAttrezzo, quantiAttrezzi } from '../persistence/attrezzi.js';
 import {
   cambiaPezzo, scavaCella, appoggiaSullaMensola, riprendiDallaMensola,
@@ -36,6 +36,29 @@ export const SALVA_IN_PRESENTAZIONE = true;
  * Il livello nuovo prende il posto del vecchio solo quando lo si comincia a giocare.
  */
 export const NON_COPRE_UN_ALTRO_LIVELLO = true;
+/*
+ * RIPRENDI_SOLO_SE_APERTO (PO-042, collaudo 1.22.1 D1): un livello salvato a meta' conta
+ * come "in sospeso" solo se e' ancora APERTO (`quadroSbloccato`). Misurato sulla 1.22.1:
+ * Ponte finito con il 100 a meta', poi «Sostituisci tutto» con un salvataggio dei livelli
+ * 1-10: il pulsante grande diceva «Livello 100», il tocco riprendeva il 100 e ricaricando
+ * si riapriva da solo, mentre la mappa lo mostra chiuso. «Sostituisci» non tocca
+ * `plinto:partita-quadro`, che non viaggia nel salvataggio.
+ *
+ * Vale per tutte le strade che leggono il salvataggio del livello: il pulsante della home
+ * (`numeroSalvato`), la ripresa automatica e `apriQuadro` (`riprendiSalvato`), la domanda
+ * di PO-008 (`livelloAMeta`) e la presentazione che non copre un altro livello.
+ *
+ * LA PARTITA DEL LIVELLO CHIUSO SI IGNORA, NON SI CANCELLA. Ignorata, se il giocatore
+ * rimette il salvataggio di prima (un altro «Sostituisci» con il file completo) il livello
+ * torna aperto e la partita si riprende com'era: cancellarla sarebbe irreversibile per un
+ * caso che si annulla da solo. Finche' resta chiuso non fa danni: non va sul pulsante, non
+ * si riprende, non fa chiedere niente, e la copre il primo livello che si comincia.
+ * Spento, torna il difetto: caso D di `npm run e2e-po041` rosso.
+ */
+export const RIPRENDI_SOLO_SE_APERTO = true;
+
+/** Il livello salvato si puo' ancora giocare? Spento l'interruttore, sempre si'. */
+const apertoAncora = (numero) => !RIPRENDI_SOLO_SE_APERTO || quadroSbloccato(numero);
 
 /**
  * Gestisce la partita di un Quadro.
@@ -105,7 +128,7 @@ export function useQuadro() {
     const voce = read(KEYS.CURRENT_LEVEL, null);
     if (!voce || !Number.isFinite(voce.numero)) return null;
     const definizione = quadroNumero(voce.numero);
-    if (!definizione) return null;
+    if (!definizione || !apertoAncora(voce.numero)) return null;
     const stato = deserializeGame(voce.partita);
     if (!stato || stato.status !== 'playing') return null;
     setQuadro(definizione);
@@ -121,6 +144,7 @@ export function useQuadro() {
   const numeroSalvato = useCallback(() => {
     const voce = read(KEYS.CURRENT_LEVEL, null);
     if (!voce || !Number.isFinite(voce.numero) || !quadroNumero(voce.numero)) return null;
+    if (!apertoAncora(voce.numero)) return null;
     const stato = deserializeGame(voce.partita);
     return stato && stato.status === 'playing' ? voce.numero : null;
   }, []);
@@ -136,6 +160,7 @@ export function useQuadro() {
     const voce = read(KEYS.CURRENT_LEVEL, null);
     if (!voce || voce.presentazione === true) return null;
     if (!Number.isFinite(voce.numero) || !quadroNumero(voce.numero)) return null;
+    if (!apertoAncora(voce.numero)) return null;
     const stato = deserializeGame(voce.partita);
     return stato && stato.status === 'playing' && stato.stats.moves > 0 ? voce.numero : null;
   }, []);
@@ -175,7 +200,8 @@ export function useQuadro() {
     if (daPresentare && !SALVA_IN_PRESENTAZIONE) return;
     if (daPresentare && NON_COPRE_UN_ALTRO_LIVELLO) {
       const voce = read(KEYS.CURRENT_LEVEL, null);
-      if (voce && voce.numero !== quadro.numero && voce.presentazione !== true) {
+      if (voce && voce.numero !== quadro.numero && voce.presentazione !== true
+        && apertoAncora(voce.numero)) {
         const salvata = deserializeGame(voce.partita);
         if (salvata && salvata.status === 'playing') return;
       }

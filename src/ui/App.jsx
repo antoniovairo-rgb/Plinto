@@ -83,6 +83,18 @@ export const RIPRESA_SENZA_GUIDA = true;
  * giorno copriva in silenzio quella a meta', perche' anche la sfida ha un salvataggio solo.
  */
 export const CONFERMA_ALTRO_LIVELLO = true;
+/*
+ * GIOCA_PIENO_SE_SUPERATO (PO-043, collaudo 1.22.1 O1; scelta del PO «101 evidenziato»):
+ * nella domanda di CONFERMA_ALTRO_LIVELLO, se il livello lasciato a meta' e' GIA'
+ * superato, il pulsante pieno, primo e con il fuoco e' «Gioca il livello N», e «Riprendi
+ * il livello M» diventa il secondo, trasparente. Misurato sulla 1.22.1: Ponte finito, 100
+ * a meta' con una mossa, «Gioca» sul 101: il pieno con il fuoco era «Riprendi il livello
+ * 100», e chi lo tocca d'istinto torna nel 100, dove il PO non voleva finire. Li' si perde
+ * solo una rigiocata di un livello vinto. Se M non e' superato la domanda resta com'era:
+ * la strada che non perde niente e' la facile (PO-008).
+ * Spento, torna com'era: caso E di `npm run e2e-po041` rosso, E2 verde.
+ */
+export const GIOCA_PIENO_SE_SUPERATO = true;
 export const CONFERMA_RIPROVA = true;
 export const CONFERMA_ALTRA_SFIDA = true;
 /*
@@ -550,6 +562,7 @@ export function App() {
         etichettaContinua: t('conferma.giocaLivello').replace('{altro}', altro),
         onTorna: () => { setConferma(null); quadri.riprendiSalvato(); },
         onContinua: () => { setConferma(null); quadri.avvia(); },
+        primaContinua: GIOCA_PIENO_SE_SUPERATO && quadroSuperato(lasciato),
       });
       return;
     }
@@ -684,6 +697,7 @@ export function App() {
       onContinua={conferma.onContinua}
       onAnnulla={chiudiConferma}
       ripiego={conferma.ripiego}
+      primaContinua={conferma.primaContinua === true}
     />
   ) : null;
 

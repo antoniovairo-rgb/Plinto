@@ -97,9 +97,16 @@ export const FUOCO_TORNA_A_CHI_APRE = true;
  * LA STRADA SICURA E' QUELLA FACILE: quella che non perde niente e' il pulsante pieno, in
  * alto, e ha il fuoco appena la finestra si apre; l'altra e' trasparente. Escape, il tocco fuori e
  * il tasto Indietro di Android (gestito da App) chiudono la domanda senza perdere niente.
+ *
+ * `primaContinua` rovescia i due pulsanti: pieno, primo e con il fuoco va «continua»,
+ * trasparente e secondo «torna». Lo usa solo la domanda sul livello a meta' quando quel
+ * livello e' gia' superato (PO-043, GIOCA_PIENO_SE_SUPERATO in App.jsx): li' si perde una
+ * rigiocata, e la strada che il giocatore cercava e' il livello nuovo. Escape, il tocco
+ * fuori e Indietro continuano a non perdere niente.
  */
 export function ConfermaPerdita({
   titolo, testo, etichettaTorna, etichettaContinua, onTorna, onContinua, onAnnulla, ripiego,
+  primaContinua = false,
 }) {
   const sicuro = useRef(null);
   // Letto al primo disegno, prima che il fuoco passi al pulsante sicuro: e' il pulsante
@@ -137,12 +144,25 @@ export function ConfermaPerdita({
         <p className="pl-azzera__titolo">{titolo}</p>
         <p className="pl-azzera__testo">{testo}</p>
         <div className="pl-azzera__scelte">
-          <button ref={sicuro} type="button" className="pl-btn pl-btn--largo" onClick={() => { scelto.current = true; onTorna(); }}>
-            {etichettaTorna}
-          </button>
-          <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { scelto.current = true; onContinua(); }}>
-            {etichettaContinua}
-          </button>
+          {primaContinua ? (
+            <>
+              <button ref={sicuro} type="button" className="pl-btn pl-btn--largo" onClick={() => { scelto.current = true; onContinua(); }}>
+                {etichettaContinua}
+              </button>
+              <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { scelto.current = true; onTorna(); }}>
+                {etichettaTorna}
+              </button>
+            </>
+          ) : (
+            <>
+              <button ref={sicuro} type="button" className="pl-btn pl-btn--largo" onClick={() => { scelto.current = true; onTorna(); }}>
+                {etichettaTorna}
+              </button>
+              <button type="button" className="pl-btn pl-btn--fantasma pl-btn--largo" onClick={() => { scelto.current = true; onContinua(); }}>
+                {etichettaContinua}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
