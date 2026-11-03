@@ -55,6 +55,10 @@ function leggiImpostazioni() {
       animazioni: !menoMovimento(),
       lingua: linguaDelBrowser(),
       introVista: false,
+      // O1 (collaudo 1.22.0): l'avviso «La Torre e' aperta» gia' mostrato (o la festa del
+      // Ponte, che lo dice gia'). Un campo nuovo con il suo predefinito: un documento
+      // scritto da una versione precedente non ce l'ha e lo legge come «non ancora».
+      avvisoTorre: false,
     },
     migra,
   });

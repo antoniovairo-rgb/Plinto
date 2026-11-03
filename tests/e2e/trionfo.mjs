@@ -107,6 +107,43 @@ async function vinciIlPrimo(numero = 1) {
   return true;
 }
 
+
+/*
+ * O4 (collaudo 1.22.0): LA FESTA CORICATA. A 640x360 si vedeva solo il titolo: i pulsanti
+ * prendevano 156 px su 360 e i numeri cominciavano sotto di loro. Adesso, in orizzontale
+ * basso, i pulsanti stanno a destra e il riepilogo a sinistra a tutta altezza, come la
+ * plancia nei livelli coricati. Si misura sulla festa gia' a schermo, girando il telefono.
+ */
+const CORICATI = [[640, 360], [800, 360], [915, 412], [1024, 600], [1280, 620]];
+async function controllaCoricata(nome) {
+  for (const [w, h] of CORICATI) {
+    await page.setViewportSize({ width: w, height: h });
+    await page.waitForTimeout(150);
+    const m = await page.evaluate(() => {
+      const r = (s) => { const el = document.querySelector(s); if (!el) return null; const b = el.getBoundingClientRect(); return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, h: b.height }; };
+      const bottoni = [...document.querySelectorAll('.pl-trionfo .pl-fine__azioni button')].map((b) => b.getBoundingClientRect());
+      const dentro = document.querySelector('.pl-trionfo__dentro');
+      if (dentro) dentro.scrollTop = 0;
+      return {
+        dentro: r('.pl-trionfo__dentro'), azioni: r('.pl-trionfo .pl-fine__azioni'), numeri: r('.pl-trionfo__numeri'),
+        bottoni: bottoni.map((b) => ({ top: b.top, bottom: b.bottom, left: b.left, right: b.right })),
+        sporge: document.documentElement.scrollWidth > window.innerWidth,
+      };
+    });
+    const dove = `${nome} ${w}x${h}`;
+    if (w === 640) await page.screenshot({ path: `${OUT}/coricata-${nome}-${w}x${h}.png` });
+    if (!m.dentro || !m.azioni) { errori.push(`CORICATA ${dove}: festa non trovata`); continue; }
+    console.log(`   ${dove}: riepilogo ${Math.round(m.dentro.left)}-${Math.round(m.dentro.right)} alto ${Math.round(m.dentro.h)}; pulsanti ${Math.round(m.azioni.left)}-${Math.round(m.azioni.right)}; numeri da ${Math.round(m.numeri?.top)} a ${Math.round(m.numeri?.bottom)}`);
+    if (m.azioni.left < m.dentro.right - 1) errori.push(`CORICATA ${dove}: i pulsanti non stanno a destra del riepilogo (pulsanti da ${Math.round(m.azioni.left)}, riepilogo fino a ${Math.round(m.dentro.right)})`);
+    if (m.dentro.h < h * 0.9) errori.push(`CORICATA ${dove}: il riepilogo e alto ${Math.round(m.dentro.h)} px su ${h}, non a tutta altezza`);
+    if (m.bottoni.some((b) => b.top < 0 || b.bottom > h + 0.5 || b.right > w + 0.5)) errori.push(`CORICATA ${dove}: un pulsante esce dallo schermo ${JSON.stringify(m.bottoni)}`);
+    if (!m.numeri || m.numeri.bottom > h) errori.push(`CORICATA ${dove}: all apertura i numeri non si vedono interi (fino a ${Math.round(m.numeri?.bottom)} su ${h})`);
+    if (m.sporge) errori.push(`CORICATA ${dove}: la pagina sporge di lato`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(150);
+}
+
 // I livelli del Ponte: le prime quattro prove stanno tutte li'. La festa della Torre ha
 // la sua prova, la quinta.
 const PONTE = OPERE[0];
@@ -120,6 +157,7 @@ await preparaEGioca(tutti.filter((n) => n !== 1));
 if (await vinciIlPrimo()) {
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/1-trionfo.png` });
+  if (await page.locator('.pl-trionfo').count() === 1) await controllaCoricata('ponte');
 
   const feste = await page.locator('.pl-trionfo').count();
   if (feste !== 1) {
@@ -428,6 +466,7 @@ await preparaEGioca(Array.from({ length: TORRE.a }, (_, i) => i + 1).filter((n) 
 if (await vinciIlPrimo(TORRE.da)) {
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${OUT}/5-trionfo-torre.png` });
+  if (await page.locator('.pl-trionfo').count() === 1) await controllaCoricata('torre');
   if (await page.locator('.pl-trionfo').count() !== 1) {
     errori.push('TRIONFO TORRE: chiudendo l ultimo livello della Torre la festa non compare');
   } else {

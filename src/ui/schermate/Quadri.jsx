@@ -15,6 +15,27 @@ import { CondividiPercorso } from '../Condividi.jsx';
 import { IconaCassetta } from '../Attrezzi.jsx';
 import { OGNI_LIVELLI, tappeDelProssimoAttrezzo } from '../../persistence/attrezzi.js';
 
+/*
+ * SCHEDE_FISSE (collaudo 1.22.0, O2; decisione del PO del 3 novembre 2026): la mappa si apre
+ * centrata sul livello corrente, e le schede «Ponte / Torre» restavano sopra lo schermo
+ * (misurate a -741 px a 360x640 con 57 livelli superati): chi e' a meta' Ponte non vedeva
+ * che la Torre esiste. Acceso, la fila delle schede resta ferma in cima mentre la mappa
+ * scorre (`position: sticky` dentro `.pl-scroll`), e la scheda chiusa dice quanti livelli
+ * mancano ad aprirla. Le schede si scelgono anche con le frecce, come chiede il modello
+ * ARIA delle schede (`role="tablist"`). Spento, torna la fila che scorre via:
+ * `npm run e2e-torre-aperta` e' rosso.
+ */
+export const SCHEDE_FISSE = true;
+
+/*
+ * ATTI_SENZA_RIGA_SE_CHIUSA (collaudo 1.22.0, O3; decisione della madre): sull'opera chiusa
+ * sotto il riquadro «... ognuno con la spunta. Te ne mancano 43.» ogni atto diceva anche
+ * «Si apre quando arrivi al livello 101»: due regole scritte in due modi, e la seconda non
+ * dice che servono tutte le spunte. Acceso, sull'opera chiusa gli atti non hanno la riga:
+ * basta il riquadro. Spento, la riga torna: `npm run e2e-torre-aperta` e' rosso.
+ */
+export const ATTI_SENZA_RIGA_SE_CHIUSA = true;
+
 /**
  * La mappa del percorso.
  *
@@ -34,7 +55,7 @@ import { OGNI_LIVELLI, tappeDelProssimoAttrezzo } from '../../persistence/attrez
  * chiusa, per la stessa ragione delle tappe chiuse: sapere cosa arriva dopo, e cosa serve
  * per aprirla, e' quello che fa venire voglia di arrivarci.
  */
-export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
+export function SchermoQuadri({ onApri, onIndietro, onAzzerato, operaIniziale = null, t }) {
   // Ricominciare da capo si conferma DUE volte. Non e' burocrazia: e' un'azione che
   // cancella ore di gioco e non si puo' annullare, e sta nella stessa schermata che
   // si apre per scegliere un livello. Un tocco solo, da un pollice che scorre, la
@@ -66,7 +87,20 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
 
   const corrente = prossimoQuadro(TOTALE_QUADRI, progressi);
   const tappaCorrente = useRef(null);
-  const [operaVista, setOperaVista] = useState(() => operaDelQuadro(corrente).id);
+  // `operaIniziale`: l'avviso della Torre aperta apre la mappa sulla Torre (App.jsx).
+  const [operaVista, setOperaVista] = useState(
+    () => (OPERE.some((o) => o.id === operaIniziale) ? operaIniziale : operaDelQuadro(corrente).id),
+  );
+  const schede = useRef([]);
+  /** Le frecce spostano la scelta e il fuoco fra le schede (modello ARIA delle schede). */
+  const frecceSchede = (e, i) => {
+    const dove = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: OPERE.length - 1 }[e.key];
+    if (dove === undefined) return;
+    e.preventDefault();
+    const j = (dove + OPERE.length) % OPERE.length;
+    setOperaVista(OPERE[j].id);
+    schede.current[j]?.focus();
+  };
   const opera = OPERE.find((o) => o.id === operaVista) ?? OPERE[0];
   const totaleOpera = livelliDellOpera(opera);
   const superatiOpera = superatiNellOpera(opera, progressi);
@@ -85,34 +119,67 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
     tappaCorrente.current?.scrollIntoView({ block: 'center' });
   }, []);
 
+  // CAMBIANDO SCHEDA si riparte dal posto giusto dell'altra opera. Con le schede ferme in
+  // cima (SCHEDE_FISSE) la scheda si tocca anche dal fondo della mappa, e la nuova opera
+  // restava scorsa a meta': toccando «La Torre» dal livello 58 non si vedeva il riquadro
+  // «Te ne mancano 43», che e' la ragione per cui la si tocca. Si va al livello corrente se
+  // sta in quest'opera, altrimenti in cima. Al primo disegno no: ci pensa l'effetto sopra.
+  const primoDisegno = useRef(true);
+  useEffect(() => {
+    if (primoDisegno.current) { primoDisegno.current = false; return; }
+    if (!SCHEDE_FISSE) return;
+    if (tappaCorrente.current) tappaCorrente.current.scrollIntoView({ block: 'center' });
+    else {
+      const scorre = schede.current[0]?.closest('.pl-scroll');
+      if (scorre) scorre.scrollTop = 0;
+    }
+  }, [operaVista]);
+
   // Il titolo e' il nome dell'opera che si sta guardando, non la parola "Livelli": i
   // cento livelli del Ponte sono UNA cosa, e i cento della Torre un'altra.
   return (
     <Pagina titolo={t(`opere.${opera.id}`)} onIndietro={onIndietro} t={t}>
       {OPERE.length > 1 ? (
-        <div className="pl-opere" role="tablist" aria-label={t('quadri.opere')}>
-          {OPERE.map((o) => {
-            const scelta = o.id === opera.id;
-            const aperta = quadroSbloccato(o.da, progressi);
-            return (
-              <button
-                key={o.id}
-                type="button"
-                role="tab"
-                aria-selected={scelta}
-                className={`pl-opere__scheda${scelta ? ' pl-opere__scheda--scelta' : ''}${aperta ? '' : ' pl-opere__scheda--chiusa'}`}
-                onClick={() => setOperaVista(o.id)}
-              >
-                {t(`opere.${o.id}`)}
-                {aperta ? null : (
-                  <svg className="pl-opere__lucchetto" viewBox="0 0 16 16" role="img" aria-label={t('quadri.operaChiusaBreve')}>
-                    <rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor" />
-                    <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
+        <div className={SCHEDE_FISSE ? 'pl-opere-fila' : undefined}>
+          <div className="pl-opere" role="tablist" aria-label={t('quadri.opere')}>
+            {OPERE.map((o, i) => {
+              const scelta = o.id === opera.id;
+              const aperta = quadroSbloccato(o.da, progressi);
+              // Quanti livelli dell'opera prima mancano per aprire questa (O2): lo stesso
+              // conto del riquadro sotto le schede, qui per ogni scheda chiusa.
+              const precedente = operaPrecedente(o);
+              const mancano = !aperta && precedente
+                ? livelliDellOpera(precedente) - superatiNellOpera(precedente, progressi) : 0;
+              const testoMancano = SCHEDE_FISSE && mancano > 0
+                ? (mancano === 1 ? t('quadri.schedaMancaUno')
+                  : t('quadri.schedaMancano').replace('{n}', numero(mancano)))
+                : '';
+              return (
+                <button
+                  key={o.id}
+                  ref={(el) => { schede.current[i] = el; }}
+                  type="button"
+                  role="tab"
+                  aria-selected={scelta}
+                  tabIndex={SCHEDE_FISSE && !scelta ? -1 : 0}
+                  onKeyDown={SCHEDE_FISSE ? (e) => frecceSchede(e, i) : undefined}
+                  className={`pl-opere__scheda${scelta ? ' pl-opere__scheda--scelta' : ''}${aperta ? '' : ' pl-opere__scheda--chiusa'}`}
+                  onClick={() => setOperaVista(o.id)}
+                >
+                  <span className="pl-opere__nome">
+                    {t(`opere.${o.id}`)}
+                    {aperta ? null : (
+                      <svg className="pl-opere__lucchetto" viewBox="0 0 16 16" role="img" aria-label={t('quadri.operaChiusaBreve')}>
+                        <rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor" />
+                        <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                      </svg>
+                    )}
+                  </span>
+                  {testoMancano ? <span className="pl-opere__mancano">{testoMancano}</span> : null}
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : null}
 
@@ -237,7 +304,7 @@ export function SchermoQuadri({ onApri, onIndietro, onAzzerato, t }) {
                 ? (inCorso
                   ? `${t('quadri.quadro').replace('{n}', inCorso.numero)} · ${descriviObiettivi(inCorso, t)} · ${inCorso.maxMosse} ${t('quadri.mosse').toLowerCase()}`
                   : '')
-                : t('quadri.attoDaAprire').replace('{n}', atto.da);
+                : (ATTI_SENZA_RIGA_SE_CHIUSA && !operaAperta ? '' : t('quadri.attoDaAprire').replace('{n}', atto.da));
               return testo ? <p className="pl-atto__obiettivo">{testo}</p> : null;
             })()}
             {/* L'ULTIMO LIVELLO CHIUSO DALLA SUA REGOLA: si dice perche' e quali livelli

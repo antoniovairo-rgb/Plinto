@@ -37,6 +37,30 @@ import { impronta } from '../../src/persistence/salvataggio.js';
 import { createGame, serializeGame } from '../../src/core/engine.js';
 import { gridFromString } from '../../src/core/grid.js';
 import { getShape } from '../../src/core/shapes.js';
+import { quadroNumero } from '../../src/config/quadri.js';
+import { posizioneMossa } from '../../tools/sequenza-vincente.mjs';
+import { iniziaQuadro, statoQuadro, giocaNelQuadro } from '../../src/core/quadro.js';
+import { createRng, seedFromString } from '../../src/core/rng.js';
+import { preferenze, scegliMossa } from '../../src/sim/giocatore-quadri.mjs';
+
+/** Le mosse che vincono un livello: lo stesso giocatore e gli stessi semi di `npm run livelli`. */
+function lineaVincente(quadro) {
+  for (let s = 0; s < 20; s += 1) {
+    const rng = createRng(seedFromString(`prova-${quadro.numero}-${s}`));
+    const pref = preferenze(quadro);
+    let partita = iniziaQuadro(quadro, { now: 0 });
+    const mosse = [];
+    for (let m = 0; m < (quadro.maxMosse ?? 300); m += 1) {
+      if (statoQuadro(quadro, partita).finito) break;
+      const mossa = scegliMossa(partita, pref, rng);
+      if (!mossa) break;
+      partita = giocaNelQuadro(quadro, partita, mossa.handIndex, mossa.row, mossa.col, m * 1000);
+      mosse.push({ handIndex: mossa.handIndex, row: mossa.row, col: mossa.col });
+    }
+    if (statoQuadro(quadro, partita).completato) return mosse;
+  }
+  return null;
+}
 
 const PERCORSO_NOTO = process.env.PLINTO_CHROMIUM
   ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -524,6 +548,72 @@ for (const [lingua, bottone, etichetta] of [['it', 'Statistiche', 'Punteggio med
   console.log(`  ${lingua}: ${etichetta} = ${riga}`);
   if (riga?.replace(/(?<=\d)[.,\s\u00a0\u202f](?=\d)/g, '') !== '5000') {
     errori.push(`D4 (${lingua}): «${etichetta}» mostra «${riga}», atteso 5000`);
+  }
+  await contesto.close();
+}
+
+// ---------- O6 (collaudo 1.22.0) ----------
+// Un salvataggio con 112 livelli superati e NESSUN documento degli attrezzi (lo scrive un
+// telefono che non ha mai riscosso: una versione di prima degli attrezzi, o il Ponte finito
+// prima di aggiornare). Si importa dal file, come chi gioca, poi si vince il 113 trascinando
+// i pezzi. Il collaudo leggeva «Hai guadagnato 3 gettoni... Avevi gia' il massimo di 3
+// gettoni, quindi 19 gettoni appena guadagnati sono andati persi»: falso, ne aveva 0.
+console.log('O6. importo 112 livelli senza gettoni, vinco il 113: l esito non si contraddice...');
+for (const modo of ['unisci', 'sostituisci']) {
+  const livelli = {};
+  for (let n = 1; n <= 112; n += 1) livelli[n] = vinto(n);
+  const dati = { quadri: { versione: 1, livelli } };
+  const file = `${OUT}/o6-${modo}.json`;
+  writeFileSync(file, JSON.stringify({ gioco: 'plinto', formato: 1, versioneGioco: '1.22.0', impronta: impronta(dati), dati }));
+  const { contesto, page } = await apri({ viewport: { width: 412, height: 915 } });
+  await page.getByRole('button', { name: 'Impostazioni' }).click();
+  const [scelta] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.getByRole('button', { name: /Scegli un file/ }).click(),
+  ]);
+  await scelta.setFiles(file);
+  if (modo === 'sostituisci') {
+    await page.getByRole('button', { name: /^Sostituisci tutto/ }).click();
+    await page.getByRole('button', { name: /^Sì$/ }).click();
+  } else {
+    await page.getByRole('button', { name: /^Unisci ai miei/ }).click();
+  }
+  await page.waitForTimeout(300);
+  const prima = await page.evaluate(() => window.localStorage.getItem('plinto:attrezzi'));
+  await page.getByRole('button', { name: 'Indietro' }).first().click();
+  await page.waitForSelector('.pl-home__menu');
+  // L'avviso della Torre (O1) puo' comparire: qui non c'entra, si chiude.
+  const nonOra = page.getByRole('button', { name: 'Non ora' });
+  if (await nonOra.count()) await nonOra.click();
+  await page.getByRole('button', { name: /^Livello 113$/i }).click();
+  const gioca = page.getByRole('button', { name: /^Gioca/ });
+  if (await gioca.count() > 0) await gioca.first().click();
+  await page.waitForSelector('.pl-plancia .pl-cella');
+  const sequenza = lineaVincente(quadroNumero(113));
+  if (!sequenza) { errori.push('O6: il motore non supera il 113: la prova non prova nulla'); await contesto.close(); continue; }
+  for (const mossa of sequenza) {
+    const punti = await posizioneMossa(page, mossa);
+    if (!punti) break;
+    await page.mouse.move(punti.px, punti.py);
+    await page.mouse.down();
+    await page.mouse.move(punti.cx, punti.cy, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(45);
+    if (await page.locator('.pl-quadro-esito, .pl-pausa-fine').count() > 0) break;
+  }
+  await page.waitForSelector('.pl-quadro-esito', { timeout: 6000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  const esito = (await page.locator('.pl-fine').innerText().catch(() => '')).replace(/\s+/g, ' ');
+  await page.screenshot({ path: `${OUT}/o6-${modo}.png` });
+  const gettoni = await page.evaluate(() => JSON.parse(window.localStorage.getItem('plinto:attrezzi') ?? 'null'));
+  console.log(`  ${modo}: attrezzi prima della vittoria ${prima}; dopo ${JSON.stringify(gettoni)}`);
+  console.log(`  ${modo}: esito «${esito.slice(0, 260)}»`);
+  if (!/gettoni/.test(esito)) errori.push(`O6 (${modo}): l esito non parla di gettoni: la prova non prova nulla («${esito.slice(0, 160)}»)`);
+  if (/Avevi già il massimo/.test(esito) && /Hai guadagnato/.test(esito)) {
+    errori.push(`O6 (${modo}): l esito dice insieme «Hai guadagnato» e «Avevi già il massimo»: «${esito.slice(0, 260)}»`);
+  }
+  if (!/al massimo 3: gli altri 19 sono andati persi/.test(esito)) {
+    errori.push(`O6 (${modo}): manca la frase unica «... al massimo 3: gli altri 19 sono andati persi»`);
   }
   await contesto.close();
 }

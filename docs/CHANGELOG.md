@@ -7,6 +7,31 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.22.1] — 3 novembre 2026 — Dopo la Torre
+
+Correzioni dal collaudo della 1.22.0 (`docs/sviluppo/COLLAUDO-1.22.0.md`, rapporto
+`docs/sviluppo/RAPPORTO-PO-040.md`). Solo sito: il pacchetto Android resta il 11916.
+
+### Corretto
+
+- **La Torre annunciata a chi aveva già finito il Ponte** (O1, scelta del PO): una volta, in
+  home, «La Torre è aperta: altri cento livelli e una regola nuova, i massi.» con «Entra nella
+  Torre». La festa del Ponte lo segna, quindi chi finisce il Ponte giocando non lo vede due
+  volte. Interruttore `AVVISO_TORRE`.
+- **Mappa: le schede «Il Ponte / La Torre» restano in cima** (O2, scelta del PO); la scheda
+  chiusa dice quanti livelli mancano; le frecce cambiano scheda. Interruttore `SCHEDE_FISSE`.
+- **Opera chiusa**: niente più «Si apre quando arrivi al livello 101» sotto gli atti (O3).
+- **Festa col telefono coricato**: pulsanti a destra, riepilogo a tutta altezza (O4).
+- **Lettore di schermo**: «1 riga eliminata», «più 1 punto», niente «!.» (O5).
+- **Gettoni** guadagnati e persi nella stessa vittoria (salvataggio importato): una frase sola (O6).
+- **Anteprima dei collegamenti**: «200 livelli», come l'immagine (D1); la descrizione
+  dell'immagine dice «griglia» e non «tabellone».
+- **Il pulsante grande della home porta al livello a cui sei arrivato** (PO-041, segnalazione
+  del PO): chi aveva finito il Ponte e poi riaperto il livello 100 vedeva «Livello 100» invece
+  di «Livello 101», come se la Torre non fosse aperta. Un livello già superato lasciato a metà
+  non prende più il pulsante; si riprende riaprendolo dalla mappa. Interruttore
+  `SOSPESO_SOLO_SE_DA_SUPERARE`, prova `npm run e2e-po041`.
+
 ## [1.22.0] — 2 novembre 2026 — La Torre
 
 Esce dopo l'approvazione di Google del pacchetto 11915 (decisione del PO, 26 ottobre 2026).

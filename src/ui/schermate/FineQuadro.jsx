@@ -4,6 +4,7 @@ import { AvanzamentoMappa } from '../AvanzamentoMappa.jsx';
 import { CondividiQuadro } from '../Condividi.jsx';
 import { quadroSbloccato } from '../../persistence/progressi.js';
 import { IconaCassetta } from '../Attrezzi.jsx';
+import { MASSIMO as GETTONI_MASSIMO } from '../../persistence/attrezzi.js';
 import { OPERE, livelliDellOpera, operaSuccessiva } from '../../config/quadri.js';
 import { InvitoRecensione } from '../Recensisci.jsx';
 
@@ -28,6 +29,31 @@ import { InvitoRecensione } from '../Recensisci.jsx';
  * niente. Prova: `node tests/e2e/trionfo.mjs`, misura a 320x700.
  */
 export const ATTO_CHIUSO_COMPATTO = true;
+
+/*
+ * GETTONI_PERSI_IN_UNA_FRASE (collaudo 1.22.0, O6): importato un salvataggio con molti
+ * livelli e nessun documento `plinto:attrezzi`, alla vittoria dopo `riscuoti` paga tutto
+ * insieme (113 livelli: 22 gettoni, ne entrano 3). L'esito diceva «Hai guadagnato 3
+ * gettoni... Adesso hai 3 gettoni. Avevi gia' il massimo di 3 gettoni, quindi 19 gettoni
+ * appena guadagnati sono andati persi»: il massimo non ce l'aveva, ne aveva 0. Riprodotto
+ * con l'importazione da file, in Unisci e in Sostituisci (`npm run correzioni`, O6).
+ * Acceso, quando nella stessa vittoria se ne guadagnano e se ne perdono la riga e' una
+ * sola: «Puoi tenerne al massimo 3: gli altri 19 sono andati persi.». Con il magazzino
+ * gia' pieno resta la frase di prima, che li' e' vera. Spento: `npm run correzioni` (O6) e
+ * `tests/gettoni-persi.test.js` rossi.
+ */
+export const GETTONI_PERSI_IN_UNA_FRASE = true;
+
+/** La riga dei gettoni persi, o null se non se n'e' perso nessuno. */
+export function fraseGettoniPersi(esito, t) {
+  const persi = esito?.attrezzoPerso ?? 0;
+  if (persi <= 0) return null;
+  if (GETTONI_PERSI_IN_UNA_FRASE && (esito.attrezzoGuadagnato ?? 0) > 0) {
+    return (persi === 1 ? t('attrezzi.persoOltre') : t('attrezzi.persiOltre'))
+      .replace('{max}', GETTONI_MASSIMO).replace('{n}', persi);
+  }
+  return (persi === 1 ? t('attrezzi.perso') : t('attrezzi.persiTanti')).replace('{n}', persi);
+}
 
 /*
  * NUMERO_MISURA_LA_CORNICE (collaudo tablet e PC, PO-014): sul telefono basso il numero
@@ -139,8 +165,7 @@ export function SchermoFineQuadro({
         ) : null}
         {esito.attrezzoPerso > 0 ? (
           <p className="pl-fine__attrezzo pl-fine__attrezzo--perso">
-            {t(esito.attrezzoPerso === 1 ? 'attrezzi.perso' : 'attrezzi.persiTanti')
-              .replace('{n}', esito.attrezzoPerso)}
+            {fraseGettoniPersi(esito, t)}
           </p>
         ) : null}
 

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Plinto } from '../Plinto.jsx';
 import { OPERE } from '../../config/quadri.js';
 import { CondividiTrionfo } from '../Condividi.jsx';
@@ -32,6 +33,18 @@ import { InvitoRecensione } from '../Recensisci.jsx';
  * l'annuncio -- cioe' tutto quello che significa qualcosa.
  */
 
+/*
+ * TRIONFO_CORICATO (collaudo 1.22.0, O4; decisione della madre): a 640x360 la festa
+ * mostrava solo il titolo. La parte che scorre era alta 204 px, i pulsanti ne prendevano
+ * 156 e i numeri cominciavano a 231, sotto i pulsanti; se il dito partiva sui pulsanti non
+ * scorreva niente. Acceso, in orizzontale basso (la stessa soglia dei livelli coricati,
+ * `orientation: landscape` e `max-height: 620px`) i pulsanti stanno in una colonna a
+ * destra, in basso dove arriva il pollice, e il riepilogo a sinistra a tutta altezza.
+ * Vale per la festa del Ponte e per quella finale. Spento: il caso coricato di
+ * `npm run e2e-trionfo` e' rosso (20 problemi).
+ */
+export const TRIONFO_CORICATO = true;
+
 /** Quanti blocchi cadono. Ventiquattro: piena a vedersi, leggera da animare. */
 const BLOCCHI_PIOGGIA = 24;
 
@@ -54,10 +67,12 @@ const PIOGGIA = Array.from({ length: BLOCCHI_PIOGGIA }, (_, i) => ({
 
 export function SchermoTrionfo({
   riepilogo, opera = OPERE[0], successiva = null, animazioni = true,
-  onElenco, onLibera, onSuccessiva, t,
+  onElenco, onLibera, onSuccessiva, onMostrata, t,
 }) {
+  // Chi la vede ha gia' saputo che l'opera dopo e' aperta (App.jsx, AVVISO_TORRE).
+  useEffect(() => { onMostrata?.(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
-    <div className="pl-screen pl-trionfo">
+    <div className={`pl-screen pl-trionfo${TRIONFO_CORICATO ? ' pl-trionfo--coricabile' : ''}`}>
       {animazioni ? (
         <div className="pl-pioggia" aria-hidden="true">
           {PIOGGIA.map((b, i) => (

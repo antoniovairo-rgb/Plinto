@@ -326,6 +326,8 @@ export default {
     oraNeHaiUno: 'You now have 1 token.',
     perso: 'You already had the maximum of 3 tokens, so the one you just earned was lost. Use a tool to make room.',
     persiTanti: 'You already had the maximum of 3 tokens, so {n} tokens you just earned were lost. Use a tool to make room.',
+    persoOltre: 'You can keep at most {max}: the other one was lost.',
+    persiOltre: 'You can keep at most {max}: the other {n} were lost.',
   },
 
   atti: {
@@ -389,6 +391,8 @@ export default {
     },
     operaMancano: '{n} to go.',
     operaMancaUno: 'One to go.',
+    schedaMancano: '{n} levels to go',
+    schedaMancaUno: '1 level to go',
     massiRegola: 'The grey squares are boulders: they count as filled, but they never disappear.',
     ultimoChiuso: 'Level {n} opens once you have cleared all the others. Still to clear: {elenco}.',
     ultimoChiusoUno: 'Level {n} opens once you have cleared all the others. Still to clear: level {m}.',
@@ -560,8 +564,10 @@ export default {
     riga: 'row', righe: 'rows',
     colonna: 'column', colonne: 'columns',
     quadrante: 'quadrant', quadranti: 'quadrants',
-    eliminate: 'cleared',
+    eliminata: 'cleared', eliminato: 'cleared',
+    eliminate: 'cleared', eliminati: 'cleared',
     piu: 'plus',
+    punto: 'point',
     punti: 'points',
     grigliaVuota: 'Grid completely cleared',
     cella: 'Square row {r} column {c}',
@@ -607,6 +613,11 @@ export default {
     riprendiLibera: 'Resume game',
     nuovaLibera: 'New game',
   },
+  avvisoTorre: {
+    testo: 'The Tower is open: a hundred more levels and a new rule, the boulders.',
+    nonOra: 'Not now',
+  },
+
   comune: {
     tornaAllaPartita: 'Back to the game',
     indietro: 'Back',

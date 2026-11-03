@@ -2252,6 +2252,30 @@ button {
 }
 .pl-opere__scheda:focus-visible { outline: 2px solid var(--pl-brand); outline-offset: 2px; }
 .pl-opere__lucchetto { width: 13px; height: 13px; flex: none; color: var(--pl-text-faint); }
+.pl-opere__nome { display: inline-flex; align-items: center; gap: 6px; }
+/* O2: quanti livelli mancano ad aprire l'opera, sotto il nome della scheda chiusa. */
+.pl-opere__scheda { flex-direction: column; gap: 0; line-height: 1.2; }
+.pl-opere__mancano {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--pl-text-dim);
+}
+/* O2: la fila delle schede resta ferma in cima mentre la mappa scorre. Il fondo pieno
+   (lo stesso della pagina) e il respiro sotto evitano che le tappe si vedano passare
+   dietro o fra le schede e il resto. */
+.pl-opere-fila {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  /* Da bordo a bordo, come una barra: dentro i 20 px di margine di .pl-scroll un fondo
+     pieno si leggeva come un riquadro piu' scuro appoggiato sul fondo della pagina. */
+  margin: 0 -20px 18px;
+  padding: 6px 20px 8px;
+  background: color-mix(in srgb, var(--pl-ink) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.pl-opere-fila .pl-opere { margin-bottom: 0; }
 
 /* Perche' l'opera e' chiusa e quanto manca ad aprirla. */
 .pl-opera-chiusa {
@@ -3271,6 +3295,38 @@ button {
 .pl-trionfo__dentro { position: relative; z-index: 1; text-align: center; }
 
 .pl-trionfo__plinto { display: flex; justify-content: center; margin-top: 8px; }
+
+/* O4 (TRIONFO_CORICATO in Trionfo.jsx): coricato e basso, riepilogo a sinistra a tutta
+   altezza e pulsanti in una colonna a destra, in basso, come la plancia dei livelli
+   coricati. La colonna da 430 px degli schermi larghi e bassi qui si toglie, come per la
+   partita: in 430 px due colonne non ci stanno. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .pl-app:has(> .pl-trionfo--coricabile) {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+  }
+  .pl-trionfo--coricabile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .pl-trionfo--coricabile .pl-trionfo__dentro {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    height: 100%;
+  }
+  .pl-trionfo--coricabile .pl-fine__azioni {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 12px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 0;
+  }
+}
 
 /* Il velo dietro il titolo: vedi il commento in Trionfo.jsx. Stessi token della frase
    di incitamento, perche' e' lo stesso problema risolto nello stesso modo. */

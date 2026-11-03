@@ -28,12 +28,12 @@ import { ConfermaPerdita } from './ConfermaDoppia.jsx';
 import { MenuPartita } from './MenuPartita.jsx';
 import { useQuadro } from '../state/useQuadro.js';
 import {
-  QUADRI, TOTALE_QUADRI, quadroNumero, attoDelQuadro, operaDelQuadro, operaSuccessiva,
+  QUADRI, TOTALE_QUADRI, OPERE, quadroNumero, attoDelQuadro, operaDelQuadro, operaSuccessiva,
   livelliDellOpera,
 } from '../config/quadri.js';
 import {
   quantiSuperati, prossimoQuadro, quadroDopo, riepilogoPercorso, riepilogoAtto, quadroSbloccato,
-  superatiNellOpera,
+  superatiNellOpera, quadroSuperato,
 } from '../persistence/progressi.js';
 import { leggiRipresa } from '../persistence/ripresa.js';
 import { giornoDiOggi, sfidaGiocabile } from '../core/sfida.js';
@@ -54,6 +54,17 @@ import { useTastoIndietro, GENITORE, PROFONDITA } from './useTastoIndietro.js';
  * Un posto da riprendere esiste solo se si e' gia' giocato, quindi la guida non serve.
  */
 export const RIPRENDI_LIVELLO_A_MANO = true;
+
+/**
+ * Interruttore PO-041: il pulsante grande della home riprende il livello lasciato a meta'
+ * solo se quel livello NON e' gia' superato. Segnalazione del PO dal telefono (1.22.0):
+ * Ponte finito, Torre aperta, ma il pulsante diceva «Livello 100» perche' il 100, gia'
+ * vinto, era stato riaperto e lasciato; con PO-013 non c'e' scritto «Riprendi», e
+ * sembrava che il Ponte non fosse finito. Acceso, il pulsante dice il livello corrente;
+ * la partita del livello vecchio resta e si riprende riaprendolo dalla mappa (PO-008).
+ * Spento, torna il livello salvato: `npm run e2e-po041` e' rosso.
+ */
+export const SOSPESO_SOLO_SE_DA_SUPERARE = true;
 export const RIPRESA_SENZA_GUIDA = true;
 /*
  * PO-008, seconda parte: le tre strade con cui il collaudo 1.21.9 perdeva una partita a
@@ -149,6 +160,20 @@ export const DURATA_PAUSA_FINE = 1500;
  * Spento, torna il difetto: passi 5b e 7 di `npm run archivio` rossi.
  */
 export const ANCORA_VIA_A_SFIDA_FINITA = true;
+/*
+ * AVVISO_TORRE (collaudo 1.22.0, O1; decisione del PO del 3 novembre 2026): chi aveva gia'
+ * finito il Ponte prima della 1.22.0 non vedeva nessuna festa e nessun avviso della Torre,
+ * perche' la festa si mostra solo alla vittoria che chiude il Ponte (misurato dal collaudo:
+ * 8 combinazioni su 8, solo «LIVELLO 101» in home). Acceso, a chi ha il Ponte finito e
+ * nessun livello della Torre superato la home mostra UNA VOLTA una finestra: «La Torre e'
+ * aperta...», con «Entra nella Torre» (la mappa sulla scheda della Torre) e «Non ora».
+ * Una finestra e non un riquadro nella home: la home non deve scorrere a 360x640
+ * (`npm run impaginazione`), e un riquadro in piu' la farebbe scorrere proprio a chi lo
+ * deve leggere. Che sia stata mostrata si ricorda in `avvisoTorre` delle impostazioni; la
+ * festa del Ponte lo scrive anche lei, cosi' chi finisce il Ponte giocando non la vede due
+ * volte. Spento, nessun avviso: `npm run e2e-torre-aperta` e' rosso.
+ */
+export const AVVISO_TORRE = true;
 
 /**
  * Radice dell'applicazione.
@@ -222,6 +247,32 @@ export function App() {
    */
   const [conferma, setConferma] = useState(null);
   const chiudiConferma = useCallback(() => setConferma(null), []);
+  // L'opera da cui si apre la mappa. null: quella del livello corrente (Quadri.jsx).
+  // Vale per un'apertura sola: uscendo dalla mappa si torna al comportamento di sempre.
+  const [operaMappa, setOperaMappa] = useState(null);
+  useEffect(() => { if (schermata !== 'quadri') setOperaMappa(null); }, [schermata]);
+
+  /*
+   * L'avviso della Torre aperta (AVVISO_TORRE). Si guarda solo in home, dopo la guida, e
+   * solo se non c'e' gia' un'altra domanda a schermo. Si segna come visto nel momento in
+   * cui si mostra: «una volta sola» vuol dire anche se si chiude senza scegliere.
+   */
+  const torre = OPERE.find((o) => o.id === 'torre');
+  const guidaFatta = impostazioni.introVista || guidaSaltata;
+  useEffect(() => {
+    if (!AVVISO_TORRE || !torre || schermata !== 'home' || !guidaFatta || conferma) return;
+    if (impostazioni.avvisoTorre) return;
+    if (!quadroSbloccato(torre.da) || superatiNellOpera(torre) > 0) return;
+    cambia('avvisoTorre', true);
+    setConferma({
+      titolo: t(`opere.${torre.id}`),
+      testo: t('avvisoTorre.testo'),
+      etichettaTorna: t(`trionfo.vai.${torre.id}`),
+      etichettaContinua: t('avvisoTorre.nonOra'),
+      onTorna: () => { setConferma(null); setOperaMappa(torre.id); setSchermata('quadri'); },
+      onContinua: () => setConferma(null),
+    });
+  }, [schermata, guidaFatta, conferma, impostazioni.avvisoTorre, quadriFatti, torre, cambia, t]);
 
   /*
    * La pausa sulla plancia finale (PO-038). La fine "in corso" e' la partita finita (libera
@@ -544,9 +595,15 @@ export function App() {
    * importando un salvataggio o azzerando i dati, e tutte queste strade passano da li'.
    */
   const livelloInSospeso = useMemo(
-    () => (RIPRENDI_LIVELLO_A_MANO && schermata === 'home' ? quadri.numeroSalvato() : null),
+    () => {
+      if (!RIPRENDI_LIVELLO_A_MANO || schermata !== 'home') return null;
+      const salvato = quadri.numeroSalvato();
+      if (salvato !== null && SOSPESO_SOLO_SE_DA_SUPERARE
+        && salvato !== livelloCorrente && quadroSuperato(salvato)) return null;
+      return salvato;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [schermata, quadri.quadro, quadri.esito],
+    [schermata, quadri.quadro, quadri.esito, livelloCorrente],
   );
 
   /**
@@ -745,6 +802,9 @@ export function App() {
               riepilogo={percorso}
               opera={opera}
               successiva={successiva}
+              // La festa del Ponte annuncia gia' la Torre: l'avviso non deve ripeterlo.
+              onMostrata={successiva?.id === 'torre' && AVVISO_TORRE
+                ? () => cambia('avvisoTorre', true) : undefined}
               onSuccessiva={() => {
                 const primo = successiva ? quadroNumero(successiva.da) : null;
                 if (primo) apriQuadro(primo);
@@ -902,6 +962,7 @@ export function App() {
       {schermata === 'quadri' ? (
         <SchermoQuadri
           onApri={apriQuadro}
+          operaIniziale={operaMappa}
           onIndietro={() => setSchermata('home')}
           // Dopo l'azzeramento il conteggio va riletto: la mappa si ridisegna da sola
           // perche' rilegge il salvataggio, ma la home mostrerebbe ancora il vecchio
