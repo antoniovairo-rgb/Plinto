@@ -26,4 +26,4 @@ nel `docs/CHANGELOG.md`; da qui in avanti si scrive anche questa riga.
 | 1.21.25 | 2026-10-26 | Si gioca in orizzontale; caratteri grandi; pacchetto 11915 «gioco» a schermo normale | PO-035, PO-017 | pubblicata (`49c5d77`); AAB 11915 caricato in produzione (26 ottobre) |
 | 1.21.26 | 2026-10-27 | Pezzo dove il dito si stacca; pannello degli attrezzi dall'alto in orizzontale; «Salta per ora» comodo; prova del dito nella CI | PO-036 | pubblicata (`b8204b5`), CI 240 verde; collaudata (nessuna E né D; O1 → PO-037) |
 | 1.21.27 | 2026-10-27 | Il primo tocco dopo i lanci non va più a vuoto (fling di Chromium) | PO-037 | pubblicata (`160ab59`), CI 247 verde; collaudata (nessuna E né D) |
-| 1.22.0 | 2026-11-02 | La Torre: livelli 101-200 con i massi; pausa sulla plancia a fine partita; sfida finita e ricarica | PO-002, PO-038, PO-039 | pubblicata (`21d8609`), CI 260 verde; AAB 11916 da caricare; collaudo in corso |
+| 1.22.0 | 2026-11-02 | La Torre: livelli 101-200 con i massi; pausa sulla plancia a fine partita; sfida finita e ricarica | PO-002, PO-038, PO-039 | pubblicata (`21d8609`), CI 260 verde; AAB 11916 da caricare; collaudata (nessun E; D1, O1-O6 → 1.22.1) |
