@@ -7,6 +7,38 @@ Tutte le modifiche degne di nota a PLINTO. Il formato segue una versione semplif
 La versione è dichiarata in un solo posto — il campo `version` di `package.json` — e
 `vite.config.js` la inietta nel bundle come `__APP_VERSION__`.
 
+## [1.22.2] — 3 novembre 2026 — Il livello giusto
+
+Correzioni dal collaudo della 1.22.1 (`docs/sviluppo/COLLAUDO-1.22.1.md`, § 5; rapporto
+`docs/sviluppo/RAPPORTO-PO-042-043.md`). Solo sito: il pacchetto Android resta il 11916.
+
+### Corretto
+
+- **Un livello chiuso non si riprende più** (PO-042, D1). Con il Ponte finito e il livello
+  100 a metà, «Sostituisci tutto» con un salvataggio dei livelli 1-10 lasciava sul pulsante
+  grande «Livello 100»: toccandolo si riapriva il 100, ormai chiuso, e ricaricando si
+  riapriva da solo. Adesso un livello salvato a metà conta solo se è ancora aperto: il
+  pulsante dice «Livello 11» e la ripresa automatica non porta nel 100. La partita del
+  livello chiuso non si cancella, si ignora: se rimetti il salvataggio di prima torna come
+  era. Interruttore `RIPRENDI_SOLO_SE_APERTO` (`src/state/useQuadro.js`), caso D di
+  `npm run e2e-po041`. Misurato: acceso uscita 0; spento uscita 1, pulsante «Livello 100».
+
+### Cambiato
+
+- **«Gioca il livello N» evidenziato quando il livello a metà è già superato** (PO-043,
+  scelta del PO). Nella domanda «Il livello 100 è a metà…», se il 100 è già superato il
+  pulsante pieno, primo e con il fuoco è «Gioca il livello 101»; «Riprendi il livello 100»
+  è il secondo. Se il livello a metà non è superato la domanda resta com'era. Interruttore
+  `GIOCA_PIENO_SE_SUPERATO` (`src/ui/App.jsx`), caso E (it, en) di `npm run e2e-po041`.
+  Misurato: acceso uscita 0; spento uscita 1, caso E2 (livello non superato) verde in tutti
+  e due i casi.
+
+### Prove
+
+- `npm run e2e-torre-aperta` legge l'esportazione da «Copia il testo» invece di importare
+  `/src/persistence/salvataggio.js`, che sul sito pubblicato è un 404 (PO-042, O2). Contro
+  il sito: prima uscita 1 (404), dopo uscita 0.
+
 ## [1.22.1] — 3 novembre 2026 — Dopo la Torre
 
 Correzioni dal collaudo della 1.22.0 (`docs/sviluppo/COLLAUDO-1.22.0.md`, rapporto
