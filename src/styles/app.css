@@ -3296,6 +3296,38 @@ button {
 
 .pl-trionfo__plinto { display: flex; justify-content: center; margin-top: 8px; }
 
+/* O4 (TRIONFO_CORICATO in Trionfo.jsx): coricato e basso, riepilogo a sinistra a tutta
+   altezza e pulsanti in una colonna a destra, in basso, come la plancia dei livelli
+   coricati. La colonna da 430 px degli schermi larghi e bassi qui si toglie, come per la
+   partita: in 430 px due colonne non ci stanno. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .pl-app:has(> .pl-trionfo--coricabile) {
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+  }
+  .pl-trionfo--coricabile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .pl-trionfo--coricabile .pl-trionfo__dentro {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    height: 100%;
+  }
+  .pl-trionfo--coricabile .pl-fine__azioni {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 12px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) 0;
+  }
+}
+
 /* Il velo dietro il titolo: vedi il commento in Trionfo.jsx. Stessi token della frase
    di incitamento, perche' e' lo stesso problema risolto nello stesso modo. */
 .pl-trionfo__intestazione {
