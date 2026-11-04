@@ -252,14 +252,28 @@ convince, e' il primo ricambio.
 
 Il file è `store/video/plinto-montaggio.webm`, generato con `npm run video` dal gioco vero:
 780×1688 (densità 2: a densità 3 il browser di registrazione perdeva fotogrammi proprio
-negli Intrecci), 30 fotogrammi al secondo, circa 90 secondi, senza audio. Rifatto il 10
-ottobre 2026 su richiesta del proprietario: una panoramica di un minuto e mezzo, a ritmo
-calmo, con una partita vinta e tante animazioni. Le parti: la guida in sei passi, la home, la mappa,
-l'apertura del livello 46 con la cassetta degli attrezzi, il livello vinto in sette mosse
-(sei eliminazioni, un Intreccio, cinque Tinte), la vittoria, la Sfida del giorno (tre mosse)
-e il suo archivio, sette mosse di partita libera che si aprono con un Intreccio da quattro
-gruppi, le statistiche e «Come si gioca». YouTube vuole un MP4: la conversione in H.264 si fa con un
-ffmpeg completo (quello di Playwright scrive solo VP8).
+negli Intrecci), 30 fotogrammi al secondo, senza audio. **Rifatto il 4 novembre 2026
+(PO-045, «Torre in apertura»)** sulla 1.22.2: 86,8 secondi misurati, ritmo calmo come
+chiesto dal proprietario il 10 ottobre. Le parti, con l'istante in cui cominciano:
+
+| Da | Parte |
+|---|---|
+| 0 s | la home di chi è arrivato al livello 115 («La Torre: 14 di 100») |
+| 2 s | la mappa sulla scheda «La Torre», un passaggio sul Ponte finito (100 di 100) e ritorno |
+| 9 s | l'apertura del livello 115: «Arriva a Catena 2» e i massi spiegati |
+| 12 s | il livello 115 giocato: nove massi in diagonale, cinque mosse, le ultime due eliminano e l'ultima è un Intreccio ×2 che lascia solo i massi, e il gioco festeggia la griglia vuota |
+| 25 s | la vittoria («Livello superato!») |
+| 28 s | di nuovo la mappa, con il 115 spuntato e il 116 di turno |
+| 30 s | la guida del primo avvio, sei passi |
+| 41 s | la Sfida del giorno (quattro mosse) e il suo archivio |
+| 54 s | sette mosse di partita libera, aperte da un Intreccio da quattro gruppi |
+| 72 s | le statistiche, «Come si gioca», la home |
+
+I tempi sono quelli stampati dallo script all'ultima generazione: si spostano di qualche
+decimo da una volta all'altra, le mosse no (semi fissi). La versione di prima (10 ottobre,
+livello 46 del Ponte) non mostrava la Torre. YouTube vuole un MP4: la conversione in H.264
+si fa con un ffmpeg completo (quello di Playwright scrive solo VP8); vedi
+`docs/sviluppo/RAPPORTO-PO-045-VIDEO.md`.
 
 Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - link a **un singolo video**, non a un canale o a una playlist, e senza parametri come
@@ -268,8 +282,8 @@ Requisiti della Play Console, dalla sua guida («Add preview assets»):
 - **annunci disattivati** (monetizzazione spenta) e **nessun limite d'età**;
 - incorporamento consentito;
 - orizzontale o verticale, ma senza bande nere: questo è verticale e non ne ha;
-- si riproducono da soli solo i **primi 30 secondi**: qui la guida, la home, la mappa,
-  l'apertura e l'inizio del livello.
+- si riproducono da soli solo i **primi 30 secondi**: qui la home, la mappa della Torre,
+  l'apertura del livello 115 e il livello con i massi giocato fino alla vittoria (a 25 s).
 
 Un video verticale sotto i tre minuti YouTube lo può classificare come Short. Nella Play
 Console si incolla comunque il link nella forma `https://www.youtube.com/watch?v=...`:
