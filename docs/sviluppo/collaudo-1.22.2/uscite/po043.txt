@@ -1,0 +1,235 @@
+E 360x640 it | grande «Livello 101» | dialog «Il livello 100 è a metà.» modale=true | [{"nome":"Gioca il livello 101","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 100","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Il livello 100 è a metà.": /   - paragraph: Il livello 100 è a metà. /   - paragraph: Se giochi il livello 101, perdi le mosse fatte nel livello 100. /   - button "Gioca il livello 101" /   - button "Riprendi il livello 100"
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Space sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 360x640 it | grande «Livello 111» | dialog «Il livello 105 è a metà.» modale=true | [{"nome":"Gioca il livello 111","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 105","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Il livello 105 è a metà.": /   - paragraph: Il livello 105 è a metà. /   - paragraph: Se giochi il livello 111, perdi le mosse fatte nel livello 105. /   - button "Gioca il livello 111" /   - button "Riprendi il livello 105"
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Space sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 360x640 it | grande «Livello 200» | dialog «Il livello 150 è a metà.» modale=true | [{"nome":"Gioca il livello 200","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 150","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Il livello 150 è a metà.": /   - paragraph: Il livello 150 è a metà. /   - paragraph: Se giochi il livello 200, perdi le mosse fatte nel livello 150. /   - button "Gioca il livello 200" /   - button "Riprendi il livello 150"
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Space sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 360x640 it | grande «Livello 11» | dialog «Il livello 11 è a metà.» modale=true | [{"nome":"Riprendi il livello 11","pieno":true,"fuoco":true},{"nome":"Gioca il livello 13","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Il livello 11 è a metà.": /   - paragraph: Il livello 11 è a metà. /   - paragraph: Se giochi il livello 13, perdi le mosse fatte nel livello 11. /   - button "Riprendi il livello 11" /   - button "Gioca il livello 13"
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Space sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 360x640 en | grande «Level 101» | dialog «Level 100 is in progress.» modale=true | [{"nome":"Play level 101","pieno":true,"fuoco":true},{"nome":"Resume level 100","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Level 100 is in progress.": /   - paragraph: Level 100 is in progress. /   - paragraph: If you play level 101, you lose the moves you made in level 100. /   - button "Play level 101" /   - button "Resume level 100"
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Space sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 360x640 en | grande «Level 111» | dialog «Level 105 is in progress.» modale=true | [{"nome":"Play level 111","pieno":true,"fuoco":true},{"nome":"Resume level 105","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Level 105 is in progress.": /   - paragraph: Level 105 is in progress. /   - paragraph: If you play level 111, you lose the moves you made in level 105. /   - button "Play level 111" /   - button "Resume level 105"
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Space sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 360x640 en | grande «Level 200» | dialog «Level 150 is in progress.» modale=true | [{"nome":"Play level 200","pieno":true,"fuoco":true},{"nome":"Resume level 150","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Level 150 is in progress.": /   - paragraph: Level 150 is in progress. /   - paragraph: If you play level 200, you lose the moves you made in level 150. /   - button "Play level 200" /   - button "Resume level 150"
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Space sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 360x640 en | grande «Level 11» | dialog «Level 11 is in progress.» modale=true | [{"nome":"Resume level 11","pieno":true,"fuoco":true},{"nome":"Play level 13","pieno":false,"fuoco":false}]
+  finestra 24,206 312x228 in 360x640
+  ariaSnapshot: - dialog "Level 11 is in progress.": /   - paragraph: Level 11 is in progress. /   - paragraph: If you play level 13, you lose the moves you made in level 11. /   - button "Resume level 11" /   - button "Play level 13"
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Space sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 640x360 it | grande «Livello 101» | dialog «Il livello 100 è a metà.» modale=true | [{"nome":"Gioca il livello 101","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 100","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 640x360 it | grande «Livello 111» | dialog «Il livello 105 è a metà.» modale=true | [{"nome":"Gioca il livello 111","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 105","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 640x360 it | grande «Livello 200» | dialog «Il livello 150 è a metà.» modale=true | [{"nome":"Gioca il livello 200","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 150","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 640x360 it | grande «Livello 11» | dialog «Il livello 11 è a metà.» modale=true | [{"nome":"Riprendi il livello 11","pieno":true,"fuoco":true},{"nome":"Gioca il livello 13","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 640x360 en | grande «Level 101» | dialog «Level 100 is in progress.» modale=true | [{"nome":"Play level 101","pieno":true,"fuoco":true},{"nome":"Resume level 100","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 640x360 en | grande «Level 111» | dialog «Level 105 is in progress.» modale=true | [{"nome":"Play level 111","pieno":true,"fuoco":true},{"nome":"Resume level 105","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 640x360 en | grande «Level 200» | dialog «Level 150 is in progress.» modale=true | [{"nome":"Play level 200","pieno":true,"fuoco":true},{"nome":"Resume level 150","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 640x360 en | grande «Level 11» | dialog «Level 11 is in progress.» modale=true | [{"nome":"Resume level 11","pieno":true,"fuoco":true},{"nome":"Play level 13","pieno":false,"fuoco":false}]
+  finestra 140,66 360x228 in 640x360
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 768x1024 it | grande «Livello 101» | dialog «Il livello 100 è a metà.» modale=true | [{"nome":"Gioca il livello 101","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 100","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 768x1024 it | grande «Livello 111» | dialog «Il livello 105 è a metà.» modale=true | [{"nome":"Gioca il livello 111","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 105","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 768x1024 it | grande «Livello 200» | dialog «Il livello 150 è a metà.» modale=true | [{"nome":"Gioca il livello 200","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 150","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 768x1024 it | grande «Livello 11» | dialog «Il livello 11 è a metà.» modale=true | [{"nome":"Riprendi il livello 11","pieno":true,"fuoco":true},{"nome":"Gioca il livello 13","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 768x1024 en | grande «Level 101» | dialog «Level 100 is in progress.» modale=true | [{"nome":"Play level 101","pieno":true,"fuoco":true},{"nome":"Resume level 100","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 768x1024 en | grande «Level 111» | dialog «Level 105 is in progress.» modale=true | [{"nome":"Play level 111","pieno":true,"fuoco":true},{"nome":"Resume level 105","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 768x1024 en | grande «Level 200» | dialog «Level 150 is in progress.» modale=true | [{"nome":"Play level 200","pieno":true,"fuoco":true},{"nome":"Resume level 150","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 768x1024 en | grande «Level 11» | dialog «Level 11 is in progress.» modale=true | [{"nome":"Resume level 11","pieno":true,"fuoco":true},{"nome":"Play level 13","pieno":false,"fuoco":false}]
+  finestra 204,398 360x228 in 768x1024
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 1366x768 it | grande «Livello 101» | dialog «Il livello 100 è a metà.» modale=true | [{"nome":"Gioca il livello 101","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 100","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 1366x768 it | grande «Livello 111» | dialog «Il livello 105 è a metà.» modale=true | [{"nome":"Gioca il livello 111","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 105","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 1366x768 it | grande «Livello 200» | dialog «Il livello 150 è a metà.» modale=true | [{"nome":"Gioca il livello 200","pieno":true,"fuoco":true},{"nome":"Riprendi il livello 150","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 1366x768 it | grande «Livello 11» | dialog «Il livello 11 è a metà.» modale=true | [{"nome":"Riprendi il livello 11","pieno":true,"fuoco":true},{"nome":"Gioca il livello 13","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «GIOCA»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+E 1366x768 en | grande «Level 101» | dialog «Level 100 is in progress.» modale=true | [{"nome":"Play level 101","pieno":true,"fuoco":true},{"nome":"Resume level 100","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 101 | voce 100/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 101 | voce 101/0m/gioco
+  secondo pulsante toccato -> plancia 100 | voce 100/3m/gioco
+W 1366x768 en | grande «Level 111» | dialog «Level 105 is in progress.» modale=true | [{"nome":"Play level 111","pieno":true,"fuoco":true},{"nome":"Resume level 105","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 111 | voce 105/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 111 | voce 111/0m/gioco
+  secondo pulsante toccato -> plancia 105 | voce 105/3m/gioco
+T 1366x768 en | grande «Level 200» | dialog «Level 150 is in progress.» modale=true | [{"nome":"Play level 200","pieno":true,"fuoco":true},{"nome":"Resume level 150","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 200 | voce 150/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 200 | voce 200/0m/gioco
+  secondo pulsante toccato -> plancia 150 | voce 150/3m/gioco
+E2 1366x768 en | grande «Level 11» | dialog «Level 11 is in progress.» modale=true | [{"nome":"Resume level 11","pieno":true,"fuoco":true},{"nome":"Play level 13","pieno":false,"fuoco":false}]
+  finestra 503,270 360x228 in 1366x768
+  Escape: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  fuori: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Indietro: finestra chiusa | presentazione 13 | voce 11/3m/gioco | fuoco «PLAY»
+  Enter sul pulsante col fuoco -> plancia 11 | voce 11/3m/gioco
+  secondo pulsante toccato -> plancia 13 | voce 13/0m/gioco
+
+PROBLEMI: 0
+uscita 0

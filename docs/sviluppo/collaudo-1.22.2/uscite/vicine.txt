@@ -1,0 +1,58 @@
+R 360x640 it | «Vuoi ricominciare il livello 4?» | [{"nome":"Torna alla partita","pieno":true,"fuoco":true},{"nome":"Sì, ricomincia da capo","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 360x640 it | «La sfida del 3 novembre è a metà.» | [{"nome":"Riprendi la sfida del 3 novembre","pieno":true,"fuoco":true},{"nome":"Apri la sfida di oggi","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 360x640 it | «La partita libera è a metà.» | [{"nome":"Riprendi la partita","pieno":true,"fuoco":true},{"nome":"Nuova partita","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 360x640 it | «La Torre» | [{"nome":"Entra nella Torre","pieno":true,"fuoco":true},{"nome":"Non ora","pieno":false,"fuoco":false}]
+R 360x640 en | «Start level 4 again?» | [{"nome":"Back to the game","pieno":true,"fuoco":true},{"nome":"Yes, start again","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 360x640 en | «The November 3 challenge is in progress.» | [{"nome":"Resume the November 3 challenge","pieno":true,"fuoco":true},{"nome":"Open today's challenge","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 360x640 en | «Your free game is in progress.» | [{"nome":"Resume game","pieno":true,"fuoco":true},{"nome":"New game","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 360x640 en | «The Tower» | [{"nome":"Enter the Tower","pieno":true,"fuoco":true},{"nome":"Not now","pieno":false,"fuoco":false}]
+R 640x360 it | «Vuoi ricominciare il livello 4?» | [{"nome":"Torna alla partita","pieno":true,"fuoco":true},{"nome":"Sì, ricomincia da capo","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 640x360 it | «La sfida del 3 novembre è a metà.» | [{"nome":"Riprendi la sfida del 3 novembre","pieno":true,"fuoco":true},{"nome":"Apri la sfida di oggi","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 640x360 it | «La partita libera è a metà.» | [{"nome":"Riprendi la partita","pieno":true,"fuoco":true},{"nome":"Nuova partita","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 640x360 it | «La Torre» | [{"nome":"Entra nella Torre","pieno":true,"fuoco":true},{"nome":"Non ora","pieno":false,"fuoco":false}]
+R 640x360 en | «Start level 4 again?» | [{"nome":"Back to the game","pieno":true,"fuoco":true},{"nome":"Yes, start again","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 640x360 en | «The November 3 challenge is in progress.» | [{"nome":"Resume the November 3 challenge","pieno":true,"fuoco":true},{"nome":"Open today's challenge","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 640x360 en | «Your free game is in progress.» | [{"nome":"Resume game","pieno":true,"fuoco":true},{"nome":"New game","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 640x360 en | «The Tower» | [{"nome":"Enter the Tower","pieno":true,"fuoco":true},{"nome":"Not now","pieno":false,"fuoco":false}]
+R 768x1024 it | «Vuoi ricominciare il livello 4?» | [{"nome":"Torna alla partita","pieno":true,"fuoco":true},{"nome":"Sì, ricomincia da capo","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 768x1024 it | «La sfida del 3 novembre è a metà.» | [{"nome":"Riprendi la sfida del 3 novembre","pieno":true,"fuoco":true},{"nome":"Apri la sfida di oggi","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 768x1024 it | «La partita libera è a metà.» | [{"nome":"Riprendi la partita","pieno":true,"fuoco":true},{"nome":"Nuova partita","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 768x1024 it | «La Torre» | [{"nome":"Entra nella Torre","pieno":true,"fuoco":true},{"nome":"Non ora","pieno":false,"fuoco":false}]
+R 768x1024 en | «Start level 4 again?» | [{"nome":"Back to the game","pieno":true,"fuoco":true},{"nome":"Yes, start again","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 768x1024 en | «The November 3 challenge is in progress.» | [{"nome":"Resume the November 3 challenge","pieno":true,"fuoco":true},{"nome":"Open today's challenge","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 768x1024 en | «Your free game is in progress.» | [{"nome":"Resume game","pieno":true,"fuoco":true},{"nome":"New game","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 768x1024 en | «The Tower» | [{"nome":"Enter the Tower","pieno":true,"fuoco":true},{"nome":"Not now","pieno":false,"fuoco":false}]
+R 1366x768 it | «Vuoi ricominciare il livello 4?» | [{"nome":"Torna alla partita","pieno":true,"fuoco":true},{"nome":"Sì, ricomincia da capo","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 1366x768 it | «La sfida del 3 novembre è a metà.» | [{"nome":"Riprendi la sfida del 3 novembre","pieno":true,"fuoco":true},{"nome":"Apri la sfida di oggi","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 1366x768 it | «La partita libera è a metà.» | [{"nome":"Riprendi la partita","pieno":true,"fuoco":true},{"nome":"Nuova partita","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 1366x768 it | «La Torre» | [{"nome":"Entra nella Torre","pieno":true,"fuoco":true},{"nome":"Non ora","pieno":false,"fuoco":false}]
+R 1366x768 en | «Start level 4 again?» | [{"nome":"Back to the game","pieno":true,"fuoco":true},{"nome":"Yes, start again","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":2,"libera":null,"sfida":null} dopo {"quadro":2,"libera":null,"sfida":null}
+S 1366x768 en | «The November 3 challenge is in progress.» | [{"nome":"Resume the November 3 challenge","pieno":true,"fuoco":true},{"nome":"Open today's challenge","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":null,"sfida":"2026-11-03/2"} dopo {"quadro":null,"libera":null,"sfida":"2026-11-03/2"}
+N 1366x768 en | «Your free game is in progress.» | [{"nome":"Resume game","pieno":true,"fuoco":true},{"nome":"New game","pieno":false,"fuoco":false}]
+  Escape: finestra chiusa | prima {"quadro":null,"libera":2,"sfida":null} dopo {"quadro":null,"libera":2,"sfida":null}
+T 1366x768 en | «The Tower» | [{"nome":"Enter the Tower","pieno":true,"fuoco":true},{"nome":"Not now","pieno":false,"fuoco":false}]
+
+PROBLEMI: 0

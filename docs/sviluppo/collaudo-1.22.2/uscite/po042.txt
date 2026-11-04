@@ -1,0 +1,158 @@
+R1 360x640 it avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Livello 101» voce 100/3m
+  Sostituisci con 1-10: nota «Fatto. Adesso hai 10 livelli superati.» | grande «Livello 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759599525}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Livello 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Livello 100: Supera prima tutti gli altri livelli. Superandolo guadagni 1 gettone per gli attrezzi»
+  Sostituisci con 1-100: nota «Fatto. Adesso hai 100 livelli superati.» | grande «Livello 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759599525}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 360x640 it Unisci 1-10 su Ponte finito + 100 a meta': grande «Livello 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 360x640 it 1-10 + 11 a meta', Sostituisci con 1-5: grande «Livello 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Livello 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758408812}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 360x640 it 1-110 + 105 a meta', Sostituisci con 1-100: grande «Livello 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Livello 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 360x640 it dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 360x640 en avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Level 101» voce 100/3m
+  Sostituisci con 1-10: nota «Done. You now have 10 levels cleared.» | grande «Level 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759623800}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Level 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Level 100: Clear all the other levels first. Clear this one and you earn 1 tool token»
+  Sostituisci con 1-100: nota «Done. You now have 100 levels cleared.» | grande «Level 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759623800}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 360x640 en Unisci 1-10 su Ponte finito + 100 a meta': grande «Level 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 360x640 en 1-10 + 11 a meta', Sostituisci con 1-5: grande «Level 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Level 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758432982}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 360x640 en 1-110 + 105 a meta', Sostituisci con 1-100: grande «Level 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Level 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 360x640 en dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 640x360 it avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Livello 101» voce 100/3m
+  Sostituisci con 1-10: nota «Fatto. Adesso hai 10 livelli superati.» | grande «Livello 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759647639}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Livello 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Livello 100: Supera prima tutti gli altri livelli. Superandolo guadagni 1 gettone per gli attrezzi»
+  Sostituisci con 1-100: nota «Fatto. Adesso hai 100 livelli superati.» | grande «Livello 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759647639}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 640x360 it Unisci 1-10 su Ponte finito + 100 a meta': grande «Livello 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 640x360 it 1-10 + 11 a meta', Sostituisci con 1-5: grande «Livello 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Livello 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758456911}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 640x360 it 1-110 + 105 a meta', Sostituisci con 1-100: grande «Livello 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Livello 111» | tocco sul 105: altro | voce 105/3m
+  PROBLEMA R4 640x360 it: il 105 non torna riprendibile (altro)
+R5 640x360 it dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 640x360 en avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Level 101» voce 100/3m
+  Sostituisci con 1-10: nota «Done. You now have 10 levels cleared.» | grande «Level 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759671552}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Level 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Level 100: Clear all the other levels first. Clear this one and you earn 1 tool token»
+  Sostituisci con 1-100: nota «Done. You now have 100 levels cleared.» | grande «Level 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759671552}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 640x360 en Unisci 1-10 su Ponte finito + 100 a meta': grande «Level 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 640x360 en 1-10 + 11 a meta', Sostituisci con 1-5: grande «Level 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Level 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758480696}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 640x360 en 1-110 + 105 a meta', Sostituisci con 1-100: grande «Level 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Level 111» | tocco sul 105: altro | voce 105/3m
+  PROBLEMA R4 640x360 en: il 105 non torna riprendibile (altro)
+R5 640x360 en dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 768x1024 it avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Livello 101» voce 100/3m
+  Sostituisci con 1-10: nota «Fatto. Adesso hai 10 livelli superati.» | grande «Livello 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759695462}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Livello 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Livello 100: Supera prima tutti gli altri livelli. Superandolo guadagni 1 gettone per gli attrezzi»
+  Sostituisci con 1-100: nota «Fatto. Adesso hai 100 livelli superati.» | grande «Livello 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759695462}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 768x1024 it Unisci 1-10 su Ponte finito + 100 a meta': grande «Livello 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 768x1024 it 1-10 + 11 a meta', Sostituisci con 1-5: grande «Livello 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Livello 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758504562}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 768x1024 it 1-110 + 105 a meta', Sostituisci con 1-100: grande «Livello 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Livello 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 768x1024 it dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 768x1024 en avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Level 101» voce 100/3m
+  Sostituisci con 1-10: nota «Done. You now have 10 levels cleared.» | grande «Level 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759719677}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Level 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Level 100: Clear all the other levels first. Clear this one and you earn 1 tool token»
+  Sostituisci con 1-100: nota «Done. You now have 100 levels cleared.» | grande «Level 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759719677}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 768x1024 en Unisci 1-10 su Ponte finito + 100 a meta': grande «Level 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 768x1024 en 1-10 + 11 a meta', Sostituisci con 1-5: grande «Level 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Level 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758528929}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 768x1024 en 1-110 + 105 a meta', Sostituisci con 1-100: grande «Level 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Level 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 768x1024 en dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 1366x768 it avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Livello 101» voce 100/3m
+  Sostituisci con 1-10: nota «Fatto. Adesso hai 10 livelli superati.» | grande «Livello 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759743794}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Livello 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Livello 100: Supera prima tutti gli altri livelli. Superandolo guadagni 1 gettone per gli attrezzi»
+  Sostituisci con 1-100: nota «Fatto. Adesso hai 100 livelli superati.» | grande «Livello 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759743794}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 1366x768 it Unisci 1-10 su Ponte finito + 100 a meta': grande «Livello 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 1366x768 it 1-10 + 11 a meta', Sostituisci con 1-5: grande «Livello 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Livello 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758553113}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 1366x768 it 1-110 + 105 a meta', Sostituisci con 1-100: grande «Livello 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Livello 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 1366x768 it dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 1366x768 en avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Level 101» voce 100/3m
+  Sostituisci con 1-10: nota «Done. You now have 10 levels cleared.» | grande «Level 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759768071}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Level 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Level 100: Clear all the other levels first. Clear this one and you earn 1 tool token»
+  Sostituisci con 1-100: nota «Done. You now have 100 levels cleared.» | grande «Level 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759768071}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 1366x768 en Unisci 1-10 su Ponte finito + 100 a meta': grande «Level 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 1366x768 en 1-10 + 11 a meta', Sostituisci con 1-5: grande «Level 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Level 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758577192}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 1366x768 en 1-110 + 105 a meta', Sostituisci con 1-100: grande «Level 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Level 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 1366x768 en dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+
+PROBLEMI: 2
+uscita 1
+--- rilancio 640x360 dopo la correzione dello scorrimento nello script ---
+R1 640x360 it avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Livello 101» voce 100/3m
+  Sostituisci con 1-10: nota «Fatto. Adesso hai 10 livelli superati.» | grande «Livello 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759840641}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Livello 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Livello 100: Supera prima tutti gli altri livelli. Superandolo guadagni 1 gettone per gli attrezzi»
+  Sostituisci con 1-100: nota «Fatto. Adesso hai 100 livelli superati.» | grande «Livello 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759840641}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 640x360 it Unisci 1-10 su Ponte finito + 100 a meta': grande «Livello 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 640x360 it 1-10 + 11 a meta', Sostituisci con 1-5: grande «Livello 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Livello 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758650325}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 640x360 it 1-110 + 105 a meta', Sostituisci con 1-100: grande «Livello 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Livello 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 640x360 it dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+R1 640x360 en avvio: plancia 100 mosse=21 (ripresa automatica del 100 attesa: il 100 e' aperto)
+  home: «Level 101» voce 100/3m
+  Sostituisci con 1-10: nota «Done. You now have 10 levels cleared.» | grande «Level 11» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759865927}
+  ricarica (ripresa del 100 di 10 min fa ancora scritta): home | grande «Level 11» | voce 100/3m
+  mappa, tappa 100: disabled=true «Level 100: Clear all the other levels first. Clear this one and you earn 1 tool token»
+  Sostituisci con 1-100: nota «Done. You now have 100 levels cleared.» | grande «Level 101» | voce 100/3m | ripresa {"dove":"quadro","quadro":100,"quando":1793759865927}
+  ricarica dopo il ripristino (ripresa entro due ore): plancia 100 mosse=21 | voce 100/3m
+R2 640x360 en Unisci 1-10 su Ponte finito + 100 a meta': grande «Level 101» | tappa 100 disabled=false | tocco: plancia 100 mosse=21 | voce 100/3m
+R3 640x360 en 1-10 + 11 a meta', Sostituisci con 1-5: grande «Level 6» | voce 11/3m
+  ricarica con la ripresa dell'11 (30 min): home
+  Sostituisci con 1-10 (ripristino): grande «Level 11» | voce 11/3m | ripresa {"dove":"quadro","quadro":11,"quando":1793758675506}
+  ricarica dopo il ripristino (ripresa ancora entro due ore): plancia 11 mosse=17 | voce 11/3m
+R4 640x360 en 1-110 + 105 a meta', Sostituisci con 1-100: grande «Level 101» | tappa 105 disabled=true | voce 105/3m
+  Sostituisci con 1-110: grande «Level 111» | tocco sul 105: plancia 105 mosse=12 | voce 105/3m
+R5 640x360 en dopo Sostituisci 1-10 apro «Livello 11»: presentazione 11, voce 11/0m; ripristino 1-100, tocco il 100: presentazione 100 | voce 100/0m
+
+PROBLEMI: 0

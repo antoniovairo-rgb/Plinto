@@ -1,0 +1,7 @@
+e2e-torre-aperta uscita 0 durata 54s
+e2e-po041 uscita 0 durata 10s
+e2e-po008 uscita 0 durata 196s
+e2e-ripresa uscita 0 durata 13s
+correzioni uscita 0 durata 36s
+e2e-salvataggio uscita 0 durata 12s
+FINE
