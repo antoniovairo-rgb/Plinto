@@ -64,6 +64,16 @@ if (!(await serverRisponde())) {
 
 const browser = await chromium.launch({ executablePath: ESEGUIBILE });
 
+/*
+ * LEGGI_DA_COPIA (PO-042, collaudo 1.22.1 O2): il controllo «l'esportazione porta
+ * avvisoTorre» importava `/src/persistence/salvataggio.js` dentro la pagina. Esiste solo
+ * con il server di sviluppo: sul sito pubblicato e' un 404 (misurato), che rendeva rossa
+ * la prova contro PLINTO_E2E_URL, mentre il `.catch` saltava il controllo in silenzio.
+ * Acceso, l'esportazione si legge da «Copia il testo», come la fa il giocatore. Spento,
+ * torna l'import: contro il sito la prova esce con 1.
+ */
+const LEGGI_DA_COPIA = true;
+
 const vinto = (n) => ({ mosse: 12, punteggio: 300, tentativi: 1 });
 const da = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const ponteFinito = () => da(PONTE.da, PONTE.a);
@@ -173,10 +183,23 @@ console.log('O1. Le impostazioni viaggiano col salvataggio: «Sostituisci tutto�
   if (!/LIVELLO 101/i.test(home)) errori.push('O1 salvataggio: dopo l importazione la home non porta al 101: la prova non prova nulla');
   if (await finestra(page).count()) errori.push('O1 salvataggio: importato «avvisoTorre: true» con Sostituisci, la finestra compare lo stesso');
   // E il contrario: l'esportazione porta il campo.
-  const esportato = await page.evaluate(async () => {
-    const m = await import('/src/persistence/salvataggio.js');
-    return m.componiSalvataggio({ versioneGioco: 'prova' }).dati.settings;
-  }).catch(() => null);
+  let esportato = null;
+  if (LEGGI_DA_COPIA) {
+    // Dal pulsante «Copia il testo», come `tests/e2e/salvataggio.mjs`: vale sia con il
+    // server di sviluppo sia sul sito pubblicato (PLINTO_E2E_URL).
+    await contesto.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.getByRole('button', { name: 'Impostazioni' }).click();
+    await page.getByRole('button', { name: /^Copia il testo$/ }).click();
+    await page.waitForTimeout(200);
+    const testo = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+    try { esportato = JSON.parse(testo)?.dati?.settings ?? {}; } catch { esportato = null; }
+    if (esportato === null) errori.push(`O1 salvataggio: «Copia il testo» non ha dato un salvataggio leggibile: «${testo.slice(0, 80)}»`);
+  } else {
+    esportato = await page.evaluate(async () => {
+      const m = await import('/src/persistence/salvataggio.js');
+      return m.componiSalvataggio({ versioneGioco: 'prova' }).dati.settings;
+    }).catch(() => null);
+  }
   if (esportato && esportato.avvisoTorre !== true) errori.push(`O1 salvataggio: il file esportato non porta «avvisoTorre»: ${JSON.stringify(esportato)}`);
   await contesto.close();
 }
