@@ -10,6 +10,19 @@
  * il suo obiettivo PRIMA di farti giocare, il livello giocato fino alla vittoria, e alla
  * fine un tratto di partita libera con gli Intrecci piu' grossi.
  *
+ * LA TORRE IN APERTURA (PO-045, scelta del proprietario, 4 novembre 2026). La Play
+ * Console fa partire da soli solo i primi 30 secondi, e la novita' da mostrare e' la
+ * Torre: nei primi 30 secondi ci sono la mappa sulla scheda «La Torre» e un livello con i
+ * massi giocato fino alla vittoria. Il giocatore ripreso ha superato tutto il Ponte e i
+ * primi quattordici livelli della Torre, come nelle schermate (che si fermano al 113).
+ *
+ * LA GUIDA SI REGISTRA PRIMA E SI MONTA DOPO. La guida del primo avvio si apre solo
+ * quando la pagina nasce: riaprirla a meta' video vorrebbe dire ricaricare la pagina, e
+ * un ricaricamento lasciava due secondi di schermo nero. Allora si registra per prima,
+ * come sempre, e il montaggio mette i tratti nell'ordine di ORDINE qui sotto: i
+ * fotogrammi hanno l'istante in cui sono stati disegnati, quindi un tratto si puo'
+ * spostare senza rifare niente.
+ *
  * VELOCE E PIENO DI ANIMAZIONI (richiesta del proprietario, 10 ottobre 2026). Il video
  * di prima durava oltre due minuti: un algoritmo giocava a passo lento ventidue mosse di
  * un livello qualunque. Adesso le mosse sono decise PRIMA, in Node, con il motore vero:
@@ -18,6 +31,14 @@
  * la partita libera una posizione di partenza in cui la prima mossa chiude quattro gruppi
  * e le due dopo eliminano ancora (la prima scelta aveva due mosse a vuoto di fila).
  * Le ricerche stanno qui sotto, con i loro semi: il video si rifa' identico.
+ *
+ * Il livello della Torre (4 novembre 2026): fra i livelli 101-125, 2000 semi ciascuno,
+ * lo stesso giocatore di sotto. I livelli della Torre partono vuoti salvo i massi, quindi
+ * nessuno si vince con molte eliminazioni in poche mosse; il piu' corto e' il 115
+ * (atto «mura», nove massi in diagonale, obiettivo una Catena di 2): cinque mosse, le
+ * ultime due eliminano, e l'ultima e' un Intreccio. Il secondo, il 120, ha cinque mosse
+ * e nessun Intreccio; quello con piu' eliminazioni, il 111, ne chiede quindici, e da
+ * solo riempirebbe i 30 secondi.
  *
  * Uso: npm run video
  */
@@ -64,12 +85,19 @@ const FPS = 30;
 const FOTOGRAMMI = `${USCITA}.fotogrammi/`;
 
 /** Il livello da mostrare e il seme del giocatore che lo vince (vedi l'intestazione). */
-const LIVELLO = 46;
-const SEME_LIVELLO = 1004;
+const LIVELLO = 115;
+const SEME_LIVELLO = 1090;
 const SUPERATI = LIVELLO - 1;
+/** Il primo livello della Torre: la mappa ne mostra le tappe a partire da qui. */
+const PRIMO_TORRE = 101;
 /** La partita libera: il seme della posizione di partenza e quante mosse mostrarne. */
 const SEME_LIBERA = 17671;
 const MOSSE_LIBERA = 7;
+/**
+ * L'ordine dei tratti nel video finale. Si registrano in un altro ordine (la guida per
+ * prima, vedi l'intestazione); qui si decide come si vedono.
+ */
+const ORDINE = ['torre', 'guida', 'resto'];
 
 /**
  * Il giocatore delle due ricerche: sceglie la posa che chiude piu' gruppi (al quadrato,
@@ -158,6 +186,11 @@ const context = await browser.newContext({
   locale: 'it-IT',
 });
 const page = await context.newPage();
+// Gli errori della pagina si raccolgono e si stampano alla fine: un video registrato
+// sopra un errore e' un video da rifare, e a guardarlo non sempre si vede.
+const errori = [];
+page.on('pageerror', (e) => errori.push(`pageerror: ${e.message}`));
+page.on('console', (m) => { if (m.type() === 'error') errori.push(`console: ${m.text()}`); });
 
 // I fotogrammi arrivano con l'istante in cui il browser li ha disegnati. Si scrivono su
 // disco e non in memoria: un minuto a 1170x2532 sono duemila immagini.
@@ -198,17 +231,17 @@ const sequenza = mosseDelLivello();
 const libera = partitaLibera();
 
 await page.goto(INDIRIZZO, { waitUntil: 'networkidle' });
-await page.evaluate(({ q, partita }) => {
+await page.evaluate(({ q, partita, superati }) => {
   window.localStorage.clear();
   window.localStorage.setItem('plinto:partita', JSON.stringify(partita));
   window.localStorage.setItem('plinto:settings', JSON.stringify({
     // introVista falso: il video si apre con la guida del primo avvio, che e' la
     // panoramica delle regole fatta dal gioco stesso.
     introVista: false, lingua: 'it', animazioni: true, aiutoVisivo: true }));
-  // Chi e' al livello 46 ha superato 45 livelli, cioe' riscosso nove gettoni: ne tiene
-  // due, cosi' nel livello si vede la cassetta accanto al gioco.
+  // Chi e' al livello 115 ha superato 114 livelli, cioe' riscosso un gettone ogni
+  // cinque: ne tiene due, cosi' nel livello si vede la cassetta accanto al gioco.
   window.localStorage.setItem('plinto:attrezzi', JSON.stringify({
-    disponibili: 2, riscossi: 9, versione: 1 }));
+    disponibili: 2, riscossi: Math.floor(superati / 5), versione: 1 }));
   window.localStorage.setItem('plinto:records', JSON.stringify({
     best: 18740, bestChain: 7, bestMove: 612, bestGroupsInOneMove: 3 }));
   window.localStorage.setItem('plinto:quadri', JSON.stringify(q));
@@ -222,7 +255,7 @@ await page.evaluate(({ q, partita }) => {
     sfide[d] = { best: 2600 + giorni * 410, partite: 1 + (giorni % 3) };
   }
   window.localStorage.setItem('plinto:sfide', JSON.stringify(sfide));
-}, { q: { versione: 1, livelli }, partita: libera.iniziale });
+}, { q: { versione: 1, livelli }, partita: libera.iniziale, superati: SUPERATI });
 await page.reload({ waitUntil: 'networkidle' });
 
 const pausa = (ms) => page.waitForTimeout(ms);
@@ -232,7 +265,7 @@ const pausa = (ms) => page.waitForTimeout(ms);
  * scossa, un'eliminazione l'onda e le scie, una mossa a vuoto solo l'atterraggio.
  * Allungati il 10 ottobre 2026 («un po' piu' lento»).
  */
-const MOSSE_SFIDA = 3;
+const MOSSE_SFIDA = 4;
 
 /** La posa che chiude piu' gruppi, letta dallo schermo: serve alla Sfida del giorno. */
 const scegliNelBrowser = () => page.evaluate(() => {
@@ -271,7 +304,9 @@ const scegliNelBrowser = () => page.evaluate(() => {
   return migliore;
 });
 
-const respiroPer = (gruppi) => (gruppi >= 2 ? 1600 : gruppi === 1 ? 1100 : 450);
+// Allungati ancora il 4 novembre 2026 (PO-045, «ritmo calmo»): con la Torre in apertura
+// il livello e' di cinque mosse, e a passo svelto il video stava sotto i 65 secondi.
+const respiroPer = (gruppi) => (gruppi >= 2 ? 2000 : gruppi === 1 ? 1350 : 650);
 
 async function unaMossa({ handIndex, row, col }, respiro = 950) {
   const punti = await page.evaluate((m) => {
@@ -316,16 +351,22 @@ async function unaMossa({ handIndex, row, col }, respiro = 950) {
   return true;
 }
 
-const tappe = [];
-const segna = (nome) => tappe.push({ nome, a: Date.now() });
+/**
+ * I TRATTI. Ognuno ha un inizio e una fine in tempo vero; fra un tratto e l'altro quello
+ * che si fa (tornare alla home, per esempio) non finisce nel video. Dentro un tratto le
+ * tappe segnano le parti, per il riepilogo stampato alla fine.
+ */
+const tratti = [];
+let tratto = null;
+const apri = (nome) => { tratto = { nome, a: Date.now(), b: null, tappe: [] }; tratti.push(tratto); };
+const chiudi = () => { tratto.b = Date.now(); tratto = null; };
+const segna = (nome) => tratto.tappe.push({ nome, a: Date.now() });
 
 // LA REGISTRAZIONE E' GIA' PARTITA da quando e' nato il contesto, quindi ha filmato
 // anche il caricamento e la preparazione dei dati: nel primo montaggio erano due secondi
-// di schermo nero in apertura, e sfasavano tutte le parti successive. Si segna qui
-// l'istante in cui la home e' davvero a schermo, e alla fine si taglia il video fin li'.
+// di schermo nero in apertura. I tratti cominciano quando la pagina e' davvero a schermo.
 await page.waitForSelector('.pl-guida');
 await pausa(400);
-const inizio = Date.now();
 
 /** Torna alla home da una pagina: la freccia in alto, come farebbe un dito. */
 const allaHome = async () => {
@@ -333,58 +374,66 @@ const allaHome = async () => {
   await page.waitForSelector('.pl-home__azioni');
 };
 
-// PANORAMICA (richiesta del proprietario, 10 ottobre 2026): almeno un minuto, che
-// racconti tutto il gioco e non solo una partita. Le parti piu' lunghe restano quelle
-// giocate; le pagine passano svelte.
+/** Scorre piano il contenitore che scorre, fino a `quanto` punti piu' giu' (o su). */
+const scorri = (quanto, passi, ms) => page.evaluate(async ({ quanto: q, passi: n, ms: d }) => {
+  const s = [...document.querySelectorAll('*')].find((x) => x.scrollHeight > x.clientHeight + 40);
+  if (!s) return;
+  const da = s.scrollTop;
+  const a = Math.max(0, Math.min(s.scrollHeight - s.clientHeight, da + q));
+  for (let i = 1; i <= n; i += 1) { s.scrollTop = da + ((a - da) * i) / n; await new Promise((r) => setTimeout(r, d)); }
+}, { quanto, passi, ms });
 
-// --- 0. La guida: le regole, come le spiega il gioco ---------------------------
+// === LA GUIDA (si registra per prima, si vede dopo la Torre) ======================
+apri('guida');
 segna('guida');
-await pausa(1700);
+await pausa(1900);
 for (let passo = 2; passo <= 6; passo += 1) {
   await page.getByRole('button', { name: /^Avanti$/ }).click();
-  await pausa(1500);
+  await pausa(1750);
 }
+// Il tratto finisce sull'ultimo passo, PRIMA della home. La home vista qui e' quella
+// di prima del livello («Livello 115»), mentre nel video la guida viene dopo la
+// vittoria: la prima prova passava in mezzo secondo da «115» a «116», e si notava.
+chiudi();
 await page.getByRole('button', { name: /Non mostrarmela/ }).click();
 await page.waitForSelector('.pl-home__azioni');
 
-// --- 1. La home: che cosa c'e' dentro ----------------------------------------
+// === LA TORRE: i primi 30 secondi del video ======================================
+apri('torre');
+// --- 1. La home -----------------------------------------------------------------
 segna('home');
-await pausa(2400);
+await pausa(2200);
 
-// --- 2. La mappa: esiste un percorso, e sei a un punto preciso ----------------
-segna('mappa');
+// --- 2. La mappa: si apre da sola sulla Torre, al livello corrente ---------------
+segna('mappa Torre');
 await page.getByRole('button', { name: /^Mappa dei livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
-// La mappa si porta da sola sul livello corrente: un istante per vederla, una scorsa
-// fino ai livelli che mancano, e si entra.
+await pausa(1800);
+// Il Ponte, finito: un tocco sulla sua scheda e lo si vede tutto spuntato, poi si torna
+// alla Torre. E' il modo piu' breve di dire «cento livelli fatti, altri cento qui».
+await page.getByRole('tab', { name: /Il Ponte/ }).click();
 await pausa(1500);
-await page.evaluate(async () => {
-  const s = [...document.querySelectorAll('*')].find((n) => n.scrollHeight > n.clientHeight + 40);
-  if (!s) return;
-  const da = s.scrollTop;
-  const a = Math.min(s.scrollHeight - s.clientHeight, da + 900);
-  for (let i = 1; i <= 40; i += 1) { s.scrollTop = da + ((a - da) * i) / 40; await new Promise((r) => setTimeout(r, 24)); }
-  await new Promise((r) => setTimeout(r, 500));
-  for (let i = 1; i <= 25; i += 1) { s.scrollTop = a - ((a - da) * i) / 25; await new Promise((r) => setTimeout(r, 20)); }
-});
+await page.getByRole('tab', { name: /La Torre/ }).click();
+await pausa(1200);
+// Una scorsa verso i livelli che mancano (gli atti dopo, ancora da aprire) e ritorno.
+await scorri(700, 40, 24);
+await pausa(400);
+await scorri(-700, 28, 22);
 await pausa(500);
 
-// --- 3. L'apertura: l'obiettivo detto PRIMA di giocare ------------------------
+// --- 3. L'apertura: l'obiettivo detto PRIMA di giocare --------------------------
 segna('apertura');
-await page.locator('.pl-tappa').nth(LIVELLO - 1).click();
+// Le tappe della scheda aperta sono solo quelle della Torre, dalla 101.
+await page.locator('.pl-tappa').nth(LIVELLO - PRIMO_TORRE).click();
 await page.waitForSelector('.pl-apertura');
 await pausa(3000);
 
-// --- 4. Il livello, vinto ------------------------------------------------------
+// --- 4. Il livello con i massi, vinto ------------------------------------------
 segna('livello');
 await page.getByRole('button', { name: /^Gioca$/ }).click();
 await page.waitForSelector('.pl-plancia');
-await pausa(600);
-// La cassetta degli attrezzi: si apre, si legge, si richiude senza usarla.
-await page.locator('.pl-attrezzi__pastiglia').first().click();
-await pausa(2200);
-await page.getByRole('button', { name: /Torna alla partita/ }).click();
-await pausa(400);
+// Un istante sulla griglia vuota: i nove massi in diagonale sono la Torre.
+await pausa(1800);
 for (const mossa of sequenza) {
   // La schermata di fine livello e' `.pl-screen.pl-fine`, la stessa della fine partita.
   if (await page.locator('.pl-fine').count()) break;
@@ -392,7 +441,7 @@ for (const mossa of sequenza) {
 }
 
 // --- 5. L'esito del livello ---------------------------------------------------
-segna('esito livello');
+segna('vittoria');
 await page.waitForSelector('.pl-fine', { timeout: 4000 }).catch(() => {});
 // Se ha vinto lo dicono i progressi salvati, non l'aspetto della schermata.
 const vinto = await page.evaluate((n) => {
@@ -401,18 +450,26 @@ const vinto = await page.evaluate((n) => {
     return Boolean(p?.livelli?.[n]);
   } catch { return false; }
 }, LIVELLO);
-await pausa(3500);
-
-// --- 6. La sfida del giorno e il suo archivio ----------------------------------
-segna('sfida del giorno');
-// Senza ricaricare la pagina: un `goto` qui lasciava due secondi di schermo nero nel
-// video. Si torna alla home come farebbe un dito, dalla mappa.
+await pausa(3000);
+// --- 6. Di nuovo la mappa: il 115 spuntato, si va avanti -------------------------
+segna('mappa dopo');
 await page.getByRole('button', { name: /^Torna ai livelli/ }).click();
 await page.waitForSelector('.pl-tappa');
+await pausa(2600);
+chiudi();
+
+// Fuori dal video: dalla mappa alla home, come farebbe un dito.
 await allaHome();
+await pausa(700);
+
+// === IL RESTO: sfida, archivio, partita libera, statistiche, regole ===========
+apri('resto');
+// --- 6. La sfida del giorno e il suo archivio ----------------------------------
+segna('sfida del giorno');
+await pausa(1100);
 await page.getByRole('button', { name: /^Sfida del giorno/ }).click();
 await page.waitForSelector('.pl-plancia');
-await pausa(1200);
+await pausa(1000);
 // La sfida cambia ogni giorno, quindi qui le mosse non si possono preparare: le sceglie
 // nel browser la stessa regola delle ricerche (la posa che chiude di piu').
 for (let i = 0; i < MOSSE_SFIDA; i += 1) {
@@ -426,7 +483,7 @@ await page.waitForSelector('.pl-home__azioni');
 segna('archivio');
 await page.getByRole('button', { name: /Archivio delle sfide/ }).click();
 await page.waitForSelector('.pl-calendario');
-await pausa(2800);
+await pausa(3000);
 
 // --- 7. La partita libera: gli Intrecci piu' grossi ----------------------------
 segna('partita libera');
@@ -446,7 +503,7 @@ for (let i = 0; i < libera.mosse.length; i += 1) {
 }
 // Non si esce a meta' di un'animazione: la prima stesura finiva proprio mentre
 // compariva la scritta dell'Intreccio, tagliandola.
-await pausa(1400);
+await pausa(1900);
 
 // --- 8. Le statistiche e le regole ---------------------------------------------
 segna('statistiche');
@@ -454,23 +511,18 @@ await page.locator('.pl-hud__menu').first().click();
 await page.getByRole('button', { name: /Torna alla home/ }).click();
 await page.waitForSelector('.pl-home__azioni');
 await page.getByRole('button', { name: /^Statistiche$/ }).click();
-await pausa(3200);
+await pausa(3600);
 await allaHome();
 segna('come si gioca');
 await page.getByRole('button', { name: /^Come si gioca$/ }).click();
 await pausa(1400);
-await page.evaluate(async () => {
-  const s = [...document.querySelectorAll('*')].find((n) => n.scrollHeight > n.clientHeight + 40);
-  if (!s) return;
-  const a = Math.min(s.scrollHeight - s.clientHeight, 1400);
-  for (let i = 1; i <= 90; i += 1) { s.scrollTop = (a * i) / 90; await new Promise((r) => setTimeout(r, 30)); }
-});
+await scorri(2000, 150, 32);
 await pausa(1500);
 await allaHome();
 segna('chiusura');
-await pausa(2500);
+await pausa(3500);
+chiudi();
 
-const fine = Date.now();
 await cdp.send('Page.stopScreencast').catch(() => {});
 await context.close();
 await browser.close();
@@ -479,10 +531,15 @@ if (server) server.kill();
 /**
  * DA FOTOGRAMMI SPARSI A UN VIDEO A CADENZA FISSA. Il browser manda un'immagine solo
  * quando lo schermo cambia: a ogni istante del video finale si mette l'ultima arrivata.
- * Il video comincia da `inizio`, quando la home e' gia' a schermo: il caricamento e la
- * preparazione dei dati restano fuori, come prima.
+ * I tratti si montano nell'ordine di ORDINE; dentro un tratto il tempo scorre com'e'
+ * stato registrato.
  */
 if (fotogrammi.length === 0) { console.error('Nessun fotogramma catturato'); process.exit(1); }
+const montati = ORDINE.map((nome) => {
+  const t = tratti.find((x) => x.nome === nome);
+  if (!t) throw new Error(`Manca il tratto "${nome}"`);
+  return t;
+});
 const finale = `${USCITA}plinto-montaggio.webm`;
 const ffmpeg = avvia(FFMPEG, [
   '-y', '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'mjpeg', '-i', 'pipe:0',
@@ -490,33 +547,69 @@ const ffmpeg = avvia(FFMPEG, [
   '-deadline', 'good', '-cpu-used', '1', '-pix_fmt', 'yuv420p', finale,
 ], { stdio: ['pipe', 'ignore', 'ignore'] });
 const chiuso = new Promise((ok) => ffmpeg.on('close', ok));
-let indice = 0;
+let scritti = 0;
+let diversi = 0;
 let buchi = 0;
-for (let t = inizio; t <= fine; t += 1000 / FPS) {
-  while (indice + 1 < fotogrammi.length && fotogrammi[indice + 1].t <= t) indice += 1;
-  const scritto = ffmpeg.stdin.write(readFileSync(fotogrammi[indice].file));
-  if (!scritto) await new Promise((ok) => ffmpeg.stdin.once('drain', ok));
-}
-// Il buco piu' lungo fra due fotogrammi: se lo screencast si fermasse (per esempio al
-// cambio di pagina della sezione 6), il video mostrerebbe un'immagine ferma e lo si
-// deve sapere, non scoprirlo guardandolo.
-for (let i = 1; i < fotogrammi.length; i += 1) {
-  if (fotogrammi[i].t >= inizio) buchi = Math.max(buchi, fotogrammi[i].t - fotogrammi[i - 1].t);
+let buchiA = 0;
+/** L'ultimo fotogramma disegnato entro l'istante t (i fotogrammi sono in ordine). */
+const ultimoEntro = (t) => {
+  let basso = 0; let alto = fotogrammi.length - 1;
+  while (basso < alto) {
+    const m = Math.ceil((basso + alto) / 2);
+    if (fotogrammi[m].t <= t) basso = m; else alto = m - 1;
+  }
+  return basso;
+};
+for (const t of montati) {
+  t.inizioVideo = scritti / FPS;
+  diversi += fotogrammi.filter((f) => f.t >= t.a && f.t < t.b).length;
+  for (let istante = t.a; istante < t.b; istante += 1000 / FPS) {
+    const scritto = ffmpeg.stdin.write(readFileSync(fotogrammi[ultimoEntro(istante)].file));
+    scritti += 1;
+    if (!scritto) await new Promise((ok) => ffmpeg.stdin.once('drain', ok));
+  }
+  // Il buco piu' lungo fra due fotogrammi DENTRO il tratto: se lo screencast si fermasse,
+  // il video mostrerebbe un'immagine ferma e lo si deve sapere, non scoprirlo guardandolo.
+  for (let i = 1; i < fotogrammi.length; i += 1) {
+    if (fotogrammi[i].t > t.a && fotogrammi[i - 1].t < t.b) {
+      const buco = Math.min(fotogrammi[i].t, t.b) - Math.max(fotogrammi[i - 1].t, t.a);
+      if (buco > buchi) { buchi = buco; buchiA = t.inizioVideo + (Math.max(fotogrammi[i - 1].t, t.a) - t.a) / 1000; }
+    }
+  }
 }
 ffmpeg.stdin.end();
 const codice = await chiuso;
 rmSync(FOTOGRAMMI, { recursive: true, force: true });
 if (codice !== 0) { console.error(`ffmpeg ha chiuso con codice ${codice}`); process.exit(1); }
 
+const nelVideo = montati.flatMap((t) => [...t.tappe.map((p, i) => ({
+  nome: p.nome,
+  da: t.inizioVideo + (p.a - t.a) / 1000,
+  dura: ((t.tappe[i + 1]?.a ?? t.b) - p.a) / 1000,
+}))]);
+const durata = scritti / FPS;
 console.log(`\nVideo: ${finale}`);
 console.log(`${LARGHEZZA * DENSITA}x${ALTEZZA * DENSITA} a ${FPS} fotogrammi al secondo, `
-  + `durata ${Math.round((fine - inizio) / 1000)}s, ${fotogrammi.length} fotogrammi catturati `
+  + `durata ${durata.toFixed(1)}s, ${fotogrammi.length} fotogrammi catturati `
   + `(${scartati} scartati perche' non a piena misura), `
-  + `pausa piu' lunga fra due fotogrammi ${Math.round(buchi)} ms`);
-console.log('\nLe parti, nell ordine:');
-tappe.forEach((t, i) => {
-  const termine = tappe[i + 1]?.a ?? fine;
-  console.log(`  ${String(Math.round((t.a - inizio) / 1000)).padStart(3)}s  ${t.nome.padEnd(16)} ${Math.round((termine - t.a) / 1000)}s`);
-});
-console.log(`\nLivello ${LIVELLO} ${vinto ? `superato in ${sequenza.length} mosse` : 'NON superato: il montaggio non ha la parte della vittoria'}`);
+  + `pausa piu' lunga fra due fotogrammi ${Math.round(buchi)} ms (a ${buchiA.toFixed(1)}s del video: `
+  + 'su una schermata ferma e\' normale, il browser non manda niente se niente cambia)');
+console.log(`Fotogrammi diversi arrivati dal browser dentro i tratti: ${diversi}, `
+  + `cioe' ${(diversi / durata).toFixed(1)} al secondo (il resto sono ripetizioni di una schermata ferma)`);
+console.log('\nLe parti, nell\'ordine del video:');
+for (const p of nelVideo) console.log(`  ${p.da.toFixed(1).padStart(5)}s  ${p.nome.padEnd(18)} ${p.dura.toFixed(1)}s`);
+const fineVittoria = nelVideo.find((p) => p.nome === 'vittoria');
+console.log(`\nLivello ${LIVELLO} ${vinto ? `superato in ${sequenza.length} mosse` : 'NON superato: il montaggio non ha la parte della vittoria'}`
+  + `; la vittoria compare a ${fineVittoria.da.toFixed(1)}s`
+  + (fineVittoria.da < 30 ? ' (dentro i primi 30 secondi)' : ' -- OLTRE i 30 secondi: rivedere i tempi'));
+console.log(`Livello ${LIVELLO}: gruppi chiusi mossa per mossa ${sequenza.map((m) => m.gruppi).join(', ')}`);
 console.log(`Partita libera: gruppi chiusi mossa per mossa ${libera.gruppi.join(', ')}`);
+// Gli avvisi di React («Warning: ...») escono solo in sviluppo e non fermano niente:
+// si stampano perche' sono difetti veri da correggere nel gioco, ma il video resta
+// buono. Un errore vero (un'eccezione, un errore della console) invece lo invalida.
+const avvisi = errori.filter((e) => e.startsWith('console: Warning:'));
+const veri = errori.filter((e) => !avvisi.includes(e));
+const breve = (e) => e.split('\n')[0].slice(0, 160);
+if (avvisi.length) console.log(`\nAvvisi di React in sviluppo (${avvisi.length}):\n  ${[...new Set(avvisi.map(breve))].join('\n  ')}`);
+console.log(veri.length ? `\nERRORI nella pagina (${veri.length}):\n  ${veri.map(breve).join('\n  ')}` : '\nNessun errore nella pagina.');
+if (!vinto || veri.length) process.exitCode = 1;
